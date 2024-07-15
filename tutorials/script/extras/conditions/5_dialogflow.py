@@ -10,7 +10,7 @@ The tutorial below demonstrates, how to integrate Google Dialogflow into your sc
 # %%
 import os
 
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -18,15 +18,15 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models.remote_api.google_dialogflow_model import (
+from chatsky.script.conditions.llm_conditions.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
 )
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -52,13 +52,10 @@ gdf_model = GoogleDialogFlowModel.from_file(
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {
-            "get_intents": gdf_model
-        },  # global processing extracts intents on each turn
         # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: {
             ("root", "finish", 1.2): i_cnd.has_cls_label(
-                "goodbye", namespace="dialogflow"
+                gdf_model, "goodbye", namespace="dialogflow"
             )
         },
     },
@@ -76,10 +73,10 @@ script = {
             TRANSITIONS: {
                 # Here, we use intents to decide which branch of dialog should be picked
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "mood_great", threshold=0.95, namespace="dialogflow"
+                    gdf_model, "mood_great", threshold=0.95, namespace="dialogflow"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    "mood_unhappy", namespace="dialogflow"
+                    gdf_model, "mood_unhappy", namespace="dialogflow"
                 ),
                 ("mood", "assert"): cnd.true(),
             },
@@ -90,10 +87,10 @@ script = {
             ),
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "deny", threshold=0.95, namespace="dialogflow"
+                    gdf_model, "deny", threshold=0.95, namespace="dialogflow"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    "affirm", namespace="dialogflow"
+                    gdf_model, "affirm", namespace="dialogflow"
                 ),
             },
         },

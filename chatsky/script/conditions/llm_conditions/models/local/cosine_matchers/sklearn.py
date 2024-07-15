@@ -7,9 +7,9 @@ It uses Sklearn BOW representations and other features to compute distances betw
 """
 from typing import Optional
 
-from chatsky.script.extras.conditions.models.sklearn import BaseSklearnModel, sklearn_available
-from chatsky.script.extras.conditions.dataset import Dataset
-from chatsky.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
+from chatsky.script.conditions.llm_conditions.models.sklearn import BaseSklearnModel, sklearn_available
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 
 class SklearnMatcher(CosineMatcherMixin, BaseSklearnModel):

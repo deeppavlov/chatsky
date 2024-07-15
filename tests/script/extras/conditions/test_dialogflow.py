@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from dff.script.extras.conditions.models.remote_api.google_dialogflow_model import (
+from chatsky.script.conditions.llm_conditions.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
     AsyncGoogleDialogFlowModel,
     dialogflow_available,

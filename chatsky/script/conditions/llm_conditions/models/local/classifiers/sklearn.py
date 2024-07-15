@@ -7,7 +7,7 @@ Use Sklearn classifiers to achieve great results on a limited set of data.
 """
 from typing import Optional
 
-from chatsky.script.extras.conditions.models.sklearn import BaseSklearnModel, sklearn_available
+from chatsky.script.conditions.llm_conditions.models.sklearn import BaseSklearnModel, sklearn_available
 
 
 class SklearnClassifier(BaseSklearnModel):

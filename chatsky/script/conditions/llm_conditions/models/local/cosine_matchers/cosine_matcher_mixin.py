@@ -13,7 +13,7 @@ except ImportError:
     numpy_available = False
 
 
-from chatsky.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 
 class CosineMatcherMixin:

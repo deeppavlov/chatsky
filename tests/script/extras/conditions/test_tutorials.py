@@ -4,13 +4,13 @@ import importlib
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.script.extras.conditions.models.remote_api.google_dialogflow_model import dialogflow_available
-from dff.script.extras.conditions.models.remote_api.rasa_model import rasa_available
-from dff.script.extras.conditions.models.remote_api.hf_api_model import hf_api_available
-from dff.script.extras.conditions.models.local.cosine_matchers.gensim import gensim_available
-from dff.script.extras.conditions.models.local.classifiers.sklearn import sklearn_available
+from chatsky.script.conditions.llm_conditions.models.remote_api.google_dialogflow_model import dialogflow_available
+from chatsky.script.conditions.llm_conditions.models.remote_api.rasa_model import rasa_available
+from chatsky.script.conditions.llm_conditions.models.remote_api.hf_api_model import hf_api_available
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.gensim import gensim_available
+from chatsky.script.conditions.llm_conditions.models.local.classifiers.sklearn import sklearn_available
 
-from dff.utils.testing.common import check_happy_path
+from chatsky.utils.testing.common import check_happy_path
 from tests.context_storages.test_dbs import ping_localhost
 
 RASA_ACTIVE = ping_localhost(5005)

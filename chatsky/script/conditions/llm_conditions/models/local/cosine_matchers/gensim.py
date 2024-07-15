@@ -18,10 +18,10 @@ except ImportError:
     gensim_available = False
     ALL_MODELS = []
 
-from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
-from chatsky.script.extras.conditions.dataset import Dataset
-from chatsky.script.extras.conditions.utils import DefaultTokenizer
-from chatsky.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.utils import DefaultTokenizer
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 
 class GensimMatcher(CosineMatcherMixin, ExtrasBaseModel):

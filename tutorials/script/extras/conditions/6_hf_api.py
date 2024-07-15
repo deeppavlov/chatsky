@@ -9,7 +9,7 @@ This module explains, how to use web-hosted huggingface models in your conversat
 
 # %%
 import os
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -17,15 +17,15 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models.remote_api.hf_api_model import (
+from chatsky.script.conditions.llm_conditions.models.remote_api.hf_api_model import (
     HFAPIModel,
 )
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -47,23 +47,19 @@ to demonstrate, how custom classifiers can be easily adapted for use your script
 api_model = HFAPIModel(
     model="obsei-ai/sell-buy-intent-classifier-bert-mini",
     api_key=os.getenv("HF_API_KEY") or input("Enter HF API key:"),
-    namespace_key="hf_api",
 )
 
 
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {
-            "get_intents_1": api_model
-        },  # annotate intents on each turn
         TRANSITIONS: {
             # We get to one of the dialog branches depending on the annotation
             ("service", "buy", 1.2): i_cnd.has_cls_label(
-                "LABEL_1", threshold=0.95
+                api_model, "LABEL_1", threshold=0.95
             ),
             ("service", "sell", 1.2): i_cnd.has_cls_label(
-                "LABEL_0", threshold=0.95
+                api_model, "LABEL_0", threshold=0.95
             ),
         },
     },

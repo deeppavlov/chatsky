@@ -1,8 +1,8 @@
 import pytest
 
-from dff.script.extras.conditions.models.local.classifiers.sklearn import SklearnClassifier, sklearn_available
-from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import SklearnMatcher
-from dff.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.models.local.classifiers.sklearn import SklearnClassifier, sklearn_available
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.sklearn import SklearnMatcher
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 if not sklearn_available:
     pytest.skip(allow_module_level=True, reason="`Sklearn` package missing.")

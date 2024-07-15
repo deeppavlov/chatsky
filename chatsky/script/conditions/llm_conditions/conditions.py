@@ -21,16 +21,6 @@ from pydantic import BaseModel, model_validator, Field
 from typing import Dict, Any
 
 
-class LabelManager(BaseModel):
-    """Class for storing labels for different models for extended conditions.
-    """
-    models_labels: Dict[str, Dict[str, Any]] = {}
-    """
-    `models_labels` should look like {"model_uuid_1": {"label_1": 0.1, "label_2": 0.5}, "model_uuid_2": {...}}
-    As keys there should be uuids generated and stored in ExtrasBaseModel.model_id (namespaces now).
-    """
-    
-
 @singledispatch
 def has_cls_label(model: ExtrasBaseModel, label, threshold: float = 0.9):
     """
@@ -52,11 +42,11 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
         # Predict labels for the last request
         # and store them in framework_data with uuid of the model as a key
         model(ctx.last_request.text)
-        if model.model_id not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data.llm_labels:
             return False
         if model.model_id is not None:
-            return ctx.framework_data.get(model.model_id, {}).get(label, 0) >= threshold
-        scores = [item.get(label, 0) for item in ctx.framework_data.values()]
+            return ctx.framework_data.llm_labels.get(model.model_id, {}).get(label, 0) >= threshold
+        scores = [item.get(label, 0) for item in ctx.framework_data.llm_labels.values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
 
@@ -67,11 +57,11 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
 def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
     def has_cls_label_innner(ctx: Context, _) -> bool:
         model(ctx.last_request.text)
-        if model.model_id not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data.llm_labels:
             return False
         if model.model_id is not None:
-            return ctx.framework_data.get(model.model_id, {}).get(label, 0) >= threshold
-        scores = [item.get(label, 0) for item in ctx.framework_data.values()]
+            return ctx.framework_data.llm_labels.get(model.model_id, {}).get(label, 0) >= threshold
+        scores = [item.get(label, 0) for item in ctx.framework_data.llm_labels.values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
 
@@ -82,7 +72,7 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Contex
 def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, pipeline: Pipeline) -> bool:
         model(ctx.last_request.text)
-        if model.model_id not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data.llm_labels:
             return False
         scores = [has_cls_label(item, model.model_id, threshold)(ctx, pipeline) for item in label]
         for score in scores:
@@ -104,7 +94,7 @@ def has_match(
     any of the pre-defined intent utterances.
     The model passed to this function should be in the fit state.
 
-    :param model: Any model from the :py:mod:`~chatsky.script.extras.conditions.models.local.cosine_matchers` module.
+    :param model: Any model from the :py:mod:`~chatsky.script.conditions.llm_conditions.models.local.cosine_matchers` module.
     :param positive_examples: Utterances that the request should match.
     :param negative_examples: Utterances that the request should not match.
     :param threshold: Similarity threshold that triggers a positive response from the function.

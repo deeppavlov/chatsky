@@ -1,8 +1,8 @@
 import pytest
 
-from dff.script.extras.conditions.models.local.cosine_matchers.gensim import GensimMatcher, gensim_available
-from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import numpy_available
-from dff.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.gensim import GensimMatcher, gensim_available
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.cosine_matcher_mixin import numpy_available
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 if not gensim_available or not numpy_available:
     pytest.skip(allow_module_level=True, reason="`Gensim` package missing.")

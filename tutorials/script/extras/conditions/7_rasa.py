@@ -10,7 +10,7 @@ and reuse them in your script.
 
 # %%
 import os
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -18,13 +18,13 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models.remote_api.rasa_model import RasaModel
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions.models.remote_api.rasa_model import RasaModel
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -51,14 +51,11 @@ rasa_model = RasaModel(
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {
-            "get_intents": rasa_model
-        },  # get intents on each turn
         # Use the obtained intents in your conditions. Note the namespace key that matches the one
         # passed to the model.
         TRANSITIONS: {
             ("root", "finish", 1.2): i_cnd.has_cls_label(
-                "goodbye", namespace="rasa"
+                rasa_model, "goodbye", namespace="rasa"
             )
         },
     },
@@ -76,10 +73,10 @@ script = {
             # You can get to different branches depending on the intent values.
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "mood_great", threshold=0.95, namespace="rasa"
+                    rasa_model, "mood_great", threshold=0.95, namespace="rasa"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    "mood_unhappy", threshold=0.99, namespace="rasa"
+                    rasa_model, "mood_unhappy", threshold=0.99, namespace="rasa"
                 ),
                 ("mood", "assert"): cnd.true(),
             },
@@ -90,10 +87,10 @@ script = {
             ),
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "deny", threshold=0.95, namespace="rasa"
+                    rasa_model, "deny", threshold=0.95, namespace="rasa"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    "affirm", namespace="rasa"
+                    rasa_model, "affirm", namespace="rasa"
                 ),
             },
         },

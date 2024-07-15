@@ -11,7 +11,7 @@ for annotating user phrases.
 # %%
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -19,15 +19,15 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models import HFClassifier
-from dff.script.extras.conditions.models import HFMatcher
-from dff.script.extras.conditions.dataset import Dataset
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions.models import HFClassifier
+from chatsky.script.conditions.llm_conditions.models import HFMatcher
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -42,7 +42,7 @@ will handle downloading and deploying the model for you. You need to instantiant
 these classes separately and then pass them to the `Classifier` / `Matcher` instance.
 
 We are using an open source model by Obsei-AI
-to demonstrate, how custom classifiers can be easily adapted for use in dff.script.extras.conditions
+to demonstrate, how custom classifiers can be easily adapted for use in chatsky.script.conditions.llm_conditions
 However, you can use any classification model that is accessible via the Hugging Face hub
 Below, we list some of the most popular open-source models that can power your conversational logic
 

@@ -8,8 +8,8 @@ Initialize it with a :py:class:`~Dataset` with regex-compliant examples.
 import re
 from typing import Optional, Union
 
-from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
-from chatsky.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 
 class RegexModel:

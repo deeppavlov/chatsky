@@ -1,9 +1,9 @@
 import pytest
 
-from dff.script import Context, Message
-from dff.script.extras.conditions.dataset import Dataset, pyyaml_available
-from dff.script.extras.conditions.utils import LABEL_KEY
-from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
+from chatsky.script import Context, Message
+from chatsky.script.conditions.llm_conditions.dataset import Dataset, pyyaml_available
+from chatsky.script.conditions.llm_conditions.utils import LABEL_KEY
+from chatsky.script.conditions.llm_conditions.models.remote_api.async_mixin import AsyncMixin
 from tests.test_utils import get_path_from_tests_to_current_dir
 
 path = get_path_from_tests_to_current_dir(__file__)
@@ -65,5 +65,5 @@ async def test_mixin(testing_pipeline):
     ctx.add_request(Message(text=REQUEST))
     model = Model(namespace_key=NAMESPACE)
     new_ctx: Context = await model(ctx, testing_pipeline)
-    assert isinstance(new_ctx.framework_states[LABEL_KEY], dict)
-    assert new_ctx.framework_states[LABEL_KEY][NAMESPACE] == RESULT
+    assert isinstance(new_ctx.framework_data.llm_labels, dict)
+    assert new_ctx.framework_data.llm_labels[NAMESPACE] == RESULT

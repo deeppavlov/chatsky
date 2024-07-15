@@ -11,7 +11,7 @@ Tutorials for other models can be found in the same section.
 # %pip install dff[ext]
 
 # %%
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -19,17 +19,17 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models.local.classifiers.regex import (
+from chatsky.script.conditions.llm_conditions.models.local.classifiers.regex import (
     RegexClassifier,
     RegexModel,
 )
-from dff.script.extras.conditions.dataset import Dataset
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -75,7 +75,7 @@ dataset = Dataset.model_validate(
 # from pathlib import Path
 # dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/example.yaml"))
 
-regex_model = RegexClassifier(namespace_key="regex", model=RegexModel(dataset))
+regex_model = RegexClassifier(model=RegexModel(dataset))
 
 
 # %% [markdown]
@@ -92,8 +92,7 @@ and compare the predicted label probabilities to a threshold of your choice.
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {"get_intents": regex_model},
-        TRANSITIONS: {("food", "offer", 1.2): i_cnd.has_cls_label("food")},
+        TRANSITIONS: {("food", "offer", 1.2): i_cnd.has_cls_label(regex_model, "food")},
     },
     "root": {
         LOCAL: {TRANSITIONS: {("service", "offer", 1.2): cnd.true()}},

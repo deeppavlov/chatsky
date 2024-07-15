@@ -9,7 +9,7 @@ for annotating user phrases.
 # %pip install dff[ext]
 
 # %%
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -17,17 +17,17 @@ from dff.script import (
     TRANSITIONS,
     LOCAL,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
-from dff.script.extras.conditions.models import SklearnClassifier
-from dff.script.extras.conditions.models import SklearnMatcher
-from dff.script.extras.conditions.dataset import Dataset
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions.models import SklearnClassifier
+from chatsky.script.conditions.llm_conditions.models import SklearnMatcher
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -73,7 +73,6 @@ classifier.fit(common_label_collection)
 matcher = SklearnMatcher(
     tokenizer=TfidfVectorizer(stop_words=["to"]),
     dataset=common_label_collection,
-    namespace_key="skm",
 )
 matcher.fit(common_label_collection)
 
@@ -81,13 +80,9 @@ matcher.fit(common_label_collection)
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {
-            "get_labels_1": classifier,
-            "get_labels_2": matcher,
-        },
         TRANSITIONS: {
             ("food", "offer", 1.2): i_cnd.has_cls_label(
-                "food", threshold=0.5, namespace="skc"
+                classifier, "food", threshold=0.5
             ),
             ("food", "offer", 1.1): i_cnd.has_match(
                 matcher, ["I want to eat"], threshold=0.6

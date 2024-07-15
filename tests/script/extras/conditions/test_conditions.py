@@ -1,9 +1,9 @@
 import pytest
-from dff.script import Context, Message
-from dff.script.extras.conditions.utils import LABEL_KEY
-from dff.script.extras.conditions.dataset import DatasetItem, Dataset
-from dff.script.extras.conditions.conditions import has_cls_label, has_match
-from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import SklearnMatcher, sklearn_available
+from chatsky.script import Context, Message
+from chatsky.script.conditions.llm_conditions.utils import LABEL_KEY
+from chatsky.script.conditions.llm_conditions.dataset import DatasetItem, Dataset
+from chatsky.script.conditions.llm_conditions.conditions import has_cls_label, has_match
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.sklearn import SklearnMatcher, sklearn_available
 
 
 @pytest.fixture(scope="session")

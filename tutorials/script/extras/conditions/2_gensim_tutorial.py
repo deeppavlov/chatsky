@@ -16,21 +16,21 @@ from urllib.request import urlopen
 
 from gensim.models import Word2Vec
 
-from dff.script import (
+from chatsky.script import (
     Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     TRANSITIONS,
 )
-from dff.script import conditions as cnd
+from chatsky.script import conditions as cnd
 
-from dff.script.extras.conditions.models import GensimMatcher
-from dff.script.extras.conditions.dataset import Dataset
-from dff.script.extras.conditions import conditions as i_cnd
-from dff.pipeline import Pipeline
-from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import (
+from chatsky.script.conditions.llm_conditions.models import GensimMatcher
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
@@ -115,13 +115,12 @@ if not os.path.exists(MODEL_FILE):
 model = Word2Vec()
 model.wv = model.wv.load_word2vec_format(MODEL_FILE)
 gensim_matcher = GensimMatcher(
-    model=model, dataset=dataset, namespace_key="gensim"
+    model=model, dataset=dataset
 )
 
 
 # %%
 script = {
-    GLOBAL: {PRE_TRANSITIONS_PROCESSING: {"annotate": gensim_matcher}},
     "root": {
         "start": {
             RESPONSE: Message(text="Hi"),
@@ -130,7 +129,7 @@ script = {
                     Message(text=("hi"))
                 ),
                 ("animals", "like_animals"): i_cnd.has_cls_label(
-                    "animals", threshold=0.75
+                    gensim_matcher, "animals", threshold=0.75
                 ),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
@@ -144,13 +143,13 @@ script = {
         "have_pets": {
             RESPONSE: Message(text="do you have pets?"),
             TRANSITIONS: {
-                "what_animal": i_cnd.has_cls_label("consent", threshold=0.75)
+                "what_animal": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75)
             },
         },
         "like_animals": {
             RESPONSE: Message(text="do you like it?"),
             TRANSITIONS: {
-                "what_animal": i_cnd.has_cls_label("consent", threshold=0.75)
+                "what_animal": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75)
             },
         },
         "what_animal": {
@@ -185,10 +184,10 @@ script = {
             RESPONSE: Message(text="what kind of news do you prefer?"),
             TRANSITIONS: {
                 "ask_about_science": i_cnd.has_cls_label(
-                    "science_news", threshold=0.85
+                    gensim_matcher, "science_news", threshold=0.85
                 ),
                 "ask_about_sport": i_cnd.has_cls_label(
-                    "sport_news", threshold=0.85
+                    gensim_matcher, "sport_news", threshold=0.85
                 ),
             },
         },
@@ -197,7 +196,7 @@ script = {
                 text="i got news about science, would you like to hear them?"
             ),
             TRANSITIONS: {
-                "science_news": i_cnd.has_cls_label("consent", threshold=0.75),
+                "science_news": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp(
                     "change the topic"
                 ),
@@ -208,7 +207,7 @@ script = {
                 text="The newly discovered comet will be named after DeepPavlov team. More at 11."
             ),
             TRANSITIONS: {
-                "what_news": i_cnd.has_cls_label("consent", threshold=0.75),
+                "what_news": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp(
                     "change the topic"
                 ),
@@ -219,7 +218,7 @@ script = {
                 text="i got news about sport, do you want to hear?"
             ),
             TRANSITIONS: {
-                "sport_news": i_cnd.has_cls_label("consent", threshold=0.75),
+                "sport_news": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp(
                     "change the topic"
                 ),
@@ -230,7 +229,7 @@ script = {
                 text="Did you know that an AI-controlled robot plays soccer better than humans?"
             ),
             TRANSITIONS: {
-                "what_news": i_cnd.has_cls_label("consent", threshold=0.75),
+                "what_news": i_cnd.has_cls_label(gensim_matcher, "consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp(
                     "change the topic"
                 ),
@@ -243,7 +242,7 @@ script = {
             TRANSITIONS: {
                 "ask_talk_about": cnd.regexp("fine"),
                 ("animals", "like_animals"): i_cnd.has_cls_label(
-                    "animals", threshold=0.75
+                    gensim_matcher, "animals", threshold=0.75
                 ),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
@@ -252,7 +251,7 @@ script = {
             RESPONSE: Message(text="what do you want to talk about"),
             TRANSITIONS: {
                 ("animals", "like_animals"): i_cnd.has_cls_label(
-                    "animals", threshold=0.85
+                    gensim_matcher, "animals", threshold=0.85
                 ),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },

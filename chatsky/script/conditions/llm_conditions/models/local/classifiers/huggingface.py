@@ -6,7 +6,7 @@ This module provides an adapter interface for Hugging Face models.
 Use pre-trained NLU classifiers to make the most of your conversational data.
 """
 
-from chatsky.script.extras.conditions.models.huggingface import BaseHFModel
+from chatsky.script.conditions.llm_conditions.models.huggingface import BaseHFModel
 
 try:
     from torch.nn import Softmax

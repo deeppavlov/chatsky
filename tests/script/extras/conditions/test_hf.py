@@ -7,8 +7,8 @@ try:
 except ImportError:
     pytest.skip(allow_module_level=True)
 
-from dff.script.extras.conditions.models.local.classifiers.huggingface import HFClassifier
-from dff.script.extras.conditions.models.local.cosine_matchers.huggingface import HFMatcher
+from chatsky.script.conditions.llm_conditions.models.local.classifiers.huggingface import HFClassifier
+from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.huggingface import HFMatcher
 
 
 @pytest.fixture(scope="session")

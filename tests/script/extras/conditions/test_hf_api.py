@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from dff.script.extras.conditions.models.remote_api.hf_api_model import (
+from chatsky.script.conditions.llm_conditions.models.remote_api.hf_api_model import (
     HFAPIModel,
     AsyncHFAPIModel,
     hf_api_available,

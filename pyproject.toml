@@ -88,7 +88,7 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 extended_conditions = ["pyyaml", "requests", "scikit-learn", "joblib"]
-transformers_conditions = ["transformers[torch]", "pyyaml", "requests", "scikit-learn", "joblib"]
+transformers_conditions = ["transformers", "pyyaml", "requests", "scikit-learn", "joblib"]
 dialogflow_conditions = ["google-cloud-dialogflow", "pyyaml", "requests", "scikit-learn", "joblib"]
 async =["httpx"]
 
