@@ -39,7 +39,7 @@ jobs:
               type=raw,value=latest,enable={{is_default_branch}}
 
         - name: Build and upload image
-          uses: docker/build-push-action@v5
+          uses: docker/build-push-action@v6
           with:
             context: chatsky/utils/docker
             file: chatsky/utils/docker/dockerfile_stats
