@@ -35,7 +35,8 @@ from ..types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
     # Everything breaks without this import, even though it's unused.
-    # Should it go into TYPE_CHECKING? Or what should be done?
+    # (It says it's not defined or something like that)
+    # Should it go into TYPE_CHECKING? If not, what should be done?
     StartConditionCheckerFunction,
 )
 from .utils import finalize_service_group
@@ -244,6 +245,7 @@ class Pipeline(BaseModel,  arbitrary_types_allowed=True):
             "services": [self._services_pipeline.info_dict],
         }
 
+    # I know this function will be removed, but for testing I'll keep it for now
     @classmethod
     def from_script(
         cls,
@@ -257,8 +259,8 @@ class Pipeline(BaseModel,  arbitrary_types_allowed=True):
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = CLIMessengerInterface(),
-        pre_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
-        post_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
+        pre_services: Optional[List[Union[Service, ServiceGroup]]] = None,
+        post_services: Optional[List[Union[Service, ServiceGroup]]] = None,
     ) -> "Pipeline":
         """
         Pipeline script-based constructor.
@@ -298,6 +300,8 @@ class Pipeline(BaseModel,  arbitrary_types_allowed=True):
         pre_services = [] if pre_services is None else pre_services
         post_services = [] if post_services is None else post_services
         return cls(
+            pre_services=pre_services,
+            post_services=post_services,
             script=script,
             start_label=start_label,
             fallback_label=fallback_label,
@@ -308,7 +312,6 @@ class Pipeline(BaseModel,  arbitrary_types_allowed=True):
             handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
-            components=[*pre_services, ACTOR, *post_services],
         )
 
     def set_actor(
