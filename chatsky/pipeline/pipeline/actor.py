@@ -27,9 +27,10 @@ from __future__ import annotations
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 import copy
 
+from chatsky.pipeline.pipeline.component import PipelineComponent
 from chatsky.utils.turn_caching import cache_clear
 from chatsky.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 from chatsky.script.core.message import Message
@@ -62,7 +63,7 @@ async def default_condition_handler(
 
 
 # arbitrary_types_allowed for testing, will remove later
-class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
+class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.
@@ -94,6 +95,12 @@ class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     handlers: Optional[Dict[ActorStage, List[Callable]]] = {}
     _clean_turn_cache: Optional[bool] = True
     # Making a 'computed field' for this feels overkill, a 'private' field is probably fine?
+
+    # Basically, Actor cannot be async with other components. That is correct, yes?
+    @model_validator(mode="after")
+    def tick_async_flag(self):
+        self.calculated_async_flag = False
+        return self
 
     @model_validator(mode="after")
     def actor_validator(self):

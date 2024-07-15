@@ -81,8 +81,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         if self.name is not None and (self.name == "" or "." in self.name):
             raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
 
-        self.calculated_async_flag = all([service.asynchronous for service in self.components])
-
         if not self.calculated_async_flag and self.requested_async_flag:
             raise Exception(f"{type(self).__name__} '{self.name}' can't be asynchronous!")
         return self

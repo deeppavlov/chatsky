@@ -13,20 +13,17 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import Optional, TYPE_CHECKING, Union, List
+from typing import Optional, TYPE_CHECKING
 from pydantic import model_validator
 
 from chatsky.script import Context
 
 
 from .extra import ComponentExtraHandler
-from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
     ServiceFunction,
     StartConditionCheckerFunction,
-    ComponentExecutionState,
-    ExtraHandlerType,
 )
 from ..pipeline.component import PipelineComponent
 
@@ -59,18 +56,11 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
 
     handler: ServiceFunction
-    # Should these be removed from the above API reference?
-    # I think they're still useful for users if included in API reference.
-    # before_handler: Optional[ComponentExtraHandler] = None
-    # after_handler: Optional[ComponentExtraHandler] = None
-    # timeout: Optional[float] = None
-    # asynchronous: Optional[bool] = None
-    # start_condition: Optional[StartConditionCheckerFunction] = None
-    # name: Optional[str] = None
 
     @model_validator(mode="after")
     def tick_async_flag(self):
         self.calculated_async_flag = True
+        return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -111,6 +101,7 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             service_representation = "[Unknown]"
         representation.update({"handler": service_representation})
         return representation
+
 
 # If this function will continue existing.
 def to_service(

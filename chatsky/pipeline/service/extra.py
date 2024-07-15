@@ -10,8 +10,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any
-from pydantic import BaseModel, computed_field, field_validator
+from typing import Optional, List, TYPE_CHECKING
+from pydantic import BaseModel, computed_field
 
 from chatsky.script import Context
 
@@ -50,14 +50,6 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
-
-    @field_validator("functions")
-    @classmethod
-    # Note to self: Here Script class has "@validate_call". Is it needed here?
-    def single_handler_init(cls, func: Any):
-        if isinstance(func, ExtraHandlerFunction):
-            return [func]
-        return func
 
     @computed_field(alias="calculated_async_flag", repr=False)
     def calculate_async_flag(self) -> bool:

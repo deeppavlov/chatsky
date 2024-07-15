@@ -16,8 +16,8 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable
-from pydantic import BaseModel, Field, model_validator, computed_field
+from typing import Union, List, Dict, Optional, Hashable, Callable, Any
+from pydantic import BaseModel, Field, model_validator, computed_field, field_validator
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -27,30 +27,33 @@ from chatsky.utils.turn_caching import cache_clear
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
-from ..service.group import ServiceGroup
-from ..service.extra import ComponentExtraHandler
+from chatsky.pipeline.service.service import Service
+from chatsky.pipeline.service.group import ServiceGroup
+from chatsky.pipeline.service.extra import BeforeHandler, AfterHandler
 from ..types import (
     ServiceFunction,
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
+    # Everything breaks without this import, even though it's unused.
+    # Should it go into TYPE_CHECKING? Or what should be done?
+    StartConditionCheckerFunction,
 )
-from .utils import finalize_service_group, pretty_format_component_info_dict
-from .component import PipelineComponent
-from chatsky.pipeline.pipeline.actor import Actor
+from .utils import finalize_service_group
+from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
 
-# """
-# Debug code. No need to look here.
-# from ..service.group import Service
-# from chatsky.pipeline.service.extra import _ComponentExtraHandler
-# """
-
+"""
+if TYPE_CHECKING:
+    from .. import Service
+    from ..service.group import ServiceGroup
+"""
 logger = logging.getLogger(__name__)
 
 ACTOR = "ACTOR"
 
 
 # Using "arbitrary_types_allowed" from pydantic for debug purposes, probably should remove later.
-class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
+# Must also add back in 'extra="forbid"', removed for testing.
+class Pipeline(BaseModel,  arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
@@ -89,9 +92,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     """
 
-    # If Actor is passed here, program will break. Should Actor be a private class somehow?
-    pre_services: List[PipelineComponent]
-    post_services: List[PipelineComponent]
+    # I wonder what happens/should happen here if only one callable is passed.
+    pre_services: Optional[List[Union[Service, ServiceGroup]]] = []
+    post_services: Optional[List[Union[Service, ServiceGroup]]] = []
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
@@ -100,45 +103,81 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     handlers: Optional[Dict[ActorStage, List[Callable]]] = None
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
-    before_handler: Optional[List[ExtraHandlerFunction]] = None
-    after_handler: Optional[List[ExtraHandlerFunction]] = None
+    before_handler: Optional[List[ExtraHandlerFunction]] = []
+    after_handler: Optional[List[ExtraHandlerFunction]] = []
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
-    # TO-DO: Remove/change three parameters below (if possible)
-    actor: Optional[Actor] = None
+    # TO-DO: Remove/change parameters below (if possible)
     _services_pipeline: Optional[ServiceGroup]
     _clean_turn_cache: Optional[bool]
 
     @computed_field(alias="_services_pipeline", repr=False)
-    def create_main_service_group(self) -> ServiceGroup:
-        components = [self.pre_services, self.actor, self.post_services]
+    def _services_pipeline(self) -> ServiceGroup:
+        components = [*self.pre_services, self.actor, *self.post_services]
         services_pipeline = ServiceGroup(
             components=components,
-            before_handler=self.before_handler,
-            after_handler=self.after_handler,
+            before_handler=BeforeHandler(self.before_handler),
+            after_handler=AfterHandler(self.after_handler),
             timeout=self.timeout,
         )
         services_pipeline.name = "pipeline"
         services_pipeline.path = ".pipeline"
         return services_pipeline
 
+    @computed_field(repr=False)
+    def actor(self) -> Actor:
+        return Actor(
+            script=self.script,
+            start_label=self.start_label,
+            fallback_label=self.fallback_label,
+            label_priority=self.label_priority,
+            condition_handler=self.condition_handler,
+            handlers=self.handlers,
+        )
+
+    @field_validator("before_handler")
+    @classmethod
+    def single_before_handler_init(cls, handler: Any):
+        if isinstance(handler, ExtraHandlerFunction):
+            return [handler]
+        return handler
+
+    @field_validator("after_handler")
+    @classmethod
+    def single_after_handler_init(cls, handler: Any):
+        if isinstance(handler, ExtraHandlerFunction):
+            return [handler]
+        return handler
+
+    # This looks kind of terrible. I could remove this and ask the user to do things the right way,
+    # but this just seems more convenient for the user. Like, "put just one callable in pre-services"? Done.
+    # TODO: Change this to a large model_validator(mode="before") for less code bloat
+    @field_validator("pre_services")
+    @classmethod
+    def single_pre_service_init(cls, services: Any):
+        if not isinstance(services, List):
+            return [services]
+        return services
+
+    @field_validator("post_services")
+    @classmethod
+    def single_post_service_init(cls, services: Any):
+        if not isinstance(services, List):
+            return [services]
+        return services
+
     @model_validator(mode="after")
     def pipeline_init(self):
-        # Here Actor can be initialized, pretty sure.
-        self.set_actor(
-            self.script,
-            self.start_label,
-            self.fallback_label,
-            self.label_priority,
-            self.condition_handler,
-            self.handlers,
-        )
+        """# I wonder if I could make actor itself a @computed_field, but I'm not sure that would work.
+        # What if the cache gets cleaned at some point? Then a new Actor would be created.
+        # Same goes for @cached_property. Would @property work?
+        self.actor = self._set_actor"""
+
         # finalize_service_group() needs to have the search for Actor removed.
         # Though this should work too.
-        actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
-        if not actor_exists:
-            raise Exception("Actor not found in the pipeline!")
+        finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+        # This could be removed.
         if self.actor is None:
             raise Exception("Actor wasn't initialized correctly!")
 
@@ -205,17 +244,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "services": [self._services_pipeline.info_dict],
         }
 
-    def pretty_format(self, show_extra_handlers: bool = False, indent: int = 4) -> str:
-        """
-        Method for receiving pretty-formatted string description of the pipeline.
-        Resulting string structure is somewhat similar to YAML string.
-        Should be used in debugging/logging purposes and should not be parsed.
-
-        :param show_extra_handlers: Whether to include Wrappers or not (could be many and/or generated).
-        :param indent: Offset from new line to add before component children.
-        """
-        return pretty_format_component_info_dict(self.info_dict, show_extra_handlers, indent=indent)
-
     @classmethod
     def from_script(
         cls,
@@ -223,12 +251,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
+        condition_handler: Optional[Callable] = default_condition_handler,
         slots: Optional[Union[GroupSlot, Dict]] = None,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
+        messenger_interface: Optional[MessengerInterface] = CLIMessengerInterface(),
         pre_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
         post_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
     ) -> "Pipeline":

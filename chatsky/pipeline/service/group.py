@@ -16,6 +16,7 @@ from pydantic import model_validator, field_validator
 
 from chatsky.script import Context
 from .extra import ComponentExtraHandler
+from ..pipeline.actor import Actor
 
 from ..pipeline.component import PipelineComponent
 from ..types import (
@@ -34,6 +35,8 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
+# I think it's fine calling this a `Service` group, even though really it's a `PipelineComponent` group.
+# The user only sees this as a `Service` group like they should.
 # arbitrary_types_allowed for testing, will remove later
 class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
@@ -59,17 +62,9 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
 
     components: List[PipelineComponent]
 
-    # Should these be removed from API reference?
-    # before_handler: Optional[ComponentExtraHandler] = None
-    # after_handler: Optional[ComponentExtraHandler] = None
-    # timeout: Optional[float] = None
-    # asynchronous: Optional[bool] = None
-    # start_condition: Optional[StartConditionCheckerFunction] = None
-    # name: Optional[str] = None
-
-    @field_validator("functions")
-    @classmethod
     # Note to self: Here Script class has "@validate_call". Is it needed here?
+    @field_validator('components')
+    @classmethod
     def single_component_init(cls, comp: Any):
         if isinstance(comp, PipelineComponent):
             return [comp]
@@ -78,9 +73,10 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
     # Of course, they might not want to break their own program, but what if.
     # Maybe I could just make this a 'private' field, like '_calc_async'
-    @model_validator(mode="after")
+    @model_validator(mode='after')
     def calculate_async_flag(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
+        return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -153,7 +149,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         self,
         global_extra_handler_type: GlobalExtraHandlerType,
         extra_handler: ExtraHandlerFunction,
-        condition: ExtraHandlerConditionFunction = lambda _: True,
+        condition: ExtraHandlerConditionFunction = lambda _: False,
     ):
         """
         Method for adding a global extra handler to this group.
@@ -171,10 +167,10 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         for service in self.components:
             if not condition(service.path):
                 continue
-            if isinstance(service, Service):
-                service.add_extra_handler(global_extra_handler_type, extra_handler)
-            else:
+            if isinstance(service, ServiceGroup):
                 service.add_extra_handler(global_extra_handler_type, extra_handler, condition)
+            else:
+                service.add_extra_handler(global_extra_handler_type, extra_handler)
 
     @property
     def info_dict(self) -> dict:
