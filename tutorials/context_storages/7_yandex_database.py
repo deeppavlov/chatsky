@@ -14,6 +14,7 @@ library for asynchronous access to Yandex DB.
 # %pip install chatsky[ydb]
 
 # %%
+import asyncio
 import os
 
 from chatsky.context_storages import context_storage_factory
@@ -40,7 +41,7 @@ db_uri = "{}{}".format(
     os.environ["YDB_ENDPOINT"],
     os.environ["YDB_DATABASE"],
 )
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 

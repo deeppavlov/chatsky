@@ -9,6 +9,7 @@ of context storage and context storage schema.
 # %pip install chatsky
 
 # %%
+import asyncio
 import pathlib
 
 from chatsky.context_storages import (
@@ -26,7 +27,7 @@ from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = context_storage_factory("shelve://dbs/partly.shlv")
+db = asyncio.run(context_storage_factory("shelve://dbs/partly.shlv"))
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 

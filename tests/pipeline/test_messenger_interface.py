@@ -2,6 +2,8 @@ import asyncio
 import sys
 import pathlib
 
+import pytest
+
 from chatsky.script import RESPONSE, TRANSITIONS, Message
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import CallbackMessengerInterface
@@ -38,7 +40,8 @@ pipeline = Pipeline.from_script(
 )
 
 
-def test_cli_messenger_interface(monkeypatch):
+@pytest.mark.asyncio
+async def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
@@ -51,7 +54,7 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
+    await pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop)
 
 
 def test_callback_messenger_interface(monkeypatch):

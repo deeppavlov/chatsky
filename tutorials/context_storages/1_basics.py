@@ -13,6 +13,7 @@ In this example JSON file is used as a storage.
 # %pip install chatsky[json,pickle]
 
 # %%
+import asyncio
 import pathlib
 
 from chatsky.context_storages import context_storage_factory
@@ -26,7 +27,7 @@ from chatsky.utils.testing.common import (
 from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = context_storage_factory("json://dbs/file.json")
+db = asyncio.run(context_storage_factory("json://dbs/file.json"))
 # db = context_storage_factory("pickle://dbs/file.pkl")
 # db = context_storage_factory("shelve://dbs/file.shlv")
 

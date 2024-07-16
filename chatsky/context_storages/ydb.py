@@ -64,7 +64,7 @@ class YDBContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(
+    async def __init__(
         self,
         path: str,
         context_schema: Optional[ContextSchema] = None,
@@ -72,7 +72,7 @@ class YDBContextStorage(DBContextStorage):
         table_name_prefix: str = "chatsky_table",
         timeout=5,
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        await DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True
 
         protocol, netloc, self.database, _, _ = urlsplit(path)
@@ -82,10 +82,10 @@ class YDBContextStorage(DBContextStorage):
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
         self.table_prefix = table_name_prefix
-        self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix))
+        self.driver, self.pool = await _init_drive(timeout, self.endpoint, self.database, table_name_prefix)
 
     @cast_key_to_string()
-    async def del_item_async(self, key: str):
+    async def delete(self, key: str):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -103,7 +103,7 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -122,7 +122,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -139,7 +139,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         async def callee(session):
             if prune_history:
                 query = f"""
@@ -159,7 +159,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");

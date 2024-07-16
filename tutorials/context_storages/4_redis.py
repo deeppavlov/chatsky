@@ -14,6 +14,7 @@ library for asynchronous access to Redis DB.
 # %pip install chatsky[redis]
 
 # %%
+import asyncio
 import os
 
 from chatsky.context_storages import context_storage_factory
@@ -31,7 +32,7 @@ from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 db_uri = "redis://{}:{}@localhost:6379/{}".format(
     "", os.environ["REDIS_PASSWORD"], "0"
 )
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)

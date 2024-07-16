@@ -8,7 +8,6 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 
-import asyncio
 import importlib
 import threading
 from functools import wraps
@@ -78,7 +77,12 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(
+    async def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls)
+        await instance.__init__(*args, **kwargs)
+        return instance
+
+    async def __init__(
         self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
     ):
         _, _, file_path = path.partition("://")
@@ -100,18 +104,9 @@ class DBContextStorage(ABC):
         """
         self.context_schema = context_schema if context_schema else ContextSchema()
 
-    def __getitem__(self, key: Hashable) -> Context:
-        """
-        Synchronous method for accessing stored Context.
-
-        :param key: Hashable key used to store Context instance.
-        :return: The stored context, associated with the given key.
-        """
-        return asyncio.run(self.get_item_async(key))
-
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
+    async def get(self, key: str) -> Context:
         """
         Asynchronous method for accessing stored Context.
 
@@ -120,18 +115,9 @@ class DBContextStorage(ABC):
         """
         return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key)
 
-    def __setitem__(self, key: Hashable, value: Context):
-        """
-        Synchronous method for storing Context.
-
-        :param key: Hashable key used to store Context instance.
-        :param value: Context to store.
-        """
-        return asyncio.run(self.set_item_async(key, value))
-
     @threadsafe_method
     @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
+    async def set(self, key: str, value: Context):
         """
         Asynchronous method for storing Context.
 
@@ -142,16 +128,8 @@ class DBContextStorage(ABC):
             value, self._write_pac_ctx, self._write_log_ctx, key, self._insert_limit
         )
 
-    def __delitem__(self, key: Hashable):
-        """
-        Synchronous method for removing stored Context.
-
-        :param key: Hashable key used to identify Context instance for deletion.
-        """
-        return asyncio.run(self.del_item_async(key))
-
     @abstractmethod
-    async def del_item_async(self, key: Hashable):
+    async def delete(self, key: Hashable):
         """
         Asynchronous method for removing stored Context.
 
@@ -159,17 +137,8 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    def __contains__(self, key: Hashable) -> bool:
-        """
-        Synchronous method for finding whether any Context is stored with given key.
-
-        :param key: Hashable key used to check if Context instance is stored.
-        :return: True if there is Context accessible by given key, False otherwise.
-        """
-        return asyncio.run(self.contains_async(key))
-
     @abstractmethod
-    async def contains_async(self, key: Hashable) -> bool:
+    async def contains(self, key: Hashable) -> bool:
         """
         Asynchronous method for finding whether any Context is stored with given key.
 
@@ -178,16 +147,8 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    def __len__(self) -> int:
-        """
-        Synchronous method for retrieving number of stored Contexts.
-
-        :return: The number of stored Contexts.
-        """
-        return asyncio.run(self.len_async())
-
     @abstractmethod
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         """
         Asynchronous method for retrieving number of stored Contexts.
 
@@ -195,45 +156,21 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    def clear(self, prune_history: bool = False):
-        """
-        Synchronous method for clearing context storage, removing all the stored Contexts.
-
-        :param prune_history: also delete the history from the storage.
-        """
-        return asyncio.run(self.clear_async(prune_history))
-
     @abstractmethod
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         """
         Asynchronous method for clearing context storage, removing all the stored Contexts.
         """
         raise NotImplementedError
 
-    def keys(self) -> Set[str]:
-        """
-        Synchronous method for getting set of all storage keys.
-        """
-        return asyncio.run(self.keys_async())
-
     @abstractmethod
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         """
         Asynchronous method for getting set of all storage keys.
         """
         raise NotImplementedError
 
-    def get(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
-        """
-        Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
-
-        :param key: Hashable key used to store Context instance.
-        :param default: Optional default value to be returned if no Context is found.
-        :return: The stored context, associated with the given key or default value.
-        """
-        return asyncio.run(self.get_async(key, default))
-
-    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
+    async def get_default(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
         """
         Asynchronous method for accessing stored Context, returning default if no Context is stored with the given key.
 
@@ -242,7 +179,7 @@ class DBContextStorage(ABC):
         :return: The stored context, associated with the given key or default value.
         """
         try:
-            return await self.get_item_async(key)
+            return await self.get(key)
         except KeyError:
             return default
 
@@ -294,7 +231,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
 
-def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
+async def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     """
     Use context_storage_factory to lazy import context storage types and instantiate them.
     The function takes a database connection URI or its equivalent. It should be prefixed with database name,
@@ -334,4 +271,4 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
     target_class = getattr(importlib.import_module(f".{module}", package="chatsky.context_storages"), _class)
-    return target_class(path, **kwargs)
+    return await target_class(path, **kwargs)

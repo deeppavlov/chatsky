@@ -17,6 +17,7 @@ Note that protocol separator for windows differs from one for linux.
 # %pip install chatsky[sqlite]
 
 # %%
+import asyncio
 import pathlib
 from platform import system
 
@@ -38,7 +39,7 @@ db_file.touch(exist_ok=True)
 
 separator = "///" if system() == "Windows" else "////"
 db_uri = f"sqlite+aiosqlite:{separator}{db_file.absolute()}"
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)

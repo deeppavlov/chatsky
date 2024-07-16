@@ -14,6 +14,7 @@ dictionary of context is used for storing additional data.
 # %%
 import logging
 
+from chatsky.context_storages import MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.script import Context, Message
 
@@ -67,8 +68,8 @@ def pong_processor(ctx: Context):
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    context_storage={},  # `context_storage` - a dictionary or
-    # a `DBContextStorage` instance,
+    context_storage=MemoryContextStorage(),
+    # `context_storage` - a `DBContextStorage` instance,
     # a place to store dialog contexts
     messenger_interface=CLIMessengerInterface(),
     # `messenger_interface` - a message channel adapter,

@@ -56,21 +56,21 @@ class JSONContextStorage(DBContextStorage):
     _VALUE_COLUMN = "value"
     _PACKED_COLUMN = "data"
 
-    def __init__(
+    async def __init__(
         self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
     ):
-        DBContextStorage.__init__(self, path, context_schema, StringSerializer(serializer))
+        await DBContextStorage.__init__(self, path, context_schema, StringSerializer(serializer))
         self.context_schema.supports_async = False
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
         self.context_table = (context_file, SerializableStorage())
         log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
         self.log_table = (log_file, SerializableStorage())
-        asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
+        await asyncio.gather(self._load(self.context_table), self._load(self.log_table))
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: str):
+    async def delete(self, key: str):
         for id in self.context_table[1].model_extra.keys():
             if self.context_table[1].model_extra[id][ExtraFields.storage_key.value] == key:
                 self.context_table[1].model_extra[id][ExtraFields.active_ctx.value] = False
@@ -78,12 +78,12 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         self.context_table = await self._load(self.context_table)
         return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         self.context_table = await self._load(self.context_table)
         return len(
             {
@@ -94,7 +94,7 @@ class JSONContextStorage(DBContextStorage):
         )
 
     @threadsafe_method
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         if prune_history:
             self.context_table[1].model_extra.clear()
             self.log_table[1].model_extra.clear()
@@ -105,7 +105,7 @@ class JSONContextStorage(DBContextStorage):
         await self._save(self.context_table)
 
     @threadsafe_method
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         self.context_table = await self._load(self.context_table)
         return {
             ctx[ExtraFields.storage_key.value]

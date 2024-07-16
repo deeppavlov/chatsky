@@ -15,6 +15,7 @@ libraries for asynchronous access to MySQL DB.
 # %pip install chatsky[mysql]
 
 # %%
+import asyncio
 import os
 
 from chatsky.context_storages import context_storage_factory
@@ -34,7 +35,7 @@ db_uri = "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
     os.environ["MYSQL_PASSWORD"],
     os.environ["MYSQL_DATABASE"],
 )
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)

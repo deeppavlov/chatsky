@@ -49,14 +49,14 @@ class MongoContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(
+    async def __init__(
         self,
         path: str,
         context_schema: Optional[ContextSchema] = None,
         serializer: Any = DefaultSerializer(),
         collection_prefix: str = "chatsky_collection",
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        await DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True
 
         if not mongo_available:
@@ -70,32 +70,30 @@ class MongoContextStorage(DBContextStorage):
             self._LOGS_TABLE: db[f"{collection_prefix}_{self._LOGS_TABLE}"],
         }
 
-        asyncio.run(
-            asyncio.gather(
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True
-                ),
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.storage_key.value, HASHED)], background=True
-                ),
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.active_ctx.value, HASHED)], background=True
-                ),
-                self.collections[self._LOGS_TABLE].create_index(
-                    [(ExtraFields.primary_id.value, ASCENDING)], background=True
-                ),
-            )
+        await asyncio.gather(
+            self.collections[self._CONTEXTS_TABLE].create_index(
+                [(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True
+            ),
+            self.collections[self._CONTEXTS_TABLE].create_index(
+                [(ExtraFields.storage_key.value, HASHED)], background=True
+            ),
+            self.collections[self._CONTEXTS_TABLE].create_index(
+                [(ExtraFields.active_ctx.value, HASHED)], background=True
+            ),
+            self.collections[self._LOGS_TABLE].create_index(
+                [(ExtraFields.primary_id.value, ASCENDING)], background=True
+            ),
         )
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: str):
+    async def delete(self, key: str):
         await self.collections[self._CONTEXTS_TABLE].update_many(
             {ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}}
         )
 
     @threadsafe_method
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         count_key = "unique_count"
         unique = (
             await self.collections[self._CONTEXTS_TABLE]
@@ -111,7 +109,7 @@ class MongoContextStorage(DBContextStorage):
         return 0 if len(unique) == 0 else unique[0][count_key]
 
     @threadsafe_method
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         if prune_history:
             await self.collections[self._CONTEXTS_TABLE].drop()
             await self.collections[self._LOGS_TABLE].drop()
@@ -121,7 +119,7 @@ class MongoContextStorage(DBContextStorage):
             )
 
     @threadsafe_method
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         unique_key = "unique_keys"
         unique = (
             await self.collections[self._CONTEXTS_TABLE]
@@ -136,7 +134,7 @@ class MongoContextStorage(DBContextStorage):
         return set(unique[0][unique_key])
 
     @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         return (
             await self.collections[self._CONTEXTS_TABLE].count_documents(
                 {"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.active_ctx.value: True}]}
