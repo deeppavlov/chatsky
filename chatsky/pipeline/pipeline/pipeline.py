@@ -54,7 +54,7 @@ ACTOR = "ACTOR"
 
 # Using "arbitrary_types_allowed" from pydantic for debug purposes, probably should remove later.
 # Must also add back in 'extra="forbid"', removed for testing.
-class Pipeline(BaseModel,  arbitrary_types_allowed=True):
+class Pipeline(BaseModel, arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:

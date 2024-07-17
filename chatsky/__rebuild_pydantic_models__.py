@@ -5,6 +5,7 @@ from chatsky.pipeline.pipeline.actor import Actor
 from chatsky.pipeline.pipeline.component import PipelineComponent
 from chatsky.pipeline.types import ExtraHandlerRuntimeInfo
 from chatsky.script import Context, Script
+
 """
 Actor.model_rebuild()
 PipelineComponent.model_rebuild()

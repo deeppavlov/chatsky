@@ -63,7 +63,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     components: List[PipelineComponent]
 
     # Note to self: Here Script class has "@validate_call". Is it needed here?
-    @field_validator('components')
+    @field_validator("components")
     @classmethod
     def single_component_init(cls, comp: Any):
         if isinstance(comp, PipelineComponent):
@@ -73,7 +73,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
     # Of course, they might not want to break their own program, but what if.
     # Maybe I could just make this a 'private' field, like '_calc_async'
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def calculate_async_flag(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self

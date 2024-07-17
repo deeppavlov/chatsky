@@ -15,9 +15,7 @@ from ..service.service import Service
 from ..service.group import ServiceGroup
 
 
-def rename_component_incrementing(
-    component: PipelineComponent, collisions: List[PipelineComponent]
-) -> str:
+def rename_component_incrementing(component: PipelineComponent, collisions: List[PipelineComponent]) -> str:
     """
     Function for generating new name for a pipeline component,
     that has similar name with other components in the same group.
