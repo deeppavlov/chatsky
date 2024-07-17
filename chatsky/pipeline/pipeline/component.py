@@ -139,12 +139,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         except asyncio.TimeoutError:
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
-    # Named this run_component, because ServiceGroup and Actor are components now too, and naming this run_service
-    # wouldn't be on point, they're not just services. The only problem I have is that this is kind of too generic,
-    # even confusingly generic, since _run() exists. Possible solution: implement _run within these classes
-    # themselves. My problem: centralizing Extra Handlers within PipelineComponent feels right. Why should Services
-    # have the right to run Extra Handlers however they want? They were already run there without checking the
-    # start_condition, which was a mistake.
     @abc.abstractmethod
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         raise NotImplementedError

@@ -92,9 +92,9 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
-    handlers: Optional[Dict[ActorStage, List[Callable]]] = {}
+    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default={})
     _clean_turn_cache: Optional[bool] = True
-    # Making a 'computed field' for this feels overkill, a 'private' field is probably fine?
+    # Making a 'computed field' for this feels overkill, a 'private' field like this is probably fine?
 
     # Basically, Actor cannot be async with other components. That is correct, yes?
     @model_validator(mode="after")
@@ -117,12 +117,19 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
 
+        # This line should be removed right after removing from_script() method.
+        self.handlers = {} if self.handlers is None else self.handlers
+
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    async def __call__(self, pipeline: Pipeline, ctx: Context):
+    # Standard signature of any PipelineComponent. ctx goes first.
+    async def __call__(self, ctx: Context, pipeline: Pipeline):
         await self.run_component(pipeline, ctx)
 
+    # This signature is mirroring to that of PipelineComponent.
+    # I think that should be changed, really. Not sure if that's important.
+    # Maybe some Actor tests will fail.
     async def run_component(self, pipeline: Pipeline, ctx: Context) -> None:
         """
         Method for running an `Actor`.

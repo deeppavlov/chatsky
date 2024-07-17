@@ -51,8 +51,8 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
 
-    @computed_field(alias="calculated_async_flag", repr=False)
-    def calculate_async_flag(self) -> bool:
+    @computed_field(repr=False)
+    def calculated_async_flag(self) -> bool:
         return all([asyncio.iscoroutinefunction(func) for func in self.functions])
 
     @property

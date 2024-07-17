@@ -93,19 +93,20 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
 
     """
 
-    # I wonder what happens/should happen here if only one callable is passed.
-    pre_services: Optional[List[Union[Service, ServiceGroup]]] = []
-    post_services: Optional[List[Union[Service, ServiceGroup]]] = []
+    # I wonder what happens/should happen here if just one callable is passed.
+    pre_services: List[Union[Service, ServiceGroup]] = Field(default=[])
+    post_services: List[Union[Service, ServiceGroup]] = Field(default=[])
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
-    condition_handler: Optional[Callable] = None
-    handlers: Optional[Dict[ActorStage, List[Callable]]] = None
+    condition_handler: Callable = Field(default=default_condition_handler)
+    slots: Optional[Union[GroupSlot, Dict]] = None
+    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default={})
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
-    before_handler: Optional[List[ExtraHandlerFunction]] = []
-    after_handler: Optional[List[ExtraHandlerFunction]] = []
+    before_handler: List[ExtraHandlerFunction] = Field(default=[])
+    after_handler: List[ExtraHandlerFunction] = Field(default=[])
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
@@ -113,7 +114,7 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
     _services_pipeline: Optional[ServiceGroup]
     _clean_turn_cache: Optional[bool]
 
-    @computed_field(alias="_services_pipeline", repr=False)
+    @computed_field(repr=False)
     def _services_pipeline(self) -> ServiceGroup:
         components = [*self.pre_services, self.actor, *self.post_services]
         services_pipeline = ServiceGroup(
@@ -175,9 +176,13 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
         # Same goes for @cached_property. Would @property work?
         self.actor = self._set_actor"""
 
-        # finalize_service_group() needs to have the search for Actor removed.
-        # Though this should work too.
+        # These lines should be removed right after removing the from_script() method.
+        self.context_storage = {} if self.context_storage is None else self.context_storage
+        # Same here, but this line creates a Pydantic error now, though it shouldn't have.
+        self.slots = GroupSlot.model_validate(self.slots) if self.slots is not None else None
+
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+
         # This could be removed.
         if self.actor is None:
             raise Exception("Actor wasn't initialized correctly!")
@@ -245,13 +250,80 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
             "services": [self._services_pipeline.info_dict],
         }
 
+    # I know this function will be removed, but for testing I'll keep it for now
+    @classmethod
+    def from_script(
+        cls,
+        script: Union[Script, Dict],
+        start_label: NodeLabel2Type,
+        fallback_label: Optional[NodeLabel2Type] = None,
+        label_priority: float = 1.0,
+        condition_handler: Callable = default_condition_handler,
+        slots: Optional[Union[GroupSlot, Dict]] = None,
+        parallelize_processing: bool = False,
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
+        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
+        messenger_interface: Optional[MessengerInterface] = CLIMessengerInterface(),
+        pre_services: Optional[List[Union[Service, ServiceGroup]]] = None,
+        post_services: Optional[List[Union[Service, ServiceGroup]]] = None,
+    ) -> "Pipeline":
+        """
+        Pipeline script-based constructor.
+        It creates :py:class:`~.Actor` object and wraps it with pipeline.
+        NB! It is generally not designed for projects with complex structure.
+        :py:class:`~.Service` and :py:class:`~.ServiceGroup` customization
+        becomes not as obvious as it could be with it.
+        Should be preferred for simple workflows with Actor auto-execution.
+        :param script: (required) A :py:class:`~.Script` instance (object or dict).
+        :param start_label: (required) Actor start label.
+        :param fallback_label: Actor fallback label.
+        :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
+            where there is no priority. Defaults to `1.0`.
+        :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+        :param slots: Slots configuration.
+        :param parallelize_processing: This flag determines whether or not the functions
+            defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+            of the script should be parallelized over respective groups.
+        :param handlers: This variable is responsible for the usage of external handlers on
+            the certain stages of work of :py:class:`~chatsky.script.Actor`.
+            - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
+            - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+        :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
+            or a dict to store dialog :py:class:`~.Context`.
+        :param messenger_interface: An instance for this pipeline.
+        :param pre_services: List of :py:data:`~.ServiceBuilder` or
+            :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
+        :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
+        :param post_services: List of :py:data:`~.ServiceBuilder` or
+            :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
+            It constructs root service group by merging `pre_services` + actor + `post_services`.
+        :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
+        """
+        pre_services = [] if pre_services is None else pre_services
+        post_services = [] if post_services is None else post_services
+        return cls(
+            pre_services=pre_services,
+            post_services=post_services,
+            script=script,
+            start_label=start_label,
+            fallback_label=fallback_label,
+            label_priority=label_priority,
+            condition_handler=condition_handler,
+            slots=slots,
+            parallelize_processing=parallelize_processing,
+            handlers=handlers,
+            messenger_interface=messenger_interface,
+            context_storage=context_storage,
+            components=[*pre_services, ACTOR, *post_services],
+        )
+
     def set_actor(
         self,
         script: Union[Script, Dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
+        condition_handler: Callable = default_condition_handler,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         """
