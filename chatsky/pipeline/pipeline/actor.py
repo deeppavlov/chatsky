@@ -124,13 +124,7 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         self._clean_turn_cache = True
 
     # Standard signature of any PipelineComponent. ctx goes first.
-    async def __call__(self, ctx: Context, pipeline: Pipeline):
-        await self.run_component(pipeline, ctx)
-
-    # This signature is mirroring to that of PipelineComponent.
-    # I think that should be changed, really. Not sure if that's important.
-    # Maybe some Actor tests will fail.
-    async def run_component(self, pipeline: Pipeline, ctx: Context) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running an `Actor`.
 
