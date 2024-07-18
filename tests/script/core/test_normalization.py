@@ -1,8 +1,8 @@
 # %%
 from typing import Tuple
 
-from dff.pipeline import Pipeline
-from dff.script import (
+from chatsky.pipeline import Pipeline
+from chatsky.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
@@ -12,13 +12,13 @@ from dff.script import (
     Context,
     Script,
     Node,
-    NodeLabel3Type,
+    ConstLabel,
     Message,
 )
-from dff.script.labels import repeat
-from dff.script.conditions import true
+from chatsky.script.labels import repeat
+from chatsky.script.conditions import true
 
-from dff.script.core.normalization import normalize_condition, normalize_label, normalize_response
+from chatsky.script.core.normalization import normalize_condition, normalize_label, normalize_response
 
 
 def std_func(ctx, pipeline):
@@ -36,10 +36,10 @@ def create_env() -> Tuple[Context, Pipeline]:
 def test_normalize_label():
     ctx, actor = create_env()
 
-    def true_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
+    def true_label_func(ctx: Context, pipeline: Pipeline) -> ConstLabel:
         return ("flow", "node1", 1)
 
-    def false_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
+    def false_label_func(ctx: Context, pipeline: Pipeline) -> ConstLabel:
         return ("flow", "node2", 1)
 
     n_f = normalize_label(true_label_func)

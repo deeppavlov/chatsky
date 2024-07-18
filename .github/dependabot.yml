@@ -29,7 +29,7 @@ updates:
     directory: "/"
     target-branch: dev
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]

@@ -1,7 +1,7 @@
 About us
 --------
 
-Dialog Flow Framework is developed by the DFF development department of `DeepPavlov <https://deeppavlov.ai>`_.
+Chatsky is developed by the Chatsky development department of `DeepPavlov <https://deeppavlov.ai>`_.
 
 Founder and leader of the project -- Denis Kuznetsov.
 

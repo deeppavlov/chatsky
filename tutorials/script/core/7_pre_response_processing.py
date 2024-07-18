@@ -11,13 +11,13 @@ additional context processing before response handlers.
 There are also some other %mddoclink(api,script.core.keywords,Keywords)
 worth attention used in this tutorial.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import (
+from chatsky.script import (
     GLOBAL,
     LOCAL,
     RESPONSE,
@@ -26,11 +26,11 @@ from dff.script import (
     Context,
     Message,
 )
-import dff.script.labels as lbl
-import dff.script.conditions as cnd
+import chatsky.script.labels as lbl
+import chatsky.script.conditions as cnd
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -107,15 +107,12 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(), Message("l3_local: l2_local: l1_global: first")),
-    (Message(), Message("l3_local: l2_local: l1_step_1: second")),
-    (Message(), Message("l3_local: l2_step_2: l1_global: third")),
-    (Message(), Message("l3_step_3: l2_local: l1_global: fourth")),
-    (
-        Message(),
-        Message("l4_step_4: l3_local: l2_local: l1_global: fifth"),
-    ),
-    (Message(), Message("l3_local: l2_local: l1_global: first")),
+    (Message(), "l3_local: l2_local: l1_global: first"),
+    (Message(), "l3_local: l2_local: l1_step_1: second"),
+    (Message(), "l3_local: l2_step_2: l1_global: third"),
+    (Message(), "l3_step_3: l2_local: l1_global: fourth"),
+    (Message(), "l4_step_4: l3_local: l2_local: l1_global: fifth"),
+    (Message(), "l3_local: l2_local: l1_global: first"),
 )
 
 

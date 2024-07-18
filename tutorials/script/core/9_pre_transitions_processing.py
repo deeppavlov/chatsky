@@ -8,13 +8,13 @@ Here, %mddoclink(api,script.core.keywords,Keywords.PRE_TRANSITIONS_PROCESSING)
 is demonstrated which can be used for additional context
 processing before transitioning to the next step.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import (
+from chatsky.script import (
     GLOBAL,
     RESPONSE,
     TRANSITIONS,
@@ -23,10 +23,10 @@ from dff.script import (
     Context,
     Message,
 )
-import dff.script.labels as lbl
-import dff.script.conditions as cnd
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+import chatsky.script.labels as lbl
+import chatsky.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -78,11 +78,11 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message("1"), Message("previous=None: current=first")),
-    (Message("2"), Message("previous=first: current=second")),
-    (Message("3"), Message("previous=second: current=third")),
-    (Message("4"), Message("previous=third: current=fourth")),
-    (Message("5"), Message("previous=fourth: current=fifth")),
+    ("1", "previous=None: current=first"),
+    ("2", "previous=first: current=second"),
+    ("3", "previous=second: current=third"),
+    ("4", "previous=third: current=fourth"),
+    ("5", "previous=fourth: current=fifth"),
 )
 
 

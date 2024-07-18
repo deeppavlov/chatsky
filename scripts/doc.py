@@ -51,7 +51,7 @@ def docs(docker: Optional[DockerClient]):
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         _build_drawio(docker)
-        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
+        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
         exit(result)

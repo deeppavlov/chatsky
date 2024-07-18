@@ -4,14 +4,14 @@ CONFIG:
 flow:
   node:
     RESPONSE:
-      dff.rsp.choice:
-        - dff.Message:
+      chatsky.rsp.choice:
+        - chatsky.Message:
             text: "Hi"
             attachments:
-              - dff.Link:
+              - chatsky.Image:
                   source: https://github.com/deeppavlov/dialog_flow_framework
-                  title: DFF
-        - dff.Message: "message"
+                  title: Chatsky
+        - chatsky.Message: "message"
     TRANSITIONS:
       - lbl:
           [flow, node, 3]

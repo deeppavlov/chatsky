@@ -15,15 +15,15 @@ and are cleared at the end of each turn.
 Maximum size parameter limits the amount of function execution results cached.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script.conditions import true
-from dff.script import Context, TRANSITIONS, RESPONSE, Message
-from dff.script.labels import repeat
-from dff.pipeline import Pipeline
-from dff.utils.turn_caching import lru_cache
-from dff.utils.testing.common import (
+from chatsky.script.conditions import true
+from chatsky.script import Context, TRANSITIONS, RESPONSE, Message
+from chatsky.script.labels import repeat
+from chatsky.pipeline import Pipeline
+from chatsky.utils.turn_caching import lru_cache
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -46,9 +46,7 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _, *__, **___) -> Message:
-    if ctx.validation:
-        return Message()
+def response(_: Context, __: Pipeline) -> Message:
     return Message(
         text=f"{cached_response(1)}-{cached_response(2)}-{cached_response(3)}-"
         f"{cached_response(2)}-{cached_response(1)}"
@@ -61,9 +59,9 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(), Message("1-2-3-2-4")),
-    (Message(), Message("5-6-7-6-8")),
-    (Message(), Message("9-10-11-10-12")),
+    (Message(), "1-2-3-2-4"),
+    (Message(), "5-6-7-6-8"),
+    (Message(), "9-10-11-10-12"),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
