@@ -4,6 +4,18 @@ from chatsky.script.conditions.llm_conditions.utils import LABEL_KEY
 from chatsky.script.conditions.llm_conditions.dataset import DatasetItem, Dataset
 from chatsky.script.conditions.llm_conditions.conditions import has_cls_label, has_match
 from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.sklearn import SklearnMatcher, sklearn_available
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+
+
+class DummyModel(ExtrasBaseModel):
+    def __init__(self, model_id=None):
+        self.model_id = model_id
+
+    def predict(self, text):
+        return {'label_a': 0.1, 'label_b': 0.9}
+
+    def __call__(self, text):
+        pass
 
 
 @pytest.fixture(scope="session")
@@ -24,17 +36,19 @@ def standard_model(testing_dataset):
 )
 def test_conditions(input, testing_pipeline):
     ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
-    assert has_cls_label(input)(ctx, testing_pipeline) is True
-    assert has_cls_label(input, namespace="model_a")(ctx, testing_pipeline) is True
-    assert has_cls_label(input, threshold=1.1)(ctx, testing_pipeline) is False
+    model = DummyModel(model_id="model_a")
+    assert has_cls_label(model, input)(ctx, testing_pipeline) is True
+    assert has_cls_label(model, input, namespace="model_a")(ctx, testing_pipeline) is True
+    assert has_cls_label(model, input, threshold=1.1)(ctx, testing_pipeline) is False
     ctx2 = Context()
-    assert has_cls_label(input)(ctx2, testing_pipeline) is False
+    assert has_cls_label(model, input)(ctx2, testing_pipeline) is False
 
 
 @pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
 def test_conds_invalid(input, testing_pipeline):
     with pytest.raises(NotImplementedError):
-        _ = has_cls_label(input)(Context(), testing_pipeline)
+        model = DummyModel(model_id="model_a")
+        _ = has_cls_label(model, input)(Context(), testing_pipeline)
 
 
 @pytest.mark.skipif(not sklearn_available, reason="Sklearn package missing.")

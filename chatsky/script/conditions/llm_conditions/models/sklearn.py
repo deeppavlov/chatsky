@@ -74,7 +74,7 @@ class BaseSklearnModel(ExtrasBaseModel):
         joblib.dump(self.tokenizer, f"{path}.tokenizer.bin")
 
     @classmethod
-    def load(cls, path: str, namespace_key: str) -> __qualname__:
+    def load(cls, path: str, namespace_key: str):
         """
         Loads the model from the specified location.
         Both the model and the tokenizer file are required.

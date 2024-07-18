@@ -14,7 +14,6 @@ Tutorials for other models can be found in the same section.
 from chatsky.script import (
     Message,
     RESPONSE,
-    PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     TRANSITIONS,
     LOCAL,
@@ -48,10 +47,6 @@ Examples of well-formed dataset files can be found in the 'data' directory.
 
 The manner of instantiating models is uniform across all types
 provided by the module.
-
-It is essential that you pass a `namespace_key` to the model,
-as it will be used to access the annotations
-inside the `Context` object.
 """
 
 
@@ -80,10 +75,9 @@ regex_model = RegexClassifier(model=RegexModel(dataset))
 
 # %% [markdown]
 """
-The instance of the model is a `Callable`, so you can put it directly to the PROCESSING sections
-of a dialogue graph, like you would do with regular functions.
+For the model to predict your labels you should pass it as an argument to the `has_cls_label` function in the `TRANSITIONS` section.
 
-The results will be stored indside the `Context` object in the `framework_states` property.
+The results will be stored indside the `Context` object in the `framework_data` property.
 Conditional functions, like `has_cls_label`, will access those annotations
 and compare the predicted label probabilities to a threshold of your choice.
 """
