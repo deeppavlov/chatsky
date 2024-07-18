@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable, TYPE_CHECKING, Any
+from typing import Optional, List, Union, Awaitable, TYPE_CHECKING, Any, Callable, Dict
 from pydantic import model_validator, field_validator
 
 from chatsky.script import Context
@@ -59,19 +59,29 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         group is executed only if it returns `True`.
     :param name: Requested group name.
     """
+    # If this is a list of PipelineComponents, why would the program know this is supposed to be a Service in the end?
+    # It's kind of logical it would try to match the best one fitting, but there are no guarantees, right?
+    # components: List[PipelineComponent]
+    components: List[Union[Service, ServiceGroup, Actor]]
 
-    components: List[PipelineComponent]
-
-    # Note to self: Here Script class has "@validate_call". Is it needed here?
-    @field_validator("components")
+    # Whenever data isn't passed like a dictionary, this tries to cast it to the right dictionary
+    # This includes List, PipelineComponent and Callable.
+    @model_validator(mode="before")
     @classmethod
-    def single_component_init(cls, comp: Any):
-        if isinstance(comp, PipelineComponent):
-            return [comp]
-        return comp
+    # Here Script class has "@validate_call". Is it needed here?
+    def components_constructor(cls, data: Any):
+        # Question: I don't think shallow copy() could be a problem for this, right?
+        # Pydantic is already rather recursively checking types.
+        result = data.copy()
+        if not isinstance(data, dict):
+            result = {"components": data}
+        # When it's a dictionary, data is cast to a list.
+        # We don't need to check if it's a list of Services or anything else: Pydantic does that for us.
+        if ("components" in result) and (not isinstance(result["components"], list)):
+            result["components"] = [result["components"]]
+        return result
 
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
-    # Of course, they might not want to break their own program, but what if.
     # Maybe I could just make this a 'private' field, like '_calc_async'
     @model_validator(mode="after")
     def calculate_async_flag(self):

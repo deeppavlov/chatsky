@@ -29,7 +29,7 @@ from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.pipeline.service.service import Service
 from chatsky.pipeline.service.group import ServiceGroup
-from chatsky.pipeline.service.extra import BeforeHandler, AfterHandler
+from chatsky.pipeline.service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
 from ..types import (
     ServiceFunction,
     GlobalExtraHandlerType,
@@ -93,9 +93,9 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
 
     """
 
-    # I wonder what happens/should happen here if just one callable is passed.
-    pre_services: List[Union[Service, ServiceGroup]] = Field(default=[])
-    post_services: List[Union[Service, ServiceGroup]] = Field(default=[])
+    # Note to self: some testing required to see if [] works as intended.
+    pre_services: ServiceGroup = Field(default=[])
+    post_services: ServiceGroup = Field(default=[])
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
@@ -105,8 +105,8 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
     handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default={})
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
-    before_handler: List[ExtraHandlerFunction] = Field(default=[])
-    after_handler: List[ExtraHandlerFunction] = Field(default=[])
+    before_handler: ComponentExtraHandler = Field(default=[])
+    after_handler: ComponentExtraHandler = Field(default=[])
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
@@ -119,8 +119,8 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
         components = [*self.pre_services, self.actor, *self.post_services]
         services_pipeline = ServiceGroup(
             components=components,
-            before_handler=BeforeHandler(self.before_handler),
-            after_handler=AfterHandler(self.after_handler),
+            before_handler=self.before_handler,
+            after_handler=self.after_handler,
             timeout=self.timeout,
         )
         services_pipeline.name = "pipeline"
@@ -137,37 +137,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
             condition_handler=self.condition_handler,
             handlers=self.handlers,
         )
-
-    @field_validator("before_handler")
-    @classmethod
-    def single_before_handler_init(cls, handler: Any):
-        if isinstance(handler, ExtraHandlerFunction):
-            return [handler]
-        return handler
-
-    @field_validator("after_handler")
-    @classmethod
-    def single_after_handler_init(cls, handler: Any):
-        if isinstance(handler, ExtraHandlerFunction):
-            return [handler]
-        return handler
-
-    # This looks kind of terrible. I could remove this and ask the user to do things the right way,
-    # but this just seems more convenient for the user. Like, "put just one callable in pre-services"? Done.
-    # TODO: Change this to a large model_validator(mode="before") for less code bloat
-    @field_validator("pre_services")
-    @classmethod
-    def single_pre_service_init(cls, services: Any):
-        if not isinstance(services, List):
-            return [services]
-        return services
-
-    @field_validator("post_services")
-    @classmethod
-    def single_post_service_init(cls, services: Any):
-        if not isinstance(services, List):
-            return [services]
-        return services
 
     @model_validator(mode="after")
     def pipeline_init(self):
@@ -314,7 +283,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
             handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
-            components=[*pre_services, ACTOR, *post_services],
         )
 
     def set_actor(

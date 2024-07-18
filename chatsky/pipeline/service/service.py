@@ -13,7 +13,7 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 from pydantic import model_validator
 
 from chatsky.script import Context
@@ -56,6 +56,16 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
 
     handler: ServiceFunction
+
+    # This code handles cases where just one Callable is passed into it's constructor data.
+    # All flags will be on default in that case.
+    @model_validator(mode="before")
+    @classmethod
+    # Here Script class has "@validate_call". Is it needed here?
+    def handler_constructor(cls, data: Any):
+        if not isinstance(data, dict):
+            return {"handler": data}
+        return data
 
     @model_validator(mode="after")
     def tick_async_flag(self):

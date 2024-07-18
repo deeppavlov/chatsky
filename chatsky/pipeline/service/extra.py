@@ -10,8 +10,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING
-from pydantic import BaseModel, computed_field
+from typing import Optional, List, TYPE_CHECKING, Any
+from pydantic import BaseModel, computed_field, model_validator
 
 from chatsky.script import Context
 
@@ -50,6 +50,18 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    # Here Script class has "@validate_call". Is it needed here?
+    def functions_constructor(cls, data: Any):
+        result = data.copy()
+        if not isinstance(data, dict):
+            result = {"functions": data}
+        # Now it's definitely a dictionary.
+        if ("functions" in result) and (not isinstance(result["functions"], list)):
+            result["functions"] = [result["functions"]]
+        return result
 
     @computed_field(repr=False)
     def calculated_async_flag(self) -> bool:
