@@ -63,7 +63,7 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     @classmethod
     # Here Script class has "@validate_call". Is it needed here?
     def handler_constructor(cls, data: Any):
-        if not isinstance(data, dict):
+        if not isinstance(data, dict) and not isinstance(data, list):
             return {"handler": data}
         return data
 

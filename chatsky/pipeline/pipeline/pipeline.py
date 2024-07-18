@@ -94,19 +94,19 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
     """
 
     # Note to self: some testing required to see if [] works as intended.
-    pre_services: ServiceGroup = Field(default=[])
-    post_services: ServiceGroup = Field(default=[])
+    pre_services: ServiceGroup = Field(default_factory=list)
+    post_services: ServiceGroup = Field(default_factory=list)
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
     slots: Optional[Union[GroupSlot, Dict]] = None
-    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default={})
+    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default_factory=dict)
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
-    before_handler: ComponentExtraHandler = Field(default=[])
-    after_handler: ComponentExtraHandler = Field(default=[])
+    before_handler: ComponentExtraHandler = Field(default_factory=list)
+    after_handler: ComponentExtraHandler = Field(default_factory=list)
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
