@@ -52,7 +52,7 @@ class AbstractHFAPIModel(ExtrasBaseModel):
             raise requests.HTTPError(test_response.text)
 
 
-class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
+class HFAPIModel(AsyncMixin, AbstractHFAPIModel):
     """
     This class implements an asynchronous connection to the Hugging Face API for dialog annotation.
     Obtain an API token from Hugging Face to gain full access to hosted models.

@@ -1,15 +1,17 @@
 # %% [markdown]
 """
-# 7. Rasa
+# 1. Dialogflow
 
-In this module, we show how you can get annotations from a RASA NLU server
-and reuse them in your script.
+The tutorial below demonstrates, how to integrate Google Dialogflow into your script logic using `llm_conditions`.
+The way of using the `GoogleDialogFlowModel` class is similar to that of other models.
+Tutorials for other models can be found in the same section.
 """
 
-# %pip install dff[ext,async]
+# %pip install dff[ext,dialogflow]
 
 # %%
 import os
+
 from chatsky.script import (
     Message,
     RESPONSE,
@@ -20,7 +22,9 @@ from chatsky.script import (
 )
 from chatsky.script import conditions as cnd
 
-from chatsky.script.conditions.llm_conditions.models.remote_api.rasa_model import RasaModel
+from chatsky.script.conditions.llm_conditions.models.remote_api.google_dialogflow_model import (
+    GoogleDialogFlowModel,
+)
 from chatsky.script.conditions.llm_conditions import conditions as i_cnd
 from chatsky.pipeline import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
@@ -33,29 +37,27 @@ from chatsky.utils.testing.common import (
 
 # %% [markdown]
 """
-Create a Rasa model and pass the url of a running RASA server.
-You can establish a connection both to a local and to a remote server.
-The class documentation shows which parameters can be passed for authorization.
+All you need to instantiate the `GoogleDialogFlowModel` class are
+Google API credentials. You can obtain further instructions
+on how to get those in the class documenation.
 
+After you have received the credentials in the form of a json file,
+you can use them to construct the class.
 """
 
 
 # %%
-rasa_model = RasaModel(
-    model="http://localhost:5005",
-    api_key=os.getenv("RASA_API_KEY", "rasa"),
-    namespace_key="rasa",
+gdf_model = GoogleDialogFlowModel.from_file(
+    filename=os.getenv("GDF_ACCOUNT_JSON", "")
 )
-
 
 # %%
 script = {
     GLOBAL: {
-        # Use the obtained intents in your conditions. Note the namespace key that matches the one
-        # passed to the model.
+        # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: {
             ("root", "finish", 1.2): i_cnd.has_cls_label(
-                rasa_model, "goodbye", namespace="rasa"
+                gdf_model, "goodbye"
             )
         },
     },
@@ -70,13 +72,13 @@ script = {
     "mood": {
         "ask": {
             RESPONSE: Message(text="How do you feel today?"),
-            # You can get to different branches depending on the intent values.
             TRANSITIONS: {
+                # Here, we use intents to decide which branch of dialog should be picked
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    rasa_model, "mood_great", threshold=0.95, namespace="rasa"
+                    gdf_model, "mood_great", threshold=0.95, namespace="dialogflow"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    rasa_model, "mood_unhappy", threshold=0.99, namespace="rasa"
+                    gdf_model, "mood_unhappy", namespace="dialogflow"
                 ),
                 ("mood", "assert"): cnd.true(),
             },
@@ -87,10 +89,10 @@ script = {
             ),
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    rasa_model, "deny", threshold=0.95, namespace="rasa"
+                    gdf_model, "deny", threshold=0.95, namespace="dialogflow"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
-                    rasa_model, "affirm", namespace="rasa"
+                    gdf_model, "affirm", namespace="dialogflow"
                 ),
             },
         },
@@ -123,7 +125,7 @@ pipeline = Pipeline.from_script(
 happy_path = [
     (Message(text="hi"), Message(text="How do you feel today?")),
     (
-        Message(text="i'm rather unhappy"),
+        Message(text="i'm sad"),
         Message(
             text="I feel you, fellow human. Watch a good movie, it might help."
         ),
@@ -143,7 +145,7 @@ happy_path = [
     (Message(text="good"), Message(text="Ok, see you soon!")),
     (Message(text="hi"), Message(text="How do you feel today?")),
     (
-        Message(text="I'm feeling great"),
+        Message(text="great"),
         Message(
             text="Now that's the right talk! You'd better stay happy and stuff."
         ),

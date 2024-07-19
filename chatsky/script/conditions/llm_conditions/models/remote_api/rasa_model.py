@@ -51,7 +51,7 @@ class AbstractRasaModel(ExtrasBaseModel):
         self.retries = retries
 
 
-class AsyncRasaModel(AsyncMixin, AbstractRasaModel):
+class RasaModel(AsyncMixin, AbstractRasaModel):
     """
     This class implements an asynchronous connection to RASA NLU server for dialog annotation.
     In order to work with this class, you need to have a running instance of Rasa NLU Server
