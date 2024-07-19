@@ -9,6 +9,7 @@ from typing import Optional
 import uuid
 import json
 from pathlib import Path
+from async_lru import alru_cache
 
 from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
 from chatsky.script.conditions.llm_conditions.models.remote_api.async_mixin import AsyncMixin
@@ -32,13 +33,12 @@ class AbstractGDFModel(ExtrasBaseModel):
     def __init__(
         self,
         model: dict,
-        namespace_key: Optional[str] = None,
         *,
         language: str = "en",
     ) -> None:
         if not dialogflow_available:
             raise ImportError("`google-cloud-dialogflow` package missing. Try `pip install chatsky[dialogflow]`.")
-        super().__init__(namespace_key=namespace_key)
+        super().__init__()
         self._language = language
         if isinstance(model, dict):
             info = model
@@ -48,17 +48,16 @@ class AbstractGDFModel(ExtrasBaseModel):
         self._credentials = service_account.Credentials.from_service_account_info(info)
 
     @classmethod
-    def from_file(cls, filename: str, namespace_key: str, language: str = "en"):
+    def from_file(cls, filename: str, language: str = "en"):
         """
         :param filename: Path to the Dialogflow credentials saved as JSON.
-        :param namespace_key: Name of the namespace that the model will be using.
         :param language: The language parameter is forwarded to the underlying
             Dialogflow wrapper.
         """
         assert Path(filename).exists(), f"Path {filename} does not exist."
         with open(filename, "r", encoding="utf-8") as file:
             info = json.load(file)
-        return cls(model=info, namespace_key=namespace_key, language=language)
+        return cls(model=info, language=language)
 
 
 class GoogleDialogFlowModel(AbstractGDFModel):
@@ -107,7 +106,7 @@ class AsyncGoogleDialogFlowModel(AsyncMixin, AbstractGDFModel):
     :param namespace_key: Name of the namespace in framework states that the model will be using.
     :param language: Language parameter is passed to the Dialogflow wrapper.
     """
-
+    @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
         session_id = uuid.uuid4()
         session_client = dialogflow_v2.SessionsAsyncClient(credentials=self._credentials)

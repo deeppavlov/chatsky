@@ -22,6 +22,5 @@ class AsyncMixin(ExtrasBaseModel):
         if ctx.last_request and ctx.last_request.text:
             labels = await self.predict(ctx.last_request.text)
 
-        namespace = self.namespace_key
-        ctx.framework_data.llm_labels[namespace] = labels
+        ctx.framework_data.llm_labels[self.model_id] = labels
         return ctx

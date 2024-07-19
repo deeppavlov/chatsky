@@ -17,8 +17,6 @@ from chatsky.script import Context
 from chatsky.pipeline import Pipeline
 from chatsky.script.conditions.llm_conditions.dataset import DatasetItem
 from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
-from pydantic import BaseModel, model_validator, Field
-from typing import Dict, Any
 
 
 @singledispatch
