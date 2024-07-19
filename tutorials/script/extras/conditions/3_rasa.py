@@ -50,8 +50,7 @@ rasa_model = RasaModel(
 # %%
 script = {
     GLOBAL: {
-        # Use the obtained intents in your conditions. Note the namespace key that matches the one
-        # passed to the model.
+        # Use the obtained intents in your conditions.
         TRANSITIONS: {
             ("root", "finish", 1.2): i_cnd.has_cls_label(
                 rasa_model, "goodbye"
