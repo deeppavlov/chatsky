@@ -40,11 +40,12 @@ from langchain_core.output_parsers import StrOutputParser
 import base64
 import httpx
 
-from chatsky.script import Message, Context
+from chatsky.script.core.message import Image, Message
+from chatsky.script import Context
 from chatsky.pipeline import Pipeline
 
 from pydantic import BaseModel
-from typing import Union, Callable
+from typing import Union
 
 
 class LLM_API(BaseModel):
@@ -122,17 +123,10 @@ def llm_response(
             if req.attachments != []:
                 content = [{"type": "text", "text": prompt + "\n" + ctx.last_request.text}]
                 for image in ctx.last_request.attachments:
-                    image_source = image.source
-                    if "http" in image_source:
-                        image_data = httpx.get(image_source).content
-                    else:
-                        with open(image_source, "rb") as image_file:
-                            image_data = image_file.read()
-                    image_b64 = base64.b64encode(image_data).decode("utf-8")
-                    extension = image_source.split(".")[-1]
-                    image_b64 = f"data:image/{extension};base64,{image_b64}"
+                    if image is not Image:
+                        continue
                     content.append(
-                        {"type": "image_url", "image_url": {"url": image_b64}}
+                        {"type": "image_url", "image_url": {"url": __attachment_to_content(image)}}
                     )
                 req_message = HumanMessage(content=content)
             else:
@@ -141,3 +135,17 @@ def llm_response(
             history_messages.append(req_message)
             history_messages.append(SystemMessage(resp.text))
     return model.respond(history_messages)
+
+def __attachment_to_content(attachment: Image) -> str:
+    """
+    Helper function to convert image to base64 string.
+    """
+    if "http" in attachment.source:
+        image_data = httpx.get(attachment.source).content
+    else:
+        with open(attachment.source, "rb") as image_file:
+            image_data = image_file.read()
+    image_b64 = base64.b64encode(image_data).decode("utf-8")
+    extension = attachment.source.split(".")[-1]
+    image_b64 = f"data:image/{extension};base64,{image_b64}"
+    return image_b64
