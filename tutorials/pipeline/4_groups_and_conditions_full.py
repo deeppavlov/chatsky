@@ -34,7 +34,6 @@ from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
-
 # %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
@@ -170,15 +169,14 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [
-            simple_service,  # This simple service
-            # will be named `simple_service_0`
-            simple_service,  # This simple service
-            # will be named `simple_service_1`
-        ],  # Despite this is the unnamed service group in the root
-        # service group, it will be named `service_group_0`
-        ACTOR,
+    "pre-services": [
+        simple_service,  # This simple service
+        # will be named `simple_service_0`
+        simple_service,  # This simple service
+        # will be named `simple_service_1`
+    ],  # Despite this is the unnamed service group in the root
+    # service group, it will be named `service_group_0`
+    "post-services": [
         ServiceGroup(
             name="named_group",
             components=[

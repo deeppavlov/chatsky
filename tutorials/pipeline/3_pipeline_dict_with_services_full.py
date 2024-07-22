@@ -151,22 +151,14 @@ pipeline_dict = {
     #     `prompt_request` - a string that will be displayed before user input
     #     `prompt_response` - an output prefix string
     "context_storage": {},
-    "components": [
+    "pre-services": [
         {
-            "handler": {
-                "handler": prepreprocess,
-                "name": "silly_service_name",
-            },
+            "handler": {prepreprocess},
             "name": "preprocessor",
-        },  # This service will be named `preprocessor`
-        # handler name will be overridden
+        },
         preprocess,
-        ACTOR,
-        Service(
-            handler=postprocess,
-            name="postprocessor",
-        ),
     ],
+    "post-services": Service(handler=postprocess, name="postprocessor"),
 }
 
 

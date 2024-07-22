@@ -82,41 +82,38 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        ServiceGroup(
-            before_handler=[collect_timestamp_before],
-            after_handler=[collect_timestamp_after],
-            components=[
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-            ],
-        ),
-        ACTOR,
-        logging_service,
-    ],
+    "pre-services": ServiceGroup(
+        before_handler=[collect_timestamp_before],
+        after_handler=[collect_timestamp_after],
+        components=[
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+        ],
+    ),
+    "post-services": logging_service,
 }
 
 # %%

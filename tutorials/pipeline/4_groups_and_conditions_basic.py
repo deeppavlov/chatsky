@@ -96,12 +96,10 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        Service(
-            handler=always_running_service,
-            name="always_running_service",
-        ),
-        ACTOR,
+    "pre-services": Service(
+        handler=always_running_service, name="always_running_service"
+    ),
+    "post-services": [
         Service(
             handler=never_running_service,
             start_condition=not_condition(

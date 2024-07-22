@@ -127,20 +127,19 @@ pipeline_dict = {
     "fallback_label": ("greeting_flow", "fallback_node"),
     "optimization_warnings": True,
     # There are no warnings - pipeline is well-optimized
-    "components": [
-        ServiceGroup(
-            name="balanced_group",
-            asynchronous=False,
-            components=[
-                simple_asynchronous_service,
-                ServiceGroup(
-                    timeout=0.02,
-                    components=[time_consuming_service for _ in range(0, 6)],
-                ),
-                simple_asynchronous_service,
-            ],
-        ),
-        ACTOR,
+    "pre-services": ServiceGroup(
+        name="balanced_group",
+        asynchronous=False,
+        components=[
+            simple_asynchronous_service,
+            ServiceGroup(
+                timeout=0.02,
+                components=[time_consuming_service for _ in range(0, 6)],
+            ),
+            simple_asynchronous_service,
+        ],
+    ),
+    "post-services": [
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],

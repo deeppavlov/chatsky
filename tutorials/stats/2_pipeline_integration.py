@@ -100,29 +100,22 @@ pipeline = Pipeline.from_dict(
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "components": [
-            ServiceGroup(
-                before_handler=[default_extractors.get_timing_before],
-                after_handler=[
-                    get_service_state,
-                    default_extractors.get_timing_after,
-                ],
-                components=[
-                    {"handler": heavy_service},
-                    {"handler": heavy_service},
-                ],
-            ),
-            Service(
-                handler=ACTOR,
-                before_handler=[
-                    default_extractors.get_timing_before,
-                ],
-                after_handler=[
-                    get_service_state,
-                    default_extractors.get_current_label,
-                    default_extractors.get_timing_after,
-                ],
-            ),
+        "pre-services": ServiceGroup(
+            before_handler=[default_extractors.get_timing_before],
+            after_handler=[
+                get_service_state,
+                default_extractors.get_timing_after,
+            ],
+            components=[
+                {"handler": heavy_service},
+                {"handler": heavy_service},
+            ],
+        ),
+        "before_actor": [default_extractors.get_timing_before],
+        "after_actor": [
+            get_service_state,
+            default_extractors.get_current_label,
+            default_extractors.get_timing_after,
         ],
     }
 )

@@ -123,13 +123,8 @@ pipeline = Pipeline.from_dict(
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "components": [
-            heavy_service,
-            Service(
-                handler=ACTOR,
-                after_handler=[default_extractors.get_current_label],
-            ),
-        ],
+        "pre-services": heavy_service,
+        "after_actor": [default_extractors.get_current_label],
     }
 )
 

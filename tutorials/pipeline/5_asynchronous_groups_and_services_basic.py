@@ -50,10 +50,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [time_consuming_service for _ in range(0, 10)],
-        ACTOR,
-    ],
+    "pre-services": [time_consuming_service for _ in range(0, 10)],
 }
 
 # %%
