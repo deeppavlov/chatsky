@@ -17,7 +17,6 @@ import random
 from datetime import datetime
 
 import psutil
-from chatsky.script import Context
 
 from chatsky.pipeline import (
     Pipeline,
@@ -25,9 +24,8 @@ from chatsky.pipeline import (
     to_service,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
 )
-
+from chatsky.script import Context
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

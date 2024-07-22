@@ -17,7 +17,7 @@ static method is used for pipeline creation (from dictionary).
 # %%
 import logging
 
-from chatsky.pipeline import Service, Pipeline, ACTOR
+from chatsky.pipeline import Service, Pipeline
 
 from chatsky.utils.testing.common import (
     check_happy_path,

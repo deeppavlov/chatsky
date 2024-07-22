@@ -11,21 +11,18 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable, TYPE_CHECKING, Any, Callable, Dict
-from pydantic import model_validator, field_validator
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any
+from pydantic import model_validator
 
 from chatsky.script import Context
-from .extra import ComponentExtraHandler
 from ..pipeline.actor import Actor
 
 from ..pipeline.component import PipelineComponent
 from ..types import (
-    StartConditionCheckerFunction,
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
-    ExtraHandlerType,
 )
 from .service import Service
 

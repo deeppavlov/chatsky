@@ -46,18 +46,15 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 # %%
 import asyncio
 
-from chatsky.script import Context
 from chatsky.pipeline import (
     Pipeline,
-    ACTOR,
-    Service,
     ExtraHandlerRuntimeInfo,
     to_service,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.script import Context
 from chatsky.stats import OtelInstrumentor, default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %% [markdown]
 """

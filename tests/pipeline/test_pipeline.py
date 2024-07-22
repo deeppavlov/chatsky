@@ -1,5 +1,3 @@
-import importlib
-
 from chatsky.script import Message
 from chatsky.pipeline import Pipeline
 from chatsky.script.core.keywords import RESPONSE, TRANSITIONS

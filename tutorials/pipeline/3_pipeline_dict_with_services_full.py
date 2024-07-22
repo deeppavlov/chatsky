@@ -20,7 +20,7 @@ import urllib.request
 
 from chatsky.script import Context
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
+from chatsky.pipeline import Service, Pipeline, ServiceRuntimeInfo
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

@@ -21,7 +21,6 @@ from chatsky.pipeline import (
     not_condition,
     service_successful_condition,
     ServiceRuntimeInfo,
-    ACTOR,
 )
 
 from chatsky.utils.testing.common import (

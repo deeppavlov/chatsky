@@ -16,8 +16,8 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable, Any
-from pydantic import BaseModel, Field, model_validator, computed_field, field_validator
+from typing import Union, List, Dict, Optional, Hashable, Callable
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -27,11 +27,9 @@ from chatsky.utils.turn_caching import cache_clear
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
-from chatsky.pipeline.service.service import Service
 from chatsky.pipeline.service.group import ServiceGroup
-from chatsky.pipeline.service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
+from chatsky.pipeline.service.extra import ComponentExtraHandler
 from ..types import (
-    ServiceFunction,
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
     # Everything breaks without this import, even though it's unused.
@@ -42,11 +40,6 @@ from ..types import (
 from .utils import finalize_service_group
 from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
 
-"""
-if TYPE_CHECKING:
-    from .. import Service
-    from ..service.group import ServiceGroup
-"""
 logger = logging.getLogger(__name__)
 
 ACTOR = "ACTOR"

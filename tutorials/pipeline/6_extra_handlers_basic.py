@@ -18,15 +18,12 @@ import logging
 import random
 from datetime import datetime
 
-from chatsky.script import Context
-
 from chatsky.pipeline import (
     Pipeline,
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
-    ACTOR,
 )
-
+from chatsky.script import Context
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

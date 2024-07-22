@@ -19,10 +19,8 @@ import json
 import logging
 import urllib.request
 
+from chatsky.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
 from chatsky.script import Context
-
-from chatsky.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo, ACTOR
-
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

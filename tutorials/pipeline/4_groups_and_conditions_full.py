@@ -22,7 +22,6 @@ from chatsky.pipeline import (
     service_successful_condition,
     all_condition,
     ServiceRuntimeInfo,
-    ACTOR,
 )
 
 from chatsky.utils.testing.common import (

@@ -29,24 +29,22 @@ docker compose --profile stats up
 # %%
 import asyncio
 
-from chatsky.script import Context
 from chatsky.pipeline import (
     Pipeline,
-    ACTOR,
-    Service,
     ExtraHandlerRuntimeInfo,
     ServiceGroup,
     GlobalExtraHandlerType,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.script import Context
+from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
 from chatsky.stats import (
     OtelInstrumentor,
     set_logger_destination,
     set_tracer_destination,
 )
-from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
 from chatsky.stats import default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))

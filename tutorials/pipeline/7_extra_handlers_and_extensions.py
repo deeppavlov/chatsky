@@ -25,9 +25,7 @@ from chatsky.pipeline import (
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
 )
-
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
