@@ -39,8 +39,11 @@ An example of a simple script.
 :meta hide-value:
 """
 
-TOY_SCRIPT_KWARGS = {"script": TOY_SCRIPT, "start_label": ("greeting_flow", "start_node"),
-                     "fallback_label": ("greeting_flow", "fallback_node")}
+TOY_SCRIPT_KWARGS = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
+}
 """
 # There should be a better description of this
 Keyword arguments to pass to :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline` in order to

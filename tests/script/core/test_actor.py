@@ -74,24 +74,20 @@ async def test_actor():
             start_label=("flow", "node1"),
         )
         ctx = Context()
-        await pipeline.actor(pipeline, ctx)
+        await pipeline.actor(ctx, pipeline)
         raise Exception("can not be passed: fail of response returned Callable")
     except ValueError:
         pass
 
     # empty ctx stability
-    pipeline = Pipeline(
-        script={"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
-    )
+    pipeline = Pipeline(script={"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1"))
     ctx = Context()
-    await pipeline.actor(pipeline, ctx)
+    await pipeline.actor(ctx, pipeline)
 
     # fake label stability
-    pipeline = Pipeline(
-        script={"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
-    )
+    pipeline = Pipeline(script={"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1"))
     ctx = Context()
-    await pipeline.actor(pipeline, ctx)
+    await pipeline.actor(ctx, pipeline)
 
 
 limit_errors = {}

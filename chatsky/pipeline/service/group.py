@@ -59,10 +59,17 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         group is executed only if it returns `True`.
     :param name: Requested group name.
     """
+
     # If this is a list of PipelineComponents, why would the program know this is supposed to be a Service in the end?
     # It's kind of logical it would try to match the best one fitting, but there are no guarantees, right?
     # components: List[PipelineComponent]
-    components: List[Union[Actor, Service, ServiceGroup,]]
+    components: List[
+        Union[
+            Actor,
+            Service,
+            ServiceGroup,
+        ]
+    ]
 
     # Whenever data isn't passed like a dictionary, this tries to cast it to the right dictionary
     # This includes List, PipelineComponent and Callable.
@@ -75,11 +82,11 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         # print(data)
         result = data.copy()
         if not isinstance(data, dict):
-            result = {'components': data}
+            result = {"components": data}
         # When it's a dictionary, data is cast to a list.
         # We don't need to check if it's a list of Services or anything else: Pydantic does that for us.
-        if ('components' in result) and (not isinstance(result['components'], list)):
-            result['components'] = [result['components']]
+        if ("components" in result) and (not isinstance(result["components"], list)):
+            result["components"] = [result["components"]]
         return result
 
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
