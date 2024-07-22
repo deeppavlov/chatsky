@@ -22,7 +22,7 @@ from chatsky.script import Message, Context
 from chatsky.pipeline import Pipeline
 
 from pydantic import BaseModel
-from typing import Union
+from typing import Union, Callable
 
 
 class LLMResponse(BaseModel):
@@ -48,7 +48,7 @@ class LLMResponse(BaseModel):
         if system_prompt != "":
             self.messages.append(SystemMessage(content=system_prompt))
 
-    def respond(self, prompt: str = ""):
+    def respond(self, prompt: str = "") -> Callable:
         def inner_response(ctx: Context, _: Pipeline) -> Message:
             if ctx.last_request.attachments != []:
                 content = [{"type": "text", "text": prompt + "\n" + ctx.last_request.text}]
