@@ -15,7 +15,7 @@ from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from chatsky.script import Context, Message
-    from chatsky.pipeline.types import PipelineRunnerFunction
+    from chatsky.core.service.types import PipelineRunnerFunction
     from chatsky.messengers.common.types import PollingInterfaceLoopFunction
     from chatsky.script.core.message import Attachment
 

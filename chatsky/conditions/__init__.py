@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .std_conditions import (
+from .standard import (
     exact_match,
     has_text,
     regexp,

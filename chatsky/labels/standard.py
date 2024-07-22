@@ -16,7 +16,7 @@ from typing import Optional, Callable, TYPE_CHECKING
 from chatsky.script import Context, ConstLabel
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 def repeat(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:

@@ -33,16 +33,16 @@ from chatsky.utils.turn_caching import cache_clear
 from chatsky.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 from chatsky.script.core.message import Message
 
-from chatsky.script.core.context import Context
+from chatsky.core.context import Context
 from chatsky.script.core.script import Script, Node
-from chatsky.script.core.normalization import normalize_label, normalize_response
+from chatsky.core.normalization import normalize_label, normalize_response
 from chatsky.script.core.keywords import GLOBAL, LOCAL
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 class Actor:

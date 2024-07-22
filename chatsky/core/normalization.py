@@ -16,7 +16,7 @@ from .types import ConstLabel, ConditionType, Label, LabelType
 from .message import Message
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 

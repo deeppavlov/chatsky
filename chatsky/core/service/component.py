@@ -15,11 +15,11 @@ import abc
 import asyncio
 from typing import Optional, Awaitable, TYPE_CHECKING
 
-from chatsky.script import Context
+from chatsky.core.context import Context
 
-from ..service.extra import BeforeHandler, AfterHandler
-from ..conditions import always_start_condition
-from ..types import (
+from chatsky.core.service.extra import BeforeHandler, AfterHandler
+from chatsky.core.service.conditions import always_start_condition
+from chatsky.core.service.types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceRuntimeInfo,
@@ -32,7 +32,7 @@ from ..types import (
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 class PipelineComponent(abc.ABC):

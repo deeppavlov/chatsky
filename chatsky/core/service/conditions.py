@@ -9,16 +9,16 @@ The standard set of them allows user to setup dependencies between pipeline comp
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
-from chatsky.script import Context
+from chatsky.core.context import Context
 
-from .types import (
+from chatsky.core.service.types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
     StartConditionCheckerAggregationFunction,
 )
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 def always_start_condition(_: Context, __: Pipeline) -> bool:

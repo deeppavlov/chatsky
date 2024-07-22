@@ -12,11 +12,11 @@ import logging
 import inspect
 from typing import Optional, List, TYPE_CHECKING
 
-from chatsky.script import Context
+from chatsky.core.context import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
-from ..types import (
+from chatsky.core.service.types import (
     ServiceRuntimeInfo,
     ExtraHandlerType,
     ExtraHandlerBuilder,
@@ -27,7 +27,7 @@ from ..types import (
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 class _ComponentExtraHandler:

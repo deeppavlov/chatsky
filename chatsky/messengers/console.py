@@ -1,8 +1,8 @@
 from typing import Any, Hashable, List, Optional, TextIO, Tuple
 from uuid import uuid4
 from chatsky.messengers.common.interface import PollingMessengerInterface
-from chatsky.pipeline.types import PipelineRunnerFunction
-from chatsky.script.core.context import Context
+from chatsky.core.service.types import PipelineRunnerFunction
+from chatsky.core.context import Context
 from chatsky.script.core.message import Message
 
 

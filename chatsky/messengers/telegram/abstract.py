@@ -11,7 +11,7 @@ from typing import Any, Callable, Optional
 from chatsky.utils.devel.extra_field_helpers import grab_extra_fields
 
 from chatsky.messengers.common import MessengerInterfaceWithAttachments
-from chatsky.pipeline.types import PipelineRunnerFunction
+from chatsky.core.service.types import PipelineRunnerFunction
 from chatsky.script.core.message import (
     Animation,
     Audio,

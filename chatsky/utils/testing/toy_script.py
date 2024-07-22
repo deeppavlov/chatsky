@@ -5,7 +5,7 @@ This module contains a simple script and a dialog which are used
 in tutorials.
 """
 
-from chatsky.script.conditions import exact_match
+from chatsky.conditions import exact_match
 from chatsky.script import TRANSITIONS, RESPONSE, Message
 
 TOY_SCRIPT = {

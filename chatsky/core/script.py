@@ -21,8 +21,8 @@ from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
 
 if TYPE_CHECKING:
-    from chatsky.script.core.context import Context
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.context import Context
+    from chatsky.core.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 

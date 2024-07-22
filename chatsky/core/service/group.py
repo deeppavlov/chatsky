@@ -13,11 +13,11 @@ import asyncio
 import logging
 from typing import Optional, List, Union, Awaitable, TYPE_CHECKING
 
-from chatsky.script import Context
+from chatsky.core.context import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
-from ..pipeline.component import PipelineComponent
-from ..types import (
+from chatsky.core.service.component import PipelineComponent
+from chatsky.core.service.types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceGroupBuilder,
@@ -32,7 +32,7 @@ from .service import Service
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 class ServiceGroup(PipelineComponent):

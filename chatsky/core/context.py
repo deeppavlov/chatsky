@@ -26,7 +26,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
-from chatsky.pipeline.types import ComponentExecutionState
+from chatsky.core.service.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
 
 if TYPE_CHECKING:

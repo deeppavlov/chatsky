@@ -26,8 +26,8 @@ from chatsky.utils.turn_caching import cache_clear
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
-from ..service.group import ServiceGroup
-from ..types import (
+from chatsky.pipeline.service.group import ServiceGroup
+from chatsky.core.service.types import (
     ServiceBuilder,
     ServiceGroupBuilder,
     PipelineBuilder,
@@ -35,8 +35,8 @@ from ..types import (
     ExtraHandlerFunction,
     ExtraHandlerBuilder,
 )
-from .utils import finalize_service_group, pretty_format_component_info_dict
-from chatsky.pipeline.pipeline.actor import Actor
+from chatsky.core.pipeline.utils import finalize_service_group, pretty_format_component_info_dict
+from chatsky.core.pipeline import Actor
 
 logger = logging.getLogger(__name__)
 

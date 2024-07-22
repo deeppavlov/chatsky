@@ -21,7 +21,7 @@ from chatsky.utils.devel.json_serialization import PickleEncodedValue
 
 if TYPE_CHECKING:
     from chatsky.script import Context, Message
-    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.core.pipeline import Pipeline
 
 
 logger = logging.getLogger(__name__)
