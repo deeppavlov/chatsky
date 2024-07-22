@@ -15,7 +15,8 @@ from langchain_mistralai import ChatMistralAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 
-from chatsky.script import Message, Context, Pipeline
+from chatsky.script import Message, Context
+from chatsky.pipeline import Pipeline
 
 from pydantic import BaseModel
 from typing import Union
@@ -38,9 +39,10 @@ class LLMResponse(BaseModel):
             self.messages.append(SystemMessage(content=system_prompt))
 
 
-    def respond(self, ctx: Context, _: Pipeline, prompt: str="") -> Message:
-        self.messages.append(HumanMessage(prompt + '\n' + ctx.last_response.text))
-        result = self.parser.invoke(self.model.invoke(self.messages))
-        self.messages.append(SystemMessage(result))
-
-        return Message(text=result)
+    def respond(self, prompt: str=""):
+        def inner_response(ctx: Context, _: Pipeline) -> Message:
+            self.messages.append(HumanMessage(prompt + '\n' + ctx.last_request.text))
+            result = self.parser.invoke(self.model.invoke(self.messages))
+            self.messages.append(SystemMessage(result))
+            return Message(text=result)
+        return inner_response
