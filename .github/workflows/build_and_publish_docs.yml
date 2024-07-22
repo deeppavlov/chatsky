@@ -40,6 +40,8 @@ jobs:
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          GDF_ACCOUNT_JSON: ${{ env.GDF_ACCOUNT_JSON }}
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
         run: |
           python -m poetry run poe docs
 
