@@ -134,7 +134,7 @@ def to_service(
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            asynchronous=asynchronous,
+            requested_async_flag=asynchronous,
             start_condition=start_condition,
             name=name,
         )
