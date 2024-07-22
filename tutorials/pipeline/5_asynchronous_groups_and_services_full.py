@@ -127,7 +127,7 @@ pipeline_dict = {
     # There are no warnings - pipeline is well-optimized
     "pre-services": ServiceGroup(
         name="balanced_group",
-        asynchronous=False,
+        requested_async_flag=False,
         components=[
             simple_asynchronous_service,
             ServiceGroup(
