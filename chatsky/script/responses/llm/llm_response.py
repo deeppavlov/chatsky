@@ -38,8 +38,8 @@ class LLMResponse(BaseModel):
             self.messages.append(SystemMessage(content=system_prompt))
 
 
-    def respond(self, ctx: Context, _: Pipeline) -> Message:
-        self.messages.append(HumanMessage(ctx.last_response.text))
+    def respond(self, ctx: Context, _: Pipeline, prompt: str="") -> Message:
+        self.messages.append(HumanMessage(prompt + '\n' + ctx.last_response.text))
         result = self.parser.invoke(self.model.invoke(self.messages))
         self.messages.append(SystemMessage(result))
 
