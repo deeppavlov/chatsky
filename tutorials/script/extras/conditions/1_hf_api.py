@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 6. HF API
+# 1. HF API
 
-This module explains, how to use web-hosted huggingface models in your conversational services.
+This module explains, how to integrate web-hosted huggingface models in your conversational services.
 """
 
 # %pip install dff[ext,async]
@@ -12,7 +12,6 @@ import os
 from chatsky.script import (
     Message,
     RESPONSE,
-    PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     TRANSITIONS,
     LOCAL,

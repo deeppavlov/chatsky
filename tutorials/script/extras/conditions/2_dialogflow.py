@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 1. Dialogflow
+# 2. Dialogflow
 
 The tutorial below demonstrates, how to integrate Google Dialogflow into your script logic using `llm_conditions`.
 The way of using the `GoogleDialogFlowModel` class is similar to that of other models.
@@ -15,7 +15,6 @@ import os
 from chatsky.script import (
     Message,
     RESPONSE,
-    PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     TRANSITIONS,
     LOCAL,

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 7. Rasa
+# 3. Rasa
 
 In this module, we show how you can get annotations from a RASA NLU server
 and reuse them in your script.
@@ -13,7 +13,6 @@ import os
 from chatsky.script import (
     Message,
     RESPONSE,
-    PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     TRANSITIONS,
     LOCAL,
