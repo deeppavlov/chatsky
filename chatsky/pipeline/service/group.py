@@ -141,7 +141,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         :return: `None`
         """
         for service in self.components:
-            if isinstance(service, Service):
+            if not isinstance(service, ServiceGroup):
                 if (
                     service.calculated_async_flag
                     and service.requested_async_flag is not None
