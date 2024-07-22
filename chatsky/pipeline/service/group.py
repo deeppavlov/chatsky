@@ -77,9 +77,10 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         # Question: I don't think shallow copy() could be a problem for this, right?
         # Pydantic is already rather recursively checking types.
         # print(data)
-        result = data.copy()
         if not isinstance(data, dict):
             result = {"components": data}
+        else:
+            result = data.copy()
         # When it's a dictionary, data is cast to a list.
         # We don't need to check if it's a list of Services or anything else: Pydantic does that for us.
         if ("components" in result) and (not isinstance(result["components"], list)):

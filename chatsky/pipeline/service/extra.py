@@ -55,9 +55,10 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @classmethod
     # Here Script class has "@validate_call". Is it needed here?
     def functions_constructor(cls, data: Any):
-        result = data.copy()
         if not isinstance(data, dict):
             result = {"functions": data}
+        else:
+            result = data.copy()
         # Now it's definitely a dictionary.
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]
