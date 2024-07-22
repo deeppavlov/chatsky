@@ -1,6 +1,22 @@
 CONFIG:
   custom_dir: custom
   start_label: [flow, node]
+  slots:
+    person:
+      specific_person:
+        RegexpSlot:
+          username:
+            regexp: r"username is ([a-zA-Z]+)"
+            match_group_idx: 1
+          email:
+            regexp: r"email is ([a-z@\.A-Z]+)"
+            match_group_idx: 1
+    friend:
+      RegexpSlot:
+        first_name:
+          regexp: r"^[A-Z][a-z]+?(?= )"
+        last_name:
+          regexp: r"(?<= )[A-Z][a-z]+"
 flow:
   node:
     RESPONSE:

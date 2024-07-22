@@ -17,6 +17,7 @@ to structure and manage the messages processing flow.
 import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
+from collections import defaultdict
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -25,7 +26,7 @@ from chatsky.utils.turn_caching import cache_clear
 
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
-from chatsky.slots.slots import GroupSlot
+from chatsky.slots.slots import GroupSlot, RegexpSlot, FunctionSlot
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -294,11 +295,27 @@ class Pipeline:
             if isinstance(i, list):
                 return tuple(i)
             return i
+
+        def dict2slots(slots_dict: dict):
+            slots = defaultdict(dict)
+            for group_slot_name, group_slot_value in slots_dict.items():
+                for slot_type, slot_value in group_slot_value.items():
+                    if slot_class := globals().get(slot_type):
+                        slots[group_slot_name] = GroupSlot(**{k: slot_class(**v) for k, v in slot_value.items()})
+                    else:
+                        nested_group_slots = dict2slots({slot_type: slot_value})
+                        slots[group_slot_name] = GroupSlot(**nested_group_slots)
+            return slots
+
+        slots = script["CONFIG"]["slots"]
+        slots = dict2slots(slots)
+
         params = {param: to_tuple(script["CONFIG"].get(param)) for param in ("start_label", "fallback_label", "label_priority")}
         del script["CONFIG"]  # todo: add support for CONFIG
         return cls(
             script=script,
             **params,
+            slots=slots,
             # validation_stage=validation_stage,
             condition_handler=condition_handler,
             # verbose=verbose,

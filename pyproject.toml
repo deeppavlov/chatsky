@@ -74,6 +74,7 @@ python-telegram-bot = { version = "~=21.3", extras = ["all"], optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
+pyyaml = "^6.0.1"
 
 [tool.poetry.extras]
 json = ["aiofiles"]
