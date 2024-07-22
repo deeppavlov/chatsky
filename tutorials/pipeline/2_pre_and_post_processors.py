@@ -23,7 +23,7 @@ from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     HAPPY_PATH,
-    TOY_SCRIPT_ARGS,
+    TOY_SCRIPT_KWARGS,
 )
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,8 @@ def pong_processor(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS,
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
     context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts

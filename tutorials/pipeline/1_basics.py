@@ -22,7 +22,7 @@ from chatsky.utils.testing import (
     is_interactive_mode,
     HAPPY_PATH,
     TOY_SCRIPT,
-    TOY_SCRIPT_ARGS,
+    TOY_SCRIPT_KWARGS,
 )
 
 
@@ -50,8 +50,8 @@ its `last_response` property will be actors response.
 """
 
 # %%
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
+pipeline = Pipeline(
+    script=TOY_SCRIPT,
     # Pipeline script object, defined in `chatsky.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
@@ -61,15 +61,15 @@ pipeline = Pipeline.from_script(
 # %% [markdown]
 """
 For the sake of brevity, other tutorials
-might use `TOY_SCRIPT_ARGS` to initialize pipeline:
+might use `TOY_SCRIPT_KWARGS` to initialize pipeline:
 """
 
 # %%
-assert TOY_SCRIPT_ARGS == (
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node"),
-)
+assert TOY_SCRIPT_KWARGS == {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
+}
 
 
 # %%

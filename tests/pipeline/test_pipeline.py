@@ -17,7 +17,7 @@ def test_pretty_format():
 
 def test_script_getting_and_setting():
     script = {"old_flow": {"": {RESPONSE: lambda _, __: Message(), TRANSITIONS: {"": cnd.true()}}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("old_flow", ""))
+    pipeline = Pipeline(script=script, start_label=("old_flow", ""))
 
     new_script = {"new_flow": {"": {RESPONSE: lambda _, __: Message(), TRANSITIONS: {"": cnd.false()}}}}
     pipeline.set_actor(script=new_script, start_label=("new_flow", ""))

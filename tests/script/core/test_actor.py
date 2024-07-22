@@ -51,26 +51,26 @@ def raised_response(ctx: Context, pipeline):
 async def test_actor():
     try:
         # fail of start label
-        Pipeline.from_script({"flow": {"node1": {}}}, start_label=("flow1", "node1"))
+        Pipeline(script={"flow": {"node1": {}}}, start_label=("flow1", "node1"))
         raise Exception("can not be passed: fail of start label")
     except ValueError:
         pass
     try:
         # fail of fallback label
-        Pipeline.from_script({"flow": {"node1": {}}}, start_label=("flow", "node1"), fallback_label=("flow1", "node1"))
+        Pipeline(script={"flow": {"node1": {}}}, start_label=("flow", "node1"), fallback_label=("flow1", "node1"))
         raise Exception("can not be passed: fail of fallback label")
     except ValueError:
         pass
     try:
         # fail of missing node
-        Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"miss_node1": true()}}}}, start_label=("flow", "node1"))
+        Pipeline(script={"flow": {"node1": {TRANSITIONS: {"miss_node1": true()}}}}, start_label=("flow", "node1"))
         raise Exception("can not be passed: fail of missing node")
     except ValueError:
         pass
     try:
         # fail of response returned Callable
-        pipeline = Pipeline.from_script(
-            {"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
+        pipeline = Pipeline(
+            script={"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
             start_label=("flow", "node1"),
         )
         ctx = Context()
@@ -80,15 +80,15 @@ async def test_actor():
         pass
 
     # empty ctx stability
-    pipeline = Pipeline.from_script(
-        {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
+    pipeline = Pipeline(
+        script={"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
     )
     ctx = Context()
     await pipeline.actor(pipeline, ctx)
 
     # fake label stability
-    pipeline = Pipeline.from_script(
-        {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
+    pipeline = Pipeline(
+        script={"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
     )
     ctx = Context()
     await pipeline.actor(pipeline, ctx)
@@ -195,7 +195,7 @@ async def test_call_limit():
         },
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"))
+    pipeline = Pipeline(script=script, start_label=("flow1", "node1"))
     for i in range(4):
         await pipeline._run_pipeline(Message("req1"), 0)
     if limit_errors:

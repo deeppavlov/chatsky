@@ -6,6 +6,6 @@ from chatsky.script.responses import choice
 
 def test_response():
     ctx = Context()
-    pipeline = Pipeline.from_script(script={"flow": {"node": {}}}, start_label=("flow", "node"))
+    pipeline = Pipeline(script={"flow": {"node": {}}}, start_label=("flow", "node"))
     for _ in range(10):
         assert choice(["text1", "text2"])(ctx, pipeline) in ["text1", "text2"]
