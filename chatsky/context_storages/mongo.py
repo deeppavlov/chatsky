@@ -60,7 +60,7 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         new_key = self._adjust_key(key)
-        value = value if isinstance(value, Context) else Context.cast(value)
+        value = Context.model_validate(value)
         document = json.loads(value.model_dump_json())
 
         document.update(new_key)
@@ -72,7 +72,7 @@ class MongoContextStorage(DBContextStorage):
         document = await self.collection.find_one(adjust_key)
         if document:
             document.pop("_id")
-            ctx = Context.cast(document)
+            ctx = Context.model_validate(document)
             return ctx
         raise KeyError
 

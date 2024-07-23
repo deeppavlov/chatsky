@@ -123,33 +123,6 @@ class Context(BaseModel):
         """
         return {key: dictionary[key] for key in sorted(dictionary)}
 
-    @classmethod
-    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
-        """
-        Transform different data types to the objects of the
-        :py:class:`~.Context` class.
-        Return an object of the :py:class:`~.Context`
-        type that is initialized by the input data.
-
-        :param ctx: Data that is used to initialize an object of the
-            :py:class:`~.Context` type.
-            An empty :py:class:`~.Context` object is returned if no data is given.
-        :return: Object of the :py:class:`~.Context`
-            type that is initialized by the input data.
-        """
-        if not ctx:
-            ctx = Context(*args, **kwargs)
-        elif isinstance(ctx, dict):
-            ctx = Context.model_validate(ctx)
-        elif isinstance(ctx, str):
-            ctx = Context.model_validate_json(ctx)
-        elif not isinstance(ctx, Context):
-            raise ValueError(
-                f"Context expected to be an instance of the Context class "
-                f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
-            )
-        return ctx
-
     def add_request(self, request: Message):
         """
         Add a new `request` to the context.
