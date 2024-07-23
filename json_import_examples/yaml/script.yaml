@@ -1,22 +1,23 @@
 CONFIG:
   custom_dir: custom
   start_label: [flow, node]
+  fallback_label: [flow, node]
   slots:
     person:
-      specific_person:
+      programmer:
         RegexpSlot:
           username:
-            regexp: r"username is ([a-zA-Z]+)"
+            regexp: "username is ([a-zA-Z]+)"
             match_group_idx: 1
           email:
-            regexp: r"email is ([a-z@\.A-Z]+)"
+            regexp: "email is ([a-z@.A-Z]+)"
             match_group_idx: 1
     friend:
       RegexpSlot:
         first_name:
-          regexp: r"^[A-Z][a-z]+?(?= )"
+          regexp: "^[A-Z][a-z]+?(?= )"
         last_name:
-          regexp: r"(?<= )[A-Z][a-z]+"
+          regexp: "(?<= )[A-Z][a-z]+"
 flow:
   node:
     RESPONSE:
@@ -28,8 +29,24 @@ flow:
                   source: https://github.com/deeppavlov/dialog_flow_framework
                   title: Chatsky
         - chatsky.Message: "message"
+    PRE_TRANSITIONS_PROCESSING:
+      username_extraction: 
+        chatsky.slots.processing.extract: "person.programmer.username"
+      email_extraction:
+        chatsky.slots.processing.extract: "person.programmer.email"
     TRANSITIONS:
+      - lbl:
+          [flow, node2, 3]
+        cnd:
+          chatsky.slots.conditions.slots_extracted: "person.programmer.username"
+      - lbl:
+          [flow, node2, 2]
+        cnd:
+          chatsky.slots.conditions.slots_extracted: "person.programmer.email"
       - lbl:
           [flow, node, 3]
         cnd:
           custom_dir.cnd.condition
+  node2:
+    RESPONSE:
+      chatsky.Message: "This's Slot speaking, how can I assist you?"
