@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dff import Pipeline
+from chatsky import Pipeline
 
 
 SCRIPT_FILE = Path(__file__).parent / "script.yaml"

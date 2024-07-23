@@ -3,21 +3,21 @@
 # 1. Basics
 
 The following tutorial shows basic usage of `pipeline`
-module as an extension to `dff.script.core`.
+module as an extension to `chatsky.script.core`.
 
 Here, `__call__` (same as
 %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
 method is used to execute pipeline once.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import Context, Message
+from chatsky.script import Context, Message
 
-from dff.pipeline import Pipeline
+from chatsky.pipeline import Pipeline
 
-from dff.utils.testing import (
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     HAPPY_PATH,
@@ -52,7 +52,7 @@ its `last_response` property will be actors response.
 # %%
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,
-    # Pipeline script object, defined in `dff.utils.testing.toy_script`
+    # Pipeline script object, defined in `chatsky.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )

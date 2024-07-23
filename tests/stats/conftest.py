@@ -1,8 +1,8 @@
 import pytest
 
 try:
-    from dff.stats import InMemoryLogExporter, InMemorySpanExporter, OTLPLogExporter, OTLPSpanExporter
-    from dff.stats.instrumentor import resource
+    from chatsky.stats import InMemoryLogExporter, InMemorySpanExporter, OTLPLogExporter, OTLPSpanExporter
+    from chatsky.stats.instrumentor import resource
     from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
     from opentelemetry.sdk.trace import TracerProvider

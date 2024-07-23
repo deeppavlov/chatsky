@@ -6,9 +6,9 @@ from argparse import Namespace
 
 try:
     import omegaconf  # noqa: F401
-    from dff.stats.__main__ import main
-    from dff.stats.cli import DEFAULT_SUPERSET_URL, DASHBOARD_SLUG
-    from dff.stats.utils import get_superset_session, drop_superset_assets
+    from chatsky.stats.__main__ import main
+    from chatsky.stats.cli import DEFAULT_SUPERSET_URL, DASHBOARD_SLUG
+    from chatsky.stats.utils import get_superset_session, drop_superset_assets
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
@@ -35,7 +35,7 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     sqla_url = f"{db_driver}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     database_data = {
         "configuration_method": "sqlalchemy_form",
-        "database_name": "dff_database",
+        "database_name": "chatsky_database",
         "driver": "string",
         "engine": None,
         "extra": "",
@@ -72,17 +72,17 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
         "Transition layout",
         "Transition ratio [chord]",
     ]
-    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-stats/"
-    assert dashboard_json["result"]["dashboard_title"] == "DFF statistics dashboard"
+    assert dashboard_json["result"]["url"] == "/superset/dashboard/chatsky-stats/"
+    assert dashboard_json["result"]["dashboard_title"] == "Chatsky statistics dashboard"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     assert datasets_json["count"] == 3
     assert datasets_json["ids"] == [1, 2, 3]
     assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
     assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
-        "dff_final_nodes",
-        "dff_node_stats",
-        "dff_stats",
+        "chatsky_final_nodes",
+        "chatsky_node_stats",
+        "chatsky_stats",
     ]
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
@@ -138,7 +138,9 @@ def test_main(testing_cfg_dir, args):
     assert os.path.getsize(args.outfile) > 2200
     with ZipFile(args.outfile) as file:
         file.extractall(testing_cfg_dir)
-    database = omegaconf.OmegaConf.load(os.path.join(testing_cfg_dir, "superset_dashboard/databases/dff_database.yaml"))
+    database = omegaconf.OmegaConf.load(
+        os.path.join(testing_cfg_dir, "superset_dashboard/databases/chatsky_database.yaml")
+    )
     sqlalchemy_uri = omegaconf.OmegaConf.select(database, "sqlalchemy_uri")
     arg_vars = vars(args)
     driver, user, host, port, name = (
@@ -151,7 +153,7 @@ def test_main(testing_cfg_dir, args):
     assert sqlalchemy_uri == f"{driver}://{user}:XXXXXXXXXX@{host}:{port}/{name}"
 
 
-@pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])
+@pytest.mark.parametrize(["cmd"], [("chatsky.stats -h",), ("chatsky.stats --help",)])
 def test_help(cmd):
     res = os.system(cmd)
     assert res == 0

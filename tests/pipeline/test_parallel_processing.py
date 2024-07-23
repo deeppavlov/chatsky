@@ -2,8 +2,8 @@ import asyncio
 
 import pytest
 
-from dff.script import Message, GLOBAL, RESPONSE, PRE_RESPONSE_PROCESSING, TRANSITIONS, conditions as cnd
-from dff.pipeline import Pipeline
+from chatsky.script import Message, GLOBAL, RESPONSE, PRE_RESPONSE_PROCESSING, TRANSITIONS, conditions as cnd
+from chatsky.pipeline import Pipeline
 
 
 @pytest.mark.asyncio

@@ -3,7 +3,7 @@ from colorama import init, Fore, Style
 
 def info():
     init()
-    print(f"\nThanks for your interest in {Fore.YELLOW}Dialog Flow Framework{Style.RESET_ALL}!\n")
+    print(f"\nThanks for your interest in {Fore.YELLOW}Chatsky{Style.RESET_ALL}!\n")
     print(
         f"{Fore.BLUE}poetry install --with lint,test,devel,tutorials,docs --all-extras{Style.RESET_ALL}:"
         + "Install development-ready version of framework"

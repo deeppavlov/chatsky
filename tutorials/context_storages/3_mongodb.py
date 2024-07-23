@@ -7,24 +7,24 @@ This is a tutorial on using MongoDB.
 See %mddoclink(api,context_storages.mongo,MongoContextStorage) class
 for storing you users' contexts in Mongo database.
 
-DFF uses [motor](https://motor.readthedocs.io/en/stable/)
+Chatsky uses [motor](https://motor.readthedocs.io/en/stable/)
 library for asynchronous access to MongoDB.
 """
 
-# %pip install dff[mongodb]
+# %pip install chatsky[mongodb]
 
 # %%
 import os
 
-from dff.context_storages import context_storage_factory
+from chatsky.context_storages import context_storage_factory
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 
 # %%

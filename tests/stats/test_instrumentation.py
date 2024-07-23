@@ -1,8 +1,8 @@
 import pytest
 
 try:
-    from dff.stats import default_extractors
-    from dff.stats import OtelInstrumentor
+    from chatsky.stats import default_extractors
+    from chatsky.stats import OtelInstrumentor
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk._logs import LoggerProvider
     from opentelemetry.sdk.metrics import MeterProvider

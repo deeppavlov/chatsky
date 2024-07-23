@@ -8,12 +8,12 @@ import pytest
 try:
     from jsonschema import validate
 
-    import dff.utils.db_benchmark as bm
-    from dff.utils.db_benchmark.basic_config import get_context, get_dict
-    from dff.context_storages import JSONContextStorage
-    from dff.script import Context, Message
+    import chatsky.utils.db_benchmark as bm
+    from chatsky.utils.db_benchmark.basic_config import get_context, get_dict
+    from chatsky.context_storages import JSONContextStorage
+    from chatsky.script import Context, Message
 except ImportError:
-    pytest.skip(reason="`dff[benchmark,tests]` not installed", allow_module_level=True)
+    pytest.skip(reason="`chatsky[benchmark,tests]` not installed", allow_module_level=True)
 
 
 ROOT_DIR = Path(__file__).parent.parent.parent

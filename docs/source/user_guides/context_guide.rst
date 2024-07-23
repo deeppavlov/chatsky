@@ -4,7 +4,7 @@ Context guide
 Introduction
 ~~~~~~~~~~~~
 
-The ``Context`` class is a backbone component of the DFF API. 
+The ``Context`` class is a backbone component of the Chatsky API.
 Like the name suggests, this data structure is used to store information
 about the current state, or context, of a particular conversation.
 Each individual user has their own ``Context`` instance and can be identified by it.
@@ -15,7 +15,7 @@ that is relevant to the conversation with the user.
 
 .. note::
 
-    Since most callback functions used in DFF script and DFF pipeline (see the `basic guide <./basic_conceptions.rst>`__)
+    Since most callback functions used in Chatsky script and Chatsky pipeline (see the `basic guide <./basic_conceptions.rst>`__)
     need to either read or update the current dialog state,
     the framework-level convention is that all functions of this kind
     use ``Context`` as their first parameter. This dependency is being
@@ -84,7 +84,7 @@ API
 This sections describes the API of the ``Context`` class.
 
 For more information, such as method signatures, see
-`API reference <../apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
+`API reference <../apiref/chatsky.script.core.context.html#chatsky.script.core.context.Context>`__.
 
 Attributes
 ==========
@@ -106,13 +106,11 @@ Attributes
   Stores the responses in-order.
 
 * **misc**: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
-  built-in DFF classes or functions, so the values that you write there are guaranteed to persist
+  built-in Chatsky classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
-* **framework_states**: This attribute is used for storing addon or pipeline states.
-  Each turn, the DFF pipeline records the intermediary states of its components into this field,
-  and clears it at the end of the turn. For this reason, developers are discouraged from storing
-  their own data in this field.
+* **framework_data**: This attribute is used for storing custom data required for pipeline execution.
+  It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
 
 Methods
 =======
@@ -121,7 +119,7 @@ The methods of the ``Context`` class can be divided into two categories:
 
 * Public methods that get called manually in custom callbacks and in functions that depend on the context.
 * Methods that are not designed for manual calls and get called automatically during pipeline runs,
-  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying DFF.
+  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying Chatsky.
 
 Public methods
 ^^^^^^^^^^^^^^
@@ -160,21 +158,21 @@ Private methods
 * **add_request**: Add a request to the context.
   It updates the `requests` dictionary. This method is called by the `Pipeline` component
   before any of the `pipeline services <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic.py>`__ are executed,
-  including `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__.
+  including `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__.
 
 * **add_response**: Add a response to the context.
-  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
+  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
   the `PRE_RESPONSE_PROCESSING <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__ functions.
 
   To be more precise, this method is called between the ``CREATE_RESPONSE`` and ``FINISH_TURN`` stages.
-  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
 
 * **add_label**: Add a label to the context.
-  It updates the `labels` field. This method is called by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`_ component when transition conditions
+  It updates the `labels` field. This method is called by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`_ component when transition conditions
   have been resolved, and when `PRE_TRANSITIONS_PROCESSING <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`__ callbacks have been run.
 
   To be more precise, this method is called between the ``GET_NEXT_NODE`` and ``REWRITE_NEXT_NODE`` stages.
-  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
 
 * **current_node**: Return the current node of the context. This is particularly useful for tracking the node during the conversation flow.
   This method only returns a node inside ``PROCESSING`` callbacks yielding ``None`` in other contexts.
@@ -187,7 +185,7 @@ to persistently store that information and to make it accessible in different us
 This functionality is implemented by the ``context storages`` module that provides 
 the uniform ``DBContextStorage`` interface as well as child classes thereof that integrate
 various database types (see the
-`api reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_).
+`api reference <../apiref/chatsky.context_storages.database.html#chatsky.context_storages.database.DBContextStorage>`_).
 
 The supported storage options are as follows:
 
@@ -204,31 +202,31 @@ The supported storage options are as follows:
 ``DBContextStorage`` instances can be uniformly constructed using the ``context_storage_factory`` function.
 The function's only parameter is a connection string that specifies both the database type
 and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
-(`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
+(`see the reference <../apiref/chatsky.context_storages.database.html#chatsky.context_storages.database.context_storage_factory>`_)
 
 .. note::
     To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.
 
-The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
+The GitHub-based distribution of Chatsky includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
 distribution and to take advantage of the packaged
-`docker compose file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/compose.yml>`_.
+`docker compose file <https://github.com/deeppavlov/chatsky/blob/master/compose.yml>`_.
 
 .. code-block:: shell
   :linenos:
 
-  git clone https://github.com/deeppavlov/dialog_flow_framework.git
-  cd dialog_flow_framework
+  git clone https://github.com/deeppavlov/chatsky.git
+  cd chatsky
   # assuming we need to deploy mongodb
   docker compose up mongo
 
 The images can be configured using the docker compose file or the
-`environment file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/.env_file>`_,
+`environment file <https://github.com/deeppavlov/chatsky/blob/master/.env_file>`_,
 also available in the distribution. Consult these files for more options.
 
 .. warning::
 
-  The data transmission protocols require the data to be JSON-serializable. DFF tackles this problem
+  The data transmission protocols require the data to be JSON-serializable. Chatsky tackles this problem
   through utilization of ``pydantic`` as described in the next section.
 
 Serialization
@@ -245,4 +243,4 @@ becomes as easy as calling the `model_dump_json` method:
     context = Context()
     serialized_context = context.model_dump_json()
 
-Knowing that, you can easily extend DFF to work with storages like Memcache or web APIs of your liking.
+Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.

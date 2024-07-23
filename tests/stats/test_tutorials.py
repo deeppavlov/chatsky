@@ -5,13 +5,13 @@ import asyncio
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from tests.context_storages.test_dbs import ping_localhost
-from dff.utils.testing.common import check_happy_path
-from dff.utils.testing.toy_script import HAPPY_PATH
+from chatsky.utils.testing.common import check_happy_path
+from chatsky.utils.testing.toy_script import HAPPY_PATH
 
 try:
     from aiochclient import ChClient
     from httpx import AsyncClient
-    from dff import stats  # noqa: F401
+    from chatsky import stats  # noqa: F401
 except ImportError:
     pytest.skip(allow_module_level=True, reason="There are dependencies missing.")
 
@@ -51,8 +51,8 @@ async def test_tutorials_ch(tutorial_module_name: str, expected_logs, otlp_log_e
     try:
         await ch_client.execute(f"TRUNCATE {table}")
         pipeline = module.pipeline
-        module.dff_instrumentor.uninstrument()
-        module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+        module.chatsky_instrumentor.uninstrument()
+        module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
         check_happy_path(pipeline, HAPPY_PATH)
         await asyncio.sleep(3)
         count = await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
@@ -78,8 +78,8 @@ async def test_tutorials_memory(
     log_exporter, logger_provider = log_exporter_and_provider
     try:
         pipeline = module.pipeline
-        module.dff_instrumentor.uninstrument()
-        module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+        module.chatsky_instrumentor.uninstrument()
+        module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
         check_happy_path(pipeline, HAPPY_PATH)
         tracer_provider.force_flush()
         logger_provider.force_flush()

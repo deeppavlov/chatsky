@@ -9,13 +9,13 @@ and %mddoclink(api,pipeline.service.group,ServiceGroup)s
 are shown for advanced data pre- and postprocessing based on conditions.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import json
 import logging
 
-from dff.pipeline import (
+from chatsky.pipeline import (
     Service,
     Pipeline,
     not_condition,
@@ -24,12 +24,12 @@ from dff.pipeline import (
     ACTOR,
 )
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)
 Pipeline can contain not only single services, but also service groups.
 Service groups can be defined as `ServiceGroupBuilder` objects:
       lists of `ServiceBuilders` and `ServiceGroupBuilders` or objects.
-The objects should contain `services` -
-a ServiceBuilder and ServiceGroupBuilder object list.
+The objects should contain `components` -
+a `ServiceBuilder` and `ServiceGroupBuilder` object list.
 
 To receive serialized information about service,
     service group or pipeline a property `info_dict` can be used,

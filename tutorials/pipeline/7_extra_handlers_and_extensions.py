@@ -10,7 +10,7 @@ function is shown, that can be used to add extra handlers before
 and/or after all pipeline services.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
@@ -19,7 +19,7 @@ import logging
 import random
 from datetime import datetime
 
-from dff.pipeline import (
+from chatsky.pipeline import (
     Pipeline,
     ComponentExecutionState,
     GlobalExtraHandlerType,
@@ -28,12 +28,12 @@ from dff.pipeline import (
     ACTOR,
 )
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

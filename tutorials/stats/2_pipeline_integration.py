@@ -2,7 +2,7 @@
 """
 # 2. Pipeline Integration
 
-In the DFF ecosystem, extractor functions act as regular extra handlers (
+In the Chatsky ecosystem, extractor functions act as regular extra handlers (
 [see the pipeline module documentation](
 %doclink(tutorial,pipeline.6_extra_handlers_basic)
 )
@@ -16,7 +16,7 @@ are showcased in this tutorial.
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
 during statistics collection.
-If you cloned the DFF repo, launch them using `docker compose`:
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```
@@ -24,13 +24,13 @@ docker compose --profile stats up
 </div>
 """
 
-# %pip install dff[stats]
+# %pip install chatsky[stats]
 
 # %%
 import asyncio
 
-from dff.script import Context
-from dff.pipeline import (
+from chatsky.script import Context
+from chatsky.pipeline import (
     Pipeline,
     ACTOR,
     Service,
@@ -38,25 +38,25 @@ from dff.pipeline import (
     ServiceGroup,
     GlobalExtraHandlerType,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.stats import (
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.stats import (
     OtelInstrumentor,
     set_logger_destination,
     set_tracer_destination,
 )
-from dff.stats import OTLPLogExporter, OTLPSpanExporter
-from dff.stats import default_extractors
-from dff.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
+from chatsky.stats import default_extractors
+from chatsky.utils.testing import is_interactive_mode, check_happy_path
 
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
 set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
-dff_instrumentor = OtelInstrumentor()
-dff_instrumentor.instrument()
+chatsky_instrumentor = OtelInstrumentor()
+chatsky_instrumentor.instrument()
 
 
 # example extractor function
-@dff_instrumentor
+@chatsky_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
