@@ -163,7 +163,7 @@ pipeline_dict = {
 
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)

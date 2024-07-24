@@ -52,7 +52,7 @@ async def get_confidence(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-pipeline = Pipeline.from_dict(
+pipeline = Pipeline.model_validate(
     {
         "script": MULTIFLOW_SCRIPT,
         "start_label": ("root", "start"),

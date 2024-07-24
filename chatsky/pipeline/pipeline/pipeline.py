@@ -216,14 +216,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
             "services": [self._services_pipeline.info_dict],
         }
 
-    @classmethod
-    def from_dict(cls, dictionary: dict) -> "Pipeline":
-        """
-        Pipeline dictionary-based constructor.
-        Dictionary should have the fields defined in Pipeline main constructor,
-        it will be split and passed to it as `**kwargs`.
-        """
-        return cls(**dictionary)
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

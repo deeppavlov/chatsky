@@ -93,7 +93,7 @@ run stage: for instance, `get_current_label` needs to only be used as an
 
 """
 # %%
-pipeline = Pipeline.from_dict(
+pipeline = Pipeline.model_validate(
     {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),

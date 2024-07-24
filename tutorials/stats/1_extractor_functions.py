@@ -114,7 +114,7 @@ async def heavy_service(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_dict(
+pipeline = Pipeline.model_validate(
     {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
