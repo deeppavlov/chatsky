@@ -92,7 +92,7 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
-    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default_factory=dict)
+    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     _clean_turn_cache: Optional[bool] = True
     # Making a 'computed field' for this feels overkill, a 'private' field like this is probably fine?
 
@@ -116,9 +116,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             self.fallback_label = normalize_label(self.fallback_label)
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
-
-        # This line should be removed right after removing from_script() method.
-        self.handlers = {} if self.handlers is None else self.handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True

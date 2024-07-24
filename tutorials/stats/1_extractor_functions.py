@@ -49,7 +49,7 @@ import asyncio
 from chatsky.pipeline import (
     Pipeline,
     ExtraHandlerRuntimeInfo,
-    to_service,
+    Service,
 )
 from chatsky.script import Context
 from chatsky.stats import OtelInstrumentor, default_extractors
@@ -108,7 +108,6 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 # %%
 # configure `get_service_state` to run after the `heavy_service`
-@to_service(after_handler=[get_service_state])
 async def heavy_service(ctx: Context):
     _ = ctx  # get something from ctx if needed
     await asyncio.sleep(0.02)
@@ -120,8 +119,11 @@ pipeline = Pipeline.from_dict(
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre-services": heavy_service,
-        "after_actor": [default_extractors.get_current_label],
+        "pre-services": Service(
+            handler=heavy_service, after_handler=[get_service_state]
+        ),
+        # TODO: Change this to add_extra_handler() from PipelineComponent
+        "after_handler": [default_extractors.get_current_label],
     }
 )
 

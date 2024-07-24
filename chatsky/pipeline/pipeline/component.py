@@ -61,24 +61,18 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     :param path: Separated by dots path to component, is universally unique.
     """
 
-    # I think before this you could pass a List[ExtraHandlerFunction] which would be turned into a ComponentExtraHandler
-    # Now you can't, option removed. Is that correct? Seems easy to do with field_validator.
-    # Possible TODO: Implement a Pydantic field_validator here for keeping that option.
     before_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: BeforeHandler([]))
     after_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: AfterHandler([]))
     timeout: Optional[float] = None
     # The user sees this name right now, this has to be changed. It's just counter-intuitive.
     requested_async_flag: Optional[bool] = None
     calculated_async_flag: bool = False
-    # Is this field really Optional[]? Also, is the Field(default=) done right?
-    start_condition: Optional[StartConditionCheckerFunction] = Field(default=always_start_condition)
+    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     name: Optional[str] = None
     path: Optional[str] = None
 
     @model_validator(mode="after")
     def pipeline_component_validator(self):
-        self.start_condition = always_start_condition if self.start_condition is None else self.start_condition
-
         if self.name is not None and (self.name == "" or "." in self.name):
             raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
 

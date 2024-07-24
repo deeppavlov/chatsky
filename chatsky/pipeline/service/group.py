@@ -57,9 +57,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     :param name: Requested group name.
     """
 
-    # If this is a list of PipelineComponents, why would the program know this is supposed to be a Service in the end?
-    # It's kind of logical it would try to match the best one fitting, but there are no guarantees, right?
-    # components: List[PipelineComponent]
     components: List[
         Union[
             Actor,
@@ -74,17 +71,15 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     @classmethod
     # Here Script class has "@validate_call". Is it needed here?
     def components_constructor(cls, data: Any):
-        # Question: I don't think shallow copy() could be a problem for this, right?
-        # Pydantic is already rather recursively checking types.
-        # print(data)
         if not isinstance(data, dict):
             result = {"components": data}
         else:
             result = data.copy()
-        # When it's a dictionary, data is cast to a list.
-        # We don't need to check if it's a list of Services or anything else: Pydantic does that for us.
+        # print(result)
+
         if ("components" in result) and (not isinstance(result["components"], list)):
             result["components"] = [result["components"]]
+        # print(result)
         return result
 
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.

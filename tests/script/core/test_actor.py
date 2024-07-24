@@ -1,6 +1,6 @@
 # %%
 import pytest
-from chatsky.pipeline import Pipeline
+from chatsky.pipeline import Pipeline, ComponentExecutionState
 from chatsky.script import (
     TRANSITIONS,
     RESPONSE,
@@ -75,8 +75,9 @@ async def test_actor():
         )
         ctx = Context()
         await pipeline.actor(ctx, pipeline)
+        assert pipeline.actor.get_state(ctx) is not ComponentExecutionState.FAILED
         raise Exception("can not be passed: fail of response returned Callable")
-    except ValueError:
+    except AssertionError:
         pass
 
     # empty ctx stability

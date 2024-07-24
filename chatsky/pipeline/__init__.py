@@ -26,4 +26,4 @@ from .pipeline.pipeline import Pipeline, ACTOR
 
 from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
 from .service.group import ServiceGroup
-from .service.service import Service, to_service
+from .service.service import Service

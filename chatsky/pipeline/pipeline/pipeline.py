@@ -95,21 +95,31 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
     slots: Optional[Union[GroupSlot, Dict]] = None
-    handlers: Optional[Dict[ActorStage, List[Callable]]] = Field(default_factory=dict)
+    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
-    context_storage: Optional[Union[DBContextStorage, Dict]] = None
+    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
     before_handler: ComponentExtraHandler = Field(default_factory=list)
     after_handler: ComponentExtraHandler = Field(default_factory=list)
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
     # TO-DO: Remove/change parameters below (if possible)
-    _services_pipeline: Optional[ServiceGroup]
+    actor: Optional[Actor] = None
+    _services_pipeline: Optional[ServiceGroup] = None
     _clean_turn_cache: Optional[bool]
 
-    @computed_field(repr=False)
-    def _services_pipeline(self) -> ServiceGroup:
-        components = [*self.pre_services, self.actor, *self.post_services]
+    def _create_actor(self) -> Actor:
+        return Actor(
+            script=self.script,
+            start_label=self.start_label,
+            fallback_label=self.fallback_label,
+            label_priority=self.label_priority,
+            condition_handler=self.condition_handler,
+            handlers=self.handlers,
+        )
+
+    def _create_pipeline_services(self) -> ServiceGroup:
+        components = [self.pre_services, self.actor, self.post_services]
         services_pipeline = ServiceGroup(
             components=components,
             before_handler=self.before_handler,
@@ -120,17 +130,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
         services_pipeline.path = ".pipeline"
         return services_pipeline
 
-    @computed_field(repr=False)
-    def actor(self) -> Actor:
-        return Actor(
-            script=self.script,
-            start_label=self.start_label,
-            fallback_label=self.fallback_label,
-            label_priority=self.label_priority,
-            condition_handler=self.condition_handler,
-            handlers=self.handlers,
-        )
-
     @model_validator(mode="after")
     def pipeline_init(self):
         """# I wonder if I could make actor itself a @computed_field, but I'm not sure that would work.
@@ -138,10 +137,15 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
         # Same goes for @cached_property. Would @property work?
         self.actor = self._set_actor"""
 
-        # These lines should be removed right after removing the from_script() method.
-        self.context_storage = {} if self.context_storage is None else self.context_storage
-        # Same here, but this line creates a Pydantic error now, though it shouldn't have.
+        # Should do this in a Pydantic Field
         self.slots = GroupSlot.model_validate(self.slots) if self.slots is not None else None
+
+        # computed_field is just not viable, they get called multiple times.
+        # Could maybe do this with a default_factory, but such function will require
+        # being defined before Pipeline
+        self.actor = self._create_actor()
+
+        self._services_pipeline = self._create_pipeline_services()
 
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 

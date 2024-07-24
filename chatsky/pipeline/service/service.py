@@ -13,17 +13,15 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import Optional, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any
 from pydantic import model_validator
 
 from chatsky.script import Context
 
 
-from .extra import ComponentExtraHandler
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
     ServiceFunction,
-    StartConditionCheckerFunction,
 )
 from ..pipeline.component import PipelineComponent
 
@@ -111,32 +109,3 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             service_representation = "[Unknown]"
         representation.update({"handler": service_representation})
         return representation
-
-
-# If this function will continue existing.
-def to_service(
-    before_handler: Optional[ComponentExtraHandler] = None,
-    after_handler: Optional[ComponentExtraHandler] = None,
-    timeout: Optional[int] = None,
-    asynchronous: Optional[bool] = None,
-    start_condition: Optional[StartConditionCheckerFunction] = None,
-    name: Optional[str] = None,
-):
-    """
-    Function for decorating a function as a Service.
-    Returns a Service, constructed from this function (taken as a handler).
-    All arguments are passed directly to `Service` constructor.
-    """
-
-    def inner(handler: ServiceFunction) -> Service:
-        return Service(
-            handler=handler,
-            before_handler=before_handler,
-            after_handler=after_handler,
-            timeout=timeout,
-            requested_async_flag=asynchronous,
-            start_condition=start_condition,
-            name=name,
-        )
-
-    return inner
