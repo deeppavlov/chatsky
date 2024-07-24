@@ -6,33 +6,13 @@ Wrapper around langchain.
 
 try:
     from langchain_openai import ChatOpenAI
-    open_ai_available = True
-except ImportError:
-    open_ai_available = False
-
-try:
     from langchain_anthropic import ChatAnthropic
-    anthropic_available = True
-except ImportError:
-    anthropic_available = False
-
-try:
     from langchain_google_vertexai import ChatVertexAI
-    vertex_ai_available = True
-except ImportError:
-    vertex_ai_available = False
-
-try:
     from langchain_cohere import ChatCohere
-    cohere_available = True
-except ImportError:
-    cohere_available = False
-
-try:
     from langchain_mistralai import ChatMistralAI
-    mistral_available = True
+    langchain_available = True
 except ImportError:
-    mistral_available = False
+    langchain_available = False
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -75,19 +55,11 @@ class LLM_API(BaseModel):
 
 
     def __check_imports(self):
-        if not open_ai_available:
-            raise ImportError("OpenAI is not available. Please install it with `pip install langchain-openai`.")  
-        if not anthropic_available:
-            raise ImportError("Anthropic is not available. Please install it with `pip install langchain-anthropic`.")
-        if not vertex_ai_available:
-            raise ImportError("Vertex AI is not available. Please install it with `pip install langchain-google-vertexai`.")
-        if not cohere_available:
-            raise ImportError("Cohere is not available. Please install it with `pip install langchain-cohere`.")
-        if not mistral_available:
-            raise ImportError("Mistral is not available. Please install it with `pip install langchain-mistralai`.")
+        if not langchain_available:
+            raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
         
 
-    def respond(self, history: int = []) -> Message:
+    def respond(self, history: list = []) -> Message:
         result = self.parser.invoke(self.model.invoke(history))
         result = Message(text=result)
         result.annotation.__generated_by_model__ = self.name
@@ -137,7 +109,8 @@ def llm_response(
 
             history_messages.append(req_message)
             history_messages.append(SystemMessage(resp.text))
-    return model.respond(history_messages)
+        return model.respond(history_messages)
+
 
 def llm_condition(
         ctx: Context,
@@ -168,3 +141,15 @@ def __attachment_to_content(attachment: Image) -> str:
     extension = attachment.source.split(".")[-1]
     image_b64 = f"data:image/{extension};base64,{image_b64}"
     return image_b64
+
+
+def message_to_langchain(message: Message):
+    if message.attachments != []:
+        content = [{"type": "text", "text": message.text}]
+        for image in message.attachments:
+            if image is not Image:
+                continue
+            content.append(
+                {"type": "image_url", "image_url": {"url": __attachment_to_content(image)}}
+            )
+    return HumanMessage(content=content)
