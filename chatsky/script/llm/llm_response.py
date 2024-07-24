@@ -47,6 +47,8 @@ from chatsky.pipeline import Pipeline
 from pydantic import BaseModel
 from typing import Union
 
+import re
+
 
 class LLM_API(BaseModel):
     """
@@ -91,8 +93,9 @@ class LLM_API(BaseModel):
         result.annotation.__generated_by_model__ = self.name
         return result
     
-    def condition(self, prompt=None, method="bool"):
-        raise NotImplementedError("Condition is not implemented.")
+    def condition(self, prompt, request):
+        result = self.parser.invoke(self.model.invoke([prompt+'\n'+request.text]))
+        return result
 
 
 def llm_response(
@@ -135,6 +138,22 @@ def llm_response(
             history_messages.append(req_message)
             history_messages.append(SystemMessage(resp.text))
     return model.respond(history_messages)
+
+def llm_condition(
+        ctx: Context,
+        pipeline: Pipeline,
+        model_name,
+        prompt="",
+        method="regex",
+        threshold=0.9
+    ):
+    """
+    Basic function for using LLM in condition cases.
+    """
+    model = pipeline.get(model_name)
+    if method == "regex":
+        return re.match(r"True", model.condition(prompt, ctx.last_request))
+
 
 def __attachment_to_content(attachment: Image) -> str:
     """
