@@ -16,7 +16,7 @@ from chatsky.pipeline import Pipeline
 from chatsky.script import Context, Message
 
 
-def choice(responses: List[Message]):
+def random_choice(responses: List[Message]):
     """
     Function wrapper that takes the list of responses as an input
     and returns handler which outputs a response randomly chosen from that list.

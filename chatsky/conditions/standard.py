@@ -84,27 +84,11 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) ->
 
     def regexp_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
         request = ctx.last_request
-        if isinstance(request, Message):
-            if request.text is None:
-                return False
-            return bool(pattern.search(request.text))
-        else:
-            logger.error(f"request has to be str type, but got request={request}")
+        if request.text is None:
             return False
+        return bool(pattern.search(request.text))
 
     return regexp_condition_handler
-
-
-@validate_call
-def check_cond_seq(cond_seq: list):
-    """
-    Check if the list consists only of Callables.
-
-    :param cond_seq: List of conditions to check.
-    """
-    for cond in cond_seq:
-        if not callable(cond):
-            raise TypeError(f"{cond_seq} has to consist of callable objects")
 
 
 _any = any
@@ -118,21 +102,16 @@ _all is an alias for all.
 
 
 @validate_call
-def aggregate(cond_seq: list, aggregate_func: Callable = _any) -> Callable[[Context, Pipeline], bool]:
+def aggregate(cond_seq: List[Callable], aggregate_func: Callable = _any) -> Callable[[Context, Pipeline], bool]:
     """
     Aggregate multiple functions into one by using aggregating function.
 
     :param cond_seq: List of conditions to check.
     :param aggregate_func: Function to aggregate conditions. Defaults to :py:func:`_any`.
     """
-    check_cond_seq(cond_seq)
 
     def aggregate_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        try:
-            return bool(aggregate_func([cond(ctx, pipeline) for cond in cond_seq]))
-        except Exception as exc:
-            logger.error(f"Exception {exc} for {cond_seq}, {aggregate_func} and {ctx.last_request}", exc_info=exc)
-            return False
+        return bool(aggregate_func([cond(ctx, pipeline) for cond in cond_seq]))
 
     return aggregate_condition_handler
 

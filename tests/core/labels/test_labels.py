@@ -1,44 +1,49 @@
-from chatsky.pipeline import Pipeline
-from chatsky.script import Context
-from chatsky.script.labels import forward, repeat, previous, to_fallback, to_start, backward
+import pytest
+
+from chatsky.labels import forward, repeat, previous, to_fallback, to_start, backward
 
 
-def test_labels():
-    ctx = Context()
+class TestLabels:
+    @pytest.fixture
+    def ctx(self, context_factory):
+        return context_factory(forbidden_fields=("requests", "responses", "misc"))
 
-    pipeline = Pipeline.from_script(
-        script={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
-        start_label=("service", "start"),
-        fallback_label=("service", "fallback"),
-    )
+    def test_repeat(self, ctx, pipeline):
+        assert repeat(5)(ctx, pipeline) == ("service", "start", 5)
 
-    assert repeat(99)(ctx, pipeline) == ("service", "start", 99)
-    assert previous(99)(ctx, pipeline) == ("service", "fallback", 99)
+        ctx.add_label(("flow", "node1"))
+        assert repeat(4)(ctx, pipeline) == ("flow", "node1", 4)
 
-    ctx.add_label(["flow", "node1"])
-    ctx.add_label(["flow", "node2"])
-    ctx.add_label(["flow", "node3"])
-    ctx.add_label(["flow", "node2"])
+        ctx.add_label(("flow", "node2"))
+        assert repeat(3)(ctx, pipeline) == ("flow", "node2", 3)
 
-    assert repeat(99)(ctx, pipeline) == ("flow", "node2", 99)
-    assert previous(99)(ctx, pipeline) == ("flow", "node3", 99)
-    assert to_fallback(99)(ctx, pipeline) == ("service", "fallback", 99)
-    assert to_start(99)(ctx, pipeline) == ("service", "start", 99)
-    assert forward(99)(ctx, pipeline) == ("flow", "node3", 99)
-    assert backward(99)(ctx, pipeline) == ("flow", "node1", 99)
+    def test_previous(self, ctx, pipeline):
+        assert previous(5)(ctx, pipeline) == ("service", "fallback", 5)
 
-    ctx.add_label(["flow", "node3"])
-    assert forward(99)(ctx, pipeline) == ("flow", "node1", 99)
-    assert forward(99, cyclicality_flag=False)(ctx, pipeline) == ("service", "fallback", 99)
+        ctx.add_label(("flow", "node1"))
+        assert previous(4)(ctx, pipeline) == ("service", "start", 4)
 
-    ctx.add_label(["flow", "node1"])
-    assert backward(99)(ctx, pipeline) == ("flow", "node3", 99)
-    assert backward(99, cyclicality_flag=False)(ctx, pipeline) == ("service", "fallback", 99)
-    ctx = Context()
-    ctx.add_label(["flow", "node2"])
-    pipeline = Pipeline.from_script(
-        script={"flow": {"node1": {}}, "service": {"start": {}, "fallback": {}}},
-        start_label=("service", "start"),
-        fallback_label=("service", "fallback"),
-    )
-    assert forward()(ctx, pipeline) == ("service", "fallback", 1.0)
+        ctx.add_label(("flow", "node2"))
+        assert previous(3)(ctx, pipeline) == ("flow", "node1", 3)
+
+    def test_to_start(self, ctx, pipeline):
+        assert to_start(5)(ctx, pipeline) == ("service", "start", 5)
+
+    def test_to_fallback(self, ctx, pipeline):
+        assert to_fallback(5)(ctx, pipeline) == ("service", "fallback", 5)
+
+    def test_forward(self, ctx, pipeline):
+        ctx.add_label(("flow", "node2"))
+        assert forward(5)(ctx, pipeline) == ("flow", "node3", 5)
+
+        ctx.add_label(("flow", "node3"))
+        assert forward(4, cyclicality_flag=True)(ctx, pipeline) == ("flow", "node1", 4)
+        assert forward(3, cyclicality_flag=False)(ctx, pipeline) == ("service", "fallback", 3)
+
+    def test_backward(self, ctx, pipeline):
+        ctx.add_label(("flow", "node2"))
+        assert backward(5)(ctx, pipeline) == ("flow", "node1", 5)
+
+        ctx.add_label(("flow", "node1"))
+        assert backward(4, cyclicality_flag=True)(ctx, pipeline) == ("flow", "node3", 4)
+        assert backward(3, cyclicality_flag=False)(ctx, pipeline) == ("service", "fallback", 3)
