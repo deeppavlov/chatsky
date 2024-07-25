@@ -42,6 +42,7 @@ from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
 
 logger = logging.getLogger(__name__)
 
+# Could be removed, I think. Need to check just in case.
 ACTOR = "ACTOR"
 
 
@@ -86,7 +87,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
 
     """
 
-    # Note to self: some testing required to see if [] works as intended.
     pre_services: ServiceGroup = Field(default_factory=list)
     post_services: ServiceGroup = Field(default_factory=list)
     script: Union[Script, Dict]
@@ -132,11 +132,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def pipeline_init(self):
-        """# I wonder if I could make actor itself a @computed_field, but I'm not sure that would work.
-        # What if the cache gets cleaned at some point? Then a new Actor would be created.
-        # Same goes for @cached_property. Would @property work?
-        self.actor = self._set_actor"""
-
         # Should do this in a Pydantic Field
         self.slots = GroupSlot.model_validate(self.slots) if self.slots is not None else None
 
@@ -148,10 +143,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
         self._services_pipeline = self._create_pipeline_services()
 
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
-
-        # This could be removed.
-        if self.actor is None:
-            raise Exception("Actor wasn't initialized correctly!")
 
         if self.optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
@@ -215,7 +206,6 @@ class Pipeline(BaseModel, arbitrary_types_allowed=True):
             "context_storage": f"Instance of {type(self.context_storage).__name__}",
             "services": [self._services_pipeline.info_dict],
         }
-
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

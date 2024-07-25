@@ -23,6 +23,7 @@ from .types import (
 )
 
 from .pipeline.pipeline import Pipeline, ACTOR
+from .pipeline.actor import Actor
 
 from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
 from .service.group import ServiceGroup

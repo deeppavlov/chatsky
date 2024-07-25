@@ -122,11 +122,9 @@ pipeline = Pipeline.model_validate(
         "pre-services": Service(
             handler=heavy_service, after_handler=[get_service_state]
         ),
-        # TODO: Change this to add_extra_handler() from PipelineComponent
-        "after_handler": [default_extractors.get_current_label],
     }
 )
-
+pipeline.actor.add_extra_handler("BEFORE", default_extractors.get_current_label)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)

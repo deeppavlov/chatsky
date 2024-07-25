@@ -112,10 +112,18 @@ pipeline = Pipeline.model_validate(
     }
 )
 # These are Extra Handlers for Actor.
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_current_label)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, get_service_state
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_current_label
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after
+)
 
 # These are global Extra Handlers for Pipeline.
 pipeline.add_global_handler(
