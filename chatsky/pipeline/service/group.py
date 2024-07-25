@@ -75,11 +75,9 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             result = {"components": data}
         else:
             result = data.copy()
-        # print(result)
 
         if ("components" in result) and (not isinstance(result["components"], list)):
             result["components"] = [result["components"]]
-        # print(result)
         return result
 
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.

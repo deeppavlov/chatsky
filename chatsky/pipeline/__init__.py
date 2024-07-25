@@ -27,4 +27,4 @@ from .pipeline.actor import Actor
 
 from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
 from .service.group import ServiceGroup
-from .service.service import Service
+from .service.service import Service, to_service
