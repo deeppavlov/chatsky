@@ -22,7 +22,8 @@ from chatsky.script import Context
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.pipeline import always_start_condition
 from ..types import (
-    ServiceFunction, StartConditionCheckerFunction,
+    ServiceFunction,
+    StartConditionCheckerFunction,
 )
 from ..pipeline.component import PipelineComponent
 from .extra import ComponentExtraHandler

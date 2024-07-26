@@ -206,4 +206,3 @@ class TestPipelineValidation:
             # 'pre_services' must be a ServiceGroup
             Pipeline(**TOY_SCRIPT_KWARGS, pre_services=123)
             assert e
-

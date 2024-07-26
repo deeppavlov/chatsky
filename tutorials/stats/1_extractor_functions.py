@@ -50,7 +50,8 @@ from chatsky.pipeline import (
     Pipeline,
     ExtraHandlerRuntimeInfo,
     GlobalExtraHandlerType,
-    to_service, Service,
+    to_service,
+    Service,
 )
 from chatsky.script import Context
 from chatsky.stats import OtelInstrumentor, default_extractors
@@ -125,7 +126,9 @@ pipeline = Pipeline.model_validate(
     }
 )
 
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.BEFORE, default_extractors.get_current_label)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.BEFORE, default_extractors.get_current_label
+)
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():

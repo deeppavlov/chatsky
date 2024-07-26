@@ -23,7 +23,8 @@ from chatsky.pipeline import (
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    Service, to_service,
+    Service,
+    to_service,
 )
 from chatsky.script import Context
 from chatsky.utils.testing.common import (
