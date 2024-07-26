@@ -62,8 +62,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         ]
     ]
 
-    # Whenever data isn't passed like a dictionary, this tries to cast it to the right dictionary
-    # This includes List, PipelineComponent and Callable.
     @model_validator(mode="before")
     @classmethod
     # Here Script class has "@validate_call". Is it needed here?

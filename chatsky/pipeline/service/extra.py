@@ -58,7 +58,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
             result = {"functions": data}
         else:
             result = data.copy()
-        # Now it's definitely a dictionary.
+
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]
         return result
