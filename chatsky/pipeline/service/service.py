@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-# arbitrary_types_allowed for testing, will remove later
 class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
     This class represents a service.
@@ -57,8 +56,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
     handler: ServiceFunction
 
-    # This code handles cases where just one Callable is passed into it's constructor data.
-    # All flags will be on default in that case.
     @model_validator(mode="before")
     @classmethod
     # Here Script class has "@validate_call". Is it needed here?

@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-# arbitrary_types_allowed for testing, will remove later
 class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class, representing an extra pipeline component handler.
@@ -173,12 +172,6 @@ class BeforeHandler(ComponentExtraHandler):
     """
 
     # Instead of __init__ here, this could look like a one-liner.
-    # The problem would be that BeforeHandlers would need to be initialized differently.
-    # Like BeforeHandler(functions=functions) instead of BeforeHandler(functions)
-    # That would break tests, tutorials and programs.
-    # Instead, this here could be a wrapper meant to keep the status quo.
-
-    # The possible one-liner:
     # stage: ExtraHandlerType = ExtraHandlerType.BEFORE
 
     def __init__(

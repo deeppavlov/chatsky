@@ -62,7 +62,6 @@ async def default_condition_handler(
     return await wrap_sync_function_in_async(condition, ctx, pipeline)
 
 
-# arbitrary_types_allowed for testing, will remove later
 class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
@@ -85,8 +84,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    # Can this just be Script, since Actor is now pydantic BaseModel?
-    # I feel like this is a bit different and is already handled.
     script: Union[Script, dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
@@ -94,9 +91,7 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     condition_handler: Callable = Field(default=default_condition_handler)
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     _clean_turn_cache: Optional[bool] = True
-    # Making a 'computed field' for this feels overkill, a 'private' field like this is probably fine?
 
-    # Basically, Actor cannot be async with other components. That is correct, yes?
     @model_validator(mode="after")
     def tick_async_flag(self):
         self.calculated_async_flag = False
@@ -121,7 +116,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         self._clean_turn_cache = True
         return self
 
-    # Standard signature of any PipelineComponent. ctx goes first.
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running an `Actor`.

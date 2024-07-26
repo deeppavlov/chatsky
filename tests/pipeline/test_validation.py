@@ -44,8 +44,10 @@ class UserFunctionSamples:
         pass
 
 
-# Need a test for returning an awaitable from a ServiceFunction, ExtraHandlerFunction
+# Could make a test for returning an awaitable from a ServiceFunction, ExtraHandlerFunction
 class TestServiceValidation:
+    # These test don't throw exceptions. It's as if any Callable[] is an instance of ServiceFunction
+    # Same for ExtraHandlerFunction. I don't know how this should be addressed.
     """
     def test_wrong_param_types(self):
         # This doesn't work. For some reason any callable can be a ServiceFunction
@@ -122,6 +124,7 @@ class TestExtraHandlerValidation:
         """
 
 
+# Note: I haven't tested asynchronous components in any way.
 class TestServiceGroupValidation:
     def test_single_service(self):
         func = UserFunctionSamples.correct_service_function_2

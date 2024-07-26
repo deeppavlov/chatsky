@@ -32,9 +32,6 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-# I think it's fine calling this a `Service` group, even though really it's a `PipelineComponent` group.
-# The user only sees this as a `Service` group like they should.
-# arbitrary_types_allowed for testing, will remove later
 class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
     A service group class.
@@ -80,8 +77,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             result["components"] = [result["components"]]
         return result
 
-    # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
-    # Maybe I could just make this a 'private' field, like '_calc_async'
     @model_validator(mode="after")
     def calculate_async_flag(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])

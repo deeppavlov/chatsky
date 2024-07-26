@@ -61,10 +61,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     :param path: Separated by dots path to component, is universally unique.
     """
 
+    # Should this be Optional
     before_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: BeforeHandler([]))
     after_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: AfterHandler([]))
     timeout: Optional[float] = None
-    # The user sees this name right now, this has to be changed. It's just counter-intuitive.
+    # The user uses this name everywhere right now, this has to be changed. It's just counter-intuitive.
     requested_async_flag: Optional[bool] = None
     calculated_async_flag: bool = False
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
