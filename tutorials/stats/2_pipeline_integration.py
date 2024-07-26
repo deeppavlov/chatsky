@@ -98,7 +98,7 @@ pipeline = Pipeline.model_validate(
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre-services": ServiceGroup(
+        "pre_services": ServiceGroup(
             before_handler=[default_extractors.get_timing_before],
             after_handler=[
                 get_service_state,
