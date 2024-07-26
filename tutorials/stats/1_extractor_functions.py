@@ -51,7 +51,6 @@ from chatsky.pipeline import (
     ExtraHandlerRuntimeInfo,
     GlobalExtraHandlerType,
     to_service,
-    Service,
 )
 from chatsky.script import Context
 from chatsky.stats import OtelInstrumentor, default_extractors

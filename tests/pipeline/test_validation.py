@@ -6,7 +6,6 @@ from chatsky.pipeline import (
     Service,
     ServiceGroup,
     Actor,
-    ComponentExtraHandler,
     ServiceRuntimeInfo,
     BeforeHandler,
 )
@@ -179,7 +178,7 @@ class TestActorValidation:
             assert e
         with pytest.raises(ValidationError) as e:
             # 'start_label' is a mandatory field
-            Actor(script={})
+            Actor(script=TOY_SCRIPT)
             assert e
         with pytest.raises(ValidationError) as e:
             # 'condition_handler' is not an Optional field.
