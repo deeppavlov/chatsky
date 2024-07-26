@@ -153,7 +153,7 @@ pipeline_dict = {
     "context_storage": {},
     "pre_services": [
         {
-            "handler": {prepreprocess},
+            "handler": prepreprocess,
             "name": "preprocessor",
         },
         preprocess,

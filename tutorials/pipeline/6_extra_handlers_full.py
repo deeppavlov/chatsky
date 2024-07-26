@@ -23,7 +23,7 @@ from chatsky.pipeline import (
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    Service,
+    Service, to_service,
 )
 from chatsky.script import Context
 from chatsky.utils.testing.common import (
@@ -147,28 +147,25 @@ memory_heap = dict()  # This object plays part of some memory heap
 
 
 # %%
-def heavy_function(ctx: Context):
+@to_service(
+    before_handler=[time_measure_before_handler, ram_measure_before_handler],
+    after_handler=[time_measure_after_handler, ram_measure_after_handler],
+)
+def heavy_service(ctx: Context):
     memory_heap[ctx.last_request.text] = [
         random.randint(0, num) for num in range(0, 1000)
     ]
 
 
-def logging_function(ctx: Context, _, info: ServiceRuntimeInfo):
+@to_service(
+    before_handler=[json_converter_before_handler],
+    after_handler=[json_converter_after_handler],
+)
+def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
     str_misc = ctx.misc[f"{info.name}-str"]
     assert isinstance(str_misc, str)
     print(f"Stringified misc: {str_misc}")
 
-
-heavy_service = Service(
-    handler=heavy_function,
-    before_handler=[time_measure_before_handler, ram_measure_before_handler],
-    after_handler=[time_measure_after_handler, ram_measure_after_handler],
-)
-logging_service = Service(
-    handler=logging_function,
-    before_handler=[json_converter_before_handler],
-    after_handler=[json_converter_after_handler],
-)
 
 pipeline_dict = {
     "script": TOY_SCRIPT,

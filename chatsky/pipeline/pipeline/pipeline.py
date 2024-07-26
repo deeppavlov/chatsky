@@ -17,7 +17,7 @@ to structure and manage the messages processing flow.
 import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
-from pydantic import BaseModel, Field, model_validator, computed_field
+from pydantic import BaseModel, Field, model_validator
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -42,12 +42,9 @@ from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
 
 logger = logging.getLogger(__name__)
 
-# Could be removed, I think. Need to check just in case.
-ACTOR = "ACTOR"
-
 
 # Using "arbitrary_types_allowed" from pydantic for debug purposes, probably should remove later.
-# Must also add back in 'extra="forbid"', removed for testing.
+# Actually, everything breaks when I do that.
 class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
@@ -94,7 +91,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
-    slots: Optional[Union[GroupSlot, Dict]] = None
+    slots: GroupSlot = Field(default_factory=GroupSlot)
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
@@ -103,7 +100,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
-    # TO-DO: Remove/change parameters below (if possible)
+    # These variables are okay like this, right?
     actor: Optional[Actor] = None
     _services_pipeline: Optional[ServiceGroup] = None
     _clean_turn_cache: Optional[bool]
@@ -132,16 +129,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def pipeline_init(self):
-        # Should do this in a Pydantic Field
-        self.slots = GroupSlot.model_validate(self.slots) if self.slots is not None else None
-
-        # computed_field is just not viable, they get called multiple times.
-        # Could maybe do this with a default_factory, but such function will require
-        # being defined before Pipeline
         self.actor = self._create_actor()
-
         self._services_pipeline = self._create_pipeline_services()
-
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         if self.optimization_warnings:

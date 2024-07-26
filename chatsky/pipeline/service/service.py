@@ -103,9 +103,8 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         Adds `handler` key to base info dictionary.
         """
         representation = super(Service, self).info_dict
-        if isinstance(self.handler, str) and self.handler == "ACTOR":
-            service_representation = "Instance of Actor"
-        elif callable(self.handler):
+        # Need to carefully remove this
+        if callable(self.handler):
             service_representation = f"Callable '{self.handler.__name__}'"
         else:
             service_representation = "[Unknown]"

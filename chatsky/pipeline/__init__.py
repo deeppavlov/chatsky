@@ -22,7 +22,7 @@ from .types import (
     ServiceFunction,
 )
 
-from .pipeline.pipeline import Pipeline, ACTOR
+from .pipeline.pipeline import Pipeline
 from .pipeline.actor import Actor
 
 from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler

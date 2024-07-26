@@ -12,7 +12,7 @@ import random
 import asyncio
 from tqdm import tqdm
 from chatsky.script import Context, Message
-from chatsky.pipeline import Pipeline, Service, ACTOR, ExtraHandlerRuntimeInfo
+from chatsky.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from chatsky.stats import (
     default_extractors,
     OtelInstrumentor,
@@ -57,26 +57,26 @@ pipeline = Pipeline.model_validate(
         "script": MULTIFLOW_SCRIPT,
         "start_label": ("root", "start"),
         "fallback_label": ("root", "fallback"),
-        "components": [
-            Service(slot_processor_1, after_handler=[get_slots]),
-            Service(slot_processor_2, after_handler=[get_slots]),
-            Service(
-                handler=ACTOR,
-                before_handler=[
-                    default_extractors.get_timing_before,
-                ],
-                after_handler=[
-                    default_extractors.get_timing_after,
-                    default_extractors.get_current_label,
-                    default_extractors.get_last_request,
-                    default_extractors.get_last_response,
-                ],
-            ),
-            Service(confidence_processor, after_handler=[get_confidence]),
-        ],
+        "pre_services": [Service(handler=slot_processor_1, after_handler=[get_slots]),
+            Service(handler=slot_processor_2, after_handler=[get_slots]),],
+        "post_services": Service(handler=confidence_processor, after_handler=[get_confidence]),
     }
 )
-
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_current_label
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_last_request
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_last_response
+)
 
 # %%
 async def worker(queue: asyncio.Queue):
