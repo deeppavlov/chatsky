@@ -79,7 +79,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre-services": ServiceGroup(
+    "pre_services": ServiceGroup(
         before_handler=[collect_timestamp_before],
         after_handler=[collect_timestamp_after],
         components=[
@@ -110,7 +110,7 @@ pipeline_dict = {
             },
         ],
     ),
-    "post-services": logging_service,
+    "post_services": logging_service,
 }
 
 # %%

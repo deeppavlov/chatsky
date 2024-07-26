@@ -125,7 +125,7 @@ pipeline_dict = {
     "fallback_label": ("greeting_flow", "fallback_node"),
     "optimization_warnings": True,
     # There are no warnings - pipeline is well-optimized
-    "pre-services": ServiceGroup(
+    "pre_services": ServiceGroup(
         name="balanced_group",
         requested_async_flag=False,
         components=[
@@ -137,7 +137,7 @@ pipeline_dict = {
             simple_asynchronous_service,
         ],
     ),
-    "post-services": [
+    "post_services": [
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],

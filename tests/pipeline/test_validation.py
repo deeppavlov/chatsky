@@ -10,17 +10,8 @@ from chatsky.pipeline import (
     ServiceRuntimeInfo,
     BeforeHandler,
 )
-from chatsky.script import (
-    PRE_RESPONSE_PROCESSING,
-    PRE_TRANSITIONS_PROCESSING,
-    RESPONSE,
-    TRANSITIONS,
-    Context,
-    Message,
-    Script,
-    ConstLabel,
-)
-from chatsky.script.conditions import exact_match
+from chatsky.script import Context
+from chatsky.utils.testing import TOY_SCRIPT, TOY_SCRIPT_KWARGS
 
 
 class UserFunctionSamples:
@@ -50,26 +41,6 @@ class UserFunctionSamples:
 
     @staticmethod
     def correct_service_function_3(_: Context, __: Pipeline, ___: ServiceRuntimeInfo):
-        pass
-
-    @staticmethod
-    def correct_label(_: Context, __: Pipeline) -> ConstLabel:
-        return ("root", "start", 1)
-
-    @staticmethod
-    def correct_response(_: Context, __: Pipeline) -> Message:
-        return Message("hi")
-
-    @staticmethod
-    def correct_condition(_: Context, __: Pipeline) -> bool:
-        return True
-
-    @staticmethod
-    def correct_pre_response_processor(_: Context, __: Pipeline) -> None:
-        pass
-
-    @staticmethod
-    def correct_pre_transition_processor(_: Context, __: Pipeline) -> None:
         pass
 
 
@@ -134,74 +105,98 @@ class TestExtraHandlerValidation:
 
     def test_wrong_inputs(self):
         with pytest.raises(ValidationError) as e:
+            # 1 is not a callable
             BeforeHandler(1)
             assert e
         with pytest.raises(ValidationError) as e:
+            # 'functions' should be a list of ExtraHandlerFunctions
             BeforeHandler([1, 2, 3])
             assert e
-        # Wait, this one works. Why?
+        # Wait, this one works. Why? An instance of BeforeHandler is not a function.
         with pytest.raises(ValidationError) as e:
             BeforeHandler(functions=BeforeHandler([]))
             assert e
 
+
 class TestServiceGroupValidation:
     def test_single_service(self):
         func = UserFunctionSamples.correct_service_function_2
+        group = ServiceGroup(components=Service(handler=func, after_handler=func))
+        assert group.components[0].handler == func
+        assert group.components[0].after_handler.functions[0] == func
+        # Same, but with model_validate
         group = ServiceGroup.model_validate(Service(handler=func, after_handler=func))
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
 
-"""
+    def test_several_correct_services(self):
+        func = UserFunctionSamples.correct_service_function_2
+        services = [Service.model_validate(func), Service(handler=func, timeout=10)]
+        group = ServiceGroup(components=services, timeout=15)
+        assert group.components == services
+        assert group.timeout == 15
+        assert group.components[0].timeout is None
+        assert group.components[1].timeout == 10
+
+    def test_wrong_inputs(self):
+        with pytest.raises(ValidationError) as e:
+            # 'components' is a mandatory field
+            ServiceGroup(before_handler=UserFunctionSamples.correct_service_function_2)
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # 'components' must be a list of PipelineComponents, wrong type
+            # Though 123 will be cast to a list
+            ServiceGroup(components=123)
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # The dictionary inside 'components' will check if Actor, Service or ServiceGroup fit the signature,
+            # but it doesn't fit any of them, so it's just a normal dictionary
+            ServiceGroup(components={"before_handler": []})
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # The dictionary inside 'components' will try to get cast to Service and will fail
+            # But 'components' must be a list of PipelineComponents, so it's just a normal dictionary
+            ServiceGroup(components={"handler": 123})
+            assert e
+
+
+# Testing of node and script validation for actor exist at script/core/test_actor.py
 class TestActorValidation:
+    def test_toy_script_actor(self):
+        Actor(**TOY_SCRIPT_KWARGS)
+
+    def test_wrong_inputs(self):
+        with pytest.raises(ValidationError) as e:
+            # 'script' is a mandatory field
+            Actor(start_label=TOY_SCRIPT_KWARGS["start_label"])
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # 'start_label' is a mandatory field
+            Actor(script={})
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # 'condition_handler' is not an Optional field.
+            Actor(**TOY_SCRIPT_KWARGS, condition_handler=None)
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # 'handlers' is not an Optional field.
+            Actor(**TOY_SCRIPT_KWARGS, handlers=None)
+            assert e
+        with pytest.raises(ValidationError) as e:
+            # 'script' must be either a dict or Script instance.
+            Actor(script=[], start_label=TOY_SCRIPT_KWARGS["start_label"])
+            assert e
+
+
+# Can't think of any other tests that aren't done in other tests in this file
 class TestPipelineValidation:
-"""
+    def test_correct_inputs(self):
+        Pipeline(**TOY_SCRIPT_KWARGS)
+        Pipeline.model_validate(TOY_SCRIPT_KWARGS)
 
+    def test_pre_services(self):
+        with pytest.raises(ValidationError) as e:
+            # 'pre_services' must be a ServiceGroup
+            Pipeline(**TOY_SCRIPT_KWARGS, pre_services=123)
+            assert e
 
-class TestLabelValidation:
-    def test_param_number(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
-            Script(
-                script={
-                    "root": {
-                        "start": {TRANSITIONS: {UserFunctionSamples.wrong_param_number: exact_match(Message("hi"))}}
-                    }
-                }
-            )
-        assert e
-
-    def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter annotation") as e:
-            Script(
-                script={
-                    "root": {
-                        "start": {TRANSITIONS: {UserFunctionSamples.wrong_param_types: exact_match(Message("hi"))}}
-                    }
-                }
-            )
-        assert e
-
-    def test_return_type(self):
-        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Incorrect return type annotation") as e:
-            Script(
-                script={
-                    "root": {
-                        "start": {TRANSITIONS: {UserFunctionSamples.wrong_return_type: exact_match(Message("hi"))}}
-                    }
-                }
-            )
-        assert e
-
-    def test_flow_name(self):
-        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Flow '\w*' cannot be found for label") as e:
-            Script(script={"root": {"start": {TRANSITIONS: {("other", "start", 1): exact_match(Message("hi"))}}}})
-        assert e
-
-    def test_node_name(self):
-        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Node '\w*' cannot be found for label") as e:
-            Script(script={"root": {"start": {TRANSITIONS: {("root", "other", 1): exact_match(Message("hi"))}}}})
-        assert e
-
-    def test_correct_script(self):
-        Script(
-            script={"root": {"start": {TRANSITIONS: {UserFunctionSamples.correct_label: exact_match(Message("hi"))}}}}
-        )

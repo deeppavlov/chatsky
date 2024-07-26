@@ -174,12 +174,12 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre-services": ServiceGroup(
+    "pre_services": ServiceGroup(
         before_handler=[time_measure_before_handler],
         after_handler=[time_measure_after_handler],
         components=[heavy_service for _ in range(0, 5)],
     ),
-    "post-services": logging_service,
+    "post_services": logging_service,
 }
 
 # %%

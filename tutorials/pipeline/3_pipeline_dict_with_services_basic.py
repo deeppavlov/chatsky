@@ -76,11 +76,11 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre-services": [
+    "pre_services": [
         {"handler": prepreprocess},
         preprocess,
     ],
-    "post-services": Service(handler=postprocess),
+    "post_services": Service(handler=postprocess),
 }
 
 # %%

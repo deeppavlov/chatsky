@@ -168,14 +168,14 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre-services": [
+    "pre_services": [
         simple_service,  # This simple service
         # will be named `simple_service_0`
         simple_service,  # This simple service
         # will be named `simple_service_1`
     ],  # Despite this is the unnamed service group in the root
     # service group, it will be named `service_group_0`
-    "post-services": [
+    "post_services": [
         ServiceGroup(
             name="named_group",
             components=[
