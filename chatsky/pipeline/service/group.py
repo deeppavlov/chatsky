@@ -90,9 +90,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
-
-        :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         """
         if self.asynchronous:
             service_futures = [service(ctx, pipeline) for service in self.components]

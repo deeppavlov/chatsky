@@ -10,8 +10,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any
-from pydantic import BaseModel, computed_field, model_validator
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
+from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.script import Context
 
@@ -45,8 +45,8 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     :param requested_async_flag: Requested asynchronous property.
     """
 
-    functions: List[ExtraHandlerFunction]
-    stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED
+    functions: List[ExtraHandlerFunction] = Field(default_factory=list)
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
 
@@ -166,23 +166,12 @@ class BeforeHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
+    :param requested_async_flag: Optional flag that indicates whether the extra functions
         should be executed asynchronously. The default value of the flag is True
         if all the functions in this handler are asynchronous.
     """
 
-    # Instead of __init__ here, this could look like a one-liner.
-    # stage: ExtraHandlerType = ExtraHandlerType.BEFORE
-
-    def __init__(
-        self,
-        functions: List[ExtraHandlerFunction],
-        timeout: Optional[int] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        super().__init__(
-            functions=functions, stage=ExtraHandlerType.BEFORE, timeout=timeout, requested_async_flag=asynchronous
-        )
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.BEFORE
 
 
 class AfterHandler(ComponentExtraHandler):
@@ -194,17 +183,9 @@ class AfterHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
+    :param requested_async_flag: Optional flag that indicates whether the extra functions
         should be executed asynchronously. The default value of the flag is True
         if all the functions in this handler are asynchronous.
     """
 
-    def __init__(
-        self,
-        functions: List[ExtraHandlerFunction],
-        timeout: Optional[int] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        super().__init__(
-            functions=functions, stage=ExtraHandlerType.AFTER, timeout=timeout, requested_async_flag=asynchronous
-        )
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER

@@ -32,10 +32,6 @@ from chatsky.pipeline.service.extra import ComponentExtraHandler
 from ..types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
-    # Everything breaks without this import, even though it's unused.
-    # (It says it's not defined or something like that)
-    # Should it go into TYPE_CHECKING? If not, what should be done?
-    StartConditionCheckerFunction,
 )
 from .utils import finalize_service_group
 from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
@@ -43,16 +39,18 @@ from chatsky.pipeline.pipeline.actor import Actor, default_condition_handler
 logger = logging.getLogger(__name__)
 
 
-# Using "arbitrary_types_allowed" from pydantic for debug purposes, probably should remove later.
-# Actually, everything breaks when I do that.
 class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
-    :param components: (required) A :py:data:`~.ServiceGroup` object,
-        that will be transformed to root service group. It should include :py:class:`~.Actor`,
-        but only once (raises exception otherwise). It will always be named pipeline.
+    :param pre_services: List of :py:data:`~.Service` or
+        :py:data:`~.ServiceGroup` that will be executed before Actor.
+    :type pre_services: ServiceGroup
+    :param post_services: List of :py:data:`~.Service` or
+        :py:data:`~.ServiceGroup` that will be executed after Actor. It constructs root
+         service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+    :type post_services: ServiceGroup
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
     :param fallback_label: Actor fallback label.
@@ -100,7 +98,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
-    # These variables are okay like this, right?
     actor: Optional[Actor] = None
     _services_pipeline: Optional[ServiceGroup] = None
     _clean_turn_cache: Optional[bool]

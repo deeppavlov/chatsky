@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from chatsky.script import Context
 
-from ..service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
+from ..service.extra import BeforeHandler, AfterHandler
 from ..conditions import always_start_condition
 from ..types import (
     StartConditionCheckerFunction,
@@ -28,6 +28,7 @@ from ..types import (
     ExtraHandlerFunction,
     ExtraHandlerType,
 )
+from ...utils.devel import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,6 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-# arbitrary_types_allowed for testing, will remove later
 class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     This class represents a pipeline component, which is a service or a service group.
@@ -61,11 +61,9 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     :param path: Separated by dots path to component, is universally unique.
     """
 
-    # Should this be Optional
-    before_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: BeforeHandler([]))
-    after_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: AfterHandler([]))
+    before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    # The user uses this name everywhere right now, this has to be changed. It's just counter-intuitive.
     requested_async_flag: Optional[bool] = None
     calculated_async_flag: bool = False
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
@@ -147,10 +145,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
-        # In the draft there was an 'await' before the start_condition, but my IDE gives a warning about this.
-        # Plus, previous implementation also doesn't have an await expression there.
-        # Though I understand why it's a good idea. (could be some slow function)
-        if self.start_condition(ctx, pipeline):
+        if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
             try:
                 await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 

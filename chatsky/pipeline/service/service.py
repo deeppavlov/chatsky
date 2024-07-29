@@ -26,7 +26,7 @@ from ..types import (
     StartConditionCheckerFunction,
 )
 from ..pipeline.component import PipelineComponent
-from .extra import ComponentExtraHandler
+from .extra import BeforeHandler, AfterHandler
 
 logger = logging.getLogger(__name__)
 
@@ -111,12 +111,11 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
 
 def to_service(
-    # These shouldn't be None, I think.
-    before_handler: Optional[ComponentExtraHandler] = None,
-    after_handler: Optional[ComponentExtraHandler] = None,
+    before_handler: BeforeHandler = None,
+    after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
     asynchronous: Optional[bool] = None,
-    start_condition: Optional[StartConditionCheckerFunction] = always_start_condition,
+    start_condition: StartConditionCheckerFunction = always_start_condition,
     name: Optional[str] = None,
 ):
     """
@@ -124,6 +123,8 @@ def to_service(
     Returns a Service, constructed from this function (taken as a handler).
     All arguments are passed directly to `Service` constructor.
     """
+    before_handler = BeforeHandler() if before_handler is None else before_handler
+    after_handler = AfterHandler() if after_handler is None else after_handler
 
     def inner(handler: ServiceFunction) -> Service:
         return Service(

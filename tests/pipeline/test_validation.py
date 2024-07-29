@@ -13,22 +13,11 @@ from chatsky.script import Context
 from chatsky.utils.testing import TOY_SCRIPT, TOY_SCRIPT_KWARGS
 
 
+# Looks overly long, we only need one function anyway.
 class UserFunctionSamples:
     """
     This class contains various examples of user functions along with their signatures.
     """
-
-    @staticmethod
-    def wrong_param_number(number: int) -> float:
-        return 8.0 + number
-
-    @staticmethod
-    def wrong_param_types(number: int, flag: bool) -> float:
-        return 8.0 + number if flag else 42.1
-
-    @staticmethod
-    def wrong_return_type(_: Context, __: Pipeline) -> float:
-        return 1.0
 
     @staticmethod
     def correct_service_function_1(_: Context):
@@ -45,30 +34,6 @@ class UserFunctionSamples:
 
 # Could make a test for returning an awaitable from a ServiceFunction, ExtraHandlerFunction
 class TestServiceValidation:
-    # These test don't throw exceptions. It's as if any Callable[] is an instance of ServiceFunction
-    # Same for ExtraHandlerFunction. I don't know how this should be addressed.
-    """
-    def test_wrong_param_types(self):
-        # This doesn't work. For some reason any callable can be a ServiceFunction
-        # Using model_validate doesn't help
-        with pytest.raises(ValidationError) as e:
-            Service(handler=UserFunctionSamples.wrong_param_types)
-            assert e
-        Service(handler=UserFunctionSamples.correct_service_function_1)
-        Service(handler=UserFunctionSamples.correct_service_function_2)
-        Service(handler=UserFunctionSamples.correct_service_function_3)
-
-    def test_wrong_param_number(self):
-        with pytest.raises(ValidationError) as e:
-            Service(handler=UserFunctionSamples.wrong_param_number)
-            assert e
-
-    def test_wrong_return_type(self):
-        with pytest.raises(ValidationError) as e:
-            Service(handler=UserFunctionSamples.wrong_return_type)
-            assert e
-    """
-
     def test_model_validator(self):
         with pytest.raises(ValidationError) as e:
             # Can't pass a list to handler, it has to be a single function
@@ -97,33 +62,27 @@ class TestServiceValidation:
 class TestExtraHandlerValidation:
     def test_correct_functions(self):
         funcs = [UserFunctionSamples.correct_service_function_1, UserFunctionSamples.correct_service_function_2]
-        handler = BeforeHandler(funcs)
+        handler = BeforeHandler(functions=funcs)
         assert handler.functions == funcs
 
     def test_single_function(self):
         single_function = UserFunctionSamples.correct_service_function_1
-        handler = BeforeHandler(single_function)
+        handler = BeforeHandler.model_validate(single_function)
         # Checking that a single function is cast to a list within constructor
         assert handler.functions == [single_function]
 
     def test_wrong_inputs(self):
         with pytest.raises(ValidationError) as e:
             # 1 is not a callable
-            BeforeHandler(1)
+            BeforeHandler.model_validate(1)
             assert e
         with pytest.raises(ValidationError) as e:
             # 'functions' should be a list of ExtraHandlerFunctions
-            BeforeHandler([1, 2, 3])
+            BeforeHandler.model_validate([1, 2, 3])
             assert e
-        # Wait, this one works. Why? An instance of BeforeHandler is not a function.
-        """
-        with pytest.raises(ValidationError) as e:
-            BeforeHandler(functions=BeforeHandler([]))
-            assert e
-        """
 
 
-# Note: I haven't tested asynchronous components in any way.
+# Note: I haven't tested components being asynchronous in any way.
 class TestServiceGroupValidation:
     def test_single_service(self):
         func = UserFunctionSamples.correct_service_function_2
