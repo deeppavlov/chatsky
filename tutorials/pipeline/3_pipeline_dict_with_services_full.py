@@ -34,8 +34,9 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created using Pydantic's `model_validate` method,
-pipeline should be defined as a dictionary of a particular structure:
+When Pipeline is created using Pydantic's `model_validate` method
+or `Pipeline`'s constructor method, pipeline should be 
+defined as a dictionary of a particular structure:
 
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.

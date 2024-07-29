@@ -8,8 +8,8 @@ dict and most important pipeline components.
 Here, %mddoclink(api,pipeline.service.service,Service)
 class, that can be used for pre- and postprocessing of messages is shown.
 
-Pipeline's %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_dict)
-static method is used for pipeline creation (from dictionary).
+%mddoclink(api,pipeline.pipeline.pipeline,Pipeline)'s
+constructor method is used for pipeline creation (directly or from dictionary).
 """
 
 # %pip install chatsky
@@ -84,6 +84,8 @@ pipeline_dict = {
 
 # %%
 pipeline = Pipeline.model_validate(pipeline_dict)
+# or
+# pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
