@@ -49,7 +49,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     :type pre_services: ServiceGroup
     :param post_services: List of :py:data:`~.Service` or
         :py:data:`~.ServiceGroup` that will be executed after Actor. It constructs root
-         service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+        service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     :type post_services: ServiceGroup
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
