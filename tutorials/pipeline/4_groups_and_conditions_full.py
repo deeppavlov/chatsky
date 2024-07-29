@@ -36,19 +36,25 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as lists of `ServiceBuilders`
+Service groups can be defined as `ServiceGroup` objects:
+      lists of `Service` or more `ServiceGroup` objects.
+`ServiceGroup` objects should contain `components` -
+a list of `Service` and `ServiceGroup` objects.
+
+Pipeline can contain not only single services, but also service groups.
+Service groups can be defined as lists of `Service` or more `ServiceGroup` objects.
     (in fact, all of the pipeline services are combined
     into root service group named "pipeline").
 Alternatively, the groups can be defined as objects
     with following constructor arguments:
 
-* `components` (required) - A list of `ServiceBuilder` objects,
-    `ServiceGroupBuilder` objects and lists of them.
-* `before_handler` - a list of `ExtraHandlerFunction` objects,
-        `ExtraHandlerBuilder` objects and lists of them.
+* `components` (required) - A list of `Service` objects,
+    `ServiceGroup` objects.
+* `before_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
         See tutorials 6 and 7.
-* `after_handler` - a list of `ExtraHandlerFunction` objects,
-        `ExtraHandlerBuilder` objects and lists of them.
+* `after_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `asynchronous` - Whether or not this service group _should_ be asynchronous
@@ -75,12 +81,11 @@ however there are some differences:
 If no name is specified for a service or service group,
     the name will be generated according to the following rules:
 
-1. If service's handler is an Actor, service will be named 'actor'.
-2. If service's handler is callable,
+1. If service's handler is callable,
     service will be named callable.
-3. Service group will be named 'service_group'.
-4. Otherwise, it will be named 'noname_service'.
-5. After that an index will be added to service name.
+2. Service group will be named 'service_group'.
+3. Otherwise, it will be named 'noname_service'.
+4. After that an index will be added to service name.
 
 To receive serialized information about service, service group
 or pipeline a property `info_dict` can be used,
@@ -134,7 +139,6 @@ There are following built-in condition functions:
     Function that returns `True`
     if any of the given `functions`
     (condition functions) return `True`.
-NB! Actor service ALWAYS runs unconditionally.
 
 Here there are two conditionally executed services:
 a service named `running_service` is executed

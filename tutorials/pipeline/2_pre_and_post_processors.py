@@ -31,11 +31,10 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created with `from_script` method, additional pre-
-and postprocessors can be defined.
-These can be any `ServiceBuilder` objects (defined in `types` module)
-- callables, objects or dicts.
-They are being turned into special `Service` objects (see tutorial 3),
+When Pipeline is created, additional pre-
+and post-services can be defined.
+These can be any callables, certain objects or dicts.
+They are being turned into special `Service` or `ServiceGroup` objects (see tutorial 3),
 that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 

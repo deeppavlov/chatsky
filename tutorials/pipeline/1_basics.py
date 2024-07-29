@@ -29,9 +29,9 @@ from chatsky.utils.testing import (
 # %% [markdown]
 """
 `Pipeline` is an object, that automates script execution and context management.
-`from_script` method can be used to create
+It's constructor method can be used to create
 a pipeline of the most basic structure:
-"preprocessors -> actor -> postprocessors"
+"pre-services -> actor -> post-services"
 as well as to define `context_storage` and `messenger_interface`.
 Actor is a component of :py:class:`.Pipeline`, that contains the
 :py:class:`.Script` and handles it. It is responsible for processing
@@ -42,7 +42,7 @@ These parameters usage will be shown in tutorials 2, 3 and 6.
 Here only required parameters are provided to pipeline.
 `context_storage` will default to simple Python dict and
 `messenger_interface` will never be used.
-pre- and postprocessors lists are empty.
+pre- and post-services lists are empty.
 `Pipeline` object can be called with user input
 as first argument and dialog id (any immutable object).
 This call will return `Context`,
@@ -61,7 +61,7 @@ pipeline = Pipeline(
 # %% [markdown]
 """
 For the sake of brevity, other tutorials
-might use `TOY_SCRIPT_KWARGS` to initialize pipeline:
+might use `TOY_SCRIPT_KWARGS` (keyword arguments) to initialize pipeline:
 """
 
 # %%

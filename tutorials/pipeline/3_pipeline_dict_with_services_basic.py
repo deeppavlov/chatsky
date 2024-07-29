@@ -31,18 +31,17 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created using `from_dict` method,
+When Pipeline is created using Pydantic's `model_validate` method,
 pipeline should be defined as a dictionary.
-It should contain `components` - a `ServiceGroupBuilder` object,
-basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
+It may contain `pre-services` and 'post-services' - `ServiceGroup` objects,
+basically a list of `Service` objects or more `ServiceGroup` objects,
 see tutorial 4.
 
-On pipeline execution services from `components`
+On pipeline execution services from `components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
-Actor constant "ACTOR" is required to be passed as one of the services.
-`ServiceBuilder` object can be defined either with callable
-(see tutorial 2) or with dict / object.
-It should contain `handler` - a `ServiceBuilder` object.
+`Service` object can be defined either with callable
+(see tutorial 2) or with `Service` constructor / dict.
+It must contain `handler` - a callable (function).
 
 Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.

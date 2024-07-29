@@ -59,7 +59,7 @@ Pipeline `add_global_extra_handler` function is used to register
 
 * `global_extra_handler_type` (required) - A `GlobalExtraHandlerType` instance,
     indicates extra handler type to add.
-* `extra_handler` (required) - The extra handler function itself.
+* `extra_handler` (required) - The `ExtraHandlerFunction` itself.
 * `whitelist` - An optional list of paths, if it's not `None`
                 the extra handlers will be applied to
                 specified pipeline components only.
