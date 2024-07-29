@@ -42,7 +42,8 @@ Service groups can be defined as `ServiceGroup` objects:
 a list of `Service` and `ServiceGroup` objects.
 
 Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as lists of `Service` or more `ServiceGroup` objects.
+Service groups can be defined as lists of `Service`
+ or more `ServiceGroup` objects.
     (in fact, all of the pipeline services are combined
     into root service group named "pipeline").
 Alternatively, the groups can be defined as objects

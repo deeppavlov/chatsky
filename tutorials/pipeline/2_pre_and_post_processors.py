@@ -34,7 +34,8 @@ logger = logging.getLogger(__name__)
 When Pipeline is created, additional pre-
 and post-services can be defined.
 These can be any callables, certain objects or dicts.
-They are being turned into special `Service` or `ServiceGroup` objects (see tutorial 3),
+They are being turned into special `Service` or `ServiceGroup` objects
+(see tutorial 3),
 that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 

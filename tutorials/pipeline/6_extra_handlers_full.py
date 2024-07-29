@@ -72,8 +72,8 @@ Extra handlers can be attached to pipeline component in a few different ways:
 2. (Services only) `to_service` decorator -
     transforms function to service with extra handlers
     from `before_handler` and `after_handler` arguments.
-3. Using `add_extra_handler` function of `PipelineComponent`
-    Example: component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
+3. Using `add_extra_handler` function of `PipelineComponent` Example:
+component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,

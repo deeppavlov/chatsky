@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 When Pipeline is created using Pydantic's `model_validate` method
-or `Pipeline`'s constructor method, pipeline should be 
+or `Pipeline`'s constructor method, pipeline should be
 defined as a dictionary of a particular structure:
 
 * `messenger_interface` - `MessengerInterface` instance,
@@ -59,7 +59,8 @@ defined as a dictionary of a particular structure:
         should be checked during initialization,
         see tutorial 5.
 
-On pipeline execution services from `components` = 'pre-services' + actor + 'post-services'
+On pipeline execution services from
+`components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
 (see tutorial 2) or with dict of structure / `Service` object

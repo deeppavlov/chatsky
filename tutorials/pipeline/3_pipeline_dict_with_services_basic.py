@@ -37,7 +37,8 @@ It may contain `pre-services` and 'post-services' - `ServiceGroup` objects,
 basically a list of `Service` objects or more `ServiceGroup` objects,
 see tutorial 4.
 
-On pipeline execution services from `components` = 'pre-services' + actor + 'post-services'
+On pipeline execution services from
+`components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
 (see tutorial 2) or with `Service` constructor / dict.
