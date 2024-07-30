@@ -48,7 +48,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
-    requested_async_flag: Optional[bool] = None
+    sequential: Optional[bool] = False
 
     @model_validator(mode="before")
     @classmethod
@@ -63,9 +63,15 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
             result["functions"] = [result["functions"]]
         return result
 
-    @computed_field(repr=False)
-    def calculated_async_flag(self) -> bool:
-        return all([asyncio.iscoroutinefunction(func) for func in self.functions])
+    # If user specified they want it sequential, so be it.
+    # Otherwise, this will calculate if it's possible.
+    # This code could throw an error before, but we're switching to 'sequential',
+    # so there's no need for that anymore.
+    @model_validator(mode="after")
+    def calculate_sequential_flag(self):
+        if not self.sequential:
+            self.sequential = all([asyncio.iscoroutinefunction(func) for func in self.functions])
+        return self
 
     @property
     def asynchronous(self) -> bool:

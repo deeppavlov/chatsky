@@ -65,11 +65,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             return {"handler": data}
         return data
 
-    @model_validator(mode="after")
-    def tick_async_flag(self):
-        self.calculated_async_flag = True
-        return self
-
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service. Service 'handler' has three possible signatures,
@@ -114,7 +109,7 @@ def to_service(
     before_handler: BeforeHandler = None,
     after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
-    asynchronous: Optional[bool] = None,
+    sequential: bool = False,
     start_condition: StartConditionCheckerFunction = always_start_condition,
     name: Optional[str] = None,
 ):
@@ -132,7 +127,7 @@ def to_service(
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            requested_async_flag=asynchronous,
+            sequential=sequential,
             start_condition=start_condition,
             name=name,
         )

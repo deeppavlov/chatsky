@@ -93,11 +93,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     _clean_turn_cache: Optional[bool] = True
 
     @model_validator(mode="after")
-    def tick_async_flag(self):
-        self.calculated_async_flag = False
-        return self
-
-    @model_validator(mode="after")
     def actor_validator(self):
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)
@@ -114,6 +109,8 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
+        # Moved it here, because this is both safe and a one-liner
+        self.sequential = True
         return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:

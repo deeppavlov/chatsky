@@ -64,8 +64,9 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    requested_async_flag: Optional[bool] = None
-    calculated_async_flag: bool = False
+    # A configurable default value for this field seems possible.
+    # Maybe in Pipeline constructor? Something like a safe mode.
+    sequential: bool = False
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     name: Optional[str] = None
     path: Optional[str] = None
@@ -74,10 +75,12 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     def pipeline_component_validator(self):
         if self.name is not None and (self.name == "" or "." in self.name):
             raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
-
-        if not self.calculated_async_flag and self.requested_async_flag:
-            raise Exception(f"{type(self).__name__} '{self.name}' can't be asynchronous!")
         return self
+
+    # Just checking if it'll work for now, I'll rename it later
+    @property
+    def asynchronous(self):
+        return not self.sequential
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
@@ -99,24 +102,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
         """
         return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
-
-    @property
-    def asynchronous(self) -> bool:
-        """
-        Property, that indicates, whether this component is synchronous or asynchronous.
-        It is calculated according to the following rules:
-
-        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` is set,
-            it returns :py:attr:`~requested_async_flag`.
-        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
-            it returns `True`.
-        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `False` or not set,
-            it returns `False`.
-        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `True`,
-            an Exception is thrown in constructor.
-
-        """
-        return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
     async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context, pipeline: Pipeline):
         extra_handler = None

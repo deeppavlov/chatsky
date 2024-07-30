@@ -75,9 +75,17 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             result["components"] = [result["components"]]
         return result
 
+    # Despite the task (removing field inheritance), I think you can't ask for a ServiceGroup with a sequential
+    # component in it to execute in parallel with other ServiceGroups like that.
+    # They would just both change the context in a non-sequential manner.
+    # The only way I see it possible, is if ServiceGroups are fully unpacked into one big list
+    # then everything's okay. Though I'm not sure how to do that best, while saving all other features of ServiceGroup.
+    # For example, ServiceGroup timeouts would be problematic. We'd need to group the parallel tasks
+    # saving what timeouts they have, and then run them with said timeouts. Sure, it's possible, but
+    # I think unpacking ServiceGroups is not scalable in case there are more ServiceGroup features.
     @model_validator(mode="after")
-    def calculate_async_flag(self):
-        self.calculated_async_flag = all([service.asynchronous for service in self.components])
+    def calculate_sequential_flag(self):
+        self.sequential = all([service.sequential for service in self.components])
         return self
 
     async def _run_parallel_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
