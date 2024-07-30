@@ -12,11 +12,9 @@ can be used by developers to define the conversation flow.
 """
 
 from __future__ import annotations
-from typing import Optional, Callable, TYPE_CHECKING
-from chatsky.script import Context, ConstLabel
+from typing import Optional, Callable
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
+from chatsky.core import Context, BaseDestination
 
 
 def repeat(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:
