@@ -26,7 +26,7 @@ except ImportError:
 
 import json
 
-from chatsky.script import Context
+from chatsky.core import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion

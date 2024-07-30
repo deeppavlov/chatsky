@@ -15,12 +15,13 @@ from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
-    from chatsky.pipeline.service.service import Service
-    from chatsky.pipeline.service.group import ServiceGroup
+    from chatsky.core.service.service import Service
+    from chatsky.core.service.group import ServiceGroup
     from chatsky.core.service.extra import _ComponentExtraHandler
     from chatsky.messengers.common.interface import MessengerInterface
     from chatsky.context_storages import DBContextStorage
-    from chatsky.script import Context, ActorStage, NodeLabel2Type, Script, Message
+    from chatsky.core.context import Context
+    from chatsky.core.message import Message
 
 
 class PipelineRunnerFunction(Protocol):

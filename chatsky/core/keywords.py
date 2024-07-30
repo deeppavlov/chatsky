@@ -86,9 +86,8 @@ class Keywords(str, Enum):
     TRANSITIONS = "transitions"
     RESPONSE = "response"
     MISC = "misc"
-    PRE_RESPONSE_PROCESSING = "pre_response_processing"
-    PRE_TRANSITIONS_PROCESSING = "pre_transitions_processing"
-    PROCESSING = "pre_transitions_processing"
+    PRE_RESPONSE = "pre_response"
+    PRE_TRANSITION = "pre_transition"
 
 
 # Redefine shortcuts
@@ -97,5 +96,5 @@ LOCAL = Keywords.LOCAL
 TRANSITIONS = Keywords.TRANSITIONS
 RESPONSE = Keywords.RESPONSE
 MISC = Keywords.MISC
-PRE_RESPONSE_PROCESSING = Keywords.PRE_RESPONSE_PROCESSING
-PRE_TRANSITIONS_PROCESSING = Keywords.PRE_TRANSITIONS_PROCESSING
+PRE_RESPONSE = Keywords.PRE_RESPONSE
+PRE_TRANSITION = Keywords.PRE_TRANSITION

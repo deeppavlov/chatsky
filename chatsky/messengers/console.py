@@ -3,7 +3,7 @@ from uuid import uuid4
 from chatsky.messengers.common.interface import PollingMessengerInterface
 from chatsky.core.service.types import PipelineRunnerFunction
 from chatsky.core.context import Context
-from chatsky.script.core.message import Message
+from chatsky.core.message import Message
 
 
 class CLIMessengerInterface(PollingMessengerInterface):

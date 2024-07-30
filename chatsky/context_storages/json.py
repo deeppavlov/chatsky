@@ -20,7 +20,7 @@ except ImportError:
 from pydantic import BaseModel, model_validator
 
 from .database import DBContextStorage, threadsafe_method
-from chatsky.script import Context
+from chatsky.core import Context
 
 
 class SerializableStorage(BaseModel, extra="allow"):

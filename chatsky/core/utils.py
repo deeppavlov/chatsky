@@ -9,8 +9,8 @@ import collections
 from typing import Union, List
 from inspect import isfunction
 
-from ..service.service import Service
-from ..service.group import ServiceGroup
+from .service.service import Service
+from .service.group import ServiceGroup
 
 
 def pretty_format_component_info_dict(
