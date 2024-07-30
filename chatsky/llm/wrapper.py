@@ -11,12 +11,11 @@ try:
     from langchain_cohere import ChatCohere
     from langchain_mistralai import ChatMistralAI
     from langchain.output_parsers import ResponseSchema, StructuredOutputParser
+    from langchain_core.messages import HumanMessage, SystemMessage
+    from langchain_core.output_parsers import StrOutputParser
     langchain_available = True
 except ImportError:
     langchain_available = False
-
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.output_parsers import StrOutputParser
 
 import base64
 import httpx
@@ -78,15 +77,11 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
         return result
     
     # Helper functions for DeepEval custom LLM usage
-    def generate(self, prompt: str, schema: BaseModel):
-        # TODO: Remake this
-        schema_parser = StructuredOutputParser.from_response_schemas([ResponseSchema(base_model=schema)])
-        chain = prompt | self.model | schema_parser
-        return chain.invoke({"input": prompt})
+    def generate(self, prompt: str):
+        return self.model.invoke(prompt).content
     
-    async def a_generate(self, prompt: str, schema: BaseModel):
-        # TODO: Remake this
-        return self.generate(HumanMessage(prompt), schema)
+    async def a_generate(self, prompt: str):
+        return self.generate(prompt)
     
     def load_model(self):
         return self.model
