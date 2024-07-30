@@ -20,17 +20,18 @@ This allows developers to save the context data and resume the conversation late
 from __future__ import annotations
 import logging
 from uuid import UUID, uuid4
-from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
+from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
-from chatsky.script.core.message import Message
-from chatsky.script.core.types import NodeLabel2Type
+from chatsky.core.message import Message
 from chatsky.core.service.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
+from chatsky.core.node_label import AbsoluteNodeLabel
 
 if TYPE_CHECKING:
-    from chatsky.script.core.script import Node
+    from chatsky.core.script import Node
+    from chatsky.core.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -46,15 +47,19 @@ def get_last_index(dictionary: dict) -> int:
     return indices[-1] if indices else -1
 
 
-class FrameworkData(BaseModel):
+class ContextError(Exception):
+    """Raised when context methods are not used correctly."""
+
+
+class FrameworkData(BaseModel, arbitrary_types_allowed=True):  # todo: remove when pipeline is BaseModel
     """
     Framework uses this to store data related to any of its modules.
     """
 
     service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
-    actor_data: Dict[str, Any] = Field(default_factory=dict, exclude=True)
-    "Actor service data. Cleared at the end of every turn."
+    current_node: Optional[Node] = Field(default=None, exclude=True)
+    pipeline: Optional[Pipeline] = Field(default=None, exclude=True)
     stats: Dict[str, Any] = Field(default_factory=dict)
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
@@ -64,9 +69,6 @@ class FrameworkData(BaseModel):
 class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
-
-    Avoid storing unserializable data in the fields of this class in order for
-    context storages to work.
     """
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
@@ -74,7 +76,7 @@ class Context(BaseModel):
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
     `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
-    labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
+    labels: Dict[int, AbsoluteNodeLabel]
     """
     `labels` stores the history of all passed `labels`
 
@@ -100,8 +102,6 @@ class Context(BaseModel):
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Chatsky Scripting functions.
 
-    Avoid storing unserializable data in order for context storages to work.
-
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
@@ -110,6 +110,13 @@ class Context(BaseModel):
     This attribute is used for storing custom data required for pipeline execution.
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
+
+    def __init__(self, start_label, id: Optional[Union[UUID, int, str]] = None):
+        labels = {-1: AbsoluteNodeLabel.model_validate(start_label)}
+        if id is None:
+            super().__init__(labels=labels)
+        else:
+            super().__init__(labels=labels, id=id)
 
     @field_validator("labels", "requests", "responses")
     @classmethod
@@ -145,57 +152,28 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         self.responses[last_index + 1] = response_message
 
-    def add_label(self, label: NodeLabel2Type):
+    def add_label(self, label: AbsoluteNodeLabel):
         """
         Add a new :py:data:`~.NodeLabel2Type` to the context.
         The new `label` is added with the index of `last_index + 1`.
 
         :param label: `label` that we need to add to the context.
         """
+        label = AbsoluteNodeLabel.model_validate(label)
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    def clear(
-        self,
-        hold_last_n_indices: int,
-        field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
-    ):
-        """
-        Delete all records from the `requests`/`responses`/`labels` except for
-        the last `hold_last_n_indices` turns.
-        If `field_names` contains `misc` field, `misc` field is fully cleared.
-
-        :param hold_last_n_indices: Number of last turns to keep.
-        :param field_names: Properties of :py:class:`~.Context` to clear.
-            Defaults to {"requests", "responses", "labels"}
-        """
-        field_names = field_names if isinstance(field_names, set) else set(field_names)
-        if "requests" in field_names:
-            for index in list(self.requests)[:-hold_last_n_indices]:
-                del self.requests[index]
-        if "responses" in field_names:
-            for index in list(self.responses)[:-hold_last_n_indices]:
-                del self.responses[index]
-        if "misc" in field_names:
-            self.misc.clear()
-        if "labels" in field_names:
-            for index in list(self.labels)[:-hold_last_n_indices]:
-                del self.labels[index]
-        if "framework_data" in field_names:
-            self.framework_data = FrameworkData()
-
     @property
-    def last_label(self) -> Optional[NodeLabel2Type]:
+    def last_label(self) -> AbsoluteNodeLabel:
         """
         Return the last :py:data:`~.NodeLabel2Type` of
         the :py:class:`~.Context`.
-        Return `None` if `labels` is empty.
-
-        Since `start_label` is not added to the `labels` field,
-        empty `labels` usually indicates that the current node is the `start_node`.
         """
         last_index = get_last_index(self.labels)
-        return self.labels.get(last_index)
+        label = self.labels.get(last_index)
+        if label is None:
+            raise ContextError("Labels are empty.")
+        return label
 
     @property
     def last_response(self) -> Optional[Message]:
@@ -206,51 +184,37 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    @last_response.setter
-    def last_response(self, response: Optional[Message]):
-        """
-        Set the last `response` of the current :py:class:`~.Context`.
-        Required for use with various response wrappers.
-        """
-        last_index = get_last_index(self.responses)
-        self.responses[last_index] = Message() if response is None else Message.model_validate(response)
-
     @property
-    def last_request(self) -> Optional[Message]:
+    def last_request(self) -> Message:
         """
         Return the last `request` of the current :py:class:`~.Context`.
         Return `None` if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
-        return self.requests.get(last_index)
-
-    @last_request.setter
-    def last_request(self, request: Optional[Message]):
-        """
-        Set the last `request` of the current :py:class:`~.Context`.
-        Required for use with various request wrappers.
-        """
-        last_index = get_last_index(self.requests)
-        self.requests[last_index] = Message() if request is None else Message.model_validate(request)
+        request = self.requests.get(last_index)
+        if request is None:
+            raise ContextError("Requests are empty.")
+        return request
 
     @property
-    def current_node(self) -> Optional[Node]:
+    def pipeline(self) -> Pipeline:
+        pipeline = self.framework_data.pipeline
+        if pipeline is None:
+            raise ContextError("Pipeline is not set.")
+        return pipeline
+
+    @property
+    def current_node(self) -> Node:
+        node = self.framework_data.current_node
+        if node is None:
+            raise ContextError("Current node is not set.")
+        return node
+
+    def _get_current_node(self) -> Node:
         """
         Return current :py:class:`~chatsky.script.core.script.Node`.
         """
-        actor_data = self.framework_data.actor_data
-        node = (
-            actor_data.get("processed_node")
-            or actor_data.get("pre_response_processed_node")
-            or actor_data.get("next_node")
-            or actor_data.get("pre_transitions_processed_node")
-            or actor_data.get("previous_node")
-        )
+        node = self.pipeline.script.get_node(self.last_label)
         if node is None:
-            logger.warning(
-                "The `current_node` method should be called "
-                "when an actor is running between the "
-                "`ActorStage.GET_PREVIOUS_NODE` and `ActorStage.FINISH_TURN` stages."
-            )
-
+            raise ContextError(f"Could not find node {self.last_label!r} in script.")
         return node
