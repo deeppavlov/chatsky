@@ -80,6 +80,20 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self
 
+    async def _run_parallel_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
+        service_futures = [service(ctx, pipeline) for service in components]
+        for service, future in zip(components, await asyncio.gather(*service_futures, return_exceptions=True)):
+            service_result = future
+            if service.asynchronous and isinstance(service_result, Awaitable):
+                await service_result
+            elif isinstance(service_result, asyncio.TimeoutError):
+                logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
+
+    async def _run_sync_component(self, ctx: Context, pipeline: Pipeline, component: Any) -> None:
+        service_result = await component(ctx, pipeline)
+        if component.asynchronous and isinstance(service_result, Awaitable):
+            await service_result
+
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service group. Catches runtime exceptions and logs them.
@@ -91,20 +105,17 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
         """
-        if self.asynchronous:
-            service_futures = [service(ctx, pipeline) for service in self.components]
-            for service, future in zip(self.components, await asyncio.gather(*service_futures, return_exceptions=True)):
-                service_result = future
-                if service.asynchronous and isinstance(service_result, Awaitable):
-                    await service_result
-                elif isinstance(service_result, asyncio.TimeoutError):
-                    logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
-
-        else:
-            for service in self.components:
-                service_result = await service(ctx, pipeline)
-                if service.asynchronous and isinstance(service_result, Awaitable):
-                    await service_result
+        current_subgroup = []
+        # This heavily relies on 'components' being a list
+        for component in self.components:
+            if component.asynchronous:
+                current_subgroup.append(component)
+            else:
+                await self._run_parallel_components(ctx, pipeline, current_subgroup)
+                await self._run_sync_component(ctx, pipeline, component)
+                current_subgroup = []
+        if len(current_subgroup) > 0:
+            await self._run_parallel_components(ctx, pipeline, current_subgroup)
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
