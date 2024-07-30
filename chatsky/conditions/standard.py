@@ -8,22 +8,22 @@ This module contains a standard set of scripting conditions that can be used to 
 These conditions can be used to check the current context, the user's input,
 or other factors that may affect the conversation flow.
 """
-
+import asyncio
 from typing import Callable, Pattern, Union, List, Optional
 import logging
 import re
+from functools import cached_property
 
-from pydantic import validate_call
+from pydantic import Field, computed_field
 
-from chatsky.pipeline import Pipeline
-from chatsky.script import NodeLabel2Type, Context, Message
-from chatsky.script.core.message import CallbackQuery
+from chatsky.core import BaseCondition, Context
+from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
+from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 logger = logging.getLogger(__name__)
 
 
-@validate_call
-def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
+class ExactMatch(BaseCondition):
     """
     Return function handler. This handler returns `True` only if the last user phrase
     is the same `Message` as the `match`.
@@ -33,46 +33,48 @@ def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[
         Can also accept `str`, which will be converted into a `Message` with its text field equal to `match`.
     :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
     """
+    match: Message
+    skip_none: bool = True
 
-    def exact_match_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+    def __init__(self, match: MessageInitTypes, *, skip_none=True):
+        super().__init__(match=match, skip_none=skip_none)
+
+    async def func(self, ctx: Context) -> bool:
         request = ctx.last_request
-        nonlocal match
-        if isinstance(match, str):
-            match = Message(text=match)
         if request is None:
             return False
-        for field in match.model_fields:
-            match_value = match.__getattribute__(field)
-            if skip_none and match_value is None:
+        for field in self.match.model_fields:
+            match_value = self.match.__getattribute__(field)
+            if self.skip_none and match_value is None:
                 continue
             if field in request.model_fields.keys():
-                if request.__getattribute__(field) != match.__getattribute__(field):
+                if request.__getattribute__(field) != self.match.__getattribute__(field):
                     return False
             else:
                 return False
         return True
 
-    return exact_match_condition_handler
 
-
-@validate_call
-def has_text(text: str) -> Callable[[Context, Pipeline], bool]:
+class HasText(BaseCondition):
     """
     Return function handler. This handler returns `True` only if the last user phrase
     contains the phrase specified in `text`.
 
     :param text: A `str` variable to look for within the user request.
     """
+    text: str
 
-    def has_text_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+    def __init__(self, text):
+        super().__init__(text=text)
+
+    async def func(self, ctx: Context) -> bool:
         request = ctx.last_request
-        return text in request.text
+        if request.text is None:
+            return False
+        return self.text in request.text
 
-    return has_text_condition_handler
 
-
-@validate_call
-def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) -> Callable[[Context, Pipeline], bool]:
+class Regexp(BaseCondition):
     """
     Return function handler. This handler returns `True` only if the last user phrase contains
     `pattern` with `flags`.
@@ -80,95 +82,80 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) ->
     :param pattern: The `RegExp` pattern.
     :param flags: Flags for this pattern. Defaults to 0.
     """
-    pattern = re.compile(pattern, flags)
+    pattern: Union[str, Pattern]
+    flags: Union[int, re.RegexFlag] = 0
 
-    def regexp_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+    def __init__(self, pattern, *, flags=0):
+        super().__init__(pattern=pattern, flags=flags)
+
+    @computed_field
+    @cached_property
+    def re_object(self) -> Pattern:
+        return re.compile(self.pattern, self.flags)
+
+    async def func(self, ctx: Context) -> bool:
         request = ctx.last_request
         if request.text is None:
             return False
-        return bool(pattern.search(request.text))
-
-    return regexp_condition_handler
+        return bool(self.re_object.search(request.text))
 
 
-_any = any
-"""
-_any is an alias for any.
-"""
-_all = all
-"""
-_all is an alias for all.
-"""
-
-
-@validate_call
-def aggregate(cond_seq: List[Callable], aggregate_func: Callable = _any) -> Callable[[Context, Pipeline], bool]:
-    """
-    Aggregate multiple functions into one by using aggregating function.
-
-    :param cond_seq: List of conditions to check.
-    :param aggregate_func: Function to aggregate conditions. Defaults to :py:func:`_any`.
-    """
-
-    def aggregate_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return bool(aggregate_func([cond(ctx, pipeline) for cond in cond_seq]))
-
-    return aggregate_condition_handler
-
-
-@validate_call
-def any(cond_seq: list) -> Callable[[Context, Pipeline], bool]:
+class Any(BaseCondition):
     """
     Return function handler. This handler returns `True`
     if any function from the list is `True`.
 
     :param cond_seq: List of conditions to check.
     """
-    _agg = aggregate(cond_seq, _any)
+    conditions: List[BaseCondition]
 
-    def any_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return _agg(ctx, pipeline)
+    def __init__(self, *conditions):
+        super().__init__(conditions=list(conditions))
 
-    return any_condition_handler
+    async def func(self, ctx: Context) -> bool:
+        return any(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
 
 
-@validate_call
-def all(cond_seq: list) -> Callable[[Context, Pipeline], bool]:
+class All(BaseCondition):
     """
     Return function handler. This handler returns `True` only
     if all functions from the list are `True`.
 
     :param cond_seq: List of conditions to check.
     """
-    _agg = aggregate(cond_seq, _all)
+    conditions: List[BaseCondition]
 
-    def all_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return _agg(ctx, pipeline)
+    def __init__(self, *conditions):
+        super().__init__(conditions=list(conditions))
 
-    return all_condition_handler
+    async def func(self, ctx: Context) -> bool:
+        return all(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
 
 
-@validate_call
-def negation(condition: Callable) -> Callable[[Context, Pipeline], bool]:
+class Negation(BaseCondition):
     """
     Return function handler. This handler returns negation of the :py:func:`~condition`: `False`
     if :py:func:`~condition` holds `True` and returns `True` otherwise.
 
     :param condition: Any :py:func:`~condition`.
     """
+    condition: BaseCondition
 
-    def negation_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return not condition(ctx, pipeline)
+    def __init__(self, condition):
+        super().__init__(condition=condition)
 
-    return negation_condition_handler
+    async def func(self, ctx: Context) -> bool:
+        result = await self.condition.wrapped_call(ctx)
+        return result is not True
 
 
-@validate_call
-def has_last_labels(
-    flow_labels: Optional[List[str]] = None,
-    labels: Optional[List[NodeLabel2Type]] = None,
-    last_n_indices: int = 1,
-) -> Callable[[Context, Pipeline], bool]:
+Not = Negation
+"""
+:py:func:`~Not` is an alias for :py:func:`~Negation`.
+"""
+
+
+class CheckLastLabels(BaseCondition):
     """
     Return condition handler. This handler returns `True` if any label from
     last `last_n_indices` context labels is in
@@ -179,69 +166,44 @@ def has_last_labels(
     :param labels: List of labels corresponding to the nodes. Empty if not set.
     :param last_n_indices: Number of last utterances to check.
     """
-    # todo: rewrite docs & function itself
-    flow_labels = [] if flow_labels is None else flow_labels
-    labels = [] if labels is None else labels
+    flow_labels: List[str] = Field(default_factory=list)
+    labels: List[AbsoluteNodeLabel] = Field(default_factory=list)
+    last_n_indices: int = Field(default=1, ge=1)
 
-    def has_last_labels_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        label = list(ctx.labels.values())[-last_n_indices:]
-        for label in list(ctx.labels.values())[-last_n_indices:]:
-            label = label if label else (None, None)
-            if label[0] in flow_labels or label in labels:
+    def __init__(self, *, flow_labels=None, labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None, last_n_indices=1):
+        if flow_labels is None:
+            flow_labels = []
+        if labels is None:
+            labels = []
+        super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
+
+    async def func(self, ctx: Context) -> bool:
+        labels = list(ctx.labels.values())[-self.last_n_indices:]
+        for label in labels:
+            if label.flow_name in self.flow_labels or label in self.labels:
                 return True
         return False
 
-    return has_last_labels_condition_handler
 
-
-@validate_call
-def true() -> Callable[[Context, Pipeline], bool]:
-    """
-    Return function handler. This handler always returns `True`.
-    """
-
-    def true_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return True
-
-    return true_handler
-
-
-@validate_call
-def false() -> Callable[[Context, Pipeline], bool]:
-    """
-    Return function handler. This handler always returns `False`.
-    """
-
-    def false_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        return False
-
-    return false_handler
-
-
-# aliases
-agg = aggregate
-"""
-:py:func:`~agg` is an alias for :py:func:`~aggregate`.
-"""
-neg = negation
-"""
-:py:func:`~neg` is an alias for :py:func:`~negation`.
-"""
-
-
-def has_callback_query(expected_query_string: str) -> Callable[[Context, Pipeline], bool]:
+class HasCallbackQuery(BaseCondition):
     """
     Condition that checks if :py:attr:`~.CallbackQuery.query_string`
-    of the last message matches `expected_query_string`.
+    of the last message matches `query_string`.
 
-    :param expected_query_string: The expected query string to compare with.
+    :param query_string: The expected query string to compare with.
     :return: The callback query comparator function.
     """
+    query_string: str
 
-    def has_callback_query_handler(ctx: Context, _: Pipeline) -> bool:
+    def __init__(self, query_string):
+        super().__init__(query_string=query_string)
+
+    async def func(self, ctx: Context) -> bool:
         last_request = ctx.last_request
-        if last_request is None or last_request.attachments is None:
+        if last_request.attachments is None:
             return False
-        return CallbackQuery(query_string=expected_query_string) in last_request.attachments
-
-    return has_callback_query_handler
+        for attachment in last_request.attachments:
+            if isinstance(attachment, CallbackQuery):
+                if attachment.query_string == self.query_string:
+                    return True
+        return False

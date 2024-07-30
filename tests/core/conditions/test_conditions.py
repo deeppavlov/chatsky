@@ -1,105 +1,110 @@
 import pytest
-from pydantic import ValidationError
 
-from chatsky.core import Message
+from chatsky.core import BaseCondition
+from chatsky.core.message import Message, CallbackQuery
 import chatsky.conditions as cnd
 
 
-class TestConditions:
-    @pytest.fixture
-    def _request_based_empty_ctx(self, context_factory):
-        ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
-        return ctx
+class FaultyCondition(BaseCondition):
+    async def func(self, ctx) -> bool:
+        raise RuntimeError()
 
-    @pytest.fixture
-    def request_based_ctx(self, _request_based_empty_ctx):
-        _request_based_empty_ctx.add_request(Message("text", misc={"key": "value"}))
-        return _request_based_empty_ctx
 
-    def test_exact_match(self, request_based_ctx, pipeline):
-        ctx = request_based_ctx
+class SubclassMessage(Message):
+    additional_field: str
 
-        assert cnd.exact_match(Message("text", misc={"key": "value"}))(ctx, pipeline) is True
-        assert cnd.exact_match(Message("text"), skip_none=True)(ctx, pipeline) is True
-        assert cnd.exact_match(Message("text"), skip_none=False)(ctx, pipeline) is False
-        assert cnd.exact_match(Message(""))(ctx, pipeline) is False
-        assert cnd.exact_match(Message("text", misc={"key": None}))(ctx, pipeline) is False
-        assert cnd.exact_match(Message(), skip_none=True)(ctx, pipeline) is True
-        assert cnd.exact_match(Message(), skip_none=False)(ctx, pipeline) is False
 
-        class SubclassMessage(Message):
-            additional_field: str
+@pytest.fixture
+def request_based_ctx(context_factory):
+    ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
+    ctx.add_request(Message("text", misc={"key": "value"}))
+    return ctx
 
-        assert (
-            cnd.exact_match(SubclassMessage("text", misc={"key": "value"}, additional_field=""))(ctx, pipeline) is False
-        )
 
-    def test_has_text(self, request_based_ctx, pipeline):
-        ctx = request_based_ctx
+@pytest.mark.parametrize("condition,result", [
+    (cnd.ExactMatch(Message("text", misc={"key": "value"})), True),
+    (cnd.ExactMatch(Message("text"), skip_none=True), True),
+    (cnd.ExactMatch(Message("text"), skip_none=False), False),
+    (cnd.ExactMatch("text", skip_none=True), True),
+    (cnd.ExactMatch(Message("")), False),
+    (cnd.ExactMatch(Message("text", misc={"key": None})), False),
+    (cnd.ExactMatch(Message(), skip_none=True), True),
+    (cnd.ExactMatch({}, skip_none=True), True),
+    (cnd.ExactMatch(SubclassMessage(text="text", misc={"key": "value"}, additional_field="")), False)
+])
+async def test_exact_match(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-        assert cnd.has_text("text")(ctx, pipeline) is True
-        assert cnd.has_text("te")(ctx, pipeline) is True
-        assert cnd.has_text("text1")(ctx, pipeline) is False
 
-    def test_regexp(self, request_based_ctx, pipeline, _request_based_empty_ctx):
-        ctx = request_based_ctx
+@pytest.mark.parametrize("condition,result", [
+    (cnd.HasText("text"), True),
+    (cnd.HasText("te"), True),
+    (cnd.HasText("text1"), False),
+])
+async def test_has_text(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-        assert cnd.regexp("t.*t")(ctx, pipeline) is True
-        assert cnd.regexp("t.*t1")(ctx, pipeline) is False
 
-        ctx = _request_based_empty_ctx
-        ctx.add_request(Message())
+@pytest.mark.parametrize("condition,result", [
+    (cnd.Regexp("t.*t"), True),
+    (cnd.Regexp("t.*t1"), False),
+])
+async def test_regexp(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-        assert cnd.regexp("")(ctx, pipeline) is False
 
-    def test_any(self, request_based_ctx, pipeline):
-        ctx = request_based_ctx
+@pytest.mark.parametrize("condition,result", [
+    (cnd.Any(cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
+    (cnd.Any(FaultyCondition(), cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
+    (cnd.Any(FaultyCondition()), False),
+    (cnd.Any(cnd.Regexp("t.*"), cnd.Regexp(".*t1")), True),
+    (cnd.Any(cnd.Regexp("1t.*"), cnd.Regexp(".*t1")), False),
+])
+async def test_any(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-        assert cnd.any([cnd.regexp("t.*"), cnd.regexp(".*t")])(ctx, pipeline) is True
-        assert cnd.any([cnd.regexp("t.*"), cnd.regexp(".*t1")])(ctx, pipeline) is True
-        assert cnd.any([cnd.regexp("1t.*"), cnd.regexp(".*t")])(ctx, pipeline) is True
-        assert cnd.any([cnd.regexp("1t.*"), cnd.regexp(".*t1")])(ctx, pipeline) is False
 
-        with pytest.raises(ValidationError):
-            cnd.any([1])
+@pytest.mark.parametrize("condition,result", [
+    (cnd.All(cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
+    (cnd.All(FaultyCondition(), cnd.Regexp("t.*"), cnd.Regexp(".*t")), False),
+    (cnd.All(cnd.Regexp("t.*"), cnd.Regexp(".*t1")), False),
+])
+async def test_all(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-    def test_all(self, request_based_ctx, pipeline):
-        ctx = request_based_ctx
 
-        assert cnd.all([cnd.regexp("t.*"), cnd.regexp(".*t")])(ctx, pipeline) is True
-        assert cnd.all([cnd.regexp("t.*"), cnd.regexp(".*t1")])(ctx, pipeline) is False
-        assert cnd.all([cnd.regexp("1t.*"), cnd.regexp(".*t")])(ctx, pipeline) is False
-        assert cnd.all([cnd.regexp("1t.*"), cnd.regexp(".*t1")])(ctx, pipeline) is False
+@pytest.mark.parametrize("condition,result", [
+    (cnd.Not(cnd.HasText("text")), False),
+    (cnd.Not(cnd.HasText("text1")), True),
+    (cnd.Not(FaultyCondition()), True),
+])
+async def test_neg(request_based_ctx, condition, result):
+    assert await condition(request_based_ctx) is result
 
-        with pytest.raises(ValidationError):
-            cnd.all([1])
 
-    def test_neg(self, request_based_ctx, pipeline):
-        ctx = request_based_ctx
+async def test_has_last_labels(context_factory):
+    ctx = context_factory(forbidden_fields=("requests", "responses", "misc"))
+    ctx.add_label(("flow", "node1"))
 
-        assert cnd.neg(cnd.has_text("text"))(ctx, pipeline) is False
-        assert cnd.neg(cnd.has_text("text1"))(ctx, pipeline) is True
+    assert await cnd.CheckLastLabels(flow_labels=["flow"])(ctx) is True
+    assert await cnd.CheckLastLabels(flow_labels=["flow1"])(ctx) is False
 
-    def test_has_last_labels(self, context_factory, pipeline):
-        ctx = context_factory(forbidden_fields=("requests", "responses", "misc"))
-        ctx.add_label(("flow", "node1"))
+    assert await cnd.CheckLastLabels(labels=[("flow", "node1")])(ctx) is True
+    assert await cnd.CheckLastLabels(labels=[("flow", "node2")])(ctx) is False
 
-        assert cnd.has_last_labels(flow_labels=["flow"])(ctx, pipeline) is True
-        assert cnd.has_last_labels(flow_labels=["flow1"])(ctx, pipeline) is False
+    ctx.add_label(("service", "start"))
 
-        assert cnd.has_last_labels(labels=[("flow", "node1")])(ctx, pipeline) is True
-        assert cnd.has_last_labels(labels=[("flow", "node2")])(ctx, pipeline) is False
+    assert await cnd.CheckLastLabels(flow_labels=["flow"])(ctx) is False
+    assert await cnd.CheckLastLabels(flow_labels=["flow"], last_n_indices=2)(ctx) is True
 
-        ctx.add_label(("service", "start"))
+    assert await cnd.CheckLastLabels(labels=[("flow", "node1")])(ctx) is False
+    assert await cnd.CheckLastLabels(labels=[("flow", "node1")], last_n_indices=2)(ctx) is True
 
-        assert cnd.has_last_labels(flow_labels=["flow"])(ctx, pipeline) is False
-        assert cnd.has_last_labels(flow_labels=["flow"], last_n_indices=2)(ctx, pipeline) is True
 
-        assert cnd.has_last_labels(labels=[("flow", "node1")])(ctx, pipeline) is False
-        assert cnd.has_last_labels(labels=[("flow", "node1")], last_n_indices=2)(ctx, pipeline) is True
+async def test_has_callback_query(context_factory):
+    ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
+    ctx.add_request(Message(attachments=[CallbackQuery(query_string="text", extra="extra"), CallbackQuery(query_string="text1")]))
 
-    def test_true_false(self, context_factory, pipeline):
-        forbidden_context = context_factory(forbidden_fields=("requests", "responses", "labels", "misc"))
-
-        assert cnd.true()(forbidden_context, pipeline) is True
-        assert cnd.false()(forbidden_context, pipeline) is False
+    assert await cnd.HasCallbackQuery("text")(ctx) is True
+    assert await cnd.HasCallbackQuery("t")(ctx) is False
+    assert await cnd.HasCallbackQuery("text1")(ctx) is True
