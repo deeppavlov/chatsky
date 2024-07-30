@@ -19,14 +19,15 @@ import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
 from chatsky.context_storages import DBContextStorage
-from chatsky.script import Script, Context, ActorStage
-from chatsky.script import NodeLabel2Type, Message
+from chatsky.core.script import Script
+from chatsky.core.context import Context
+from chatsky.core.message import Message
 from chatsky.utils.turn_caching import cache_clear
 
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
-from chatsky.pipeline.service.group import ServiceGroup
+from chatsky.core.service.group import ServiceGroup
 from chatsky.core.service.types import (
     ServiceBuilder,
     ServiceGroupBuilder,
@@ -35,8 +36,9 @@ from chatsky.core.service.types import (
     ExtraHandlerFunction,
     ExtraHandlerBuilder,
 )
-from chatsky.core.pipeline.utils import finalize_service_group, pretty_format_component_info_dict
-from chatsky.core.pipeline import Actor
+from chatsky.core.utils import finalize_service_group, pretty_format_component_info_dict
+from chatsky.core.service.actor import Actor
+from chatsky.core.node_label import AbsoluteNodeLabel
 
 logger = logging.getLogger(__name__)
 
@@ -87,12 +89,10 @@ class Pipeline:
         self,
         components: ServiceGroupBuilder,
         script: Union[Script, Dict],
-        start_label: NodeLabel2Type,
-        fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
+        start_label: AbsoluteNodeLabel,
+        fallback_label: Optional[AbsoluteNodeLabel] = None,
+        default_priority: float = 1.0,
         slots: Optional[Union[GroupSlot, Dict]] = None,
-        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
@@ -122,9 +122,7 @@ class Pipeline:
                 script,
                 start_label,
                 fallback_label,
-                label_priority,
-                condition_handler,
-                handlers,
+                default_priority,
             )
         if self.actor is None:
             raise Exception("Actor wasn't initialized correctly!")
@@ -208,13 +206,11 @@ class Pipeline:
     def from_script(
         cls,
         script: Union[Script, Dict],
-        start_label: NodeLabel2Type,
-        fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
+        start_label: AbsoluteNodeLabel,
+        fallback_label: Optional[AbsoluteNodeLabel] = None,
+        default_priority: float = 1.0,
         slots: Optional[Union[GroupSlot, Dict]] = None,
         parallelize_processing: bool = False,
-        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
@@ -231,7 +227,7 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
+        :param default_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param slots: Slots configuration.
@@ -261,11 +257,9 @@ class Pipeline:
             script=script,
             start_label=start_label,
             fallback_label=fallback_label,
-            label_priority=label_priority,
-            condition_handler=condition_handler,
+            default_priority=default_priority,
             slots=slots,
             parallelize_processing=parallelize_processing,
-            handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
             components=[*pre_services, ACTOR, *post_services],
@@ -274,11 +268,9 @@ class Pipeline:
     def set_actor(
         self,
         script: Union[Script, Dict],
-        start_label: NodeLabel2Type,
-        fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
-        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
+        start_label: AbsoluteNodeLabel,
+        fallback_label: Optional[AbsoluteNodeLabel] = None,
+        default_priority: float = 1.0,
     ):
         """
         Set actor for the current pipeline and conducts necessary checks.
@@ -290,16 +282,11 @@ class Pipeline:
         :param fallback_label: Actor fallback label. The label of :py:class:`~chatsky.script.Script`.
             Dialog comes into that label if all other transitions failed,
             or there was an error while executing the scenario.
-        :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
+        :param default_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param handlers: This variable is responsible for the usage of external handlers on
-            the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-            - key :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
-            - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
-        self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
+        self.actor = Actor(script, start_label, fallback_label, default_priority)
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":
@@ -318,17 +305,19 @@ class Pipeline:
         This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         if ctx_id is None:
-            ctx = Context()
+            ctx = Context(self.actor.start_label)
         elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
+            ctx = await self.context_storage.get_async(ctx_id, Context(self.actor.start_label, id=ctx_id))
         else:
-            ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+            ctx = self.context_storage.get(ctx_id, Context(self.actor.start_label, id=ctx_id))
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)
 
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
+
+        ctx.framework_data.pipeline = self
 
         ctx.add_request(request)
         result = await self._services_pipeline(ctx, self)
