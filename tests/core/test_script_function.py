@@ -1,0 +1,115 @@
+import pytest
+import logging
+
+from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
+from chatsky.core.script_function import BasePriority, BaseCondition, BaseResponse, BaseDestination, BaseProcessing
+from chatsky.core.script_function import logger, ScriptFunctionError
+from chatsky.core import Message, Pipeline, Context
+from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabel
+
+
+class TestBaseFunctionCallWrapper:
+    @pytest.mark.parametrize("func_type,data,return_value", [
+        (BaseResponse, "text", Message(text="text")),
+        (BaseCondition, False, False),
+        (BaseDestination, ("flow", "node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
+        (BaseProcessing, None, None),
+        (BasePriority, 1.0, 1.0)
+    ])
+    async def test_validation(self, func_type, data, return_value):
+        class MyFunc(func_type):
+            async def func(self, ctx):
+                return data
+
+        assert await MyFunc().wrapped_call(None) == return_value
+
+    async def test_wrong_type(self):
+        class MyProc(BaseProcessing):
+            async def func(self, ctx):
+                return 1
+
+        assert isinstance(await MyProc().wrapped_call(None), TypeError)
+
+    async def test_non_async_func(self):
+        class MyCondition(BaseCondition):
+            def func(self, ctx):
+                return True
+
+        assert await MyCondition().wrapped_call(None) is True
+
+    @pytest.fixture
+    def log_list(self):
+        logs = []
+
+        class Handler(logging.Handler):
+            def emit(self, record) -> bool:
+                logs.append(record)
+                return True
+
+        logger.addHandler(Handler())
+        logger.setLevel(logging.DEBUG)
+        return logs
+
+    async def test_catch_exception(self, log_list):
+        class MyProc(BaseProcessing):
+            async def func(self, ctx):
+                raise RuntimeError()
+
+        assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
+        assert len(log_list) == 1
+        assert log_list[0].levelname == "WARNING"
+
+    async def test_exception_not_logged(self, log_list):
+        class MyProc(BaseProcessing):
+            async def func(self, ctx):
+                raise ScriptFunctionError()
+
+        assert isinstance(await MyProc().wrapped_call(None), ScriptFunctionError)
+        assert len(log_list) == 1
+        assert log_list[0].levelname == "DEBUG"
+
+
+@pytest.mark.parametrize("func_type,data,root_value,return_value", [
+    (ConstResponse, "response_text", Message(text="response_text"), Message(text="response_text")),
+    (ConstResponse, Message(text="response_text"), Message(text="response_text"), Message(text="response_text")),
+    (ConstDestination, ("flow", "node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
+    (ConstDestination, NodeLabel(flow_name="flow", node_name="node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
+    (ConstPriority, 1.0, 1.0, 1.0),
+    (ConstPriority, None, None, None),
+    (ConstCondition, False, False, False),
+])
+async def test_const_functions(func_type, data, root_value, return_value):
+    func = func_type.model_validate(data)
+    assert func.root == root_value
+
+    assert await func.wrapped_call(None) == return_value
+
+
+class TestNodeLabelValidation:
+    @pytest.fixture
+    def pipeline(self):
+        return Pipeline.from_script({"flow1": {"node": {}}, "flow2": {"node": {}}}, start_label=("flow1", "node"))
+
+    @pytest.fixture
+    def context_flow_factory(self, pipeline):
+        def factory(flow_name: str):
+            ctx = Context((flow_name, "node"))
+            ctx.framework_data.pipeline = pipeline
+            return ctx
+        return factory
+
+    @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))
+    async def test_const_destination(self, context_flow_factory, flow_name):
+        const_dst = ConstDestination.model_validate("node")
+
+        dst = await const_dst.wrapped_call(context_flow_factory(flow_name))
+        assert dst.flow_name == flow_name
+
+    @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))
+    async def test_base_destination(self, context_flow_factory, flow_name):
+        class MyDestination(BaseDestination):
+            def func(self, ctx):
+                return "node"
+
+        dst = await MyDestination().wrapped_call(context_flow_factory(flow_name))
+        assert dst.flow_name == flow_name
