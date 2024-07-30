@@ -42,7 +42,7 @@ class CallbackQuery(Attachment):
     It has query string attribute, that represents the response data string.
     """
 
-    query_string: Optional[str]
+    query_string: str
     chatsky_attachment_type: Literal["callback_query"] = "callback_query"
 
 
