@@ -55,6 +55,10 @@ class Flow(BaseModel, extra="allow"):
     script: Optional[Script] = Field(default=None, exclude=True, alias="__script__")
     name: Optional[str] = Field(default=None, alias="__name__")
 
+    @property
+    def nodes(self) -> dict[str, Node]:
+        return self.__pydantic_extra__
+
     @model_validator(mode="after")
     def link_nodes(self):
         for name, node in self.__pydantic_extra__.items():
@@ -74,6 +78,10 @@ class Flow(BaseModel, extra="allow"):
 class Script(BaseModel, extra="allow"):
     global_node: Node = Field(alias="global", default_factory=Node)
     __pydantic_extra__: dict[str, Flow]
+
+    @property
+    def flows(self) -> dict[str, Flow]:
+        return self.__pydantic_extra__
 
     @model_validator(mode="after")
     def link_flows(self):
