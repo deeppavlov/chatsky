@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, TypeAlias, Union, Tuple, TYPE_CHECKING, Annotated
 
-from pydantic import BaseModel, model_validator, ValidationInfo, ValidationError
+from pydantic import BaseModel, model_validator, ValidationInfo
 
 if TYPE_CHECKING:
     from chatsky.core.context import Context
@@ -30,7 +30,7 @@ class NodeLabel(BaseModel):
             if len(data) == 2 and isinstance(data[0], str) and isinstance(data[1], str):
                 return {"flow_name": data[0], "node_name": data[1]}
             else:
-                raise ValidationError(f"Cannot validate NodeLabel from {data!r}: tuple should contain 2 strings.")
+                raise ValueError(f"Cannot validate NodeLabel from {data!r}: tuple should contain 2 strings.")
         return data
 
 
