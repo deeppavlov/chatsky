@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar
 
-from pydantic import BaseModel, Field, PrivateAttr, model_serializer, model_validator
+from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 
@@ -8,7 +8,7 @@ K, V = TypeVar("K"), TypeVar("V")
 
 
 class ContextDict(BaseModel, Generic[K, V]):
-    write_full_diff: bool = Field(False)
+    _write_full_diff: bool = PrivateAttr(False)
     _attached: bool = PrivateAttr(False)
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _keys: List[K] = PrivateAttr(default_factory=list)
@@ -22,11 +22,12 @@ class ContextDict(BaseModel, Generic[K, V]):
     _marker: object = PrivateAttr(object())
 
     @classmethod
-    async def connect(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
+    async def connect(cls, storage: DBContextStorage, id: str, field: str, write_full_diff: bool = False) -> "ContextDict":
         keys = await storage.load_field_keys(id, field)
         items = await storage.load_field_latest(id, field)
         hashes = {k: hash(v) for k, v in items.items()}
         instance = cls.model_validate(items)
+        instance._write_full_diff = write_full_diff
         instance._attached = True
         instance._storage = storage
         instance._ctx_id = id
@@ -36,7 +37,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     async def __getitem__(self, key: K) -> V:
-        if key not in self._items.keys() and self._attached:
+        if key not in self._items.keys() and self._attached and self._write_full_diff:
             self._items[key] = await self._storage.load_field_item(self._ctx_id, self._field_name, key)
             self._hashes[key] = hash(self._items[key])
         return self._items[key]
@@ -44,13 +45,15 @@ class ContextDict(BaseModel, Generic[K, V]):
     def __setitem__(self, key: K, value: V) -> None:
         if self._attached:
             self._added += [key]
-            self._hashes[key] = None
+            if self._write_full_diff:
+                self._hashes[key] = None
         self._items[key] = value
 
     def __delitem__(self, key: K) -> None:
         if self._attached:
             self._added = [v for v in self._added if v is not key]
-            self._items[key] = None
+            if self._write_full_diff:
+                self._items[key] = None
         else:
             del self._items[key]
 
@@ -145,7 +148,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     def _serialize_model(self) -> Dict[K, V]:
         if not self._attached:
             return self._items
-        elif self.write_full_diff:
+        elif self._write_full_diff:
             return {k: v for k, v in self._items.items() if hash(v) != self._hashes[k]}
         else:
             return {k: self._items[k] for k in self._added}
