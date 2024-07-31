@@ -9,8 +9,8 @@ from pydantic import BaseModel, model_validator
 
 from chatsky.utils.devel import wrap_sync_function_in_async
 from chatsky.core.context import Context
-from chatsky.core.message import Message
-from chatsky.core.node_label import NodeLabel, AbsoluteNodeLabel
+from chatsky.core.message import Message, MessageInitTypes
+from chatsky.core.node_label import NodeLabel, NodeLabelInitTypes, AbsoluteNodeLabel
 
 
 logger = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ class BaseResponse(BaseScriptFunc[Message], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = Message
 
     @abstractmethod
-    async def func(self, ctx: Context) -> Message:
+    async def func(self, ctx: Context) -> MessageInitTypes:
         raise NotImplementedError
 
 
@@ -99,7 +99,7 @@ class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = AbsoluteNodeLabel
 
     @abstractmethod
-    async def func(self, ctx: Context) -> AbsoluteNodeLabel:
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
         raise NotImplementedError
 
 

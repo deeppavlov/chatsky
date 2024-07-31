@@ -1,4 +1,6 @@
-from typing import Optional, TypeAlias, Union, Tuple
+from __future__ import annotations
+
+from typing import Optional, TypeAlias, Union, Tuple, TYPE_CHECKING, Annotated
 
 from pydantic import BaseModel, model_validator, ValidationInfo, ValidationError
 
@@ -29,7 +31,12 @@ class NodeLabel(BaseModel):
         return data
 
 
-NodeLabelInitTypes: TypeAlias = Union[NodeLabel, str, Tuple[str, str], dict]
+NodeLabelInitTypes: TypeAlias = Union[
+    NodeLabel,
+    Annotated[str, "node_name, flow name equal to current flow's name"],
+    Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
+    Annotated[dict, "dict repr of NodeLabel"]
+]
 """Types that :py:class:`~.NodeLabelInitTypes` can be validated from."""
 
 
@@ -49,5 +56,10 @@ class AbsoluteNodeLabel(NodeLabel):
         return data
 
 
-AbsoluteNodeLabelInitTypes: TypeAlias = Union[AbsoluteNodeLabel, Tuple[str, str], dict]
+
+AbsoluteNodeLabelInitTypes: TypeAlias = Union[
+    AbsoluteNodeLabel,
+    Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
+    Annotated[dict, "dict repr of AbsoluteNodeLabel"]
+]
 """Types that :py:class:`~.AbsoluteNodeLabelInitTypes` can be validated from."""

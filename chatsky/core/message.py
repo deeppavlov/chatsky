@@ -5,7 +5,7 @@ The :py:class:`.Message` class is a universal data model for representing a mess
 Chatsky. It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Literal, Optional, List, Union, TypeAlias
+from typing import Literal, Optional, List, Union, TypeAlias, Annotated
 from pathlib import Path
 from urllib.request import urlopen
 import uuid
@@ -322,5 +322,5 @@ class Message(DataModel):
         return data
 
 
-MessageInitTypes: TypeAlias = Union[Message, dict, str]
+MessageInitTypes: TypeAlias = Union[Message, Annotated[dict, "dict repr of message"], Annotated[str, "message text"]]
 """Types that :py:class:`~.Message` can be validated from."""
