@@ -12,12 +12,15 @@ can be used by developers to define the conversation flow.
 """
 
 from __future__ import annotations
-from typing import Optional, Callable
 
-from chatsky.core import Context, BaseDestination
+from pydantic import Field
+
+from chatsky.core.context import get_last_index, Context
+from chatsky.core.node_label import NodeLabelInitTypes, AbsoluteNodeLabel
+from chatsky.core.script_function import BaseDestination
 
 
-def repeat(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:
+class Repeat(BaseDestination):
     """
     Returns transition handler that takes :py:class:`.Context`,
     :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -28,43 +31,19 @@ def repeat(priority: Optional[float] = None) -> Callable[[Context, Pipeline], Co
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def repeat_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        current_priority = pipeline.actor.label_priority if priority is None else priority
-        if len(ctx.labels) >= 1:
-            flow_label, label = list(ctx.labels.values())[-1]
-        else:
-            flow_label, label = pipeline.actor.start_label[:2]
-        return (flow_label, label, current_priority)
+    shift: int = Field(default=0, ge=0)
 
-    return repeat_transition_handler
-
-
-def previous(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:
-    """
-    Returns transition handler that takes :py:class:`~chatsky.script.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <chatsky.script.ConstLabel>`
-    to the previous node with a given :py:const:`priority <float>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
-    If the current node is the start node, fallback is returned.
-
-    :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
-    """
-
-    def previous_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        current_priority = pipeline.actor.label_priority if priority is None else priority
-        if len(ctx.labels) >= 2:
-            flow_label, label = list(ctx.labels.values())[-2]
-        elif len(ctx.labels) == 1:
-            flow_label, label = pipeline.actor.start_label[:2]
-        else:
-            flow_label, label = pipeline.actor.fallback_label[:2]
-        return (flow_label, label, current_priority)
-
-    return previous_transition_handler
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+        index = get_last_index(ctx.labels)
+        shifted_index = index - self.shift
+        result = ctx.labels.get(shifted_index)
+        if result is None:
+            raise KeyError(f"No label with index {shifted_index!r}. "
+                           f"Current label index: {index!r}; Repeat.shift: {self.shift!r}.")
+        return result
 
 
-def to_start(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:
+class Start(BaseDestination):
     """
     Returns transition handler that takes :py:class:`~chatsky.script.Context`,
     :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -75,14 +54,11 @@ def to_start(priority: Optional[float] = None) -> Callable[[Context, Pipeline], 
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def to_start_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        current_priority = pipeline.actor.label_priority if priority is None else priority
-        return (*pipeline.actor.start_label[:2], current_priority)
-
-    return to_start_transition_handler
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+        return ctx.pipeline.actor.start_label
 
 
-def to_fallback(priority: Optional[float] = None) -> Callable[[Context, Pipeline], ConstLabel]:
+class Fallback(BaseDestination):
     """
     Returns transition handler that takes :py:class:`~chatsky.script.Context`,
     :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -93,51 +69,43 @@ def to_fallback(priority: Optional[float] = None) -> Callable[[Context, Pipeline
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def to_fallback_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        current_priority = pipeline.actor.label_priority if priority is None else priority
-        return (*pipeline.actor.fallback_label[:2], current_priority)
-
-    return to_fallback_transition_handler
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+        return ctx.pipeline.actor.fallback_label
 
 
-def _get_label_by_index_shifting(
+def get_next_node_in_flow(
+    node_label: AbsoluteNodeLabel,
     ctx: Context,
-    pipeline: Pipeline,
-    priority: Optional[float] = None,
-    increment_flag: bool = True,
-    cyclicality_flag: bool = True,
-) -> ConstLabel:
+    *,
+    increment: bool = True,
+    loop: bool = False,
+) -> AbsoluteNodeLabel:
     """
     Function that returns node label from the context and pipeline after shifting the index.
 
+    :param node_label: Label of the node to shift from.
     :param ctx: Dialog context.
-    :param pipeline: Dialog pipeline.
-    :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
-    :param increment_flag: If it is `True`, label index is incremented by `1`,
-        otherwise it is decreased by `1`. Defaults to `True`.
-    :param cyclicality_flag: If it is `True` the iteration over the label list is going cyclically
-        (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
+    :param increment: If it is `True`, label index is incremented by `1`,
+        otherwise it is decreased by `1`.
+    :param loop: If it is `True` the iteration over the label list is going cyclically
+        (i.e. Backward in the first node returns the last node).
     :return: The tuple that consists of `(flow_label, label, priority)`.
         If fallback is executed `(flow_fallback_label, fallback_label, priority)` are returned.
     """
-    flow_label, node_label, current_priority = repeat(priority)(ctx, pipeline)
-    labels = list(pipeline.script.get(flow_label, {}))
+    node_label = AbsoluteNodeLabel.model_validate(node_label, context={"ctx": ctx})
+    node_keys = list(ctx.pipeline.script.get_flow(node_label.flow_name).nodes.keys())
 
-    if node_label not in labels:
-        return (*pipeline.actor.fallback_label[:2], current_priority)
+    node_index = node_keys.index(node_label.node_name)
+    node_index = node_index + 1 if increment else node_index - 1
+    if not (loop or (0 <= node_index < len(node_keys))):
+        raise IndexError(f"Node index {node_index!r} out of range for node_keys: {node_keys!r}."
+                         f"Consider using the `loop` flag.")
+    node_index %= len(node_keys)
 
-    label_index = labels.index(node_label)
-    label_index = label_index + 1 if increment_flag else label_index - 1
-    if not (cyclicality_flag or (0 <= label_index < len(labels))):
-        return (*pipeline.actor.fallback_label[:2], current_priority)
-    label_index %= len(labels)
-
-    return (flow_label, labels[label_index], current_priority)
+    return AbsoluteNodeLabel(flow_name=node_label.flow_name, node_name=node_keys[node_index])
 
 
-def forward(
-    priority: Optional[float] = None, cyclicality_flag: bool = True
-) -> Callable[[Context, Pipeline], ConstLabel]:
+class Forward(BaseDestination):
     """
     Returns transition handler that takes :py:class:`~chatsky.script.Context`,
     :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -149,18 +117,18 @@ def forward(
     :param cyclicality_flag: If it is `True`, the iteration over the label list is going cyclically
         (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
     """
+    loop: bool = False
 
-    def forward_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=True, cyclicality_flag=cyclicality_flag
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+        return get_next_node_in_flow(
+            ctx.last_label,
+            ctx,
+            increment=True,
+            loop=self.loop
         )
 
-    return forward_transition_handler
 
-
-def backward(
-    priority: Optional[float] = None, cyclicality_flag: bool = True
-) -> Callable[[Context, Pipeline], ConstLabel]:
+class Backward(BaseDestination):
     """
     Returns transition handler that takes :py:class:`~chatsky.script.Context`,
     :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -172,10 +140,12 @@ def backward(
     :param cyclicality_flag: If it is `True`, the iteration over the label list is going cyclically
         (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
     """
+    loop: bool = False
 
-    def back_transition_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
-        return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=False, cyclicality_flag=cyclicality_flag
+    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+        return get_next_node_in_flow(
+            ctx.last_label,
+            ctx,
+            increment=False,
+            loop=self.loop
         )
-
-    return back_transition_handler
