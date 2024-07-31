@@ -4,8 +4,11 @@ from typing import Optional, TypeAlias, Union, Tuple, TYPE_CHECKING, Annotated
 
 from pydantic import BaseModel, model_validator, ValidationInfo, ValidationError
 
+if TYPE_CHECKING:
+    from chatsky.core.context import Context
 
-def _get_current_flow_name(ctx) -> Optional[str]:
+
+def _get_current_flow_name(ctx: Context) -> Optional[str]:
     current_node = ctx._get_current_node()
     return current_node.flow.name
 
@@ -55,6 +58,18 @@ class AbsoluteNodeLabel(NodeLabel):
             return {"flow_name": flow_name, "node_name": data.node_name}
         return data
 
+    @model_validator(mode="after")
+    def check_node_exists(self, info: ValidationInfo):
+        context = info.context
+        if isinstance(context, dict):
+            ctx: Context = info.context.get("ctx")
+            if ctx is not None:
+                script = ctx.framework_data.pipeline.script
+
+                node = script.get_node(self)
+                if node is None:
+                    raise ValueError(f"Cannot find node {self!r} in script.")
+        return self
 
 
 AbsoluteNodeLabelInitTypes: TypeAlias = Union[
