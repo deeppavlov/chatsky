@@ -23,14 +23,16 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     @classmethod
     async def connect(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
-        instance = cls()
+        keys = await storage.load_field_keys(id, field)
+        items = await storage.load_field_latest(id, field)
+        hashes = {k: hash(v) for k, v in items.items()}
+        instance = cls.model_validate(items)
         instance._attached = True
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._items = await storage.load_field_latest(id, field)
-        instance._keys = await storage.load_field_keys(id, field)
-        instance._hashes = {k: hash(v) for k, v in instance._items.items()}
+        instance._keys = keys
+        instance._hashes = hashes
         return instance
 
     async def __getitem__(self, key: K) -> V:
@@ -133,7 +135,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     @model_validator(mode="wrap")
     def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":
         instance = handler(dict())
-        instance._items = value
+        if all([isinstance(k, int) for k in value.keys()]):
+            instance._items = {key: value[key] for key in sorted(value)}
+        else:
+            instance._items = value
         return instance
 
     @model_serializer()

@@ -23,12 +23,13 @@ from uuid import uuid4
 from time import time_ns
 from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
 from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
 from chatsky.pipeline.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
+from chatsky.utils.context_dict.ctx_dict import ContextDict
 
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
@@ -91,28 +92,28 @@ class Context(BaseModel):
     Timestamp when the context was **last time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
-    labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
+    labels: ContextDict[int, NodeLabel2Type] = Field(default_factory=ContextDict)
     """
     `labels` stores the history of all passed `labels`
 
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Message] = Field(default_factory=dict)
+    requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
     """
     `requests` stores the history of all `requests` received by the agent
 
         - key - `id` of the turn.
         - value - `request` on this turn.
     """
-    responses: Dict[int, Message] = Field(default_factory=dict)
+    responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
     """
     `responses` stores the history of all agent `responses`
 
         - key - `id` of the turn.
         - value - `response` on this turn.
     """
-    misc: Dict[str, Any] = Field(default_factory=dict)
+    misc: ContextDict[str, Any] = Field(default_factory=ContextDict)
     """
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Chatsky Scripting functions.
@@ -127,18 +128,6 @@ class Context(BaseModel):
     This attribute is used for storing custom data required for pipeline execution.
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
-
-    @field_validator("labels", "requests", "responses")
-    @classmethod
-    def sort_dict_keys(cls, dictionary: dict) -> dict:
-        """
-        Sort the keys in the `dictionary`. This needs to be done after deserialization,
-        since the keys are deserialized in a random order.
-
-        :param dictionary: Dictionary with unsorted keys.
-        :return: Dictionary with sorted keys.
-        """
-        return {key: dictionary[key] for key in sorted(dictionary)}
 
     @classmethod
     def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
