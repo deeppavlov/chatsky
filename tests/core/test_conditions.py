@@ -108,3 +108,15 @@ async def test_has_callback_query(context_factory):
     assert await cnd.HasCallbackQuery("text")(ctx) is True
     assert await cnd.HasCallbackQuery("t")(ctx) is False
     assert await cnd.HasCallbackQuery("text1")(ctx) is True
+
+
+@pytest.mark.parametrize("cnd", [
+    cnd.HasText(""),
+    cnd.Regexp(""),
+    cnd.HasCallbackQuery("")
+])
+async def test_empty_text(context_factory, cnd):
+    ctx = context_factory()
+    ctx.add_request(Message())
+
+    assert await cnd(ctx) is False

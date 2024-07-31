@@ -41,8 +41,6 @@ class ExactMatch(BaseCondition):
 
     async def func(self, ctx: Context) -> bool:
         request = ctx.last_request
-        if request is None:
-            return False
         for field in self.match.model_fields:
             match_value = self.match.__getattribute__(field)
             if self.skip_none and match_value is None:
