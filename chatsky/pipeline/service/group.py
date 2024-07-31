@@ -61,6 +61,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             ServiceGroup,
         ]
     ]
+    all_sequential: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -105,17 +106,21 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
         """
-        current_subgroup = []
-        # This heavily relies on 'components' being a list
-        for component in self.components:
-            if component.asynchronous:
-                current_subgroup.append(component)
-            else:
-                await self._run_parallel_components(ctx, pipeline, current_subgroup)
+        if self.all_sequential:
+            for component in self.components:
                 await self._run_sync_component(ctx, pipeline, component)
-                current_subgroup = []
-        if len(current_subgroup) > 0:
-            await self._run_parallel_components(ctx, pipeline, current_subgroup)
+        else:
+            current_subgroup = []
+            # This heavily relies on 'components' being a list
+            for component in self.components:
+                if component.asynchronous:
+                    current_subgroup.append(component)
+                else:
+                    await self._run_parallel_components(ctx, pipeline, current_subgroup)
+                    await self._run_sync_component(ctx, pipeline, component)
+                    current_subgroup = []
+            if len(current_subgroup) > 0:
+                await self._run_parallel_components(ctx, pipeline, current_subgroup)
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
