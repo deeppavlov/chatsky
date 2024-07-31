@@ -12,19 +12,21 @@ respond to the user and keep the conversation flowing.
 import random
 from typing import List
 
-from chatsky.pipeline import Pipeline
-from chatsky.script import Context, Message
+from chatsky.core import BaseResponse, Message, Context
+from chatsky.core.message import MessageInitTypes
 
 
-def random_choice(responses: List[Message]):
+class RandomChoice(BaseResponse):
     """
     Function wrapper that takes the list of responses as an input
     and returns handler which outputs a response randomly chosen from that list.
 
     :param responses: A list of responses for random sampling.
     """
+    responses: List[Message]
 
-    def choice_response_handler(ctx: Context, pipeline: Pipeline):
-        return random.choice(responses)
+    def __init__(self, *responses: MessageInitTypes):
+        super().__init__(responses=responses)
 
-    return choice_response_handler
+    async def func(self, ctx: Context) -> MessageInitTypes:
+        return random.choice(self.responses)

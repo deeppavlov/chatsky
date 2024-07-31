@@ -3,25 +3,23 @@ import random
 import pytest
 
 from chatsky.core import Message
-from chatsky.responses import random_choice
+from chatsky.responses import RandomChoice
 
 
-class TestResponses:
-    @pytest.fixture
-    def ctx(self, context_factory):
-        return context_factory(forbidden_fields=("labels", "requests", "responses", "misc"))
+@pytest.fixture
+def ctx(context_factory):
+    return context_factory(forbidden_fields=("labels", "requests", "responses", "misc"))
 
-    def test_random_choice(self, ctx, pipeline):
-        random.seed(0)
 
-        rsp = random_choice(
-            [
-                Message(text="1"),
-                Message(text="2"),
-                Message(text="3"),
-            ]
-        )
+async def test_random_choice(ctx):
+    random.seed(0)
 
-        assert rsp(ctx, pipeline).text == "2"
-        assert rsp(ctx, pipeline).text == "2"
-        assert rsp(ctx, pipeline).text == "1"
+    rsp = RandomChoice(
+        Message(text="1"),
+        Message(text="2"),
+        Message(text="3"),
+    )
+
+    assert (await rsp(ctx)).text == "2"
+    assert (await rsp(ctx)).text == "2"
+    assert (await rsp(ctx)).text == "1"
