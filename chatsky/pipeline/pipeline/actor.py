@@ -109,8 +109,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
-        # Moved it here, because this is both safe and a one-liner
-        self.sequential = True
         return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:

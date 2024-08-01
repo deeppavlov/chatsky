@@ -11,7 +11,7 @@ import asyncio
 import logging
 import inspect
 from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
-from pydantic import BaseModel, computed_field, model_validator, Field
+from pydantic import BaseModel, model_validator, Field
 
 from chatsky.script import Context
 
@@ -42,13 +42,14 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         after pipeline component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.
-    :param requested_async_flag: Requested asynchronous property.
+    :param asynchronous: A flag that indicates whether the extra functions
+        should be executed concurrently. The default value of the flag is False.
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
-    sequential: Optional[bool] = False
+    asynchronous: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -62,34 +63,6 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]
         return result
-
-    # If user specified they want it sequential, so be it.
-    # Otherwise, this will calculate if it's possible.
-    # This code could throw an error before, but we're switching to 'sequential',
-    # so there's no need for that anymore.
-    @model_validator(mode="after")
-    def calculate_sequential_flag(self):
-        if not self.sequential:
-            self.sequential = all([asyncio.iscoroutinefunction(func) for func in self.functions])
-        return self
-
-    @property
-    def asynchronous(self) -> bool:
-        """
-        Property, that indicates, whether this component extra handler is synchronous or asynchronous.
-        It is calculated according to the following rules:
-
-        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` is set,
-            it returns :py:attr:`~requested_async_flag`.
-        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
-            it returns `True`.
-        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `False` or not set,
-            it returns `False`.
-        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `True`,
-            an Exception is thrown in constructor.
-
-        """
-        return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
     async def _run_function(
         self, func: ExtraHandlerFunction, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo
@@ -172,9 +145,8 @@ class BeforeHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param requested_async_flag: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. The default value of the flag is True
-        if all the functions in this handler are asynchronous.
+    :param asynchronous: Optional flag that indicates whether the extra functions
+        should be executed concurrently. The default value of the flag is False.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.BEFORE
@@ -189,9 +161,8 @@ class AfterHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param requested_async_flag: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. The default value of the flag is True
-        if all the functions in this handler are asynchronous.
+    :param asynchronous: Optional flag that indicates whether the extra functions
+        should be executed concurrently. The default value of the flag is False.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER

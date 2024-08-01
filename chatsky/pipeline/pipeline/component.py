@@ -47,12 +47,8 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     :type after_handler: Optional[:py:data:`~.ComponentExtraHandler`]
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.
-    :param requested_async_flag: Requested asynchronous property;
-        if not defined, `calculated_async_flag` is used instead.
-    :param calculated_async_flag: Whether the component can be asynchronous or not
-        1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
-        2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
-
+    :param asynchronous: Optional flag that indicates whether the inside functions/components
+        should be executed concurrently. The default value of the flag is False.
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
         component is executed only if it returns `True`.
     :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
@@ -64,9 +60,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    # A configurable default value for this field seems possible.
-    # Maybe in Pipeline constructor? Something like a safe mode.
-    sequential: bool = False
+    asynchronous: bool = False
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     name: Optional[str] = None
     path: Optional[str] = None
@@ -76,11 +70,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         if self.name is not None and (self.name == "" or "." in self.name):
             raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
         return self
-
-    # Just checking if it'll work for now, I'll rename it later
-    @property
-    def asynchronous(self):
-        return not self.sequential
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """

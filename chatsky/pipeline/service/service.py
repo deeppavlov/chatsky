@@ -109,7 +109,7 @@ def to_service(
     before_handler: BeforeHandler = None,
     after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
-    sequential: bool = False,
+    asynchronous: bool = False,
     start_condition: StartConditionCheckerFunction = always_start_condition,
     name: Optional[str] = None,
 ):
@@ -127,7 +127,7 @@ def to_service(
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            sequential=sequential,
+            asynchronous=asynchronous,
             start_condition=start_condition,
             name=name,
         )
