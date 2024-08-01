@@ -8,9 +8,9 @@ if TYPE_CHECKING:
     from chatsky.core.context import Context
 
 
-def _get_current_flow_name(ctx: Context) -> Optional[str]:
-    current_node = ctx._get_current_node()
-    return current_node.flow.name
+def _get_current_flow_name(ctx: Context) -> str:
+    current_node = ctx.last_label
+    return current_node.flow_name
 
 
 class NodeLabel(BaseModel):
