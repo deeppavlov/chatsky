@@ -49,7 +49,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
     :param asynchronous: Optional flag that indicates whether the components inside
-        should be executed asynchronously. The default value of the flag is False.
+        should be executed concurrently. The default value of the flag is False.
     :param all_async: Optional flag that, if set to True, makes the `ServiceGroup` run
         all components inside it asynchronously. Default value is False.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
@@ -131,31 +131,17 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         that indicate service group inefficiency or explicitly defined parameters mismatch.
         These are cases for warnings issuing:
 
-        - Service can be asynchronous, however is marked synchronous explicitly.
         - Service is not asynchronous, however has a timeout defined.
-        - Group is not marked synchronous explicitly and contains both synchronous and asynchronous components.
 
         :return: `None`
         """
         for service in self.components:
             if not isinstance(service, ServiceGroup):
-                if (
-                    service.calculated_async_flag
-                    and service.requested_async_flag is not None
-                    and not service.requested_async_flag
-                ):
-                    logger.warning(f"Service '{service.name}' could be asynchronous!")
                 if not service.asynchronous and service.timeout is not None:
-                    logger.warning(f"Timeout can not be applied for Service '{service.name}': it's not asynchronous!")
+                    logger.warning(
+                        f"Timeout can not be applied for PipelineComponent '{service.name}': it's not asynchronous!"
+                    )
             else:
-                if not service.calculated_async_flag:
-                    if service.requested_async_flag is None and any(
-                        [sub_service.asynchronous for sub_service in service.components]
-                    ):
-                        logger.warning(
-                            f"ServiceGroup '{service.name}' contains both sync and async services, "
-                            "it should be split or marked as synchronous explicitly!",
-                        )
                 service.log_optimization_warnings()
 
     def add_extra_handler(

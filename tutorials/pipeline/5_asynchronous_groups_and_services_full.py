@@ -19,7 +19,12 @@ import json
 import logging
 import urllib.request
 
-from chatsky.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
+from chatsky.pipeline import (
+    ServiceGroup,
+    Pipeline,
+    ServiceRuntimeInfo,
+    to_service,
+)
 from chatsky.script import Context
 from chatsky.utils.testing.common import (
     check_happy_path,
@@ -32,26 +37,25 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-Services and service groups can be synchronous and asynchronous.
-In synchronous service groups services are executed consequently,
+Services and service groups are `PipelineComponent`s,
+which can be synchronous or asynchronous.
+All `ServiceGroup`s are made of these `PipelineComponent`s.
+
+Synchronous components are executed consequently,
     some of them can even return `Context` object,
     modifying it.
-In asynchronous service groups all services
-    are executed simultaneously and should not return anything,
-    neither modify Context.
+Asynchronous components are executed
+    simultaneously and should not return anything,
+    neither modify `Context`.
+The main reason all services can't be asynchronous is because there
+are services which can modify the `Context`.
 
-To become asynchronous service or service group
-    should _be able_ to be asynchronous
-    and should not be marked synchronous.
-Service can be asynchronous if its handler is an async function.
-Service group can be asynchronous if all services
-and service groups inside it are asynchronous.
-If service or service group can be asynchronous
-the `asynchronous` constructor parameter is checked.
-If the parameter is not set,
-the service becomes asynchronous, and if set, it is used instead.
-If service can not be asynchronous,
-but is marked asynchronous, an exception is thrown.
+It should be noted that only adjacent asynchronous components in a
+`ServiceGroup` are executed simultaneously, unless overridden
+with 'all_async' flag, then all components are considered asynchronous.
+To put it bluntly, [a, s, a, a, a, s] -> a, s, (a, a, a), s,
+those three adjacent async functions will run simultaneously.
+Basically, the order of your services in the list matters.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,
@@ -60,17 +64,24 @@ it is aborted and marked as failed.
 Pipeline `optimization_warnings` argument can be used to
     display optimization warnings during pipeline construction.
 Generally for optimization purposes asynchronous
-    services should be combined into asynchronous
-    groups to run simultaneously.
+    services should not be contained in nested or different ServiceGroups.
+    (different ServiceGroups that aren't marked as 'asynchronous' themselves)
+    Instead, it's best to keep all asynchronous components inside the same
+    ServiceGroup, so that the program can easily keep track of them
+    and guarantee optimized performance.
 Synchronous services should be expelled from (mostly) asynchronous groups.
 
-Here service group `balanced_group` can be asynchronous,
-    however it is requested to be synchronous,
-    so its services are executed consequently.
-Service group `service_group_0` is asynchronous,
+Here service group `balanced_group` could be fully asynchronous,
+    however it is not requested, so the group will be synchronous,
+    meaning its services are executed with default
+    `ServiceGroup` execution logic.
+Service group `service_group_0` is not marked as 'asynchronous',
+    meaning 'balanced_group' treats it as a synchronous component,
+    waiting for the previous component to finish before running this one.
+`service_group_0` only has async components inside, so
     it doesn't run out of timeout of 0.02 seconds,
-    however contains 6 time consuming services,
-    each of them sleeps for 0.01 of a second.
+    even though it contains 6 time consuming services,
+    each of them sleeping for 0.01 of a second.
 Service group `service_group_1` is also asynchronous,
 it logs HTTPS requests (from 1 to 15),
     running simultaneously, in random order.
@@ -81,10 +92,12 @@ Service group `pipeline` can't be asynchronous because
 
 
 # %%
+@to_service(asynchronous=True)
 async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info.name}' is running")
 
 
+@to_service(asynchronous=True)
 async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
@@ -127,10 +140,10 @@ pipeline_dict = {
     # There are no warnings - pipeline is well-optimized
     "pre_services": ServiceGroup(
         name="balanced_group",
-        requested_async_flag=False,
         components=[
             simple_asynchronous_service,
             ServiceGroup(
+                name="service_group_0",
                 timeout=0.02,
                 components=[time_consuming_service for _ in range(0, 6)],
             ),
@@ -138,8 +151,14 @@ pipeline_dict = {
         ],
     ),
     "post_services": [
-        [meta_web_querying_service(photo) for photo in range(1, 16)],
-        context_printing_service,
+        ServiceGroup(
+            name="service_group_1",
+            components=[
+                [meta_web_querying_service(photo) for photo in range(1, 16)],
+                context_printing_service,
+            ],
+            all_async=True
+        )
     ],
 }
 

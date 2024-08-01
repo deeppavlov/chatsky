@@ -14,7 +14,7 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 # %%
 import asyncio
 
-from chatsky.pipeline import Pipeline
+from chatsky.pipeline import Pipeline, ServiceGroup
 
 from chatsky.utils.testing.common import (
     is_interactive_mode,
@@ -25,19 +25,31 @@ from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """
-Services and service groups can be synchronous and asynchronous.
-In synchronous service groups services are executed consequently.
-In asynchronous service groups all services are executed simultaneously.
+Services and service groups are `PipelineComponent`s,
+which can be synchronous or asynchronous.
+All `ServiceGroup`s are made of these `PipelineComponent`s.
+Within a `ServiceGroup` synchronous components are executed consequently,
+while adjacent asynchronous components are executed simultaneously.
+To put it bluntly, [a, s, a, a, a, s] -> a, s, (a, a, a), s,
+those three adjacent async functions will run simultaneously.
+Basically, the order of your services in the list matters.
 
-Service can be asynchronous if its handler is an async function.
-Service group can be asynchronous if all services
-and service groups inside it are asynchronous.
+By default, all `PipelineComponent`s are synchronous,
+but can be marked as 'asynchronous'.
+Service groups have a flag 'all_async' which makes it treat
+every component inside it as asynchronous,
+running all components simultaneously. (by default it's `False`)
+This is convenient if you have a bunch of functions,
+that you want to run simultaneously,
+but don't want to make a service for each of them.
 
-Here there is an asynchronous service group, that contains 10 services,
-each of them should sleep for 0.01 of a second.
-However, as the group is asynchronous,
+Here is a service group with the flag 'all_async' set to 'True',
+that contains 10 services, each of them should sleep for 0.01 of a second.
+However, as the group is fully asynchronous,
 it is being executed for 0.01 of a second in total.
-Service group can be synchronous or asynchronous.
+The same would happen if all of those services were marked as 'asynchronous'.
+Once again, by default, all services inside a
+service group are executed sequentially.
 """
 
 
@@ -50,7 +62,10 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [time_consuming_service for _ in range(0, 10)],
+    "pre_services": ServiceGroup(
+        components=[time_consuming_service for _ in range(0, 10)],
+        all_async=True,
+    ),
 }
 
 # %%
