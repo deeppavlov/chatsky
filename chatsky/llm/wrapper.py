@@ -24,6 +24,7 @@ import re
 from chatsky.script.core.message import Image, Message
 from chatsky.script import Context
 from chatsky.pipeline import Pipeline
+from chatsky.llm.methods import BaseMethod
 
 from pydantic import BaseModel
 from typing import Union, Callable
@@ -66,15 +67,17 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
             raise ImportError("DeepEval is not available. Please install it with `pip install chatsky[llm]`.")
         
 
-    def respond(self, history: list = []) -> Message:
+    def respond(self, history: list = [], message_schema=None) -> Message:
         result = self.parser.invoke(self.model.invoke(history))
         result = Message(text=result)
         result.annotation.__generated_by_model__ = self.name
         return result
     
-    def condition(self, prompt, request):
-        result = self.parser.invoke(self.model.invoke([prompt+'\n'+request.text]))
-        return result
+    def condition(self, prompt: str, method: BaseMethod):
+        def process_input(ctx: Context, _: Pipeline) -> bool:
+            result = method(ctx, self.parser.invoke(self.model.invoke([prompt+'\n'+ctx.last_request.text])))
+            return result
+        return process_input
     
     # Helper functions for DeepEval custom LLM usage
     def generate(self, prompt: str):
@@ -121,16 +124,15 @@ def llm_response(
 def llm_condition(
         ctx: Context,
         pipeline: Pipeline,
-        model_name,
-        prompt="",
-        method: Callable=None,
-        threshold=0.9
+        model_name: str,
+        prompt: str,
+        method: BaseMethod
     ):
     """
     Basic function for using LLM in condition cases.
     """
     model = pipeline.get(model_name)
-    return method(model.condition(prompt, ctx.last_request))
+    return method(model.condition(prompt, method))
 
 
 def __attachment_to_content(attachment: Image) -> str:
