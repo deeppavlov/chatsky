@@ -28,7 +28,7 @@ class Node(BaseModel):
     misc: dict = Field(default_factory=dict)
 
     def merge(self, other: Node):
-        self.transitions.append(*other.transitions)
+        self.transitions.extend(other.transitions)
         if other.response is not None:
             self.response = other.response
         self.pre_transition.update(**other.pre_transition)
@@ -46,7 +46,7 @@ class Flow(BaseModel, extra="allow"):
         return self.__pydantic_extra__
 
     def get_node(self, name: str) -> Optional[Node]:
-        return self.__pydantic_extra__.get(name)
+        return self.nodes.get(name)
 
 
 class Script(BaseModel, extra="allow"):
@@ -58,7 +58,7 @@ class Script(BaseModel, extra="allow"):
         return self.__pydantic_extra__
 
     def get_flow(self, name: str) -> Optional[Flow]:
-        return self.__pydantic_extra__.get(name)
+        return self.flows.get(name)
 
     def get_node(self, label: AbsoluteNodeLabel) -> Optional[Node]:
         flow = self.get_flow(label.flow_name)
