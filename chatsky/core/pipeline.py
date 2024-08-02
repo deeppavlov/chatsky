@@ -305,11 +305,11 @@ class Pipeline:
         This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         if ctx_id is None:
-            ctx = Context(self.actor.start_label)
+            ctx = Context.init(self.actor.start_label)
         elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context(self.actor.start_label, id=ctx_id))
+            ctx = await self.context_storage.get_async(ctx_id, Context.init(self.actor.start_label, id=ctx_id))
         else:
-            ctx = self.context_storage.get(ctx_id, Context(self.actor.start_label, id=ctx_id))
+            ctx = self.context_storage.get(ctx_id, Context.init(self.actor.start_label, id=ctx_id))
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)

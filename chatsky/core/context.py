@@ -22,12 +22,12 @@ import logging
 from uuid import UUID, uuid4
 from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
-from chatsky.core.message import Message
+from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.service.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
-from chatsky.core.node_label import AbsoluteNodeLabel
+from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:
     from chatsky.core.script import Node
@@ -44,7 +44,7 @@ def get_last_index(dictionary: dict) -> int:
     :return: Last index from the `dictionary`.
     """
     indices = list(dictionary)
-    return indices[-1] if indices else -1
+    return max([*indices, -1])
 
 
 class ContextError(Exception):
@@ -111,26 +111,15 @@ class Context(BaseModel):
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
-    def __init__(self, start_label, id: Optional[Union[UUID, int, str]] = None):
+    @classmethod
+    def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
         labels = {-1: AbsoluteNodeLabel.model_validate(start_label)}
         if id is None:
-            super().__init__(labels=labels)
+            return cls(labels=labels)
         else:
-            super().__init__(labels=labels, id=id)
+            return cls(labels=labels, id=id)
 
-    @field_validator("labels", "requests", "responses")
-    @classmethod
-    def sort_dict_keys(cls, dictionary: dict) -> dict:
-        """
-        Sort the keys in the `dictionary`. This needs to be done after deserialization,
-        since the keys are deserialized in a random order.
-
-        :param dictionary: Dictionary with unsorted keys.
-        :return: Dictionary with sorted keys.
-        """
-        return {key: dictionary[key] for key in sorted(dictionary)}
-
-    def add_request(self, request: Message):
+    def add_request(self, request: MessageInitTypes):
         """
         Add a new `request` to the context.
         The new `request` is added with the index of `last_index + 1`.
@@ -141,7 +130,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         self.requests[last_index + 1] = request_message
 
-    def add_response(self, response: Message):
+    def add_response(self, response: MessageInitTypes):
         """
         Add a new `response` to the context.
         The new `response` is added with the index of `last_index + 1`.
@@ -152,7 +141,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         self.responses[last_index + 1] = response_message
 
-    def add_label(self, label: AbsoluteNodeLabel):
+    def add_label(self, label: AbsoluteNodeLabelInitTypes):
         """
         Add a new :py:data:`~.NodeLabel2Type` to the context.
         The new `label` is added with the index of `last_index + 1`.

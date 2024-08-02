@@ -1,53 +1,61 @@
-# %%
-import random
+import pytest
 
-from chatsky.script import Context, Message
-
-
-def shuffle_dict_keys(dictionary: dict) -> dict:
-    return {key: dictionary[key] for key in sorted(dictionary, key=lambda k: random.random())}
+from chatsky.core.context import get_last_index, Context, ContextError
+from chatsky.core.node_label import AbsoluteNodeLabel
+from chatsky.core.message import Message
 
 
-def test_context():
-    ctx = Context()
-    for index in range(0, 30, 2):
-        ctx.add_request(Message(str(index)))
-        ctx.add_label((str(index), str(index + 1)))
-        ctx.add_response(Message(str(index + 1)))
-    ctx.labels = shuffle_dict_keys(ctx.labels)
-    ctx.requests = shuffle_dict_keys(ctx.requests)
-    ctx.responses = shuffle_dict_keys(ctx.responses)
-    ctx = Context.model_validate_json(ctx.model_dump_json())
-    ctx.misc[123] = 312
-    ctx.misc["1001"] = "11111"
-    ctx.add_request(Message(str(1000)))
-    ctx.add_label((str(1000), str(1000 + 1)))
-    ctx.add_response(Message(str(1000 + 1)))
+@pytest.mark.parametrize("dict,result", [
+    ({}, -1),
+    ({1: None, 5: None}, 5),
+    ({5: None, 1: None}, 5),
+])
+def test_get_last_index(dict, result):
+    assert get_last_index(dict) == result
 
-    assert ctx.labels == {
-        10: ("20", "21"),
-        11: ("22", "23"),
-        12: ("24", "25"),
-        13: ("26", "27"),
-        14: ("28", "29"),
-        15: ("1000", "1001"),
-    }
-    assert ctx.requests == {
-        10: Message("20"),
-        11: Message("22"),
-        12: Message("24"),
-        13: Message("26"),
-        14: Message("28"),
-        15: Message("1000"),
-    }
-    assert ctx.responses == {
-        10: Message("21"),
-        11: Message("23"),
-        12: Message("25"),
-        13: Message("27"),
-        14: Message("29"),
-        15: Message("1001"),
-    }
-    assert ctx.misc == {"1001": "11111"}
-    assert ctx.current_node is None
-    ctx.model_dump_json()
+
+def test_init():
+    ctx1 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
+    ctx2 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
+    assert ctx1.labels == {-1: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
+    assert ctx1.id != ctx2.id
+
+    ctx3 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"), id="id")
+    assert ctx3.labels == {-1: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
+    assert ctx3.id == "id"
+
+
+def test_labels():
+    ctx = Context.model_validate({"labels": {5: ("flow", "node1")}})
+
+    assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
+    ctx.add_label(("flow", "node2"))
+    assert ctx.labels == {5: AbsoluteNodeLabel(flow_name="flow", node_name="node1"), 6: AbsoluteNodeLabel(flow_name="flow", node_name="node2")}
+    assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
+
+    ctx.labels = {}
+    with pytest.raises(ContextError):
+        ctx.last_label
+
+
+def test_requests():
+    ctx = Context(labels={}, requests={5: "text1"})
+    assert ctx.last_request == Message("text1")
+    ctx.add_request("text2")
+    assert ctx.requests == {5: Message("text1"), 6: Message("text2")}
+    assert ctx.last_request == Message("text2")
+
+    ctx.requests = {}
+    with pytest.raises(ContextError):
+        ctx.last_request
+
+
+def test_responses():
+    ctx = Context(labels={}, responses={5: "text1"})
+    assert ctx.last_response == Message("text1")
+    ctx.add_response("text2")
+    assert ctx.responses == {5: Message("text1"), 6: Message("text2")}
+    assert ctx.last_response == Message("text2")
+
+    ctx.responses = {}
+    assert ctx.last_response is None
