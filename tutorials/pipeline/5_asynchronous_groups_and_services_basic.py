@@ -59,11 +59,11 @@ async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
 
-@to_service(asynchronous=True)
 def interact(stage: str, service: str):
-    async def service(_: Context, __: Pipeline):
+    async def slow_service(_: Context, __: Pipeline):
         print(f"{stage} with service {service}")
         await asyncio.sleep(0.1)
+    return slow_service
 
 
 pipeline_dict = {
