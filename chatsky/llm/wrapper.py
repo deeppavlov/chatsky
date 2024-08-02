@@ -6,10 +6,10 @@ Wrapper around langchain.
 
 try:
     from langchain_openai import ChatOpenAI
-    from langchain_anthropic import ChatAnthropic
-    from langchain_google_vertexai import ChatVertexAI
-    from langchain_cohere import ChatCohere
-    from langchain_mistralai import ChatMistralAI
+    # from langchain_anthropic import ChatAnthropic
+    # from langchain_google_vertexai import ChatVertexAI
+    # from langchain_cohere import ChatCohere
+    # from langchain_mistralai import ChatMistralAI
     from langchain.output_parsers import ResponseSchema, StructuredOutputParser
     from langchain_core.messages import HumanMessage, SystemMessage
     from langchain_core.output_parsers import StrOutputParser
@@ -36,7 +36,7 @@ except ImportError:
     deepeval_available = False
 
 
-class LLM_API(BaseModel, DeepEvalBaseLLM):
+class LLM_API(DeepEvalBaseLLM):
     """
     This class acts as a wrapper for all LLMs from langchain
     and handles message exchange between remote model and chatsky classes.
@@ -44,9 +44,7 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
 
     def __init__(
         self,
-        model: Union[
-            ChatOpenAI, ChatAnthropic, ChatVertexAI, ChatCohere, ChatMistralAI
-        ],
+        model: ChatOpenAI,
         system_prompt: str = "",
     ) -> None:
         """
@@ -54,7 +52,7 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
         :param system_prompt: System prompt for the model.
         """
         self.__check_imports()
-        self.model = model
+        self.model: ChatOpenAI = model
         self.name = ""
         self.parser = StrOutputParser()
         self.system_prompt = system_prompt
@@ -67,10 +65,10 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
             raise ImportError("DeepEval is not available. Please install it with `pip install chatsky[llm]`.")
         
 
-    def respond(self, history: list = [], message_schema=None) -> Message:
+    def respond(self, history: list = [""], message_schema=None) -> Message:
         result = self.parser.invoke(self.model.invoke(history))
         result = Message(text=result)
-        result.annotation.__generated_by_model__ = self.name
+        # result.annotation.__generated_by_model__ = self.name
         return result
     
     def condition(self, prompt: str, method: BaseMethod):
@@ -94,12 +92,10 @@ class LLM_API(BaseModel, DeepEvalBaseLLM):
 
 
 def llm_response(
-        ctx: Context,
-        pipeline: Pipeline,
         model_name,
         prompt="",
         history=5,
-        filter_func: Callable=None
+        filter_func: Callable=lambda x: True
     ):
     """
     Basic function for receiving LLM responses.
@@ -110,16 +106,20 @@ def llm_response(
     :param history: Number of messages to keep in history.
     :param filter_func: filter function to filter messages that will go the models context.
     """
-    model = pipeline.get(model_name)
-    history_messages = []
-    if history == 0:
-        return model.respond([prompt + "\n" + ctx.last_request.text])
-    else:
-        for req, resp in filter(lambda x: filter_func(x), zip(ctx.requests[-history:], ctx.responses[-history:])):
-            history_messages.append(message_to_langchain(req))
-            history_messages.append(message_to_langchain(resp, human=False))
-        return model.respond(history_messages)
-
+    def wrapped(ctx: Context, pipeline: Pipeline):
+        model = pipeline.models[model_name]
+        history_messages = []
+        if history == 0:
+            return model.respond([prompt + "\n" + ctx.last_request.text])
+        else:
+            pairs = zip([ctx.requests[x] for x in range(len(ctx.requests))],
+                     [ctx.responses[x] for x in range(len(ctx.responses))])
+            for req, resp in filter(lambda x: filter_func(x), list(pairs)[-history:]):
+                history_messages.append(message_to_langchain(req))
+                history_messages.append(message_to_langchain(resp, human=False))
+            print(history_messages)
+            return model.respond(history_messages)
+    return wrapped
 
 def llm_condition(
         ctx: Context,
@@ -131,7 +131,7 @@ def llm_condition(
     """
     Basic function for using LLM in condition cases.
     """
-    model = pipeline.get(model_name)
+    model = pipeline.models[model_name]
     return method(model.condition(prompt, method))
 
 
@@ -151,8 +151,8 @@ def __attachment_to_content(attachment: Image) -> str:
 
 
 def message_to_langchain(message: Message, human=True):
-    if message.attachments != []:
-        content = [{"type": "text", "text": message.text}]
+    content = [{"type": "text", "text": message.text}]
+    if message.attachments:
         for image in message.attachments:
             if image is not Image:
                 continue

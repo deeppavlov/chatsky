@@ -88,7 +88,7 @@ ydb = ["ydb", "six"]
 telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
-llm = ["httpx", "langchain", "langchain-openai", "langchain-anthropic", "langchain-google-vertexai", "langchain-cohere", "langchain-groq", "langchain-mistralai", "langchain-fireworks", "deepeval"]
+llm = ["httpx", "deepeval", "langchain", "langchain-openai", "langchain-anthropic", "langchain-google-vertexai", "langchain-cohere", "langchain-groq", "langchain-mistralai", "langchain-fireworks"]
 
 [tool.poetry.group.lint]
 optional = true

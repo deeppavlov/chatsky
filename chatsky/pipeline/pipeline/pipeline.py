@@ -92,6 +92,7 @@ class Pipeline:
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
         slots: Optional[Union[GroupSlot, Dict]] = None,
+        models: Optional[Dict] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -105,6 +106,7 @@ class Pipeline:
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self.slots = GroupSlot.model_validate(slots) if slots is not None else None
+        self.models = models if models is not None else None
         self._services_pipeline = ServiceGroup(
             components,
             before_handler=before_handler,
@@ -213,6 +215,7 @@ class Pipeline:
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
         slots: Optional[Union[GroupSlot, Dict]] = None,
+        models: Optional[Dict] = None,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -264,6 +267,7 @@ class Pipeline:
             label_priority=label_priority,
             condition_handler=condition_handler,
             slots=slots,
+            models=models,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
