@@ -117,11 +117,7 @@ def test_worker_shielding():
         def __init__(self):
             super().__init__()
             self.ctx_id = uuid.uuid4()
-            self.requests = ["1sa", "nb2", "3fdg", "g46", "2sh2", "h31", "m56", "72ds"]
-            self.requests.extend(self.requests)
-            self.requests.extend(self.requests)
-            self.requests.extend(self.requests)
-            self.requests.extend(self.requests)
+            self.requests = ["1sa", "nb2", "3fdg", "g46", "2sh2", "h31", "m56", "72ds"] * 5
             self.expected_updates = self.requests.copy()
             self.received_updates = []
             self.obtained_requests = False
