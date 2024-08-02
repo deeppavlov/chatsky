@@ -28,9 +28,8 @@ import logging
 import asyncio
 from typing import Union, Optional
 
-from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.core.transition import Transition
-from chatsky.utils.turn_caching import cache_clear
+from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
+from chatsky.core.transition import get_next_label
 from chatsky.core.message import Message
 
 from chatsky.core.context import Context
@@ -65,8 +64,8 @@ class Actor:
     def __init__(
         self,
         script: Union[Script, dict],
-        start_label: AbsoluteNodeLabel,
-        fallback_label: Optional[AbsoluteNodeLabel] = None,
+        start_label: AbsoluteNodeLabelInitTypes,
+        fallback_label: Optional[AbsoluteNodeLabelInitTypes] = None,
         default_priority: float = 1.0,
     ):
         self.script = Script.model_validate(script)
@@ -83,63 +82,48 @@ class Actor:
             if self.script.get_node(self.fallback_label) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
 
-        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
-        self._clean_turn_cache = True
-
     async def __call__(self, ctx: Context):
-        ctx.framework_data.current_node = ctx._get_current_node().inherited_node  # todo: catch this
+        next_label = self.fallback_label
 
-        logger.debug(f"Running pre_transition")
-        await self._run_processing(ctx.current_node.pre_transition, ctx)
+        try:
+            ctx.framework_data.current_node = self.script.get_global_local_inherited_node(ctx.last_label)
 
-        logger.debug(f"Running transitions")
-        transition_results = await asyncio.gather(
-            *[transition.wrapped_call(ctx) for transition in ctx.current_node.transitions]
-        )
+            logger.debug(f"Running pre_transition")
+            await self._run_processing(ctx.current_node.pre_transition, ctx)
 
-        def transition_key(tr: Transition):
-            priority = tr.priority
-            if priority is None:
-                return ctx.pipeline.actor.default_priority
-            return priority
+            logger.debug(f"Running transitions")
 
-        transitions = sorted(
-            [transition for transition in transition_results if isinstance(transition, Transition)],
-            key=transition_key,
-            reverse=True
-        )
+            destination_result = await get_next_label(ctx, ctx.current_node.transitions, self.default_priority)
+            if destination_result is not None:
+                next_label = destination_result
+        except Exception as exc:
+            logger.exception("Exception occurred during transition processing.", exc_info=exc)
 
-        if len(transitions) == 0:
-            next_node = self.fallback_label
-        else:
-            next_node = transitions[0].dst
-        logger.debug(f"Possible transitions: {transitions!r}")
-        logger.debug(f"Next label: {next_node!r}")
+        logger.debug(f"Next label: {next_label!r}")
 
-        ctx.add_label(next_node)
+        ctx.add_label(next_label)
 
-        ctx.framework_data.current_node = ctx._get_current_node().inherited_node
+        response = Message()
 
-        # run pre response processing
-        await self._run_processing(ctx.current_node.pre_response, ctx)
+        try:
+            ctx.framework_data.current_node = self.script.get_global_local_inherited_node(next_label)
 
-        response = None
+            logger.debug(f"Running pre_response")
+            await self._run_processing(ctx.current_node.pre_response, ctx)
 
-        node_response = ctx.current_node.response
-        if node_response is not None:
-            result = await node_response.wrapped_call(ctx)
-            if isinstance(result, Message):
-                response = result
+            node_response = ctx.current_node.response
+            if node_response is not None:
+                response_result = await node_response(ctx)
+                if isinstance(response_result, Message):
+                    response = response_result
+                else:
+                    logger.debug("Response was not produced.")
+            else:
+                logger.debug("Node has empty response.")
+        except Exception as exc:
+            logger.exception("Exception occurred during response processing.", exc_info=exc)
 
-        if response is None:
-            logger.debug("Response was not produced")
-            ctx.add_response(Message())
-        else:
-            logger.debug(f"Got response: {response!r}")
-            ctx.add_response(response)
-
-        if self._clean_turn_cache:
-            cache_clear()
+        ctx.add_response(response)
 
     @staticmethod
     async def _run_processing_parallel(processing: dict[str, BaseProcessing], ctx: Context) -> None:
