@@ -157,7 +157,7 @@ pipeline_dict = {
                 [meta_web_querying_service(photo) for photo in range(1, 16)],
                 context_printing_service,
             ],
-            all_async=True
+            all_async=True,
         )
     ],
 }

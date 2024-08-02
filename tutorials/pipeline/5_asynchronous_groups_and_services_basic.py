@@ -14,7 +14,8 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 # %%
 import asyncio
 
-from chatsky.pipeline import Pipeline, ServiceGroup
+from chatsky import Context
+from chatsky.pipeline import Pipeline, ServiceGroup, to_service
 
 from chatsky.utils.testing.common import (
     is_interactive_mode,
@@ -58,6 +59,13 @@ async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
 
+@to_service(asynchronous=True)
+def interact(stage: str, service: str):
+    async def service(_: Context, __: Pipeline):
+        print(f"{stage} with service {service}")
+        await asyncio.sleep(0.1)
+
+
 pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
@@ -66,6 +74,26 @@ pipeline_dict = {
         components=[time_consuming_service for _ in range(0, 10)],
         all_async=True,
     ),
+    "post_services": [
+        ServiceGroup(
+            name="InteractWithServiceA",
+            components=[
+                interact("Starting interaction", "A"),
+                interact("Interacting", "A"),
+                interact("Finishing interaction", "A"),
+            ],
+            asynchronous=True,
+        ),
+        ServiceGroup(
+            name="InteractWithServiceB",
+            components=[
+                interact("Starting interaction", "B"),
+                interact("Interacting", "B"),
+                interact("Finishing interaction", "B"),
+            ],
+            asynchronous=True,
+        ),
+    ],
 }
 
 # %%
@@ -73,5 +101,6 @@ pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
+    assert False
     if is_interactive_mode():
         run_interactive_mode(pipeline)
