@@ -11,23 +11,23 @@ This tutorial is a more advanced version of the
 ).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import json
 import logging
 import urllib.request
 
-from dff.script import Context
-from dff.messengers.common import CLIMessengerInterface
-from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
-from dff.utils.testing.common import (
+from chatsky.script import Context
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
 
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -43,20 +43,25 @@ These objects are dictionaries of particular structure:
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
         (dictionary or a `DBContextStorage` instance).
-* `services` (required) - A `ServiceGroupBuilder` object,
+* `components` (required) - A `ServiceGroupBuilder` object,
         basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
         see tutorial 4.
-* `wrappers` - A list of pipeline wrappers, see tutorial 7.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `optimization_warnings` - Whether pipeline asynchronous structure
         should be checked during initialization,
         see tutorial 5.
 
-On pipeline execution services from `services` list are run
+On pipeline execution services from `components` list are run
 without difference between pre- and postprocessors.
-If "ACTOR" constant is not found among `services` pipeline creation fails.
+If "ACTOR" constant is not found among `components` pipeline creation fails.
 There can be only one "ACTOR" constant in the pipeline.
-ServiceBuilder object can be defined either with callable (see tutorial 2) or
+`ServiceBuilder` object can be defined either with callable (see tutorial 2) or
 with dict of structure / object with following constructor arguments:
 
 * `handler` (required) - ServiceBuilder,
@@ -64,7 +69,12 @@ with dict of structure / object with following constructor arguments:
         it will be used instead of base ServiceBuilder.
     NB! Fields of nested ServiceBuilder will be overridden
         by defined fields of the base ServiceBuilder.
-* `wrappers` - a list of service wrappers, see tutorial 7.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
 * `timeout` - service timeout, see tutorial 5.
 * `asynchronous` - whether or not this service _should_ be asynchronous
         (keep in mind that not all services _can_ be asynchronous),

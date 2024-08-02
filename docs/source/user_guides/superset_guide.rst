@@ -4,7 +4,7 @@ Superset guide
 Description
 ~~~~~~~~~~~
 
-| The Dialog Flow Stats module can be used to obtain and visualize usage statistics for your service.
+| The Chatsky Stats module can be used to obtain and visualize usage statistics for your service.
 | The module relies on several open source solutions that allow for data persistence and visualization
 
 * `Clickhouse <https://clickhouse.com/>`_ serves as an OLAP storage for data.
@@ -22,9 +22,9 @@ Collection procedure
     :linenos:
 
     # clone the original repository to access the docker compose file
-    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    git clone https://github.com/deeppavlov/chatsky.git
     # install with the stats extra
-    cd dialog_flow_framework
+    cd chatsky
     pip install .[stats]
 
 **Launching services**
@@ -33,15 +33,15 @@ Collection procedure
     :linenos:
 
     # clone the original repository to access the docker compose file
-    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    git clone https://github.com/deeppavlov/chatsky.git
     # launch the required services
-    cd dialog_flow_framework
+    cd chatsky
     docker compose --profile stats up
 
 **Collecting data**
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
-DFF tutorials (`1 <../tutorials/tutorials.stats.1_extractor_functions.py>`_, `2 <../tutorials/tutorials.stats.2_pipeline_integration.py>`_)
+Chatsky tutorials (`1 <../tutorials/tutorials.stats.1_extractor_functions.py>`_, `2 <../tutorials/tutorials.stats.2_pipeline_integration.py>`_)
 showcase all the steps needed to achieve that. We will run 
 a special script in order to obtain richly-annotated sample data points to visualize.
 
@@ -74,21 +74,21 @@ The file can then be used to parametrize the configuration script.
 
 .. code-block:: shell
 
-    dff.stats tutorials/stats/example_config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
+    chatsky.stats tutorials/stats/example_config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
 
 .. warning::
     
-    Here we passed passwords via CLI, which is not recommended. For enhanced security, call the command above omitting the passwords (`dff.stats -P -dP -U superset ...`) and you will be prompted to enter them interactively.
+    Here we passed passwords via CLI, which is not recommended. For enhanced security, call the command above omitting the passwords (`chatsky.stats -P -dP -U superset ...`) and you will be prompted to enter them interactively.
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
-shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
+shipped with Chatsky, make sure that your access rights are sufficient to edit the workspace.
 
 Using Superset
 ~~~~~~~~~~~~~~
 
 | In order to view the imported dashboard, log into `Superset <http://localhost:8088/>`_ using your username and password (which are both `superset` by default and can be configured via `.env_file`).
-| The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
+| The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **Chatsky stats**.
 | The dashboard is split into four sections based on the types of charts and on the chart topic.
 
 *  The **Overview** section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
@@ -116,7 +116,7 @@ Using Superset
     Plots for pipeline-produced dialog annotations.
 
 On some occasions, Superset can show warnings about the database connection being faulty.
-In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.
+In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `chatsky_database` instance updating the credentials.
 
 .. figure:: ../_static/images/databases.png
 
@@ -131,15 +131,15 @@ an easy and intuitive way to create your own charts and to customize the dashboa
 **Datasets**
 
 If you aim to create your own chart, Superset will prompt you to select a dataset to draw data from.
-The current configuration provides three datasets `dff-node-stats`, `dff-stats`, and `dff-final-nodes`.
-However, in most cases, you would use `dff-stats` or `dff-node-stats`. The former contains all data points,
+The current configuration provides three datasets `chatsky-node-stats`, `chatsky-stats`, and `chatsky-final-nodes`.
+However, in most cases, you would use `chatsky-stats` or `chatsky-node-stats`. The former contains all data points,
 while the latter only includes the logs produced by `get_current_label` extractor
-(`see the API reference <../apiref/dff.stats.default_extractors.html#dff.stats.default_extractors.get_current_label>`_).
-`dff-final-nodes` contains the same information as the said datasources,
+(`see the API reference <../apiref/chatsky.stats.default_extractors.html#chatsky.stats.default_extractors.get_current_label>`_).
+`chatsky-final-nodes` contains the same information as the said datasources,
 but only aggregates the labels of nodes visited at the end of dialog graph traversal,
 i.e. nodes that terminate the dialog.
 
-`dff-nodes-stats` uses the following variables to store the data:
+`chatsky-nodes-stats` uses the following variables to store the data:
 
 * The `context_id` field can be used to distinguish dialog contexts from each other and serves as a user identifier.
 * `request_id` is the number of the dialog turn at which the data record was emitted. The data points can be aggregated over this field, showing the distribution of a variable over the dialog history.
@@ -178,7 +178,7 @@ and put in the extraction expression, as shown in the examples above.
 
 The configuration of a Superset dashboard can be easily exported and then reused
 in other Superset instances. This can be done using the GUI: navigate to the
-`Dashboards` section of the Superset application, locate your dashboard (named `DFF statistics` per default).
+`Dashboards` section of the Superset application, locate your dashboard (named `Chatsky statistics` per default).
 Then press the `export` button on the right and save the zip file to any convenient location.
 
 **Importing existing configuration files**

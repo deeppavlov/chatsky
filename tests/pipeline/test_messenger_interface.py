@@ -1,15 +1,12 @@
 import asyncio
 import sys
 import pathlib
-import uuid
 
-# Must be removed, used only for debug purposes
-import logging
-
-from dff.script import RESPONSE, TRANSITIONS, Message, Context
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+from chatsky.script import RESPONSE, TRANSITIONS, Message, Context
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.messengers.common import CallbackMessengerInterface
+from chatsky.pipeline import Pipeline
+import chatsky.script.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {
@@ -17,19 +14,19 @@ SCRIPT = {
             RESPONSE: {
                 "text": "",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
         },
         "node1": {
             RESPONSE: {
                 "text": "Pong",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
         },
         "fallback_node": {
             RESPONSE: {
                 "text": "Ooops",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
         },
     }
 }
@@ -45,7 +42,7 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's Chatsky powered bot, let's chat!")
 
     def loop() -> bool:
         loop.runs_left -= 1

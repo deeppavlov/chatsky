@@ -9,7 +9,7 @@ and %mddoclink(api,pipeline.service.extra,AfterHandler)
 are shown as additional means of data processing, attached to services.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
@@ -18,16 +18,21 @@ import logging
 import random
 from datetime import datetime
 
-from dff.script import Context
+from chatsky.script import Context
 
-from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo, ACTOR
+from chatsky.pipeline import (
+    Pipeline,
+    ServiceGroup,
+    ExtraHandlerRuntimeInfo,
+    ACTOR,
+)
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

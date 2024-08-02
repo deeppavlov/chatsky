@@ -13,7 +13,7 @@ from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-_distribution_metadata = importlib.metadata.metadata('dff')
+_distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
 copyright = "2023, DeepPavlov"
@@ -102,7 +102,7 @@ nbsphinx_thumbnails = {
 
 html_context = {
     "github_user": "deeppavlov",
-    "github_repo": "dialog_flow_framework",
+    "github_repo": "chatsky",
     "github_version": "master",
     "doc_path": "docs/source",
 }
@@ -115,8 +115,8 @@ html_css_files = [
 html_theme_options = {
     "header_links_before_dropdown": 5,
     "logo": {
-        "alt_text": "DFF logo (simple and nice)",
-        "text": "Dialog Flow Framework",
+        "alt_text": "Chatsky logo (simple and nice)",
+        "text": "Chatsky",
     },
     "icon_links": [
         {
@@ -133,7 +133,7 @@ html_theme_options = {
         },
         {
             "name": "GitHub",
-            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "url": "https://github.com/deeppavlov/chatsky",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
@@ -152,7 +152,7 @@ autodoc_default_options = {
     "undoc-members": False,
     "private-members": True,
     "member-order": "bysource",
-    "exclude-members": "_abc_impl, model_fields",
+    "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
 
 
@@ -183,19 +183,22 @@ def setup(_):
                     ("responses", "Responses"),
                 ],
             ),
+            ("tutorials.slots", "Slots"),
             ("tutorials.utils", "Utils"),
             ("tutorials.stats", "Stats"),
         ]
     )
     regenerate_apiref(
         [
-            ("dff.context_storages", "Context Storages"),
-            ("dff.messengers", "Messenger Interfaces"),
-            ("dff.pipeline", "Pipeline"),
-            ("dff.script", "Script"),
-            ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Testing Utils"),
-            ("dff.utils.turn_caching", "Caching"),
-            ("dff.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.context_storages", "Context Storages"),
+            ("chatsky.messengers", "Messenger Interfaces"),
+            ("chatsky.pipeline", "Pipeline"),
+            ("chatsky.script", "Script"),
+            ("chatsky.slots", "Slots"),
+            ("chatsky.stats", "Stats"),
+            ("chatsky.utils.testing", "Testing Utils"),
+            ("chatsky.utils.turn_caching", "Caching"),
+            ("chatsky.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.utils.devel", "Development Utils"),
         ]
     )

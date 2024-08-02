@@ -13,15 +13,15 @@ Caches are kept in a library-wide singleton
 and are cleared at the end of each turn.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script.conditions import true
-from dff.script import Context, TRANSITIONS, RESPONSE, Message
-from dff.script.labels import repeat
-from dff.pipeline import Pipeline
-from dff.utils.turn_caching import cache
-from dff.utils.testing.common import (
+from chatsky.script.conditions import true
+from chatsky.script import Context, TRANSITIONS, RESPONSE, Message
+from chatsky.script.labels import repeat
+from chatsky.pipeline import Pipeline
+from chatsky.utils.turn_caching import cache
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -47,9 +47,7 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _, *__, **___) -> Message:
-    if ctx.validation:
-        return Message()
+def response(_: Context, __: Pipeline) -> Message:
     return Message(
         text=f"{cached_response(1)}-{cached_response(2)}-"
         f"{cached_response(1)}-{cached_response(2)}"
@@ -62,9 +60,9 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(), Message("1-2-1-2")),
-    (Message(), Message("3-4-3-4")),
-    (Message(), Message("5-6-5-6")),
+    (Message(), "1-2-1-2"),
+    (Message(), "3-4-3-4"),
+    (Message(), "5-6-5-6"),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))

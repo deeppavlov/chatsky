@@ -3,19 +3,19 @@
 # Core: 6. Context serialization
 
 This tutorial shows context serialization.
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Message
-import dff.script.conditions as cnd
+from chatsky.script import TRANSITIONS, RESPONSE, Context, Message
+import chatsky.script.conditions as cnd
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -46,10 +46,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message("hi"), Message("answer 1")),
-    (Message("how are you?"), Message("answer 2")),
-    (Message("ok"), Message("answer 3")),
-    (Message("good"), Message("answer 4")),
+    ("hi", "answer 1"),
+    ("how are you?", "answer 2"),
+    ("ok", "answer 3"),
+    ("good", "answer 4"),
 )
 
 # %% [markdown]

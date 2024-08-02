@@ -6,7 +6,7 @@ This tutorial shows how to use an API endpoint
 created in the FastAPI tutorial in load testing.
 """
 
-# %pip install dff locust
+# %pip install chatsky locust
 
 # %% [markdown]
 """
@@ -52,12 +52,12 @@ import sys
 
 from locust import FastHttpUser, task, constant, main
 
-from dff.script import Message
-from dff.utils.testing import HAPPY_PATH, is_interactive_mode
+from chatsky.script import Message
+from chatsky.utils.testing import HAPPY_PATH, is_interactive_mode
 
 
 # %%
-class DFFUser(FastHttpUser):
+class ChatskyUser(FastHttpUser):
     wait_time = constant(1)
 
     def check_happy_path(self, happy_path):

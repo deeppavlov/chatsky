@@ -1,59 +1,40 @@
-"""
-These tests check that pipelines defined in tutorials follow `happy_path` defined in the same tutorials.
-"""
-
-import importlib
-import logging
+from importlib import import_module
+from json import loads
+from pathlib import Path
 
 import pytest
 
-try:
-    import telebot  # noqa: F401
-    import telethon  # noqa: F401
-except ImportError:
-    pytest.skip(reason="`telegram` is not available", allow_module_level=True)
-
+from chatsky.messengers.telegram import telegram_available
+from chatsky.script.core.message import DataAttachment
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.common import check_happy_path
-from dff.utils.testing.telegram import TelegramTesting, replace_click_button
+
+if telegram_available:
+    from tests.messengers.telegram.utils import cast_dict_to_happy_step, MockApplication
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
+happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
 
 
+@pytest.mark.skipif(not telegram_available, reason="Telegram dependencies missing")
 @pytest.mark.parametrize(
     "tutorial_module_name",
-    [
-        "1_basic",
-        "2_buttons",
-        "3_buttons_with_callback",
-    ],
+    ["1_basic", "2_attachments", "3_advanced"],
 )
-def test_client_tutorials_without_telegram(tutorial_module_name, env_vars):
-    tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
-    pipeline = tutorial_module.pipeline
-    happy_path = tutorial_module.happy_path
-    check_happy_path(pipeline, replace_click_button(happy_path))
+def test_tutorials(tutorial_module_name: str, monkeypatch):
+    def patched_data_attachment_eq(self: DataAttachment, other: DataAttachment):
+        first_copy = self.model_copy()
+        if first_copy.cached_filename is not None:
+            first_copy.cached_filename = first_copy.cached_filename.name
+        second_copy = other.model_copy()
+        if second_copy.cached_filename is not None:
+            second_copy.cached_filename = second_copy.cached_filename.name
+        return super(DataAttachment, first_copy).__eq__(second_copy)
 
+    monkeypatch.setattr(DataAttachment, "__eq__", patched_data_attachment_eq)
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "tutorial_module_name",
-    [
-        "1_basic",
-        "2_buttons",
-        "3_buttons_with_callback",
-        "4_conditions",
-        "5_conditions_with_media",
-        "7_polling_setup",
-    ],
-)
-@pytest.mark.telegram
-async def test_client_tutorials(tutorial_module_name, api_credentials, bot_user, session_file):
-    tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
-    pipeline = tutorial_module.pipeline
-    happy_path = tutorial_module.happy_path
-    test_helper = TelegramTesting(
-        pipeline=pipeline, api_credentials=api_credentials, session_file=session_file, bot=bot_user
-    )
-    logging.info("Test start")
-    await test_helper.check_happy_path(happy_path)
+    monkeypatch.setenv("TG_BOT_TOKEN", "token")
+    happy_path_data = loads(happy_paths_file.read_text())[tutorial_module_name]
+    happy_path_steps = cast_dict_to_happy_step(happy_path_data)
+    module = import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
+    module.interface.application = MockApplication.create(module.interface, happy_path_steps)
+    module.pipeline.run()

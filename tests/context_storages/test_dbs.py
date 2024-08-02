@@ -5,7 +5,7 @@ import socket
 import os
 from platform import system
 
-from dff.context_storages import (
+from chatsky.context_storages import (
     get_protocol_install_suggestion,
     json_available,
     pickle_available,
@@ -20,8 +20,8 @@ from dff.context_storages import (
     context_storage_factory,
 )
 
-from dff.script import Context
-from dff.utils.testing.cleanup_db import (
+from chatsky.script import Context
+from chatsky.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
     delete_pickle,
@@ -32,8 +32,8 @@ from dff.utils.testing.cleanup_db import (
 )
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.pipeline import Pipeline
-from dff.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -91,8 +91,8 @@ def generic_test(db, testing_context, context_id):
 @pytest.mark.parametrize(
     ["protocol", "expected"],
     [
-        ("pickle", "Try to run `pip install dff[pickle]`"),
-        ("postgresql", "Try to run `pip install dff[postgresql]`"),
+        ("pickle", "Try to run `pip install chatsky[pickle]`"),
+        ("postgresql", "Try to run `pip install chatsky[postgresql]`"),
         ("false", ""),
     ],
 )
