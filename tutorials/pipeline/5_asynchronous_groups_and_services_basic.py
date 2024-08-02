@@ -101,6 +101,5 @@ pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
-    assert False
     if is_interactive_mode():
         run_interactive_mode(pipeline)
