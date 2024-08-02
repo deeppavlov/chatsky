@@ -64,7 +64,7 @@ class AbsoluteNodeLabel(NodeLabel):
         if isinstance(context, dict):
             ctx: Context = info.context.get("ctx")
             if ctx is not None:
-                script = ctx.framework_data.pipeline.script
+                script = ctx.pipeline.script
 
                 node = script.get_node(self)
                 if node is None:
@@ -74,6 +74,7 @@ class AbsoluteNodeLabel(NodeLabel):
 
 AbsoluteNodeLabelInitTypes: TypeAlias = Union[
     AbsoluteNodeLabel,
+    NodeLabel,
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
     Annotated[dict, "dict repr of AbsoluteNodeLabel"]
 ]

@@ -68,6 +68,17 @@ class TestBaseFunctionCallWrapper:
         assert len(log_list) == 1
         assert log_list[0].levelname == "DEBUG"
 
+    async def test_base_exception_not_handled(self):
+        class SpecialException(BaseException):
+            pass
+
+        class MyProc(BaseProcessing):
+            async def func(self, ctx):
+                raise SpecialException()
+
+        with pytest.raises(SpecialException):
+            await MyProc().wrapped_call(None)
+
 
 @pytest.mark.parametrize("func_type,data,root_value,return_value", [
     (ConstResponse, "response_text", Message(text="response_text"), Message(text="response_text")),

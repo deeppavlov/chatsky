@@ -46,6 +46,7 @@ async def get_next_label(ctx: Context, transitions: List[Transition], default_pr
         for transition, priority_result in zip(filtered_transitions, priority_results)
         if priority_result is True or priority_result is None or isinstance(priority_result, float)
     ]
+    logger.debug(f"Possible transitions: {transitions_with_priorities!r}")
 
     transitions_with_priorities = sorted(transitions_with_priorities, key=lambda x: x[1], reverse=True)
 

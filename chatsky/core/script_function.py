@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class ScriptFunctionError(Exception):
-    """Raising this class in a user function will produce a debug level log."""
+    """Raising this class in a user function will produce a debug level log instead of warning."""
 
 
 ReturnType = TypeVar("ReturnType")
@@ -28,7 +28,7 @@ class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType]):
 
     @abstractmethod
     async def func(self, ctx: Context):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     async def wrapped_call(self, ctx: Context, info: str = "") -> ReturnType | Exception:
         try:
