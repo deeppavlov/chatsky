@@ -44,13 +44,24 @@ This is convenient if you have a bunch of functions,
 that you want to run simultaneously,
 but don't want to make a service for each of them.
 
-Here is a service group with the flag 'all_async' set to 'True',
-that contains 10 services, each of them should sleep for 0.01 of a second.
+Here, "pre_services" is a service group with the flag
+'all_async' set to 'True', that contains 10 services,
+each of them should sleep for 0.01 of a second.
 However, as the group is fully asynchronous,
 it is being executed for 0.01 of a second in total.
 The same would happen if all of those services were marked as 'asynchronous'.
 Once again, by default, all services inside a
-service group are executed sequentially.
+service group are executed sequentially if they
+weren't explicitly marked as asynchronous.
+
+To further demonstrate ServiceGroup's logic,
+"post_services" is a ServiceGroup with asynchronous components 'A' and 'B',
+which execute simultaneously, and also one non-async component 'C' at the end.
+If 'A' and 'B' weren't async, then all steps for component 'A'
+would pass first and only then would execution start for
+component 'B', but instead they start
+at the same time. Only after both of them have finished,
+does component 'C' start working.
 """
 
 
@@ -92,6 +103,15 @@ pipeline_dict = {
                 interact("Finishing interaction", "B"),
             ],
             asynchronous=True,
+        ),
+        ServiceGroup(
+            name="InteractWithServiceC",
+            components=[
+                interact("Starting interaction", "C"),
+                interact("Interacting", "C"),
+                interact("Finishing interaction", "C"),
+            ],
+            asynchronous=False,
         ),
     ],
 }
