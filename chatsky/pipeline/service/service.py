@@ -48,7 +48,7 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param requested_async_flag: Requested asynchronous property.
+    :param asynchronous: Requested asynchronous property.
     :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
         service is executed only if it returns `True`.
     :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
