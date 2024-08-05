@@ -11,7 +11,7 @@ try:
     # from langchain_cohere import ChatCohere
     # from langchain_mistralai import ChatMistralAI
     from langchain.output_parsers import ResponseSchema, StructuredOutputParser
-    from langchain_core.messages import HumanMessage, SystemMessage
+    from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
     from langchain_core.output_parsers import StrOutputParser
     langchain_available = True
 except ImportError:
@@ -108,15 +108,19 @@ def llm_response(
     """
     def wrapped(ctx: Context, pipeline: Pipeline):
         model = pipeline.models[model_name]
-        history_messages = []
+        if model.system_prompt == "":
+            history_messages = []
+        else:
+            history_messages = [SystemMessage(model.system_prompt)]
         if history == 0:
-            return model.respond([prompt + "\n" + ctx.last_request.text])
+            return model.respond(history_messages+[prompt + "\n" + ctx.last_request.text])
         else:
             pairs = zip([ctx.requests[x] for x in range(len(ctx.requests))],
                      [ctx.responses[x] for x in range(len(ctx.responses))])
             for req, resp in filter(lambda x: filter_func(x), list(pairs)[-history:]):
                 history_messages.append(message_to_langchain(req))
                 history_messages.append(message_to_langchain(resp, human=False))
+            history_messages.append(message_to_langchain(ctx.last_request, prompt=prompt))    
             print(history_messages)
             return model.respond(history_messages)
     return wrapped
@@ -150,8 +154,8 @@ def __attachment_to_content(attachment: Image) -> str:
     return image_b64
 
 
-def message_to_langchain(message: Message, human=True):
-    content = [{"type": "text", "text": message.text}]
+def message_to_langchain(message: Message, prompt: str= "", human: bool=True):
+    content = [{"type": "text", "text": prompt + "\n" + message.text}]
     if message.attachments:
         for image in message.attachments:
             if image is not Image:
@@ -162,4 +166,4 @@ def message_to_langchain(message: Message, human=True):
     if human:
         return HumanMessage(content=content)
     else:
-        return SystemMessage(content=content)
+        return AIMessage(content=content)
