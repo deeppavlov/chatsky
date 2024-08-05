@@ -247,4 +247,4 @@ def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Contex
                 db.clear()
             else:
                 db.clear(prune_history=True)
-            test(db, Context.cast(frozen_ctx), context_id)
+            test(db, Context.model_validate_json(frozen_ctx), context_id)

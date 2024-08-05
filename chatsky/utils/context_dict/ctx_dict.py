@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar
+from asyncio import gather
+from typing import Any, Awaitable, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union, Literal
 
 from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
@@ -7,61 +8,102 @@ from chatsky.context_storages.database import DBContextStorage
 K, V = TypeVar("K"), TypeVar("V")
 
 
+async def launch_coroutines(coroutines: List[Awaitable], is_async: bool) -> List[Any]:
+    if is_async:
+        return await gather(*coroutines)
+    else:
+        return [await coroutine for coroutine in coroutines]
+
+
 class ContextDict(BaseModel, Generic[K, V]):
+    WRITE_KEY: Literal["WRITE"] = "WRITE"
+    DELETE_KEY: Literal["DELETE"] = "DELETE"
+
     _write_full_diff: bool = PrivateAttr(False)
-    _attached: bool = PrivateAttr(False)
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _keys: List[K] = PrivateAttr(default_factory=list)
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
     _field_name: str = PrivateAttr(default_factory=str)
+    _field_constructor: Callable[[Dict[str, Any]], V] = PrivateAttr(default_factory=dict)
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
     _added: List[K] = PrivateAttr(default_factory=list)
+    _removed: List[K] = PrivateAttr(default_factory=list)
 
     _marker: object = PrivateAttr(object())
 
     @classmethod
-    async def connect(cls, storage: DBContextStorage, id: str, field: str, write_full_diff: bool = False) -> "ContextDict":
-        keys = await storage.load_field_keys(id, field)
-        items = await storage.load_field_latest(id, field)
+    async def new(cls, storage: DBContextStorage, id: str) -> "ContextDict":
+        instance = cls()
+        instance._storage = storage
+        instance._ctx_id = id
+        return instance
+
+    @classmethod
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = dict, write_full_diff: bool = False) -> "ContextDict":
+        keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
         hashes = {k: hash(v) for k, v in items.items()}
         instance = cls.model_validate(items)
         instance._write_full_diff = write_full_diff
-        instance._attached = True
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
+        instance._field_constructor = constructor
         instance._keys = keys
         instance._hashes = hashes
         return instance
 
-    async def __getitem__(self, key: K) -> V:
-        if key not in self._items.keys() and self._attached and self._write_full_diff:
-            self._items[key] = await self._storage.load_field_item(self._ctx_id, self._field_name, key)
-            self._hashes[key] = hash(self._items[key])
-        return self._items[key]
+    async def _load_items(self, keys: List[K]) -> Dict[K, V]:
+        items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
+        for key, item in zip(keys, items):
+            self._items[key] = self._field_constructor(item)
+            self._hashes[key] = hash(item)
 
-    def __setitem__(self, key: K, value: V) -> None:
-        if self._attached:
-            self._added += [key]
-            if self._write_full_diff:
-                self._hashes[key] = None
-        self._items[key] = value
-
-    def __delitem__(self, key: K) -> None:
-        if self._attached:
-            self._added = [v for v in self._added if v is not key]
-            if self._write_full_diff:
-                self._items[key] = None
+    async def __getitem__(self, key: Union[K, slice]) -> V:
+        if self._storage is not None and self._write_full_diff:
+            if isinstance(key, slice):
+                await self._load_items([k for k in range(len(self._keys))[key] if k not in self._items.keys()])
+            elif key not in self._items.keys():
+                await self._load_items([key])
+        if isinstance(key, slice):
+            return {k: await self._items[k] for k in range(len(self._items.keys()))[key]}
         else:
+            return self._items[key]
+
+    def __setitem__(self, key: Union[K, slice], value: Union[V, Sequence[V]]) -> None:
+        if isinstance(key, slice) and isinstance(value, Sequence):
+            if len(key) != len(value):
+                raise ValueError("Slices must have the same length!")
+            for k, v in zip(range(len(self._keys))[key], value):
+                self[k] = v
+        elif not isinstance(key, slice) and not isinstance(value, Sequence):
+            self._keys += [key]
+            if key not in self._items.keys():
+                self._added += [key]
+            if key in self._removed:
+                self._removed.remove(key)
+            self._items[key] = value
+        else:
+            raise ValueError("Slice key must have sequence value!")
+
+    def __delitem__(self, key: Union[K, slice]) -> None:
+        if isinstance(key, slice):
+            for k in range(len(self._keys))[key]:
+                del self[k]
+        else:
+            self._removed += [key]
+            if key in self._items.keys():
+                self._keys.remove(key)
+            if key in self._added:
+                self._added.remove(key)
             del self._items[key]
 
     def __iter__(self) -> Sequence[K]:
-        return iter(self._keys if self._attached else self._items.keys())
+        return iter(self._keys if self._storage is not None else self._items.keys())
     
     def __len__(self) -> int:
-        return len(self._keys if self._attached else self._items.keys())
+        return len(self._keys if self._storage is not None else self._items.keys())
 
     async def get(self, key: K, default: V = _marker) -> V:
         try:
@@ -138,17 +180,26 @@ class ContextDict(BaseModel, Generic[K, V]):
     @model_validator(mode="wrap")
     def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":
         instance = handler(dict())
-        if all([isinstance(k, int) for k in value.keys()]):
-            instance._items = {key: value[key] for key in sorted(value)}
-        else:
-            instance._items = value
+        instance._items = {key: value[key] for key in sorted(value)}
         return instance
 
     @model_serializer()
     def _serialize_model(self) -> Dict[K, V]:
-        if not self._attached:
+        if self._storage is None:
             return self._items
         elif self._write_full_diff:
             return {k: v for k, v in self._items.items() if hash(v) != self._hashes[k]}
         else:
             return {k: self._items[k] for k in self._added}
+
+    async def store(self) -> None:
+        if self._storage is not None:
+            await launch_coroutines(
+                [
+                    self._storage.update_field_items(self._ctx_id, self._field_name, self.model_dump()),
+                    self._storage.delete_field_keys(self._ctx_id, self._field_name, self._removed),
+                ],
+                self._storage.is_asynchronous,
+            )
+        else:
+            raise RuntimeError("ContextDict is not attached to any context storage!")

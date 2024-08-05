@@ -25,11 +25,12 @@ from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, PrivateAttr
 
+from chatsky.context_storages.database import DBContextStorage
 from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
 from chatsky.pipeline.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
-from chatsky.utils.context_dict.ctx_dict import ContextDict
+from chatsky.utils.context_dict.ctx_dict import ContextDict, launch_coroutines
 
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
@@ -46,6 +47,12 @@ def get_last_index(dictionary: dict) -> int:
     """
     indices = list(dictionary)
     return indices[-1] if indices else -1
+
+
+class Turn(BaseModel):
+    label: NodeLabel2Type
+    request: Message
+    response: Message
 
 
 class FrameworkData(BaseModel):
@@ -71,16 +78,9 @@ class Context(BaseModel):
     context storages to work.
     """
 
-    _storage_key: Optional[str] = PrivateAttr(default=None)
+    primary_id: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
     """
-    `_storage_key` is the storage-unique context identifier, by which it's stored in context storage.
-    By default, randomly generated using `uuid4` `_storage_key` is used.
-    `_storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
-    """
-    _primary_id: str = PrivateAttr(default_factory=lambda: str(uuid4()))
-    """
-    `_primary_id` is the unique context identifier. By default, randomly generated using `uuid4` `_primary_id` is used.
-    `_primary_id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    `primary_id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
     """
     _created_at: int = PrivateAttr(default_factory=time_ns)
     """
@@ -92,26 +92,12 @@ class Context(BaseModel):
     Timestamp when the context was **last time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
-    labels: ContextDict[int, NodeLabel2Type] = Field(default_factory=ContextDict)
+    turns: ContextDict[int, Turn] = Field(default_factory=ContextDict)
     """
-    `labels` stores the history of all passed `labels`
+    `turns` stores the history of all passed `labels`, `requests`, and `responses`.
 
         - key - `id` of the turn.
         - value - `label` on this turn.
-    """
-    requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
-    """
-    `requests` stores the history of all `requests` received by the agent
-
-        - key - `id` of the turn.
-        - value - `request` on this turn.
-    """
-    responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
-    """
-    `responses` stores the history of all agent `responses`
-
-        - key - `id` of the turn.
-        - value - `response` on this turn.
     """
     misc: ContextDict[str, Any] = Field(default_factory=ContextDict)
     """
@@ -128,33 +114,41 @@ class Context(BaseModel):
     This attribute is used for storing custom data required for pipeline execution.
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
+    _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
-        """
-        Transform different data types to the objects of the
-        :py:class:`~.Context` class.
-        Return an object of the :py:class:`~.Context`
-        type that is initialized by the input data.
-
-        :param ctx: Data that is used to initialize an object of the
-            :py:class:`~.Context` type.
-            An empty :py:class:`~.Context` object is returned if no data is given.
-        :return: Object of the :py:class:`~.Context`
-            type that is initialized by the input data.
-        """
-        if not ctx:
-            ctx = Context(*args, **kwargs)
-        elif isinstance(ctx, dict):
-            ctx = Context.model_validate(ctx)
-        elif isinstance(ctx, str):
-            ctx = Context.model_validate_json(ctx)
-        elif not isinstance(ctx, Context):
-            raise ValueError(
-                f"Context expected to be an instance of the Context class "
-                f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
+    async def connect(cls, id: Optional[str], storage: Optional[DBContextStorage] = None) -> Context:
+        if storage is None:
+            return cls(id=id)
+        else:
+            (crt_at, upd_at, fw_data), turns, misc = await launch_coroutines(
+                [
+                    storage.load_main_info(id),
+                    ContextDict.connected(storage, id, "turns"),
+                    ContextDict.connected(storage, id, "misc")
+                ],
+                storage.is_asynchronous,
             )
-        return ctx
+            return cls(id=id, _created_at=crt_at, _updated_at=upd_at, framework_data=fw_data, turns=turns, misc=misc)
+
+    async def store(self) -> None:
+        if self._storage is not None:
+            await launch_coroutines(
+                [
+                    self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, self.framework_data),
+                    self.turns.store(),
+                    self.misc.store(),
+                ],
+                self._storage.is_asynchronous,
+            )
+        else:
+            raise RuntimeError("Context is not attached to any context storage!")
+
+    async def delete(self) -> None:
+        if self._storage is not None:
+            await self._storage.delete_main_info(self.primary_id)
+        else:
+            raise RuntimeError("Context is not attached to any context storage!")
 
     def add_request(self, request: Message):
         """
@@ -216,14 +210,6 @@ class Context(BaseModel):
                 del self.labels[index]
         if "framework_data" in field_names:
             self.framework_data = FrameworkData()
-
-    @property
-    def storage_key(self) -> Optional[str]:
-        """
-        Returns the key the context was saved in storage the last time.
-        Returns None if the context wasn't saved yet.
-        """
-        return self._storage_key
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -299,7 +285,7 @@ class Context(BaseModel):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Context):
             return (
-                self._primary_id == value._primary_id
+                self.primary_id == value.primary_id
                 and self.labels == value.labels
                 and self.requests == value.requests
                 and self.responses == value.responses

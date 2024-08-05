@@ -202,7 +202,7 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
         for field_name, log_dict in tasks.items():
             ctx_dict[field_name].update(log_dict)
 
-        ctx = Context.cast(ctx_dict)
+        ctx = Context.model_validate(ctx_dict)
         setattr(ctx, ExtraFields.primary_id.value, primary_id)
         setattr(ctx, ExtraFields.storage_key.value, storage_key)
         return ctx
