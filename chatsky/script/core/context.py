@@ -124,7 +124,7 @@ class Context(BaseModel):
             (crt_at, upd_at, fw_data), turns, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, "turns"),
+                    ContextDict.connected(storage, id, "turns", Turn.model_validate),
                     ContextDict.connected(storage, id, "misc")
                 ],
                 storage.is_asynchronous,

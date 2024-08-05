@@ -19,17 +19,16 @@ class ContextDict(BaseModel, Generic[K, V]):
     WRITE_KEY: Literal["WRITE"] = "WRITE"
     DELETE_KEY: Literal["DELETE"] = "DELETE"
 
-    _write_full_diff: bool = PrivateAttr(False)
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _keys: List[K] = PrivateAttr(default_factory=list)
+    _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
+    _added: List[K] = PrivateAttr(default_factory=list)
+    _removed: List[K] = PrivateAttr(default_factory=list)
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
     _field_name: str = PrivateAttr(default_factory=str)
     _field_constructor: Callable[[Dict[str, Any]], V] = PrivateAttr(default_factory=dict)
-    _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
-    _added: List[K] = PrivateAttr(default_factory=list)
-    _removed: List[K] = PrivateAttr(default_factory=list)
 
     _marker: object = PrivateAttr(object())
 
@@ -41,11 +40,10 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = dict, write_full_diff: bool = False) -> "ContextDict":
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = dict) -> "ContextDict":
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
         hashes = {k: hash(v) for k, v in items.items()}
         instance = cls.model_validate(items)
-        instance._write_full_diff = write_full_diff
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
@@ -61,7 +59,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             self._hashes[key] = hash(item)
 
     async def __getitem__(self, key: Union[K, slice]) -> V:
-        if self._storage is not None and self._write_full_diff:
+        if self._storage is not None and self._storage.rewrite_existing:
             if isinstance(key, slice):
                 await self._load_items([k for k in range(len(self._keys))[key] if k not in self._items.keys()])
             elif key not in self._items.keys():
@@ -187,7 +185,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     def _serialize_model(self) -> Dict[K, V]:
         if self._storage is None:
             return self._items
-        elif self._write_full_diff:
+        elif self._storage.rewrite_existing:
             return {k: v for k, v in self._items.items() if hash(v) != self._hashes[k]}
         else:
             return {k: self._items[k] for k in self._added}
