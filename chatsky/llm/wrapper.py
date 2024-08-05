@@ -154,8 +154,12 @@ def __attachment_to_content(attachment: Image) -> str:
     return image_b64
 
 
-def message_to_langchain(message: Message, prompt: str= "", human: bool=True):
-    content = [{"type": "text", "text": prompt + "\n" + message.text}]
+def message_to_langchain(message: Message, prompt: str= "", human: bool=True) -> HumanMessage|AIMessage:
+    if prompt:
+        content = [{"type": "text", "text": prompt + "\n" + message.text}]
+    else:
+        content = [{"type": "text", "text": message.text}]
+        
     if message.attachments:
         for image in message.attachments:
             if image is not Image:

@@ -15,13 +15,16 @@ Chatsky uses langchain under the hood to connect to the remote models.
 from chatsky.script import Message
 from chatsky.script.conditions import exact_match
 from chatsky.script.conditions import std_conditions as cnd
+from chatsky.script import labels as lbl
 from chatsky.script import RESPONSE, TRANSITIONS
 from chatsky.pipeline import Pipeline
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.script.responses.llm.llm_response import LLMResponse
+from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
+from chatsky.llm.methods import Contains
+
 
 import getpass
 import os
@@ -39,7 +42,7 @@ Alternatively you can instantiate model object inside of RESPONSE field in the n
 """
 
 # %%
-model = LLMResponse(ChatOpenAI(model="gpt-3.5-turbo"), system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.")
+model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"), system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.")
 
 # %% [markdown]
 """
@@ -54,22 +57,31 @@ toy_script = {
             TRANSITIONS: {"greeting_node": exact_match("Hi")},
         },
         "greeting_node": {
-            RESPONSE: model.respond(),
-            TRANSITIONS: {"main_node": exact_match("i'm fine, how are you?")},
+            RESPONSE: llm_response(model_name="barista_model", history=0),
+            TRANSITIONS: {"main_node": exact_match("Who are you?")},
         },
         "main_node": {
-            RESPONSE: model.respond(),
+            RESPONSE: llm_response(model_name="barista_model"),
             TRANSITIONS: {
                 "latte_art_node": exact_match("Tell me about latte art."),
-                "image_desc_node": exact_match("Tell me what coffee is it?")},
+                "image_desc_node": exact_match("Tell me what coffee is it?"),
+                "boss_node": llm_condition(model_name="barista_model", prompt="PROMPT: return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.", method=Contains(pattern="TRUE")),
+                lbl.repeat(): cnd.true()},
+        },
+        "boss_node": {
+            RESPONSE: Message("Input your ID number."),
+            TRANSITIONS: {
+                "main_node": cnd.true(),
+            },
         },
         "latte_art_node": {
-            RESPONSE: model.respond(prompt="PROMPT: pretend that you have never heard about latte art before."),
-            TRANSITIONS: {"image_desc_node": exact_match("Ok, goodbye.")},
+            # we can pass a node-specific prompt to a LLM.
+            RESPONSE: llm_response(model_name="barista_model", prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it."),
+            TRANSITIONS: {"main_node": exact_match("Ok, goodbye.")},
         },
         "image_desc_node": {
             # we expect user to send some images of coffee.
-            RESPONSE: model.respond(prompt="PROMPT: user will give you some images of coffee. Describe them."),
+            RESPONSE: llm_response(model_name="barista_model", prompt="PROMPT: user will give you some images of coffee. Describe them."),
             TRANSITIONS: {"main_node": cnd.true()},
         },
         "fallback_node": {
