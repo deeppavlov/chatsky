@@ -123,27 +123,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
 
-    def log_optimization_warnings(self):
-        """
-        Method for logging service group optimization warnings for all this groups inner components.
-        (NOT this group itself!).
-        Warnings are basically messages,
-        that indicate service group inefficiency or explicitly defined parameters mismatch.
-        These are cases for warnings issuing:
-
-        - Service is not asynchronous, however has a timeout defined.
-
-        :return: `None`
-        """
-        for service in self.components:
-            if not isinstance(service, ServiceGroup):
-                if not service.asynchronous and service.timeout is not None:
-                    logger.warning(
-                        f"Timeout can not be applied for PipelineComponent '{service.name}': it's not asynchronous!"
-                    )
-            else:
-                service.log_optimization_warnings()
-
     def add_extra_handler(
         self,
         global_extra_handler_type: GlobalExtraHandlerType,

@@ -71,11 +71,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to pipeline root service group.
-    :param optimization_warnings: Asynchronous pipeline optimization check request flag;
-        warnings will be sent to logs. Additionally, it has some calculated fields:
-
-        - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-        - `actor` is a pipeline actor, found among services.
     :param parallelize_processing: This flag determines whether or not the functions
         defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
         of the script should be parallelized over respective groups.
@@ -96,7 +91,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     before_handler: ComponentExtraHandler = Field(default_factory=list)
     after_handler: ComponentExtraHandler = Field(default_factory=list)
     timeout: Optional[float] = None
-    optimization_warnings: bool = False
     parallelize_processing: bool = False
     actor: Optional[Actor] = None
     _services_pipeline: Optional[ServiceGroup] = None
@@ -129,9 +123,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         self.actor = self._create_actor()
         self._services_pipeline = self._create_pipeline_services()
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
-
-        if self.optimization_warnings:
-            self._services_pipeline.log_optimization_warnings()
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
