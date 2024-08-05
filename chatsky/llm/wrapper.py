@@ -126,8 +126,6 @@ def llm_response(
     return wrapped
 
 def llm_condition(
-        ctx: Context,
-        pipeline: Pipeline,
         model_name: str,
         prompt: str,
         method: BaseMethod
@@ -135,8 +133,10 @@ def llm_condition(
     """
     Basic function for using LLM in condition cases.
     """
-    model = pipeline.models[model_name]
-    return method(model.condition(prompt, method))
+    def wrapped(ctx, pipeline):
+        model = pipeline.models[model_name]
+        return model.condition(prompt, method)
+    return wrapped
 
 
 def __attachment_to_content(attachment: Image) -> str:

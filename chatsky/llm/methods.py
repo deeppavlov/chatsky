@@ -21,6 +21,7 @@ class BaseMethod(BaseModel, abc.ABC):
 class Contains(BaseMethod):
     pattern: str
     async def __call__(ctx: Context, model_result: str, pattern: str="") -> bool:
+        print("Model result:", model_result)
         return await bool(pattern.lower() in model_result.lower())
 
 class DeepEvalMethod(BaseMethod):
