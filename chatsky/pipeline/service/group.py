@@ -98,7 +98,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         Method for running this service group. It doesn't include extra handlers execution,
         start condition checking or error handling - pure execution only.
         If this ServiceGroup's `all_async` flag is set to True (it's False by default)
-        then all `components` will run simultaneously. Otherwise ServiceGroup's default logic will apply,
+        then all `components` will run simultaneously. Otherwise, ServiceGroup's default logic will apply,
         which is running all sequential components one after another with groups of asynchronous components in between.
         You could say that a group of adjacent 'asynchronous' components is a sequential component itself.
         Collects information about components execution state - group is finished successfully
@@ -108,7 +108,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         :param pipeline: The current pipeline.
         """
         if self.all_async:
-            await self._run_sync_component(ctx, pipeline, self.components)
+            await self._run_async_components(ctx, pipeline, self.components)
         else:
             current_subgroup = []
             for component in self.components:
