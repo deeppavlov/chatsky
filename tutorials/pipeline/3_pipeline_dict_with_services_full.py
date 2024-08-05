@@ -55,9 +55,6 @@ defined as a dictionary of a particular structure:
         a `ComponentExtraHandler` object.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
-* `optimization_warnings` - Whether pipeline asynchronous structure
-        should be checked during initialization,
-        see tutorial 5.
 
 On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'

@@ -93,11 +93,6 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     _clean_turn_cache: Optional[bool] = True
 
     @model_validator(mode="after")
-    def tick_async_flag(self):
-        self.calculated_async_flag = False
-        return self
-
-    @model_validator(mode="after")
     def actor_validator(self):
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)

@@ -58,9 +58,10 @@ Alternatively, the groups can be defined as objects
         a `ComponentExtraHandler` object.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
-* `asynchronous` - Whether or not this service group _should_ be asynchronous
-    (keep in mind that not all service groups _can_ be asynchronous),
-    see tutorial 5.
+* `asynchronous` - Whether or not this service group should be 
+    asynchronous to other components
+* `all_async` - Whether or not this service group should run
+    all it's components asynchronously.
 * `start_condition` - Service group start condition.
 * `name` - Custom defined name for the service group
     (keep in mind that names in one ServiceGroup should be unique).
@@ -69,13 +70,6 @@ Service (and service group) object fields
 are mostly the same as constructor parameters,
 however there are some differences:
 
-* `requested_async_flag` - Contains the value received
-    from `asynchronous` constructor parameter.
-* `calculated_async_flag` - Contains automatically calculated
-    possibility of the service to be asynchronous.
-* `asynchronous` - Combination af `..._async_flag` fields,
-    requested value overrides calculated (if not `None`),
-    see tutorial 5.
 * `path` - Contains globally unique (for pipeline)
     path to the service or service group.
 

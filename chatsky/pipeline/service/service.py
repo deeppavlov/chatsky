@@ -48,7 +48,7 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param requested_async_flag: Requested asynchronous property.
+    :param asynchronous: Requested asynchronous property.
     :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
         service is executed only if it returns `True`.
     :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
@@ -64,11 +64,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         if not isinstance(data, dict):
             return {"handler": data}
         return data
-
-    @model_validator(mode="after")
-    def tick_async_flag(self):
-        self.calculated_async_flag = True
-        return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -114,7 +109,7 @@ def to_service(
     before_handler: BeforeHandler = None,
     after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
-    asynchronous: Optional[bool] = None,
+    asynchronous: bool = False,
     start_condition: StartConditionCheckerFunction = always_start_condition,
     name: Optional[str] = None,
 ):
@@ -132,7 +127,7 @@ def to_service(
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            requested_async_flag=asynchronous,
+            asynchronous=asynchronous,
             start_condition=start_condition,
             name=name,
         )

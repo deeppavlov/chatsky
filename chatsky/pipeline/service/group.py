@@ -48,7 +48,10 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param requested_async_flag: Requested asynchronous property.
+    :param asynchronous: Optional flag that indicates whether the components inside
+        should be executed concurrently. The default value of the flag is False.
+    :param all_async: Optional flag that, if set to True, makes the `ServiceGroup` run
+        all components inside it asynchronously. Default value is False.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
         group is executed only if it returns `True`.
     :param name: Requested group name.
@@ -61,6 +64,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             ServiceGroup,
         ]
     ]
+    all_async: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -75,74 +79,49 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             result["components"] = [result["components"]]
         return result
 
-    @model_validator(mode="after")
-    def calculate_async_flag(self):
-        self.calculated_async_flag = all([service.asynchronous for service in self.components])
-        return self
+    async def _run_async_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
+        service_futures = [service(ctx, pipeline) for service in components]
+        for service, future in zip(components, await asyncio.gather(*service_futures, return_exceptions=True)):
+            service_result = future
+            if service.asynchronous and isinstance(service_result, Awaitable):
+                await service_result
+            elif isinstance(service_result, asyncio.TimeoutError):
+                logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
+
+    async def _run_sync_component(self, ctx: Context, pipeline: Pipeline, component: Any) -> None:
+        service_result = await component(ctx, pipeline)
+        if component.asynchronous and isinstance(service_result, Awaitable):
+            await service_result
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
-        Method for running this service group. Catches runtime exceptions and logs them.
-        It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
-        Executes components inside the group based on its `asynchronous` property.
-        Collects information about their execution state - group is finished successfully
+        Method for running this service group. It doesn't include extra handlers execution,
+        start condition checking or error handling - pure execution only.
+        If this ServiceGroup's `all_async` flag is set to True (it's False by default)
+        then all `components` will run simultaneously. Otherwise, ServiceGroup's default logic will apply,
+        which is running all sequential components one after another with groups of asynchronous components in between.
+        You could say that a group of adjacent 'asynchronous' components is a sequential component itself.
+        Collects information about components execution state - group is finished successfully
         only if all components in it finished successfully.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
         """
-        if self.asynchronous:
-            service_futures = [service(ctx, pipeline) for service in self.components]
-            for service, future in zip(self.components, await asyncio.gather(*service_futures, return_exceptions=True)):
-                service_result = future
-                if service.asynchronous and isinstance(service_result, Awaitable):
-                    await service_result
-                elif isinstance(service_result, asyncio.TimeoutError):
-                    logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
-
+        if self.all_async:
+            await self._run_async_components(ctx, pipeline, self.components)
         else:
-            for service in self.components:
-                service_result = await service(ctx, pipeline)
-                if service.asynchronous and isinstance(service_result, Awaitable):
-                    await service_result
+            current_subgroup = []
+            for component in self.components:
+                if component.asynchronous:
+                    current_subgroup.append(component)
+                else:
+                    await self._run_async_components(ctx, pipeline, current_subgroup)
+                    await self._run_sync_component(ctx, pipeline, component)
+                    current_subgroup = []
+            await self._run_async_components(ctx, pipeline, current_subgroup)
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
-
-    def log_optimization_warnings(self):
-        """
-        Method for logging service group optimization warnings for all this groups inner components.
-        (NOT this group itself!).
-        Warnings are basically messages,
-        that indicate service group inefficiency or explicitly defined parameters mismatch.
-        These are cases for warnings issuing:
-
-        - Service can be asynchronous, however is marked synchronous explicitly.
-        - Service is not asynchronous, however has a timeout defined.
-        - Group is not marked synchronous explicitly and contains both synchronous and asynchronous components.
-
-        :return: `None`
-        """
-        for service in self.components:
-            if not isinstance(service, ServiceGroup):
-                if (
-                    service.calculated_async_flag
-                    and service.requested_async_flag is not None
-                    and not service.requested_async_flag
-                ):
-                    logger.warning(f"Service '{service.name}' could be asynchronous!")
-                if not service.asynchronous and service.timeout is not None:
-                    logger.warning(f"Timeout can not be applied for Service '{service.name}': it's not asynchronous!")
-            else:
-                if not service.calculated_async_flag:
-                    if service.requested_async_flag is None and any(
-                        [sub_service.asynchronous for sub_service in service.components]
-                    ):
-                        logger.warning(
-                            f"ServiceGroup '{service.name}' contains both sync and async services, "
-                            "it should be split or marked as synchronous explicitly!",
-                        )
-                service.log_optimization_warnings()
 
     def add_extra_handler(
         self,
