@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
+from typing import Any, Optional, Literal, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, PrivateAttr
 
@@ -78,6 +78,9 @@ class Context(BaseModel):
     context storages to work.
     """
 
+    TURNS_NAME: Literal["turns"] = "turns"
+    MISC_NAME: Literal["misc"] = "misc"
+
     primary_id: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
     """
     `primary_id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
@@ -124,8 +127,8 @@ class Context(BaseModel):
             (crt_at, upd_at, fw_data), turns, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, "turns", Turn.model_validate),
-                    ContextDict.connected(storage, id, "misc")
+                    ContextDict.connected(storage, id, cls.TURNS_NAME, Turn.model_validate),
+                    ContextDict.connected(storage, id, cls.MISC_NAME)
                 ],
                 storage.is_asynchronous,
             )
@@ -146,13 +149,13 @@ class Context(BaseModel):
                 self._storage.is_asynchronous,
             )
         else:
-            raise RuntimeError("Context is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     async def delete(self) -> None:
         if self._storage is not None:
             await self._storage.delete_main_info(self.primary_id)
         else:
-            raise RuntimeError("Context is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     def add_request(self, request: Message):
         """

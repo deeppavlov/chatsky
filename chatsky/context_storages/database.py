@@ -300,7 +300,7 @@ class ContextStorage:
     def is_asynchronous(self) -> bool:
         return NotImplementedError
 
-    def __init__(self, path: str, serializer: Any = DefaultSerializer(), rewrite_existing: bool = False):
+    def __init__(self, path: str, rewrite_existing: bool = False, serializer: Optional[Any] = None):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -310,7 +310,7 @@ class ContextStorage:
         """Threading for methods that require single thread access."""
         self._insert_limit = False
         """Maximum number of items that can be inserted simultaneously, False if no such limit exists."""
-        self.serializer = validate_serializer(serializer)
+        self.serializer = DefaultSerializer() if serializer is None else validate_serializer(serializer)
         """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""

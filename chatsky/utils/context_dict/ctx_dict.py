@@ -60,14 +60,14 @@ class ContextDict(BaseModel, Generic[K, V]):
             self._items[key] = self._field_constructor(objected)
             self._hashes[key] = hash(item)
 
-    async def __getitem__(self, key: Union[K, slice]) -> V:
+    async def __getitem__(self, key: Union[K, slice]) -> Union[V, List[V]]:
         if self._storage is not None and self._storage.rewrite_existing:
             if isinstance(key, slice):
                 await self._load_items([k for k in range(len(self._keys))[key] if k not in self._items.keys()])
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
-            return {k: self._items[k] for k in range(len(self._items.keys()))[key]}
+            return [self._items[k] for k in range(len(self._items.keys()))[key]]
         else:
             return self._items[key]
 
@@ -110,17 +110,25 @@ class ContextDict(BaseModel, Generic[K, V]):
                 raise
             return default
 
-    def keys(self) -> Set[K]:
-        return set(iter(self))
+    async def get_latest(self, default: V = _marker) -> V:
+        try:
+            return await self[max(self._keys)]
+        except KeyError:
+            if default is self._marker:
+                raise
+            return default
 
     def __contains__(self, key: K) -> bool:
         return key in self.keys()
 
-    async def items(self) -> Set[Tuple[K, V]]:
-        return {(k, await self[k]) for k in self.keys()}
+    def keys(self) -> Set[K]:
+        return set(iter(self))
 
     async def values(self) -> Set[V]:
-        return {await self[k] for k in self.keys()}
+        return set(await self[:])
+    
+    async def items(self) -> Set[Tuple[K, V]]:
+        return tuple(zip(self.keys(), await self.values()))
 
     async def pop(self, key: K, default: V = _marker) -> V:
         try:
@@ -143,16 +151,11 @@ class ContextDict(BaseModel, Generic[K, V]):
         return key, value
 
     async def clear(self) -> None:
-        try:
-            while True:
-                await self.popitem()
-        except KeyError:
-            pass
+        del self[:]
 
     async def update(self, other: Any = (), /, **kwds) -> None:
         if isinstance(other, ContextDict):
-            for key in other:
-                self[key] = await other[key]
+            self.update(zip(other.keys(), await other.values()))
         elif isinstance(other, Mapping):
             for key in other:
                 self[key] = other[key]
@@ -200,4 +203,4 @@ class ContextDict(BaseModel, Generic[K, V]):
                 self._storage.is_asynchronous,
             )
         else:
-            raise RuntimeError("ContextDict is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
