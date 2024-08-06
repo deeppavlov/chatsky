@@ -129,7 +129,9 @@ class Context(BaseModel):
                 ],
                 storage.is_asynchronous,
             )
-            return cls(id=id, _created_at=crt_at, _updated_at=upd_at, framework_data=fw_data, turns=turns, misc=misc)
+            instance = cls(id=id, framework_data=fw_data, turns=turns, misc=misc)
+            instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
+            return instance
 
     async def store(self) -> None:
         if self._storage is not None:

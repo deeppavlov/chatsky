@@ -20,10 +20,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     DELETE_KEY: Literal["DELETE"] = "DELETE"
 
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
-    _keys: List[K] = PrivateAttr(default_factory=list)
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
-    _added: List[K] = PrivateAttr(default_factory=list)
-    _removed: List[K] = PrivateAttr(default_factory=list)
+    _keys: Set[K] = PrivateAttr(default_factory=set)
+    _added: Set[K] = PrivateAttr(default_factory=set)
+    _removed: Set[K] = PrivateAttr(default_factory=set)
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
@@ -48,7 +48,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         instance._ctx_id = id
         instance._field_name = field
         instance._field_constructor = constructor
-        instance._keys = keys
+        instance._keys = set(keys)
         instance._hashes = hashes
         return instance
 
@@ -65,7 +65,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
-            return {k: await self._items[k] for k in range(len(self._items.keys()))[key]}
+            return {k: self._items[k] for k in range(len(self._items.keys()))[key]}
         else:
             return self._items[key]
 
@@ -76,11 +76,9 @@ class ContextDict(BaseModel, Generic[K, V]):
             for k, v in zip(range(len(self._keys))[key], value):
                 self[k] = v
         elif not isinstance(key, slice) and not isinstance(value, Sequence):
-            self._keys += [key]
-            if key not in self._items.keys():
-                self._added += [key]
-            if key in self._removed:
-                self._removed.remove(key)
+            self._keys.add(key)
+            self._added.add(key)
+            self._removed.discard(key)
             self._items[key] = value
         else:
             raise ValueError("Slice key must have sequence value!")
@@ -90,11 +88,10 @@ class ContextDict(BaseModel, Generic[K, V]):
             for k in range(len(self._keys))[key]:
                 del self[k]
         else:
-            self._removed += [key]
+            self._removed.add(key)
+            self._added.discard(key)
             if key in self._items.keys():
-                self._keys.remove(key)
-            if key in self._added:
-                self._added.remove(key)
+                self._keys.discard(key)
             del self._items[key]
 
     def __iter__(self) -> Sequence[K]:
@@ -195,7 +192,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             await launch_coroutines(
                 [
                     self._storage.update_field_items(self._ctx_id, self._field_name, self.model_dump()),
-                    self._storage.delete_field_keys(self._ctx_id, self._field_name, self._removed),
+                    self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed)),
                 ],
                 self._storage.is_asynchronous,
             )
