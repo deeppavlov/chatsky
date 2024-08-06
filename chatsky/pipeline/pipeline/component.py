@@ -72,8 +72,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
     @model_validator(mode="after")
     def pipeline_component_validator(self):
-        if self.name is not None and (self.name == "" or "." in self.name):
-            raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
+        if self.name is not None:
+            if self.name == "":
+                raise ValueError("Name cannot be blank.")
+            if "." in self.name:
+                raise ValueError(f"Name cannot contain '.': {self.name!r}.")
 
         if not self.calculated_async_flag and self.requested_async_flag:
             raise Exception(f"{type(self).__name__} '{self.name}' can't be asynchronous!")
