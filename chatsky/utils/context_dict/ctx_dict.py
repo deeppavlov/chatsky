@@ -16,9 +16,6 @@ async def launch_coroutines(coroutines: List[Awaitable], is_async: bool) -> List
 
 
 class ContextDict(BaseModel, Generic[K, V]):
-    WRITE_KEY: Literal["WRITE"] = "WRITE"
-    DELETE_KEY: Literal["DELETE"] = "DELETE"
-
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
     _keys: Set[K] = PrivateAttr(default_factory=set)
@@ -54,7 +51,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
-        items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
+        items = await self._storage.load_field_items(self._ctx_id, self._field_name, set(keys))
         for key, item in zip(keys, items):
             objected = self._storage.serializer.loads(item)
             self._items[key] = self._field_constructor(objected)
@@ -176,6 +173,19 @@ class ContextDict(BaseModel, Generic[K, V]):
                 raise
             self[key] = default
         return default
+
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, ContextDict):
+            return False
+        return (
+            self._items == value._items
+            and self._hashes == value._hashes
+            and self._added == value._added
+            and self._removed == value._removed
+            and self._storage == value._storage
+            and self._ctx_id == value._ctx_id
+            and self._field_name == value._field_name
+        )
 
     @model_validator(mode="wrap")
     def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":

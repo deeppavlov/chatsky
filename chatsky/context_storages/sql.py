@@ -14,34 +14,29 @@ public-domain, SQL database engine.
 """
 
 import asyncio
-import importlib
-import os
-from typing import Any, Callable, Collection, Dict, List, Optional, Set, Tuple
+from importlib import import_module
+from os import getenv
+from typing import Any, Callable, Collection, Hashable, List, Optional, Tuple
 
-from .serializer import DefaultSerializer
-from .database import DBContextStorage, threadsafe_method, cast_key_to_string
+from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ContextSchema, ExtraFields
 
 try:
     from sqlalchemy import (
         Table,
         MetaData,
         Column,
-        PickleType,
+        LargeBinary,
+        ForeignKey,
         String,
         BigInteger,
         Integer,
         Index,
-        Boolean,
         Insert,
         inspect,
         select,
-        update,
         delete,
-        func,
     )
-    from sqlalchemy.dialects.mysql import LONGBLOB
     from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
@@ -82,25 +77,18 @@ if not sqlalchemy_available:
 
 
 def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
-    return getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
+    return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
 def _get_write_limit(dialect: str):
     if dialect == "sqlite":
-        return (int(os.getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 4
+        return (int(getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 4
     elif dialect == "mysql":
         return False
     elif dialect == "postgresql":
         return 32757 // 4
     else:
         return 9990 // 4
-
-
-def _import_pickletype_for_dialect(dialect: str, serializer: Any) -> "PickleType":
-    if dialect == "mysql":
-        return PickleType(pickler=serializer, impl=LONGBLOB)
-    else:
-        return PickleType(pickler=serializer)
 
 
 def _get_update_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
@@ -147,25 +135,22 @@ class SQLContextStorage(DBContextStorage):
         set this parameter to `True` to bypass the import checks.
     """
 
-    _CONTEXTS_TABLE = "contexts"
-    _LOGS_TABLE = "logs"
     _KEY_COLUMN = "key"
     _VALUE_COLUMN = "value"
-    _FIELD_COLUMN = "field"
-    _PACKED_COLUMN = "data"
 
     _UUID_LENGTH = 64
     _FIELD_LENGTH = 256
 
     def __init__(
-        self,
-        path: str,
-        context_schema: Optional[ContextSchema] = None,
-        serializer: Any = DefaultSerializer(),
+        self, path: str,
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        turns_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
         table_name_prefix: str = "chatsky_table",
         custom_driver: bool = False,
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
@@ -173,87 +158,38 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        _PICKLETYPE_CLASS = _import_pickletype_for_dialect
-
-        self.tables_prefix = table_name_prefix
-        self.context_schema.supports_async = self.dialect != "sqlite"
-
-        self.tables = dict()
         self._metadata = MetaData()
-        self.tables[self._CONTEXTS_TABLE] = Table(
-            f"{table_name_prefix}_{self._CONTEXTS_TABLE}",
+        self._main_table = Table(
+            f"{table_name_prefix}_{self._main_table_name}",
             self._metadata,
-            Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
-            Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
-            Column(ExtraFields.active_ctx.value, Boolean(), index=True, nullable=False, default=True),
-            Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
-            Column(ExtraFields.created_at.value, BigInteger(), nullable=False),
-            Column(ExtraFields.updated_at.value, BigInteger(), nullable=False),
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+            Column(self._created_at_column_name, BigInteger(), nullable=False),
+            Column(self._updated_at_column_name, BigInteger(), nullable=False),
+            Column(self._framework_data_column_name, LargeBinary(), nullable=False),
         )
-        self.tables[self._LOGS_TABLE] = Table(
-            f"{table_name_prefix}_{self._LOGS_TABLE}",
+        self._turns_table = Table(
+            f"{table_name_prefix}_{self.turns_config.name}",
             self._metadata,
-            Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
-            Column(self._FIELD_COLUMN, String(self._FIELD_LENGTH), index=True, nullable=False),
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name]), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
-            Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
-            Column(ExtraFields.updated_at.value, BigInteger(), nullable=False),
-            Index("logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
+            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
+            Index(f"{self.turns_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
+        )
+        self._misc_table = Table(
+            f"{table_name_prefix}_{self.misc_config.name}",
+            self._metadata,
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name]), nullable=False),
+            Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
+            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
+            Index(f"{self.misc_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
         )
 
         asyncio.run(self._create_self_tables())
 
-    @threadsafe_method
-    @cast_key_to_string()
-    async def del_item_async(self, key: str):
-        stmt = update(self.tables[self._CONTEXTS_TABLE])
-        stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
-        stmt = stmt.values({ExtraFields.active_ctx.value: False})
-        async with self.engine.begin() as conn:
-            await conn.execute(stmt)
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
-        subq = select(self.tables[self._CONTEXTS_TABLE])
-        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
-        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
-        stmt = select(func.count()).select_from(subq.subquery())
-        async with self.engine.begin() as conn:
-            result = (await conn.execute(stmt)).fetchone()
-            if result is None or len(result) == 0:
-                raise ValueError(f"Database {self.dialect} error: operation CONTAINS")
-            return result[0] != 0
-
-    @threadsafe_method
-    async def len_async(self) -> int:
-        subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
-        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
-        stmt = select(func.count()).select_from(subq.subquery())
-        async with self.engine.begin() as conn:
-            result = (await conn.execute(stmt)).fetchone()
-            if result is None or len(result) == 0:
-                raise ValueError(f"Database {self.dialect} error: operation LENGTH")
-            return result[0]
-
-    @threadsafe_method
-    async def clear_async(self, prune_history: bool = False):
-        if prune_history:
-            stmt = delete(self.tables[self._CONTEXTS_TABLE])
-        else:
-            stmt = update(self.tables[self._CONTEXTS_TABLE])
-            stmt = stmt.values({ExtraFields.active_ctx.value: False})
-        async with self.engine.begin() as conn:
-            await conn.execute(stmt)
-
-    @threadsafe_method
-    async def keys_async(self) -> Set[str]:
-        stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
-        stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
-        async with self.engine.begin() as conn:
-            result = (await conn.execute(stmt)).fetchall()
-            return set() if result is None else {res[0] for res in result}
-
+    @property
+    def is_asynchronous(self) -> bool:
+        return self.dialect != "sqlite"
+    
     async def _create_self_tables(self):
         """
         Create tables required for context storing, if they do not exist yet.
@@ -280,79 +216,89 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+    def _get_table_and_config(self, field_name: str) -> Tuple[Table, FieldConfig]:
+        if field_name == self.turns_config.name:
+            return self._turns_table, self.turns_config
+        elif field_name == self.misc_config.name:
+            return self._misc_table, self.misc_config
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
+        stmt = select(self._main_table).where(self._main_table.c[self._primary_id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
-            stmt = select(
-                self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value],
-                self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN],
-            )
-            stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
-            stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
-            stmt = stmt.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
             result = (await conn.execute(stmt)).fetchone()
-            if result is not None:
-                return result[1], result[0]
-            else:
-                return dict(), None
+            return None if result is None else result[1:]
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        insert_stmt = self._INSERT_CALLABLE(self._main_table).values(
+            {
+                self._primary_id_column_name: ctx_id,
+                self._created_at_column_name: crt_at,
+                self._updated_at_column_name: upd_at,
+                self._framework_data_column_name: fw_data,
+            }
+        )
+        update_stmt = _get_update_stmt(
+            self.dialect,
+            insert_stmt,
+            [self._updated_at_column_name, self._framework_data_column_name],
+            [self._primary_id_column_name],
+        )
         async with self.engine.begin() as conn:
-            stmt = select(
-                self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN]
-            )
-            stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
-            stmt = stmt.where(self.tables[self._LOGS_TABLE].c[self._FIELD_COLUMN] == field_name)
-            stmt = stmt.order_by(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN].desc())
-            if keys_limit is not None:
-                stmt = stmt.limit(keys_limit)
-            result = (await conn.execute(stmt)).fetchall()
-            if len(result) > 0:
-                return {key: value for key, value in result}
-            else:
-                return dict()
-
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
-        async with self.engine.begin() as conn:
-            insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
-                {
-                    self._PACKED_COLUMN: data,
-                    ExtraFields.storage_key.value: storage_key,
-                    ExtraFields.primary_id.value: primary_id,
-                    ExtraFields.created_at.value: created,
-                    ExtraFields.updated_at.value: updated,
-                }
-            )
-            update_stmt = _get_update_stmt(
-                self.dialect,
-                insert_stmt,
-                [
-                    self._PACKED_COLUMN,
-                    ExtraFields.storage_key.value,
-                    ExtraFields.updated_at.value,
-                    ExtraFields.active_ctx.value,
-                ],
-                [ExtraFields.primary_id.value],
-            )
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
+    async def delete_main_info(self, ctx_id: str) -> None:
+        stmt = delete(self._main_table).where(self._main_table.c[self._primary_id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
-            insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
-                [
-                    {
-                        self._FIELD_COLUMN: field,
-                        self._KEY_COLUMN: key,
-                        self._VALUE_COLUMN: value,
-                        ExtraFields.primary_id.value: primary_id,
-                        ExtraFields.updated_at.value: updated,
-                    }
-                    for field, key, value in data
-                ]
-            )
-            update_stmt = _get_update_stmt(
-                self.dialect,
-                insert_stmt,
-                [self._VALUE_COLUMN, ExtraFields.updated_at.value],
-                [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN],
-            )
+            await conn.execute(stmt)
+
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+        field_table, field_config = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[self._VALUE_COLUMN])
+        stmt = stmt.where(field_table.c[self._primary_id_column_name] == ctx_id)
+        if field_name == self.turns_config.name:
+            stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
+        if isinstance(field_config.subscript, int):
+            stmt = stmt.limit(field_config.subscript)
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._primary_id_column_name] == ctx_id)
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._VALUE_COLUMN])
+        stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+        field_table, _ = self._get_table_and_config(field_name)
+        keys, values = zip(*items)
+        insert_stmt = self._INSERT_CALLABLE(field_table).values(
+            {
+                self._primary_id_column_name: ctx_id,
+                self._KEY_COLUMN: keys,
+                self._VALUE_COLUMN: values,
+            }
+        )
+        update_stmt = _get_update_stmt(
+            self.dialect,
+            insert_stmt,
+            [self._KEY_COLUMN, self._VALUE_COLUMN],
+            [self._primary_id_column_name],
+        )
+        async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
+
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = delete(field_table)
+        stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
+        async with self.engine.begin() as conn:
+            await conn.execute(stmt)

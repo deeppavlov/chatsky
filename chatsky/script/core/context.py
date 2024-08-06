@@ -124,14 +124,17 @@ class Context(BaseModel):
         if storage is None:
             return cls(id=id)
         else:
-            (crt_at, upd_at, fw_data), turns, misc = await launch_coroutines(
+            main, turns, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, cls.TURNS_NAME, Turn.model_validate),
-                    ContextDict.connected(storage, id, cls.MISC_NAME)
+                    ContextDict.connected(storage, id, storage.turns_config.name, Turn.model_validate),
+                    ContextDict.connected(storage, id, storage.misc_config.name)
                 ],
                 storage.is_asynchronous,
             )
+            if main is None:
+                raise ValueError(f"Context with id {id} not found in the storage!")
+            crt_at, upd_at, fw_data = main
             objected = storage.serializer.loads(fw_data)
             instance = cls(id=id, framework_data=objected, turns=turns, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
@@ -293,10 +296,10 @@ class Context(BaseModel):
         if isinstance(value, Context):
             return (
                 self.primary_id == value.primary_id
-                and self.labels == value.labels
-                and self.requests == value.requests
-                and self.responses == value.responses
+                and self.turns == value.turns
                 and self.misc == value.misc
+                and self.framework_data == value.framework_data
+                and self._storage == value._storage
             )
         else:
             return False
