@@ -42,8 +42,9 @@ class ContextDict(BaseModel, Generic[K, V]):
     @classmethod
     async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = dict) -> "ContextDict":
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
-        hashes = {k: hash(v) for k, v in items.items()}
-        instance = cls.model_validate(items)
+        hashes = {k: hash(v) for k, v in items}
+        objected = {k: storage.serializer.loads(v) for k, v in items}
+        instance = cls.model_validate(objected)
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
@@ -55,7 +56,8 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
         for key, item in zip(keys, items):
-            self._items[key] = self._field_constructor(item)
+            objected = self._storage.serializer.loads(item)
+            self._items[key] = self._field_constructor(objected)
             self._hashes[key] = hash(item)
 
     async def __getitem__(self, key: Union[K, slice]) -> V:
@@ -189,9 +191,10 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     async def store(self) -> None:
         if self._storage is not None:
+            byted = [(k, self._storage.serializer.dumps(v)) for k, v in self.model_dump().items()]
             await launch_coroutines(
                 [
-                    self._storage.update_field_items(self._ctx_id, self._field_name, self.model_dump()),
+                    self._storage.update_field_items(self._ctx_id, self._field_name, byted),
                     self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed)),
                 ],
                 self._storage.is_asynchronous,

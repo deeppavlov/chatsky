@@ -294,6 +294,84 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
 
+class ContextStorage:
+    @property
+    @abstractmethod
+    def is_asynchronous(self) -> bool:
+        return NotImplementedError
+
+    def __init__(self, path: str, serializer: Any = DefaultSerializer(), rewrite_existing: bool = False):
+        _, _, file_path = path.partition("://")
+        self.full_path = path
+        """Full path to access the context storage, as it was provided by user."""
+        self.path = file_path
+        """`full_path` without a prefix defining db used."""
+        self._lock = threading.Lock()
+        """Threading for methods that require single thread access."""
+        self._insert_limit = False
+        """Maximum number of items that can be inserted simultaneously, False if no such limit exists."""
+        self.serializer = validate_serializer(serializer)
+        """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
+        self.rewrite_existing = rewrite_existing
+        """Whether to rewrite existing data in the storage."""
+
+    @abstractmethod
+    async def load_main_info(self, ctx_id: str) -> Tuple[int, int, bytes]:
+        """
+        Load main information about the context storage.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        """
+        Update main information about the context storage.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete_main_info(self, ctx_id: str) -> None:
+        """
+        Delete main information about the context storage.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        """
+        Load the latest field data.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[str]:
+        """
+        Load all field keys.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[str]) -> List[bytes]:
+        """
+        Load field items.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[str, bytes]]) -> None:
+        """
+        Update field items.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[str]) -> None:
+        """
+        Delete field keys.
+        """
+        raise NotImplementedError
+
+
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     """
     Use context_storage_factory to lazy import context storage types and instantiate them.

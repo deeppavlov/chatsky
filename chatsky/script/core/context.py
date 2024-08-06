@@ -129,15 +129,17 @@ class Context(BaseModel):
                 ],
                 storage.is_asynchronous,
             )
-            instance = cls(id=id, framework_data=fw_data, turns=turns, misc=misc)
+            objected = storage.serializer.loads(fw_data)
+            instance = cls(id=id, framework_data=objected, turns=turns, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
     async def store(self) -> None:
         if self._storage is not None:
+            byted = self._storage.serializer.dumps(self.framework_data)
             await launch_coroutines(
                 [
-                    self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, self.framework_data),
+                    self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, byted),
                     self.turns.store(),
                     self.misc.store(),
                 ],
