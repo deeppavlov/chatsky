@@ -65,7 +65,9 @@ toy_script = {
             TRANSITIONS: {
                 "latte_art_node": exact_match("Tell me about latte art."),
                 "image_desc_node": exact_match("Tell me what coffee is it?"),
-                "boss_node": llm_condition(model_name="barista_model", prompt="PROMPT: return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.", method=Contains(pattern="TRUE")),
+                "boss_node": llm_condition(model_name="barista_model",
+                                           prompt="PROMPT: return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
+                                           method=Contains(pattern="TRUE")),
                 lbl.repeat(): cnd.true()},
         },
         "boss_node": {

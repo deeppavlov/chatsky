@@ -10,7 +10,6 @@ try:
     # from langchain_google_vertexai import ChatVertexAI
     # from langchain_cohere import ChatCohere
     # from langchain_mistralai import ChatMistralAI
-    from langchain.output_parsers import ResponseSchema, StructuredOutputParser
     from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
     from langchain_core.output_parsers import StrOutputParser
     langchain_available = True
@@ -19,14 +18,12 @@ except ImportError:
 
 import base64
 import httpx
-import re
 
 from chatsky.script.core.message import Image, Message
 from chatsky.script import Context
 from chatsky.pipeline import Pipeline
 from chatsky.llm.methods import BaseMethod
 
-from pydantic import BaseModel
 from typing import Union, Callable
 
 try:
@@ -113,15 +110,14 @@ def llm_response(
         else:
             history_messages = [SystemMessage(model.system_prompt)]
         if history == 0:
-            return model.respond(history_messages+[prompt + "\n" + ctx.last_request.text])
+            return model.respond(history_messages+[message_to_langchain(Message(prompt + "\n" + ctx.last_request.text))])
         else:
             pairs = zip([ctx.requests[x] for x in range(len(ctx.requests))],
                      [ctx.responses[x] for x in range(len(ctx.responses))])
             for req, resp in filter(lambda x: filter_func(x), list(pairs)[-history:]):
                 history_messages.append(message_to_langchain(req))
                 history_messages.append(message_to_langchain(resp, human=False))
-            history_messages.append(message_to_langchain(ctx.last_request, prompt=prompt))    
-            print(history_messages)
+            history_messages.append(message_to_langchain(ctx.last_request, prompt=prompt))
             return model.respond(history_messages)
     return wrapped
 
