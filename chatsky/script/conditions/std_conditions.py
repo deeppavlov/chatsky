@@ -205,7 +205,6 @@ def has_last_labels(
     labels = [] if labels is None else labels
 
     def has_last_labels_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-        label = list(ctx.labels.values())[-last_n_indices:]
         for label in list(ctx.labels.values())[-last_n_indices:]:
             label = label if label else (None, None)
             if label[0] in flow_labels or label in labels:

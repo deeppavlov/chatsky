@@ -330,7 +330,7 @@ class Pipeline:
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
-        ctx.add_request(request)
+        ctx.add_turn_items(request=request)
         result = await self._services_pipeline(ctx, self)
 
         if asyncio.iscoroutine(result):

@@ -21,9 +21,9 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Callable, Optional, Literal, Union, Dict, List, Set, TYPE_CHECKING
+from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, PrivateAttr, model_serializer, model_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
 from chatsky.context_storages.database import DBContextStorage
 from chatsky.script.core.message import Message
@@ -49,9 +49,9 @@ def get_last_index(dictionary: dict) -> int:
 
 
 class Turn(BaseModel):
-    label: NodeLabel2Type
-    request: Message
-    response: Message
+    label: Optional[NodeLabel2Type] = Field(default=None)
+    request: Message = Field(default_factory=Message)
+    response: Message = Field(default_factory=Message)
 
 
 class FrameworkData(BaseModel):
@@ -77,7 +77,7 @@ class Context(BaseModel):
     context storages to work.
     """
 
-    primary_id: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
+    primary_id: str = Field(default_factory=lambda: str(uuid4()), exclude=True, frozen=True)
     """
     `primary_id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
     """
@@ -170,11 +170,25 @@ class Context(BaseModel):
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
+    @property
+    def labels(self) -> Dict[int, NodeLabel2Type]:
+        return {id: turn.label for id, turn in self.turns.items()}
+    
+    @property
+    def requests(self) -> Dict[int, Message]:
+        return {id: turn.request for id, turn in self.turns.items()}
+    
+    @property
+    def responses(self) -> Dict[int, Message]:
+        return {id: turn.response for id, turn in self.turns.items()}
+
     def add_turn(self, turn: Turn):
         last_index = get_last_index(self.turns)
         self.turns[last_index + 1] = turn
 
-    def add_turn_items(self, label: NodeLabel2Type, request: Message, response: Message):
+    def add_turn_items(self, label: Optional[NodeLabel2Type] = None, request: Optional[Message] = None, response: Optional[Message] = None):
+        request = Message() if request is None else request
+        response = Message() if response is None else response
         self.add_turn(Turn(label=label, request=request, response=response))
 
     @property
@@ -192,7 +206,7 @@ class Context(BaseModel):
         return self.last_turn.label if self.last_turn is not None else None
 
     @last_label.setter
-    def last_label(self, label: NodeLabel2Type):
+    def last_label(self, label: Optional[NodeLabel2Type]):
         last_turn = self.last_turn
         if last_turn is not None:
             self.last_turn.label =  label
@@ -256,17 +270,3 @@ class Context(BaseModel):
             )
         else:
             return False
-
-    @model_serializer()
-    def _serialize_model(self) -> Dict[str, Any]:
-        return {
-            "turns": self.turns.model_dump(),
-            "misc": self.misc.model_dump(),
-            "framework_data": self.framework_data.model_dump(),
-        }
-
-    @model_validator(mode="wrap")
-    def _validate_model(value: Dict[str, Any], handler: Callable[[Dict], "Context"]) -> "Context":
-        validated = handler(value)
-        validated._updated_at = validated._created_at = time_ns()
-        return validated

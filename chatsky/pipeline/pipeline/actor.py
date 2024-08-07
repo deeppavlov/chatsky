@@ -119,7 +119,7 @@ class Actor:
         self._get_next_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE)
 
-        ctx.add_label(ctx.framework_data.actor_data["next_label"][:2])
+        ctx.last_label = ctx.framework_data.actor_data["next_label"][:2]
 
         # rewrite next node
         self._rewrite_next_node(ctx)
@@ -134,7 +134,7 @@ class Actor:
             ctx.framework_data.actor_data["pre_response_processed_node"].response, ctx, pipeline
         )
         await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE)
-        ctx.add_response(ctx.framework_data.actor_data["response"])
+        ctx.last_response = ctx.framework_data.actor_data["response"]
 
         await self._run_handlers(ctx, pipeline, ActorStage.FINISH_TURN)
         if self._clean_turn_cache:
