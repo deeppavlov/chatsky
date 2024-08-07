@@ -1,18 +1,12 @@
+import asyncio
 import os
 import signal
-import asyncio
-import sys
-import pathlib
 import uuid
-import time
 
-# Must be removed, used only for debug purposes
-import logging
-
-from dff.script import RESPONSE, TRANSITIONS, Message, Context
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface, PollingMessengerInterface
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+import chatsky.script.conditions as cnd
+from chatsky.messengers.common import PollingMessengerInterface
+from chatsky.pipeline import Pipeline
+from chatsky.script import RESPONSE, TRANSITIONS, Message, Context
 
 
 def repeat_message_back(ctx: Context, _: Pipeline, *args, **kwargs):
@@ -130,7 +124,9 @@ def test_worker_shielding():
                 # Is this the right way to run a random async function?
                 asyncio.create_task(self.shutdown())
 
-                # This shuts down the interface via the main method. The asyncio.CancelledError won't affect the workers due to shielding. If all the messages still get processed, then the workers are shielded.
+                # This shuts down the interface via the main method.
+                # The asyncio.CancelledError won't affect the workers due to shielding.
+                # If all the messages still get processed, then the workers are shielded.
             return True
 
         async def _get_updates(self):
