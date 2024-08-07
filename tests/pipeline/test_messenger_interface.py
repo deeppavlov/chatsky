@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky.script import RESPONSE, TRANSITIONS, Message, Context
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import CallbackMessengerInterface
 from chatsky.pipeline import Pipeline
@@ -51,7 +51,7 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
+    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop=loop))
 
 
 def test_callback_messenger_interface(monkeypatch):

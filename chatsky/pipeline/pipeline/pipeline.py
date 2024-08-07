@@ -15,6 +15,7 @@ to structure and manage the messages processing flow.
 """
 
 import asyncio
+import signal
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
@@ -102,6 +103,8 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
+        self.stopped_by_signal = False
+        self.context_lock = ContextLock()
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self.slots = GroupSlot.model_validate(slots) if slots is not None else None
@@ -347,6 +350,16 @@ class Pipeline:
 
         return ctx
 
+    def sigint_handler(self, loop):
+        self.stopped_by_signal = True
+        logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
+        # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
+        if self.messenger_interface.running_in_foreground:
+            loop.run_until_complete(self.messenger_interface.shutdown())
+        # In case someone launched a pipeline with connect() instead of
+        # run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal
+        # is still changed to True.
+
     def run(self):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
@@ -355,7 +368,18 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+
+        # event_loop = asyncio.get_event_loop()
+        # event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
+
+        # This doesn't work for now, because _sigint_handler is just added to the queue of async tasks, waiting for the program, which it shouldn't, in order to shut it down at all.
+        # I'm using a different solution fow now, but the original one has the benefit of utilising the event loop (not ending other asyncio tasks) and "being thread-safe" according to some sources, not sure if that's true or needed, though.
+        # TO-DO: Do graceful termination via the event loop. I'm thinking if the _sigint_handler() task could be added to the start of the asyncio queue and not the end, it would've worked. But I know neither if that'll work nor how to do it.
+
+        # signal.signal(signal.SIGINT, self.sigint_handler)
+
+        asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
+        logger.info(f"pipeline finished working")
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
@@ -372,3 +396,14 @@ class Pipeline:
     @property
     def script(self) -> Script:
         return self.actor.script
+
+
+class ContextLock:
+    # locks: dict[ctx_id, asyncio.Lock] = {}
+    def __init__(self):
+        self.locks = {}
+
+    def __getitem__(self, key):
+        if not key in self.locks:
+            self.locks[key] = asyncio.Lock()
+        return self.locks[key]
