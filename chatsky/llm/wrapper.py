@@ -65,7 +65,10 @@ class LLM_API(DeepEvalBaseLLM):
     def respond(self, history: list = [""], message_schema=None) -> Message:
         result = self.parser.invoke(self.model.invoke(history))
         result = Message(text=result)
-        # result.annotation.__generated_by_model__ = self.name
+        if result.annotations:
+            result.annotations["__generated_by_model__"] = self.name
+        else:
+            result.annotations = {"__generated_by_model__": self.name}
         return result
     
     def condition(self, prompt: str, method: BaseMethod):
