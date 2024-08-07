@@ -1,15 +1,13 @@
 # %% [markdown]
 """
-# LLM Responses: 1. Basics
+# LLM: 1. Basics
 
 Using Chatsky you can easily add LLM invocations to your script.
-In this tutorial we will see how to use LLM responses.
+In this tutorial we will see how to use LLM for responses and conditions.
 Chatsky uses langchain under the hood to connect to the remote models.
 """
 
-# %pip install chatsky
-# %pip install langchain-openai
-# or install langchain for the model of your choise
+# %pip install chatsky[llm]
 
 # %%
 from chatsky.script import Message
@@ -39,6 +37,7 @@ Keep in mind, that if you instantiate model object outside of the script,
 it will be reused across all the nodes and therefore it will store all dialogue history.
 This is not advised if you are short on tokens or if you do not need to store all dialogue history.
 Alternatively you can instantiate model object inside of RESPONSE field in the nodes you need.
+Via `history` parameter you can set number of dialogue _turns_ that the model will use as the history. Default value is `5`.
 """
 
 # %%
@@ -51,7 +50,7 @@ Also you can pass images to the LLM, just pass them as attachments to your messa
 
 # %%
 toy_script = {
-    "greeting_flow": {
+    "main_flow": {
         "start_node": {
             RESPONSE: Message(""),
             TRANSITIONS: {"greeting_node": exact_match("Hi")},
@@ -96,8 +95,9 @@ toy_script = {
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
+    start_label=("main_flow", "start_node"),
+    fallback_label=("main_flow", "fallback_node"),
+    models={"barista_model": model}
 )
 
 if __name__ == "__main__":
