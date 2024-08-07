@@ -138,6 +138,7 @@ class Context(BaseModel):
 
     async def store(self) -> None:
         if self._storage is not None:
+            self._updated_at = time_ns()
             byted = self._storage.serializer.dumps(self.framework_data)
             await launch_coroutines(
                 [

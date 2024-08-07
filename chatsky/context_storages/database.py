@@ -8,14 +8,13 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 
-import importlib
-import threading
+import pickle
 from abc import ABC, abstractmethod
+from importlib import import_module
 from typing import Any, Hashable, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
-from .serializer import DefaultSerializer, validate_serializer
 from .protocol import PROTOCOLS
 
 
@@ -66,9 +65,7 @@ class DBContextStorage(ABC):
         """Full path to access the context storage, as it was provided by user."""
         self.path = file_path
         """`full_path` without a prefix defining db used."""
-        self._lock = threading.Lock()
-        """Threading for methods that require single thread access."""
-        self.serializer = DefaultSerializer() if serializer is None else validate_serializer(serializer)
+        self.serializer = pickle if serializer is None else serializer
         """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
@@ -181,5 +178,5 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     For more information, see the function doc:\n{context_storage_factory.__doc__}
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
-    target_class = getattr(importlib.import_module(f".{module}", package="chatsky.context_storages"), _class)
+    target_class = getattr(import_module(f".{module}", package="chatsky.context_storages"), _class)
     return target_class(path, **kwargs)
