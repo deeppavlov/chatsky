@@ -9,10 +9,7 @@ K, V = TypeVar("K"), TypeVar("V")
 
 
 async def launch_coroutines(coroutines: List[Awaitable], is_async: bool) -> List[Any]:
-    if is_async:
-        return await gather(*coroutines)
-    else:
-        return [await coroutine for coroutine in coroutines]
+    return await gather(*coroutines) if is_async else [await coroutine for coroutine in coroutines]
 
 
 class ContextDict(BaseModel, Generic[K, V]):
@@ -190,7 +187,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     @model_validator(mode="wrap")
     def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":
         instance = handler(dict())
-        instance._items = {key: value[key] for key in sorted(value)}
+        instance._items = {k: v for k, v in value.items()}
         return instance
 
     @model_serializer()

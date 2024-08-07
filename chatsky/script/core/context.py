@@ -21,9 +21,9 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Optional, Literal, Union, Dict, List, Set, TYPE_CHECKING
+from typing import Any, Callable, Optional, Literal, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, model_serializer, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 from chatsky.script.core.message import Message
@@ -45,8 +45,7 @@ def get_last_index(dictionary: dict) -> int:
     :param dictionary: Dictionary with unsorted keys.
     :return: Last index from the `dictionary`.
     """
-    indices = list(dictionary)
-    return indices[-1] if indices else -1
+    return max(dictionary.keys(), default=-1)
 
 
 class Turn(BaseModel):
@@ -77,9 +76,6 @@ class Context(BaseModel):
     Avoid storing unserializable data in the fields of this class in order for
     context storages to work.
     """
-
-    TURNS_NAME: Literal["turns"] = "turns"
-    MISC_NAME: Literal["misc"] = "misc"
 
     primary_id: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
     """
@@ -154,121 +150,77 @@ class Context(BaseModel):
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
+    def clear(
+        self,
+        hold_last_n_indices: int,
+        field_names: Union[Set[str], List[str]] = {"turns"},
+    ):
+        field_names = field_names if isinstance(field_names, set) else set(field_names)
+        if "turns" in field_names:
+            del self.turns[:-hold_last_n_indices]
+        if "misc" in field_names:
+            self.misc.clear()
+        if "framework_data" in field_names:
+            self.framework_data = FrameworkData()
+
     async def delete(self) -> None:
         if self._storage is not None:
             await self._storage.delete_main_info(self.primary_id)
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
-    def add_request(self, request: Message):
-        """
-        Add a new `request` to the context.
-        The new `request` is added with the index of `last_index + 1`.
+    def add_turn(self, turn: Turn):
+        last_index = get_last_index(self.turns)
+        self.turns[last_index + 1] = turn
 
-        :param request: `request` to be added to the context.
-        """
-        request_message = Message.model_validate(request)
-        last_index = get_last_index(self.requests)
-        self.requests[last_index + 1] = request_message
+    def add_turn_items(self, label: NodeLabel2Type, request: Message, response: Message):
+        self.add_turn(Turn(label=label, request=request, response=response))
 
-    def add_response(self, response: Message):
-        """
-        Add a new `response` to the context.
-        The new `response` is added with the index of `last_index + 1`.
+    @property
+    def last_turn(self) -> Optional[Turn]:
+        last_index = get_last_index(self.turns)
+        return self.turns.get(last_index)
 
-        :param response: `response` to be added to the context.
-        """
-        response_message = Message.model_validate(response)
-        last_index = get_last_index(self.responses)
-        self.responses[last_index + 1] = response_message
-
-    def add_label(self, label: NodeLabel2Type):
-        """
-        Add a new :py:data:`~.NodeLabel2Type` to the context.
-        The new `label` is added with the index of `last_index + 1`.
-
-        :param label: `label` that we need to add to the context.
-        """
-        last_index = get_last_index(self.labels)
-        self.labels[last_index + 1] = label
-
-    def clear(
-        self,
-        hold_last_n_indices: int,
-        field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
-    ):
-        """
-        Delete all records from the `requests`/`responses`/`labels` except for
-        the last `hold_last_n_indices` turns.
-        If `field_names` contains `misc` field, `misc` field is fully cleared.
-
-        :param hold_last_n_indices: Number of last turns to keep.
-        :param field_names: Properties of :py:class:`~.Context` to clear.
-            Defaults to {"requests", "responses", "labels"}
-        """
-        field_names = field_names if isinstance(field_names, set) else set(field_names)
-        if "requests" in field_names:
-            for index in list(self.requests)[:-hold_last_n_indices]:
-                del self.requests[index]
-        if "responses" in field_names:
-            for index in list(self.responses)[:-hold_last_n_indices]:
-                del self.responses[index]
-        if "misc" in field_names:
-            self.misc.clear()
-        if "labels" in field_names:
-            for index in list(self.labels)[:-hold_last_n_indices]:
-                del self.labels[index]
-        if "framework_data" in field_names:
-            self.framework_data = FrameworkData()
+    @last_turn.setter
+    def last_turn(self, turn: Optional[Turn]):
+        last_index = get_last_index(self.turns)
+        self.turns[last_index] = Turn() if turn is None else turn
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
-        """
-        Return the last :py:data:`~.NodeLabel2Type` of
-        the :py:class:`~.Context`.
-        Return `None` if `labels` is empty.
+        return self.last_turn.label if self.last_turn is not None else None
 
-        Since `start_label` is not added to the `labels` field,
-        empty `labels` usually indicates that the current node is the `start_node`.
-        """
-        last_index = get_last_index(self.labels)
-        return self.labels.get(last_index)
+    @last_label.setter
+    def last_label(self, label: NodeLabel2Type):
+        last_turn = self.last_turn
+        if last_turn is not None:
+            self.last_turn.label =  label
+        else:
+            raise ValueError("The turn history is empty!")
 
     @property
     def last_response(self) -> Optional[Message]:
-        """
-        Return the last `response` of the current :py:class:`~.Context`.
-        Return `None` if `responses` is empty.
-        """
-        last_index = get_last_index(self.responses)
-        return self.responses.get(last_index)
+        return self.last_turn.response if self.last_turn is not None else None
 
     @last_response.setter
     def last_response(self, response: Optional[Message]):
-        """
-        Set the last `response` of the current :py:class:`~.Context`.
-        Required for use with various response wrappers.
-        """
-        last_index = get_last_index(self.responses)
-        self.responses[last_index] = Message() if response is None else Message.model_validate(response)
+        last_turn = self.last_turn
+        if last_turn is not None:
+            self.last_turn.response = Message() if response is None else response
+        else:
+            raise ValueError("The turn history is empty!")
 
     @property
     def last_request(self) -> Optional[Message]:
-        """
-        Return the last `request` of the current :py:class:`~.Context`.
-        Return `None` if `requests` is empty.
-        """
-        last_index = get_last_index(self.requests)
-        return self.requests.get(last_index)
+        return self.last_turn.request if self.last_turn is not None else None
 
     @last_request.setter
     def last_request(self, request: Optional[Message]):
-        """
-        Set the last `request` of the current :py:class:`~.Context`.
-        Required for use with various request wrappers.
-        """
-        last_index = get_last_index(self.requests)
-        self.requests[last_index] = Message() if request is None else Message.model_validate(request)
+        last_turn = self.last_turn
+        if last_turn is not None:
+            self.last_turn.request = Message() if request is None else request
+        else:
+            raise ValueError("The turn history is empty!")
 
     @property
     def current_node(self) -> Optional[Node]:
@@ -303,3 +255,17 @@ class Context(BaseModel):
             )
         else:
             return False
+
+    @model_serializer()
+    def _serialize_model(self) -> Dict[str, Any]:
+        return {
+            "turns": self.turns.model_dump(),
+            "misc": self.misc.model_dump(),
+            "framework_data": self.framework_data.model_dump(),
+        }
+
+    @model_validator(mode="wrap")
+    def _validate_model(value: Dict[str, Any], handler: Callable[[Dict], "Context"]) -> "Context":
+        validated = handler(value)
+        validated._updated_at = validated._created_at = time_ns()
+        return validated

@@ -91,7 +91,7 @@ def _get_write_limit(dialect: str):
         return 9990 // 4
 
 
-def _get_update_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
+def _get_upsert_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
     if dialect == "postgresql" or dialect == "sqlite":
         if len(columns) > 0:
             update_stmt = insert_stmt.on_conflict_do_update(
@@ -148,11 +148,10 @@ class SQLContextStorage(DBContextStorage):
         turns_config: Optional[FieldConfig] = None,
         misc_config: Optional[FieldConfig] = None,
         table_name_prefix: str = "chatsky_table",
-        custom_driver: bool = False,
     ):
         DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
 
-        self._check_availability(custom_driver)
+        self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
         self._insert_limit = _get_write_limit(self.dialect)
@@ -199,22 +198,21 @@ class SQLContextStorage(DBContextStorage):
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
 
-    def _check_availability(self, custom_driver: bool):
+    def _check_availability(self):
         """
         Chech availability of the specified backend, raise error if not available.
 
         :param custom_driver: custom driver is requested - no checks will be performed.
         """
-        if not custom_driver:
-            if self.full_path.startswith("postgresql") and not postgres_available:
-                install_suggestion = get_protocol_install_suggestion("postgresql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("mysql") and not mysql_available:
-                install_suggestion = get_protocol_install_suggestion("mysql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("sqlite") and not sqlite_available:
-                install_suggestion = get_protocol_install_suggestion("sqlite")
-                raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+        if self.full_path.startswith("postgresql") and not postgres_available:
+            install_suggestion = get_protocol_install_suggestion("postgresql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("mysql") and not mysql_available:
+            install_suggestion = get_protocol_install_suggestion("mysql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("sqlite") and not sqlite_available:
+            install_suggestion = get_protocol_install_suggestion("sqlite")
+            raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     def _get_table_and_config(self, field_name: str) -> Tuple[Table, FieldConfig]:
         if field_name == self.turns_config.name:
@@ -239,7 +237,7 @@ class SQLContextStorage(DBContextStorage):
                 self._framework_data_column_name: fw_data,
             }
         )
-        update_stmt = _get_update_stmt(
+        update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
             [self._updated_at_column_name, self._framework_data_column_name],
@@ -280,6 +278,8 @@ class SQLContextStorage(DBContextStorage):
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_table, _ = self._get_table_and_config(field_name)
         keys, values = zip(*items)
+        if field_name == self.misc_config.name and any(len(key) > self._FIELD_LENGTH for key in keys):
+            raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
         insert_stmt = self._INSERT_CALLABLE(field_table).values(
             {
                 self._primary_id_column_name: ctx_id,
@@ -287,7 +287,7 @@ class SQLContextStorage(DBContextStorage):
                 self._VALUE_COLUMN: values,
             }
         )
-        update_stmt = _get_update_stmt(
+        update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
             [self._KEY_COLUMN, self._VALUE_COLUMN],
