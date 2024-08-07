@@ -63,8 +63,18 @@ class LLM_API(DeepEvalBaseLLM):
         
 
     def respond(self, history: list = [""], message_schema=None) -> Message:
-        result = self.parser.invoke(self.model.invoke(history))
-        result = Message(text=result)
+        if message_schema is None:
+            result = self.parser.invoke(self.model.invoke(history))
+            result = Message(text=result)
+        elif set(message_schema.keys()).intersection(set(Message.model_fields.keys())) != set():
+            # Case if the message_schema desribes Message structure
+            raise NotImplementedError
+        else:
+            # Case if the message_schema desribes Message.text structure
+            structured_model = self.model.with_structured_output(message_schema)
+            result = self.parser.invoke(structured_model.invoke(history))
+            result = Message(text=str(result))
+        
         if result.annotations:
             result.annotations["__generated_by_model__"] = self.name
         else:
@@ -112,7 +122,7 @@ def llm_response(
             history_messages = []
         else:
             history_messages = [SystemMessage(model.system_prompt)]
-        if history == 0:
+        if history == 0 or len(ctx.responses)==0 or len(ctx.requests)==0:
             return model.respond(history_messages+[message_to_langchain(Message(prompt + "\n" + ctx.last_request.text))])
         else:
             pairs = zip([ctx.requests[x] for x in range(len(ctx.requests))],

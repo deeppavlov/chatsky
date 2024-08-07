@@ -37,8 +37,8 @@ class MockContext(BaseModel):
 
     def __init__(self):
         super().__init__(
-            requests=[Message(text=f"Request {i}") for i in range(10)],
-            responses=[Message(text=f"Response {i}") for i in range(10)],
+            requests=[Message(text=f"Request {i}") for i in range(3)],
+            responses=[Message(text=f"Response {i}") for i in range(3)],
             last_request=Message(text="Last request"),
         )
 
@@ -56,5 +56,6 @@ def pipeline(mock_model):
 
 
 def test_history(context, pipeline):
-    assert llm_response("test_model", "prompt", history=2)(context, pipeline).text == r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 8'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 8'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 9'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 9'}]), HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]"""
+    assert llm_response("test_model", "prompt", history=2)(context, pipeline).text == r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]"""
     assert llm_response("test_model", "prompt", history=0)(context, pipeline).text == r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]"""
+    assert llm_response("test_model", "prompt", history=4)(context, pipeline).text == r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]"""
