@@ -30,12 +30,5 @@ class DeepEvalMethod(BaseMethod):
     threshold: float
     async def __call__(ctx: Context, model_result: str) -> bool:
         test_case = LLMTestCase(input=ctx.last_request.text, actual_output=model_result)
-        # TODO: re-think deepeval usage
+        # TODO: re-consider deepeval usage
         pass
-
-
-def semantic_distance(target: str | Message, threshold: float):
-    def _(ctx: Context, _: Pipeline) -> bool:
-        pass
-
-    return _
