@@ -260,8 +260,7 @@ class PollingMessengerInterface(MessengerInterface):
 
     async def _polling_job(self, poll_timeout: float):
         try:
-            coroutine = asyncio.wait_for(self._get_updates(), timeout=poll_timeout)
-            received_updates = await coroutine
+            received_updates = await asyncio.wait_for(self._get_updates(), timeout=poll_timeout)
             if received_updates is not None:
                 for update in received_updates:
                     await self.request_queue.put(update)
