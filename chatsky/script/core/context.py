@@ -30,7 +30,7 @@ from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
 from chatsky.pipeline.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
-from chatsky.utils.context_dict.ctx_dict import ContextDict, launch_coroutines
+from chatsky.utils.context_dict.ctx_dict import ContextDict, ContextDictView, launch_coroutines
 
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
@@ -38,20 +38,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_last_index(dictionary: dict) -> int:
-    """
-    Obtain the last index from the `dictionary`. Return `-1` if the `dict` is empty.
-
-    :param dictionary: Dictionary with unsorted keys.
-    :return: Last index from the `dictionary`.
-    """
-    return max(dictionary.keys(), default=-1)
-
-
 class Turn(BaseModel):
     label: Optional[NodeLabel2Type] = Field(default=None)
-    request: Message = Field(default_factory=Message)
-    response: Message = Field(default_factory=Message)
+    request: Optional[Message] = Field(default=None)
+    response: Optional[Message] = Field(default=None)
 
 
 class FrameworkData(BaseModel):
@@ -171,39 +161,36 @@ class Context(BaseModel):
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     @property
-    def labels(self) -> Dict[int, NodeLabel2Type]:
-        return {id: turn.label for id, turn in self.turns.items()}
-    
+    def labels(self) -> ContextDictView[int, NodeLabel2Type]:
+        return ContextDictView(self.turns, lambda turn: turn.label)
+
     @property
-    def requests(self) -> Dict[int, Message]:
-        return {id: turn.request for id, turn in self.turns.items()}
-    
+    def requests(self) -> ContextDictView[int, Message]:
+        return ContextDictView(self.turns, lambda turn: turn.request)
+
     @property
-    def responses(self) -> Dict[int, Message]:
-        return {id: turn.response for id, turn in self.turns.items()}
+    def responses(self) -> ContextDictView[int, Message]:
+        return ContextDictView(self.turns, lambda turn: turn.response)
 
     def add_turn(self, turn: Turn):
-        last_index = get_last_index(self.turns)
-        self.turns[last_index + 1] = turn
+        self.turns[max(self.turns.keys(), default=-1) + 1] = turn
 
     def add_turn_items(self, label: Optional[NodeLabel2Type] = None, request: Optional[Message] = None, response: Optional[Message] = None):
-        request = Message() if request is None else request
-        response = Message() if response is None else response
         self.add_turn(Turn(label=label, request=request, response=response))
 
     @property
     def last_turn(self) -> Optional[Turn]:
-        last_index = get_last_index(self.turns)
-        return self.turns.get(last_index)
+        return self.turns._items.get(max(self.turns._items.keys(), default=None), None)
 
     @last_turn.setter
     def last_turn(self, turn: Optional[Turn]):
-        last_index = get_last_index(self.turns)
-        self.turns[last_index] = Turn() if turn is None else turn
+        self.turns[max(self.turns.keys(), default=0)] = Turn() if turn is None else turn
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
-        return self.last_turn.label if self.last_turn is not None else None
+        label_keys = [k for k in self.turns._items.keys() if self.turns._items[k].label is not None]
+        last_label_turn = self.turns._items.get(max(label_keys, default=None), None)
+        return last_label_turn.label if last_label_turn is not None else None
 
     @last_label.setter
     def last_label(self, label: Optional[NodeLabel2Type]):
@@ -215,7 +202,9 @@ class Context(BaseModel):
 
     @property
     def last_response(self) -> Optional[Message]:
-        return self.last_turn.response if self.last_turn is not None else None
+        response_keys = [k for k in self.turns._items.keys() if self.turns._items[k].response is not None]
+        last_response_turn = self.turns._items.get(max(response_keys, default=None), None)
+        return last_response_turn.response if last_response_turn is not None else None
 
     @last_response.setter
     def last_response(self, response: Optional[Message]):
@@ -227,7 +216,9 @@ class Context(BaseModel):
 
     @property
     def last_request(self) -> Optional[Message]:
-        return self.last_turn.request if self.last_turn is not None else None
+        request_keys = [k for k in self.turns._items.keys() if self.turns._items[k].request is not None]
+        last_request_turn = self.turns._items.get(max(request_keys, default=None), None)
+        return last_request_turn.request if last_request_turn is not None else None
 
     @last_request.setter
     def last_request(self, request: Optional[Message]):

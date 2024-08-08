@@ -169,7 +169,7 @@ class SQLContextStorage(DBContextStorage):
         self._turns_table = Table(
             f"{table_name_prefix}_{self.turns_config.name}",
             self._metadata,
-            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name]), nullable=False),
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
             Index(f"{self.turns_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
@@ -177,7 +177,7 @@ class SQLContextStorage(DBContextStorage):
         self._misc_table = Table(
             f"{table_name_prefix}_{self.misc_config.name}",
             self._metadata,
-            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name]), nullable=False),
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
             Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
             Index(f"{self.misc_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),

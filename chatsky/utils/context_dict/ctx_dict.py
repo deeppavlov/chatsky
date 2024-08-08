@@ -5,7 +5,7 @@ from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 
-K, V = TypeVar("K"), TypeVar("V")
+K, V, N = TypeVar("K"), TypeVar("V"), TypeVar("N")
 
 
 async def launch_coroutines(coroutines: List[Awaitable], is_async: bool) -> List[Any]:
@@ -211,3 +211,19 @@ class ContextDict(BaseModel, Generic[K, V]):
             )
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+
+
+class ContextDictView(Mapping[K, N]):
+    def __init__(self, context_dict: ContextDict[K, V], mapping: Callable[[V], N]) -> None:
+        super().__init__()
+        self._context_dict = context_dict
+        self._mapping_lambda = mapping
+    
+    async def __getitem__(self, key: K) -> N:
+        return self._mapping_lambda(await self._context_dict[key])
+
+    def __iter__(self) -> Sequence[K]:
+        return iter(self._context_dict)
+
+    def __len__(self) -> int:
+        return len(self._context_dict)
