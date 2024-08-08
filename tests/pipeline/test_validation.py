@@ -47,6 +47,11 @@ class TestServiceValidation:
             # Python says that two positional arguments were given when only one was expected.
             # This happens before Pydantic's validation, so I think there's nothing we can do.
             Service(UserFunctionSamples.correct_service_function_1)
+        with pytest.raises(ValidationError):
+            # Can't pass 'None' to handler, it has to be a callable function
+            # Though I wonder if empty Services should be allowed.
+            # I see no reason to allow it.
+            Service()
         # But it can work like this.
         # A single function gets cast to the right dictionary here.
         Service.model_validate(UserFunctionSamples.correct_service_function_1)
@@ -71,6 +76,10 @@ class TestExtraHandlerValidation:
         with pytest.raises(ValidationError):
             # 'functions' should be a list of ExtraHandlerFunctions
             BeforeHandler.model_validate([1, 2, 3])
+        with pytest.raises(ValidationError):
+            # 'functions' should be a list of ExtraHandlerFunctions,
+            # you can't pass another ExtraHandler there
+            BeforeHandler.model_validate(BeforeHandler())
 
 
 # Note: I haven't tested components being asynchronous in any way.

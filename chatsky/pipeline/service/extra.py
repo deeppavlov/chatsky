@@ -11,7 +11,7 @@ import asyncio
 import logging
 import inspect
 from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Callable
-from pydantic import BaseModel, computed_field, model_validator, Field
+from pydantic import BaseModel, computed_field, model_validator, Field, ValidationError
 
 from chatsky.script import Context
 
@@ -57,7 +57,8 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         elif isinstance(data, dict):
             result = data.copy()
         else:
-            return data
+            raise ValidationError("Extra Handler can only be initialized from a Dict,"
+                                  " a Callable or a list of Callables. Wrong inputs received.")
 
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]

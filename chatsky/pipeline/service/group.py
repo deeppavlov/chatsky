@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
-from pydantic import model_validator
+from pydantic import model_validator, ValidationError
 
 from chatsky.script import Context
 from ..pipeline.actor import Actor
@@ -70,7 +70,8 @@ class ServiceGroup(PipelineComponent):
         elif isinstance(data, dict):
             result = data.copy()
         else:
-            return data
+            raise ValidationError("Service Group can only be initialized from a Dict,"
+                                  " a PipelineComponent or a list of PipelineComponents. Wrong inputs received.")
 
         if ("components" in result) and (not isinstance(result["components"], list)):
             result["components"] = [result["components"]]

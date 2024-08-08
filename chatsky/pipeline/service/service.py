@@ -13,8 +13,8 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import TYPE_CHECKING, Any, Optional
-from pydantic import model_validator
+from typing import TYPE_CHECKING, Any, Optional, Callable
+from pydantic import model_validator, ValidationError
 
 from chatsky.script import Context
 
@@ -60,9 +60,13 @@ class Service(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def handler_constructor(cls, data: Any):
-        if not isinstance(data, dict):
+        if isinstance(data, Callable):
             return {"handler": data}
-        return data
+        elif isinstance(data, dict):
+            return data
+        else:
+            raise ValidationError("A Service can only be initialized from a Dict or"
+                                  " a Callable. Wrong inputs received.")
 
     @model_validator(mode="after")
     def tick_async_flag(self):
