@@ -162,15 +162,15 @@ class Context(BaseModel):
 
     @property
     def labels(self) -> ContextDictView[int, NodeLabel2Type]:
-        return ContextDictView(self.turns, lambda turn: turn.label)
+        return ContextDictView(self.turns, lambda turn: turn.label, lambda turn, label: Turn(label=label, request=turn.request, response=turn.response))
 
     @property
     def requests(self) -> ContextDictView[int, Message]:
-        return ContextDictView(self.turns, lambda turn: turn.request)
+        return ContextDictView(self.turns, lambda turn: turn.request, lambda turn, request: Turn(label=turn.label, request=request, response=turn.response))
 
     @property
     def responses(self) -> ContextDictView[int, Message]:
-        return ContextDictView(self.turns, lambda turn: turn.response)
+        return ContextDictView(self.turns, lambda turn: turn.response, lambda turn, response: Turn(label=turn.label, request=turn.request, response=response))
 
     def add_turn(self, turn: Turn):
         self.turns[max(self.turns.keys(), default=-1) + 1] = turn
