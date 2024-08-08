@@ -10,7 +10,7 @@ from chatsky.pipeline import (
     BeforeHandler,
 )
 from chatsky.script import Context
-from chatsky.utils.testing import TOY_SCRIPT, TOY_SCRIPT_KWARGS
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS
 
 
 # Looks overly long, we only need one function anyway.

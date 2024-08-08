@@ -10,8 +10,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
-from pydantic import BaseModel, computed_field, model_validator, Field
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Union, Callable, Tuple
+from pydantic import BaseModel, computed_field, model_validator, Field, field_validator
 
 from chatsky.script import Context
 
@@ -53,14 +53,16 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @model_validator(mode="before")
     @classmethod
     def functions_constructor(cls, data: Any):
-        if not isinstance(data, dict):
-            result = {"functions": data}
-        else:
-            result = data.copy()
+        if isinstance(data, (List, Callable, Tuple)):
+            return {"functions": data}
+        return data
 
-        if ("functions" in result) and (not isinstance(result["functions"], list)):
-            result["functions"] = [result["functions"]]
-        return result
+    @field_validator("functions")
+    @classmethod
+    def functions_validator(cls, functions):
+        if not isinstance(functions, list):
+            return [functions]
+        return functions
 
     @computed_field(repr=False)
     def calculated_async_flag(self) -> bool:
