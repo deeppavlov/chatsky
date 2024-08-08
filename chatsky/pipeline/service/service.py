@@ -63,8 +63,7 @@ class Service(PipelineComponent):
         if isinstance(data, Callable):
             return {"handler": data}
         elif not isinstance(data, dict):
-            raise ValueError("A Service can only be initialized from a Dict or a Callable."
-                             " Wrong inputs received.")
+            raise ValueError("A Service can only be initialized from a Dict or a Callable." " Wrong inputs received.")
         return data
 
     @model_validator(mode="after")

@@ -70,8 +70,10 @@ class ServiceGroup(PipelineComponent):
         elif isinstance(data, dict):
             result = data.copy()
         else:
-            raise ValueError("Service Group can only be initialized from a Dict,"
-                             " a PipelineComponent or a list of PipelineComponents. Wrong inputs received.")
+            raise ValueError(
+                "Service Group can only be initialized from a Dict,"
+                " a PipelineComponent or a list of PipelineComponents. Wrong inputs received."
+            )
 
         if ("components" in result) and (not isinstance(result["components"], list)):
             result["components"] = [result["components"]]
@@ -129,9 +131,9 @@ class ServiceGroup(PipelineComponent):
         for service in self.components:
             if not isinstance(service, ServiceGroup):
                 if (
-                        service.calculated_async_flag
-                        and service.requested_async_flag is not None
-                        and not service.requested_async_flag
+                    service.calculated_async_flag
+                    and service.requested_async_flag is not None
+                    and not service.requested_async_flag
                 ):
                     logger.warning(f"Service '{service.name}' could be asynchronous!")
                 if not service.asynchronous and service.timeout is not None:
@@ -139,7 +141,7 @@ class ServiceGroup(PipelineComponent):
             else:
                 if not service.calculated_async_flag:
                     if service.requested_async_flag is None and any(
-                            [sub_service.asynchronous for sub_service in service.components]
+                        [sub_service.asynchronous for sub_service in service.components]
                     ):
                         logger.warning(
                             f"ServiceGroup '{service.name}' contains both sync and async services, "
@@ -148,10 +150,10 @@ class ServiceGroup(PipelineComponent):
                 service.log_optimization_warnings()
 
     def add_extra_handler(
-            self,
-            global_extra_handler_type: GlobalExtraHandlerType,
-            extra_handler: ExtraHandlerFunction,
-            condition: ExtraHandlerConditionFunction = lambda _: False,
+        self,
+        global_extra_handler_type: GlobalExtraHandlerType,
+        extra_handler: ExtraHandlerFunction,
+        condition: ExtraHandlerConditionFunction = lambda _: False,
     ):
         """
         Method for adding a global extra handler to this group.

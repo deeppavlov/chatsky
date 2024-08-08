@@ -57,8 +57,10 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         elif isinstance(data, dict):
             result = data.copy()
         else:
-            raise ValueError("Extra Handler can only be initialized from a Dict,"
-                             " a Callable or a list of Callables. Wrong inputs received.")
+            raise ValueError(
+                "Extra Handler can only be initialized from a Dict,"
+                " a Callable or a list of Callables. Wrong inputs received."
+            )
 
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]
