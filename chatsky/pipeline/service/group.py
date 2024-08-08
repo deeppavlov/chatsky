@@ -71,7 +71,7 @@ class ServiceGroup(PipelineComponent):
 
     @field_validator("components")
     @classmethod
-    def components_constructor(cls, components):
+    def components_validator(cls, components):
         if not isinstance(components, list):
             return [components]
         return components

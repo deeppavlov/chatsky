@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Union, Callable, Tuple
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Callable
 from pydantic import BaseModel, computed_field, model_validator, Field, field_validator
 
 from chatsky.script import Context
