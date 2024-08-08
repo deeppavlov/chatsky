@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import inspect
 from typing import TYPE_CHECKING, Any, Optional, Callable
-from pydantic import model_validator, ValidationError
+from pydantic import model_validator
 
 from chatsky.script import Context
 
@@ -62,11 +62,10 @@ class Service(PipelineComponent):
     def handler_constructor(cls, data: Any):
         if isinstance(data, Callable):
             return {"handler": data}
-        elif isinstance(data, dict):
-            return data
-        else:
-            raise ValidationError("A Service can only be initialized from a Dict or"
-                                  " a Callable. Wrong inputs received.")
+        elif not isinstance(data, dict):
+            raise ValueError("A Service can only be initialized from a Dict or a Callable."
+                             " Wrong inputs received.")
+        return data
 
     @model_validator(mode="after")
     def tick_async_flag(self):

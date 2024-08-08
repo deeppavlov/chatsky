@@ -51,7 +51,7 @@ class TestServiceValidation:
             # Can't pass 'None' to handler, it has to be a callable function
             # Though I wonder if empty Services should be allowed.
             # I see no reason to allow it.
-            Service()
+            Service(handler=Service())
         # But it can work like this.
         # A single function gets cast to the right dictionary here.
         Service.model_validate(UserFunctionSamples.correct_service_function_1)
