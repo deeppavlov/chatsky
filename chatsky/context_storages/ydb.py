@@ -15,10 +15,8 @@ from os.path import join
 from typing import Any, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, cast_key_to_string
+from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ContextSchema, ExtraFields
-from .serializer import DefaultSerializer
 
 try:
     from ydb import (
@@ -67,12 +65,14 @@ class YDBContextStorage(DBContextStorage):
     def __init__(
         self,
         path: str,
-        context_schema: Optional[ContextSchema] = None,
-        serializer: Any = DefaultSerializer(),
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        turns_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
         table_name_prefix: str = "chatsky_table",
         timeout=5,
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
         self.context_schema.supports_async = True
 
         protocol, netloc, self.database, _, _ = urlsplit(path)
@@ -84,7 +84,6 @@ class YDBContextStorage(DBContextStorage):
         self.table_prefix = table_name_prefix
         self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix))
 
-    @cast_key_to_string()
     async def del_item_async(self, key: str):
         async def callee(session):
             query = f"""
@@ -102,7 +101,6 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
         async def callee(session):
             query = f"""

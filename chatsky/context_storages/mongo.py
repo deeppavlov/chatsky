@@ -23,10 +23,8 @@ try:
 except ImportError:
     mongo_available = False
 
-from .database import DBContextStorage, threadsafe_method, cast_key_to_string
+from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ContextSchema, ExtraFields
-from .serializer import DefaultSerializer
 
 
 class MongoContextStorage(DBContextStorage):
@@ -52,11 +50,13 @@ class MongoContextStorage(DBContextStorage):
     def __init__(
         self,
         path: str,
-        context_schema: Optional[ContextSchema] = None,
-        serializer: Any = DefaultSerializer(),
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        turns_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
         collection_prefix: str = "chatsky_collection",
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
         self.context_schema.supports_async = True
 
         if not mongo_available:
@@ -87,14 +87,11 @@ class MongoContextStorage(DBContextStorage):
             )
         )
 
-    @threadsafe_method
-    @cast_key_to_string()
     async def del_item_async(self, key: str):
         await self.collections[self._CONTEXTS_TABLE].update_many(
             {ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}}
         )
 
-    @threadsafe_method
     async def len_async(self) -> int:
         count_key = "unique_count"
         unique = (
@@ -110,7 +107,6 @@ class MongoContextStorage(DBContextStorage):
         )
         return 0 if len(unique) == 0 else unique[0][count_key]
 
-    @threadsafe_method
     async def clear_async(self, prune_history: bool = False):
         if prune_history:
             await self.collections[self._CONTEXTS_TABLE].drop()
@@ -120,7 +116,6 @@ class MongoContextStorage(DBContextStorage):
                 {}, {"$set": {ExtraFields.active_ctx.value: False}}
             )
 
-    @threadsafe_method
     async def keys_async(self) -> Set[str]:
         unique_key = "unique_keys"
         unique = (
@@ -135,7 +130,6 @@ class MongoContextStorage(DBContextStorage):
         )
         return set(unique[0][unique_key])
 
-    @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
         return (
             await self.collections[self._CONTEXTS_TABLE].count_documents(

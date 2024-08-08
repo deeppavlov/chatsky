@@ -17,9 +17,7 @@ from pathlib import Path
 from shelve import DbfilenameShelf
 from typing import Any, Set, Tuple, List, Dict, Optional
 
-from .context_schema import ContextSchema, ExtraFields
-from .database import DBContextStorage, cast_key_to_string
-from .serializer import DefaultSerializer
+from .database import DBContextStorage, FieldConfig
 
 
 class ShelveContextStorage(DBContextStorage):
@@ -35,9 +33,14 @@ class ShelveContextStorage(DBContextStorage):
     _PACKED_COLUMN = "data"
 
     def __init__(
-        self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
+        self,
+        path: str,
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        turns_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
         self.context_schema.supports_async = False
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
@@ -45,13 +48,11 @@ class ShelveContextStorage(DBContextStorage):
         log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
         self.log_db = DbfilenameShelf(str(log_file.resolve()), writeback=True)
 
-    @cast_key_to_string()
     async def del_item_async(self, key: str):
         for id in self.context_db.keys():
             if self.context_db[id][ExtraFields.storage_key.value] == key:
                 self.context_db[id][ExtraFields.active_ctx.value] = False
 
-    @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
         return await self._get_last_ctx(key) is not None
 

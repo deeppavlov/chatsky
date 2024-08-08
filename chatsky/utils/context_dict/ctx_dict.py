@@ -1,15 +1,11 @@
-from asyncio import gather
-from typing import Any, Awaitable, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union, Literal
+from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
+from .asyncronous import launch_coroutines
 
-K, V, N = TypeVar("K"), TypeVar("V"), TypeVar("N")
-
-
-async def launch_coroutines(coroutines: List[Awaitable], is_async: bool) -> List[Any]:
-    return await gather(*coroutines) if is_async else [await coroutine for coroutine in coroutines]
+K, V = TypeVar("K"), TypeVar("V")
 
 
 class ContextDict(BaseModel, Generic[K, V]):
@@ -99,14 +95,6 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def get(self, key: K, default: V = _marker) -> V:
         try:
             return await self[key]
-        except KeyError:
-            if default is self._marker:
-                raise
-            return default
-
-    async def get_latest(self, default: V = _marker) -> V:
-        try:
-            return await self[max(self._keys)]
         except KeyError:
             if default is self._marker:
                 raise
@@ -211,47 +199,3 @@ class ContextDict(BaseModel, Generic[K, V]):
             )
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
-
-
-class ContextDictView(Mapping[K, N]):
-    _marker = object()
-
-    def __init__(self, context_dict: ContextDict[K, V], get_mapping: Callable[[V], N], set_mapping: Callable[[V, N], V]) -> None:
-        super().__init__()
-        self._context_dict = context_dict
-        self._get_mapping_lambda = get_mapping
-        self._set_mapping_lambda = set_mapping
-    
-    async def __getitem__(self, key: K) -> N:
-        return self._get_mapping_lambda(await self._context_dict[key])
-
-    def __setitem__(self, key: K, value: N) -> None:
-        self._context_dict[key] = self._set_mapping_lambda(key, value)
-
-    def __iter__(self) -> Sequence[K]:
-        return iter(self._context_dict)
-
-    def __len__(self) -> int:
-        return len(self._context_dict)
-
-    async def update(self, other: Any = (), /, **kwds) -> None:
-        if isinstance(other, Mapping):
-            for key in other:
-                self[key] = other[key]
-        elif hasattr(other, "keys"):
-            for key in other.keys():
-                self[key] = other[key]
-        else:
-            for key, value in other:
-                self[key] = value
-        for key, value in kwds.items():
-            self[key] = value
-
-    async def setdefault(self, key: K, default: V = _marker) -> V:
-        try:
-            return await self[key]
-        except KeyError:
-            if default is self._marker:
-                raise
-            self[key] = default
-        return default
