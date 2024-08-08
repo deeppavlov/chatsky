@@ -115,12 +115,16 @@ class Pipeline:
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
         actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+
+        self.start_label = start_label
+        if fallback_label is None:
+            fallback_label = start_label
+
         if not actor_exists:
             raise Exception("Actor not found in the pipeline!")
         else:
             self.set_actor(
                 script,
-                start_label,
                 fallback_label,
                 default_priority,
             )
@@ -268,7 +272,6 @@ class Pipeline:
     def set_actor(
         self,
         script: Union[Script, Dict],
-        start_label: AbsoluteNodeLabel,
         fallback_label: Optional[AbsoluteNodeLabel] = None,
         default_priority: float = 1.0,
     ):
@@ -286,7 +289,7 @@ class Pipeline:
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         """
-        self.actor = Actor(script, start_label, fallback_label, default_priority)
+        self.actor = Actor(script, fallback_label, default_priority)
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":

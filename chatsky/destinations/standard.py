@@ -55,7 +55,7 @@ class Start(BaseDestination):
     """
 
     async def func(self, ctx: Context) -> NodeLabelInitTypes:
-        return ctx.pipeline.actor.start_label
+        return ctx.pipeline.start_label
 
 
 class Fallback(BaseDestination):

@@ -64,23 +64,14 @@ class Actor:
     def __init__(
         self,
         script: Union[Script, dict],
-        start_label: AbsoluteNodeLabelInitTypes,
-        fallback_label: Optional[AbsoluteNodeLabelInitTypes] = None,
+        fallback_label: AbsoluteNodeLabelInitTypes,
         default_priority: float = 1.0,
     ):
         self.script = Script.model_validate(script)
         self.default_priority = default_priority
-
-        self.start_label = AbsoluteNodeLabel.model_validate(start_label)
-        if self.script.get_node(self.start_label) is None:
-            raise ValueError(f"Unknown start_label={self.start_label}")
-
-        if fallback_label is None:
-            self.fallback_label = self.start_label
-        else:
-            self.fallback_label = AbsoluteNodeLabel.model_validate(fallback_label)
-            if self.script.get_node(self.fallback_label) is None:
-                raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        self.fallback_label = AbsoluteNodeLabel.model_validate(fallback_label)
+        if self.script.get_node(self.fallback_label) is None:
+            raise ValueError(f"Unknown fallback_label={self.fallback_label}")
 
     async def __call__(self, ctx: Context):
         next_label = self.fallback_label
