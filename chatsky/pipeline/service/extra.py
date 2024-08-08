@@ -52,7 +52,6 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
     def functions_constructor(cls, data: Any):
         if not isinstance(data, dict):
             result = {"functions": data}

@@ -62,7 +62,7 @@ async def default_condition_handler(
     return await wrap_sync_function_in_async(condition, ctx, pipeline)
 
 
-class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
+class Actor(PipelineComponent):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.
@@ -84,13 +84,14 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    script: Union[Script, dict]
+    script: Script
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
     condition_handler: Callable = Field(default=default_condition_handler)
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
-    _clean_turn_cache: Optional[bool] = True
+    # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+    _clean_turn_cache: bool = True
 
     @model_validator(mode="after")
     def tick_async_flag(self):
@@ -98,22 +99,20 @@ class Actor(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     @model_validator(mode="after")
-    def actor_validator(self):
-        if not isinstance(self.script, Script):
-            self.script = Script(script=self.script)
+    def start_label_validator(self):
         self.start_label = normalize_label(self.start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
+        return self
 
+    @model_validator(mode="after")
+    def fallback_label_validator(self):
         if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:
             self.fallback_label = normalize_label(self.fallback_label)
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
-
-        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
-        self._clean_turn_cache = True
         return self
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:

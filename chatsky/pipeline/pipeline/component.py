@@ -137,7 +137,22 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+        """
+        Method for running this component. It can be an Actor, Service or ServiceGroup.
+        It has to be defined in the child classes,
+        which is done in each of the default PipelineComponents.
+        Service 'handler' has three possible signatures. These possible signatures are:
+
+        - (ctx: Context) - accepts current dialog context only.
+        - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
+        - | (ctx: Context, pipeline: Pipeline, info: ServiceRuntimeInfo) - accepts context,
+              pipeline and service runtime info dictionary.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
+        :return: `None`
+        """
         raise NotImplementedError
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
@@ -148,21 +163,20 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
-        if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
-            try:
+        try:
+            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
                 await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
-                await self.run_component(ctx, pipeline)
-                if self.get_state(ctx) is not ComponentExecutionState.FAILED:
+                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
                 await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-            except Exception as exc:
-                self._set_state(ctx, ComponentExecutionState.FAILED)
-                logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
-        else:
-            self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+            else:
+                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+        except Exception as exc:
+            self._set_state(ctx, ComponentExecutionState.FAILED)
+            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
     async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
         """

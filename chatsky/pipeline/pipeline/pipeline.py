@@ -16,8 +16,9 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
+from functools import cached_property
 from typing import Union, List, Dict, Optional, Hashable, Callable
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -98,11 +99,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
-    actor: Optional[Actor] = None
-    _services_pipeline: Optional[ServiceGroup] = None
     _clean_turn_cache: Optional[bool]
 
-    def _create_actor(self) -> Actor:
+    @computed_field
+    @cached_property
+    def actor(self) -> Actor:
         return Actor(
             script=self.script,
             start_label=self.start_label,
@@ -112,7 +113,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             handlers=self.handlers,
         )
 
-    def _create_pipeline_services(self) -> ServiceGroup:
+    @computed_field
+    @cached_property
+    def _services_pipeline(self) -> ServiceGroup:
         components = [self.pre_services, self.actor, self.post_services]
         services_pipeline = ServiceGroup(
             components=components,
@@ -126,8 +129,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def pipeline_init(self):
-        self.actor = self._create_actor()
-        self._services_pipeline = self._create_pipeline_services()
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         if self.optimization_warnings:

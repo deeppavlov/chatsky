@@ -34,7 +34,6 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     """
     if isinstance(component, Actor):
         base_name = "actor"
-    # Pretty sure that service.handler can only be a callable now. Should the newly irrelevant logic be removed?
     elif isinstance(component, Service) and callable(component.handler):
         if isfunction(component.handler):
             base_name = component.handler.__name__
@@ -43,7 +42,6 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     elif isinstance(component, ServiceGroup):
         base_name = "service_group"
     else:
-        # This should never be triggered. (All PipelineComponent derivatives are handled above)
         base_name = "noname_service"
 
     name_index = 0

@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
 from pydantic import model_validator
 
 from chatsky.script import Context
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
+class ServiceGroup(PipelineComponent):
     """
     A service group class.
     Service group can be included into pipeline as an object or a pipeline component list.
@@ -64,7 +64,6 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
     def components_constructor(cls, data: Any):
         if not isinstance(data, dict):
             result = {"components": data}
@@ -80,7 +79,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
         """
         Method for running this service group. Catches runtime exceptions and logs them.
         It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
@@ -107,7 +106,8 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
                     await service_result
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
-        self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
+        if failed:
+            return ComponentExecutionState.FAILED
 
     def log_optimization_warnings(self):
         """

@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
+class Service(PipelineComponent):
     """
     This class represents a service.
     Service can be included into pipeline as object or a dictionary.
@@ -59,7 +59,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
     def handler_constructor(cls, data: Any):
         if not isinstance(data, dict):
             return {"handler": data}
