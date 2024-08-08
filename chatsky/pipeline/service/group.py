@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
-from pydantic import model_validator, field_validator
+from pydantic import model_validator
 
 from chatsky.script import Context
 from ..pipeline.actor import Actor
