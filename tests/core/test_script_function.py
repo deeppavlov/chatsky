@@ -1,5 +1,4 @@
 import pytest
-import logging
 
 from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
 from chatsky.core.script_function import BasePriority, BaseCondition, BaseResponse, BaseDestination, BaseProcessing
@@ -37,20 +36,9 @@ class TestBaseFunctionCallWrapper:
 
         assert await MyCondition().wrapped_call(None) is True
 
-    @pytest.fixture
-    def log_list(self):
-        logs = []
+    async def test_catch_exception(self, log_event_catcher):
+        log_list = log_event_catcher(logger)
 
-        class Handler(logging.Handler):
-            def emit(self, record) -> bool:
-                logs.append(record)
-                return True
-
-        logger.addHandler(Handler())
-        logger.setLevel(logging.DEBUG)
-        return logs
-
-    async def test_catch_exception(self, log_list):
         class MyProc(BaseProcessing):
             async def func(self, ctx):
                 raise RuntimeError()

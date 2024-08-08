@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 from chatsky.core import Pipeline
 from chatsky.core import Context
@@ -35,3 +36,18 @@ def context_factory(pipeline):
         return ctx
 
     return _context_factory
+
+@pytest.fixture
+def log_event_catcher():
+    def inner(logger, level=logging.DEBUG):
+        logs = []
+
+        class Handler(logging.Handler):
+            def emit(self, record) -> bool:
+                logs.append(record)
+                return True
+
+        logger.addHandler(Handler())
+        logger.setLevel(level)
+        return logs
+    return inner
