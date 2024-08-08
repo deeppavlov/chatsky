@@ -35,25 +35,24 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
-
-    :param functions: A list or instance of :py:data:`~.ExtraHandlerFunction`.
-    :type functions: :py:data:`~.ExtraHandlerFunction`
-    :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
-        after pipeline component.
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param requested_async_flag: Requested asynchronous property.
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
+    """A list or instance of :py:data:`~.ExtraHandlerFunction`.
+    :type functions: :py:data:`~.ExtraHandlerFunction`"""
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
+    """An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
+    be executed before or after pipeline component."""
     timeout: Optional[float] = None
+    """(for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted."""
     requested_async_flag: Optional[bool] = None
+    """Requested asynchronous property."""
 
     @model_validator(mode="before")
     @classmethod
     def functions_constructor(cls, data: Any):
-        if isinstance(data, (List, Callable, Tuple)):
+        if isinstance(data, (List[Callable], Callable)):
             return {"functions": data}
         return data
 
