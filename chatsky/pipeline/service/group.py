@@ -65,7 +65,7 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def components_constructor(cls, data: Any):
-        if isinstance(data, (List[PipelineComponent], PipelineComponent)):
+        if isinstance(data, (list, PipelineComponent)):
             return {"components": data}
         return data
 

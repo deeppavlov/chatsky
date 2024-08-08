@@ -52,7 +52,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @model_validator(mode="before")
     @classmethod
     def functions_constructor(cls, data: Any):
-        if isinstance(data, (List[Callable], Callable)):
+        if isinstance(data, (list, Callable)):
             return {"functions": data}
         return data
 
