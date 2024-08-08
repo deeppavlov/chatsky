@@ -189,7 +189,7 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     async def store(self) -> None:
         if self._storage is not None:
-            byted = [(k, self._storage.serializer.dumps(v)) for k, v in self.model_dump().items()]
+            byted = [(k, self._storage.serializer.dumps(v)) for k, v in self.model_dump(mode="json").items()]
             await launch_coroutines(
                 [
                     self._storage.update_field_items(self._ctx_id, self._field_name, byted),

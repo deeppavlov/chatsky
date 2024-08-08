@@ -16,7 +16,7 @@ public-domain, SQL database engine.
 import asyncio
 from importlib import import_module
 from os import getenv
-from typing import Any, Callable, Collection, Hashable, List, Optional, Tuple
+from typing import Any, Callable, Collection, Hashable, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
@@ -259,6 +259,8 @@ class SQLContextStorage(DBContextStorage):
             stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
         if isinstance(field_config.subscript, int):
             stmt = stmt.limit(field_config.subscript)
+        elif isinstance(field_config.subscript, Set):
+            stmt = stmt.where(field_table.c[self._KEY_COLUMN].in_(field_config.subscript))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 

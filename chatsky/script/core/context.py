@@ -30,18 +30,19 @@ from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
 from chatsky.pipeline.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
-from chatsky.utils.context_dict.ctx_dict import ContextDict, ContextDictView, launch_coroutines
+from chatsky.utils.context_dict import ContextDict, launch_coroutines
 
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
 
 logger = logging.getLogger(__name__)
 
-
+"""
 class Turn(BaseModel):
     label: Optional[NodeLabel2Type] = Field(default=None)
     request: Optional[Message] = Field(default=None)
     response: Optional[Message] = Field(default=None)
+"""
 
 
 class FrameworkData(BaseModel):
@@ -81,7 +82,9 @@ class Context(BaseModel):
     Timestamp when the context was **last time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
-    turns: ContextDict[int, Turn] = Field(default_factory=ContextDict)
+    labels: ContextDict[int, NodeLabel2Type] = Field(default_factory=ContextDict)
+    requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
+    responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
     """
     `turns` stores the history of all passed `labels`, `requests`, and `responses`.
 
@@ -110,10 +113,12 @@ class Context(BaseModel):
         if storage is None:
             return cls(id=id)
         else:
-            main, turns, misc = await launch_coroutines(
+            main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.turns_config.name, Turn.model_validate),
+                    ContextDict.connected(storage, id, storage.turns_config.name, tuple),
+                    ContextDict.connected(storage, id, storage.requests_config.name, Message.model_validate),
+                    ContextDict.connected(storage, id, storage.responses_config.name, Message.model_validate),
                     ContextDict.connected(storage, id, storage.misc_config.name)
                 ],
                 storage.is_asynchronous,
@@ -122,7 +127,7 @@ class Context(BaseModel):
                 raise ValueError(f"Context with id {id} not found in the storage!")
             crt_at, upd_at, fw_data = main
             objected = storage.serializer.loads(fw_data)
-            instance = cls(id=id, framework_data=objected, turns=turns, misc=misc)
+            instance = cls(id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
@@ -133,7 +138,9 @@ class Context(BaseModel):
             await launch_coroutines(
                 [
                     self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, byted),
-                    self.turns.store(),
+                    self.labels.store(),
+                    self.requests.store(),
+                    self.responses.store(),
                     self.misc.store(),
                 ],
                 self._storage.is_asynchronous,
@@ -144,11 +151,15 @@ class Context(BaseModel):
     def clear(
         self,
         hold_last_n_indices: int,
-        field_names: Union[Set[str], List[str]] = {"turns"},
+        field_names: Union[Set[str], List[str]] = {"labels", "requests", "responses"},
     ):
         field_names = field_names if isinstance(field_names, set) else set(field_names)
-        if "turns" in field_names:
-            del self.turns[:-hold_last_n_indices]
+        if "labels" in field_names:
+            del self.labels[:-hold_last_n_indices]
+        if "requests" in field_names:
+            del self.requests[:-hold_last_n_indices]
+        if "responses" in field_names:
+            del self.responses[:-hold_last_n_indices]
         if "misc" in field_names:
             self.misc.clear()
         if "framework_data" in field_names:
@@ -160,31 +171,10 @@ class Context(BaseModel):
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
-    @property
-    def labels(self) -> ContextDictView[int, NodeLabel2Type]:
-        return ContextDictView(self.turns, lambda turn: turn.label, lambda turn, label: Turn(label=label, request=turn.request, response=turn.response))
-
-    @property
-    def requests(self) -> ContextDictView[int, Message]:
-        return ContextDictView(self.turns, lambda turn: turn.request, lambda turn, request: Turn(label=turn.label, request=request, response=turn.response))
-
-    @property
-    def responses(self) -> ContextDictView[int, Message]:
-        return ContextDictView(self.turns, lambda turn: turn.response, lambda turn, response: Turn(label=turn.label, request=turn.request, response=response))
-
-    def add_turn(self, turn: Turn):
-        self.turns[max(self.turns.keys(), default=-1) + 1] = turn
-
     def add_turn_items(self, label: Optional[NodeLabel2Type] = None, request: Optional[Message] = None, response: Optional[Message] = None):
-        self.add_turn(Turn(label=label, request=request, response=response))
-
-    @property
-    def last_turn(self) -> Optional[Turn]:
-        return self.turns._items.get(max(self.turns._items.keys(), default=None), None)
-
-    @last_turn.setter
-    def last_turn(self, turn: Optional[Turn]):
-        self.turns[max(self.turns.keys(), default=0)] = Turn() if turn is None else turn
+        self.labels[max(self.labels.keys(), default=-1) + 1] = label
+        self.requests[max(self.requests.keys(), default=-1) + 1] = request
+        self.responses[max(self.responses.keys(), default=-1) + 1] = response
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -194,11 +184,7 @@ class Context(BaseModel):
 
     @last_label.setter
     def last_label(self, label: Optional[NodeLabel2Type]):
-        last_turn = self.last_turn
-        if last_turn is not None:
-            self.last_turn.label =  label
-        else:
-            raise ValueError("The turn history is empty!")
+        self.labels[max(self.labels.keys(), default=0)] = label
 
     @property
     def last_response(self) -> Optional[Message]:
@@ -208,11 +194,7 @@ class Context(BaseModel):
 
     @last_response.setter
     def last_response(self, response: Optional[Message]):
-        last_turn = self.last_turn
-        if last_turn is not None:
-            self.last_turn.response = Message() if response is None else response
-        else:
-            raise ValueError("The turn history is empty!")
+        self.responses[max(self.responses.keys(), default=0)] = response
 
     @property
     def last_request(self) -> Optional[Message]:
@@ -222,11 +204,7 @@ class Context(BaseModel):
 
     @last_request.setter
     def last_request(self, request: Optional[Message]):
-        last_turn = self.last_turn
-        if last_turn is not None:
-            self.last_turn.request = Message() if request is None else request
-        else:
-            raise ValueError("The turn history is empty!")
+        self.requests[max(self.requests.keys(), default=0)] = request
 
     @property
     def current_node(self) -> Optional[Node]:

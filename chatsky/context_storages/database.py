@@ -11,7 +11,7 @@ This class implements the basic functionality and can be extended to add additio
 import pickle
 from abc import ABC, abstractmethod
 from importlib import import_module
-from typing import Any, Hashable, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -30,7 +30,7 @@ class FieldConfig(BaseModel, validate_assignment=True):
     It can not (and should not) be changed in runtime.
     """
 
-    subscript: Union[Literal["__all__"], int] = 3
+    subscript: Union[Literal["__all__"], int, Set[str]] = 3
     """
     `subscript` is used for limiting keys for reading and writing.
     It can be a string `__all__` meaning all existing keys or number,
@@ -57,8 +57,7 @@ class DBContextStorage(ABC):
         path: str,
         serializer: Optional[Any] = None,
         rewrite_existing: bool = False,
-        turns_config: Optional[FieldConfig] = None,
-        misc_config: Optional[FieldConfig] = None,
+        configuration: Optional[Dict[str, FieldConfig]] = None,
     ):
         _, _, file_path = path.partition("://")
         self.full_path = path
@@ -69,8 +68,10 @@ class DBContextStorage(ABC):
         """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
-        self.turns_config = turns_config if turns_config is not None else FieldConfig(name="turns")
-        self.misc_config = misc_config if misc_config is not None else FieldConfig(name="misc")
+        self.labels_config = configuration.get("labels", FieldConfig(name="labels"))
+        self.requests_config = configuration.get("requests", FieldConfig(name="requests"))
+        self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
+        self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
 
     @abstractmethod
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
