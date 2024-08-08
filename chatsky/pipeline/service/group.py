@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
-from pydantic import model_validator
+from pydantic import model_validator, field_validator
 
 from chatsky.script import Context
 from ..pipeline.actor import Actor
@@ -65,14 +65,16 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def components_constructor(cls, data: Any):
-        if not isinstance(data, dict):
-            result = {"components": data}
-        else:
-            result = data.copy()
+        if isinstance(data, (List[PipelineComponent], PipelineComponent)):
+            return {"components": data}
+        return data
 
-        if ("components" in result) and (not isinstance(result["components"], list)):
-            result["components"] = [result["components"]]
-        return result
+    @field_validator("components")
+    @classmethod
+    def components_constructor(cls, components):
+        if not isinstance(components, list):
+            return [components]
+        return components
 
     @model_validator(mode="after")
     def calculate_async_flag(self):
