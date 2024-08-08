@@ -53,15 +53,15 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @classmethod
     def functions_constructor(cls, data: Any):
         if isinstance(data, (list, Callable)):
-            return {"functions": data}
-        return data
+            result = {"functions": data}
+        elif isinstance(data, dict):
+            result = data.copy()
+        else:
+            return data
 
-    @field_validator("functions")
-    @classmethod
-    def functions_validator(cls, functions):
-        if not isinstance(functions, list):
-            return [functions]
-        return functions
+        if ("functions" in result) and (not isinstance(result["functions"], list)):
+            result["functions"] = [result["functions"]]
+        return result
 
     @computed_field(repr=False)
     def calculated_async_flag(self) -> bool:

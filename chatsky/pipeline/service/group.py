@@ -66,15 +66,15 @@ class ServiceGroup(PipelineComponent):
     @classmethod
     def components_constructor(cls, data: Any):
         if isinstance(data, (list, PipelineComponent)):
-            return {"components": data}
-        return data
+            result = {"components": data}
+        elif isinstance(data, dict):
+            result = data.copy()
+        else:
+            return data
 
-    @field_validator("components")
-    @classmethod
-    def components_validator(cls, components):
-        if not isinstance(components, list):
-            return [components]
-        return components
+        if ("components" in result) and (not isinstance(result["components"], list)):
+            result["components"] = [result["components"]]
+        return result
 
     @model_validator(mode="after")
     def calculate_async_flag(self):
