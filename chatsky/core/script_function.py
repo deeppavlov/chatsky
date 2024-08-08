@@ -16,10 +16,6 @@ from chatsky.core.node_label import NodeLabel, NodeLabelInitTypes, AbsoluteNodeL
 logger = logging.getLogger(__name__)
 
 
-class ScriptFunctionError(Exception):
-    """Raising this class in a user function will produce a debug level log instead of warning."""
-
-
 ReturnType = TypeVar("ReturnType")
 
 
@@ -42,9 +38,6 @@ class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType]):
                 )
             logger.debug(f"Function {self.__class__.__name__} returned {result!r}. {info}")
             return result
-        except ScriptFunctionError as exc:
-            logger.debug(f"A {exc.__class__.__name__} occurred in {self.__class__.__name__}. {info}", exc_info=exc)
-            return exc
         except Exception as exc:
             logger.warning(f"An exception occurred in {self.__class__.__name__}. {info}", exc_info=exc)
             return exc

@@ -3,7 +3,7 @@ import logging
 
 from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
 from chatsky.core.script_function import BasePriority, BaseCondition, BaseResponse, BaseDestination, BaseProcessing
-from chatsky.core.script_function import logger, ScriptFunctionError
+from chatsky.core.script_function import logger
 from chatsky.core import Message, Pipeline, Context
 from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabel
 
@@ -58,15 +58,6 @@ class TestBaseFunctionCallWrapper:
         assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
         assert len(log_list) == 1
         assert log_list[0].levelname == "WARNING"
-
-    async def test_exception_not_logged(self, log_list):
-        class MyProc(BaseProcessing):
-            async def func(self, ctx):
-                raise ScriptFunctionError()
-
-        assert isinstance(await MyProc().wrapped_call(None), ScriptFunctionError)
-        assert len(log_list) == 1
-        assert log_list[0].levelname == "DEBUG"
 
     async def test_base_exception_not_handled(self):
         class SpecialException(BaseException):
