@@ -28,7 +28,7 @@ from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = context_storage_factory("json://dbs/file.json")
 # db = context_storage_factory("pickle://dbs/file.pkl")
-# db = context_storage_factory("shelve://dbs/file")
+# db = context_storage_factory("shelve://dbs/file.shlv")
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 

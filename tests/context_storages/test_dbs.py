@@ -10,7 +10,6 @@ from chatsky.context_storages import (
     json_available,
     pickle_available,
     ShelveContextStorage,
-    DBContextStorage,
     postgres_available,
     mysql_available,
     sqlite_available,
@@ -20,7 +19,6 @@ from chatsky.context_storages import (
     context_storage_factory,
 )
 
-from chatsky.script import Context
 from chatsky.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
@@ -30,10 +28,9 @@ from chatsky.utils.testing.cleanup_db import (
     delete_sql,
     delete_ydb,
 )
+from tests.context_storages.test_functions import run_all_functions
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from chatsky.pipeline import Pipeline
-from chatsky.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -61,33 +58,6 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 
-def generic_test(db, testing_context, context_id):
-    assert isinstance(db, DBContextStorage)
-    # perform cleanup
-    db.clear()
-    assert len(db) == 0
-    # test write operations
-    db[context_id] = Context(id=context_id)
-    assert context_id in db
-    assert len(db) == 1
-    db[context_id] = testing_context  # overwriting a key
-    assert len(db) == 1
-    # test read operations
-    new_ctx = db[context_id]
-    assert isinstance(new_ctx, Context)
-    assert {**new_ctx.model_dump(), "id": str(new_ctx.id)} == {
-        **testing_context.model_dump(),
-        "id": str(testing_context.id),
-    }
-    # test delete operations
-    del db[context_id]
-    assert context_id not in db
-    # test `get` method
-    assert db.get(context_id) is None
-    pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
-    check_happy_path(pipeline, happy_path=HAPPY_PATH)
-
-
 @pytest.mark.parametrize(
     ["protocol", "expected"],
     [
@@ -101,23 +71,28 @@ def test_protocol_suggestion(protocol, expected):
     assert result == expected
 
 
+def test_dict(testing_context, context_id):
+    db = dict()
+    run_all_functions(db, testing_context, context_id)
+
+
 def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_shelve(db))
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
 def test_json(testing_file, testing_context, context_id):
     db = context_storage_factory(f"json://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_json(db))
 
 
 @pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
 def test_pickle(testing_file, testing_context, context_id):
     db = context_storage_factory(f"pickle://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_pickle(db))
 
 
@@ -135,7 +110,7 @@ def test_mongo(testing_context, context_id):
             os.environ["MONGO_INITDB_ROOT_USERNAME"],
         )
     )
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_mongo(db))
 
 
@@ -144,7 +119,7 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.docker
 def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.environ["REDIS_PASSWORD"], "0"))
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_redis(db))
 
 
@@ -159,7 +134,7 @@ def test_postgres(testing_context, context_id):
             os.environ["POSTGRES_DB"],
         )
     )
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -167,7 +142,7 @@ def test_postgres(testing_context, context_id):
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -182,7 +157,7 @@ def test_mysql(testing_context, context_id):
             os.environ["MYSQL_DATABASE"],
         )
     )
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -195,7 +170,7 @@ def test_ydb(testing_context, context_id):
             os.environ["YDB_ENDPOINT"],
             os.environ["YDB_DATABASE"],
         ),
-        table_name="test",
+        table_name_prefix="test_chatsky_table",
     )
-    generic_test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))

@@ -14,17 +14,29 @@ public-domain, SQL database engine.
 """
 
 import asyncio
-import importlib
-import json
-from typing import Hashable
+from importlib import import_module
+from os import getenv
+from typing import Any, Callable, Collection, Hashable, List, Optional, Set, Tuple
 
-from chatsky.script import Context
-
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
 
 try:
-    from sqlalchemy import Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy import (
+        Table,
+        MetaData,
+        Column,
+        LargeBinary,
+        ForeignKey,
+        String,
+        BigInteger,
+        Integer,
+        Index,
+        Insert,
+        inspect,
+        select,
+        delete,
+    )
     from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
@@ -64,129 +76,231 @@ if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
 
-def import_insert_for_dialect(dialect: str):
-    """
-    Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
+def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
+    return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
-    :param dialect: Chosen sqlalchemy dialect.
-    """
-    global insert
-    insert = getattr(
-        importlib.import_module(f"sqlalchemy.dialects.{dialect}"),
-        "insert",
-    )
+
+def _get_write_limit(dialect: str):
+    if dialect == "sqlite":
+        return (int(getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 4
+    elif dialect == "mysql":
+        return False
+    elif dialect == "postgresql":
+        return 32757 // 4
+    else:
+        return 9990 // 4
+
+
+def _get_upsert_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
+    if dialect == "postgresql" or dialect == "sqlite":
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_conflict_do_update(
+                index_elements=unique, set_={column: insert_stmt.excluded[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.on_conflict_do_nothing()
+    elif dialect == "mysql":
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_duplicate_key_update(
+                **{column: insert_stmt.inserted[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.prefix_with("IGNORE")
+    else:
+        update_stmt = insert_stmt
+    return update_stmt
 
 
 class SQLContextStorage(DBContextStorage):
     """
     | SQL-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
+    | When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
+    | instead of forward slashes '/' in the file path.
+
+    CONTEXT table is represented by `contexts` table.
+    Columns of the table are: active_ctx, primary_id, storage_key, data, created_at and updated_at.
+
+    LOGS table is represented by `logs` table.
+    Columns of the table are: primary_id, field, key, value and updated_at.
 
     :param path: Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
-        instead of forward slashes '/' in the file path.
-    :param table_name: The name of the table to use.
+        Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
+        `mysql+asyncmy://root:pass@localhost:3306/test`,
+        `postgresql+asyncpg://postgres:pass@localhost:5430/test`.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
+    :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
     :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
     """
 
-    def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        DBContextStorage.__init__(self, path)
+    _KEY_COLUMN = "key"
+    _VALUE_COLUMN = "value"
 
-        self._check_availability(custom_driver)
+    _UUID_LENGTH = 64
+    _FIELD_LENGTH = 256
+
+    def __init__(
+        self, path: str,
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        turns_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
+        table_name_prefix: str = "chatsky_table",
+    ):
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
+
+        self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
+        self._insert_limit = _get_write_limit(self.dialect)
+        self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        id_column_args = {"primary_key": True}
-        if self.dialect == "sqlite":
-            id_column_args["sqlite_on_conflict_primary_key"] = "REPLACE"
-
-        self.metadata = MetaData()
-        self.table = Table(
-            table_name,
-            self.metadata,
-            Column("id", String(36), **id_column_args),
-            Column("context", JSON),  # column for storing serialized contexts
+        self._metadata = MetaData()
+        self._main_table = Table(
+            f"{table_name_prefix}_{self._main_table_name}",
+            self._metadata,
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+            Column(self._created_at_column_name, BigInteger(), nullable=False),
+            Column(self._updated_at_column_name, BigInteger(), nullable=False),
+            Column(self._framework_data_column_name, LargeBinary(), nullable=False),
+        )
+        self._turns_table = Table(
+            f"{table_name_prefix}_{self.turns_config.name}",
+            self._metadata,
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._KEY_COLUMN, Integer(), nullable=False),
+            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
+            Index(f"{self.turns_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
+        )
+        self._misc_table = Table(
+            f"{table_name_prefix}_{self.misc_config.name}",
+            self._metadata,
+            Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
+            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
+            Index(f"{self.misc_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
         )
 
-        asyncio.run(self._create_self_table())
+        asyncio.run(self._create_self_tables())
 
-        import_insert_for_dialect(self.dialect)
-
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        value = value if isinstance(value, Context) else Context.cast(value)
-        value = json.loads(value.model_dump_json())
-
-        insert_stmt = insert(self.table).values(id=str(key), context=value)
-        update_stmt = await self._get_update_stmt(insert_stmt)
-
-        async with self.engine.connect() as conn:
-            await conn.execute(update_stmt)
-            await conn.commit()
-
-    @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            row = result.fetchone()
-            if row:
-                return Context.cast(row[0])
-        raise KeyError
-
-    @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        stmt = delete(self.table).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            await conn.execute(stmt)
-            await conn.commit()
-
-    @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return bool(result.fetchone())
-
-    @threadsafe_method
-    async def len_async(self) -> int:
-        stmt = select(func.count()).select_from(self.table)
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return result.fetchone()[0]
-
-    @threadsafe_method
-    async def clear_async(self):
-        stmt = delete(self.table)
-        async with self.engine.connect() as conn:
-            await conn.execute(stmt)
-            await conn.commit()
-
-    async def _create_self_table(self):
+    @property
+    def is_asynchronous(self) -> bool:
+        return self.dialect != "sqlite"
+    
+    async def _create_self_tables(self):
+        """
+        Create tables required for context storing, if they do not exist yet.
+        """
         async with self.engine.begin() as conn:
-            if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(self.table.name)):
-                await conn.run_sync(self.table.create, self.engine)
+            for table in self.tables.values():
+                if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
+                    await conn.run_sync(table.create, self.engine)
 
-    async def _get_update_stmt(self, insert_stmt):
-        if self.dialect == "sqlite":
-            return insert_stmt
-        elif self.dialect == "mysql":
-            update_stmt = insert_stmt.on_duplicate_key_update(context=insert_stmt.inserted.context)
+    def _check_availability(self):
+        """
+        Chech availability of the specified backend, raise error if not available.
+
+        :param custom_driver: custom driver is requested - no checks will be performed.
+        """
+        if self.full_path.startswith("postgresql") and not postgres_available:
+            install_suggestion = get_protocol_install_suggestion("postgresql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("mysql") and not mysql_available:
+            install_suggestion = get_protocol_install_suggestion("mysql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("sqlite") and not sqlite_available:
+            install_suggestion = get_protocol_install_suggestion("sqlite")
+            raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+
+    def _get_table_and_config(self, field_name: str) -> Tuple[Table, FieldConfig]:
+        if field_name == self.turns_config.name:
+            return self._turns_table, self.turns_config
+        elif field_name == self.misc_config.name:
+            return self._misc_table, self.misc_config
         else:
-            update_stmt = insert_stmt.on_conflict_do_update(
-                index_elements=["id"], set_=dict(context=insert_stmt.excluded.context)
-            )
-        return update_stmt
+            raise ValueError(f"Unknown field name: {field_name}!")
 
-    def _check_availability(self, custom_driver: bool):
-        if not custom_driver:
-            if self.full_path.startswith("postgresql") and not postgres_available:
-                install_suggestion = get_protocol_install_suggestion("postgresql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("mysql") and not mysql_available:
-                install_suggestion = get_protocol_install_suggestion("mysql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("sqlite") and not sqlite_available:
-                install_suggestion = get_protocol_install_suggestion("sqlite")
-                raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
+        stmt = select(self._main_table).where(self._main_table.c[self._primary_id_column_name] == ctx_id)
+        async with self.engine.begin() as conn:
+            result = (await conn.execute(stmt)).fetchone()
+            return None if result is None else result[1:]
+
+    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        insert_stmt = self._INSERT_CALLABLE(self._main_table).values(
+            {
+                self._primary_id_column_name: ctx_id,
+                self._created_at_column_name: crt_at,
+                self._updated_at_column_name: upd_at,
+                self._framework_data_column_name: fw_data,
+            }
+        )
+        update_stmt = _get_upsert_stmt(
+            self.dialect,
+            insert_stmt,
+            [self._updated_at_column_name, self._framework_data_column_name],
+            [self._primary_id_column_name],
+        )
+        async with self.engine.begin() as conn:
+            await conn.execute(update_stmt)
+
+    async def delete_main_info(self, ctx_id: str) -> None:
+        stmt = delete(self._main_table).where(self._main_table.c[self._primary_id_column_name] == ctx_id)
+        async with self.engine.begin() as conn:
+            await conn.execute(stmt)
+
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+        field_table, field_config = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[self._VALUE_COLUMN])
+        stmt = stmt.where(field_table.c[self._primary_id_column_name] == ctx_id)
+        if field_name == self.turns_config.name:
+            stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
+        if isinstance(field_config.subscript, int):
+            stmt = stmt.limit(field_config.subscript)
+        elif isinstance(field_config.subscript, Set):
+            stmt = stmt.where(field_table.c[self._KEY_COLUMN].in_(field_config.subscript))
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._primary_id_column_name] == ctx_id)
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = select(field_table.c[self._VALUE_COLUMN])
+        stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+        field_table, _ = self._get_table_and_config(field_name)
+        keys, values = zip(*items)
+        if field_name == self.misc_config.name and any(len(key) > self._FIELD_LENGTH for key in keys):
+            raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
+        insert_stmt = self._INSERT_CALLABLE(field_table).values(
+            {
+                self._primary_id_column_name: ctx_id,
+                self._KEY_COLUMN: keys,
+                self._VALUE_COLUMN: values,
+            }
+        )
+        update_stmt = _get_upsert_stmt(
+            self.dialect,
+            insert_stmt,
+            [self._KEY_COLUMN, self._VALUE_COLUMN],
+            [self._primary_id_column_name],
+        )
+        async with self.engine.begin() as conn:
+            await conn.execute(update_stmt)
+
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
+        field_table, _ = self._get_table_and_config(field_name)
+        stmt = delete(field_table)
+        stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
+        async with self.engine.begin() as conn:
+            await conn.execute(stmt)

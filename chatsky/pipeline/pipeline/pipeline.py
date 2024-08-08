@@ -311,7 +311,7 @@ class Pipeline:
         return cls(**dictionary)
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -330,7 +330,7 @@ class Pipeline:
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
-        ctx.add_request(request)
+        ctx.add_turn_items(request=request)
         result = await self._services_pipeline(ctx, self)
 
         if asyncio.iscoroutine(result):

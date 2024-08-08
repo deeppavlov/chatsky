@@ -8,181 +8,136 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 
-import asyncio
-import importlib
-import threading
-from functools import wraps
+import pickle
 from abc import ABC, abstractmethod
-from typing import Callable, Hashable, Optional
+from importlib import import_module
+from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
+
+from pydantic import BaseModel, Field
 
 from .protocol import PROTOCOLS
-from ..script import Context
+
+
+class FieldConfig(BaseModel, validate_assignment=True):
+    """
+    Schema for :py:class:`~.Context` fields that are dictionaries with numeric keys fields.
+    Used for controlling read and write policy of the particular field.
+    """
+
+    name: str = Field(default_factory=str, frozen=True)
+    """
+    `name` is the name of backing :py:class:`~.Context` field.
+    It can not (and should not) be changed in runtime.
+    """
+
+    subscript: Union[Literal["__all__"], int, Set[str]] = 3
+    """
+    `subscript` is used for limiting keys for reading and writing.
+    It can be a string `__all__` meaning all existing keys or number,
+    negative for first **N** keys and positive for last **N** keys.
+    Keys should be sorted as numbers.
+    Default: 3.
+    """
 
 
 class DBContextStorage(ABC):
-    r"""
-    An abstract interface for `chatsky` DB context storages.
-    It includes the most essential methods of the python `dict` class.
-    Can not be instantiated.
+    _main_table_name: Literal["main"] = "main"
+    _primary_id_column_name: Literal["primary_id"] = "primary_id"
+    _created_at_column_name: Literal["created_at"] = "created_at"
+    _updated_at_column_name: Literal["updated_at"] = "updated_at"
+    _framework_data_column_name: Literal["framework_data"] = "framework_data"
 
-    :param path: Parameter `path` should be set with the URI of the database.
-        It includes a prefix and the required connection credentials.
-        Example: postgresql+asyncpg://user:password@host:port/database
-        In the case of classes that save data to hard drive instead of external databases
-        you need to specify the location of the file, like you do in sqlite.
-        Keep in mind that in Windows you will have to use double backslashes '\\'
-        instead of forward slashes '/' when defining the file path.
+    @property
+    @abstractmethod
+    def is_asynchronous(self) -> bool:
+        return NotImplementedError
 
-    """
-
-    def __init__(self, path: str):
+    def __init__(
+        self,
+        path: str,
+        serializer: Optional[Any] = None,
+        rewrite_existing: bool = False,
+        configuration: Optional[Dict[str, FieldConfig]] = None,
+    ):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
         self.path = file_path
-        """`full_path` without a prefix defining db used"""
-        self._lock = threading.Lock()
-        """Threading for methods that require single thread access."""
-
-    def __getitem__(self, key: Hashable) -> Context:
-        """
-        Synchronous method for accessing stored Context.
-
-        :param key: Hashable key used to store Context instance.
-        :return: The stored context, associated with the given key.
-        """
-        return asyncio.run(self.get_item_async(key))
+        """`full_path` without a prefix defining db used."""
+        self.serializer = pickle if serializer is None else serializer
+        """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
+        self.rewrite_existing = rewrite_existing
+        """Whether to rewrite existing data in the storage."""
+        self.labels_config = configuration.get("labels", FieldConfig(name="labels"))
+        self.requests_config = configuration.get("requests", FieldConfig(name="requests"))
+        self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
+        self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
 
     @abstractmethod
-    async def get_item_async(self, key: Hashable) -> Context:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
         """
-        Asynchronous method for accessing stored Context.
-
-        :param key: Hashable key used to store Context instance.
-        :return: The stored context, associated with the given key.
+        Load main information about the context storage.
         """
         raise NotImplementedError
 
-    def __setitem__(self, key: Hashable, value: Context):
-        """
-        Synchronous method for storing Context.
-
-        :param key: Hashable key used to store Context instance.
-        :param value: Context to store.
-        """
-        return asyncio.run(self.set_item_async(key, value))
-
     @abstractmethod
-    async def set_item_async(self, key: Hashable, value: Context):
+    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         """
-        Asynchronous method for storing Context.
-
-        :param key: Hashable key used to store Context instance.
-        :param value: Context to store.
+        Update main information about the context storage.
         """
         raise NotImplementedError
 
-    def __delitem__(self, key: Hashable):
-        """
-        Synchronous method for removing stored Context.
-
-        :param key: Hashable key used to identify Context instance for deletion.
-        """
-        return asyncio.run(self.del_item_async(key))
-
     @abstractmethod
-    async def del_item_async(self, key: Hashable):
+    async def delete_main_info(self, ctx_id: str) -> None:
         """
-        Asynchronous method for removing stored Context.
-
-        :param key: Hashable key used to identify Context instance for deletion.
+        Delete main information about the context storage.
         """
         raise NotImplementedError
 
-    def __contains__(self, key: Hashable) -> bool:
-        """
-        Synchronous method for finding whether any Context is stored with given key.
-
-        :param key: Hashable key used to check if Context instance is stored.
-        :return: True if there is Context accessible by given key, False otherwise.
-        """
-        return asyncio.run(self.contains_async(key))
-
     @abstractmethod
-    async def contains_async(self, key: Hashable) -> bool:
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         """
-        Asynchronous method for finding whether any Context is stored with given key.
-
-        :param key: Hashable key used to check if Context instance is stored.
-        :return: True if there is Context accessible by given key, False otherwise.
+        Load the latest field data.
         """
         raise NotImplementedError
 
-    def __len__(self) -> int:
-        """
-        Synchronous method for retrieving number of stored Contexts.
-
-        :return: The number of stored Contexts.
-        """
-        return asyncio.run(self.len_async())
-
     @abstractmethod
-    async def len_async(self) -> int:
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
         """
-        Asynchronous method for retrieving number of stored Contexts.
-
-        :return: The number of stored Contexts.
+        Load all field keys.
         """
         raise NotImplementedError
 
-    def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
-        """
-        Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
-
-        :param key: Hashable key used to store Context instance.
-        :param default: Optional default value to be returned if no Context is found.
-        :return: The stored context, associated with the given key or default value.
-        """
-        return asyncio.run(self.get_async(key, default))
-
-    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
-        """
-        Asynchronous method for accessing stored Context, returning default if no Context is stored with the given key.
-
-        :param key: Hashable key used to store Context instance.
-        :param default: Optional default value to be returned if no Context is found.
-        :return: The stored context, associated with the given key or default value.
-        """
-        try:
-            return await self.get_item_async(str(key))
-        except KeyError:
-            return default
-
-    def clear(self):
-        """
-        Synchronous method for clearing context storage, removing all the stored Contexts.
-        """
-        return asyncio.run(self.clear_async())
-
     @abstractmethod
-    async def clear_async(self):
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
         """
-        Asynchronous method for clearing context storage, removing all the stored Contexts.
+        Load field items.
         """
         raise NotImplementedError
 
+    @abstractmethod
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+        """
+        Update field items.
+        """
+        raise NotImplementedError
 
-def threadsafe_method(func: Callable):
-    """
-    A decorator that makes sure methods of an object instance are threadsafe.
-    """
-
-    @wraps(func)
-    def _synchronized(self, *args, **kwargs):
-        with self._lock:
-            return func(self, *args, **kwargs)
-
-    return _synchronized
+    @abstractmethod
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
+        """
+        Delete field keys.
+        """
+        raise NotImplementedError
+    
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, DBContextStorage):
+            return False
+        return (
+            self.full_path == other.full_path 
+            and self.path == other.path
+            and self._batch_size == other._batch_size
+            and self.rewrite_existing == other.rewrite_existing
+        )
 
 
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
@@ -224,5 +179,5 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     For more information, see the function doc:\n{context_storage_factory.__doc__}
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
-    target_class = getattr(importlib.import_module(f".{module}", package="chatsky.context_storages"), _class)
+    target_class = getattr(import_module(f".{module}", package="chatsky.context_storages"), _class)
     return target_class(path, **kwargs)

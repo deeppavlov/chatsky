@@ -19,31 +19,30 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 import logging
-from uuid import UUID, uuid4
+from uuid import uuid4
+from time import time_ns
 from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, PrivateAttr
 
+from chatsky.context_storages.database import DBContextStorage
 from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
 from chatsky.pipeline.types import ComponentExecutionState
 from chatsky.slots.slots import SlotManager
+from chatsky.utils.context_dict import ContextDict, launch_coroutines
 
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
 
 logger = logging.getLogger(__name__)
 
-
-def get_last_index(dictionary: dict) -> int:
-    """
-    Obtain the last index from the `dictionary`. Return `-1` if the `dict` is empty.
-
-    :param dictionary: Dictionary with unsorted keys.
-    :return: Last index from the `dictionary`.
-    """
-    indices = list(dictionary)
-    return indices[-1] if indices else -1
+"""
+class Turn(BaseModel):
+    label: Optional[NodeLabel2Type] = Field(default=None)
+    request: Optional[Message] = Field(default=None)
+    response: Optional[Message] = Field(default=None)
+"""
 
 
 class FrameworkData(BaseModel):
@@ -69,33 +68,30 @@ class Context(BaseModel):
     context storages to work.
     """
 
-    id: Union[UUID, int, str] = Field(default_factory=uuid4)
+    primary_id: str = Field(default_factory=lambda: str(uuid4()), exclude=True, frozen=True)
     """
-    `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    `primary_id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
     """
-    labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
+    _created_at: int = PrivateAttr(default_factory=time_ns)
     """
-    `labels` stores the history of all passed `labels`
+    Timestamp when the context was **first time saved to database**.
+    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
+    """
+    _updated_at: int = PrivateAttr(default_factory=time_ns)
+    """
+    Timestamp when the context was **last time saved to database**.
+    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
+    """
+    labels: ContextDict[int, NodeLabel2Type] = Field(default_factory=ContextDict)
+    requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
+    responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
+    """
+    `turns` stores the history of all passed `labels`, `requests`, and `responses`.
 
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Message] = Field(default_factory=dict)
-    """
-    `requests` stores the history of all `requests` received by the agent
-
-        - key - `id` of the turn.
-        - value - `request` on this turn.
-    """
-    responses: Dict[int, Message] = Field(default_factory=dict)
-    """
-    `responses` stores the history of all agent `responses`
-
-        - key - `id` of the turn.
-        - value - `response` on this turn.
-    """
-    misc: Dict[str, Any] = Field(default_factory=dict)
+    misc: ContextDict[str, Any] = Field(default_factory=ContextDict)
     """
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Chatsky Scripting functions.
@@ -110,155 +106,105 @@ class Context(BaseModel):
     This attribute is used for storing custom data required for pipeline execution.
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
-
-    @field_validator("labels", "requests", "responses")
-    @classmethod
-    def sort_dict_keys(cls, dictionary: dict) -> dict:
-        """
-        Sort the keys in the `dictionary`. This needs to be done after deserialization,
-        since the keys are deserialized in a random order.
-
-        :param dictionary: Dictionary with unsorted keys.
-        :return: Dictionary with sorted keys.
-        """
-        return {key: dictionary[key] for key in sorted(dictionary)}
+    _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
-        """
-        Transform different data types to the objects of the
-        :py:class:`~.Context` class.
-        Return an object of the :py:class:`~.Context`
-        type that is initialized by the input data.
-
-        :param ctx: Data that is used to initialize an object of the
-            :py:class:`~.Context` type.
-            An empty :py:class:`~.Context` object is returned if no data is given.
-        :return: Object of the :py:class:`~.Context`
-            type that is initialized by the input data.
-        """
-        if not ctx:
-            ctx = Context(*args, **kwargs)
-        elif isinstance(ctx, dict):
-            ctx = Context.model_validate(ctx)
-        elif isinstance(ctx, str):
-            ctx = Context.model_validate_json(ctx)
-        elif not isinstance(ctx, Context):
-            raise ValueError(
-                f"Context expected to be an instance of the Context class "
-                f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
+    async def connect(cls, id: Optional[str], storage: Optional[DBContextStorage] = None) -> Context:
+        if storage is None:
+            return cls(id=id)
+        else:
+            main, labels, requests, responses, misc = await launch_coroutines(
+                [
+                    storage.load_main_info(id),
+                    ContextDict.connected(storage, id, storage.turns_config.name, tuple),
+                    ContextDict.connected(storage, id, storage.requests_config.name, Message.model_validate),
+                    ContextDict.connected(storage, id, storage.responses_config.name, Message.model_validate),
+                    ContextDict.connected(storage, id, storage.misc_config.name)
+                ],
+                storage.is_asynchronous,
             )
-        return ctx
+            if main is None:
+                raise ValueError(f"Context with id {id} not found in the storage!")
+            crt_at, upd_at, fw_data = main
+            objected = storage.serializer.loads(fw_data)
+            instance = cls(id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
+            instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
+            return instance
 
-    def add_request(self, request: Message):
-        """
-        Add a new `request` to the context.
-        The new `request` is added with the index of `last_index + 1`.
-
-        :param request: `request` to be added to the context.
-        """
-        request_message = Message.model_validate(request)
-        last_index = get_last_index(self.requests)
-        self.requests[last_index + 1] = request_message
-
-    def add_response(self, response: Message):
-        """
-        Add a new `response` to the context.
-        The new `response` is added with the index of `last_index + 1`.
-
-        :param response: `response` to be added to the context.
-        """
-        response_message = Message.model_validate(response)
-        last_index = get_last_index(self.responses)
-        self.responses[last_index + 1] = response_message
-
-    def add_label(self, label: NodeLabel2Type):
-        """
-        Add a new :py:data:`~.NodeLabel2Type` to the context.
-        The new `label` is added with the index of `last_index + 1`.
-
-        :param label: `label` that we need to add to the context.
-        """
-        last_index = get_last_index(self.labels)
-        self.labels[last_index + 1] = label
+    async def store(self) -> None:
+        if self._storage is not None:
+            self._updated_at = time_ns()
+            byted = self._storage.serializer.dumps(self.framework_data)
+            await launch_coroutines(
+                [
+                    self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, byted),
+                    self.labels.store(),
+                    self.requests.store(),
+                    self.responses.store(),
+                    self.misc.store(),
+                ],
+                self._storage.is_asynchronous,
+            )
+        else:
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     def clear(
         self,
         hold_last_n_indices: int,
-        field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
+        field_names: Union[Set[str], List[str]] = {"labels", "requests", "responses"},
     ):
-        """
-        Delete all records from the `requests`/`responses`/`labels` except for
-        the last `hold_last_n_indices` turns.
-        If `field_names` contains `misc` field, `misc` field is fully cleared.
-
-        :param hold_last_n_indices: Number of last turns to keep.
-        :param field_names: Properties of :py:class:`~.Context` to clear.
-            Defaults to {"requests", "responses", "labels"}
-        """
         field_names = field_names if isinstance(field_names, set) else set(field_names)
+        if "labels" in field_names:
+            del self.labels[:-hold_last_n_indices]
         if "requests" in field_names:
-            for index in list(self.requests)[:-hold_last_n_indices]:
-                del self.requests[index]
+            del self.requests[:-hold_last_n_indices]
         if "responses" in field_names:
-            for index in list(self.responses)[:-hold_last_n_indices]:
-                del self.responses[index]
+            del self.responses[:-hold_last_n_indices]
         if "misc" in field_names:
             self.misc.clear()
-        if "labels" in field_names:
-            for index in list(self.labels)[:-hold_last_n_indices]:
-                del self.labels[index]
         if "framework_data" in field_names:
             self.framework_data = FrameworkData()
 
+    async def delete(self) -> None:
+        if self._storage is not None:
+            await self._storage.delete_main_info(self.primary_id)
+        else:
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+
+    def add_turn_items(self, label: Optional[NodeLabel2Type] = None, request: Optional[Message] = None, response: Optional[Message] = None):
+        self.labels[max(self.labels.keys(), default=-1) + 1] = label
+        self.requests[max(self.requests.keys(), default=-1) + 1] = request
+        self.responses[max(self.responses.keys(), default=-1) + 1] = response
+
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
-        """
-        Return the last :py:data:`~.NodeLabel2Type` of
-        the :py:class:`~.Context`.
-        Return `None` if `labels` is empty.
+        label_keys = [k for k in self.turns._items.keys() if self.turns._items[k].label is not None]
+        last_label_turn = self.turns._items.get(max(label_keys, default=None), None)
+        return last_label_turn.label if last_label_turn is not None else None
 
-        Since `start_label` is not added to the `labels` field,
-        empty `labels` usually indicates that the current node is the `start_node`.
-        """
-        last_index = get_last_index(self.labels)
-        return self.labels.get(last_index)
+    @last_label.setter
+    def last_label(self, label: Optional[NodeLabel2Type]):
+        self.labels[max(self.labels.keys(), default=0)] = label
 
     @property
     def last_response(self) -> Optional[Message]:
-        """
-        Return the last `response` of the current :py:class:`~.Context`.
-        Return `None` if `responses` is empty.
-        """
-        last_index = get_last_index(self.responses)
-        return self.responses.get(last_index)
+        response_keys = [k for k in self.turns._items.keys() if self.turns._items[k].response is not None]
+        last_response_turn = self.turns._items.get(max(response_keys, default=None), None)
+        return last_response_turn.response if last_response_turn is not None else None
 
     @last_response.setter
     def last_response(self, response: Optional[Message]):
-        """
-        Set the last `response` of the current :py:class:`~.Context`.
-        Required for use with various response wrappers.
-        """
-        last_index = get_last_index(self.responses)
-        self.responses[last_index] = Message() if response is None else Message.model_validate(response)
+        self.responses[max(self.responses.keys(), default=0)] = response
 
     @property
     def last_request(self) -> Optional[Message]:
-        """
-        Return the last `request` of the current :py:class:`~.Context`.
-        Return `None` if `requests` is empty.
-        """
-        last_index = get_last_index(self.requests)
-        return self.requests.get(last_index)
+        request_keys = [k for k in self.turns._items.keys() if self.turns._items[k].request is not None]
+        last_request_turn = self.turns._items.get(max(request_keys, default=None), None)
+        return last_request_turn.request if last_request_turn is not None else None
 
     @last_request.setter
     def last_request(self, request: Optional[Message]):
-        """
-        Set the last `request` of the current :py:class:`~.Context`.
-        Required for use with various request wrappers.
-        """
-        last_index = get_last_index(self.requests)
-        self.requests[last_index] = Message() if request is None else Message.model_validate(request)
+        self.requests[max(self.requests.keys(), default=0)] = request
 
     @property
     def current_node(self) -> Optional[Node]:
@@ -281,3 +227,15 @@ class Context(BaseModel):
             )
 
         return node
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Context):
+            return (
+                self.primary_id == value.primary_id
+                and self.turns == value.turns
+                and self.misc == value.misc
+                and self.framework_data == value.framework_data
+                and self._storage == value._storage
+            )
+        else:
+            return False

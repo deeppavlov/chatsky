@@ -17,7 +17,7 @@ def test_context():
     ctx.labels = shuffle_dict_keys(ctx.labels)
     ctx.requests = shuffle_dict_keys(ctx.requests)
     ctx.responses = shuffle_dict_keys(ctx.responses)
-    ctx = Context.cast(ctx.model_dump_json())
+    ctx = Context.model_validate_json(ctx.model_dump_json())
     ctx.misc[123] = 312
     ctx.clear(5, ["requests", "responses", "misc", "labels", "framework_data"])
     ctx.misc["1001"] = "11111"
@@ -52,8 +52,3 @@ def test_context():
     assert ctx.misc == {"1001": "11111"}
     assert ctx.current_node is None
     ctx.model_dump_json()
-
-    try:
-        Context.cast(123)
-    except ValueError:
-        pass
