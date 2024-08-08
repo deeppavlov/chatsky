@@ -84,7 +84,7 @@ class Actor(PipelineComponent):
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    script: Script
+    script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
@@ -100,6 +100,8 @@ class Actor(PipelineComponent):
 
     @model_validator(mode="after")
     def start_label_validator(self):
+        if not isinstance(self.script, Script):
+            self.script = Script(script=self.script)
         self.start_label = normalize_label(self.start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
