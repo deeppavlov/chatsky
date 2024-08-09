@@ -79,15 +79,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     Handler that processes a call of actor condition functions. Defaults to `None`.
     """
     slots: GroupSlot = Field(default_factory=GroupSlot)
-    """Slots configuration."""
+    """
+    Slots configuration.
+    """
     # Docs could look like this for one-liners
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
     the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-        - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+    - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
+    - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
@@ -115,8 +118,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     Asynchronous pipeline optimization check request flag;
     warnings will be sent to logs. Additionally, it has some calculated fields:
 
-        - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-        - `actor` is a pipeline actor, found among services.
+    - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
+    - `actor` is a pipeline actor, found among services.
+
     """
     parallelize_processing: bool = False
     """

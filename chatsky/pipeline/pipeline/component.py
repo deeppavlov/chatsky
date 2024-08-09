@@ -62,20 +62,21 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     calculated_async_flag: bool = False
     """
-    Whether the component can be asynchronous or not
+    Whether the component can be asynchronous or not.
 
     1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
     2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
+
     """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
     StartConditionCheckerFunction that is invoked before each component execution;
-        component is executed only if it returns `True`.
+    component is executed only if it returns `True`.
     """
     name: Optional[str] = None
     """
     Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-        should not be blank or contain `.` symbol.
+    should not be blank or contain `.` symbol.
     """
     path: Optional[str] = None
     """

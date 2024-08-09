@@ -97,8 +97,9 @@ class Actor(PipelineComponent):
     This variable is responsible for the usage of external handlers on
     the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-        - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
-        - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
+    - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
+    - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
+
     """
     # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
     _clean_turn_cache: bool = True
