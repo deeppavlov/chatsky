@@ -160,16 +160,16 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
     @property
     def computed_name(self) -> str:
         """
         Every derivative of `PipelineComponent` must define this property.
         :return: `str`.
         """
-        raise NotImplementedError
-        # Or could return the following:
-        # return "noname_service"
+        return "noname_service"
+        # Or could do the following:
+        # raise NotImplementedError
+        # But this default value makes sense and replicates previous logic.
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
