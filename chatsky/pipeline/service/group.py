@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, Callable
 from pydantic import model_validator
 
 from chatsky.script import Context
@@ -65,7 +65,7 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def components_constructor(cls, data: Any):
-        if isinstance(data, (list, PipelineComponent)):
+        if isinstance(data, (list, PipelineComponent, Callable)):
             result = {"components": data}
         elif isinstance(data, dict):
             result = data.copy()
