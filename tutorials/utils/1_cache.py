@@ -65,7 +65,7 @@ happy_path = (
     (Message(), "5-6-5-6"),
 )
 
-pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
+pipeline = Pipeline(script=toy_script, start_label=("flow", "node1"))
 
 
 # %%

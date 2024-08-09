@@ -6,7 +6,7 @@ This notebook shows basic tutorial of creating a simple dialog bot (agent).
 
 Here, basic usege of %mddoclink(api,pipeline.pipeline.pipeline,Pipeline)
 primitive is shown: its' creation with
-%mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_script)
+%mddoclink(api,pipeline.pipeline.pipeline,Pipeline)
 and execution.
 
 Additionally, function %mddoclink(api,utils.testing.common,check_happy_path)
@@ -139,8 +139,8 @@ then its value becomes equal to `start_label`.
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )

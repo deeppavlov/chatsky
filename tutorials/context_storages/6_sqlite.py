@@ -28,7 +28,7 @@ from chatsky.utils.testing.common import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 
 # %%
@@ -41,7 +41,7 @@ db_uri = f"sqlite+aiosqlite:{separator}{db_file.absolute()}"
 db = context_storage_factory(db_uri)
 
 
-pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
 
 
 # %%

@@ -6,7 +6,7 @@ from chatsky.script.labels import forward, repeat, previous, to_fallback, to_sta
 def test_labels():
     ctx = Context()
 
-    pipeline = Pipeline.from_script(
+    pipeline = Pipeline(
         script={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),
@@ -36,7 +36,7 @@ def test_labels():
     assert backward(99, cyclicality_flag=False)(ctx, pipeline) == ("service", "fallback", 99)
     ctx = Context()
     ctx.add_label(["flow", "node2"])
-    pipeline = Pipeline.from_script(
+    pipeline = Pipeline(
         script={"flow": {"node1": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),

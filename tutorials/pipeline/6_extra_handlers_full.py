@@ -17,17 +17,15 @@ import random
 from datetime import datetime
 
 import psutil
-from chatsky.script import Context
 
 from chatsky.pipeline import (
     Pipeline,
     ServiceGroup,
-    to_service,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
+    to_service,
 )
-
+from chatsky.script import Context
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -74,6 +72,8 @@ Extra handlers can be attached to pipeline component in a few different ways:
 2. (Services only) `to_service` decorator -
     transforms function to service with extra handlers
     from `before_handler` and `after_handler` arguments.
+3. Using `add_extra_handler` function of `PipelineComponent` Example:
+component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,
@@ -172,15 +172,12 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        ServiceGroup(
-            before_handler=[time_measure_before_handler],
-            after_handler=[time_measure_after_handler],
-            components=[heavy_service for _ in range(0, 5)],
-        ),
-        ACTOR,
-        logging_service,
-    ],
+    "pre_services": ServiceGroup(
+        before_handler=[time_measure_before_handler],
+        after_handler=[time_measure_after_handler],
+        components=[heavy_service for _ in range(0, 5)],
+    ),
+    "post_services": logging_service,
 }
 
 # %%

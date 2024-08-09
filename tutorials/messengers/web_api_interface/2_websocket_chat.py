@@ -27,7 +27,7 @@ is used to process requests.
 from chatsky.messengers.common.interface import CallbackMessengerInterface
 from chatsky.script import Message
 from chatsky.pipeline import Pipeline
-from chatsky.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -36,8 +36,8 @@ from fastapi.responses import HTMLResponse
 
 # %%
 messenger_interface = CallbackMessengerInterface()
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS, messenger_interface=messenger_interface
 )
 
 

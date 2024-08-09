@@ -77,8 +77,8 @@ def process_response(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("flow_start", "node_start"),
     post_services=[process_response],
 )

@@ -25,9 +25,7 @@ from chatsky.pipeline import (
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
 )
-
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -61,7 +59,7 @@ Pipeline `add_global_extra_handler` function is used to register
 
 * `global_extra_handler_type` (required) - A `GlobalExtraHandlerType` instance,
     indicates extra handler type to add.
-* `extra_handler` (required) - The extra handler function itself.
+* `extra_handler` (required) - The `ExtraHandlerFunction` itself.
 * `whitelist` - An optional list of paths, if it's not `None`
                 the extra handlers will be applied to
                 specified pipeline components only.
@@ -124,10 +122,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [long_service for _ in range(0, 25)],
-        ACTOR,
-    ],
+    "pre_services": [long_service for _ in range(0, 25)],
 }
 
 # %%

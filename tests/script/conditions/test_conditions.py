@@ -12,7 +12,7 @@ def test_conditions():
     failed_ctx = Context()
     failed_ctx.add_request(Message())
     failed_ctx.add_label(label)
-    pipeline = Pipeline.from_script(script={"flow": {"node": {}}}, start_label=("flow", "node"))
+    pipeline = Pipeline(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
     assert cnd.exact_match("text")(ctx, pipeline)
     assert cnd.exact_match(Message("text", misc={}))(ctx, pipeline)

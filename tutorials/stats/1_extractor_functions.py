@@ -46,18 +46,16 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 # %%
 import asyncio
 
-from chatsky.script import Context
 from chatsky.pipeline import (
     Pipeline,
-    ACTOR,
-    Service,
     ExtraHandlerRuntimeInfo,
+    GlobalExtraHandlerType,
     to_service,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.script import Context
 from chatsky.stats import OtelInstrumentor, default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %% [markdown]
 """
@@ -118,22 +116,18 @@ async def heavy_service(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_dict(
+pipeline = Pipeline.model_validate(
     {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "components": [
-            heavy_service,
-            Service(
-                handler=ACTOR,
-                after_handler=[default_extractors.get_current_label],
-            ),
-        ],
+        "pre_services": heavy_service,
     }
 )
 
-
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.BEFORE, default_extractors.get_current_label
+)
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():

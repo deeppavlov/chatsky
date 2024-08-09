@@ -28,7 +28,7 @@ def std_func(ctx, pipeline):
 def create_env() -> Tuple[Context, Pipeline]:
     ctx = Context()
     script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: Message("response")}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+    pipeline = Pipeline(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
     ctx.add_request(Message("text"))
     return ctx, pipeline
 

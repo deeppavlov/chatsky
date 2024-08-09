@@ -33,7 +33,7 @@ from chatsky.utils.testing.cleanup_db import (
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from chatsky.pipeline import Pipeline
-from chatsky.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing import check_happy_path, TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -84,7 +84,7 @@ def generic_test(db, testing_context, context_id):
     assert context_id not in db
     # test `get` method
     assert db.get(context_id) is None
-    pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
+    pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
     check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 

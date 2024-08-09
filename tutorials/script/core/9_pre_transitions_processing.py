@@ -87,8 +87,8 @@ happy_path = (
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )

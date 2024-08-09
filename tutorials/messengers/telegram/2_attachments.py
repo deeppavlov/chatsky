@@ -258,7 +258,7 @@ interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
-pipeline = Pipeline.from_script(
+pipeline = Pipeline(
     script=script,
     start_label=("main_flow", "start_node"),
     fallback_label=("main_flow", "fallback_node"),
