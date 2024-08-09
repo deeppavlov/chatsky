@@ -63,7 +63,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     calculated_async_flag: bool = False
     """
     Whether the component can be asynchronous or not
-    
+
     1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
     2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
     """
