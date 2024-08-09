@@ -153,7 +153,6 @@ autodoc_default_options = {
     "private-members": True,
     "member-order": "bysource",
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
-    "inherited-members": "PipelineComponent",
 }
 
 
