@@ -80,14 +80,13 @@ class Actor(PipelineComponent):
     fallback_label: Optional[NodeLabel2Type] = None
     """
     The label of :py:class:`~chatsky.script.Script`.
-        Dialog comes into that label if all other transitions failed,
-        or there was an error while executing the scenario.
-        Defaults to `None`.
+    Dialog comes into that label if all other transitions failed,
+    or there was an error while executing the scenario. Defaults to `None`.
     """
     label_priority: float = 1.0
     """
     Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
+    where there is no priority. Defaults to `1.0`.
     """
     condition_handler: Callable = Field(default=default_condition_handler)
     """
@@ -96,7 +95,7 @@ class Actor(PipelineComponent):
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
+    the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
         - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
@@ -105,12 +104,12 @@ class Actor(PipelineComponent):
     _clean_turn_cache: bool = True
 
     @model_validator(mode="after")
-    def __tick_async_flag(self):
+    def __tick_async_flag__(self):
         self.calculated_async_flag = False
         return self
 
     @model_validator(mode="after")
-    def __start_label_validator(self):
+    def __start_label_validator__(self):
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)
         self.start_label = normalize_label(self.start_label)
@@ -119,7 +118,7 @@ class Actor(PipelineComponent):
         return self
 
     @model_validator(mode="after")
-    def __fallback_label_validator(self):
+    def __fallback_label_validator__(self):
         if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:

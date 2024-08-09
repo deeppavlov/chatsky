@@ -49,13 +49,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     pre_services: ServiceGroup = Field(default_factory=list)
     """
     List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
-        that will be executed before Actor.
+    that will be executed before Actor.
     """
     post_services: ServiceGroup = Field(default_factory=list)
     """
     List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
-        executed after Actor. It constructs root
-        service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+    executed after Actor. It constructs root
+    service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """
     script: Union[Script, Dict]
     """
@@ -72,7 +72,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     label_priority: float = 1.0
     """
     Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
+    where there is no priority. Defaults to `1.0`.
     """
     condition_handler: Callable = Field(default=default_condition_handler)
     """
@@ -84,7 +84,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
+    the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
         - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
@@ -96,7 +96,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
-        a dict to store dialog :py:class:`~.Context`.
+    a dict to store dialog :py:class:`~.Context`.
     """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
     """
@@ -113,7 +113,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     optimization_warnings: bool = False
     """
     Asynchronous pipeline optimization check request flag;
-        warnings will be sent to logs. Additionally, it has some calculated fields:
+    warnings will be sent to logs. Additionally, it has some calculated fields:
 
         - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         - `actor` is a pipeline actor, found among services.
@@ -121,8 +121,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     parallelize_processing: bool = False
     """
     This flag determines whether or not the functions
-        defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
-        of the script should be parallelized over respective groups.
+    defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+    of the script should be parallelized over respective groups.
     """
     _clean_turn_cache: Optional[bool]
 

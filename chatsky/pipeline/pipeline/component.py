@@ -53,7 +53,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     timeout: Optional[float] = None
     """
     (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
+    if it exceeds this time, it is interrupted.
     """
     requested_async_flag: Optional[bool] = None
     """
@@ -63,8 +63,9 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     calculated_async_flag: bool = False
     """
     Whether the component can be asynchronous or not
-        1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
-        2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
+    
+    1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
+    2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
     """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
