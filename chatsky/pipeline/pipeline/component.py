@@ -44,36 +44,33 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     """
-    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
-    :type before_handler: Optional[:py:data:`~.ComponentExtraHandler`]"""
+    :py:class:`~.BeforeHandler`, associated with this component."""
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     """
-    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
-    :type after_handler: Optional[:py:data:`~.ComponentExtraHandler`]"""
+    :py:class:`~.AfterHandler`, associated with this component."""
     timeout: Optional[float] = None
     """
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
+    (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted."""
     requested_async_flag: Optional[bool] = None
     """
-    :param requested_async_flag: Requested asynchronous property;
-        if not defined, `calculated_async_flag` is used instead."""
+    Requested asynchronous property; if not defined, 
+    `calculated_async_flag` is used instead."""
     calculated_async_flag: bool = False
     """
-    :param calculated_async_flag: Whether the component can be asynchronous or not
+    Whether the component can be asynchronous or not
         1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
         2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not."""
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
-    :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
-        component is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]"""
+    StartConditionCheckerFunction that is invoked before each component execution;
+        component is executed only if it returns `True`."""
     name: Optional[str] = None
     """
-    :param name: Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
+    Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
         should not be blank or contain `.` symbol."""
     path: Optional[str] = None
-    """:param path: Separated by dots path to component, is universally unique."""
+    """Separated by dots path to component, is universally unique."""
 
     @model_validator(mode="after")
     def pipeline_component_validator(self):
