@@ -177,6 +177,10 @@ class ServiceGroup(PipelineComponent):
                 service.add_extra_handler(global_extra_handler_type, extra_handler)
 
     @property
+    def computed_name(self) -> str:
+        return "service_group"
+
+    @property
     def info_dict(self) -> dict:
         """
         See `Component.info_dict` property.

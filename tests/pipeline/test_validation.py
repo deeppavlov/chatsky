@@ -69,6 +69,12 @@ class TestExtraHandlerValidation:
         # Checking that a single function is cast to a list within constructor
         assert handler.functions == [single_function]
 
+    def test_extra_handler_as_functions(self):
+        # 'functions' should be a list of ExtraHandlerFunctions,
+        # but you can pass another ExtraHandler there, because, coincidentally,
+        # it's a Callable with the right signature. It may be changed later, though.
+        BeforeHandler.model_validate({"functions": BeforeHandler(functions=[])})
+
     def test_wrong_inputs(self):
         with pytest.raises(ValidationError):
             # 1 is not a callable
@@ -76,13 +82,11 @@ class TestExtraHandlerValidation:
         with pytest.raises(ValidationError):
             # 'functions' should be a list of ExtraHandlerFunctions
             BeforeHandler.model_validate([1, 2, 3])
-        with pytest.raises(ValidationError):
-            # 'functions' should be a list of ExtraHandlerFunctions,
-            # you can't pass another ExtraHandler there
-            BeforeHandler.model_validate(BeforeHandler())
 
 
-# Note: I haven't tested components being asynchronous in any way.
+# Note: I haven't tested components being asynchronous in any way,
+# other than in the async pipeline components tutorial.
+# It's not a test though.
 class TestServiceGroupValidation:
     def test_single_service(self):
         func = UserFunctionSamples.correct_service_function_2
@@ -110,11 +114,11 @@ class TestServiceGroupValidation:
             ServiceGroup(components=123)
         with pytest.raises(ValidationError):
             # The dictionary inside 'components' will check if Actor, Service or ServiceGroup fit the signature,
-            # but it doesn't fit any of them, so it's just a normal dictionary
+            # but it doesn't fit any of them (required fields are not defined), so it's just a normal dictionary.
             ServiceGroup(components={"before_handler": []})
         with pytest.raises(ValidationError):
-            # The dictionary inside 'components' will try to get cast to Service and will fail
-            # But 'components' must be a list of PipelineComponents, so it's just a normal dictionary
+            # The dictionary inside 'components' will try to get cast to Service and will fail.
+            # 'components' must be a list of PipelineComponents, but it's just a normal dictionary (not a Service).
             ServiceGroup(components={"handler": 123})
 
 

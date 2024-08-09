@@ -117,6 +117,10 @@ class Actor(PipelineComponent):
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
 
+    @property
+    def computed_name(self) -> str:
+        return "actor"
+
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running an `Actor`.

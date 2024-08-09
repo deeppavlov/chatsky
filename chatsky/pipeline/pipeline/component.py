@@ -40,35 +40,40 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     This class represents a pipeline component, which is a service or a service group.
     It contains some fields that they have in common.
-
-    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
-    :type before_handler: Optional[:py:data:`~.ComponentExtraHandler`]
-    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
-    :type after_handler: Optional[:py:data:`~.ComponentExtraHandler`]
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param requested_async_flag: Requested asynchronous property;
-        if not defined, `calculated_async_flag` is used instead.
-    :param calculated_async_flag: Whether the component can be asynchronous or not
-        1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
-        2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
-
-    :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
-        component is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
-    :param name: Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-        should not be blank or contain `.` symbol.
-    :param path: Separated by dots path to component, is universally unique.
     """
 
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    """
+    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
+    :type before_handler: Optional[:py:data:`~.ComponentExtraHandler`]"""
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    """
+    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
+    :type after_handler: Optional[:py:data:`~.ComponentExtraHandler`]"""
     timeout: Optional[float] = None
+    """
+    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
+        if it exceeds this time, it is interrupted."""
     requested_async_flag: Optional[bool] = None
+    """
+    :param requested_async_flag: Requested asynchronous property;
+        if not defined, `calculated_async_flag` is used instead."""
     calculated_async_flag: bool = False
+    """
+    :param calculated_async_flag: Whether the component can be asynchronous or not
+        1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
+        2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not."""
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    """
+    :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
+        component is executed only if it returns `True`.
+    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]"""
     name: Optional[str] = None
+    """
+    :param name: Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
+        should not be blank or contain `.` symbol."""
     path: Optional[str] = None
+    """:param path: Separated by dots path to component, is universally unique."""
 
     @model_validator(mode="after")
     def pipeline_component_validator(self):
@@ -154,6 +159,17 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :return: `None`
         """
         raise NotImplementedError
+
+    @abc.abstractmethod
+    @property
+    def computed_name(self) -> str:
+        """
+        Every derivative of `PipelineComponent` must define this property.
+        :return: `str`.
+        """
+        raise NotImplementedError
+        # Or could return the following:
+        # return "noname_service"
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """

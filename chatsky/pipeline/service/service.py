@@ -96,6 +96,16 @@ class Service(PipelineComponent):
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
 
     @property
+    def computed_name(self) -> str:
+        if callable(self.handler):
+            if inspect.isfunction(self.handler):
+                return self.handler.__name__
+            else:
+                return self.handler.__class__.__name__
+        else:
+            return "noname_service"
+
+    @property
     def info_dict(self) -> dict:
         """
         See `Component.info_dict` property.
