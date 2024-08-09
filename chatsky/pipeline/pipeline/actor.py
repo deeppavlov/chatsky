@@ -66,40 +66,51 @@ class Actor(PipelineComponent):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.
+    """
 
-    :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
-        While the graph is being initialized, it is validated and then used for the dialog.
-    :param start_label: The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
-    :param fallback_label: The label of :py:class:`~chatsky.script.Script`.
+    script: Union[Script, Dict]
+    """
+    The dialog scenario: a graph described by the :py:class:`.Keywords`.
+    While the graph is being initialized, it is validated and then used for the dialog.
+    """
+    start_label: NodeLabel2Type
+    """
+    The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
+    """
+    fallback_label: Optional[NodeLabel2Type] = None
+    """
+    The label of :py:class:`~chatsky.script.Script`.
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
+    """
+    label_priority: float = 1.0
+    """
+    Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
-    :param handlers: This variable is responsible for the usage of external handlers on
+    """
+    condition_handler: Callable = Field(default=default_condition_handler)
+    """
+    Handler that processes a call of condition functions. Defaults to `None`.
+    """
+    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
+    """
+    This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
         - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
-
-    script: Union[Script, Dict]
-    start_label: NodeLabel2Type
-    fallback_label: Optional[NodeLabel2Type] = None
-    label_priority: float = 1.0
-    condition_handler: Callable = Field(default=default_condition_handler)
-    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
     _clean_turn_cache: bool = True
 
     @model_validator(mode="after")
-    def tick_async_flag(self):
+    def __tick_async_flag(self):
         self.calculated_async_flag = False
         return self
 
     @model_validator(mode="after")
-    def start_label_validator(self):
+    def __start_label_validator(self):
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)
         self.start_label = normalize_label(self.start_label)
@@ -108,7 +119,7 @@ class Actor(PipelineComponent):
         return self
 
     @model_validator(mode="after")
-    def fallback_label_validator(self):
+    def __fallback_label_validator(self):
         if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:

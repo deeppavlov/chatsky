@@ -44,61 +44,86 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
+    """
 
-    :param pre_services: List of :py:data:`~.Service` or
-        :py:data:`~.ServiceGroup` that will be executed before Actor.
-    :type pre_services: ServiceGroup
-    :param post_services: List of :py:data:`~.Service` or
-        :py:data:`~.ServiceGroup` that will be executed after Actor. It constructs root
+    pre_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
+        that will be executed before Actor.
+    """
+    post_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
+        executed after Actor. It constructs root
         service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
-    :type post_services: ServiceGroup
-    :param script: (required) A :py:class:`~.Script` instance (object or dict).
-    :param start_label: (required) Actor start label.
-    :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    """
+    script: Union[Script, Dict]
+    """
+    (required) A :py:class:`~.Script` instance (object or dict).
+    """
+    start_label: NodeLabel2Type
+    """
+    (required) Actor start label.
+    """
+    fallback_label: Optional[NodeLabel2Type] = None
+    """
+    Actor fallback label.
+    """
+    label_priority: float = 1.0
+    """
+    Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-    :param handlers: This variable is responsible for the usage of external handlers on
+    """
+    condition_handler: Callable = Field(default=default_condition_handler)
+    """
+    Handler that processes a call of actor condition functions. Defaults to `None`.
+    """
+    slots: GroupSlot = Field(default_factory=GroupSlot)
+    """Slots configuration."""
+    # Docs could look like this for one-liners
+    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
+    """
+    This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
         - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
-
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
+    """
+    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
+    """
+    An `AbsMessagingInterface` instance for this pipeline.
+    """
+    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    """
+    A :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
-    :param before_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type before_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param after_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param timeout: Timeout to add to pipeline root service group.
-    :param optimization_warnings: Asynchronous pipeline optimization check request flag;
+    """
+    before_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
+    after_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
+    timeout: Optional[float] = None
+    """
+    Timeout to add to pipeline root service group.
+    """
+    optimization_warnings: bool = False
+    """
+    Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally, it has some calculated fields:
 
         - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         - `actor` is a pipeline actor, found among services.
-    :param parallelize_processing: This flag determines whether or not the functions
+    """
+    parallelize_processing: bool = False
+    """
+    This flag determines whether or not the functions
         defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
         of the script should be parallelized over respective groups.
-
     """
-
-    pre_services: ServiceGroup = Field(default_factory=list)
-    post_services: ServiceGroup = Field(default_factory=list)
-    script: Union[Script, Dict]
-    start_label: NodeLabel2Type
-    fallback_label: Optional[NodeLabel2Type] = None
-    label_priority: float = 1.0
-    condition_handler: Callable = Field(default=default_condition_handler)
-    slots: GroupSlot = Field(default_factory=GroupSlot)
-    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
-    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
-    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
-    before_handler: ComponentExtraHandler = Field(default_factory=list)
-    after_handler: ComponentExtraHandler = Field(default_factory=list)
-    timeout: Optional[float] = None
-    optimization_warnings: bool = False
-    parallelize_processing: bool = False
     _clean_turn_cache: Optional[bool]
 
     @computed_field
@@ -128,7 +153,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return services_pipeline
 
     @model_validator(mode="after")
-    def pipeline_init(self):
+    def __pipeline_init(self):
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         if self.optimization_warnings:

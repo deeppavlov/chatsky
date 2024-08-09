@@ -59,7 +59,7 @@ class Service(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def handler_constructor(cls, data: Any):
+    def __handler_constructor(cls, data: Any):
         if isinstance(data, Callable):
             return {"handler": data}
         elif not isinstance(data, dict):
@@ -67,7 +67,7 @@ class Service(PipelineComponent):
         return data
 
     @model_validator(mode="after")
-    def tick_async_flag(self):
+    def __tick_async_flag(self):
         self.calculated_async_flag = True
         return self
 

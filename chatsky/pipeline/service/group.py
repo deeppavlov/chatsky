@@ -64,7 +64,7 @@ class ServiceGroup(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def components_constructor(cls, data: Any):
+    def __components_constructor(cls, data: Any):
         if isinstance(data, (list, PipelineComponent, Callable)):
             result = {"components": data}
         elif isinstance(data, dict):
@@ -80,7 +80,7 @@ class ServiceGroup(PipelineComponent):
         return result
 
     @model_validator(mode="after")
-    def calculate_async_flag(self):
+    def __calculate_async_flag(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self
 

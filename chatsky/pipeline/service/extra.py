@@ -38,16 +38,23 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
-    """A list or instance of :py:data:`~.ExtraHandlerFunction`.
-    :type functions: :py:data:`~.ExtraHandlerFunction`"""
+    """
+    A list or instance of :py:data:`~.ExtraHandlerFunction`.
+    """
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
-    """An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
-    be executed before or after pipeline component."""
+    """
+    An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
+    be executed before or after pipeline component.
+    """
     timeout: Optional[float] = None
-    """(for asynchronous only!) Maximum component execution time (in seconds),
-    if it exceeds this time, it is interrupted."""
+    """
+    (for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted.
+    """
     requested_async_flag: Optional[bool] = None
-    """Requested asynchronous property."""
+    """
+    Requested asynchronous property.
+    """
 
     @model_validator(mode="before")
     @classmethod
