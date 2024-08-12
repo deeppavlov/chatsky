@@ -149,7 +149,7 @@ favicons = [
 
 autodoc_default_options = {
     "members": True,
-    "undoc-members": True,
+    "undoc-members": False,
     "private-members": True,
     "member-order": "bysource",
     "inherited-members": "BaseModel, ABC",
