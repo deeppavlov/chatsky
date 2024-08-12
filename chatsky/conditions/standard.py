@@ -9,7 +9,7 @@ These conditions can be used to check the current context, the user's input,
 or other factors that may affect the conversation flow.
 """
 import asyncio
-from typing import Callable, Pattern, Union, List, Optional
+from typing import Pattern, Union, List, Optional
 import logging
 import re
 from functools import cached_property

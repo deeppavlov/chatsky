@@ -9,7 +9,7 @@ from chatsky.slots.slots import (
     ExtractedValueSlot,
     SlotNotExtracted,
 )
-from chatsky.script import Message
+from chatsky.core import Message
 
 
 def faulty_func(_):
@@ -169,13 +169,13 @@ class TestSlotManager:
         ],
     )
     async def test_slot_extraction(
-        self, slot_name, expected_slot_storage, empty_slot_manager, context_with_request, pipeline
+        self, slot_name, expected_slot_storage, empty_slot_manager, context_with_request
     ):
-        await empty_slot_manager.extract_slot(slot_name, context_with_request, pipeline)
+        await empty_slot_manager.extract_slot(slot_name, context_with_request)
         assert empty_slot_manager.slot_storage == expected_slot_storage
 
-    async def test_extract_all(self, empty_slot_manager, context_with_request, pipeline):
-        await empty_slot_manager.extract_all(context_with_request, pipeline)
+    async def test_extract_all(self, empty_slot_manager, context_with_request):
+        await empty_slot_manager.extract_all(context_with_request)
         assert empty_slot_manager.slot_storage == full_slot_storage
 
     @pytest.mark.parametrize(

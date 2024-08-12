@@ -1,7 +1,6 @@
 import pytest
 
-from chatsky.pipeline import Pipeline
-from chatsky.script import Message, RESPONSE, TRANSITIONS
+from chatsky.core import Message, RESPONSE, TRANSITIONS, Pipeline
 
 
 @pytest.mark.asyncio

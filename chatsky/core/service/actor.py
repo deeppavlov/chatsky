@@ -26,7 +26,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 from __future__ import annotations
 import logging
 import asyncio
-from typing import Union, Optional
+from typing import Union
 
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.transition import get_next_label

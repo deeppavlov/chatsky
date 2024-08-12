@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from chatsky.script import Message
+from chatsky.core import Message
 from chatsky.slots.slots import (
     RegexpSlot,
     GroupSlot,
@@ -35,10 +35,10 @@ from chatsky.slots.slots import (
         ),
     ],
 )
-async def test_regexp(user_request, regexp, expected, context, pipeline):
+async def test_regexp(user_request, regexp, expected, context):
     context.add_request(user_request)
     slot = RegexpSlot(regexp=regexp)
-    result = await slot.get_value(context, pipeline)
+    result = await slot.get_value(context)
     assert result == expected
 
 
@@ -57,26 +57,26 @@ async def test_regexp(user_request, regexp, expected, context, pipeline):
         ),
     ],
 )
-async def test_function(user_request, func, expected, context, pipeline):
+async def test_function(user_request, func, expected, context):
     context.add_request(user_request)
     slot = FunctionSlot(func=func)
-    result = await slot.get_value(context, pipeline)
+    result = await slot.get_value(context)
     assert result == expected
 
     async def async_func(*args, **kwargs):
         return func(*args, **kwargs)
 
     slot = FunctionSlot(func=async_func)
-    result = await slot.get_value(context, pipeline)
+    result = await slot.get_value(context)
     assert result == expected
 
 
-async def test_function_exception(context, pipeline):
+async def test_function_exception(context):
     def func(msg: Message):
         raise RuntimeError("error")
 
     slot = FunctionSlot(func=func)
-    result = await slot.get_value(context, pipeline)
+    result = await slot.get_value(context)
     assert result.is_slot_extracted is False
     assert isinstance(result.extracted_value, RuntimeError)
 
@@ -124,9 +124,9 @@ async def test_function_exception(context, pipeline):
         ),
     ],
 )
-async def test_group_slot_extraction(user_request, slot, expected, is_extracted, context, pipeline):
+async def test_group_slot_extraction(user_request, slot, expected, is_extracted, context):
     context.add_request(user_request)
-    result = await slot.get_value(context, pipeline)
+    result = await slot.get_value(context)
     assert result == expected
     assert result.__slot_extracted__ == is_extracted
 

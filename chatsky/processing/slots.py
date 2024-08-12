@@ -4,95 +4,95 @@ Processing
 This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API.
 """
 
-from __future__ import annotations
-
 import logging
-from typing import Awaitable, Callable, TYPE_CHECKING
+from typing import List
 
-if TYPE_CHECKING:
-    from chatsky.slots.slots import SlotName
-    from chatsky.script import Context
-    from chatsky.pipeline import Pipeline
+from chatsky.core.message import MessageInitTypes, Message
+from chatsky.slots.slots import SlotName, SlotManager
+from chatsky.core import Context, BaseProcessing, BaseResponse
 
 logger = logging.getLogger(__name__)
 
 
-def extract(*slots: SlotName) -> Callable[[Context, Pipeline], Awaitable[None]]:
+class Extract(BaseProcessing):
     """
     Extract slots listed slots.
     This will override all slots even if they are already extracted.
 
     :param slots: List of slot names to extract.
     """
+    slots: List[SlotName]
 
-    async def inner(ctx: Context, pipeline: Pipeline) -> None:
+    def __init__(self, *slots: SlotName):
+        super().__init__(slots=slots)
+
+    async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        for slot in slots:  # todo: maybe gather
-            await manager.extract_slot(slot, ctx, pipeline)
-
-    return inner
+        for slot in self.slots:  # todo: maybe gather
+            await manager.extract_slot(slot, ctx)
 
 
-def extract_all():
+class ExtractAll(BaseProcessing):
     """
     Extract all slots defined in the pipeline.
     """
 
-    async def inner(ctx: Context, pipeline: Pipeline):
+    async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        await manager.extract_all(ctx, pipeline)
-
-    return inner
+        await manager.extract_all(ctx)
 
 
-def unset(*slots: SlotName) -> Callable[[Context, Pipeline], None]:
+class Unset(BaseProcessing):
     """
     Mark specified slots as not extracted and clear extracted values.
 
     :param slots: List of slot names to extract.
     """
+    slots: List[SlotName]
 
-    def unset_inner(ctx: Context, pipeline: Pipeline) -> None:
+    def __init__(self, *slots: SlotName):
+        super().__init__(slots=slots)
+
+    async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        for slot in slots:
+        for slot in self.slots:
             manager.unset_slot(slot)
 
-    return unset_inner
 
-
-def unset_all():
+class UnsetAll(BaseProcessing):
     """
     Mark all slots as not extracted and clear all extracted values.
     """
 
-    def inner(ctx: Context, pipeline: Pipeline):
+    async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         manager.unset_all_slots()
 
-    return inner
 
-
-def fill_template() -> Callable[[Context, Pipeline], None]:
+class FillTemplate(BaseProcessing):
     """
     Fill the response template in the current node.
 
     Response message of the current node should be a format-string: e.g. "Your username is {profile.username}".
     """
+    class FilledResponse(BaseResponse):
+        response: BaseResponse
+        manager: SlotManager
 
-    def inner(ctx: Context, pipeline: Pipeline) -> None:
+        async def func(self, ctx: Context) -> MessageInitTypes:
+            result = self.response.wrapped_call(ctx)
+            if not isinstance(result, Message):
+                raise ValueError("Cannot fill template: response did not return Message.")
+            if result.text is not None:
+                result.text = self.manager.fill_template(result.text)
+            return result
+
+
+    async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        # get current node response
         response = ctx.current_node.response
 
         if response is None:
             return
 
-        if callable(response):
-            response = response(ctx, pipeline)
-
-        new_text = manager.fill_template(response.text)
-
-        response.text = new_text
-        ctx.current_node.response = response
-
-    return inner
+        ctx.current_node.response = self.FilledResponse(response=response, manager=manager)

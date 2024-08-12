@@ -13,8 +13,8 @@ Detailed examples can be found in the `tutorials` section.
 
 from datetime import datetime
 
-from chatsky.script import Context
-from chatsky.pipeline import ExtraHandlerRuntimeInfo, Pipeline
+from chatsky.core import Context, Pipeline
+from chatsky.core.service.extra import ExtraHandlerRuntimeInfo
 from .utils import get_extra_handler_name
 
 

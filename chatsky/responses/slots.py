@@ -4,15 +4,11 @@ Response
 Slot-related Chatsky responses.
 """
 
-from __future__ import annotations
-from typing import Callable, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from chatsky.script import Context, Message
-    from chatsky.pipeline import Pipeline
+from chatsky.core import Context, Message, BaseResponse
+from chatsky.core.message import MessageInitTypes
 
 
-def filled_template(template: Message) -> Callable[[Context, Pipeline], Message]:
+class FilledTemplate(BaseResponse):
     """
     Fill template with slot values.
     The `text` attribute of the template message should be a format-string:
@@ -24,11 +20,13 @@ def filled_template(template: Message) -> Callable[[Context, Pipeline], Message]
 
     :param template: Template message with a format-string text.
     """
+    template: Message
 
-    def fill_inner(ctx: Context, pipeline: Pipeline) -> Message:
-        message = template.model_copy()
-        new_text = ctx.framework_data.slot_manager.fill_template(template.text)
-        message.text = new_text
+    def __init__(self, template: MessageInitTypes):
+        super().__init__(template=template)
+
+    async def func(self, ctx: Context) -> MessageInitTypes:
+        message = self.template.model_copy()
+        if message.text is not None:
+            message.text = ctx.framework_data.slot_manager.fill_template(message.text)
         return message
-
-    return fill_inner

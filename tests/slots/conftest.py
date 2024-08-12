@@ -1,8 +1,7 @@
 import pytest
 
-from chatsky.script import Message, TRANSITIONS, RESPONSE, Context
-from chatsky.script import conditions as cnd
-from chatsky.pipeline import Pipeline
+from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr
+from chatsky import conditions as cnd
 from chatsky.slots.slots import SlotNotExtracted
 
 
@@ -16,13 +15,14 @@ def patch_exception_equality(monkeypatch):
 
 @pytest.fixture(scope="function")
 def pipeline():
-    script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: {"node": cnd.true()}}}}
+    script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: [Tr(dst="node")]}}}
     pipeline = Pipeline.from_script(script=script, start_label=("flow", "node"))
     return pipeline
 
 
 @pytest.fixture(scope="function")
-def context():
+def context(pipeline):
     ctx = Context()
     ctx.add_request(Message(text="Hi"))
+    ctx.framework_data.pipeline = pipeline
     return ctx

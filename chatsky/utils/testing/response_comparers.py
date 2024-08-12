@@ -6,7 +6,7 @@ This module defines function used to compare two response objects.
 
 from typing import Any, Optional
 
-from chatsky.script import Context, Message
+from chatsky.core import Context, Message
 
 
 def default_comparer(candidate: Message, reference: Message, _: Context) -> Optional[Any]:

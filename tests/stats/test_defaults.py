@@ -2,9 +2,8 @@ import importlib
 
 import pytest
 
-from chatsky.script import Context
-from chatsky.pipeline import Pipeline
-from chatsky.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from chatsky.core import Context, Pipeline
+from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 
 try:
     from chatsky.stats import default_extractors

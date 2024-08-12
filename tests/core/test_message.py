@@ -10,7 +10,7 @@ from pydantic import ValidationError, HttpUrl, FilePath
 
 from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.script.core.message import (
+from chatsky.core.message import (
     Animation,
     Audio,
     CallbackQuery,

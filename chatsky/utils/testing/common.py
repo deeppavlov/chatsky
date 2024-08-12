@@ -8,8 +8,7 @@ from os import getenv
 from typing import Callable, Tuple, Optional, Union
 from uuid import uuid4
 
-from chatsky.script import Context, Message
-from chatsky.pipeline import Pipeline
+from chatsky.core import Context, Message, Pipeline
 from chatsky.utils.testing.response_comparers import default_comparer
 
 

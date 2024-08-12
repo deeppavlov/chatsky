@@ -20,8 +20,7 @@ from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.utils.devel.json_serialization import PickleEncodedValue
 
 if TYPE_CHECKING:
-    from chatsky.script import Context, Message
-    from chatsky.core.pipeline import Pipeline
+    from chatsky.core import Context, Message
 
 
 logger = logging.getLogger(__name__)
@@ -171,7 +170,7 @@ class BaseSlot(BaseModel, frozen=True):
     """
 
     @abstractmethod
-    async def get_value(self, ctx: Context, pipeline: Pipeline) -> ExtractedSlot:
+    async def get_value(self, ctx: Context) -> ExtractedSlot:
         """
         Extract slot value from :py:class:`~.Context` and return an instance of :py:class:`~.ExtractedSlot`.
         """
@@ -194,7 +193,7 @@ class ValueSlot(BaseSlot, frozen=True):
     default_value: Any = None
 
     @abstractmethod
-    async def extract_value(self, ctx: Context, pipeline: Pipeline) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
         """
         Return value extracted from context.
 
@@ -204,13 +203,13 @@ class ValueSlot(BaseSlot, frozen=True):
         """
         raise NotImplementedError
 
-    async def get_value(self, ctx: Context, pipeline: Pipeline) -> ExtractedValueSlot:
+    async def get_value(self, ctx: Context) -> ExtractedValueSlot:
         """Wrapper for :py:meth:`~.ValueSlot.extract_value` to handle exceptions."""
         extracted_value = SlotNotExtracted("Caught an exit exception.")
         is_slot_extracted = False
 
         try:
-            extracted_value = await self.extract_value(ctx, pipeline)
+            extracted_value = await self.extract_value(ctx)
             is_slot_extracted = not isinstance(extracted_value, SlotNotExtracted)
         except Exception as error:
             logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
@@ -252,9 +251,9 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
                 raise ValueError(f"Extra field names cannot be dunder: {field!r}")
         return self
 
-    async def get_value(self, ctx: Context, pipeline: Pipeline) -> ExtractedGroupSlot:
+    async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         child_values = await asyncio.gather(
-            *(child.get_value(ctx, pipeline) for child in self.__pydantic_extra__.values())
+            *(child.get_value(ctx) for child in self.__pydantic_extra__.values())
         )
         return ExtractedGroupSlot(
             **{child_name: child_value for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys())}
@@ -278,7 +277,7 @@ class RegexpSlot(ValueSlot, frozen=True):
     match_group_idx: int = 0
     "Index of the group to match."
 
-    async def extract_value(self, ctx: Context, _: Pipeline) -> Union[str, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         search = re.search(self.regexp, request_text)
         return (
@@ -297,7 +296,7 @@ class FunctionSlot(ValueSlot, frozen=True):
 
     func: Callable[[Message], Union[Awaitable[Union[Any, SlotNotExtracted]], Any, SlotNotExtracted]]
 
-    async def extract_value(self, ctx: Context, _: Pipeline) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
         return await wrap_sync_function_in_async(self.func, ctx.last_request)
 
 
@@ -344,22 +343,22 @@ class SlotManager(BaseModel):
             pass
         raise KeyError(f"Could not find slot {slot_name!r}.")
 
-    async def extract_slot(self, slot_name: SlotName, ctx: Context, pipeline: Pipeline) -> None:
+    async def extract_slot(self, slot_name: SlotName, ctx: Context) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
 
         :raises KeyError: If the slot with the specified name does not exist.
         """
         slot = self.get_slot(slot_name)
-        value = await slot.get_value(ctx, pipeline)
+        value = await slot.get_value(ctx)
 
         recursive_setattr(self.slot_storage, slot_name, value)
 
-    async def extract_all(self, ctx: Context, pipeline: Pipeline):
+    async def extract_all(self, ctx: Context):
         """
         Extract all slots from slot configuration `root_slot` and set `slot_storage` to the extracted value.
         """
-        self.slot_storage = await self.root_slot.get_value(ctx, pipeline)
+        self.slot_storage = await self.root_slot.get_value(ctx)
 
     def get_extracted_slot(self, slot_name: SlotName) -> ExtractedSlot:
         """

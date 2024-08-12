@@ -76,7 +76,7 @@ class Context(BaseModel):
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
     `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
-    labels: Dict[int, AbsoluteNodeLabel]
+    labels: Dict[int, AbsoluteNodeLabel] = Field(default_factory=dict)
     """
     `labels` stores the history of all passed `labels`
 

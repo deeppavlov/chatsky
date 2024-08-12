@@ -61,6 +61,7 @@ class TestBaseFunctionCallWrapper:
 
 @pytest.mark.parametrize("func_type,data,root_value,return_value", [
     (ConstResponse, "response_text", Message(text="response_text"), Message(text="response_text")),
+    (ConstResponse, {"text": "response_text"}, Message(text="response_text"), Message(text="response_text")),
     (ConstResponse, Message(text="response_text"), Message(text="response_text"), Message(text="response_text")),
     (ConstDestination, ("flow", "node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
     (ConstDestination, NodeLabel(flow_name="flow", node_name="node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
@@ -83,7 +84,7 @@ class TestNodeLabelValidation:
     @pytest.fixture
     def context_flow_factory(self, pipeline):
         def factory(flow_name: str):
-            ctx = Context((flow_name, "node"))
+            ctx = Context.init((flow_name, "node"))
             ctx.framework_data.pipeline = pipeline
             return ctx
         return factory

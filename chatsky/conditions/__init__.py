@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .standard import (
+from chatsky.conditions.standard import (
     ExactMatch,
     HasText,
     Regexp,
@@ -11,3 +11,4 @@ from .standard import (
     Not,
     HasCallbackQuery,
 )
+from chatsky.conditions.slots import SlotsExtracted

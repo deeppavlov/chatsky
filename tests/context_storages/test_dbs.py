@@ -20,7 +20,7 @@ from chatsky.context_storages import (
     context_storage_factory,
 )
 
-from chatsky.script import Context
+from chatsky.core import Context, Pipeline
 from chatsky.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
@@ -31,11 +31,7 @@ from chatsky.utils.testing.cleanup_db import (
     delete_ydb,
 )
 
-from tests.test_utils import get_path_from_tests_to_current_dir
-from chatsky.pipeline import Pipeline
 from chatsky.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
-
-dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 def ping_localhost(port: int, timeout=60):

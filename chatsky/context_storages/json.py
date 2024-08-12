@@ -17,7 +17,7 @@ try:
 except ImportError:
     json_available = False
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
 
 from .database import DBContextStorage, threadsafe_method
 from chatsky.core import Context
