@@ -151,7 +151,7 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": False,
     "private-members": True,
-    "member-order": "bysource",
+    "member-order": "groupwise",
     "inherited-members": "BaseModel, ABC",
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
