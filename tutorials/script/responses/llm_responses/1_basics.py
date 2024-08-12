@@ -46,6 +46,7 @@ model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"), system_prompt="You are an exp
 # %% [markdown]
 """
 Also you can pass images to the LLM, just pass them as attachments to your message.
+As you can see in this script, you can pass an additional prompt to the LLM. We will cover that thoroughly in the Prompt usage tutorial.
 """
 
 # %%
