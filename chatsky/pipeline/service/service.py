@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import inspect
 from typing import TYPE_CHECKING, Any, Optional, Callable
-from pydantic import model_validator
+from pydantic import model_validator, Field
 
 from chatsky.script import Context
 
@@ -40,22 +40,20 @@ class Service(PipelineComponent):
     Service can be included into pipeline as object or a dictionary.
     Service group can be synchronous or asynchronous.
     Service can be asynchronous only if its handler is a coroutine.
-
-    :param handler: A service function or an actor.
-    :type handler: :py:data:`~.ServiceFunction`
-    :param before_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type before_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param after_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param timeout: Timeout to add to the group.
-    :param asynchronous: Requested asynchronous property.
-    :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
-        service is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
-    :param name: Requested service name.
     """
 
     handler: ServiceFunction
+    """
+    A service function.
+    """
+    # Inherited fields repeated. Don't delete these, they're needed for documentation!
+    before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    timeout: Optional[float] = None
+    requested_async_flag: Optional[bool] = None
+    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    name: Optional[str] = None
+    path: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod

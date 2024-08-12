@@ -31,11 +31,30 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created using Pydantic's `model_validate` method,
-pipeline should be defined as a dictionary.
-It may contain `pre-services` and 'post-services' - `ServiceGroup` objects,
-basically a list of `Service` objects or more `ServiceGroup` objects,
-see tutorial 4.
+When Pipeline is created using it's constructor method or
+Pydantic's `model_validate` method,
+`Pipeline` should be defined as a dictionary of a particular structure,
+which must contain `script`, `start_label` and `fallback_label`,
+see `Script` tutorials.
+
+Optional Pipeline parameters:
+* `messenger_interface` - `MessengerInterface` instance,
+        is used to connect to channel and transfer IO to user.
+* `context_storage` - Place to store dialog contexts
+        (dictionary or a `DBContextStorage` instance).
+* `pre-services` - A `ServiceGroup` object,
+        basically a list of `Service` objects or more `ServiceGroup` objects,
+        see tutorial 4.
+* `post-services` - A `ServiceGroup` object,
+        basically a list of `Service` objects or more `ServiceGroup` objects,
+        see tutorial 4.
+* `before_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
+* `timeout` - Pipeline timeout, see tutorial 5.
 
 On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
@@ -48,8 +67,8 @@ Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
 
-Here, the pipeline contains 4 services,
-defined in 4 different ways with different signatures.
+Here, the pipeline contains 3 services,
+defined in 3 different ways with different signatures.
 """
 
 
@@ -77,16 +96,20 @@ pipeline_dict = {
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
     "pre_services": [
-        {"handler": prepreprocess},
+        {
+            "handler": prepreprocess,
+            "name": "prepreprocessor",
+        },
         preprocess,
     ],
-    "post_services": Service(handler=postprocess),
+    "post_services": Service(handler=postprocess, name="postprocessor"),
 }
 
 # %%
-pipeline = Pipeline.model_validate(pipeline_dict)
+pipeline = Pipeline(**pipeline_dict)
 # or
-# pipeline = Pipeline(**pipeline_dict)
+# pipeline = Pipeline.model_validate(pipeline_dict)
+
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
