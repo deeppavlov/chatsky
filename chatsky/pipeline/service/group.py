@@ -80,6 +80,14 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         return result
 
     async def _run_async_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
+        """
+        Method for running a group of asynchronous components in parallel to each other.
+        No check if they are asynchronous or not happens.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
+        :param components: The components to run in parallel to each other.
+        """
         service_futures = [service(ctx, pipeline) for service in components]
         for service, future in zip(components, await asyncio.gather(*service_futures, return_exceptions=True)):
             service_result = future
@@ -89,6 +97,13 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
                 logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
 
     async def _run_sync_component(self, ctx: Context, pipeline: Pipeline, component: Any) -> None:
+        """
+        Method for running a single synchronous component.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
+        :param component: The component be run.
+        """
         service_result = await component(ctx, pipeline)
         if component.asynchronous and isinstance(service_result, Awaitable):
             await service_result
