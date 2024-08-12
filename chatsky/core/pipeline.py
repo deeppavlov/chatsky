@@ -22,7 +22,6 @@ from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
 from chatsky.core.context import Context
 from chatsky.core.message import Message
-from chatsky.utils.turn_caching import cache_clear
 
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
@@ -135,11 +134,6 @@ class Pipeline:
             self._services_pipeline.log_optimization_warnings()
 
         self.parallelize_processing = parallelize_processing
-
-        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
-        self._clean_turn_cache = True
-        if self._clean_turn_cache:
-            self.actor._clean_turn_cache = False
 
     def add_global_handler(
         self,
@@ -334,8 +328,6 @@ class Pipeline:
             await self.context_storage.set_item_async(ctx_id, ctx)
         else:
             self.context_storage[ctx_id] = ctx
-        if self._clean_turn_cache:
-            cache_clear()
 
         return ctx
 
