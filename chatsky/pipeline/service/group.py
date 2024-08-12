@@ -12,7 +12,9 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, Callable
-from pydantic import model_validator
+
+from chatsky.pipeline import BeforeHandler, AfterHandler, always_start_condition
+from pydantic import model_validator, Field
 
 from chatsky.script import Context
 from ..pipeline.actor import Actor
@@ -23,6 +25,7 @@ from ..types import (
     GlobalExtraHandlerType,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
+    StartConditionCheckerFunction,
 )
 from .service import Service
 
@@ -40,18 +43,6 @@ class ServiceGroup(PipelineComponent):
     Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
     Components in asynchronous groups are executed simultaneously.
     Group can be asynchronous only if all components in it are asynchronous.
-
-    :param components: A `ServiceGroup` object, that will be added to the group.
-    :type components: :py:data:`~.ServiceGroup`
-    :param before_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type before_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param after_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param timeout: Timeout to add to the group.
-    :param requested_async_flag: Requested asynchronous property.
-    :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
-        group is executed only if it returns `True`.
-    :param name: Requested group name.
     """
 
     components: List[
@@ -61,6 +52,17 @@ class ServiceGroup(PipelineComponent):
             ServiceGroup,
         ]
     ]
+    """
+    A `ServiceGroup` object, that will be added to the group.
+    """
+    # Inherited fields repeated. Don't delete these, they're needed for documentation!
+    before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    timeout: Optional[float] = None
+    requested_async_flag: Optional[bool] = None
+    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    name: Optional[str] = None
+    path: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod

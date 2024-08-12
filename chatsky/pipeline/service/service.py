@@ -46,11 +46,11 @@ class Service(PipelineComponent):
     """
     A service function.
     """
+    # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
-    calculated_async_flag: bool = False
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     name: Optional[str] = None
     path: Optional[str] = None
