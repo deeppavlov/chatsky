@@ -52,25 +52,15 @@ This is convenient if you have a bunch of functions,
 that you want to run simultaneously,
 but don't want to make a service for each of them.
 
-<<<<<<< HEAD:tutorials/pipeline/5_asynchronous_groups_and_services.py
-Here is a service group "pre_services"
-with the flag 'all_async' set to 'True',
-that contains 10 services, each of them should sleep for 0.01 of a second.
-=======
 Here, "pre_services" is a service group with the flag
 'all_async' set to 'True', that contains 10 services,
 each of them should sleep for 0.01 of a second.
->>>>>>> 730e941d6c54a1ad52bed4b8a0946e34aa61d1ef:tutorials/pipeline/5_asynchronous_groups_and_services_basic.py
 However, as the group is fully asynchronous,
 it is being executed for 0.01 of a second in total.
 The same would happen if all of those services were marked as 'asynchronous'.
 Once again, by default, all services inside a
-<<<<<<< HEAD:tutorials/pipeline/5_asynchronous_groups_and_services.py
-service group are executed sequentially.
-=======
 service group are executed sequentially if they
 weren't explicitly marked as asynchronous.
->>>>>>> 730e941d6c54a1ad52bed4b8a0946e34aa61d1ef:tutorials/pipeline/5_asynchronous_groups_and_services_basic.py
 
 To further demonstrate ServiceGroup's logic,
 "post_services" is a ServiceGroup with asynchronous components 'A' and 'B',
