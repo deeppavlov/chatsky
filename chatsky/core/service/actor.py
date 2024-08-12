@@ -26,8 +26,10 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 from __future__ import annotations
 import logging
 import asyncio
-from typing import Union
+from typing import Union, TYPE_CHECKING
+from pydantic import Field, model_validator
 
+from chatsky.core.service.component import PipelineComponent
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.transition import get_next_label
 from chatsky.core.message import Message
@@ -36,44 +38,57 @@ from chatsky.core.context import Context
 from chatsky.core.script import Script
 from chatsky.core.script_function import BaseProcessing
 
+if TYPE_CHECKING:
+    from chatsky.core.pipeline import Pipeline
+
 logger = logging.getLogger(__name__)
 
 
-class Actor:
+class Actor(PipelineComponent):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.
-
-    :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
-        While the graph is being initialized, it is validated and then used for the dialog.
-    :param start_label: The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
-    :param fallback_label: The label of :py:class:`~chatsky.script.Script`.
-        Dialog comes into that label if all other transitions failed,
-        or there was an error while executing the scenario.
-        Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
-    :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-        - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
-        - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    def __init__(
-        self,
-        script: Union[Script, dict],
-        fallback_label: AbsoluteNodeLabelInitTypes,
-        default_priority: float = 1.0,
-    ):
-        self.script = Script.model_validate(script)
-        self.default_priority = default_priority
-        self.fallback_label = AbsoluteNodeLabel.model_validate(fallback_label)
+    script: Script
+    """
+    The dialog scenario: a graph described by the :py:class:`.Keywords`.
+    While the graph is being initialized, it is validated and then used for the dialog.
+    """
+    fallback_label: AbsoluteNodeLabel
+    """
+    The label of :py:class:`~chatsky.script.Script`.
+    Dialog comes into that label if all other transitions failed,
+    or there was an error while executing the scenario. Defaults to `None`.
+    """
+    default_priority: float = 1.0
+    """
+    Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
+    where there is no priority. Defaults to `1.0`.
+    """
+
+    @model_validator(mode="after")
+    def __tick_async_flag__(self):
+        self.calculated_async_flag = False
+        return self
+
+    @model_validator(mode="after")
+    def __fallback_label_validator__(self):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        return self
 
-    async def __call__(self, ctx: Context):
+    @property
+    def computed_name(self) -> str:
+        return "actor"
+
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+        """
+        Method for running an `Actor`.
+
+        :param pipeline: Current pipeline.
+        :param ctx: Current dialog context.
+        """
         next_label = self.fallback_label
 
         try:

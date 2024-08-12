@@ -14,6 +14,7 @@ import logging
 import abc
 import asyncio
 from typing import Optional, Awaitable, TYPE_CHECKING
+from pydantic import BaseModel, Field, model_validator
 
 from chatsky.core.context import Context
 
@@ -26,8 +27,8 @@ from chatsky.core.service.types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
     ExtraHandlerType,
-    ExtraHandlerBuilder,
 )
+from ...utils.devel import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
@@ -35,75 +36,64 @@ if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
 
 
-class PipelineComponent(abc.ABC):
+class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     This class represents a pipeline component, which is a service or a service group.
     It contains some fields that they have in common.
-
-    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
-    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
-    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param requested_async_flag: Requested asynchronous property;
-        if not defined, `calculated_async_flag` is used instead.
-    :param calculated_async_flag: Whether the component can be asynchronous or not
-        1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
-        2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
-
-    :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
-        component is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
-    :param name: Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-        should not be blank or contain `.` symbol.
-    :param path: Separated by dots path to component, is universally unique.
     """
 
-    def __init__(
-        self,
-        before_handler: Optional[ExtraHandlerBuilder] = None,
-        after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[float] = None,
-        requested_async_flag: Optional[bool] = None,
-        calculated_async_flag: bool = False,
-        start_condition: Optional[StartConditionCheckerFunction] = None,
-        name: Optional[str] = None,
-        path: Optional[str] = None,
-    ):
-        self.timeout = timeout
-        """
-        Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted (for asynchronous only!).
-        """
-        self.requested_async_flag = requested_async_flag
-        """Requested asynchronous property; if not defined, :py:attr:`~requested_async_flag` is used instead."""
-        self.calculated_async_flag = calculated_async_flag
-        """Calculated asynchronous property, whether the component can be asynchronous or not."""
-        self.start_condition = always_start_condition if start_condition is None else start_condition
-        """
-        Component start condition that is invoked before each component execution;
-        component is executed only if it returns `True`.
-        """
-        self.name = name
-        """
-        Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
-        should not be blank or contain '.' symbol.
-        """
-        self.path = path
-        """
-        Dot-separated path to component (is universally unique).
-        This attribute is set in :py:func:`~chatsky.pipeline.pipeline.utils.finalize_service_group`.
-        """
+    before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    """
+    :py:class:`~.BeforeHandler`, associated with this component.
+    """
+    after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    """
+    :py:class:`~.AfterHandler`, associated with this component.
+    """
+    timeout: Optional[float] = None
+    """
+    (for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted.
+    """
+    requested_async_flag: Optional[bool] = None
+    """
+    Requested asynchronous property; if not defined,
+    `calculated_async_flag` is used instead.
+    """
+    calculated_async_flag: bool = False
+    """
+    Whether the component can be asynchronous or not.
 
-        self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
-        self.after_handler = AfterHandler([] if after_handler is None else after_handler)
+    1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
+    2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
 
-        if name is not None and (name == "" or "." in name):
-            raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {name})!")
+    """
+    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    """
+    StartConditionCheckerFunction that is invoked before each component execution;
+    component is executed only if it returns `True`.
+    """
+    name: Optional[str] = None
+    """
+    Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
+    should not be blank or contain `.` symbol.
+    """
+    path: Optional[str] = None
+    """
+    Separated by dots path to component, is universally unique.
+    """
 
-        if not calculated_async_flag and requested_async_flag:
-            raise Exception(f"{type(self).__name__} '{name}' can't be asynchronous!")
+    @model_validator(mode="after")
+    def __pipeline_component_validator(self):
+        if self.name is not None:
+            if self.name == "":
+                raise ValueError("Name cannot be blank.")
+            if "." in self.name:
+                raise ValueError(f"Name cannot contain '.': {self.name!r}.")
+
+        if not self.calculated_async_flag and self.requested_async_flag:
+            raise Exception(f"{type(self).__name__} '{self.name}' can't be asynchronous!")
+        return self
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
@@ -160,15 +150,57 @@ class PipelineComponent(abc.ABC):
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+        """
+        Method for running this component. It can be an Actor, Service or ServiceGroup.
+        It has to be defined in the child classes,
+        which is done in each of the default PipelineComponents.
+        Service 'handler' has three possible signatures. These possible signatures are:
+
+        - (ctx: Context) - accepts current dialog context only.
+        - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
+        - | (ctx: Context, pipeline: Pipeline, info: ServiceRuntimeInfo) - accepts context,
+              pipeline and service runtime info dictionary.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
+        :return: `None`
+        """
+        raise NotImplementedError
+
+    @property
+    def computed_name(self) -> str:
+        """
+        Every derivative of `PipelineComponent` must define this property.
+        :return: `str`.
+        """
+        return "noname_service"
+        # Or could do the following:
+        # raise NotImplementedError
+        # But this default value makes sense and replicates previous logic.
+
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
-        A method for running pipeline component, it is overridden in all its children.
-        This method is run after the component's timeout is set (if needed).
+        A method for running a pipeline component. Executes extra handlers before and after execution,
+        launches `run_component` method. This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
-        raise NotImplementedError
+        try:
+            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
+                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
+
+                self._set_state(ctx, ComponentExecutionState.RUNNING)
+                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
+                    self._set_state(ctx, ComponentExecutionState.FINISHED)
+
+                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+            else:
+                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+        except Exception as exc:
+            self._set_state(ctx, ComponentExecutionState.FAILED)
+            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
     async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
         """

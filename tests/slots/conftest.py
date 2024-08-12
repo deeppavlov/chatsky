@@ -16,7 +16,7 @@ def patch_exception_equality(monkeypatch):
 @pytest.fixture(scope="function")
 def pipeline():
     script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: [Tr(dst="node")]}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("flow", "node"))
+    pipeline = Pipeline(script=script, start_label=("flow", "node"))
     return pipeline
 
 

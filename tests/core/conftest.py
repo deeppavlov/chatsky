@@ -7,7 +7,7 @@ from chatsky.core import Context
 
 @pytest.fixture
 def pipeline():
-    return Pipeline.from_script(
+    return Pipeline(
         script={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),

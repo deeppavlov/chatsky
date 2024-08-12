@@ -61,13 +61,13 @@ class TestRequestProcessing:
         }})
 
         ctx = Context.init(start_label=("flow", "node1"))
-        actor = Actor(script, fallback_label=("flow", "fallback"))
+        actor = Actor(script=script, fallback_label=("flow", "fallback"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
@@ -81,13 +81,13 @@ class TestRequestProcessing:
         })
 
         ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor(script, fallback_label=("flow", "fallback"))
+        actor = Actor(script=script, fallback_label=("flow", "fallback"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
@@ -108,13 +108,13 @@ class TestRequestProcessing:
         })
 
         ctx = Context.init(start_label=("flow", "node1"))
-        actor = Actor(script, fallback_label=("flow", "fallback"), default_priority=default_priority)
+        actor = Actor(script=script, fallback_label=("flow", "fallback"), default_priority=default_priority)
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
         assert ctx.last_label.node_name == result
 
     async def test_transition_exception_handling(self, object_factory, log_event_catcher):
@@ -127,13 +127,13 @@ class TestRequestProcessing:
         script = Script.model_validate({"flow": {"node": {PRE_TRANSITION: {"": MyProcessing()}}, "fallback": {}}})
 
         ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor(script, fallback_label=("flow", "fallback"))
+        actor = Actor(script=script, fallback_label=("flow", "fallback"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.last_label.node_name == "fallback"
         assert log_list[0].msg == "Exception occurred during transition processing."
@@ -145,13 +145,13 @@ class TestRequestProcessing:
         script = Script.model_validate({"flow": {"node": {}}})
 
         ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor(script, fallback_label=("flow", "node"))
+        actor = Actor(script=script, fallback_label=("flow", "node"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.responses == {0: Message()}
         assert log_list[-1].msg == "Node has empty response."
@@ -166,13 +166,13 @@ class TestRequestProcessing:
         script = Script.model_validate({"flow": {"node": {RESPONSE: MyResponse()}}})
 
         ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor(script, fallback_label=("flow", "node"))
+        actor = Actor(script=script, fallback_label=("flow", "node"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.responses == {0: Message()}
         assert log_list[-1].msg == "Response was not produced."
@@ -187,20 +187,20 @@ class TestRequestProcessing:
         script = Script.model_validate({"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}}}})
 
         ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor(script, fallback_label=("flow", "node"))
+        actor = Actor(script=script, fallback_label=("flow", "node"))
         ctx.framework_data.pipeline = object_factory(
             parallelize_processing=True,
             script=script
         )
 
-        await actor(ctx)
+        await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.responses == {0: Message()}
         assert log_list[0].msg == "Exception occurred during response processing."
         assert str(log_list[0].exc_info[1]) == "Current node is not set."
 
 
-async def test_processing(object_factory):
+async def test_pre_processing(object_factory):
     contested_resource = {}
 
     class Proc1(BaseProcessing):

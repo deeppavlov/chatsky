@@ -16,7 +16,9 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
+from functools import cached_property
 from typing import Union, List, Dict, Optional, Hashable
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
@@ -27,113 +29,138 @@ from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup
+from chatsky.core.service.extra import ComponentExtraHandler
 from chatsky.core.service.types import (
-    ServiceBuilder,
-    ServiceGroupBuilder,
-    PipelineBuilder,
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
-    ExtraHandlerBuilder,
 )
-from chatsky.core.utils import finalize_service_group, pretty_format_component_info_dict
+from .utils import finalize_service_group
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel
 
 logger = logging.getLogger(__name__)
 
-ACTOR = "ACTOR"
 
-
-class Pipeline:
+class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
-
-    :param components: (required) A :py:data:`~.ServiceGroupBuilder` object,
-        that will be transformed to root service group. It should include :py:class:`~.Actor`,
-        but only once (raises exception otherwise). It will always be named pipeline.
-    :param script: (required) A :py:class:`~.Script` instance (object or dict).
-    :param start_label: (required) Actor start label.
-    :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-    :param slots: Slots configuration.
-    :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-        - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
-
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
-        a dict to store dialog :py:class:`~.Context`.
-    :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param timeout: Timeout to add to pipeline root service group.
-    :param optimization_warnings: Asynchronous pipeline optimization check request flag;
-        warnings will be sent to logs. Additionally it has some calculated fields:
-
-        - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-        - `actor` is a pipeline actor, found among services.
-    :param parallelize_processing: This flag determines whether or not the functions
-        defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
-        of the script should be parallelized over respective groups.
-
     """
 
-    def __init__(
-        self,
-        components: ServiceGroupBuilder,
-        script: Union[Script, Dict],
-        start_label: AbsoluteNodeLabel,
-        fallback_label: Optional[AbsoluteNodeLabel] = None,
-        default_priority: float = 1.0,
-        slots: Optional[Union[GroupSlot, Dict]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
-        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        before_handler: Optional[ExtraHandlerBuilder] = None,
-        after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[float] = None,
-        optimization_warnings: bool = False,
-        parallelize_processing: bool = False,
-    ):
-        self.actor: Actor = None
-        self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
-        self.context_storage = {} if context_storage is None else context_storage
-        self.slots = GroupSlot.model_validate(slots) if slots is not None else None
-        self._services_pipeline = ServiceGroup(
-            components,
-            before_handler=before_handler,
-            after_handler=after_handler,
-            timeout=timeout,
+    pre_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
+    that will be executed before Actor.
+    """
+    post_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
+    executed after Actor. It constructs root
+    service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+    """
+    script: Script
+    """
+    (required) A :py:class:`~.Script` instance (object or dict).
+    """
+    start_label: AbsoluteNodeLabel
+    """
+    (required) Actor start label.
+    """
+    fallback_label: Optional[AbsoluteNodeLabel] = None
+    """
+    Actor fallback label.
+    """
+    default_priority: float = 1.0
+    """
+    Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    where there is no priority. Defaults to `1.0`.
+    """
+    slots: GroupSlot = Field(default_factory=GroupSlot)
+    """
+    Slots configuration.
+    """
+    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
+    """
+    An `AbsMessagingInterface` instance for this pipeline.
+    """
+    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    """
+    A :py:class:`~.DBContextStorage` instance for this pipeline or
+    a dict to store dialog :py:class:`~.Context`.
+    """
+    before_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
+    after_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
+    timeout: Optional[float] = None
+    """
+    Timeout to add to pipeline root service group.
+    """
+    optimization_warnings: bool = False
+    """
+    Asynchronous pipeline optimization check request flag;
+    warnings will be sent to logs. Additionally, it has some calculated fields:
+
+    - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
+    - `actor` is a pipeline actor, found among services.
+
+    """
+    parallelize_processing: bool = False
+    """
+    This flag determines whether or not the functions
+    defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+    of the script should be parallelized over respective groups.
+    """
+
+    @computed_field
+    @cached_property
+    def actor(self) -> Actor:
+        return Actor(
+            script=self.script,
+            fallback_label=self.fallback_label or self.start_label,
+            default_priority=self.default_priority,
         )
 
-        self._services_pipeline.name = "pipeline"
-        self._services_pipeline.path = ".pipeline"
-        actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+    @computed_field
+    @cached_property
+    def _services_pipeline(self) -> ServiceGroup:
+        components = [self.pre_services, self.actor, self.post_services]
+        services_pipeline = ServiceGroup(
+            components=components,
+            before_handler=self.before_handler,
+            after_handler=self.after_handler,
+            timeout=self.timeout,
+        )
+        services_pipeline.name = "pipeline"
+        services_pipeline.path = ".pipeline"
+        return services_pipeline
 
-        self.start_label = start_label
-        if fallback_label is None:
-            fallback_label = start_label
+    @model_validator(mode="after")
+    def validate_start_label(self):
+        if self.script.get_node(self.start_label) is None:
+            raise ValueError(f"Unknown start_label={self.start_label}")
+        return self
 
-        if not actor_exists:
-            raise Exception("Actor not found in the pipeline!")
-        else:
-            self.set_actor(
-                script,
-                fallback_label,
-                default_priority,
-            )
-        if self.actor is None:
-            raise Exception("Actor wasn't initialized correctly!")
+    @model_validator(mode="after")
+    def validate_fallback_label(self):
+        if self.fallback_label is None:
+            self.fallback_label = self.start_label
+        if self.script.get_node(self.fallback_label) is None:
+            raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        return self
 
-        if optimization_warnings:
+    @model_validator(mode="after")
+    def __pipeline_init(self):
+        finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+
+        if self.optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
 
-        self.parallelize_processing = parallelize_processing
+        return self
 
     def add_global_handler(
         self,
@@ -188,111 +215,6 @@ class Pipeline:
             "context_storage": f"Instance of {type(self.context_storage).__name__}",
             "services": [self._services_pipeline.info_dict],
         }
-
-    def pretty_format(self, show_extra_handlers: bool = False, indent: int = 4) -> str:
-        """
-        Method for receiving pretty-formatted string description of the pipeline.
-        Resulting string structure is somewhat similar to YAML string.
-        Should be used in debugging/logging purposes and should not be parsed.
-
-        :param show_wrappers: Whether to include Wrappers or not (could be many and/or generated).
-        :param indent: Offset from new line to add before component children.
-        """
-        return pretty_format_component_info_dict(self.info_dict, show_extra_handlers, indent=indent)
-
-    @classmethod
-    def from_script(
-        cls,
-        script: Union[Script, Dict],
-        start_label: AbsoluteNodeLabel,
-        fallback_label: Optional[AbsoluteNodeLabel] = None,
-        default_priority: float = 1.0,
-        slots: Optional[Union[GroupSlot, Dict]] = None,
-        parallelize_processing: bool = False,
-        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
-        pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
-        post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
-    ) -> "Pipeline":
-        """
-        Pipeline script-based constructor.
-        It creates :py:class:`~.Actor` object and wraps it with pipeline.
-        NB! It is generally not designed for projects with complex structure.
-        :py:class:`~.Service` and :py:class:`~.ServiceGroup` customization
-        becomes not as obvious as it could be with it.
-        Should be preferred for simple workflows with Actor auto-execution.
-
-        :param script: (required) A :py:class:`~.Script` instance (object or dict).
-        :param start_label: (required) Actor start label.
-        :param fallback_label: Actor fallback label.
-        :param default_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
-            where there is no priority. Defaults to `1.0`.
-        :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param slots: Slots configuration.
-        :param parallelize_processing: This flag determines whether or not the functions
-            defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
-            of the script should be parallelized over respective groups.
-        :param handlers: This variable is responsible for the usage of external handlers on
-            the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-            - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
-            - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
-
-        :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
-            or a dict to store dialog :py:class:`~.Context`.
-        :param messenger_interface: An instance for this pipeline.
-        :param pre_services: List of :py:data:`~.ServiceBuilder` or
-            :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
-        :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
-        :param post_services: List of :py:data:`~.ServiceBuilder` or
-            :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
-            It constructs root service group by merging `pre_services` + actor + `post_services`.
-        :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
-        """
-        pre_services = [] if pre_services is None else pre_services
-        post_services = [] if post_services is None else post_services
-        return cls(
-            script=script,
-            start_label=start_label,
-            fallback_label=fallback_label,
-            default_priority=default_priority,
-            slots=slots,
-            parallelize_processing=parallelize_processing,
-            messenger_interface=messenger_interface,
-            context_storage=context_storage,
-            components=[*pre_services, ACTOR, *post_services],
-        )
-
-    def set_actor(
-        self,
-        script: Union[Script, Dict],
-        fallback_label: Optional[AbsoluteNodeLabel] = None,
-        default_priority: float = 1.0,
-    ):
-        """
-        Set actor for the current pipeline and conducts necessary checks.
-        Reset actor to previous if any errors are found.
-
-        :param script: (required) A :py:class:`~.Script` instance (object or dict).
-        :param start_label: (required) Actor start label.
-            The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
-        :param fallback_label: Actor fallback label. The label of :py:class:`~chatsky.script.Script`.
-            Dialog comes into that label if all other transitions failed,
-            or there was an error while executing the scenario.
-        :param default_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
-            where there is no priority. Defaults to `1.0`.
-        :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        """
-        self.actor = Actor(script, fallback_label, default_priority)
-
-    @classmethod
-    def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":
-        """
-        Pipeline dictionary-based constructor.
-        Dictionary should have the fields defined in Pipeline main constructor,
-        it will be split and passed to it as `**kwargs`.
-        """
-        return cls(**dictionary)
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

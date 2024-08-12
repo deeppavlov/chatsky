@@ -8,20 +8,13 @@ data structures, and other types that are defined for type hinting.
 
 from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
-from typing_extensions import NotRequired, TypedDict, TypeAlias
+from typing import Callable, Union, Awaitable, Dict, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
+from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
 
 if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-    from chatsky.core.service.service import Service
-    from chatsky.core.service.group import ServiceGroup
-    from chatsky.core.service.extra import _ComponentExtraHandler
-    from chatsky.messengers.common.interface import MessengerInterface
-    from chatsky.context_storages import DBContextStorage
-    from chatsky.core.context import Context
-    from chatsky.core.message import Message
+    from chatsky.core import Context, Message, Pipeline
 
 
 class PipelineRunnerFunction(Protocol):
@@ -178,90 +171,4 @@ ServiceFunction: TypeAlias = Union[
 A function type for creating service handlers.
 Can accept current dialog context, pipeline, and current service info.
 Can be both synchronous and asynchronous.
-"""
-
-
-ExtraHandlerBuilder: TypeAlias = Union[
-    "_ComponentExtraHandler",
-    TypedDict(
-        "WrapperDict",
-        {
-            "timeout": NotRequired[Optional[float]],
-            "asynchronous": NotRequired[bool],
-            "functions": List[ExtraHandlerFunction],
-        },
-    ),
-    List[ExtraHandlerFunction],
-]
-"""
-A type, representing anything that can be transformed to ExtraHandlers.
-It can be:
-
-- ExtraHandlerFunction object
-- Dictionary, containing keys `timeout`, `asynchronous`, `functions`
-"""
-
-
-ServiceBuilder: TypeAlias = Union[
-    ServiceFunction,
-    "Service",
-    str,
-    TypedDict(
-        "ServiceDict",
-        {
-            "handler": "ServiceBuilder",
-            "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
-            "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
-            "timeout": NotRequired[Optional[float]],
-            "asynchronous": NotRequired[bool],
-            "start_condition": NotRequired[StartConditionCheckerFunction],
-            "name": Optional[str],
-        },
-    ),
-]
-"""
-A type, representing anything that can be transformed to service.
-It can be:
-
-- ServiceFunction (will become handler)
-- Service object (will be spread and recreated)
-- String 'ACTOR' - the pipeline Actor will be placed there
-- Dictionary, containing keys that are present in Service constructor parameters
-"""
-
-
-ServiceGroupBuilder: TypeAlias = Union[
-    List[Union[ServiceBuilder, List[ServiceBuilder], "ServiceGroup"]],
-    "ServiceGroup",
-]
-"""
-A type, representing anything that can be transformed to service group.
-It can be:
-
-- List of `ServiceBuilders`, `ServiceGroup` objects and lists (recursive)
-- `ServiceGroup` object (will be spread and recreated)
-"""
-
-
-PipelineBuilder: TypeAlias = TypedDict(
-    "PipelineBuilder",
-    {
-        "messenger_interface": NotRequired[Optional["MessengerInterface"]],
-        "context_storage": NotRequired[Optional[Union["DBContextStorage", Dict]]],
-        "components": ServiceGroupBuilder,
-        "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
-        "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
-        "optimization_warnings": NotRequired[bool],
-        "parallelize_processing": NotRequired[bool],
-        "script": Union["Script", Dict],
-        "start_label": "NodeLabel2Type",
-        "fallback_label": NotRequired[Optional["NodeLabel2Type"]],
-        "label_priority": NotRequired[float],
-        "condition_handler": NotRequired[Optional[Callable]],
-        "handlers": NotRequired[Optional[Dict["ActorStage", List[Callable]]]],
-    },
-)
-"""
-A type, representing anything that can be transformed to pipeline.
-It can be Dictionary, containing keys that are present in Pipeline constructor parameters.
 """

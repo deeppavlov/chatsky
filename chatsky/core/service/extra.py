@@ -10,16 +10,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Callable
+from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.core.context import Context
 
-from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.core.service.types import (
     ServiceRuntimeInfo,
     ExtraHandlerType,
-    ExtraHandlerBuilder,
     ExtraHandlerFunction,
     ExtraHandlerRuntimeInfo,
 )
@@ -30,53 +29,53 @@ if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
 
 
-class _ComponentExtraHandler:
+class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class, representing an extra pipeline component handler.
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
-
-    :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
-        a dict or a list of :py:data:`~.ExtraHandlerFunction`.
-    :type functions: :py:data:`~.ExtraHandlerBuilder`
-    :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
-        after pipeline component.
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param asynchronous: Requested asynchronous property.
     """
 
-    def __init__(
-        self,
-        functions: ExtraHandlerBuilder,
-        stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED,
-        timeout: Optional[float] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            timeout=timeout, asynchronous=asynchronous
-        )
-        if isinstance(functions, _ComponentExtraHandler):
-            self.__init__(
-                **_get_attrs_with_updates(
-                    functions,
-                    ("calculated_async_flag", "stage"),
-                    {"requested_async_flag": "asynchronous"},
-                    overridden_parameters,
-                )
-            )
-        elif isinstance(functions, dict):
-            functions.update(overridden_parameters)
-            self.__init__(**functions)
-        elif isinstance(functions, List):
-            self.functions = functions
-            self.timeout = timeout
-            self.requested_async_flag = asynchronous
-            self.calculated_async_flag = all([asyncio.iscoroutinefunction(func) for func in self.functions])
-            self.stage = stage
+    functions: List[ExtraHandlerFunction] = Field(default_factory=list)
+    """
+    A list or instance of :py:data:`~.ExtraHandlerFunction`.
+    """
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
+    """
+    An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
+    be executed before or after pipeline component.
+    """
+    timeout: Optional[float] = None
+    """
+    (for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted.
+    """
+    requested_async_flag: Optional[bool] = None
+    """
+    Requested asynchronous property.
+    """
+
+    @model_validator(mode="before")
+    @classmethod
+    def functions_constructor(cls, data: Any):
+        if isinstance(data, (list, Callable)):
+            result = {"functions": data}
+        elif isinstance(data, dict):
+            result = data.copy()
         else:
-            raise Exception(f"Unknown type for {type(self).__name__} {functions}")
+            raise ValueError(
+                "Extra Handler can only be initialized from a Dict,"
+                " a Callable or a list of Callables. Wrong inputs received."
+            )
+
+        if ("functions" in result) and (not isinstance(result["functions"], list)):
+            result["functions"] = [result["functions"]]
+        return result
+
+    @computed_field(repr=False)
+    def calculated_async_flag(self) -> bool:
+        return all([asyncio.iscoroutinefunction(func) for func in self.functions])
 
     @property
     def asynchronous(self) -> bool:
@@ -168,47 +167,35 @@ class _ComponentExtraHandler:
         }
 
 
-class BeforeHandler(_ComponentExtraHandler):
+class BeforeHandler(ComponentExtraHandler):
     """
     A handler for extra functions that are executed before the component's main function.
 
-    :param functions: A callable or a list of callables that will be executed
+    :param functions: A list of callables that will be executed
         before the component's main function.
-    :type functions: ExtraHandlerBuilder
+    :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
+    :param requested_async_flag: Optional flag that indicates whether the extra functions
         should be executed asynchronously. The default value of the flag is True
         if all the functions in this handler are asynchronous.
     """
 
-    def __init__(
-        self,
-        functions: ExtraHandlerBuilder,
-        timeout: Optional[int] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        super().__init__(functions, ExtraHandlerType.BEFORE, timeout, asynchronous)
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.BEFORE
 
 
-class AfterHandler(_ComponentExtraHandler):
+class AfterHandler(ComponentExtraHandler):
     """
     A handler for extra functions that are executed after the component's main function.
 
-    :param functions: A callable or a list of callables that will be executed
+    :param functions: A list of callables that will be executed
         after the component's main function.
-    :type functions: ExtraHandlerBuilder
+    :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
+    :param requested_async_flag: Optional flag that indicates whether the extra functions
         should be executed asynchronously. The default value of the flag is True
         if all the functions in this handler are asynchronous.
     """
 
-    def __init__(
-        self,
-        functions: ExtraHandlerBuilder,
-        timeout: Optional[int] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        super().__init__(functions, ExtraHandlerType.AFTER, timeout, asynchronous)
+    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER

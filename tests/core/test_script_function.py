@@ -79,7 +79,7 @@ async def test_const_functions(func_type, data, root_value, return_value):
 class TestNodeLabelValidation:
     @pytest.fixture
     def pipeline(self):
-        return Pipeline.from_script({"flow1": {"node": {}}, "flow2": {"node": {}}}, start_label=("flow1", "node"))
+        return Pipeline(script={"flow1": {"node": {}}, "flow2": {"node": {}}}, start_label=("flow1", "node"))
 
     @pytest.fixture
     def context_flow_factory(self, pipeline):
