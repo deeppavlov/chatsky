@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, Callable
 from pydantic import model_validator
 
 from chatsky.script import Context
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
+class ServiceGroup(PipelineComponent):
     """
     A service group class.
     Service group can be included into pipeline as an object or a pipeline component list.
@@ -48,8 +48,9 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param asynchronous: Optional flag that indicates whether the components inside
-        should be executed concurrently. The default value of the flag is False.
+    :param asynchronous: Optional flag that indicates whether this ServiceGroup
+        can be executed concurrently with adjacent asynchronous PipelineComponents.
+        The default value of the flag is False.
     :param all_async: Optional flag that, if set to True, makes the `ServiceGroup` run
         all components inside it asynchronously. Default value is False.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
@@ -68,12 +69,16 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
-    def components_constructor(cls, data: Any):
-        if not isinstance(data, dict):
+    def __components_constructor(cls, data: Any):
+        if isinstance(data, (list, PipelineComponent, Callable)):
             result = {"components": data}
-        else:
+        elif isinstance(data, dict):
             result = data.copy()
+        else:
+            raise ValueError(
+                "Service Group can only be initialized from a Dict,"
+                " a PipelineComponent or a list of PipelineComponents. Wrong inputs received."
+            )
 
         if ("components" in result) and (not isinstance(result["components"], list)):
             result["components"] = [result["components"]]
@@ -108,7 +113,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         if component.asynchronous and isinstance(service_result, Awaitable):
             await service_result
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
         """
         Method for running this service group. It doesn't include extra handlers execution,
         start condition checking or error handling - pure execution only.
@@ -136,7 +141,8 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
             await self._run_async_components(ctx, pipeline, current_subgroup)
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
-        self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
+        if failed:
+            return ComponentExecutionState.FAILED
 
     def add_extra_handler(
         self,
@@ -164,6 +170,10 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
                 service.add_extra_handler(global_extra_handler_type, extra_handler, condition)
             else:
                 service.add_extra_handler(global_extra_handler_type, extra_handler)
+
+    @property
+    def computed_name(self) -> str:
+        return "service_group"
 
     @property
     def info_dict(self) -> dict:

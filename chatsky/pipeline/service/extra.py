@@ -10,8 +10,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
-from pydantic import BaseModel, model_validator, Field
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Callable
+from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.script import Context
 
@@ -35,30 +35,40 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
-
-    :param functions: A list or instance of :py:data:`~.ExtraHandlerFunction`.
-    :type functions: :py:data:`~.ExtraHandlerFunction`
-    :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
-        after pipeline component.
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param asynchronous: A flag that indicates whether the extra functions
-        should be executed concurrently. The default value of the flag is False.
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
+    """
+    A list or instance of :py:data:`~.ExtraHandlerFunction`.
+    """
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
+    """
+    An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
+    be executed before or after pipeline component.
+    """
     timeout: Optional[float] = None
+    """
+    (for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted.
+    """
     asynchronous: bool = False
+    """
+    A flag that indicates whether the extra handler's functions
+    should be executed concurrently. The default value of the flag is False.
+    """
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
     def functions_constructor(cls, data: Any):
-        if not isinstance(data, dict):
+        if isinstance(data, (list, Callable)):
             result = {"functions": data}
-        else:
+        elif isinstance(data, dict):
             result = data.copy()
+        else:
+            raise ValueError(
+                "Extra Handler can only be initialized from a Dict,"
+                " a Callable or a list of Callables. Wrong inputs received."
+            )
 
         if ("functions" in result) and (not isinstance(result["functions"], list)):
             result["functions"] = [result["functions"]]

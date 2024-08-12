@@ -13,7 +13,7 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Callable
 from pydantic import model_validator
 
 from chatsky.script import Context
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
+class Service(PipelineComponent):
     """
     This class represents a service.
     Service can be included into pipeline as object or a dictionary.
@@ -59,10 +59,11 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="before")
     @classmethod
-    # Here Script class has "@validate_call". Is it needed here?
-    def handler_constructor(cls, data: Any):
-        if not isinstance(data, dict):
+    def __handler_constructor(cls, data: Any):
+        if isinstance(data, Callable):
             return {"handler": data}
+        elif not isinstance(data, dict):
+            raise ValueError("A Service can only be initialized from a Dict or a Callable." " Wrong inputs received.")
         return data
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
@@ -88,6 +89,16 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             await wrap_sync_function_in_async(self.handler, ctx, pipeline, self._get_runtime_info(ctx))
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
+
+    @property
+    def computed_name(self) -> str:
+        if callable(self.handler):
+            if inspect.isfunction(self.handler):
+                return self.handler.__name__
+            else:
+                return self.handler.__class__.__name__
+        else:
+            return "noname_service"
 
     @property
     def info_dict(self) -> dict:

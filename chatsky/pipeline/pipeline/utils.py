@@ -7,11 +7,8 @@ These functions provide a variety of utility functionality.
 
 import collections
 from typing import List
-from inspect import isfunction
 
-from .actor import Actor
 from .component import PipelineComponent
-from ..service.service import Service
 from ..service.group import ServiceGroup
 
 
@@ -32,20 +29,10 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     :param collisions: Components in the same service group as component.
     :return: Generated name
     """
-    if isinstance(component, Actor):
-        base_name = "actor"
-    # Pretty sure that service.handler can only be a callable now. Should the newly irrelevant logic be removed?
-    elif isinstance(component, Service) and callable(component.handler):
-        if isfunction(component.handler):
-            base_name = component.handler.__name__
-        else:
-            base_name = component.handler.__class__.__name__
-    elif isinstance(component, ServiceGroup):
-        base_name = "service_group"
+    if isinstance(component, PipelineComponent):
+        base_name = component.computed_name
     else:
-        # This should never be triggered. (All PipelineComponent derivatives are handled above)
         base_name = "noname_service"
-
     name_index = 0
     while f"{base_name}_{name_index}" in [component.name for component in collisions]:
         name_index += 1

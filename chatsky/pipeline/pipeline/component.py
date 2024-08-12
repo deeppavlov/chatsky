@@ -40,35 +40,49 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     This class represents a pipeline component, which is a service or a service group.
     It contains some fields that they have in common.
-
-    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
-    :type before_handler: Optional[:py:data:`~.ComponentExtraHandler`]
-    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
-    :type after_handler: Optional[:py:data:`~.ComponentExtraHandler`]
-    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted.
-    :param asynchronous: Optional flag that indicates whether the inside functions/components
-        should be executed concurrently. The default value of the flag is False.
-    :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
-        component is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
-    :param name: Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-        should not be blank or contain `.` symbol.
-    :param path: Separated by dots path to component, is universally unique.
     """
 
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    """
+    :py:class:`~.BeforeHandler`, associated with this component.
+    """
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    """
+    :py:class:`~.AfterHandler`, associated with this component.
+    """
     timeout: Optional[float] = None
+    """
+    (for asynchronous only!) Maximum component execution time (in seconds),
+    if it exceeds this time, it is interrupted.
+    """
     asynchronous: bool = False
+    """
+    Optional flag that indicates whether this component
+    should be executed concurrently with adjacent async components.
+    """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    """
+    StartConditionCheckerFunction that is invoked before each component execution;
+    component is executed only if it returns `True`.
+    """
     name: Optional[str] = None
+    """
+    Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
+    should not be blank or contain `.` symbol.
+    """
     path: Optional[str] = None
+    """
+    Separated by dots path to component, is universally unique.
+    """
 
     @model_validator(mode="after")
-    def pipeline_component_validator(self):
-        if self.name is not None and (self.name == "" or "." in self.name):
-            raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {self.name})!")
+    def __pipeline_component_validator(self):
+        if self.name is not None:
+            if self.name == "":
+                raise ValueError("Name cannot be blank.")
+            if "." in self.name:
+                raise ValueError(f"Name cannot contain '.': {self.name!r}.")
+
         return self
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
@@ -108,8 +122,34 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+        """
+        Method for running this component. It can be an Actor, Service or ServiceGroup.
+        It has to be defined in the child classes,
+        which is done in each of the default PipelineComponents.
+        Service 'handler' has three possible signatures. These possible signatures are:
+
+        - (ctx: Context) - accepts current dialog context only.
+        - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
+        - | (ctx: Context, pipeline: Pipeline, info: ServiceRuntimeInfo) - accepts context,
+              pipeline and service runtime info dictionary.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
+        :return: `None`
+        """
         raise NotImplementedError
+
+    @property
+    def computed_name(self) -> str:
+        """
+        Every derivative of `PipelineComponent` must define this property.
+        :return: `str`.
+        """
+        return "noname_service"
+        # Or could do the following:
+        # raise NotImplementedError
+        # But this default value makes sense and replicates previous logic.
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -119,21 +159,20 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
-        if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
-            try:
+        try:
+            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
                 await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
-                await self.run_component(ctx, pipeline)
-                if self.get_state(ctx) is not ComponentExecutionState.FAILED:
+                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
                 await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-            except Exception as exc:
-                self._set_state(ctx, ComponentExecutionState.FAILED)
-                logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
-        else:
-            self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+            else:
+                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+        except Exception as exc:
+            self._set_state(ctx, ComponentExecutionState.FAILED)
+            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
     async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
         """

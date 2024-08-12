@@ -16,8 +16,9 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
+from functools import cached_property
 from typing import Union, List, Dict, Optional, Hashable, Callable
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -43,60 +44,86 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
-
-    :param pre_services: List of :py:data:`~.Service` or
-        :py:data:`~.ServiceGroup` that will be executed before Actor.
-    :type pre_services: ServiceGroup
-    :param post_services: List of :py:data:`~.Service` or
-        :py:data:`~.ServiceGroup` that will be executed after Actor. It constructs root
-        service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
-    :type post_services: ServiceGroup
-    :param script: (required) A :py:class:`~.Script` instance (object or dict).
-    :param start_label: (required) Actor start label.
-    :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-    :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-        - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
-
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
-        a dict to store dialog :py:class:`~.Context`.
-    :param before_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type before_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param after_handler: List of `_ComponentExtraHandler` to add to the group.
-    :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
-    :param timeout: Timeout to add to pipeline root service group.
-    :param parallelize_processing: This flag determines whether or not the functions
-        defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
-        of the script should be parallelized over respective groups.
-
     """
 
     pre_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
+    that will be executed before Actor.
+    """
     post_services: ServiceGroup = Field(default_factory=list)
+    """
+    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
+    executed after Actor. It constructs root
+    service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+    """
     script: Union[Script, Dict]
+    """
+    (required) A :py:class:`~.Script` instance (object or dict).
+    """
     start_label: NodeLabel2Type
+    """
+    (required) Actor start label.
+    """
     fallback_label: Optional[NodeLabel2Type] = None
+    """
+    Actor fallback label.
+    """
     label_priority: float = 1.0
+    """
+    Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    where there is no priority. Defaults to `1.0`.
+    """
     condition_handler: Callable = Field(default=default_condition_handler)
+    """
+    Handler that processes a call of actor condition functions. Defaults to `None`.
+    """
     slots: GroupSlot = Field(default_factory=GroupSlot)
+    """
+    Slots configuration.
+    """
+    # Docs could look like this for one-liners
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
+    """
+    This variable is responsible for the usage of external handlers on
+    the certain stages of work of :py:class:`~chatsky.script.Actor`.
+
+    - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
+    - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+
+    """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
+    """
+    An `AbsMessagingInterface` instance for this pipeline.
+    """
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    """
+    A :py:class:`~.DBContextStorage` instance for this pipeline or
+    a dict to store dialog :py:class:`~.Context`.
+    """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
     after_handler: ComponentExtraHandler = Field(default_factory=list)
+    """
+    List of `_ComponentExtraHandler` to add to the group.
+    """
     timeout: Optional[float] = None
+    """
+    Timeout to add to pipeline root service group.
+    """
     parallelize_processing: bool = False
-    actor: Optional[Actor] = None
-    _services_pipeline: Optional[ServiceGroup] = None
+    """
+    This flag determines whether or not the functions
+    defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+    of the script should be parallelized over respective groups.
+    """
     _clean_turn_cache: Optional[bool]
 
-    def _create_actor(self) -> Actor:
+    @computed_field
+    @cached_property
+    def actor(self) -> Actor:
         return Actor(
             script=self.script,
             start_label=self.start_label,
@@ -106,7 +133,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             handlers=self.handlers,
         )
 
-    def _create_pipeline_services(self) -> ServiceGroup:
+    @computed_field
+    @cached_property
+    def _services_pipeline(self) -> ServiceGroup:
         components = [self.pre_services, self.actor, self.post_services]
         services_pipeline = ServiceGroup(
             components=components,
@@ -119,9 +148,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return services_pipeline
 
     @model_validator(mode="after")
-    def pipeline_init(self):
-        self.actor = self._create_actor()
-        self._services_pipeline = self._create_pipeline_services()
+    def __pipeline_init(self):
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
