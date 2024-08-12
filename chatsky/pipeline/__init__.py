@@ -22,9 +22,9 @@ from .types import (
     ServiceFunction,
 )
 
-from .pipeline.pipeline import Pipeline
-from .pipeline.actor import Actor
-
 from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
-from .service.group import ServiceGroup
 from .service.service import Service, to_service
+from .service.group import ServiceGroup
+
+from .pipeline.actor import Actor
+from .pipeline.pipeline import Pipeline
