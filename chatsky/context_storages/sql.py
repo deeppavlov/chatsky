@@ -16,7 +16,7 @@ public-domain, SQL database engine.
 import asyncio
 from importlib import import_module
 from os import getenv
-from typing import Any, Callable, Collection, Hashable, List, Optional, Set, Tuple
+from typing import Any, Callable, Collection, Dict, Hashable, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
@@ -145,11 +145,10 @@ class SQLContextStorage(DBContextStorage):
         self, path: str,
         serializer: Optional[Any] = None,
         rewrite_existing: bool = False,
-        turns_config: Optional[FieldConfig] = None,
-        misc_config: Optional[FieldConfig] = None,
+        configuration: Optional[Dict[str, FieldConfig]] = None,
         table_name_prefix: str = "chatsky_table",
     ):
-        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
+        DBContextStorage.__init__(self, path, serializer, rewrite_existing, configuration)
 
         self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
@@ -167,12 +166,14 @@ class SQLContextStorage(DBContextStorage):
             Column(self._framework_data_column_name, LargeBinary(), nullable=False),
         )
         self._turns_table = Table(
-            f"{table_name_prefix}_{self.turns_config.name}",
+            f"{table_name_prefix}_{self._turns_table_name}",
             self._metadata,
             Column(self._primary_id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._primary_id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
-            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
-            Index(f"{self.turns_config.name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
+            Column(self.labels_config.name, LargeBinary(), nullable=True),
+            Column(self.requests_config.name, LargeBinary(), nullable=True),
+            Column(self.responses_config.name, LargeBinary(), nullable=True),
+            Index(f"{self._turns_table_name}_index", self._primary_id_column_name, self._KEY_COLUMN, unique=True),
         )
         self._misc_table = Table(
             f"{table_name_prefix}_{self.misc_config.name}",
@@ -214,11 +215,15 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    def _get_table_and_config(self, field_name: str) -> Tuple[Table, FieldConfig]:
-        if field_name == self.turns_config.name:
-            return self._turns_table, self.turns_config
+    def _get_table_field_and_config(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
+        if field_name == self.labels_config.name:
+            return self._turns_table, field_name, self.labels_config
+        elif field_name == self.requests_config.name:
+            return self._turns_table, field_name, self.requests_config
+        elif field_name == self.responses_config.name:
+            return self._turns_table, field_name, self.responses_config
         elif field_name == self.misc_config.name:
-            return self._misc_table, self.misc_config
+            return self._misc_table, self._VALUE_COLUMN, self.misc_config
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
@@ -252,10 +257,10 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(stmt)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, field_config = self._get_table_and_config(field_name)
-        stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[self._VALUE_COLUMN])
+        field_table, field_name, field_config = self._get_table_field_and_config(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[field_name])
         stmt = stmt.where(field_table.c[self._primary_id_column_name] == ctx_id)
-        if field_name == self.turns_config.name:
+        if field_table == self._turns_table:
             stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
         if isinstance(field_config.subscript, int):
             stmt = stmt.limit(field_config.subscript)
@@ -265,20 +270,20 @@ class SQLContextStorage(DBContextStorage):
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, _ = self._get_table_and_config(field_name)
+        field_table, _, _ = self._get_table_field_and_config(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._primary_id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        field_table, _ = self._get_table_and_config(field_name)
-        stmt = select(field_table.c[self._VALUE_COLUMN])
+        field_table, field_name, _ = self._get_table_field_and_config(field_name)
+        stmt = select(field_table.c[field_name])
         stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, _ = self._get_table_and_config(field_name)
+        field_table, field_name, _ = self._get_table_field_and_config(field_name)
         keys, values = zip(*items)
         if field_name == self.misc_config.name and any(len(key) > self._FIELD_LENGTH for key in keys):
             raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
@@ -286,20 +291,20 @@ class SQLContextStorage(DBContextStorage):
             {
                 self._primary_id_column_name: ctx_id,
                 self._KEY_COLUMN: keys,
-                self._VALUE_COLUMN: values,
+                field_name: values,
             }
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [self._KEY_COLUMN, self._VALUE_COLUMN],
+            [self._KEY_COLUMN, field_name],
             [self._primary_id_column_name],
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
 
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
-        field_table, _ = self._get_table_and_config(field_name)
+        field_table, _, _ = self._get_table_field_and_config(field_name)
         stmt = delete(field_table)
         stmt = stmt.where((field_table.c[self._primary_id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
         async with self.engine.begin() as conn:

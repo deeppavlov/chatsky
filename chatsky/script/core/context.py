@@ -116,7 +116,7 @@ class Context(BaseModel):
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.turns_config.name, tuple),
+                    ContextDict.connected(storage, id, storage.labels_config.name, tuple),
                     ContextDict.connected(storage, id, storage.requests_config.name, Message.model_validate),
                     ContextDict.connected(storage, id, storage.responses_config.name, Message.model_validate),
                     ContextDict.connected(storage, id, storage.misc_config.name)
@@ -178,9 +178,8 @@ class Context(BaseModel):
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
-        label_keys = [k for k in self.turns._items.keys() if self.turns._items[k].label is not None]
-        last_label_turn = self.turns._items.get(max(label_keys, default=None), None)
-        return last_label_turn.label if last_label_turn is not None else None
+        label_keys = [k for k in self.labels._items.keys() if self.labels._items[k] is not None]
+        return self.labels._items.get(max(label_keys, default=None), None)
 
     @last_label.setter
     def last_label(self, label: Optional[NodeLabel2Type]):
@@ -188,9 +187,8 @@ class Context(BaseModel):
 
     @property
     def last_response(self) -> Optional[Message]:
-        response_keys = [k for k in self.turns._items.keys() if self.turns._items[k].response is not None]
-        last_response_turn = self.turns._items.get(max(response_keys, default=None), None)
-        return last_response_turn.response if last_response_turn is not None else None
+        response_keys = [k for k in self.responses._items.keys() if self.responses._items[k] is not None]
+        return self.responses._items.get(max(response_keys, default=None), None)
 
     @last_response.setter
     def last_response(self, response: Optional[Message]):
@@ -198,9 +196,8 @@ class Context(BaseModel):
 
     @property
     def last_request(self) -> Optional[Message]:
-        request_keys = [k for k in self.turns._items.keys() if self.turns._items[k].request is not None]
-        last_request_turn = self.turns._items.get(max(request_keys, default=None), None)
-        return last_request_turn.request if last_request_turn is not None else None
+        request_keys = [k for k in self.requests._items.keys() if self.requests._items[k] is not None]
+        return self.requests._items.get(max(request_keys, default=None), None)
 
     @last_request.setter
     def last_request(self, request: Optional[Message]):
@@ -232,7 +229,9 @@ class Context(BaseModel):
         if isinstance(value, Context):
             return (
                 self.primary_id == value.primary_id
-                and self.turns == value.turns
+                and self.labels == value.labels
+                and self.requests == value.requests
+                and self.responses == value.responses
                 and self.misc == value.misc
                 and self.framework_data == value.framework_data
                 and self._storage == value._storage
