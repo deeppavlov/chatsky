@@ -6,9 +6,9 @@ Prompting is an essential step in using LLMs and Chatsky provides you with a sim
 The main idea behind that is the hierarchy of prompts. It can be portrayed as follows:
 ```
 SYSTEM: SYSTEM_PROMPT
+SYSTEM: NODE_PROMPT
 SYSTEM: GLOBAL_PROMPT
 SYSTEM: LOCAL_PROMPT
-SYSTEM: NODE_PROMPT
 
 # history `n` turns
 HUMAN: req
@@ -34,8 +34,7 @@ from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
-from chatsky.llm.methods import Contains
+from chatsky.llm.wrapper import LLM_API, llm_response
 
 
 import getpass
@@ -47,7 +46,7 @@ from langchain_openai import ChatOpenAI
 # %% [markdown]
 """
 Let's create a simple script to demonstrate this. Note, that prompt should go the `MISC` field of the node. Inside `MISC` it can be stored under the `prompt` key, or under the `global_prompt` key (or `local_prompt` accordingly).
-In the latter case it would not be overwritten by a _more local_ prompt.
+Please note, that `MISC` is just a dictionary and its fields can be overwritten in any node, if given the same key. You can utilize this in your project, but below we present the intended way of using `MISC` for storing multiple prompts.
 """
 
 # %%
@@ -96,9 +95,8 @@ toy_script = {
     "hr_flow": {
         LOCAL: {
             MISC: {
-                "prompt": "Your role is a bank HR. Provide user with the information about our vacant places.",
                 # you can easily pass additional data to the model using the prompts
-                "local_prompt": f"Vacancies: {("Java-developer", "InfoSec-specialist")}."
+                "prompt": f"Your role is a bank HR. Provide user with the information about our vacant places. Vacancies: {("Java-developer", "InfoSec-specialist")}.",
             },
             "start_node": {
                 RESPONSE: llm_response(model_name="bank_model"),
@@ -109,10 +107,13 @@ toy_script = {
                 }
             },
             "cook_node": {
-                RESPONSE: llm_response(model_name="bank_model", prompt="You've once was a cook on a ship and you are so happy to see you colleague."),
+                RESPONSE: llm_response(model_name="bank_model"),
                 TRANSITIONS: {
                     "start_node": cnd.exact_match("/end"),
                     lbl.repeat(): cnd.true()
+                },
+                MISC: {
+                    "prompt": "You were waiting for the cook employee from last week. Greet your user and tell them about the salary you can offer."
                 }
             }
         }
@@ -121,9 +122,9 @@ toy_script = {
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("main_flow", "start_node"),
+    start_label=("greeting_flow", "start_node"),
     fallback_label=("main_flow", "fallback_node"),
-    models={"barista_model": model}
+    models={"bank_model": model}
 )
 
 if __name__ == "__main__":

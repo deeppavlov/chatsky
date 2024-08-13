@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# LLM: 2. Filtering History
+# LLM: 3. Filtering History
 
 If you want to take the messages that meet your particular criteria and pass them to the LLMs context you can use the `llm_response`s `filter_func` parameter.
 It must be a function that takes a single `Message` object and returns a boolean.

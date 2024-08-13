@@ -69,12 +69,13 @@ class LLM_API(DeepEvalBaseLLM):
         
         elif issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
-            result = Message.model_validate(message_schema)
+            structured_model = self.model.with_structured_output(message_schema)
+            result = Message.model_validate(structured_model.invoke(history))
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)
-            result = self.parser.invoke(structured_model.invoke(history))
-            result = Message(text=str(result))
+            result = structured_model.invoke(history)
+            result = Message(text=str(result.json()))
         
         if result.annotations:
             result.annotations["__generated_by_model__"] = self.name
@@ -126,16 +127,18 @@ def llm_response(
         current_node = ctx.current_node
         current_misc = current_node.misc if current_node is not None else None
         if current_misc is not None:
+            # populate history with global and local prompts
+            if "prompt" in current_misc:
+                node_prompt = current_misc["prompt"]
+                history_messages.append(SystemMessage(node_prompt))
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
                 history_messages.append(SystemMessage(global_prompt))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
                 history_messages.append(SystemMessage(local_prompt))
-            if "prompt" in current_misc:
-                node_prompt = current_misc["prompt"]
-                history_messages.append(SystemMessage(node_prompt))
 
+        # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses)==0 or len(ctx.requests)==0):
             pairs = zip([ctx.requests[x] for x in range(len(ctx.requests))],
                      [ctx.responses[x] for x in range(len(ctx.responses))])
