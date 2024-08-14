@@ -198,12 +198,3 @@ class Context(BaseModel):
         if node is None:
             raise ContextError("Current node is not set.")
         return node
-
-    def _get_current_node(self) -> Node:
-        """
-        Return current :py:class:`~chatsky.script.core.script.Node`.
-        """
-        node = self.pipeline.script.get_node(self.last_label)
-        if node is None:
-            raise ContextError(f"Could not find node {self.last_label!r} in script.")
-        return node
