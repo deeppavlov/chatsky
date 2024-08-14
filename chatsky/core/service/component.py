@@ -16,8 +16,6 @@ import asyncio
 from typing import Optional, Awaitable, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator
 
-from chatsky.core.context import Context
-
 from chatsky.core.service.extra import BeforeHandler, AfterHandler
 from chatsky.core.service.conditions import always_start_condition
 from chatsky.core.service.types import (
@@ -34,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
+    from chatsky.core.context import Context
 
 
 class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allowed=True):
