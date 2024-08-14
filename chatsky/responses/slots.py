@@ -4,7 +4,10 @@ Response
 Slot-related Chatsky responses.
 """
 
+from typing import Union
+
 from chatsky.core import Context, Message, BaseResponse
+from chatsky.core.script_function import AnyResponse
 from chatsky.core.message import MessageInitTypes
 
 
@@ -20,13 +23,15 @@ class FilledTemplate(BaseResponse):
 
     :param template: Template message with a format-string text.
     """
-    template: Message
+    template: AnyResponse
 
-    def __init__(self, template: MessageInitTypes):
+    def __init__(self, template: Union[MessageInitTypes, BaseResponse]):
         super().__init__(template=template)
 
     async def func(self, ctx: Context) -> MessageInitTypes:
-        message = self.template.model_copy()
-        if message.text is not None:
-            message.text = ctx.framework_data.slot_manager.fill_template(message.text)
-        return message
+        result = self.template.wrapped_call(ctx)
+        if not isinstance(result, Message):
+            raise ValueError("Cannot fill template: response did not return Message.")
+        if result.text is not None:
+            result.text = ctx.framework_data.slot_manager.fill_template(result.text)
+        return result

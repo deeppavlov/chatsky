@@ -7,9 +7,9 @@ This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s
 import logging
 from typing import List
 
-from chatsky.core.message import MessageInitTypes, Message
-from chatsky.slots.slots import SlotName, SlotManager
-from chatsky.core import Context, BaseProcessing, BaseResponse
+from chatsky.slots.slots import SlotName
+from chatsky.core import Context, BaseProcessing
+from chatsky.responses.slots import FilledTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -75,24 +75,11 @@ class FillTemplate(BaseProcessing):
 
     Response message of the current node should be a format-string: e.g. "Your username is {profile.username}".
     """
-    class FilledResponse(BaseResponse):
-        response: BaseResponse
-        manager: SlotManager
-
-        async def func(self, ctx: Context) -> MessageInitTypes:
-            result = self.response.wrapped_call(ctx)
-            if not isinstance(result, Message):
-                raise ValueError("Cannot fill template: response did not return Message.")
-            if result.text is not None:
-                result.text = self.manager.fill_template(result.text)
-            return result
-
 
     async def func(self, ctx: Context):
-        manager = ctx.framework_data.slot_manager
         response = ctx.current_node.response
 
         if response is None:
             return
 
-        ctx.current_node.response = self.FilledResponse(response=response, manager=manager)
+        ctx.current_node.response = FilledTemplate(template=response)
