@@ -145,6 +145,13 @@ class TestPipelineValidation:
         Pipeline(**TOY_SCRIPT_KWARGS)
         Pipeline.model_validate(TOY_SCRIPT_KWARGS)
 
+    # Testing if actor is an unchangeable constant throughout the program
+    def test_cached_property(self):
+        pipeline = Pipeline(**TOY_SCRIPT_KWARGS)
+        old_actor_id = id(pipeline.actor)
+        pipeline.start_label = ("greeting_flow", "fallback_node")
+        assert old_actor_id == id(pipeline.actor)
+
     def test_pre_services(self):
         with pytest.raises(ValidationError):
             # 'pre_services' must be a ServiceGroup

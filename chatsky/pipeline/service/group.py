@@ -67,19 +67,13 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def __components_constructor(cls, data: Any):
-        if isinstance(data, (list, PipelineComponent, Callable)):
-            result = {"components": data}
-        elif isinstance(data, dict):
-            result = data.copy()
-        else:
-            raise ValueError(
-                "Service Group can only be initialized from a Dict,"
-                " a PipelineComponent or a list of PipelineComponents. Wrong inputs received."
-            )
-
-        if ("components" in result) and (not isinstance(result["components"], list)):
-            result["components"] = [result["components"]]
-        return result
+        """Adds support for initializing from a `Callable`, `List`
+        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)"""
+        if isinstance(data, list):
+            return {"components": data}
+        if callable(data) or isinstance(data, PipelineComponent):
+            return {"components": [data]}
+        return data
 
     @model_validator(mode="after")
     def __calculate_async_flag(self):

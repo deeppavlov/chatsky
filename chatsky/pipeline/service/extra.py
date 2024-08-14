@@ -59,19 +59,14 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @model_validator(mode="before")
     @classmethod
     def functions_constructor(cls, data: Any):
-        if isinstance(data, (list, Callable)):
-            result = {"functions": data}
-        elif isinstance(data, dict):
-            result = data.copy()
-        else:
-            raise ValueError(
-                "Extra Handler can only be initialized from a Dict,"
-                " a Callable or a list of Callables. Wrong inputs received."
-            )
-
-        if ("functions" in result) and (not isinstance(result["functions"], list)):
-            result["functions"] = [result["functions"]]
-        return result
+        """
+        Adds support for initializing from a `Callable` or List[`Callable`].
+        """
+        if isinstance(data, list):
+            return {"functions": data}
+        if callable(data):
+            return {"functions": [data]}
+        return data
 
     @computed_field(repr=False)
     def calculated_async_flag(self) -> bool:

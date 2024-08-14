@@ -54,7 +54,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     post_services: ServiceGroup = Field(default_factory=list)
     """
     List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
-    executed after Actor. It constructs root
+    executed after :py:class:`~.Actor`. It constructs root
     service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """
     script: Union[Script, Dict]
@@ -63,15 +63,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     start_label: NodeLabel2Type
     """
-    (required) Actor start label.
+    (required) :py:class:`~.Actor` start label.
     """
     fallback_label: Optional[NodeLabel2Type] = None
     """
-    Actor fallback label.
+    :py:class:`~.Actor` fallback label.
     """
     label_priority: float = 1.0
     """
-    Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
     where there is no priority. Defaults to `1.0`.
     """
     condition_handler: Callable = Field(default=default_condition_handler)
@@ -82,7 +82,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    # Docs could look like this for one-liners
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
@@ -103,11 +102,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
     """
-    List of `_ComponentExtraHandler` to add to the group.
+    List of :py:class:`~._ComponentExtraHandler` to add to the group.
     """
     after_handler: ComponentExtraHandler = Field(default_factory=list)
     """
-    List of `_ComponentExtraHandler` to add to the group.
+    List of :py:class:`~._ComponentExtraHandler` to add to the group.
     """
     timeout: Optional[float] = None
     """
@@ -157,7 +156,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return services_pipeline
 
     @model_validator(mode="after")
-    def __pipeline_init(self):
+    def __pipeline_init__(self):
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         if self.optimization_warnings:

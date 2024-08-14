@@ -111,6 +111,11 @@ class Actor(PipelineComponent):
 
     @model_validator(mode="after")
     def __start_label_validator__(self):
+        """
+        Validates :py:data:`~.Actor.start_label`. In case requested
+        `start_label` doesn't exist in the given :py:class:`~.Script`,
+        raises ValueError.
+        """
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)
         self.start_label = normalize_label(self.start_label)
@@ -120,6 +125,11 @@ class Actor(PipelineComponent):
 
     @model_validator(mode="after")
     def __fallback_label_validator__(self):
+        """
+        Validates :py:data:`~.Actor.fallback_label`. In case requested
+        `fallback_label` doesn't exist in the given :py:class:`~.Script`,
+        raises ValueError.
+        """
         if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:
@@ -133,12 +143,6 @@ class Actor(PipelineComponent):
         return "actor"
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for running an `Actor`.
-
-        :param pipeline: Current pipeline.
-        :param ctx: Current dialog context.
-        """
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)
 
         # get previous node
