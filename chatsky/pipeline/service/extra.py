@@ -63,10 +63,16 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         Adds support for initializing from a `Callable` or List[`Callable`].
         """
         if isinstance(data, list):
-            return {"functions": data}
-        if callable(data):
-            return {"functions": [data]}
-        return data
+            result = {"functions": data}
+        elif callable(data):
+            result = {"functions": [data]}
+        else:
+            result = data
+
+        if isinstance(result, dict):
+            if ("functions" in result) and (not isinstance(result["functions"], list)):
+                result["functions"] = [result["functions"]]
+        return result
 
     @computed_field(repr=False)
     def calculated_async_flag(self) -> bool:

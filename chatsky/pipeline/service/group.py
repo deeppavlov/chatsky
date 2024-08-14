@@ -70,10 +70,16 @@ class ServiceGroup(PipelineComponent):
         """Adds support for initializing from a `Callable`, `List`
         and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)"""
         if isinstance(data, list):
-            return {"components": data}
-        if callable(data) or isinstance(data, PipelineComponent):
-            return {"components": [data]}
-        return data
+            result = {"components": data}
+        elif callable(data) or isinstance(data, PipelineComponent):
+            result = {"components": [data]}
+        else:
+            result = data
+
+        if isinstance(result, dict):
+            if ("components" in result) and (not isinstance(result["components"], list)):
+                result["components"] = [result["components"]]
+        return result
 
     @model_validator(mode="after")
     def __calculate_async_flag(self):
