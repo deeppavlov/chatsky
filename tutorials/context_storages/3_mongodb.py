@@ -18,7 +18,7 @@ import os
 
 from chatsky.context_storages import context_storage_factory
 
-from chatsky.pipeline import Pipeline
+from chatsky import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
