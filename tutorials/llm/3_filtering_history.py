@@ -23,9 +23,8 @@ from chatsky.utils.testing import (
 from chatsky.llm.wrapper import LLM_API, llm_response
 from chatsky.llm.filters import BaseFilter, FromTheModel
 
-import getpass
 import os
-os.environ["OPENAI_API_KEY"] = getpass.getpass()
+os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 from langchain_openai import ChatOpenAI
 
@@ -50,37 +49,36 @@ There is a function `FromTheModel` that can be used to separate the models memor
 #%%
 toy_script = {
     "main_flow": {
+        "start_node": {
+        RESPONSE: Message(""),
+        TRANSITIONS: {"greeting_node": exact_match("Hi")},
+    },
         "greeting_node": {
-            "start_node": {
-            RESPONSE: Message(""),
-            TRANSITIONS: {"greeting_node": exact_match("Hi")},
-        },
-            "greeting_node": {
-                RESPONSE: llm_response(model_name="assistant_model", history=0),
-                TRANSITIONS: {"main_node": exact_match("Who are you?")},    
-        },
-            "main_node": {
-                RESPONSE: llm_response(model_name="assistant_model", history=3),
-                TRANSITIONS: {
-                    "remind_node": cnd.exact_match("/remind"),
-                    lbl.repeat: cnd.true
-                }
-            },
-            "remind_node": {
-                RESPONSE: llm_response(model_name="assistant_model", history=15, filter_func=FilterImportant),
-                TRANSITIONS: {
-                    "main_node": cnd.true
-                }
-            },
-            "fallback_node": {
-                RESPONSE: Message("I did not quite understand you..."),
-                TRANSITIONS: {
-                    "main_node": cnd.true
-                }
+            RESPONSE: llm_response(model_name="assistant_model", history=0),
+            TRANSITIONS: {"main_node": exact_match("Who are you?")},    
+    },
+        "main_node": {
+            RESPONSE: llm_response(model_name="assistant_model", history=3),
+            TRANSITIONS: {
+                "remind_node": cnd.exact_match("/remind"),
+                lbl.repeat(): cnd.true()
             }
+        },
+        "remind_node": {
+            RESPONSE: llm_response(model_name="assistant_model", history=15, filter_func=FilterImportant),
+            TRANSITIONS: {
+                "main_node": cnd.true()
+            }
+        },
+        "fallback_node": {
+            RESPONSE: Message("I did not quite understand you..."),
+            TRANSITIONS: {
+                "main_node": cnd.true()
+            }
+        }
     }
 }
-}
+
 
 # %%
 pipeline = Pipeline.from_script(

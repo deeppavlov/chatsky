@@ -23,10 +23,8 @@ from chatsky.utils.testing import (
 from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
 from chatsky.llm.methods import Contains
 
-
-import getpass
 import os
-os.environ["OPENAI_API_KEY"] = getpass.getpass()
+os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 from langchain_openai import ChatOpenAI
 

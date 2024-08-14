@@ -15,7 +15,7 @@ Models
 ===============
 
 Under the hood Chatsky uses LangChain classes for accessing different models APIs.
-These models, defined in the ``langchain_*`` should be passed in the ``LLM_API`` object as a parameter.
+These models, defined in the ``langchain_*`` should be passed in the `LLM_API <../apiref/chatsky.llm.wrapper.html#chatsky.llm.wrapper.LLM_API>` object as a parameter.
 
 .. code-block:: python
 
@@ -46,7 +46,7 @@ You can also define multiple models and use all of them throughout your script. 
 Responses
 =========
 
-Chatsky provides you with a simple functions to use for receiving ``Message`` object containing models response.
+Chatsky provides you with a simple functions to use for receiving `Message <../apiref/chatsky.script.html#chatsky.script.Message` object containing models response.
 
 .. code-block:: python
     
@@ -74,7 +74,7 @@ The LLM-response based conditions can also be applied to the script.
         }
 
 You must specify prompt, that will retrieve demanded information from users input and method that will transform models response to a boolean value.
-You can find some pre-made methods in ``~chatsky.llm.methods``.
+You can find some pre-made methods in `<../apiref/chatsky.llm.methods.html#chatsky.llm.methods`.
 
 Prompts
 =======

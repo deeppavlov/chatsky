@@ -36,10 +36,8 @@ from chatsky.utils.testing import (
 )
 from chatsky.llm.wrapper import LLM_API, llm_response
 
-
-import getpass
 import os
-os.environ["OPENAI_API_KEY"] = getpass.getpass()
+os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 from langchain_openai import ChatOpenAI
 
@@ -75,6 +73,10 @@ toy_script = {
                 lbl.repeat(): cnd.true()
                 },
         },
+        "fallback_node": {
+            RESPONSE: Message("Something went wrong"),
+            TRANSITIONS: {"greeting_node": cnd.true()},
+        }
     },
     "loan_flow": {
         LOCAL: {
@@ -96,8 +98,9 @@ toy_script = {
         LOCAL: {
             MISC: {
                 # you can easily pass additional data to the model using the prompts
-                "prompt": f"Your role is a bank HR. Provide user with the information about our vacant places. Vacancies: {("Java-developer", "InfoSec-specialist")}.",
-            },
+                "prompt": f"Your role is a bank HR. Provide user with the information about our vacant places. Vacancies: {('Java-developer', 'InfoSec-specialist')}.",
+            }
+        },
             "start_node": {
                 RESPONSE: llm_response(model_name="bank_model"),
                 TRANSITIONS: {
@@ -118,12 +121,12 @@ toy_script = {
             }
         }
     }
-}
+
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),
-    fallback_label=("main_flow", "fallback_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
     models={"bank_model": model}
 )
 

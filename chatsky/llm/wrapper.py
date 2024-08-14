@@ -152,7 +152,7 @@ def llm_response(
                     history_messages.append(message_to_langchain(req))
                     history_messages.append(message_to_langchain(resp, source="ai"))
         
-        history_messages.append(message_to_langchain(prompt, source="system"))
+        history_messages.append(SystemMessage(prompt))
         history_messages.append(message_to_langchain(ctx.last_request, source="human"))
         return model.respond(history_messages)
     return wrapped
