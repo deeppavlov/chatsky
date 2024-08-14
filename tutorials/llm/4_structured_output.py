@@ -23,6 +23,7 @@ from chatsky.llm.wrapper import LLM_API, llm_response
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 import os
+
 os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 from langchain_openai import ChatOpenAI
@@ -34,9 +35,9 @@ from langchain_openai import ChatOpenAI
 # %%
 model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"))
 
+
 class Movie(BaseModel):
     name: str = Field(description="Name of the movie")
     genre: str = Field(description="Genre of the movie")
     plot: str = Field(description="Plot of the movie in chapters")
     cast: list = Field(description="List of the actors")
-

@@ -24,6 +24,7 @@ from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
 from chatsky.llm.methods import Contains
 
 import os
+
 os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 from langchain_openai import ChatOpenAI
@@ -39,7 +40,10 @@ Via `history` parameter you can set number of dialogue _turns_ that the model wi
 """
 
 # %%
-model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"), system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.")
+model = LLM_API(
+    ChatOpenAI(model="gpt-3.5-turbo"),
+    system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.",
+)
 
 # %% [markdown]
 """
@@ -63,10 +67,13 @@ toy_script = {
             TRANSITIONS: {
                 "latte_art_node": exact_match("Tell me about latte art."),
                 "image_desc_node": exact_match("Tell me what coffee is it?"),
-                "boss_node": llm_condition(model_name="barista_model",
-                                           prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
-                                           method=Contains(pattern="TRUE")),
-                lbl.repeat(): cnd.true()},
+                "boss_node": llm_condition(
+                    model_name="barista_model",
+                    prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
+                    method=Contains(pattern="TRUE"),
+                ),
+                lbl.repeat(): cnd.true(),
+            },
         },
         "boss_node": {
             RESPONSE: Message("Input your ID number."),
@@ -76,12 +83,18 @@ toy_script = {
         },
         "latte_art_node": {
             # we can pass a node-specific prompt to a LLM.
-            RESPONSE: llm_response(model_name="barista_model", prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it."),
+            RESPONSE: llm_response(
+                model_name="barista_model",
+                prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it.",
+            ),
             TRANSITIONS: {"main_node": exact_match("Ok, goodbye.")},
         },
         "image_desc_node": {
             # we expect user to send some images of coffee.
-            RESPONSE: llm_response(model_name="barista_model", prompt="PROMPT: user will give you some images of coffee. Describe them."),
+            RESPONSE: llm_response(
+                model_name="barista_model",
+                prompt="PROMPT: user will give you some images of coffee. Describe them.",
+            ),
             TRANSITIONS: {"main_node": cnd.true()},
         },
         "fallback_node": {
@@ -96,7 +109,7 @@ pipeline = Pipeline.from_script(
     toy_script,
     start_label=("main_flow", "start_node"),
     fallback_label=("main_flow", "fallback_node"),
-    models={"barista_model": model}
+    models={"barista_model": model},
 )
 
 if __name__ == "__main__":
