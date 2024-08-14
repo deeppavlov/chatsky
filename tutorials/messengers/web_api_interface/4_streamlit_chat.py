@@ -40,7 +40,7 @@ import requests
 import streamlit as st
 from streamlit_chat import message
 import streamlit.components.v1 as components
-from chatsky.script import Message
+from chatsky.core import Message
 
 
 # %% [markdown]

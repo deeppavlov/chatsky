@@ -19,11 +19,10 @@ import os
 
 from pydantic import HttpUrl
 
-from chatsky.script import conditions as cnd
-from chatsky.script import GLOBAL, RESPONSE, TRANSITIONS, Message
+from chatsky import conditions as cnd
+from chatsky.core import GLOBAL, RESPONSE, TRANSITIONS, Message, Pipeline, Transition as Tr
 from chatsky.messengers.telegram import LongpollingInterface
-from chatsky.pipeline import Pipeline
-from chatsky.script.core.message import (
+from chatsky.core.message import (
     Animation,
     Audio,
     Contact,
@@ -131,21 +130,21 @@ QUOTED_ATTACHMENTS = [f'"{attachment}"' for attachment in ATTACHMENTS]
 """
 The bot below sends different attachments on request.
 
-[Here](%doclink(api,script.core.message)) you can find
+[Here](%doclink(api,core.message)) you can find
 all the attachment options available.
 """
 
 # %%
 script = {
     GLOBAL: {
-        TRANSITIONS: {
-            ("main_flow", f"{attachment}_node"): cnd.exact_match(attachment)
+        TRANSITIONS: [
+            Tr(dst=("main_flow", f"{attachment}_node"), cnd=cnd.ExactMatch(attachment))
             for attachment in ATTACHMENTS
-        }
+        ]
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: {"intro_node": cnd.exact_match("/start")},
+            TRANSITIONS: [Tr(dst="intro_node", cnd=cnd.ExactMatch("/start"))],
         },
         "intro_node": {
             RESPONSE: Message(

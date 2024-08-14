@@ -18,15 +18,14 @@ As mentioned in that tutorial,
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 is used to process requests.
 
-%mddoclink(api,script.core.message,Message) is used to represent text messages.
+%mddoclink(api,core.message,Message) is used to represent text messages.
 """
 
 # %pip install chatsky uvicorn fastapi
 
 # %%
 from chatsky.messengers.common.interface import CallbackMessengerInterface
-from chatsky.script import Message
-from chatsky.pipeline import Pipeline
+from chatsky.core import Message, Pipeline
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn

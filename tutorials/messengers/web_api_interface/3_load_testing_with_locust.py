@@ -52,7 +52,7 @@ import sys
 
 from locust import FastHttpUser, task, constant, main
 
-from chatsky.script import Message
+from chatsky.core import Message
 from chatsky.utils.testing import HAPPY_PATH, is_interactive_mode
 
 

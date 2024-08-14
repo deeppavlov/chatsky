@@ -10,7 +10,7 @@ You can see the result at http://127.0.0.1:8000/docs.
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 is used to process requests.
 
-%mddoclink(api,script.core.message,Message)
+%mddoclink(api,core.message,Message)
 is used in creating a JSON Schema for the endpoint.
 """
 
@@ -18,8 +18,7 @@ is used in creating a JSON Schema for the endpoint.
 
 # %%
 from chatsky.messengers.common.interface import CallbackMessengerInterface
-from chatsky.script import Message
-from chatsky.pipeline import Pipeline
+from chatsky.core import Message, Pipeline
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
