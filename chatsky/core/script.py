@@ -9,11 +9,11 @@ the user's input and the current state of the conversation.
 # %%
 from __future__ import annotations
 import logging
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel, Field
 
-from chatsky.core.script_function import BaseResponse, ConstResponse, BaseProcessing
+from chatsky.core.script_function import AnyResponse, BaseProcessing
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.transition import Transition
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class Node(BaseModel):
     transitions: List[Transition] = Field(default_factory=list)
-    response: Optional[Union[BaseResponse, ConstResponse]] = None
+    response: Optional[AnyResponse] = Field(default=None)
     pre_transition: Dict[str, BaseProcessing] = Field(default_factory=dict)
     pre_response: Dict[str, BaseProcessing] = Field(default_factory=dict)
     misc: dict = Field(default_factory=dict)

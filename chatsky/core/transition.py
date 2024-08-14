@@ -6,7 +6,8 @@ import asyncio
 
 from pydantic import BaseModel, Field
 
-from chatsky.core.script_function import BaseCondition, ConstCondition, BaseDestination, ConstDestination, BasePriority, ConstPriority
+from chatsky.core.script_function import AnyCondition, AnyDestination, AnyPriority
+from chatsky.core.script_function import BaseCondition, BaseDestination, BasePriority
 from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabelInitTypes
 
 if TYPE_CHECKING:
@@ -17,14 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class Transition(BaseModel):
-    cnd: Union[BaseCondition, ConstCondition] = Field(default=True, validate_default=True)
-    dst: Union[BaseDestination, ConstDestination]
-    priority: Union[BasePriority, ConstPriority] = Field(default=None, validate_default=True)
+    cnd: AnyCondition = Field(default=True, validate_default=True)
+    dst: AnyDestination
+    priority: AnyPriority = Field(default=None, validate_default=True)
 
     def __init__(self, *,
-                 cnd: Union[BaseCondition, bool] = True,
-                 dst: Union[BaseDestination, NodeLabelInitTypes],
-                 priority: Union[BasePriority, Optional[float]] = None
+                 cnd: Union[bool, BaseCondition] = True,
+                 dst: Union[NodeLabelInitTypes, BaseDestination],
+                 priority: Union[Optional[float], BasePriority] = None
                  ):
         super().__init__(cnd=cnd, dst=dst, priority=priority)
 

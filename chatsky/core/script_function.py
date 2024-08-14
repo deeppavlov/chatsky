@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Generic, TypeVar, Union, Tuple, ClassVar, Optional
+from typing import Generic, TypeVar, Union, Tuple, ClassVar, Optional, Annotated
 from abc import abstractmethod, ABC
 import logging
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 
 from chatsky.utils.devel import wrap_sync_function_in_async
 from chatsky.core.context import Context
@@ -76,6 +76,9 @@ class ConstCondition(ConstScriptFunc[bool], BaseCondition):
     pass
 
 
+AnyCondition = Annotated[Union[ConstCondition, BaseCondition], Field(union_mode="left_to_right")]
+
+
 class BaseResponse(BaseScriptFunc[Message], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = Message
 
@@ -88,6 +91,9 @@ class ConstResponse(ConstScriptFunc[Message], BaseResponse):
     pass
 
 
+AnyResponse = Annotated[Union[ConstResponse, BaseResponse], Field(union_mode="left_to_right")]
+
+
 class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = AbsoluteNodeLabel
 
@@ -98,6 +104,9 @@ class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
 
 class ConstDestination(ConstScriptFunc[NodeLabel], BaseDestination):
     pass
+
+
+AnyDestination = Annotated[Union[ConstDestination, BaseDestination], Field(union_mode="left_to_right")]
 
 
 class BaseProcessing(BaseScriptFunc[None], ABC):
@@ -118,3 +127,6 @@ class BasePriority(BaseScriptFunc[Union[float, None, bool]], ABC):
 
 class ConstPriority(ConstScriptFunc[Optional[float]], BasePriority):
     pass
+
+
+AnyPriority = Annotated[Union[ConstPriority, BasePriority], Field(union_mode="left_to_right")]

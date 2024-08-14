@@ -3,7 +3,7 @@ import pytest
 from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
 from chatsky.core.script_function import BasePriority, BaseCondition, BaseResponse, BaseDestination, BaseProcessing
 from chatsky.core.script_function import logger
-from chatsky.core import Message, Pipeline, Context
+from chatsky.core import Message, Pipeline, Context, Node, Transition
 from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabel
 
 
@@ -104,3 +104,11 @@ class TestNodeLabelValidation:
 
         dst = await MyDestination().wrapped_call(context_flow_factory(flow_name))
         assert dst.flow_name == flow_name
+
+
+def test_response_from_dict_validation():
+    Node.model_validate({"response": {"msg": "text"}})
+
+
+def test_destination_from_dict_validation():
+    Transition.model_validate({"dst": {"flow_name": "flow", "node_name": "node"}})
