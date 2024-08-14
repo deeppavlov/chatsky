@@ -188,7 +188,7 @@ def __attachment_to_content(attachment: Image, iface) -> str:
     return image_b64
 
 
-def message_to_langchain(message: Message, source: str = "human") -> HumanMessage | AIMessage | SystemMessage:
+def message_to_langchain(message: Message, source: str = "human"):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
