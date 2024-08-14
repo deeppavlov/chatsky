@@ -245,6 +245,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             await result
 
         ctx.framework_data.service_states.clear()
+        ctx.framework_data.pipeline = None
 
         if isinstance(self.context_storage, DBContextStorage):
             await self.context_storage.set_item_async(ctx_id, ctx)
