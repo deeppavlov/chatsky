@@ -29,9 +29,11 @@ async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandler
 
     """
     last_label = ctx.last_label
-    if last_label is None:
-        last_label = pipeline.actor.start_label[:2]
-    return {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
+    return {
+        "flow": last_label.flow_name,
+        "node": last_label.node_name,
+        "label": f"{last_label.flow_name}: {last_label.node_name}"
+    }
 
 
 async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
