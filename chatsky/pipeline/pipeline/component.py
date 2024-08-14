@@ -167,7 +167,9 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     @property
     def computed_name(self) -> str:
         """
-        Every derivative of :py:class:`~.PipelineComponent` must define this property.
+        Default name that is used if `self.name` is not defined.
+        In case two components in a `ServiceGroup` have the same `computed_name`
+        an incrementing number is appended to the name.
         """
         return "noname_service"
         # Or could do the following:
