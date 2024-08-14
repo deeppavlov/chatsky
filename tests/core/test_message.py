@@ -125,6 +125,9 @@ class TestMessage:
                 cached_bytes = document.cached_filename.read_bytes()
                 assert document_bytes == cached_bytes
 
+                cached_bytes_via_get_bytes = await document.get_bytes(cli_iface)
+                assert document_bytes == cached_bytes_via_get_bytes
+
     def test_missing_error(self):
         with pytest.raises(ValidationError) as e:
             _ = DataAttachment(source=HttpUrl("http://google.com"), id="123")
