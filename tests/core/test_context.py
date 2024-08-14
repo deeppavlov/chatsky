@@ -2,7 +2,10 @@ import pytest
 
 from chatsky.core.context import get_last_index, Context, ContextError
 from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.core.message import Message
+from chatsky.core.message import Message, MessageInitTypes
+from chatsky.core.script_function import BaseResponse, BaseProcessing
+from chatsky.core.pipeline import Pipeline
+from chatsky.core.keywords import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
 
 
 @pytest.mark.parametrize("dict,result", [
@@ -59,3 +62,36 @@ def test_responses():
 
     ctx.responses = {}
     assert ctx.last_response is None
+
+
+async def test_pipeline_available():
+    class MyResponse(BaseResponse):
+        async def func(self, ctx: Context) -> MessageInitTypes:
+            return ctx.pipeline.start_label.node_name
+
+    pipeline = Pipeline(script={"flow": {"node": {RESPONSE: MyResponse()}}}, start_label=("flow", "node"))
+    ctx = await pipeline._run_pipeline(Message(""))
+
+    assert ctx.last_response == Message("node")
+
+    ctx.framework_data.pipeline = None
+    with pytest.raises(ContextError):
+        await MyResponse().func(ctx)
+
+
+async def test_current_node_available():
+    log = []
+    class MyProcessing(BaseProcessing):
+        async def func(self, ctx: Context) -> None:
+            log.append(ctx.current_node)
+
+    pipeline = Pipeline(
+        script={"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}, PRE_TRANSITION: {"": MyProcessing()}}}},
+        start_label=("flow", "node")
+    )
+    ctx = await pipeline._run_pipeline(Message(""))
+    assert len(log) == 2
+
+    ctx.framework_data.current_node = None
+    with pytest.raises(ContextError):
+        await MyProcessing().func(ctx)
