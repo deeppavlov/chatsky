@@ -15,12 +15,13 @@ from chatsky.script.conditions import std_conditions as cnd
 from chatsky.script import labels as lbl
 from chatsky.script import RESPONSE, TRANSITIONS
 from chatsky.pipeline import Pipeline
+from chatsky.script import Context
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
-from chatsky.llm.methods import Contains
+from chatsky.llm.wrapper import LLM_API, llm_response
+from chatsky.llm.filters import BaseFilter, FromTheModel
 
 import getpass
 import os
@@ -36,15 +37,16 @@ model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"), system_prompt="You are a data
 In this example we will use very simple filtering function to retrieve only the important messages.
 """
 #%%
-def filter_important(message: Message) -> bool:
-    return "#important" in message.text.lower()
+class FilterImportant(BaseFilter):
+    def __call__(self, ctx: Context=None, request: Message=None, response: Message=None, model_name: str=None) -> bool:
+        if "#important" in request.text.lower():
+            return True
+        return False
 # %% [markdown]
 """
 Alternatively, if you use several models in one script (e.g. one for chatting, one for text summarization), you may want to separate the models memory using the same `filter_func` parameter.
+There is a function `FromTheModel` that can be used to separate the models memory.
 """
-#%%
-def only_chitchat(message: Message) -> bool:
-    return message.annotations["__generated_by_model__"] == "assistant_model"
 #%%
 toy_script = {
     "main_flow": {
@@ -65,7 +67,7 @@ toy_script = {
                 }
             },
             "remind_node": {
-                RESPONSE: llm_response(model_name="assistant_model", history=15, filter_func=filter_important),
+                RESPONSE: llm_response(model_name="assistant_model", history=15, filter_func=FilterImportant),
                 TRANSITIONS: {
                     "main_node": cnd.true
                 }
