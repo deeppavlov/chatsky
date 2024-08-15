@@ -20,7 +20,9 @@ class IsImportant(BaseFilter):
     def __call__(
         self, ctx: Context = None, request: Message = None, response: Message = None, model_name: str = None
     ) -> bool:
-        if request.misc["important"] or response.misc["important"]:
+        if request and request.misc["important"]:
+            return True
+        if response and response.misc["important"]:
             return True
         return False
 

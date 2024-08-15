@@ -1,8 +1,10 @@
 from chatsky.llm.wrapper import LLM_API, llm_response, message_to_langchain, __attachment_to_content
-from chatsky.llm.filters import BaseFilter, IsImportant, FromTheModel
+from chatsky.llm.filters import IsImportant, FromTheModel
 from langchain_core.messages import HumanMessage, AIMessage
 from chatsky.script.core.message import Message, Image
-from pydantic import BaseModel
+from chatsky.script import Context, TRANSITIONS, RESPONSE
+from chatsky.script import conditions as cnd
+from chatsky.pipeline import Pipeline
 
 import pytest
 
@@ -24,54 +26,50 @@ class MockChatOpenAI:
 def mock_model():
     return MockChatOpenAI()
 
+@pytest.fixture
+def filter_context():
+    ctx = Context()
+    ctx.add_request(Message(text="Request 1", misc={"important": True}, annotation={"__generated_by_model__": "test_model"}))
+    ctx.add_request(Message(text="Request 2", misc={"important": False}, annotation={"__generated_by_model__": "other_model"}))
+    ctx.add_request(Message(text="Request 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
+    ctx.add_response(Message(text="Response 1", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
+    ctx.add_response(Message(text="Response 2", misc={"important": True}, annotation={"__generated_by_model__": "other_model"}))
+    ctx.add_response(Message(text="Response 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
+    return ctx
 
-class MockContext(BaseModel):
-    requests: list[Message]
-    responses: list[Message]
-    last_request: Message
-
-    def __init__(self):
-        super().__init__(
-            requests=[Message(text=f"Request {i}") for i in range(3)],
-            responses=[Message(text=f"Response {i}") for i in range(3)],
-            last_request=Message(text="Last request"),
-        )
+@pytest.fixture
+def context():
+    ctx = Context()
+    for i in range(3):
+        ctx.add_request(Message(text=f"Request {i}"))
+        ctx.add_response(Message(text=f"Response {i}"))
+    ctx.add_request(Message(text="Last request"))
+    return ctx
 
 
 class MockPipeline:
     def __init__(self, mock_model):
         self.models = {"test_model": LLM_API(mock_model)}
 
-
-@pytest.fixture
-def context():
-    return MockContext()
-
-
 @pytest.fixture
 def pipeline(mock_model):
     return MockPipeline(mock_model)
 
 
-class TestFilter(BaseFilter):
-    async def __call__(self, ctx=None, request: Message = None, response: Message = None, model_name: str = None):
-        pass
-
-
 def test_message_to_langchain():
-    assert message_to_langchain(Message(text="hello")) == HumanMessage(content=[{"type": "text", "text": "hello"}])
-    assert message_to_langchain(Message(text="hello")) != HumanMessage(content=[{"type": "text", "text": "goodbye"}])
-    assert message_to_langchain(Message(text="hello"), human=False) != HumanMessage(
+    assert message_to_langchain(Message(text="hello"), source="human") == HumanMessage(content=[{"type": "text", "text": "hello"}])
+    assert message_to_langchain(Message(text="hello"), source="ai") != HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-    assert message_to_langchain(Message(text="hello"), human=False) == AIMessage(
+    assert message_to_langchain(Message(text="hello"), source="ai") == AIMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-
 
 # @pytest.mark.parametrize("img,expected", [(Image(source="https://example.com"), ValueError)])
 # def test_attachments(img, expected):
-#     assert __attachment_to_content(img) == expected
+#     script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: {"node": cnd.true()}}}}
+#     pipe = Pipeline.from_script(script=script, start_label=("flow", "node"))
+#     assert __attachment_to_content(img, pipe.messenger_interface) == expected
 
 
 @pytest.mark.parametrize(
@@ -79,23 +77,40 @@ def test_message_to_langchain():
     [
         (
             2,
-            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]""",
+            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
         ),
         (
             0,
-            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]""",
+            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
         ),
         (
             4,
-            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'prompt\nLast request'}])]""",
+            r"""Mock response with history: [HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
         ),
     ],
 )
 def test_history(context, pipeline, hist, expected):
-    assert llm_response("test_model", "prompt", history=hist)(context, pipeline).text == expected
+    assert llm_response("test_model", history=hist)(context, pipeline).text == expected
 
 
-# @pytest.mark.parametrize("filter_func,expected",
-#                          [(FromTheModel)])
-# def test_filtering(context, pipeline, filter_func, expected):
-#     llm_response("test_model", "prompt", history=5, filter_func=filter_func)(context, pipeline).text == expected
+def test_is_important_filter(filter_context):
+    filter_func = IsImportant()
+    ctx = filter_context
+
+    # Test filtering important messages
+    assert filter_func(ctx, ctx.requests[0], ctx.responses[0], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], model_name="test_model")
+    assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], model_name="test_model")
+
+    assert not filter_func(ctx, None, ctx.responses[0], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[0], None, model_name="test_model")
+
+
+def test_model_filter(filter_context):
+    filter_func = FromTheModel()
+    ctx = filter_context
+    # Test filtering important messages
+    assert filter_func(ctx, ctx.requests[0], ctx.responses[0], model_name="test_model")
+    assert not filter_func(ctx, ctx.requests[1], ctx.responses[1], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[2], ctx.responses[2], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[1], ctx.responses[2], model_name="test_model")

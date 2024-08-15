@@ -130,13 +130,13 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             # populate history with global and local prompts
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
-                history_messages.append(SystemMessage(node_prompt))
+                history_messages.append(message_to_langchain(Message(node_prompt), source="system"))
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
-                history_messages.append(SystemMessage(global_prompt))
+                history_messages.append(message_to_langchain(Message(global_prompt), source="system"))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
-                history_messages.append(SystemMessage(local_prompt))
+                history_messages.append(message_to_langchain(Message(local_prompt), source="system"))
 
         # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
@@ -154,7 +154,8 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
                     history_messages.append(message_to_langchain(req))
                     history_messages.append(message_to_langchain(resp, source="ai"))
 
-        history_messages.append(SystemMessage(prompt))
+        if prompt:
+            history_messages.append(message_to_langchain(Message(prompt), source="system"))
         history_messages.append(message_to_langchain(ctx.last_request, source="human"))
         return model.respond(history_messages)
 
@@ -180,7 +181,8 @@ def __attachment_to_content(attachment: Image, iface) -> str:
     """
     Helper function to convert image to base64 string.
     """
-    image_b64 = base64.b64encode(attachment.get_bytes(iface)).decode("utf-8")
+    image_bytes = attachment.get_bytes(iface)
+    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
     extension = attachment.source.split(".")[-1]
     if image_b64 == "" or extension is None:
         raise ValueError("Data image is not accessible.")

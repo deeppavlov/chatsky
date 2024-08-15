@@ -21,7 +21,7 @@ from chatsky.utils.testing import (
     run_interactive_mode,
 )
 from chatsky.llm.wrapper import LLM_API, llm_response
-from chatsky.llm.filters import BaseFilter, FromTheModel
+from chatsky.llm.filters import BaseFilter
 
 import os
 
@@ -82,7 +82,7 @@ toy_script = {
             RESPONSE: llm_response(
                 model_name="assistant_model",
                 history=15,
-                filter_func=FilterImportant,
+                filter_func=FilterImportant(),
             ),
             TRANSITIONS: {"main_node": cnd.true()},
         },
