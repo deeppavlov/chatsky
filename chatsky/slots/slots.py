@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union
+from typing import Annotated, Callable, Any, Awaitable, TYPE_CHECKING, Union
 from typing_extensions import TypeAlias
 import logging
 from functools import reduce
@@ -235,7 +235,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    __pydantic_extra__: dict[str, Union["ValueSlot", "GroupSlot"]]
+    __pydantic_extra__: dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]] = {}
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)

@@ -5,19 +5,21 @@ CONFIG:
   slots:
     person:
       programmer:
-        RegexpSlot:
-          username:
-            regexp: "username is ([a-zA-Z]+)"
+        username:
+          chatsky.slots.RegexpSlot:
+            regexp: r"username is ([a-zA-Z]+)"
             match_group_idx: 1
-          email:
-            regexp: "email is ([a-z@.A-Z]+)"
+        email:
+          chatsky.slots.RegexpSlot:
+            regexp: r"email is ([a-z@\.A-Z]+)"
             match_group_idx: 1
     friend:
-      RegexpSlot:
-        first_name:
-          regexp: "^[A-Z][a-z]+?(?= )"
-        last_name:
-          regexp: "(?<= )[A-Z][a-z]+"
+      first_name:
+        chatsky.slots.RegexpSlot:
+          regexp: r"^[A-Z][a-z]+?(?= )"
+      last_name:
+        chatsky.slots.RegexpSlot:
+          regexp: r"(?<= )[A-Z][a-z]+"
 flow:
   node:
     RESPONSE:

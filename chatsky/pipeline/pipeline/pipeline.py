@@ -296,29 +296,14 @@ class Pipeline:
                 return tuple(i)
             return i
 
-        def dict2slots(slots_dict: dict):
-            slots = defaultdict(dict)
-            for group_slot_name, group_slot_value in slots_dict.items():
-                for slot_type, slot_value in group_slot_value.items():
-                    if slot_class := globals().get(slot_type):
-                        slots[group_slot_name] = GroupSlot(**{k: slot_class(**v) for k, v in slot_value.items()})
-                    else:
-                        nested_group_slots = dict2slots({slot_type: slot_value})
-                        slots[group_slot_name] = GroupSlot(**nested_group_slots)
-            return slots
-
-        slots = script["CONFIG"]["slots"]
-        slots = dict2slots(slots)
-
-        params = {param: to_tuple(script["CONFIG"].get(param)) for param in ("start_label", "fallback_label", "label_priority")}
+        config = JSONImporter(file).replace_script_objects(script["CONFIG"])
+        params = {param: to_tuple(script["CONFIG"].get(param)) for param in config.keys() if param != "custom_dir"}
         del script["CONFIG"]  # todo: add support for CONFIG
+
         return cls(
             script=script,
             **params,
-            slots=slots,
-            # validation_stage=validation_stage,
             condition_handler=condition_handler,
-            # verbose=verbose,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
