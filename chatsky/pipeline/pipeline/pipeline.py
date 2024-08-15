@@ -48,12 +48,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     pre_services: ServiceGroup = Field(default_factory=list)
     """
-    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
+    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup`
     that will be executed before Actor.
     """
     post_services: ServiceGroup = Field(default_factory=list)
     """
-    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
+    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup` that will be
     executed after :py:class:`~.Actor`. It constructs root
     service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """

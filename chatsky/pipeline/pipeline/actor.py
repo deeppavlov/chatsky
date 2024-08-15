@@ -98,7 +98,7 @@ class Actor(PipelineComponent):
     the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
     - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
-    - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
+    - value (`List[Callable]`) - The list of called handlers for each stage.  Defaults to an empty `dict`.
 
     """
     # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!

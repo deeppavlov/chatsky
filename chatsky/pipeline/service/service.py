@@ -44,7 +44,7 @@ class Service(PipelineComponent):
 
     handler: ServiceFunction
     """
-    A service function.
+    A :py:data:`~.ServiceFunction`.
     """
     # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -96,13 +96,10 @@ class Service(PipelineComponent):
 
     @property
     def computed_name(self) -> str:
-        if callable(self.handler):
-            if inspect.isfunction(self.handler):
-                return self.handler.__name__
-            else:
-                return self.handler.__class__.__name__
+        if inspect.isfunction(self.handler):
+            return self.handler.__name__
         else:
-            return "noname_service"
+            return self.handler.__class__.__name__
 
     @property
     def info_dict(self) -> dict:

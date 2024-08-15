@@ -53,7 +53,7 @@ class ServiceGroup(PipelineComponent):
         ]
     ]
     """
-    A `ServiceGroup` object, that will be added to the group.
+    A :py:class:`~.ServiceGroup` object, that will be added to the group.
     """
     # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -67,8 +67,11 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def __components_constructor(cls, data: Any):
-        """Adds support for initializing from a `Callable`, `List`
-        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)"""
+        """
+        Adds support for initializing from a `Callable`, `List`
+        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
+        Casts `components` to `list` if it's not already.
+        """
         if isinstance(data, list):
             result = {"components": data}
         elif callable(data) or isinstance(data, PipelineComponent):
@@ -90,7 +93,7 @@ class ServiceGroup(PipelineComponent):
         """
         Method for running this service group. Catches runtime exceptions and logs them.
         It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
-        Executes components inside the group based on its `asynchronous` property.
+        Executes components inside the group based on its :py:attr:`~.PipelineComponent.asynchronous` property.
         Collects information about their execution state - group is finished successfully
         only if all components in it finished successfully.
 

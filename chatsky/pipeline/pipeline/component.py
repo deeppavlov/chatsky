@@ -58,7 +58,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     requested_async_flag: Optional[bool] = None
     """
     Requested asynchronous property; if not defined,
-    `calculated_async_flag` is used instead.
+    :py:attr:`~.PipelineComponent.calculated_async_flag` is used instead.
     """
     calculated_async_flag: bool = False
     """
@@ -167,14 +167,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     @property
     def computed_name(self) -> str:
         """
-        Default name that is used if `self.name` is not defined.
-        In case two components in a `ServiceGroup` have the same `computed_name`
-        an incrementing number is appended to the name.
+        Default name that is used if :py:attr:`~.PipelineComponent.name` is not defined.
+        In case two components in a :py:class:`~.ServiceGroup` have the same
+        :py:attr:`~.PipelineComponent.computed_name` an incrementing number is appended to the name.
         """
         return "noname_service"
-        # Or could do the following:
-        # raise NotImplementedError
-        # But this default value makes sense and replicates previous logic.
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
