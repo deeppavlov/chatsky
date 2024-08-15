@@ -26,16 +26,30 @@ class MockChatOpenAI:
 def mock_model():
     return MockChatOpenAI()
 
+
 @pytest.fixture
 def filter_context():
     ctx = Context()
-    ctx.add_request(Message(text="Request 1", misc={"important": True}, annotation={"__generated_by_model__": "test_model"}))
-    ctx.add_request(Message(text="Request 2", misc={"important": False}, annotation={"__generated_by_model__": "other_model"}))
-    ctx.add_request(Message(text="Request 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
-    ctx.add_response(Message(text="Response 1", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
-    ctx.add_response(Message(text="Response 2", misc={"important": True}, annotation={"__generated_by_model__": "other_model"}))
-    ctx.add_response(Message(text="Response 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"}))
+    ctx.add_request(
+        Message(text="Request 1", misc={"important": True}, annotation={"__generated_by_model__": "test_model"})
+    )
+    ctx.add_request(
+        Message(text="Request 2", misc={"important": False}, annotation={"__generated_by_model__": "other_model"})
+    )
+    ctx.add_request(
+        Message(text="Request 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+    )
+    ctx.add_response(
+        Message(text="Response 1", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+    )
+    ctx.add_response(
+        Message(text="Response 2", misc={"important": True}, annotation={"__generated_by_model__": "other_model"})
+    )
+    ctx.add_response(
+        Message(text="Response 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+    )
     return ctx
+
 
 @pytest.fixture
 def context():
@@ -51,19 +65,23 @@ class MockPipeline:
     def __init__(self, mock_model):
         self.models = {"test_model": LLM_API(mock_model)}
 
+
 @pytest.fixture
 def pipeline(mock_model):
     return MockPipeline(mock_model)
 
 
 def test_message_to_langchain():
-    assert message_to_langchain(Message(text="hello"), source="human") == HumanMessage(content=[{"type": "text", "text": "hello"}])
+    assert message_to_langchain(Message(text="hello"), source="human") == HumanMessage(
+        content=[{"type": "text", "text": "hello"}]
+    )
     assert message_to_langchain(Message(text="hello"), source="ai") != HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
     assert message_to_langchain(Message(text="hello"), source="ai") == AIMessage(
         content=[{"type": "text", "text": "hello"}]
     )
+
 
 # @pytest.mark.parametrize("img,expected", [(Image(source="https://example.com"), ValueError)])
 # def test_attachments(img, expected):

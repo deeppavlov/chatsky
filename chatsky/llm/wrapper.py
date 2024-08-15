@@ -6,11 +6,10 @@ Wrapper around langchain.
 
 try:
     from langchain_openai import ChatOpenAI
-
-    # from langchain_anthropic import ChatAnthropic
-    # from langchain_google_vertexai import ChatVertexAI
-    # from langchain_cohere import ChatCohere
-    # from langchain_mistralai import ChatMistralAI
+    from langchain_anthropic import ChatAnthropic
+    from langchain_google_vertexai import ChatVertexAI
+    from langchain_cohere import ChatCohere
+    from langchain_mistralai import ChatMistralAI
     from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
     from langchain_core.output_parsers import StrOutputParser
 
@@ -28,15 +27,8 @@ from chatsky.llm.methods import BaseMethod
 from typing import Union, Callable, Type
 from pydantic import BaseModel
 
-try:
-    from deepeval.models import DeepEvalBaseLLM
 
-    deepeval_available = True
-except ImportError:
-    deepeval_available = False
-
-
-class LLM_API(DeepEvalBaseLLM):
+class LLM_API:
     """
     This class acts as a wrapper for all LLMs from langchain
     and handles message exchange between remote model and chatsky classes.
@@ -60,8 +52,6 @@ class LLM_API(DeepEvalBaseLLM):
     def __check_imports(self):
         if not langchain_available:
             raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
-        if not deepeval_available:
-            raise ImportError("DeepEval is not available. Please install it with `pip install chatsky[llm]`.")
 
     def respond(
         self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None
@@ -92,19 +82,6 @@ class LLM_API(DeepEvalBaseLLM):
             return result
 
         return process_input
-
-    # Helper functions for DeepEval custom LLM usage
-    def generate(self, prompt: str):
-        return self.model.invoke(prompt).content
-
-    async def a_generate(self, prompt: str):
-        return self.generate(prompt)
-
-    def load_model(self):
-        return self.model
-
-    def get_model_name(self):
-        return self.name
 
 
 def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True):
