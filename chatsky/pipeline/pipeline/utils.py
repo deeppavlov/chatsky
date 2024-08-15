@@ -21,7 +21,7 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     - If component is an `Actor`, it is named `actor`.
     - If component is a `Service` and the service's handler is `Callable`, it is named after this `callable`.
     - If it's a service group, it is named `service_group`.
-    - Otherwise, it is names `noname_service`.
+    - Otherwise, it is named `noname_service`.
     - | After that, `_[NUMBER]` is added to the resulting name,
         where `_[NUMBER]` is number of components with the same name in current service group.
 
@@ -29,10 +29,7 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     :param collisions: Components in the same service group as component.
     :return: Generated name
     """
-    if isinstance(component, PipelineComponent):
-        base_name = component.computed_name
-    else:
-        base_name = "noname_service"
+    base_name = component.computed_name
     name_index = 0
     while f"{base_name}_{name_index}" in [component.name for component in collisions]:
         name_index += 1

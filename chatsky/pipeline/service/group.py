@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, Callable
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
 
 from chatsky.pipeline import BeforeHandler, AfterHandler, always_start_condition
 from pydantic import model_validator, Field
@@ -53,7 +53,7 @@ class ServiceGroup(PipelineComponent):
         ]
     ]
     """
-    A `ServiceGroup` object, that will be added to the group.
+    A :py:class:`~.ServiceGroup` object, that will be added to the group.
     """
     all_async: bool = False
     """
@@ -72,18 +72,21 @@ class ServiceGroup(PipelineComponent):
     @model_validator(mode="before")
     @classmethod
     def __components_constructor(cls, data: Any):
-        if isinstance(data, (list, PipelineComponent, Callable)):
+        """
+        Adds support for initializing from a `Callable`, `List`
+        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
+        Casts `components` to `list` if it's not already.
+        """
+        if isinstance(data, list):
             result = {"components": data}
-        elif isinstance(data, dict):
-            result = data.copy()
+        elif callable(data) or isinstance(data, PipelineComponent):
+            result = {"components": [data]}
         else:
-            raise ValueError(
-                "Service Group can only be initialized from a Dict,"
-                " a PipelineComponent or a list of PipelineComponents. Wrong inputs received."
-            )
+            result = data
 
-        if ("components" in result) and (not isinstance(result["components"], list)):
-            result["components"] = [result["components"]]
+        if isinstance(result, dict):
+            if ("components" in result) and (not isinstance(result["components"], list)):
+                result["components"] = [result["components"]]
         return result
 
     async def _run_async_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
