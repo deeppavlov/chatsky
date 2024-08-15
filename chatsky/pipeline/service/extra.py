@@ -25,7 +25,7 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 

@@ -17,7 +17,7 @@ from .types import (
     StartConditionCheckerAggregationFunction,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 

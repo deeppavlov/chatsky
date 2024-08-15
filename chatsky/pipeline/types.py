@@ -13,7 +13,7 @@ from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from chatsky.pipeline.pipeline.pipeline import Pipeline
     from chatsky.script import Context, Message
 
