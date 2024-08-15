@@ -11,7 +11,7 @@ import asyncio
 import logging
 import inspect
 from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
-from pydantic import BaseModel, computed_field, model_validator, Field
+from pydantic import BaseModel, model_validator, Field
 
 from chatsky.script import Context
 

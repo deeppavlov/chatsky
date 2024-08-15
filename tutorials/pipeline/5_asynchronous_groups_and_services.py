@@ -15,7 +15,7 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 import asyncio
 
 from chatsky import Context
-from chatsky.pipeline import Pipeline, ServiceGroup, to_service
+from chatsky.pipeline import Pipeline, ServiceGroup
 
 from chatsky.utils.testing.common import (
     is_interactive_mode,
@@ -82,6 +82,7 @@ def interact(stage: str, service: str):
     async def slow_service(_: Context, __: Pipeline):
         print(f"{stage} with service {service}")
         await asyncio.sleep(0.1)
+
     return slow_service
 
 

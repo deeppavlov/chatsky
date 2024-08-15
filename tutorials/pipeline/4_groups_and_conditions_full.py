@@ -58,7 +58,7 @@ Alternatively, the groups can be defined as objects
         a `ComponentExtraHandler` object.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
-* `asynchronous` - Whether or not this service group should be 
+* `asynchronous` - Whether or not this service group should be
     asynchronous to other components
 * `all_async` - Whether or not this service group should run
     all it's components asynchronously.
