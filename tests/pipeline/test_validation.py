@@ -1,3 +1,6 @@
+from typing import Callable
+
+from chatsky.pipeline.pipeline.component import PipelineComponent
 from pydantic import ValidationError
 import pytest
 
@@ -156,3 +159,26 @@ class TestPipelineValidation:
         with pytest.raises(ValidationError):
             # 'pre_services' must be a ServiceGroup
             Pipeline(**TOY_SCRIPT_KWARGS, pre_services=123)
+
+
+class CustomPipelineComponent(PipelineComponent):
+    start_condition: Callable = lambda: True
+
+    def run_component(self, ctx: Context, pipeline: Pipeline):
+        pass
+
+
+class TestPipelineComponentValidation:
+    CustomPipelineComponent.model_rebuild()
+
+    def test_wrong_names(self):
+        func = UserFunctionSamples.correct_service_function_1
+        with pytest.raises(ValidationError):
+            Service(handler=func, name="bad.name")
+        with pytest.raises(ValidationError):
+            Service(handler=func, name="")
+
+    # Maybe this test should be in a different file, though.
+    def test_name_not_defined(self):
+        comp = CustomPipelineComponent()
+        assert comp.computed_name == "noname_service"
