@@ -1,0 +1,31 @@
+FROM python:3.8.1-slim as builder
+
+WORKDIR /build
+
+ENV POETRY_VERSION=1.8.2 \
+    POETRY_HOME=/poetry \
+    POETRY_VENV=/poetry-venv
+
+RUN python3 -m venv $POETRY_VENV \
+    && $POETRY_VENV/bin/pip install -U pip setuptools \
+    && $POETRY_VENV/bin/pip install poetry==$POETRY_VERSION
+
+ENV PATH="${PATH}:${POETRY_VENV}/bin"
+
+COPY ./ ./
+
+RUN poetry build
+
+#------------------------------------------------------------
+
+FROM python:3.8.1-slim as runtime
+
+WORKDIR /app
+
+COPY --from=builder /build/dist/*.whl .
+
+RUN pip install *.whl
+
+COPY . .
+
+CMD python json_import_examples/yaml/pipeline.py
