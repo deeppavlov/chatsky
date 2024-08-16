@@ -23,10 +23,11 @@ class ContextDict(BaseModel, Generic[K, V]):
     _marker: object = PrivateAttr(object())
 
     @classmethod
-    async def new(cls, storage: DBContextStorage, id: str) -> "ContextDict":
+    async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
         instance = cls()
         instance._storage = storage
         instance._ctx_id = id
+        instance._field_name = field
         return instance
 
     @classmethod

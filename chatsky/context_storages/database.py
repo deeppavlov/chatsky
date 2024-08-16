@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from importlib import import_module
 from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, validate_call
 
 from .protocol import PROTOCOLS
 
@@ -34,10 +34,17 @@ class FieldConfig(BaseModel, validate_assignment=True):
     """
     `subscript` is used for limiting keys for reading and writing.
     It can be a string `__all__` meaning all existing keys or number,
+    string `__none__` meaning none of the existing keys (actually alias for 0),
     negative for first **N** keys and positive for last **N** keys.
     Keys should be sorted as numbers.
     Default: 3.
     """
+
+    @field_validator("subscript", mode="before")
+    @classmethod
+    @validate_call
+    def _validate_subscript(cls, subscript: Union[Literal["__all__"], Literal["__none__"], int, Set[str]]) -> Union[Literal["__all__"], int, Set[str]]:
+        return 0 if subscript == "__none__" else subscript
 
 
 class DBContextStorage(ABC):
@@ -123,12 +130,11 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
         """
         Delete field keys.
         """
-        raise NotImplementedError
+        await self.update_field_items(ctx_id, field_name, [(k, None) for k in keys])
     
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DBContextStorage):

@@ -109,9 +109,14 @@ class Context(BaseModel):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    async def connect(cls, id: Optional[str], storage: Optional[DBContextStorage] = None) -> Context:
-        if storage is None:
-            return cls(id=id)
+    async def connect(cls, storage: DBContextStorage, id: Optional[str] = None) -> Context:
+        if id is None:
+            id = str(uuid4())
+            labels = ContextDict.new(storage, id, storage.labels_config.name)
+            requests = ContextDict.new(storage, id, storage.requests_config.name)
+            responses = ContextDict.new(storage, id, storage.responses_config.name)
+            misc = ContextDict.new(storage, id, storage.misc_config.name)
+            return cls(primary_id=id, labels=labels, requests=requests, responses=responses, misc=misc)
         else:
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
@@ -127,7 +132,7 @@ class Context(BaseModel):
                 raise ValueError(f"Context with id {id} not found in the storage!")
             crt_at, upd_at, fw_data = main
             objected = storage.serializer.loads(fw_data)
-            instance = cls(id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
+            instance = cls(primary_id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 

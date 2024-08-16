@@ -302,6 +302,3 @@ class SQLContextStorage(DBContextStorage):
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
-
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
-        await self.update_field_items(ctx_id, field_name, [(k, None) for k in keys])
