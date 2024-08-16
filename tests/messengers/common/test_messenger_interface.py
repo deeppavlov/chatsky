@@ -47,7 +47,8 @@ class BaseTestPollingInterface(PollingMessengerInterface):
 
 def test_echo_responses():
     # logger = logging.getLogger(__name__)
-    # logging.basicConfig(level=logging.DEBUG, filename="test_log.log",filemode="w", format="%(asctime)s %(levelname)s %(message)s")
+    # logging.basicConfig(level=logging.DEBUG,
+    # filename="test_log.log",filemode="w", format="%(asctime)s %(levelname)s %(message)s")
     class TestPollingInterface(BaseTestPollingInterface):
         def __init__(self):
             super().__init__()
@@ -85,8 +86,12 @@ def test_context_lock():
             self.expected_updates = [(0, "id: 1"), (1, "id: 3"), (0, "id: 2")]
             self.received_updates = []
 
-        # First worker is ordered to hand over control to (0, id: 2), which immediately gives it back because of the ContextLock(). Then, id: 3 gets completed right away, due to there not being any more 'await' statements there.
-        # What's important here is that the worker for the "id: 2" couldn't start working on it's task immediately, because of ContextLock(), proving it's function. Even though it was given control with an 'await' just below.
+        # First worker is ordered to hand over control to (0, id: 2),
+        # which immediately gives it back because of the ContextLock().
+        # Then, id: 3 gets completed right away, due to there not being any more 'await' statements there.
+        # What's important here is that the worker for the "id: 2" couldn't start
+        # working on it's task immediately, because of ContextLock(), proving it's function.
+        # Even though it was given control with an 'await' just below.
         async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
             context = await pipeline._run_pipeline(update, ctx_id)
             if context.last_response.text == "id: 1":
@@ -145,7 +150,8 @@ def test_worker_shielding():
             await super().cleanup()
             pass
             # This is here, so that workers have a bit of time to complete the remaining requests.
-            # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.
+            # Without this line the test fails, because there's nothing blocking
+            # the code further and the assertions execute immediately after.
 
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
@@ -195,14 +201,22 @@ def test_shielding():
             context = await pipeline._run_pipeline(update, ctx_id)
             await self._respond(ctx_id, context.last_response)
 
-            # This shuts down the entire program via graceful termination. If the received messages are correct even after a SIGINT, the program has working graceful termination.
-            # Ok, so it's interesting. When using time.sleep() graceful termination works, but when using an 'await asyncio.sleep()' the test breaks, because the exception from 'shutdown()' isn't caught. I couldn't figure it out, but now I think it's logical. When SIGINT is received by a new signal handler that I made, the program throws an exception into whichever async function it's currently in, could be any of them.
+            # This shuts down the entire program via graceful termination.
+            # If the received messages are correct even after a SIGINT,
+            # the program has working graceful termination.
+            # Ok, so it's interesting. When using time.sleep() graceful termination works,
+            # but when using an 'await asyncio.sleep()' the test breaks,
+            # because the exception from 'shutdown()' isn't caught. I couldn't figure it out,
+            # but now I think it's logical. When SIGINT is received by a new signal handler
+            # that I made, the program throws an exception into whichever async
+            # function it's currently in, could be any of them.
 
         async def cleanup(self):
             await super().cleanup()
             pass
             # This is here, so that workers have a bit of time to complete the remaining requests.
-            # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.
+            # Without this line the test fails, because there's nothing blocking the code
+            # further and the assertions execute immediately after.
 
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,

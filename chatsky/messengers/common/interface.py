@@ -295,6 +295,7 @@ class PollingMessengerInterface(MessengerInterface):
         for i in range(self.number_of_workers):
             task = asyncio.create_task(asyncio.shield(self._worker(worker_timeout)))
             self._worker_tasks.append(task)
+        print("worker tasks:", self._worker_tasks)
         await self._polling_loop(loop=loop, poll_timeout=poll_timeout, timeout=timeout)
 
     # Maybe "worker_cleanup" instead of this function name?

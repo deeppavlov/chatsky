@@ -17,6 +17,7 @@ to structure and manage the messages processing flow.
 import asyncio
 import os
 import signal
+from asyncio import AbstractEventLoop
 from functools import partial
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
@@ -352,7 +353,7 @@ class Pipeline:
 
         return ctx
 
-    def sigint_handler(self, loop):
+    def sigint_handler(self, loop: AbstractEventLoop) -> None:
         """
         Method that is called when SIGINT is received.
         Stops Pipeline and all it's interfaces.
@@ -379,7 +380,7 @@ class Pipeline:
 
     async def a_run(self):
         async_loop = asyncio.get_running_loop()
-        if os.name == 'nt':
+        if os.name == "nt":
             # Graceful termination for Windows.
             def placeholder_func(signum, frame):
                 self.sigint_handler(async_loop)
