@@ -14,12 +14,23 @@ import abc
 
 
 class BaseMethod(BaseModel, abc.ABC):
+    """
+    Base class to evaluate models response as condition.
+    """
     @abc.abstractmethod
     async def __call__(self, ctx: Context, model_result: str) -> bool:
         raise NotImplementedError
 
 
 class Contains(BaseMethod):
+    """
+    Simple method to check if a string contains a pattern.
+
+    :param str pattern: pattern to check
+
+    :return: True if pattern is contained in model result
+    :rtype: bool
+    """
     pattern: str
 
     async def __call__(self, ctx: Context, model_result: str, pattern: str = "") -> bool:

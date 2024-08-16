@@ -11,12 +11,24 @@ import abc
 
 
 class BaseFilter(BaseModel, abc.ABC):
+    """
+    Base class for all message history filters.
+    """
     @abc.abstractmethod
     def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool:
+        """
+        :param Context ctx: Context object.
+        :param Message request: Request message.
+        :param Message response: Response message.
+        :param str model_name: Name of the model in the Pipeline.models.
+        """
         raise NotImplementedError
 
 
 class IsImportant(BaseFilter):
+    """
+    Filter that checks if the "important" field in a Message.misc is True.
+    """
     def __call__(
         self, ctx: Context = None, request: Message = None, response: Message = None, model_name: str = None
     ) -> bool:
@@ -28,6 +40,9 @@ class IsImportant(BaseFilter):
 
 
 class FromTheModel(BaseFilter):
+    """
+    Filter that checks if the message was sent by the model.
+    """
     def __call__(
         self, ctx: Context = None, request: Message = None, response: Message = None, model_name: str = None
     ) -> bool:

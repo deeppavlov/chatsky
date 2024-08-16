@@ -142,6 +142,7 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
 def llm_condition(model_name: str, prompt: str, method: BaseMethod):
     """
     Basic function for using LLM in condition cases.
+    
     :param model_name: Key of the model from the `Pipeline.models` dictionary.
     :param prompt: Prompt for the model to use on users input.
     :param method: Method that takes models output and returns boolean.
@@ -171,9 +172,8 @@ def message_to_langchain(message: Message, source: str = "human"):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
-    Args:
-        message (Message): ~chatsky.script.core.message.Message object.
-        source (str, optional): Source of a message [`human`, `ai`, `system`]. Defaults to "human".
+    :param Message message: ~chatsky.script.core.message.Message object.
+    :param str source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
 
     Returns:
         HumanMessage|AIMessage|SystemMessage: langchain message object.
