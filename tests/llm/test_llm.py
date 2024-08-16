@@ -14,12 +14,12 @@ class MockChatOpenAI:
         self.name = "test_model"
         self.model = self
 
-    def invoke(self, history: list = [""]):
+    async def ainvoke(self, history: list = [""]):
         response = AIMessage(content=f"Mock response with history: {history}")
         return response
 
     def respond(self, history: list = [""]):
-        return self.invoke(history)
+        return self.ainvoke(history)
 
 
 @pytest.fixture
@@ -107,8 +107,9 @@ def test_message_to_langchain():
         ),
     ],
 )
-def test_history(context, pipeline, hist, expected):
-    assert llm_response("test_model", history=hist)(context, pipeline).text == expected
+async def test_history(context, pipeline, hist, expected):
+    res = await llm_response("test_model", history=hist)(context, pipeline)
+    assert res.text == expected
 
 
 def test_is_important_filter(filter_context):

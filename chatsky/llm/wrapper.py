@@ -12,7 +12,7 @@ try:
     from langchain_mistralai import ChatMistralAI
     from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
     from langchain_core.output_parsers import StrOutputParser
-
+    from langchain_core.language_models.chat_models import BaseChatModel
     langchain_available = True
 except ImportError:
     langchain_available = False
@@ -36,7 +36,7 @@ class LLM_API:
 
     def __init__(
         self,
-        model: ChatOpenAI,
+        model: BaseChatModel,
         system_prompt: str = "",
     ) -> None:
         """
@@ -53,21 +53,21 @@ class LLM_API:
         if not langchain_available:
             raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
 
-    def respond(
+    async def respond(
         self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     ) -> Message:
         if message_schema is None:
-            result = self.parser.invoke(self.model.invoke(history))
+            result = await self.parser.ainvoke(await self.model.ainvoke(history))
             result = Message(text=result)
 
         elif issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
-            structured_model = self.model.with_structured_output(message_schema)
-            result = Message.model_validate(structured_model.invoke(history))
+            structured_model = await self.model.with_structured_output(message_schema)
+            result = Message.model_validate(await structured_model.invoke(history))
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
-            structured_model = self.model.with_structured_output(message_schema)
-            result = structured_model.invoke(history)
+            structured_model = await self.model.with_structured_output(message_schema)
+            result = await structured_model.invoke(history)
             result = Message(text=str(result.json()))
 
         if result.annotations:
@@ -76,12 +76,12 @@ class LLM_API:
             result.annotations = {"__generated_by_model__": self.name}
         return result
 
-    def condition(self, prompt: str, method: BaseMethod):
-        def process_input(ctx: Context, _: Pipeline) -> bool:
-            result = method(ctx, self.parser.invoke(self.model.invoke([prompt + "\n" + ctx.last_request.text])))
+    async def condition(self, prompt: str, method: BaseMethod):
+        async def process_input(ctx: Context, _: Pipeline) -> bool:
+            result = method(ctx, await self.parser.ainvoke(await self.model.ainvoke([prompt + "\n" + ctx.last_request.text])))
             return result
 
-        return process_input
+        return await process_input
 
 
 def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True):
@@ -95,7 +95,7 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
     :param filter_func: filter function to filter messages that will go the models context.
     """
 
-    def wrapped(ctx: Context, pipeline: Pipeline) -> Message:
+    async def wrapped(ctx: Context, pipeline: Pipeline) -> Message:
         model = pipeline.models[model_name]
         if model.system_prompt == "":
             history_messages = []
@@ -134,7 +134,7 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
         if prompt:
             history_messages.append(message_to_langchain(Message(prompt), source="system"))
         history_messages.append(message_to_langchain(ctx.last_request, source="human"))
-        return model.respond(history_messages)
+        return await model.respond(history_messages)
 
     return wrapped
 
@@ -147,18 +147,18 @@ def llm_condition(model_name: str, prompt: str, method: BaseMethod):
     :param method: Method that takes models output and returns boolean.
     """
 
-    def wrapped(ctx, pipeline):
+    async def wrapped(ctx, pipeline):
         model = pipeline.models[model_name]
-        return model.condition(prompt, method)
+        return await model.condition(prompt, method)
 
     return wrapped
 
 
-def __attachment_to_content(attachment: Image, iface) -> str:
+async def __attachment_to_content(attachment: Image, iface) -> str:
     """
     Helper function to convert image to base64 string.
     """
-    image_bytes = attachment.get_bytes(iface)
+    image_bytes = await attachment.get_bytes(iface)
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
     extension = attachment.source.split(".")[-1]
     if image_b64 == "" or extension is None:
