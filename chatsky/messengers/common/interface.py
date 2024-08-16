@@ -11,12 +11,8 @@ import asyncio
 import logging
 from pathlib import Path
 from tempfile import gettempdir
-import signal
-from functools import partial
-import time  # Don't forget to remove this
-import contextlib
 
-from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
+from typing import Optional, Any, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from chatsky.script import Context, Message
@@ -37,9 +33,15 @@ class MessengerInterface(abc.ABC):
     def __init__(self):
         self.task = None
         self.pipeline = None
-        self.running_in_foreground = False
+        # I guess, it sounds more like "self.still_accepting_requests".
         self.running = True
+        """
+        Shows whether the interface is still accepting new requests.
+        """
         self.finished_working = False
+        """
+        Shows whether the interface has finished processing all of the requests received.
+        """
 
     @abc.abstractmethod
     async def connect(
@@ -77,21 +79,7 @@ class MessengerInterface(abc.ABC):
         worker_timeout: float = None,
         timeout: float = 0,
     ):
-        self.running_in_foreground = True
         self.pipeline = pipeline
-
-        # Functionally looks about the same as the other option, just not pretty
-        def placeholder_func(signum, frame):
-            pipeline.sigint_handler(async_loop)
-
-        async_loop = asyncio.get_running_loop()
-        signal.signal(signal.SIGINT, placeholder_func)
-
-        """
-        # This only works on Linux. Windows should work with 'signal', though.
-        async_loop = asyncio.get_running_loop()
-        async_loop.add_signal_handler(signal.SIGINT, partial(pipeline.sigint_handler, async_loop))
-        """
 
         # TODO: correctly redefine connect() in all interfaces.
         self.task = asyncio.create_task(
@@ -116,7 +104,7 @@ class MessengerInterface(abc.ABC):
 
     async def shutdown(self):
         """
-        Right now, this cancels the main task (if it hasn't finished) and sets a flag self.running to False,
+        This cancels the main task (if it hasn't finished) and sets a flag self.running to False,
         so that any async tasks in loops can see that and turn off as soon as they are done.
         """
         logger.info(f"messenger_interface.shutdown() called - shutting down interface")
@@ -128,7 +116,7 @@ class MessengerInterface(abc.ABC):
             # Awaiting self.task() throws an exception, but if the main task
             # of this interface has finished through any means (like a loop() function running out of loops),
             # the exception would break the program (nothing is there to catch it anymore),
-            # so instead the exception will be caught and nothing will happen.
+            # so instead the exception will be suppressed.
             if not self.finished_working:
                 raise asyncio.CancelledError
         logger.info(f"{type(self).__name__} has stopped working - SIGINT received")
@@ -220,17 +208,19 @@ class PollingMessengerInterface(MessengerInterface):
         if request is not None:
             (ctx_id, update) = request
             async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
-                # Trying to see if _process_request works at all. Looks like it does it just fine, actually
-                # await self._process_request(ctx_id, update, self.pipeline)
+                await asyncio.wait_for(
+                    await self._process_request(ctx_id, update, self.pipeline),
+                    timeout=worker_timeout,
+                )
                 # Doesn't work in a thread for some reason - it goes into an infinite cycle.
-                # """
+                """
                 await asyncio.wait_for(
                     await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
                         self._process_request, ctx_id, update, self.pipeline
                     ),
                     timeout=worker_timeout,
                 )
-                # """
+                """
             return False
         else:
             return True
@@ -279,10 +269,10 @@ class PollingMessengerInterface(MessengerInterface):
                 await asyncio.sleep(timeout)
         finally:
             self.running = False
-            # If loop() is somehow True after being False once, this will be wrong.
+            # If loop() is somehow True after being False once, this logging will be wrong.
             # But no user would want to break their own logging, right?
             if loop() is False:
-                logger.info(f"polling_loop stopped working - the loop() condition was false")
+                logger.info(f"polling_loop stopped working - the loop() condition was False")
             else:
                 logger.info(f"polling_loop stopped working - the stop signal was received.")
             # If there are no more jobs/stop signal received, a special 'None' request is
@@ -307,15 +297,13 @@ class PollingMessengerInterface(MessengerInterface):
             self._worker_tasks.append(task)
         await self._polling_loop(loop=loop, poll_timeout=poll_timeout, timeout=timeout)
 
-    # Workers for PollingMessengerInterface are awaited here.
-    # This probably shouldn't be in cleanup(), it may get overwritten
-    # by a user's cleanup if they derive from PollingMessengerInterface.
-    # Also, sounds like too critical of a component to call it "cleanup".
+    # Maybe "worker_cleanup" instead of this function name?
     async def cleanup(self):
+        """
+        Blocks until all workers are done.
+        """
         await super().cleanup()
         await asyncio.wait(self._worker_tasks)
-        # await asyncio.gather(*self._worker_tasks)
-        # Blocks until all workers are done
 
     def _on_exception(self, e: BaseException):
         """
@@ -337,8 +325,16 @@ class CallbackMessengerInterface(MessengerInterface):
 
     def __init__(self) -> None:
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
+        super().__init__()
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        poll_timeout: float = None,
+        worker_timeout: float = None,
+        timeout: float = 0,
+    ):
         self._pipeline_runner = pipeline_runner
 
     async def on_request_async(

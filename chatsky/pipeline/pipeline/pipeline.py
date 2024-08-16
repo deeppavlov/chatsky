@@ -15,7 +15,9 @@ to structure and manage the messages processing flow.
 """
 
 import asyncio
+import os
 import signal
+from functools import partial
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
@@ -351,10 +353,14 @@ class Pipeline:
         return ctx
 
     def sigint_handler(self, loop):
+        """
+        Method that is called when SIGINT is received.
+        Stops Pipeline and all it's interfaces.
+        """
         self.stopped_by_signal = True
         logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
         # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
-        if self.messenger_interface.running_in_foreground:
+        if self.messenger_interface.running:
             loop.run_until_complete(self.messenger_interface.shutdown())
         # In case someone launched a pipeline with connect() instead of
         # run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal
@@ -367,16 +373,21 @@ class Pipeline:
         so every time user request is received, `_run_pipeline` will be called.
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
+        Wraps it's code in a_run() to start an asyncio 'event loop' needed for graceful termination.
         """
+        asyncio.run(self.a_run())
 
-        # event_loop = asyncio.get_event_loop()
-        # event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
+    async def a_run(self):
+        async_loop = asyncio.get_running_loop()
+        if os.name == 'nt':
+            # Graceful termination for Windows.
+            def placeholder_func(signum, frame):
+                self.sigint_handler(async_loop)
 
-        # This doesn't work for now, because _sigint_handler is just added to the queue of async tasks, waiting for the program, which it shouldn't, in order to shut it down at all.
-        # I'm using a different solution fow now, but the original one has the benefit of utilising the event loop (not ending other asyncio tasks) and "being thread-safe" according to some sources, not sure if that's true or needed, though.
-        # TO-DO: Do graceful termination via the event loop. I'm thinking if the _sigint_handler() task could be added to the start of the asyncio queue and not the end, it would've worked. But I know neither if that'll work nor how to do it.
-
-        # signal.signal(signal.SIGINT, self.sigint_handler)
+            signal.signal(signal.SIGINT, placeholder_func)
+        else:
+            # Graceful termination for Linux / macOS / other.
+            async_loop.add_signal_handler(signal.SIGINT, partial(self.sigint_handler, async_loop))
 
         asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
         logger.info(f"pipeline finished working")
