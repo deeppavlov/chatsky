@@ -5,6 +5,7 @@ from chatsky.script.core.message import Message, Image
 from chatsky.script import Context, TRANSITIONS, RESPONSE
 from chatsky.script import conditions as cnd
 from chatsky.pipeline import Pipeline
+from chatsky.messengers.common import MessengerInterfaceWithAttachments
 
 import pytest
 
@@ -83,11 +84,12 @@ def test_message_to_langchain():
     )
 
 
-# @pytest.mark.parametrize("img,expected", [(Image(source="https://example.com"), ValueError)])
-# def test_attachments(img, expected):
-#     script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: {"node": cnd.true()}}}}
-#     pipe = Pipeline.from_script(script=script, start_label=("flow", "node"))
-#     assert __attachment_to_content(img, pipe.messenger_interface) == expected
+@pytest.mark.parametrize("img,expected", [(Image(source="https://example.com"), ValueError)])
+async def test_attachments(img, expected):
+    script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: {"node": cnd.true()}}}}
+    pipe = Pipeline.from_script(script=script, start_label=("flow", "node"), messenger_interface=MessengerInterfaceWithAttachments())
+    res = await __attachment_to_content(img, pipe.messenger_interface)
+    assert res == expected
 
 
 @pytest.mark.parametrize(

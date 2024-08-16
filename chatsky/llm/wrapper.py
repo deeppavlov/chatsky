@@ -84,7 +84,7 @@ class LLM_API:
         return await process_input
 
 
-def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True):
+def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True, message_schema: Union[None, Type[Message], Type[BaseModel]] = None):
     """
     Basic function for receiving LLM responses.
     :param ctx: Context object. (Assigned automatically)
@@ -134,7 +134,7 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
         if prompt:
             history_messages.append(message_to_langchain(Message(prompt), source="system"))
         history_messages.append(message_to_langchain(ctx.last_request, source="human"))
-        return await model.respond(history_messages)
+        return await model.respond(history_messages, message_schema=message_schema)
 
     return wrapped
 
