@@ -3,23 +3,10 @@ from typing import Any, Dict, Hashable, List, Optional, Set, Tuple
 from .database import DBContextStorage, FieldConfig
 
 
-class PassSerializer:
-    """
-    Empty serializer.
-    Does not modify data during serialization and deserialization.
-    """
-
-    def loads(self, obj: Any) -> Any:
-        return obj
-    
-    def dumps(self, obj: Any) -> Any:
-        return obj
-
-
 class MemoryContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` storing contexts in memory, wthout file backend.
-    By default it sets path to an empty string and sets serializer to :py:class:`PassSerializer`.
+    By default it sets path to an empty string.
 
     Keeps data in a dictionary and two lists:
     
@@ -37,7 +24,6 @@ class MemoryContextStorage(DBContextStorage):
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
     ):
-        serializer = PassSerializer() if serializer is None else serializer
         DBContextStorage.__init__(self, path, serializer, rewrite_existing, configuration)
         self._storage = {
             self._main_table_name: dict(),

@@ -76,6 +76,7 @@ class DBContextStorage(ABC):
         """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
+        configuration = configuration if configuration is not None else dict()
         self.labels_config = configuration.get("labels", FieldConfig(name="labels"))
         self.requests_config = configuration.get("requests", FieldConfig(name="requests"))
         self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
@@ -142,7 +143,6 @@ class DBContextStorage(ABC):
         return (
             self.full_path == other.full_path 
             and self.path == other.path
-            and self._batch_size == other._batch_size
             and self.rewrite_existing == other.rewrite_existing
         )
 
