@@ -76,7 +76,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     name: Optional[str] = None
     """
     Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-    should not be blank or contain `.` symbol.
+    should not be blank or contain the ``.`` character.
     """
     path: Optional[str] = None
     """
