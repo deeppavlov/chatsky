@@ -152,7 +152,7 @@ class TestPipelineValidation:
     def test_cached_property(self):
         pipeline = Pipeline(**TOY_SCRIPT_KWARGS)
         old_actor_id = id(pipeline.actor)
-        pipeline.start_label = ("greeting_flow", "fallback_node")
+        pipeline.fallback_label = ("greeting_flow", "other_node")
         assert old_actor_id == id(pipeline.actor)
 
     def test_pre_services(self):
@@ -169,8 +169,6 @@ class CustomPipelineComponent(PipelineComponent):
 
 
 class TestPipelineComponentValidation:
-    CustomPipelineComponent.model_rebuild()
-
     def test_wrong_names(self):
         func = UserFunctionSamples.correct_service_function_1
         with pytest.raises(ValidationError):
@@ -178,7 +176,7 @@ class TestPipelineComponentValidation:
         with pytest.raises(ValidationError):
             Service(handler=func, name="")
 
-    # Maybe this test should be in a different file, though.
+    # todo: move this to component tests
     def test_name_not_defined(self):
         comp = CustomPipelineComponent()
         assert comp.computed_name == "noname_service"
