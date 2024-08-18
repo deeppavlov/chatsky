@@ -32,7 +32,7 @@ from ...utils.devel import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 

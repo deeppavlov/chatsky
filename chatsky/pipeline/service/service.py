@@ -30,7 +30,7 @@ from .extra import BeforeHandler, AfterHandler
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
