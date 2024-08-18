@@ -60,7 +60,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     @classmethod
     def functions_constructor(cls, data: Any):
         """
-        Adds support for initializing from a `Callable` or List[`Callable`].
+        Add support for initializing from a `Callable` or List[`Callable`].
         Casts `functions` to `list` if it's not already.
         """
         if isinstance(data, list):

@@ -112,9 +112,9 @@ class Actor(PipelineComponent):
     @model_validator(mode="after")
     def __start_label_validator__(self):
         """
-        Validates :py:data:`~.Actor.start_label`. In case requested
-        `start_label` doesn't exist in the given :py:class:`~.Script`,
-        raises ValueError.
+        Validate :py:data:`~.Actor.start_label`.
+
+        :raises ValueError: If `start_label` doesn't exist in the given :py:class:`~.Script`.
         """
         if not isinstance(self.script, Script):
             self.script = Script(script=self.script)
@@ -126,9 +126,8 @@ class Actor(PipelineComponent):
     @model_validator(mode="after")
     def __fallback_label_validator__(self):
         """
-        Validates :py:data:`~.Actor.fallback_label`. In case requested
-        `fallback_label` doesn't exist in the given :py:class:`~.Script`,
-        raises ValueError.
+        Validate :py:data:`~.Actor.fallback_label`.
+        :raises ValueError: If `fallback_label` doesn't exist in the given :py:class:`~.Script`.
         """
         if self.fallback_label is None:
             self.fallback_label = self.start_label
