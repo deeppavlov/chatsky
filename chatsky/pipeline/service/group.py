@@ -66,7 +66,7 @@ class ServiceGroup(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def __components_constructor(cls, data: Any):
+    def components_validator(cls, data: Any):
         """
         Add support for initializing from a `Callable`, `List`
         and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
