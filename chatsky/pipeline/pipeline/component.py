@@ -84,7 +84,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
 
     @model_validator(mode="after")
-    def __pipeline_component_validator(self):
+    def __pipeline_component_validator__(self):
         """
         Validate this component.
 

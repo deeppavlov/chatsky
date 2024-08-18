@@ -85,7 +85,7 @@ class ServiceGroup(PipelineComponent):
         return result
 
     @model_validator(mode="after")
-    def __calculate_async_flag(self):
+    def __calculate_async_flag__(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self
 

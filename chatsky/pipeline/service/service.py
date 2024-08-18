@@ -66,7 +66,7 @@ class Service(PipelineComponent):
         return data
 
     @model_validator(mode="after")
-    def __tick_async_flag(self):
+    def __tick_async_flag__(self):
         self.calculated_async_flag = True
         return self
 
