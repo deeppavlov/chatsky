@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 ReturnType = TypeVar("ReturnType")
 
 
-class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType]):
+class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType], frozen=True):
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
 
     @abstractmethod
