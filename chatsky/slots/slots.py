@@ -9,10 +9,11 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union
+from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Annotated, Optional
 from typing_extensions import TypeAlias
 import logging
 from functools import reduce
+from string import Formatter
 
 from pydantic import BaseModel, model_validator, Field
 
@@ -132,7 +133,7 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    __pydantic_extra__: dict[str, Union["ExtractedValueSlot", "ExtractedGroupSlot"]]
+    __pydantic_extra__: dict[str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]]
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -209,7 +210,7 @@ class ValueSlot(BaseSlot, frozen=True):
         is_slot_extracted = False
 
         try:
-            extracted_value = await self.extract_value(ctx)
+            extracted_value = await wrap_sync_function_in_async(self.extract_value, ctx)
             is_slot_extracted = not isinstance(extracted_value, SlotNotExtracted)
         except Exception as error:
             logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
@@ -234,7 +235,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    __pydantic_extra__: dict[str, Union["ValueSlot", "GroupSlot"]]
+    __pydantic_extra__: dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)
@@ -335,12 +336,9 @@ class SlotManager(BaseModel):
 
         :raises KeyError: If the slot with the specified name does not exist.
         """
-        try:
-            slot = recursive_getattr(self.root_slot, slot_name)
-            if isinstance(slot, BaseSlot):
-                return slot
-        except (AttributeError, KeyError):
-            pass
+        slot = recursive_getattr(self.root_slot, slot_name)
+        if isinstance(slot, BaseSlot):
+            return slot
         raise KeyError(f"Could not find slot {slot_name!r}.")
 
     async def extract_slot(self, slot_name: SlotName, ctx: Context) -> None:
@@ -360,18 +358,15 @@ class SlotManager(BaseModel):
         """
         self.slot_storage = await self.root_slot.get_value(ctx)
 
-    def get_extracted_slot(self, slot_name: SlotName) -> ExtractedSlot:
+    def get_extracted_slot(self, slot_name: SlotName) -> Union[ExtractedValueSlot, ExtractedGroupSlot]:
         """
         Retrieve extracted value from `slot_storage`.
 
         :raises KeyError: If the slot with the specified name does not exist.
         """
-        try:
-            slot = recursive_getattr(self.slot_storage, slot_name)
-            if isinstance(slot, ExtractedSlot):
-                return slot
-        except (AttributeError, KeyError):
-            pass
+        slot = recursive_getattr(self.slot_storage, slot_name)
+        if isinstance(slot, ExtractedSlot):
+            return slot
         raise KeyError(f"Could not find slot {slot_name!r}.")
 
     def is_slot_extracted(self, slot_name: str) -> bool:
@@ -402,9 +397,14 @@ class SlotManager(BaseModel):
         """
         self.slot_storage.__unset__()
 
-    def fill_template(self, template: str) -> str:
+    class KwargOnlyFormatter(Formatter):
+        def get_value(self, key, args, kwargs):
+            return super().get_value(str(key), args, kwargs)
+
+    def fill_template(self, template: str) -> Optional[str]:
         """
-        Fill `template` string with extracted slot values and return a formatted string.
+        Fill `template` string with extracted slot values and return a formatted string
+        or None if an exception has occurred while trying to fill template.
 
         `template` should be a format-string:
 
@@ -414,4 +414,8 @@ class SlotManager(BaseModel):
         it would return the following text:
         "Your username is admin".
         """
-        return template.format(**dict(self.slot_storage.__pydantic_extra__.items()))
+        try:
+            return self.KwargOnlyFormatter().format(template, **dict(self.slot_storage.__pydantic_extra__.items()))
+        except Exception as exc:
+            logger.exception("An exception occurred during template filling.",  exc_info=exc)
+            return None

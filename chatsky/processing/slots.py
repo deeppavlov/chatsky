@@ -3,7 +3,7 @@ Processing
 ---------------------------
 This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API.
 """
-
+import asyncio
 import logging
 from typing import List
 
@@ -28,8 +28,11 @@ class Extract(BaseProcessing):
 
     async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        for slot in self.slots:  # todo: maybe gather
-            await manager.extract_slot(slot, ctx)
+        results = await asyncio.gather(*(manager.extract_slot(slot, ctx) for slot in self.slots), return_exceptions=True)
+
+        for result in results:
+            if isinstance(result, Exception):
+                logger.exception("An exception occurred during slot extraction.", exc_info=result)
 
 
 class ExtractAll(BaseProcessing):
@@ -56,7 +59,10 @@ class Unset(BaseProcessing):
     async def func(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         for slot in self.slots:
-            manager.unset_slot(slot)
+            try:
+                manager.unset_slot(slot)
+            except Exception as exc:
+                logger.exception("An exception occurred during slot resetting.", exc_info=exc)
 
 
 class UnsetAll(BaseProcessing):
