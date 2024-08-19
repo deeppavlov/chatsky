@@ -167,13 +167,19 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @computed_field
     @cached_property
+    def actor(self) -> Actor:
+        """An actor instance of the pipeline."""
+        return Actor()
+
+    @computed_field
+    @cached_property
     def services_pipeline(self) -> PipelineServiceGroup:
         """
         A group containing :py:attr:`.Pipeline.pre_services`, :py:class:`~.Actor`
         and :py:attr:`.Pipeline.post_services`.
         It has :py:attr:`.Pipeline.before_handler` and :py:attr:`.Pipeline.after_handler` applied to it.
         """
-        components = [self.pre_services, Actor(), self.post_services]
+        components = [self.pre_services, self.actor, self.post_services]
         services_pipeline = PipelineServiceGroup(
             components=components,
             before_handler=self.before_handler,
