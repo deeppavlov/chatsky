@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Callable
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
 from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.core.context import Context
@@ -58,19 +58,21 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
     @model_validator(mode="before")
     @classmethod
-    def functions_constructor(cls, data: Any):
-        if isinstance(data, (list, Callable)):
+    def functions_validator(cls, data: Any):
+        """
+        Add support for initializing from a `Callable` or List[`Callable`].
+        Casts `functions` to `list` if it's not already.
+        """
+        if isinstance(data, list):
             result = {"functions": data}
-        elif isinstance(data, dict):
-            result = data.copy()
+        elif callable(data):
+            result = {"functions": [data]}
         else:
-            raise ValueError(
-                "Extra Handler can only be initialized from a Dict,"
-                " a Callable or a list of Callables. Wrong inputs received."
-            )
+            result = data
 
-        if ("functions" in result) and (not isinstance(result["functions"], list)):
-            result["functions"] = [result["functions"]]
+        if isinstance(result, dict):
+            if ("functions" in result) and (not isinstance(result["functions"], list)):
+                result["functions"] = [result["functions"]]
         return result
 
     @computed_field(repr=False)

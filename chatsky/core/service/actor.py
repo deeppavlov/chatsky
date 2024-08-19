@@ -74,6 +74,10 @@ class Actor(PipelineComponent):
 
     @model_validator(mode="after")
     def __fallback_label_validator__(self):
+        """
+        Validate :py:data:`~.Actor.fallback_label`.
+        :raises ValueError: If `fallback_label` doesn't exist in the given :py:class:`~.Script`.
+        """
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
@@ -83,12 +87,6 @@ class Actor(PipelineComponent):
         return "actor"
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for running an `Actor`.
-
-        :param pipeline: Current pipeline.
-        :param ctx: Current dialog context.
-        """
         next_label = self.fallback_label
 
         try:

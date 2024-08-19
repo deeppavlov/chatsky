@@ -57,7 +57,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     requested_async_flag: Optional[bool] = None
     """
     Requested asynchronous property; if not defined,
-    `calculated_async_flag` is used instead.
+    :py:attr:`~.PipelineComponent.calculated_async_flag` is used instead.
     """
     calculated_async_flag: bool = False
     """
@@ -69,13 +69,13 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
-    StartConditionCheckerFunction that is invoked before each component execution;
+    :py:class:`~.pipeline.types.StartConditionCheckerFunction` that is invoked before each component execution;
     component is executed only if it returns `True`.
     """
     name: Optional[str] = None
     """
     Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-    should not be blank or contain `.` symbol.
+    should not be blank or contain the ``.`` character.
     """
     path: Optional[str] = None
     """
@@ -83,7 +83,13 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
 
     @model_validator(mode="after")
-    def __pipeline_component_validator(self):
+    def __pipeline_component_validator__(self):
+        """
+        Validate this component.
+
+        :raises ValueError: If component's name is blank or if it contains dots.
+        :raises Exception: In case component can't be async, but was requested to be.
+        """
         if self.name is not None:
             if self.name == "":
                 raise ValueError("Name cannot be blank.")
@@ -151,32 +157,21 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     @abc.abstractmethod
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
         """
-        Method for running this component. It can be an Actor, Service or ServiceGroup.
-        It has to be defined in the child classes,
-        which is done in each of the default PipelineComponents.
-        Service 'handler' has three possible signatures. These possible signatures are:
+        Run this component.
 
-        - (ctx: Context) - accepts current dialog context only.
-        - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
-        - | (ctx: Context, pipeline: Pipeline, info: ServiceRuntimeInfo) - accepts context,
-              pipeline and service runtime info dictionary.
-
-        :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
-        :return: `None`
+        :param ctx: Current dialog :py:class:`~.Context`.
+        :param pipeline: This :py:class:`~.Pipeline`.
         """
         raise NotImplementedError
 
     @property
     def computed_name(self) -> str:
         """
-        Every derivative of `PipelineComponent` must define this property.
-        :return: `str`.
+        Default name that is used if :py:attr:`~.PipelineComponent.name` is not defined.
+        In case two components in a :py:class:`~.ServiceGroup` have the same
+        :py:attr:`~.PipelineComponent.computed_name` an incrementing number is appended to the name.
         """
         return "noname_service"
-        # Or could do the following:
-        # raise NotImplementedError
-        # But this default value makes sense and replicates previous logic.
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """

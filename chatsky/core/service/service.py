@@ -42,7 +42,7 @@ class Service(PipelineComponent):
 
     handler: ServiceFunction
     """
-    A service function.
+    A :py:data:`~.ServiceFunction`.
     """
     # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -55,15 +55,16 @@ class Service(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def __handler_constructor(cls, data: Any):
+    def handler_validator(cls, data: Any):
+        """
+        Add support for initializing from a `Callable`.
+        """
         if isinstance(data, Callable):
             return {"handler": data}
-        elif not isinstance(data, dict):
-            raise ValueError("A Service can only be initialized from a Dict or a Callable." " Wrong inputs received.")
         return data
 
     @model_validator(mode="after")
-    def __tick_async_flag(self):
+    def __tick_async_flag__(self):
         self.calculated_async_flag = True
         return self
 
@@ -93,13 +94,10 @@ class Service(PipelineComponent):
 
     @property
     def computed_name(self) -> str:
-        if callable(self.handler):
-            if inspect.isfunction(self.handler):
-                return self.handler.__name__
-            else:
-                return self.handler.__class__.__name__
+        if inspect.isfunction(self.handler):
+            return self.handler.__name__
         else:
-            return "noname_service"
+            return self.handler.__class__.__name__
 
     @property
     def info_dict(self) -> dict:

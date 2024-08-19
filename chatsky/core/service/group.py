@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, Callable
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
 
 from pydantic import model_validator, Field
 
@@ -53,7 +53,7 @@ class ServiceGroup(PipelineComponent):
         ]
     ]
     """
-    A `ServiceGroup` object, that will be added to the group.
+    A :py:class:`~.ServiceGroup` object, that will be added to the group.
     """
     # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -66,23 +66,26 @@ class ServiceGroup(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def __components_constructor(cls, data: Any):
-        if isinstance(data, (list, PipelineComponent, Callable)):
+    def components_validator(cls, data: Any):
+        """
+        Add support for initializing from a `Callable`, `List`
+        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
+        Casts `components` to `list` if it's not already.
+        """
+        if isinstance(data, list):
             result = {"components": data}
-        elif isinstance(data, dict):
-            result = data.copy()
+        elif callable(data) or isinstance(data, PipelineComponent):
+            result = {"components": [data]}
         else:
-            raise ValueError(
-                "Service Group can only be initialized from a Dict,"
-                " a PipelineComponent or a list of PipelineComponents. Wrong inputs received."
-            )
+            result = data
 
-        if ("components" in result) and (not isinstance(result["components"], list)):
-            result["components"] = [result["components"]]
+        if isinstance(result, dict):
+            if ("components" in result) and (not isinstance(result["components"], list)):
+                result["components"] = [result["components"]]
         return result
 
     @model_validator(mode="after")
-    def __calculate_async_flag(self):
+    def __calculate_async_flag__(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
         return self
 
@@ -90,7 +93,7 @@ class ServiceGroup(PipelineComponent):
         """
         Method for running this service group. Catches runtime exceptions and logs them.
         It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
-        Executes components inside the group based on its `asynchronous` property.
+        Executes components inside the group based on its :py:attr:`~.PipelineComponent.asynchronous` property.
         Collects information about their execution state - group is finished successfully
         only if all components in it finished successfully.
 

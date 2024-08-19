@@ -49,13 +49,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     pre_services: ServiceGroup = Field(default_factory=list)
     """
-    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup`
+    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup`
     that will be executed before Actor.
     """
     post_services: ServiceGroup = Field(default_factory=list)
     """
-    List of :py:data:`~.Service` or :py:data:`~.ServiceGroup` that will be
-    executed after Actor. It constructs root
+    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup` that will be
+    executed after :py:class:`~.Actor`. It constructs root
     service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """
     script: Script
@@ -64,15 +64,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     start_label: AbsoluteNodeLabel
     """
-    (required) Actor start label.
+    (required) :py:class:`~.Actor` start label.
     """
     fallback_label: Optional[AbsoluteNodeLabel] = None
     """
-    Actor fallback label.
+    :py:class:`~.Actor` fallback label.
     """
     default_priority: float = 1.0
     """
-    Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
     where there is no priority. Defaults to `1.0`.
     """
     slots: GroupSlot = Field(default_factory=GroupSlot)
@@ -90,11 +90,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
     """
-    List of `_ComponentExtraHandler` to add to the group.
+    List of :py:class:`~._ComponentExtraHandler` to add to the group.
     """
     after_handler: ComponentExtraHandler = Field(default_factory=list)
     """
-    List of `_ComponentExtraHandler` to add to the group.
+    List of :py:class:`~._ComponentExtraHandler` to add to the group.
     """
     timeout: Optional[float] = None
     """
@@ -154,7 +154,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     @model_validator(mode="after")
-    def __pipeline_init(self):
+    def __pipeline_init__(self):
         finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
 
         if self.optimization_warnings:
