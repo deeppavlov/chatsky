@@ -47,7 +47,6 @@ class ServiceGroup(PipelineComponent):
 
     components: List[
         Union[
-            Actor,
             Service,
             ServiceGroup,
         ]

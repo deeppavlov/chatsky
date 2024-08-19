@@ -1,19 +1,17 @@
 from typing import Callable
 
-from chatsky.pipeline.pipeline.component import PipelineComponent
 from pydantic import ValidationError
 import pytest
 
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     Service,
     ServiceGroup,
-    Actor,
     ServiceRuntimeInfo,
     BeforeHandler,
+    PipelineComponent,
 )
-from chatsky.script import Context
-from chatsky.utils.testing import TOY_SCRIPT_KWARGS
+from chatsky.core import Context, Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, TOY_SCRIPT
 
 
 # Looks overly long, we only need one function anyway.
@@ -116,7 +114,7 @@ class TestServiceGroupValidation:
             # Though 123 will be cast to a list
             ServiceGroup(components=123)
         with pytest.raises(ValidationError):
-            # The dictionary inside 'components' will check if Actor, Service or ServiceGroup fit the signature,
+            # The dictionary inside 'components' will check if Service or ServiceGroup fit the signature,
             # but it doesn't fit any of them (required fields are not defined), so it's just a normal dictionary.
             ServiceGroup(components={"before_handler": []})
         with pytest.raises(ValidationError):
@@ -125,35 +123,32 @@ class TestServiceGroupValidation:
             ServiceGroup(components={"handler": 123})
 
 
-# Testing of node and script validation for actor exist at script/core/test_actor.py
-class TestActorValidation:
-    def test_toy_script_actor(self):
-        Actor(**TOY_SCRIPT_KWARGS)
-
-    def test_wrong_inputs(self):
-        with pytest.raises(ValidationError):
-            # 'condition_handler' is not an Optional field.
-            Actor(**TOY_SCRIPT_KWARGS, condition_handler=None)
-        with pytest.raises(ValidationError):
-            # 'handlers' is not an Optional field.
-            Actor(**TOY_SCRIPT_KWARGS, handlers=None)
-        with pytest.raises(ValidationError):
-            # 'script' must be either a dict or Script instance.
-            Actor(script=[], start_label=TOY_SCRIPT_KWARGS["start_label"])
-
-
 # Can't think of any other tests that aren't done in other tests in this file
 class TestPipelineValidation:
     def test_correct_inputs(self):
         Pipeline(**TOY_SCRIPT_KWARGS)
         Pipeline.model_validate(TOY_SCRIPT_KWARGS)
 
-    # Testing if actor is an unchangeable constant throughout the program
-    def test_cached_property(self):
+    def test_fallback_label_set_to_start_label(self):
+        pipeline = Pipeline(script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+        assert pipeline.fallback_label.node_name == "start_node"
+
+    def test_incorrect_labels(self):
+        with pytest.raises(ValidationError):
+            Pipeline(script=TOY_SCRIPT, start_label=("nonexistent", "nonexistent"))
+
+        with pytest.raises(ValidationError):
+            Pipeline(
+                script=TOY_SCRIPT,
+                start_label=("greeting_flow", "start_node"),
+                fallback_label=("nonexistent", "nonexistent")
+            )
+
+    def test_pipeline_services_cached(self):
         pipeline = Pipeline(**TOY_SCRIPT_KWARGS)
-        old_actor_id = id(pipeline.actor)
+        old_actor_id = id(pipeline.services_pipeline)
         pipeline.fallback_label = ("greeting_flow", "other_node")
-        assert old_actor_id == id(pipeline.actor)
+        assert old_actor_id == id(pipeline.services_pipeline)
 
     def test_pre_services(self):
         with pytest.raises(ValidationError):

@@ -50,36 +50,9 @@ class Actor(PipelineComponent):
     according to the :py:class:`~chatsky.script.Script`.
     """
 
-    script: Script
-    """
-    The dialog scenario: a graph described by the :py:class:`.Keywords`.
-    While the graph is being initialized, it is validated and then used for the dialog.
-    """
-    fallback_label: AbsoluteNodeLabel
-    """
-    The label of :py:class:`~chatsky.script.Script`.
-    Dialog comes into that label if all other transitions failed,
-    or there was an error while executing the scenario. Defaults to `None`.
-    """
-    default_priority: float = 1.0
-    """
-    Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
-    where there is no priority. Defaults to `1.0`.
-    """
-
     @model_validator(mode="after")
     def __tick_async_flag__(self):
         self.calculated_async_flag = False
-        return self
-
-    @model_validator(mode="after")
-    def __fallback_label_validator__(self):
-        """
-        Validate :py:data:`~.Actor.fallback_label`.
-        :raises ValueError: If `fallback_label` doesn't exist in the given :py:class:`~.Script`.
-        """
-        if self.script.get_node(self.fallback_label) is None:
-            raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
 
     @property
@@ -87,17 +60,17 @@ class Actor(PipelineComponent):
         return "actor"
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
-        next_label = self.fallback_label
+        next_label = pipeline.fallback_label
 
         try:
-            ctx.framework_data.current_node = self.script.get_global_local_inherited_node(ctx.last_label)
+            ctx.framework_data.current_node = pipeline.script.get_global_local_inherited_node(ctx.last_label)
 
             logger.debug(f"Running pre_transition")
             await self._run_processing(ctx.current_node.pre_transition, ctx)
 
             logger.debug(f"Running transitions")
 
-            destination_result = await get_next_label(ctx, ctx.current_node.transitions, self.default_priority)
+            destination_result = await get_next_label(ctx, ctx.current_node.transitions, pipeline.default_priority)
             if destination_result is not None:
                 next_label = destination_result
         except Exception as exc:
@@ -110,7 +83,7 @@ class Actor(PipelineComponent):
         response = Message()
 
         try:
-            ctx.framework_data.current_node = self.script.get_global_local_inherited_node(next_label)
+            ctx.framework_data.current_node = pipeline.script.get_global_local_inherited_node(next_label)
 
             logger.debug(f"Running pre_response")
             await self._run_processing(ctx.current_node.pre_response, ctx)

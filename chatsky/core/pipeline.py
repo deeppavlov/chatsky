@@ -28,17 +28,23 @@ from chatsky.core.message import Message
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
-from chatsky.core.service.group import ServiceGroup
-from chatsky.core.service.extra import ComponentExtraHandler
+from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
+from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
 from chatsky.core.service.types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
 )
+from .service import Service
 from .utils import finalize_service_group
 from chatsky.core.service.actor import Actor
-from chatsky.core.node_label import AbsoluteNodeLabel
+from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 logger = logging.getLogger(__name__)
+
+
+class PipelineServiceGroup(ServiceGroup):
+    """A service group that allows actor inside."""
+    components: List[Union[Actor, Service, ServiceGroup]]
 
 
 class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
@@ -47,16 +53,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     It accepts constructor parameters:
     """
 
-    pre_services: ServiceGroup = Field(default_factory=list)
+    pre_services: ServiceGroup = Field(default_factory=list, validate_default=True)
     """
-    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup`
-    that will be executed before Actor.
+    :py:class:`~.ServiceGroup` that will be executed before Actor.
     """
-    post_services: ServiceGroup = Field(default_factory=list)
+    post_services: ServiceGroup = Field(default_factory=list, validate_default=True)
     """
-    List of :py:class:`~.Service` or :py:class:`~.ServiceGroup` that will be
-    executed after :py:class:`~.Actor`. It constructs root
-    service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
+    :py:class:`~.ServiceGroup` that will be executed after :py:class:`~.Actor`.
     """
     script: Script
     """
@@ -66,7 +69,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     (required) :py:class:`~.Actor` start label.
     """
-    fallback_label: Optional[AbsoluteNodeLabel] = None
+    fallback_label: AbsoluteNodeLabel
     """
     :py:class:`~.Actor` fallback label.
     """
@@ -88,13 +91,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
     """
-    before_handler: ComponentExtraHandler = Field(default_factory=list)
+    before_handler: BeforeHandler = Field(default_factory=list, validate_default=True)
     """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
+    :py:class:`~.BeforeHandler` to add to the pipeline service.
     """
-    after_handler: ComponentExtraHandler = Field(default_factory=list)
+    after_handler: AfterHandler = Field(default_factory=list, validate_default=True)
     """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
+    :py:class:`~.AfterHandler` to add to the pipeline service.
     """
     timeout: Optional[float] = None
     """
@@ -105,7 +108,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     Asynchronous pipeline optimization check request flag;
     warnings will be sent to logs. Additionally, it has some calculated fields:
 
-    - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
+    - `services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
     - `actor` is a pipeline actor, found among services.
 
     """
@@ -116,20 +119,62 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     of the script should be parallelized over respective groups.
     """
 
-    @computed_field
-    @cached_property
-    def actor(self) -> Actor:
-        return Actor(
-            script=self.script,
-            fallback_label=self.fallback_label or self.start_label,
-            default_priority=self.default_priority,
-        )
+    def __init__(
+            self,
+            script: Union[Script, dict],
+            start_label: AbsoluteNodeLabelInitTypes,
+            fallback_label: AbsoluteNodeLabelInitTypes = None,
+            *,
+            default_priority: float = None,
+            slots: GroupSlot = None,
+            messenger_interface: MessengerInterface = None,
+            context_storage: Union[DBContextStorage, dict] = None,
+            pre_services: ServiceGroupInitTypes = None,
+            post_services: ServiceGroupInitTypes = None,
+            before_handler: ComponentExtraHandlerInitTypes = None,
+            after_handler: ComponentExtraHandlerInitTypes = None,
+            timeout: float = None,
+            optimization_warnings: bool = None,
+            parallelize_processing: bool = None,
+    ):
+        if fallback_label is None:
+            fallback_label = start_label
+        init_dict = {
+            "script": script,
+            "start_label": start_label,
+            "fallback_label": fallback_label,
+            "default_priority": default_priority,
+            "slots": slots,
+            "messenger_interface": messenger_interface,
+            "context_storage": context_storage,
+            "pre_services": pre_services,
+            "post_services": post_services,
+            "before_handler": before_handler,
+            "after_handler": after_handler,
+            "timeout": timeout,
+            "optimization_warnings": optimization_warnings,
+            "parallelize_processing": parallelize_processing,
+        }
+        empty_fields = set()
+        for k, v in init_dict.items():
+            if k not in self.model_fields:
+                raise NotImplementedError("Init method contains a field not in model fields.")
+            if v is None:
+                empty_fields.add(k)
+        for field in empty_fields:
+            del init_dict[field]
+        super().__init__(**init_dict)
 
     @computed_field
     @cached_property
-    def _services_pipeline(self) -> ServiceGroup:
-        components = [self.pre_services, self.actor, self.post_services]
-        services_pipeline = ServiceGroup(
+    def services_pipeline(self) -> PipelineServiceGroup:
+        """
+        A group containing :py:attr:`.Pipeline.pre_services`, :py:class:`~.Actor`
+        and :py:attr:`.Pipeline.post_services`.
+        It has :py:attr:`.Pipeline.before_handler` and :py:attr:`.Pipeline.after_handler` applied to it.
+        """
+        components = [self.pre_services, Actor(), self.post_services]
+        services_pipeline = PipelineServiceGroup(
             components=components,
             before_handler=self.before_handler,
             after_handler=self.after_handler,
@@ -137,6 +182,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         )
         services_pipeline.name = "pipeline"
         services_pipeline.path = ".pipeline"
+
+        finalize_service_group(services_pipeline, path=services_pipeline.path)
+
+        if self.optimization_warnings:
+            services_pipeline.log_optimization_warnings()
+
         return services_pipeline
 
     @model_validator(mode="after")
@@ -147,19 +198,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def validate_fallback_label(self):
-        if self.fallback_label is None:
-            self.fallback_label = self.start_label
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
-        return self
-
-    @model_validator(mode="after")
-    def __pipeline_init__(self):
-        finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
-
-        if self.optimization_warnings:
-            self._services_pipeline.log_optimization_warnings()
-
         return self
 
     def add_global_handler(
@@ -200,7 +240,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 else GlobalExtraHandlerType.AFTER
             )
 
-        self._services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
+        self.services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
 
     @property
     def info_dict(self) -> dict:
@@ -213,7 +253,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "type": type(self).__name__,
             "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
             "context_storage": f"Instance of {type(self.context_storage).__name__}",
-            "services": [self._services_pipeline.info_dict],
+            "services": [self.services_pipeline.info_dict],
         }
 
     async def _run_pipeline(
@@ -239,7 +279,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.framework_data.pipeline = self
 
         ctx.add_request(request)
-        result = await self._services_pipeline(ctx, self)
+        result = await self.services_pipeline(ctx, self)
 
         if asyncio.iscoroutine(result):
             await result

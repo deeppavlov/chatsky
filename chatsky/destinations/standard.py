@@ -70,7 +70,7 @@ class Fallback(BaseDestination):
     """
 
     async def func(self, ctx: Context) -> NodeLabelInitTypes:
-        return ctx.pipeline.actor.fallback_label
+        return ctx.pipeline.fallback_label
 
 
 def get_next_node_in_flow(
