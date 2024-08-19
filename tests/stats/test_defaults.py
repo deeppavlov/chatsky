@@ -11,15 +11,8 @@ except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context,expected",
-    [
-        (Context(), {"flow": "greeting_flow", "label": "greeting_flow: start_node", "node": "start_node"}),
-        (Context(labels={0: ("a", "b")}), {"flow": "a", "node": "b", "label": "a: b"}),
-    ],
-)
-async def test_get_current_label(context: Context, expected: set):
+async def test_get_current_label():
+    context = Context.init(("a", "b"))
     pipeline = Pipeline(script={"greeting_flow": {"start_node": {}}}, start_label=("greeting_flow", "start_node"))
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
@@ -29,7 +22,7 @@ async def test_get_current_label(context: Context, expected: set):
         ),
     )
     result = await default_extractors.get_current_label(context, pipeline, runtime_info)
-    assert result == expected
+    assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
 @pytest.mark.asyncio

@@ -95,6 +95,7 @@ def test_get_inherited_node():
     )
 
     assert script.get_global_local_inherited_node(AbsoluteNodeLabel(flow_name="", node_name="")) == None
+    assert script.get_global_local_inherited_node(AbsoluteNodeLabel(flow_name="flow", node_name="")) == None
     assert script.get_global_local_inherited_node(AbsoluteNodeLabel(flow_name="flow", node_name="node")) == Node(
         misc={"k1": "g1", "k2": "l1", "k3": "n1", "k4": "n2", "k5": "n3"}
     )
