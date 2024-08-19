@@ -5,7 +5,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.script_function import BaseResponse, BaseProcessing
 from chatsky.core.pipeline import Pipeline
-from chatsky.core.keywords import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
+from chatsky.core import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
 
 
 @pytest.mark.parametrize("dict,result", [

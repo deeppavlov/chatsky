@@ -8,7 +8,7 @@ from chatsky.core.service.actor import Actor, logger
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.context import Context
 from chatsky.core.script import Script
-from chatsky.core.keywords import RESPONSE, TRANSITIONS, PRE_TRANSITION, PRE_RESPONSE
+from chatsky.core import RESPONSE, TRANSITIONS, PRE_TRANSITION, PRE_RESPONSE
 
 
 class TestRequestProcessing:

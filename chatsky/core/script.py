@@ -77,3 +77,19 @@ class Script(BaseModel, extra="allow"):
         inheritant_node = Node()
 
         return inheritant_node.merge(self.global_node).merge(flow.local_node).merge(node)
+
+
+GLOBAL = "global"
+"""Key for :py:attr:`~chatsky.core.script.Script.global_node`."""
+LOCAL = "local"
+"""Key for :py:attr:`~chatsky.core.script.Flow.local_node`."""
+TRANSITIONS = "transitions"
+"""Key for :py:attr:`~chatsky.core.script.Node.transitions`."""
+RESPONSE = "response"
+"""Key for :py:attr:`~chatsky.core.script.Node.response`."""
+MISC = "misc"
+"""Key for :py:attr:`~chatsky.core.script.Node.misc`."""
+PRE_RESPONSE = "pre_response"
+"""Key for :py:attr:`~chatsky.core.script.Node.pre_response`."""
+PRE_TRANSITION = "pre_transition"
+"""Key for :py:attr:`~chatsky.core.script.Node.pre_transition`."""
