@@ -10,7 +10,7 @@ from chatsky.core.script import Node, Flow, Script
 class MyProcessing(BaseProcessing):
     value: str = ""
 
-    async def func(self, ctx: Context) -> None:
+    async def call(self, ctx: Context) -> None:
         return
 
 

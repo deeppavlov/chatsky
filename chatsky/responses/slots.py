@@ -35,7 +35,7 @@ class FilledTemplate(BaseResponse):
                  on_exception: Literal["keep_template", "return_none"] = "return_none"):
         super().__init__(template=template, on_exception=on_exception)
 
-    async def func(self, ctx: Context) -> MessageInitTypes:
+    async def call(self, ctx: Context) -> MessageInitTypes:
         result = await self.template.wrapped_call(ctx)
         if not isinstance(result, Message):
             raise ValueError("Cannot fill template: response did not return Message.")

@@ -17,21 +17,21 @@ class TestBaseFunctionCallWrapper:
     ])
     async def test_validation(self, func_type, data, return_value):
         class MyFunc(func_type):
-            async def func(self, ctx):
+            async def call(self, ctx):
                 return data
 
         assert await MyFunc().wrapped_call(None) == return_value
 
     async def test_wrong_type(self):
         class MyProc(BaseProcessing):
-            async def func(self, ctx):
+            async def call(self, ctx):
                 return 1
 
         assert isinstance(await MyProc().wrapped_call(None), TypeError)
 
     async def test_non_async_func(self):
         class MyCondition(BaseCondition):
-            def func(self, ctx):
+            def call(self, ctx):
                 return True
 
         assert await MyCondition().wrapped_call(None) is True
@@ -40,7 +40,7 @@ class TestBaseFunctionCallWrapper:
         log_list = log_event_catcher(logger)
 
         class MyProc(BaseProcessing):
-            async def func(self, ctx):
+            async def call(self, ctx):
                 raise RuntimeError()
 
         assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
@@ -52,7 +52,7 @@ class TestBaseFunctionCallWrapper:
             pass
 
         class MyProc(BaseProcessing):
-            async def func(self, ctx):
+            async def call(self, ctx):
                 raise SpecialException()
 
         with pytest.raises(SpecialException):
@@ -99,7 +99,7 @@ class TestNodeLabelValidation:
     @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))
     async def test_base_destination(self, context_flow_factory, flow_name):
         class MyDestination(BaseDestination):
-            def func(self, ctx):
+            def call(self, ctx):
                 return "node"
 
         dst = await MyDestination().wrapped_call(context_flow_factory(flow_name))

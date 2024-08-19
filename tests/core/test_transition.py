@@ -6,27 +6,27 @@ from chatsky.core.node_label import NodeLabelInitTypes
 
 
 class FaultyDestination(BaseDestination):
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         raise RuntimeError()
 
 
 class FaultyCondition(BaseCondition):
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         raise RuntimeError()
 
 
 class FaultyPriority(BasePriority):
-    async def func(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> float | bool | None:
         raise RuntimeError()
 
 
 class TruePriority(BasePriority):
-    async def func(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> float | bool | None:
         return True
 
 
 class FalsePriority(BasePriority):
-    async def func(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> float | bool | None:
         return False
 
 

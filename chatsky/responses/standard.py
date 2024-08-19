@@ -28,5 +28,5 @@ class RandomChoice(BaseResponse):
     def __init__(self, *responses: MessageInitTypes):
         super().__init__(responses=responses)
 
-    async def func(self, ctx: Context) -> MessageInitTypes:
+    async def call(self, ctx: Context) -> MessageInitTypes:
         return random.choice(self.responses)

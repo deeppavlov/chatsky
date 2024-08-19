@@ -26,7 +26,7 @@ class Extract(BaseProcessing):
     def __init__(self, *slots: SlotName):
         super().__init__(slots=slots)
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         results = await asyncio.gather(*(manager.extract_slot(slot, ctx) for slot in self.slots), return_exceptions=True)
 
@@ -40,7 +40,7 @@ class ExtractAll(BaseProcessing):
     Extract all slots defined in the pipeline.
     """
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         await manager.extract_all(ctx)
 
@@ -56,7 +56,7 @@ class Unset(BaseProcessing):
     def __init__(self, *slots: SlotName):
         super().__init__(slots=slots)
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         for slot in self.slots:
             try:
@@ -70,7 +70,7 @@ class UnsetAll(BaseProcessing):
     Mark all slots as not extracted and clear all extracted values.
     """
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         manager.unset_all_slots()
 
@@ -82,7 +82,7 @@ class FillTemplate(BaseProcessing):
     Response message of the current node should be a format-string: e.g. "Your username is {profile.username}".
     """
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         response = ctx.current_node.response
 
         if response is None:

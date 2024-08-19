@@ -108,7 +108,7 @@ document_data = {
 
 # %%
 class DataAttachmentHash(BaseResponse):
-    async def func(self, ctx: Context) -> MessageInitTypes:
+    async def call(self, ctx: Context) -> MessageInitTypes:
         attachment = [
             a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
         ]

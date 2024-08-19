@@ -23,17 +23,17 @@ class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType], frozen=True):
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
 
     @abstractmethod
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         raise NotImplementedError()
 
     async def wrapped_call(self, ctx: Context, info: str = "") -> ReturnType | Exception:
         try:
-            result = await wrap_sync_function_in_async(self.func, ctx)
+            result = await wrap_sync_function_in_async(self.call, ctx)
             if not isinstance(self.return_type, tuple) and issubclass(self.return_type, BaseModel):
                 result = self.return_type.model_validate(result, context={"ctx": ctx})
             if not isinstance(result, self.return_type):
                 raise TypeError(
-                    f"Function `func` of {self.__class__.__name__} should return {self.return_type!r}. "
+                    f"Function `call` of {self.__class__.__name__} should return {self.return_type!r}. "
                     f"Got instead: {result!r}"
                 )
             logger.debug(f"Function {self.__class__.__name__} returned {result!r}. {info}")
@@ -49,7 +49,7 @@ class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType], frozen=True):
 class ConstScriptFunc(BaseScriptFunc, Generic[ReturnType]):
     root: ReturnType
 
-    async def func(self, ctx: Context):
+    async def call(self, ctx: Context):
         return self.root
 
     @model_validator(mode="before")
@@ -62,7 +62,7 @@ class BaseCondition(BaseScriptFunc[bool], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = bool
 
     @abstractmethod
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         raise NotImplementedError
 
     async def __call__(self, ctx: Context, info: str = "") -> bool:
@@ -83,7 +83,7 @@ class BaseResponse(BaseScriptFunc[Message], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = Message
 
     @abstractmethod
-    async def func(self, ctx: Context) -> MessageInitTypes:
+    async def call(self, ctx: Context) -> MessageInitTypes:
         raise NotImplementedError
 
 
@@ -98,7 +98,7 @@ class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = AbsoluteNodeLabel
 
     @abstractmethod
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         raise NotImplementedError
 
 
@@ -113,7 +113,7 @@ class BaseProcessing(BaseScriptFunc[None], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = NoneType
 
     @abstractmethod
-    async def func(self, ctx: Context) -> None:
+    async def call(self, ctx: Context) -> None:
         raise NotImplementedError
 
 
@@ -121,7 +121,7 @@ class BasePriority(BaseScriptFunc[Union[float, None, bool]], ABC):
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = (float, NoneType, bool)
 
     @abstractmethod
-    async def func(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> float | bool | None:
         raise NotImplementedError
 
 

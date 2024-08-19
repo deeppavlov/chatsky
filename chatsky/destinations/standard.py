@@ -33,7 +33,7 @@ class Repeat(BaseDestination):
 
     shift: int = Field(default=0, ge=0)
 
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         index = get_last_index(ctx.labels)
         shifted_index = index - self.shift
         result = ctx.labels.get(shifted_index)
@@ -54,7 +54,7 @@ class Start(BaseDestination):
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return ctx.pipeline.start_label
 
 
@@ -69,7 +69,7 @@ class Fallback(BaseDestination):
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return ctx.pipeline.fallback_label
 
 
@@ -119,7 +119,7 @@ class Forward(BaseDestination):
     """
     loop: bool = False
 
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return get_next_node_in_flow(
             ctx.last_label,
             ctx,
@@ -142,7 +142,7 @@ class Backward(BaseDestination):
     """
     loop: bool = False
 
-    async def func(self, ctx: Context) -> NodeLabelInitTypes:
+    async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return get_next_node_in_flow(
             ctx.last_label,
             ctx,

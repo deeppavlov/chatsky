@@ -39,7 +39,7 @@ class ExactMatch(BaseCondition):
     def __init__(self, match: MessageInitTypes, *, skip_none=True):
         super().__init__(match=match, skip_none=skip_none)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
         for field in self.match.model_fields:
             match_value = self.match.__getattribute__(field)
@@ -65,7 +65,7 @@ class HasText(BaseCondition):
     def __init__(self, text):
         super().__init__(text=text)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
         if request.text is None:
             return False
@@ -91,7 +91,7 @@ class Regexp(BaseCondition):
     def re_object(self) -> Pattern:
         return re.compile(self.pattern, self.flags)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
         if request.text is None:
             return False
@@ -110,7 +110,7 @@ class Any(BaseCondition):
     def __init__(self, *conditions):
         super().__init__(conditions=list(conditions))
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         return any(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
 
 
@@ -126,7 +126,7 @@ class All(BaseCondition):
     def __init__(self, *conditions):
         super().__init__(conditions=list(conditions))
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         return all(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
 
 
@@ -142,7 +142,7 @@ class Negation(BaseCondition):
     def __init__(self, condition):
         super().__init__(condition=condition)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         result = await self.condition.wrapped_call(ctx)
         return result is not True
 
@@ -175,7 +175,7 @@ class CheckLastLabels(BaseCondition):
             labels = []
         super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         labels = list(ctx.labels.values())[-self.last_n_indices:]
         for label in labels:
             if label.flow_name in self.flow_labels or label in self.labels:
@@ -196,7 +196,7 @@ class HasCallbackQuery(BaseCondition):
     def __init__(self, query_string):
         super().__init__(query_string=query_string)
 
-    async def func(self, ctx: Context) -> bool:
+    async def call(self, ctx: Context) -> bool:
         last_request = ctx.last_request
         if last_request.attachments is None:
             return False

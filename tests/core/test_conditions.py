@@ -6,7 +6,7 @@ import chatsky.conditions as cnd
 
 
 class FaultyCondition(BaseCondition):
-    async def func(self, ctx) -> bool:
+    async def call(self, ctx) -> bool:
         raise RuntimeError()
 
 

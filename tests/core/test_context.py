@@ -66,7 +66,7 @@ def test_responses():
 
 async def test_pipeline_available():
     class MyResponse(BaseResponse):
-        async def func(self, ctx: Context) -> MessageInitTypes:
+        async def call(self, ctx: Context) -> MessageInitTypes:
             return ctx.pipeline.start_label.node_name
 
     pipeline = Pipeline(script={"flow": {"node": {RESPONSE: MyResponse()}}}, start_label=("flow", "node"))
@@ -76,13 +76,13 @@ async def test_pipeline_available():
 
     ctx.framework_data.pipeline = None
     with pytest.raises(ContextError):
-        await MyResponse().func(ctx)
+        await MyResponse().call(ctx)
 
 
 async def test_current_node_available():
     log = []
     class MyProcessing(BaseProcessing):
-        async def func(self, ctx: Context) -> None:
+        async def call(self, ctx: Context) -> None:
             log.append(ctx.current_node)
 
     pipeline = Pipeline(
@@ -94,4 +94,4 @@ async def test_current_node_available():
 
     ctx.framework_data.current_node = None
     with pytest.raises(ContextError):
-        await MyProcessing().func(ctx)
+        await MyProcessing().call(ctx)

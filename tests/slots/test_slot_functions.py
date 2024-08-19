@@ -103,11 +103,11 @@ async def test_unset_all(context, manager, monkeypatch, call_logger_factory):
 class TestTemplateFilling:
     async def test_failed_template(self, context, call_logger_factory):
         class MyResponse(BaseResponse):
-            async def func(self, ctx: Context) -> MessageInitTypes:
+            async def call(self, ctx: Context) -> MessageInitTypes:
                 raise RuntimeError()
 
         with pytest.raises(ValueError):
-            await rsp.FilledTemplate(MyResponse()).func(context)
+            await rsp.FilledTemplate(MyResponse()).call(context)
 
     async def test_missing_text(self, context, log_event_catcher):
         logs = log_event_catcher(rsp_logger, level=logging.WARN)

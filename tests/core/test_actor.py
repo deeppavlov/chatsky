@@ -98,7 +98,7 @@ class TestRequestProcessing:
         log_list = log_event_catcher(logger, level="ERROR")
 
         class MyProcessing(BaseProcessing):
-            async def func(self, ctx: Context) -> None:
+            async def call(self, ctx: Context) -> None:
                 ctx.framework_data.current_node = None
 
         script = Script.model_validate({"flow": {"node": {PRE_TRANSITION: {"": MyProcessing()}}, "fallback": {}}})
@@ -141,7 +141,7 @@ class TestRequestProcessing:
         log_list = log_event_catcher(logger, level="DEBUG")
 
         class MyResponse(BaseResponse):
-            async def func(self, ctx: Context) -> MessageInitTypes:
+            async def call(self, ctx: Context) -> MessageInitTypes:
                 return None
 
         script = Script.model_validate({"flow": {"node": {RESPONSE: MyResponse()}}})
@@ -164,7 +164,7 @@ class TestRequestProcessing:
         log_list = log_event_catcher(logger, level="ERROR")
 
         class MyProcessing(BaseProcessing):
-            async def func(self, ctx: Context) -> None:
+            async def call(self, ctx: Context) -> None:
                 ctx.framework_data.current_node = None
 
         script = Script.model_validate({"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}}}})
@@ -189,12 +189,12 @@ async def test_pre_processing():
     contested_resource = {}
 
     class Proc1(BaseProcessing):
-        async def func(self, ctx: Context) -> None:
+        async def call(self, ctx: Context) -> None:
             await asyncio.sleep(0)
             contested_resource[""] = 1
 
     class Proc2(BaseProcessing):
-        async def func(self, ctx: Context) -> None:
+        async def call(self, ctx: Context) -> None:
             contested_resource[""] = 2
 
     procs = {"1": Proc1(), "2": Proc2()}
