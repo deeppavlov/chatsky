@@ -13,7 +13,7 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import TYPE_CHECKING, Any, Optional, Callable
+from typing import TYPE_CHECKING, Any, Optional, Callable, TypeAlias, Union, Annotated
 from pydantic import model_validator, Field
 
 from chatsky.core.context import Context
@@ -143,3 +143,11 @@ def to_service(
         )
 
     return inner
+
+
+ServiceInitTypes: TypeAlias = Union[
+    Service,
+    Annotated[dict, "dict following the Service data model"],
+    Annotated[Callable, "handler for the service"]
+]
+"""Types that :py:class:`~.Service` can be validated from."""

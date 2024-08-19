@@ -11,7 +11,7 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, TypeAlias, Annotated
 
 from pydantic import model_validator, Field
 
@@ -27,7 +27,7 @@ from chatsky.core.service.types import (
     ExtraHandlerFunction,
     StartConditionCheckerFunction,
 )
-from .service import Service
+from .service import Service, ServiceInitTypes
 
 logger = logging.getLogger(__name__)
 
@@ -194,3 +194,12 @@ class ServiceGroup(PipelineComponent):
         representation = super(ServiceGroup, self).info_dict
         representation.update({"services": [service.info_dict for service in self.components]})
         return representation
+
+
+ServiceGroupInitTypes: TypeAlias = Union[
+    ServiceGroup,
+    Annotated[List[Union[Actor, ServiceInitTypes, "ServiceGroupInitTypes"]], "list of components"],
+    Annotated[Union[Actor, ServiceInitTypes, "ServiceGroupInitTypes"], "single component of the group"],
+    Annotated[dict, "dict following the ServiceGroup data model"]
+]
+"""Types that :py:class:`~.ServiceGroup` can be validated from."""

@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, TypeAlias, Union, Annotated, Callable
 from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.core.context import Context
@@ -201,3 +201,13 @@ class AfterHandler(ComponentExtraHandler):
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER
+
+
+ComponentExtraHandlerInitTypes: TypeAlias = Union[
+    ComponentExtraHandler,
+    Annotated[dict, "dict following the ComponentExtraHandler data model"],
+    Annotated[Callable, "a singular function for the extra handler"],
+    Annotated[List[Callable], "functions for the extra handler"],
+]
+"""Types that :py:class:`~.ComponentExtraHandler` can be validated from."""
+

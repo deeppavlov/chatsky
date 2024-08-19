@@ -322,5 +322,9 @@ class Message(DataModel):
         return data
 
 
-MessageInitTypes: TypeAlias = Union[Message, Annotated[dict, "dict repr of message"], Annotated[str, "message text"]]
+MessageInitTypes: TypeAlias = Union[
+    Message,
+    Annotated[dict, "dict following the Message data model"],
+    Annotated[str, "message text"]
+]
 """Types that :py:class:`~.Message` can be validated from."""

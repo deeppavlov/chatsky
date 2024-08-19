@@ -38,9 +38,9 @@ NodeLabelInitTypes: TypeAlias = Union[
     NodeLabel,
     Annotated[str, "node_name, flow name equal to current flow's name"],
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
-    Annotated[dict, "dict repr of NodeLabel"]
+    Annotated[dict, "dict following the NodeLabel data model"]
 ]
-"""Types that :py:class:`~.NodeLabelInitTypes` can be validated from."""
+"""Types that :py:class:`~.NodeLabel` can be validated from."""
 
 
 class AbsoluteNodeLabel(NodeLabel):
@@ -76,6 +76,6 @@ AbsoluteNodeLabelInitTypes: TypeAlias = Union[
     AbsoluteNodeLabel,
     NodeLabel,
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
-    Annotated[dict, "dict repr of AbsoluteNodeLabel"]
+    Annotated[dict, "dict following the AbsoluteNodeLabel data model"]
 ]
-"""Types that :py:class:`~.AbsoluteNodeLabelInitTypes` can be validated from."""
+"""Types that :py:class:`~.AbsoluteNodeLabel` can be validated from."""
