@@ -88,7 +88,7 @@ class ExtractedSlot(BaseModel, ABC):
     Represents value of an extracted slot.
 
     Instances of this class are managed by framework and
-    are stored in :py:attr:`~chatsky.script.core.context.FrameworkData.slot_manager`.
+    are stored in :py:attr:`~chatsky.core.context.FrameworkData.slot_manager`.
     They can be accessed via the ``ctx.framework_data.slot_manager.get_extracted_slot`` method.
     """
 

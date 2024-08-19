@@ -1,7 +1,8 @@
 """
-Processing
----------------------------
-This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API.
+Slot Processing
+---------------
+This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API as :py:class:`.BaseProcessing`
+subclasses.
 """
 import asyncio
 import logging
@@ -18,10 +19,9 @@ class Extract(BaseProcessing):
     """
     Extract slots listed slots.
     This will override all slots even if they are already extracted.
-
-    :param slots: List of slot names to extract.
     """
     slots: List[SlotName]
+    """A list of slot names to extract."""
 
     def __init__(self, *slots: SlotName):
         super().__init__(slots=slots)
@@ -48,10 +48,9 @@ class ExtractAll(BaseProcessing):
 class Unset(BaseProcessing):
     """
     Mark specified slots as not extracted and clear extracted values.
-
-    :param slots: List of slot names to extract.
     """
     slots: List[SlotName]
+    """A list of slot names to extract."""
 
     def __init__(self, *slots: SlotName):
         super().__init__(slots=slots)
@@ -79,7 +78,7 @@ class FillTemplate(BaseProcessing):
     """
     Fill the response template in the current node.
 
-    Response message of the current node should be a format-string: e.g. "Your username is {profile.username}".
+    Response message of the current node should be a format-string: e.g. ``"Your username is {profile.username}"``.
     """
 
     async def call(self, ctx: Context):

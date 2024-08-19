@@ -1,14 +1,11 @@
 """
-Labels
-------
-:py:const:`Labels <chatsky.script.ConstLabel>` are one of the important components of the dialog graph,
-which determine the targeted node name of the transition.
-They are used to identify the next step in the conversation.
-Labels can also be used in combination with other conditions,
-such as the current context or user data, to create more complex and dynamic conversations.
+Standard Destinations
+---------------------
+This module provides basic destinations.
 
-This module contains a standard set of scripting :py:const:`labels <chatsky.script.ConstLabel>` that
-can be used by developers to define the conversation flow.
+- :py:class:`Repeat` -- history-based destination;
+- :py:class:`Start` and :py:class:`Fallback` -- config-based destinations;
+- :py:class:`Forward` and :py:class:`Backward` -- script-based destinations.
 """
 
 from __future__ import annotations
@@ -22,16 +19,17 @@ from chatsky.core.script_function import BaseDestination
 
 class Repeat(BaseDestination):
     """
-    Returns transition handler that takes :py:class:`.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <ConstLabel>`
-    to the last node with a given :py:const:`priority <float>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
+    Return label of the node located at a certain position in the label history.
 
-    :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
+    Return label of the last visited node by default.
     """
 
     shift: int = Field(default=0, ge=0)
+    """
+    Position of the node in the history from the last element.
+    
+    Shift 0 means last label; shift 1 means second to last label; e.t.c.
+    """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
         index = get_last_index(ctx.labels)
@@ -45,13 +43,7 @@ class Repeat(BaseDestination):
 
 class Start(BaseDestination):
     """
-    Returns transition handler that takes :py:class:`~chatsky.script.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <chatsky.script.ConstLabel>`
-    to the start node with a given :py:const:`priority <float>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
-
-    :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
+    Return :py:attr:`~chatsky.core.pipeline.Pipeline.start_label`.
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
@@ -60,13 +52,7 @@ class Start(BaseDestination):
 
 class Fallback(BaseDestination):
     """
-    Returns transition handler that takes :py:class:`~chatsky.script.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <chatsky.script.ConstLabel>`
-    to the fallback node with a given :py:const:`priority <float>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
-
-    :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
+    Return :py:attr:`~chatsky.core.pipeline.Pipeline.fallback_label`.
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
@@ -81,7 +67,7 @@ def get_next_node_in_flow(
     loop: bool = False,
 ) -> AbsoluteNodeLabel:
     """
-    Function that returns node label from the context and pipeline after shifting the index.
+    Function that returns node label of a node in the same flow after shifting the index.
 
     :param node_label: Label of the node to shift from.
     :param ctx: Dialog context.
@@ -107,17 +93,13 @@ def get_next_node_in_flow(
 
 class Forward(BaseDestination):
     """
-    Returns transition handler that takes :py:class:`~chatsky.script.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <chatsky.script.ConstLabel>`
-    to the forward node with a given :py:const:`priority <float>` and :py:const:`cyclicality_flag <bool>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
-
-    :param priority: Float priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
-    :param cyclicality_flag: If it is `True`, the iteration over the label list is going cyclically
-        (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
+    Return the next node relative to the current node in the current flow.
     """
     loop: bool = False
+    """
+    Whether to return the first node of the flow if the current node is the last one.
+    Otherwise and exception is raised (and transition is considered unsuccessful).
+    """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return get_next_node_in_flow(
@@ -130,17 +112,13 @@ class Forward(BaseDestination):
 
 class Backward(BaseDestination):
     """
-    Returns transition handler that takes :py:class:`~chatsky.script.Context`,
-    :py:class:`~chatsky.pipeline.Pipeline` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <chatsky.script.ConstLabel>`
-    to the backward node with a given :py:const:`priority <float>` and :py:const:`cyclicality_flag <bool>`.
-    If the priority is not given, `Pipeline.actor.label_priority` is used as default.
-
-    :param priority: Float priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
-    :param cyclicality_flag: If it is `True`, the iteration over the label list is going cyclically
-        (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
+    Return the previous node relative to the current node in the current flow.
     """
     loop: bool = False
+    """
+    Whether to return the last node of the flow if the current node is the first one.
+    Otherwise and exception is raised (and transition is considered unsuccessful).
+    """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
         return get_next_node_in_flow(

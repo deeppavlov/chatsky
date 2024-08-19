@@ -1,8 +1,9 @@
 """
 Message
 -------
-The :py:class:`.Message` class is a universal data model for representing a message that should be supported by
-Chatsky. It only contains types and properties that are compatible with most messaging services.
+The Message class is a universal data model for representing a message.
+
+It only contains types and properties that are compatible with most messaging services.
 """
 
 from typing import Literal, Optional, List, Union, TypeAlias, Annotated
@@ -317,6 +318,9 @@ class Message(DataModel):
     @model_validator(mode="before")
     @classmethod
     def validate_from_str(cls, data):
+        """
+        Allow instantiating this class from a single string which becomes :py:attr:`Message.text`
+        """
         if isinstance(data, str):
             return {"text": data}
         return data

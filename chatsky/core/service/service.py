@@ -1,11 +1,11 @@
 """
 Service
 -------
-The Service module contains the :py:class:`.Service` class,
-which can be included into pipeline as object or a dictionary.
+The Service module contains the :py:class:`.Service` class which represents a single task.
+
 Pipeline consists of services and service groups.
-Service group can be synchronous or asynchronous.
 Service is an atomic part of a pipeline.
+
 Service can be asynchronous only if its handler is a coroutine.
 Actor wrapping service is asynchronous.
 """
@@ -35,8 +35,7 @@ if TYPE_CHECKING:
 class Service(PipelineComponent):
     """
     This class represents a service.
-    Service can be included into pipeline as object or a dictionary.
-    Service group can be synchronous or asynchronous.
+
     Service can be asynchronous only if its handler is a coroutine.
     """
 

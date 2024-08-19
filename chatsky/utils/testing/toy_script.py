@@ -45,7 +45,7 @@ TOY_SCRIPT_KWARGS = {
 }
 """
 # There should be a better description of this
-Keyword arguments to pass to :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline` in order to
+Keyword arguments to pass to :py:meth:`~chatsky.core.pipeline.Pipeline` in order to
 use :py:data:`~.TOY_SCRIPT`:
 
 .. code-block::
@@ -71,98 +71,98 @@ An example of a simple dialog.
 MULTIFLOW_SCRIPT = {
     "root": {
         "start": {
-            RESPONSE: Message("Hi"),
-            TRANSITIONS: {
-                ("small_talk", "ask_some_questions"): ExactMatch("hi"),
-                ("animals", "have_pets"): ExactMatch("i like animals"),
-                ("animals", "like_animals"): ExactMatch("let's talk about animals"),
-                ("news", "what_news"): ExactMatch("let's talk about news"),
-            },
+            RESPONSE: "Hi",
+            TRANSITIONS: [
+                Tr(dst=("small_talk", "ask_some_questions"), cnd=ExactMatch("hi")),
+                Tr(dst=("animals", "have_pets"), cnd=ExactMatch("i like animals")),
+                Tr(dst=("animals", "like_animals"), cnd=ExactMatch("let's talk about animals")),
+                Tr(dst=("news", "what_news"), cnd=ExactMatch("let's talk about news")),
+            ],
         },
-        "fallback": {RESPONSE: Message("Oops")},
+        "fallback": {RESPONSE: "Oops"},
     },
     "animals": {
         "have_pets": {
-            RESPONSE: Message("do you have pets?"),
-            TRANSITIONS: {"what_animal": ExactMatch("yes")},
+            RESPONSE: "do you have pets?",
+            TRANSITIONS: [Tr(dst="what_animal", cnd=ExactMatch("yes"))],
         },
         "like_animals": {
-            RESPONSE: Message("do you like it?"),
-            TRANSITIONS: {"what_animal": ExactMatch("yes")},
+            RESPONSE: "do you like it?",
+            TRANSITIONS: [Tr(dst="what_animal", cnd=ExactMatch("yes"))],
         },
         "what_animal": {
-            RESPONSE: Message("what animals do you have?"),
-            TRANSITIONS: {
-                "ask_about_color": ExactMatch("bird"),
-                "ask_about_breed": ExactMatch("dog"),
-            },
+            RESPONSE: "what animals do you have?",
+            TRANSITIONS: [
+                Tr(dst="ask_about_color", cnd=ExactMatch("bird")),
+                Tr(dst="ask_about_breed", cnd=ExactMatch("dog")),
+            ],
         },
-        "ask_about_color": {RESPONSE: Message("what color is it")},
+        "ask_about_color": {RESPONSE: "what color is it"},
         "ask_about_breed": {
-            RESPONSE: Message("what is this breed?"),
-            TRANSITIONS: {
-                "ask_about_breed": ExactMatch("pereat"),
-                "tell_fact_about_breed": ExactMatch("bulldog"),
-                "ask_about_training": ExactMatch("I don't know"),
-            },
+            RESPONSE: "what is this breed?",
+            TRANSITIONS: [
+                Tr(dst="ask_about_breed", cnd=ExactMatch("pereat")),
+                Tr(dst="tell_fact_about_breed", cnd=ExactMatch("bulldog")),
+                Tr(dst="ask_about_training", cnd=ExactMatch("I don't know")),
+            ],
         },
         "tell_fact_about_breed": {
-            RESPONSE: Message("Bulldogs appeared in England as specialized bull-baiting dogs. "),
+            RESPONSE: "Bulldogs appeared in England as specialized bull-baiting dogs. ",
         },
-        "ask_about_training": {RESPONSE: Message("Do you train your dog? ")},
+        "ask_about_training": {RESPONSE: "Do you train your dog? "},
     },
     "news": {
         "what_news": {
-            RESPONSE: Message("what kind of news do you prefer?"),
-            TRANSITIONS: {
-                "ask_about_science": ExactMatch("science"),
-                "ask_about_sport": ExactMatch("sport"),
-            },
+            RESPONSE: "what kind of news do you prefer?",
+            TRANSITIONS: [
+                Tr(dst="ask_about_science", cnd=ExactMatch("science")),
+                Tr(dst="ask_about_sport", cnd=ExactMatch("sport")),
+            ],
         },
         "ask_about_science": {
-            RESPONSE: Message("i got news about science, do you want to hear?"),
-            TRANSITIONS: {
-                "science_news": ExactMatch("yes"),
-                ("small_talk", "ask_some_questions"): ExactMatch("let's change the topic"),
-            },
+            RESPONSE: "i got news about science, do you want to hear?",
+            TRANSITIONS: [
+                Tr(dst="science_news", cnd=ExactMatch("yes")),
+                Tr(dst=("small_talk", "ask_some_questions"), cnd=ExactMatch("let's change the topic")),
+            ],
         },
         "science_news": {
-            RESPONSE: Message("This is science news"),
-            TRANSITIONS: {
-                "what_news": ExactMatch("ok"),
-                ("small_talk", "ask_some_questions"): ExactMatch("let's change the topic"),
-            },
+            RESPONSE: "This is science news",
+            TRANSITIONS: [
+                Tr(dst="what_news", cnd=ExactMatch("ok")),
+                Tr(dst=("small_talk", "ask_some_questions"), cnd=ExactMatch("let's change the topic")),
+            ],
         },
         "ask_about_sport": {
-            RESPONSE: Message("i got news about sport, do you want to hear?"),
-            TRANSITIONS: {
-                "sport_news": ExactMatch("yes"),
-                ("small_talk", "ask_some_questions"): ExactMatch("let's change the topic"),
-            },
+            RESPONSE: "i got news about sport, do you want to hear?",
+            TRANSITIONS: [
+                Tr(dst="sport_news", cnd=ExactMatch("yes")),
+                Tr(dst=("small_talk", "ask_some_questions"), cnd=ExactMatch("let's change the topic")),
+            ],
         },
         "sport_news": {
-            RESPONSE: Message("This is sport news"),
-            TRANSITIONS: {
-                "what_news": ExactMatch("ok"),
-                ("small_talk", "ask_some_questions"): ExactMatch("let's change the topic"),
-            },
+            RESPONSE: "This is sport news",
+            TRANSITIONS: [
+                Tr(dst="what_news", cnd=ExactMatch("ok")),
+                Tr(dst=("small_talk", "ask_some_questions"), cnd=ExactMatch("let's change the topic")),
+            ],
         },
     },
     "small_talk": {
         "ask_some_questions": {
-            RESPONSE: Message("how are you"),
-            TRANSITIONS: {
-                "ask_talk_about": ExactMatch("fine"),
-                ("animals", "like_animals"): ExactMatch("let's talk about animals"),
-                ("news", "what_news"): ExactMatch("let's talk about news"),
-            },
+            RESPONSE: "how are you",
+            TRANSITIONS: [
+                Tr(dst="ask_talk_about", cnd=ExactMatch("fine")),
+                Tr(dst=("animals", "like_animals"), cnd=ExactMatch("let's talk about animals")),
+                Tr(dst=("news", "what_news"), cnd=ExactMatch("let's talk about news")),
+            ],
         },
         "ask_talk_about": {
-            RESPONSE: Message("what do you want to talk about"),
-            TRANSITIONS: {
-                ("animals", "like_animals"): ExactMatch("dog"),
-                ("news", "what_news"): ExactMatch("let's talk about news"),
-            },
+            RESPONSE: "what do you want to talk about",
+            TRANSITIONS: [
+                Tr(dst=("animals", "like_animals"), cnd=ExactMatch("dog")),
+                Tr(dst=("news", "what_news"), cnd=ExactMatch("let's talk about news")),
+            ],
         },
     },
 }

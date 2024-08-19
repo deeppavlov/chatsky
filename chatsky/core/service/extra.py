@@ -1,9 +1,8 @@
 """
 Extra Handler
 -------------
-The Extra Handler module contains additional functionality that extends the capabilities of the system
-beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
-For example, it is used to grep statistics from components, timing, logging, etc.
+Extra handlers are functions that are executed before or after a
+:py:class:`~chatsky.core.service.component.PipelineComponent`.
 """
 
 from __future__ import annotations
@@ -31,7 +30,8 @@ if TYPE_CHECKING:
 
 class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
-    Class, representing an extra pipeline component handler.
+    Class, representing an extra handler for pipeline components.
+
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.

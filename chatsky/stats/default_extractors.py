@@ -61,7 +61,7 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
 async def get_last_response(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the text of the last response in the current context.
-    This handler is best used together with the `ACTOR` component.
+    This handler is best used together with the `Actor` component.
 
     This function is required to enable charts that aggregate requests and responses.
     """
@@ -72,7 +72,7 @@ async def get_last_response(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 async def get_last_request(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the text of the last request in the current context.
-    This handler is best used together with the `ACTOR` component.
+    This handler is best used together with the `Actor` component.
 
     This function is required to enable charts that aggregate requests and responses.
     """

@@ -1,7 +1,8 @@
 """
 Types
 -----
-The Types module contains several classes and special types that are used throughout `Chatsky Pipeline`.
+This module defines type aliases used throughout the ``Core.Service`` module.
+
 The classes and special types in this module can include data models,
 data structures, and other types that are defined for type hinting.
 """
@@ -47,7 +48,7 @@ class PipelineRunnerFunction(Protocol):
 class ComponentExecutionState(str, Enum):
     """
     Enum, representing pipeline component execution state.
-    These states are stored in `ctx.framework_keys.service_states`,
+    These states are stored in :py:attr:`~chatsky.core.context.FrameworkData.service_states`,
     that should always be requested with `NOT_RUN` being default fallback.
     Following states are supported:
 

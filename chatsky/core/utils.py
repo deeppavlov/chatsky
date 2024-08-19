@@ -1,8 +1,7 @@
 """
 Utils
 -----
-The Utils module contains several service functions that are commonly used throughout the framework.
-These functions provide a variety of utility functionality.
+The Utils module contains functions used to provide names to nameless pipeline components inside of a group.
 """
 
 import collections
@@ -16,14 +15,12 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     """
     Function for generating new name for a pipeline component,
     that has similar name with other components in the same group.
+
     The name is generated according to these rules:
 
-    - If component is an `Actor`, it is named `actor`.
-    - If component is a `Service` and the service's handler is `Callable`, it is named after this `callable`.
-    - If it's a service group, it is named `service_group`.
-    - Otherwise, it is named `noname_service`.
-    - | After that, `_[NUMBER]` is added to the resulting name,
-        where `_[NUMBER]` is number of components with the same name in current service group.
+    1. Base name is :py:attr:`.PipelineComponent.computed_name`;
+    2. After that, ``_[NUMBER]`` is added to the resulting name,
+       where ``_[NUMBER]`` is number of components with the same name in current service group.
 
     :param component: Component to be renamed.
     :param collisions: Components in the same service group as component.

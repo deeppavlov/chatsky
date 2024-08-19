@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+"""
+This module defines core feature of the Chatsky framework.
+"""
 from chatsky.core.context import Context
 from chatsky.core.message import Message
 from chatsky.core.pipeline import Pipeline

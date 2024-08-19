@@ -1,7 +1,7 @@
 """
-Response
----------------------------
-Slot-related Chatsky responses.
+Slot Responses
+--------------
+Slot-related responses.
 """
 
 from typing import Union, Literal
@@ -24,11 +24,16 @@ class FilledTemplate(BaseResponse):
     For the example above, if ``profile.username`` slot has value "admin",
     it would return a copy of the message with the following text:
     "Your username is admin".
-
-    :param template: Template message with a format-string text.
     """
     template: AnyResponse
+    """A response to use as a template."""
     on_exception: Literal["keep_template", "return_none"] = "return_none"
+    """
+    What to do if template filling fails.
+    
+    - "keep_template": :py:attr:`template` is returned, unfilled.
+    - "return_none": an empty message is returned.
+    """
 
     def __init__(self,
                  template: Union[MessageInitTypes, BaseResponse],

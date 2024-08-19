@@ -1,7 +1,14 @@
+"""
+Script Function
+---------------
+This module provides base classes for functions used in :py:class:`~chatsky.core.script.Script` instances.
+
+These functions allow dynamic script configuration and are essential to the scripting process.
+"""
 from __future__ import annotations
 
 from types import NoneType
-from typing import Generic, TypeVar, Union, Tuple, ClassVar, Optional, Annotated
+from typing import Generic, TypeVar, Union, Tuple, ClassVar, Optional, Annotated, Any
 from abc import abstractmethod, ABC
 import logging
 
@@ -19,14 +26,31 @@ logger = logging.getLogger(__name__)
 ReturnType = TypeVar("ReturnType")
 
 
-class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType], frozen=True):
+class BaseScriptFunc(BaseModel, ABC, frozen=True):
+    """
+    Base class for any script function.
+
+    Defines :py:meth:`wrapped_call` that wraps :py:meth:`call` and handles exceptions and types conversions.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
+    """Return type of the script function."""
 
     @abstractmethod
     async def call(self, ctx: Context):
+        """Implement this to create a custom function."""
         raise NotImplementedError()
 
-    async def wrapped_call(self, ctx: Context, info: str = "") -> ReturnType | Exception:
+    async def wrapped_call(self, ctx: Context, info: str = ""):
+        """
+        Handle :py:meth:`call`:
+
+        - Call it (regardless of whether it is async);
+        - Cast returned value to :py:attr:`return_type`;
+        - Catch exceptions.
+
+        :return: An instance of :py:attr:`return_type` if possible.
+            Otherwise, an ``Exception`` instance detailing what went wrong.
+        """
         try:
             result = await wrap_sync_function_in_async(self.call, ctx)
             if not isinstance(self.return_type, tuple) and issubclass(self.return_type, BaseModel):
@@ -42,12 +66,16 @@ class BaseScriptFunc(BaseModel, ABC, Generic[ReturnType], frozen=True):
             logger.warning(f"An exception occurred in {self.__class__.__name__}. {info}", exc_info=exc)
             return exc
 
-    async def __call__(self, ctx: Context, info: str = "") -> ReturnType | Exception:
+    async def __call__(self, ctx: Context, info: str = ""):
         return await self.wrapped_call(ctx, info)
 
 
-class ConstScriptFunc(BaseScriptFunc, Generic[ReturnType]):
-    root: ReturnType
+class ConstScriptFunc(BaseScriptFunc):
+    """
+    Base class for script functions that return a constant value.
+    """
+    root: None
+    """Value to return."""
 
     async def call(self, ctx: Context):
         return self.root
@@ -55,10 +83,16 @@ class ConstScriptFunc(BaseScriptFunc, Generic[ReturnType]):
     @model_validator(mode="before")
     @classmethod
     def validate_value(cls, data):
+        """Allow instantiating this class from its root value."""
         return {"root": data}
 
 
-class BaseCondition(BaseScriptFunc[bool], ABC):
+class BaseCondition(BaseScriptFunc, ABC):
+    """
+    Base class for condition functions.
+
+    These are used in :py:attr:`chatsky.core.transition.Transition.cnd`.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = bool
 
     @abstractmethod
@@ -72,14 +106,23 @@ class BaseCondition(BaseScriptFunc[bool], ABC):
         return result
 
 
-class ConstCondition(ConstScriptFunc[bool], BaseCondition):
-    pass
+class ConstCondition(ConstScriptFunc, BaseCondition):
+    root: bool
 
 
 AnyCondition = Annotated[Union[ConstCondition, BaseCondition], Field(union_mode="left_to_right")]
+"""
+A type annotation that allows accepting both :py:class:`ConstCondition` and :py:class:`BaseCondition`
+while validating :py:class:`ConstCondition` if possible.
+"""
 
 
-class BaseResponse(BaseScriptFunc[Message], ABC):
+class BaseResponse(BaseScriptFunc, ABC):
+    """
+    Base class for response functions.
+
+    These are used in :py:attr:`chatsky.core.script.Node.response`.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = Message
 
     @abstractmethod
@@ -87,14 +130,23 @@ class BaseResponse(BaseScriptFunc[Message], ABC):
         raise NotImplementedError
 
 
-class ConstResponse(ConstScriptFunc[Message], BaseResponse):
-    pass
+class ConstResponse(ConstScriptFunc, BaseResponse):
+    root: Message
 
 
 AnyResponse = Annotated[Union[ConstResponse, BaseResponse], Field(union_mode="left_to_right")]
+"""
+A type annotation that allows accepting both :py:class:`ConstResponse` and :py:class:`BaseResponse`
+while validating :py:class:`ConstResponse` if possible.
+"""
 
 
-class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
+class BaseDestination(BaseScriptFunc, ABC):
+    """
+    Base class for destination functions.
+
+    These are used in :py:attr:`chatsky.core.transition.Transition.dst`.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = AbsoluteNodeLabel
 
     @abstractmethod
@@ -102,14 +154,24 @@ class BaseDestination(BaseScriptFunc[AbsoluteNodeLabel], ABC):
         raise NotImplementedError
 
 
-class ConstDestination(ConstScriptFunc[NodeLabel], BaseDestination):
-    pass
+class ConstDestination(ConstScriptFunc, BaseDestination):
+    root: NodeLabel
 
 
 AnyDestination = Annotated[Union[ConstDestination, BaseDestination], Field(union_mode="left_to_right")]
+"""
+A type annotation that allows accepting both :py:class:`ConstDestination` and :py:class:`BaseDestination`
+while validating :py:class:`ConstDestination` if possible.
+"""
 
 
-class BaseProcessing(BaseScriptFunc[None], ABC):
+class BaseProcessing(BaseScriptFunc, ABC):
+    """
+    Base class for processing functions.
+
+    These are used in :py:attr:`chatsky.core.script.Node.pre_transition`
+    and :py:attr:`chatsky.core.script.Node.pre_response`.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = NoneType
 
     @abstractmethod
@@ -117,7 +179,18 @@ class BaseProcessing(BaseScriptFunc[None], ABC):
         raise NotImplementedError
 
 
-class BasePriority(BaseScriptFunc[Union[float, None, bool]], ABC):
+class BasePriority(BaseScriptFunc, ABC):
+    """
+    Base class for priority functions.
+
+    These are used in :py:attr:`chatsky.core.transition.Transition.priority`.
+
+    Has several possible return types:
+
+    - ``float``: Transition successful with the corresponding priority;
+    - ``True`` or ``None``: Transition successful with the :py:attr:`~chatsky.core.pipeline.Pipeline.default_priority`;
+    - ``False``: Transition unsuccessful.
+    """
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = (float, NoneType, bool)
 
     @abstractmethod
@@ -125,8 +198,12 @@ class BasePriority(BaseScriptFunc[Union[float, None, bool]], ABC):
         raise NotImplementedError
 
 
-class ConstPriority(ConstScriptFunc[Optional[float]], BasePriority):
-    pass
+class ConstPriority(ConstScriptFunc, BasePriority):
+    root: Optional[float]
 
 
 AnyPriority = Annotated[Union[ConstPriority, BasePriority], Field(union_mode="left_to_right")]
+"""
+A type annotation that allows accepting both :py:class:`ConstPriority` and :py:class:`BasePriority`
+while validating :py:class:`ConstPriority` if possible.
+"""

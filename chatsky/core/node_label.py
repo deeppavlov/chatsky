@@ -1,3 +1,9 @@
+"""
+Node Label
+----------
+This module defines classes for addressing nodes.
+"""
+
 from __future__ import annotations
 
 from typing import Optional, TypeAlias, Union, Tuple, TYPE_CHECKING, Annotated
@@ -9,17 +15,38 @@ if TYPE_CHECKING:
 
 
 def _get_current_flow_name(ctx: Context) -> str:
+    """Get flow name of the current node from context."""
     current_node = ctx.last_label
     return current_node.flow_name
 
 
 class NodeLabel(BaseModel):
+    """
+    A label for a node. (a way to address a specific node in the script)
+
+    Can be relative if :py:attr:`flow_name` is ``None``:
+    such ``NodeLabel`` will reference a node with the name :py:attr:`node_name`
+    in the current flow.
+    """
     flow_name: Optional[str] = None
+    """
+    Name of the flow in the script.
+    Can be ``None`` in which case this is inherited from the :py:attr:`.Context.current_node`.
+    """
     node_name: str
+    """
+    Name of the node in the flow.
+    """
 
     @model_validator(mode="before")
     @classmethod
     def validate_from_str_or_tuple(cls, data, info: ValidationInfo):
+        """
+        Allow instantiating of this class from:
+
+        - A single string (node name). Also attempt to get the current flow name from context.
+        - A tuple of two strings (flow and node name).
+        """
         if isinstance(data, str):
             flow_name = None
             context = info.context
@@ -44,11 +71,26 @@ NodeLabelInitTypes: TypeAlias = Union[
 
 
 class AbsoluteNodeLabel(NodeLabel):
+    """
+    A label for a node. (a way to address a specific node in the script)
+    """
     flow_name: str
+    """
+    Name of the flow in the script.
+    """
+    node_name: str
+    """
+    Name of the node in the flow.
+    """
 
     @model_validator(mode="before")
     @classmethod
     def validate_from_node_label(cls, data, info: ValidationInfo):
+        """
+        Allow instantiating of this class from :py:class:`NodeLabel`.
+
+        Attempt to get the current flow name from context if :py:attr:`NodeLabel.flow_name` is empty.
+        """
         if isinstance(data, NodeLabel):
             flow_name = data.flow_name
             if flow_name is None:
@@ -60,6 +102,9 @@ class AbsoluteNodeLabel(NodeLabel):
 
     @model_validator(mode="after")
     def check_node_exists(self, info: ValidationInfo):
+        """
+        Validate node exists in the script.
+        """
         context = info.context
         if isinstance(context, dict):
             ctx: Context = info.context.get("ctx")

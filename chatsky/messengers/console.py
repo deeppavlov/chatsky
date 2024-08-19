@@ -40,7 +40,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.core.pipeline.Pipeline._run_pipeline` function.
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid4()

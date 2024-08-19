@@ -1,17 +1,11 @@
 """
 Pipeline
 --------
-The Pipeline module contains the :py:class:`.Pipeline` class,
-which is a fundamental element of Chatsky. The Pipeline class is responsible
-for managing and executing the various components (:py:class:`.PipelineComponent`)which make up
-the processing of messages from and to users.
-It provides a way to organize and structure the messages processing flow.
-The Pipeline class is designed to be highly customizable and configurable,
-allowing developers to add, remove, or modify the components that make up the messages processing flow.
+Pipeline is the main element of the Chatsky framework.
 
-The Pipeline class is designed to be used in conjunction with the :py:class:`.PipelineComponent`
-class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
-to structure and manage the messages processing flow.
+Pipeline is responsible for managing and executing the various components
+(:py:class:`~chatsky.core.service.component.PipelineComponent`)
+including :py:class:`.Actor`.
 """
 
 import asyncio
@@ -50,7 +44,6 @@ class PipelineServiceGroup(ServiceGroup):
 class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class that automates service execution and creates service pipeline.
-    It accepts constructor parameters:
     """
 
     pre_services: ServiceGroup = Field(default_factory=list, validate_default=True)
@@ -67,16 +60,21 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     start_label: AbsoluteNodeLabel
     """
-    (required) :py:class:`~.Actor` start label.
+    (required) The first node of every context.
     """
     fallback_label: AbsoluteNodeLabel
     """
-    :py:class:`~.Actor` fallback label.
+    Node which will is used if :py:class:`Actor` cannot find the next node.
+    
+    This most commonly happens when there are not suitable transitions.
+    
+    Defaults to :py:attr:`start_label`.
     """
     default_priority: float = 1.0
     """
-    Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
-    where there is no priority. Defaults to `1.0`.
+    Default priority value for :py:class:`~chatsky.core.transition.Transition`.
+    
+    Defaults to ``1.0``.
     """
     slots: GroupSlot = Field(default_factory=GroupSlot)
     """
@@ -84,7 +82,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
-    An `AbsMessagingInterface` instance for this pipeline.
+    A `MessengerInterface` instance for this pipeline.
+    
+    It handles connections to interfaces that provide user requests and accept bot responses.
     """
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
     """
@@ -198,12 +198,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def validate_start_label(self):
+        """Validate :py:attr:`start_label` is in :py:attr:`script`."""
         if self.script.get_node(self.start_label) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
         return self
 
     @model_validator(mode="after")
     def validate_fallback_label(self):
+        """Validate :py:attr:`fallback_label` is in :py:attr:`script`."""
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
@@ -221,7 +223,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         or before/after each pipeline component.
         They can be used for pipeline statistics collection or other functionality extensions.
         NB! Global wrappers are still wrappers,
-        they shouldn't be used for much time-consuming tasks (see ../service/wrapper.py).
+        they shouldn't be used for much time-consuming tasks (see :py:mod:`chatsky.core.service.extra`).
 
         :param global_handler_type: (required) indication where the wrapper
             function should be executed.
@@ -267,7 +269,19 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
+
+        This method does:
+
+        1. Retrieve from :py:attr:`context_storage` or initialize context ``ctx_id``.
+        2. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.
+        3. Set up :py:attr:`.Context.framework_data` fields.
+        4. Add ``request`` to the context.
+        5. Execute :py:attr:`services_pipeline`.
+           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information).
+        6. Save context in the :py:attr:`context_storage`.
+
+        :return: Modified context ``ctx_id``.
         """
         if ctx_id is None:
             ctx = Context.init(self.start_label)
@@ -302,10 +316,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     def run(self):
         """
-        Method that starts a pipeline and connects to `messenger_interface`.
-        It passes `_run_pipeline` to `messenger_interface` as a callbacks,
-        so every time user request is received, `_run_pipeline` will be called.
-        This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
+        Method that starts a pipeline and connects to :py:attr:`messenger_interface`.
+
+        It passes :py:meth:`_run_pipeline` to :py:attr:`messenger_interface` as a callback,
+        so every time user request is received, :py:meth:`_run_pipeline` will be called.
+
+        This method can be both blocking and non-blocking. It depends on current :py:attr:`messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
@@ -315,13 +331,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     ) -> Context:
         """
         Method that executes pipeline once.
-        Basically, it is a shortcut for `_run_pipeline`.
-        NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
+        Basically, it is a shortcut for :py:meth:`_run_pipeline`.
+        NB! When pipeline is executed this way, :py:attr:`messenger_interface` won't be initiated nor connected.
 
         This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))
-
-    @property
-    def script(self) -> Script:
-        return self.actor.script

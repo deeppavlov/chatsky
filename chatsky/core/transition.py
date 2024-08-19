@@ -1,3 +1,9 @@
+"""
+Transition
+----------
+This module defines a transition class that is used to
+specify conditions and destinations for transitions to nodes.
+"""
 from __future__ import annotations
 
 from typing import Union, List, TYPE_CHECKING, Optional
@@ -18,9 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 class Transition(BaseModel):
+    """
+    A basic class for a transition to a node.
+    """
     cnd: AnyCondition = Field(default=True, validate_default=True)
+    """A condition that determines if transition is allowed to happen."""
     dst: AnyDestination
+    """Destination node of the transition."""
     priority: AnyPriority = Field(default=None, validate_default=True)
+    """Priority of the transition. Higher priority transitions are resolved first."""
 
     def __init__(self, *,
                  cnd: Union[bool, BaseCondition] = True,
@@ -31,6 +43,25 @@ class Transition(BaseModel):
 
 
 async def get_next_label(ctx: Context, transitions: List[Transition], default_priority: float) -> Optional[AbsoluteNodeLabel]:
+    """
+    Determine the next node based on ``transitions`` and ``ctx``.
+
+    The process is as follows:
+
+    1. Condition result is calculated for every transition.
+    2. Transitions are filtered by the calculated condition.
+    3. Priority result is calculated for every transition that is left.
+       ``default_priority`` is used for priority that return ``True`` or ``None``
+       as per :py:class:`.BasePriority`.
+       Those that return ``False`` are filtered out.
+    4. Destination result is calculated for every transition that is left.
+    5. The highest priority transition is chosen.
+
+    If at any point any :py:class:`.BaseCondition`, :py:class:`.BaseDestination` or :py:class:`.BasePriority`
+    produces an exception, the respective transition is filtered out.
+
+    :return: Label of the next node or ``None`` if no transition is left by the end of the process.
+    """
     filtered_transitions = transitions.copy()
     condition_results = await asyncio.gather(*[transition.cnd(ctx) for transition in filtered_transitions])
 

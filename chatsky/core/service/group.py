@@ -1,11 +1,12 @@
 """
 Service Group
 -------------
-The Service Group module contains the
-:py:class:`~.ServiceGroup` class, which is used to represent a group of related services.
+The Service Group module contains the ServiceGroup class, which is used to represent a group of related services.
+
 This class provides a way to organize and manage multiple services as a single unit,
 allowing for easier management and organization of the services within the pipeline.
-The :py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
+
+:py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
 """
 
 from __future__ import annotations
@@ -38,7 +39,7 @@ if TYPE_CHECKING:
 class ServiceGroup(PipelineComponent):
     """
     A service group class.
-    Service group can be included into pipeline as an object or a pipeline component list.
+
     Service group can be synchronous or asynchronous.
     Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
     Components in asynchronous groups are executed simultaneously.

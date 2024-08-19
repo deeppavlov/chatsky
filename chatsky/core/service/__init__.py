@@ -1,4 +1,8 @@
-# -*- coding: utf-8 -*-
+"""
+Service
+-------
+This module defines services -- a way to process context outside the Script.
+"""
 from .component import PipelineComponent
 from .conditions import (
     always_start_condition,

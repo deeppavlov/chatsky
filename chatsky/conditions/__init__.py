@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from chatsky.conditions.standard import (
     ExactMatch,
     HasText,

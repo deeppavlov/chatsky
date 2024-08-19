@@ -1,15 +1,14 @@
 """
 Context
 -------
-A Context is a data structure that is used to store information about the current state of a conversation.
+Context is a data structure that is used to store information about the current state of a conversation.
+
 It is used to keep track of the user's input, the current stage of the conversation, and any other
 information that is relevant to the current context of a dialog.
-The Context provides a convenient interface for working with data, allowing developers to easily add,
-retrieve, and manipulate data as the conversation progresses.
 
 The Context data structure provides several key features to make working with data easier.
 Developers can use the context to store any information that is relevant to the current conversation,
-such as user data, session data, conversation history, or etc.
+such as user data, session data, conversation history, e.t.c.
 This allows developers to easily access and use this data throughout the conversation flow.
 
 Another important feature of the context is data serialization.
@@ -51,7 +50,7 @@ class ContextError(Exception):
     """Raised when context methods are not used correctly."""
 
 
-class FrameworkData(BaseModel, arbitrary_types_allowed=True):  # todo: remove when pipeline is BaseModel
+class FrameworkData(BaseModel):
     """
     Framework uses this to store data related to any of its modules.
     """
@@ -59,7 +58,15 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):  # todo: remove wh
     service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
     current_node: Optional[Node] = Field(default=None, exclude=True)
+    """
+    A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_global_local_inherited_node`.
+    This node can be safely modified by Processing functions to alter current node fields.
+    """
     pipeline: Optional[Pipeline] = Field(default=None, exclude=True)
+    """
+    Instance of the pipeline that manages this context.
+    Can be used to obtain run configuration such as script or fallback label.
+    """
     stats: Dict[str, Any] = Field(default_factory=dict)
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
@@ -82,6 +89,8 @@ class Context(BaseModel):
 
         - key - `id` of the turn.
         - value - `label` on this turn.
+    
+    Start label is stored at the ``-1`` key.
     """
     requests: Dict[int, Message] = Field(default_factory=dict)
     """
@@ -99,8 +108,8 @@ class Context(BaseModel):
     """
     misc: Dict[str, Any] = Field(default_factory=dict)
     """
-    `misc` stores any custom data. The scripting doesn't use this dictionary by default,
-    so storage of any data won't reflect on the work on the internal Chatsky Scripting functions.
+    `misc` stores any custom data. The framework doesn't use this dictionary,
+    so storage of any data won't reflect on the work of the internal Chatsky functions.
 
         - key - Arbitrary data name.
         - value - Arbitrary data.
@@ -113,6 +122,7 @@ class Context(BaseModel):
 
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
+        """Initialize new context from ``start_label`` and, optionally, context ``id``."""
         labels = {-1: AbsoluteNodeLabel.model_validate(start_label)}
         if id is None:
             return cls(labels=labels)
@@ -143,7 +153,7 @@ class Context(BaseModel):
 
     def add_label(self, label: AbsoluteNodeLabelInitTypes):
         """
-        Add a new :py:data:`~.NodeLabel2Type` to the context.
+        Add a new :py:class:`~.AbsoluteNodeLabel` to the context.
         The new `label` is added with the index of `last_index + 1`.
 
         :param label: `label` that we need to add to the context.
@@ -155,7 +165,7 @@ class Context(BaseModel):
     @property
     def last_label(self) -> AbsoluteNodeLabel:
         """
-        Return the last :py:data:`~.NodeLabel2Type` of
+        Return the last :py:class:`~.AbsoluteNodeLabel` of
         the :py:class:`~.Context`.
         """
         last_index = get_last_index(self.labels)
@@ -187,6 +197,7 @@ class Context(BaseModel):
 
     @property
     def pipeline(self) -> Pipeline:
+        """Return :py:attr:`.FrameworkData.pipeline`."""
         pipeline = self.framework_data.pipeline
         if pipeline is None:
             raise ContextError("Pipeline is not set.")
@@ -194,6 +205,7 @@ class Context(BaseModel):
 
     @property
     def current_node(self) -> Node:
+        """Return :py:attr:`.FrameworkData.current_node`."""
         node = self.framework_data.current_node
         if node is None:
             raise ContextError("Current node is not set.")

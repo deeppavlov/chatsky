@@ -35,8 +35,6 @@ def check_happy_path(
 ):
     """
     Running tutorial with provided pipeline for provided requests, comparing responses with correct expected responses.
-    In cases when additional processing of responses is needed (e.g. in case of response being an HTML string),
-    a special function (response comparer) is used.
 
     :param pipeline: The Pipeline instance, that will be used for checking.
     :param happy_path: A tuple of (request, response) tuples, so-called happy path,

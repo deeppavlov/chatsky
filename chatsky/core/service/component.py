@@ -1,12 +1,9 @@
 """
 Component
 ---------
-The Component module defines a :py:class:`.PipelineComponent` class,
-which is a fundamental building block of the framework. A PipelineComponent represents a single
-step in a processing pipeline, and is responsible for performing a specific task or set of tasks.
+The Component module defines a :py:class:`.PipelineComponent` class.
 
-The PipelineComponent class can be a group or a service. It is designed to be reusable and composable,
-allowing developers to create complex processing pipelines by combining multiple components.
+This is a base class for pipeline processing and is responsible for performing a specific task.
 """
 
 from __future__ import annotations
@@ -37,8 +34,7 @@ if TYPE_CHECKING:
 
 class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
-    This class represents a pipeline component, which is a service or a service group.
-    It contains some fields that they have in common.
+    Base class for a single task processed by :py:class:`.Pipeline`.
     """
 
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -57,24 +53,20 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     requested_async_flag: Optional[bool] = None
     """
     Requested asynchronous property; if not defined,
-    :py:attr:`~.PipelineComponent.calculated_async_flag` is used instead.
+    :py:attr:`~PipelineComponent.calculated_async_flag` is used instead.
     """
     calculated_async_flag: bool = False
     """
     Whether the component can be asynchronous or not.
-
-    1) for :py:class:`~.pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
-    2) for :py:class:`~.pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
-
     """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
-    :py:class:`~.pipeline.types.StartConditionCheckerFunction` that is invoked before each component execution;
-    component is executed only if it returns `True`.
+    :py:data:`.StartConditionCheckerFunction` that is invoked before each component execution;
+    component is executed only if it returns ``True``.
     """
     name: Optional[str] = None
     """
-    Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
+    Component name (should be unique in a single :py:class:`~chatsky.core.service.group.ServiceGroup`),
     should not be blank or contain the ``.`` character.
     """
     path: Optional[str] = None
@@ -102,22 +94,21 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
-        Method for component runtime state setting, state is preserved in `ctx.framework_data`.
+        Method for component runtime state setting, state is preserved in :py:attr:`.Context.framework_data`.
 
         :param ctx: :py:class:`~.Context` to keep state in.
         :param value: State to set.
-        :return: `None`
         """
         ctx.framework_data.service_states[self.path] = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
-        Method for component runtime state getting, state is preserved in `ctx.framework_data`.
+        Method for component runtime state getting, state is preserved in :py:attr:`.Context.framework_data`.
 
         :param ctx: :py:class:`~.Context` to get state from.
         :param default: Default to return if no record found
-            (usually it's :py:attr:`~.pipeline.types.ComponentExecutionState.NOT_RUN`).
-        :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
+            (usually it's :py:attr:`~.ComponentExecutionState.NOT_RUN`).
+        :return: :py:class:`.ComponentExecutionState` of this service or default if not found.
         """
         return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
 
@@ -168,15 +159,15 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     def computed_name(self) -> str:
         """
         Default name that is used if :py:attr:`~.PipelineComponent.name` is not defined.
-        In case two components in a :py:class:`~.ServiceGroup` have the same
-        :py:attr:`~.PipelineComponent.computed_name` an incrementing number is appended to the name.
+        In case two components in a :py:class:`~chatsky.core.service.group.ServiceGroup` have the same
+        :py:attr:`.computed_name` an incrementing number is appended to the name.
         """
         return "noname_service"
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         A method for running a pipeline component. Executes extra handlers before and after execution,
-        launches `run_component` method. This method is run after the component's timeout is set (if needed).
+        launches :py:meth:`.run_component` method. This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
@@ -199,11 +190,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
         """
         A method for calling pipeline components.
-        It sets up timeout if this component is asynchronous and executes it using :py:meth:`~._run` method.
+        It sets up timeout if this component is asynchronous and executes it using :py:meth:`_run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
-        :return: `None` if the service is synchronous; an `Awaitable` otherwise.
+        :return: ``None`` if the service is synchronous; an ``Awaitable`` otherwise.
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, pipeline))
@@ -230,7 +221,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         Method for retrieving runtime info about this component.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :return: :py:class:`~.chatsky.script.typing.ServiceRuntimeInfo`
+        :return: :py:class:`.ServiceRuntimeInfo`
             object where all not set fields are replaced with `[None]`.
         """
         return ServiceRuntimeInfo(
