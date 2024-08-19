@@ -13,20 +13,20 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Callable
+from pydantic import model_validator, Field
 
 from chatsky.script import Context
 
-from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
+
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
+from chatsky.pipeline import always_start_condition
 from ..types import (
-    ServiceBuilder,
+    ServiceFunction,
     StartConditionCheckerFunction,
-    ComponentExecutionState,
-    ExtraHandlerBuilder,
-    ExtraHandlerType,
 )
 from ..pipeline.component import PipelineComponent
+from .extra import BeforeHandler, AfterHandler
 
 logger = logging.getLogger(__name__)
 
@@ -40,73 +40,40 @@ class Service(PipelineComponent):
     Service can be included into pipeline as object or a dictionary.
     Service group can be synchronous or asynchronous.
     Service can be asynchronous only if its handler is a coroutine.
-
-    :param handler: A service function or an actor.
-    :type handler: :py:data:`~.ServiceBuilder`
-    :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param timeout: Timeout to add to the group.
-    :param asynchronous: Requested asynchronous property.
-    :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
-        service is executed only if it returns `True`.
-    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
-    :param name: Requested service name.
     """
 
-    def __init__(
-        self,
-        handler: ServiceBuilder,
-        before_handler: Optional[ExtraHandlerBuilder] = None,
-        after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[float] = None,
-        asynchronous: Optional[bool] = None,
-        start_condition: Optional[StartConditionCheckerFunction] = None,
-        name: Optional[str] = None,
-    ):
-        overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            before_handler=before_handler,
-            after_handler=after_handler,
-            timeout=timeout,
-            asynchronous=asynchronous,
-            start_condition=start_condition,
-            name=name,
-        )
-        if isinstance(handler, dict):
-            handler.update(overridden_parameters)
-            self.__init__(**handler)
-        elif isinstance(handler, Service):
-            self.__init__(
-                **_get_attrs_with_updates(
-                    handler,
-                    (
-                        "calculated_async_flag",
-                        "path",
-                    ),
-                    {"requested_async_flag": "asynchronous"},
-                    overridden_parameters,
-                )
-            )
-        elif callable(handler) or isinstance(handler, str) and handler == "ACTOR":
-            self.handler = handler
-            super(Service, self).__init__(
-                before_handler,
-                after_handler,
-                timeout,
-                True,
-                True,
-                start_condition,
-                name,
-            )
-        else:
-            raise Exception(f"Unknown type of service handler: {handler}")
+    handler: ServiceFunction
+    """
+    A :py:data:`~.ServiceFunction`.
+    """
+    # Inherited fields repeated. Don't delete these, they're needed for documentation!
+    before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
+    after_handler: AfterHandler = Field(default_factory=AfterHandler)
+    timeout: Optional[float] = None
+    requested_async_flag: Optional[bool] = None
+    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    name: Optional[str] = None
+    path: Optional[str] = None
 
-    async def _run_handler(self, ctx: Context, pipeline: Pipeline) -> None:
+    @model_validator(mode="before")
+    @classmethod
+    def handler_validator(cls, data: Any):
         """
-        Method for service `handler` execution.
-        Handler has three possible signatures, so this method picks the right one to invoke.
-        These possible signatures are:
+        Add support for initializing from a `Callable`.
+        """
+        if isinstance(data, Callable):
+            return {"handler": data}
+        return data
+
+    @model_validator(mode="after")
+    def __tick_async_flag__(self):
+        self.calculated_async_flag = True
+        return self
+
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+        """
+        Method for running this service. Service 'handler' has three possible signatures,
+        so this method picks the right one to invoke. These possible signatures are:
 
         - (ctx: Context) - accepts current dialog context only.
         - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
@@ -127,55 +94,12 @@ class Service(PipelineComponent):
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
 
-    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for running this service if its handler is an `Actor`.
-        Catches runtime exceptions.
-
-        :param ctx: Current dialog context.
-        """
-        try:
-            await pipeline.actor(pipeline, ctx)
-            self._set_state(ctx, ComponentExecutionState.FINISHED)
-        except Exception as exc:
-            self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Actor '{self.name}' execution failed!", exc_info=exc)
-
-    async def _run_as_service(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for running this service if its handler is not an Actor.
-        Checks start condition and catches runtime exceptions.
-
-        :param ctx: Current dialog context.
-        :param pipeline: Current pipeline.
-        """
-        try:
-            if self.start_condition(ctx, pipeline):
-                self._set_state(ctx, ComponentExecutionState.RUNNING)
-                await self._run_handler(ctx, pipeline)
-                self._set_state(ctx, ComponentExecutionState.FINISHED)
-            else:
-                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
-        except Exception as exc:
-            self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
-
-    async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for handling this service execution.
-        Executes extra handlers before and after execution, launches `_run_as_actor` or `_run_as_service` method.
-
-        :param ctx: (required) Current dialog context.
-        :param pipeline: the current pipeline.
-        """
-        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
-
-        if isinstance(self.handler, str) and self.handler == "ACTOR":
-            await self._run_as_actor(ctx, pipeline)
+    @property
+    def computed_name(self) -> str:
+        if inspect.isfunction(self.handler):
+            return self.handler.__name__
         else:
-            await self._run_as_service(ctx, pipeline)
-
-        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+            return self.handler.__class__.__name__
 
     @property
     def info_dict(self) -> dict:
@@ -184,9 +108,8 @@ class Service(PipelineComponent):
         Adds `handler` key to base info dictionary.
         """
         representation = super(Service, self).info_dict
-        if isinstance(self.handler, str) and self.handler == "ACTOR":
-            service_representation = "Instance of Actor"
-        elif callable(self.handler):
+        # Need to carefully remove this
+        if callable(self.handler):
             service_representation = f"Callable '{self.handler.__name__}'"
         else:
             service_representation = "[Unknown]"
@@ -195,11 +118,11 @@ class Service(PipelineComponent):
 
 
 def to_service(
-    before_handler: Optional[ExtraHandlerBuilder] = None,
-    after_handler: Optional[ExtraHandlerBuilder] = None,
+    before_handler: BeforeHandler = None,
+    after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
     asynchronous: Optional[bool] = None,
-    start_condition: Optional[StartConditionCheckerFunction] = None,
+    start_condition: StartConditionCheckerFunction = always_start_condition,
     name: Optional[str] = None,
 ):
     """
@@ -207,14 +130,16 @@ def to_service(
     Returns a Service, constructed from this function (taken as a handler).
     All arguments are passed directly to `Service` constructor.
     """
+    before_handler = BeforeHandler() if before_handler is None else before_handler
+    after_handler = AfterHandler() if after_handler is None else after_handler
 
-    def inner(handler: ServiceBuilder) -> Service:
+    def inner(handler: ServiceFunction) -> Service:
         return Service(
             handler=handler,
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            asynchronous=asynchronous,
+            requested_async_flag=asynchronous,
             start_condition=start_condition,
             name=name,
         )

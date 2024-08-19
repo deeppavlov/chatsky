@@ -27,8 +27,10 @@ from __future__ import annotations
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
+from pydantic import Field, model_validator
 import copy
 
+from chatsky.pipeline.pipeline.component import PipelineComponent
 from chatsky.utils.turn_caching import cache_clear
 from chatsky.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 from chatsky.script.core.message import Message
@@ -45,58 +47,101 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class Actor:
+# Had to define this earlier, because when Pydantic starts it's __init__ it thinks of this function as
+# being referenced before assignment
+async def default_condition_handler(
+    condition: Callable, ctx: Context, pipeline: Pipeline
+) -> Callable[[Context, Pipeline], bool]:
+    """
+    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
+
+    :param condition: Condition to copy.
+    :param ctx: Context of current condition.
+    :param pipeline: Pipeline we use in this condition.
+    """
+    return await wrap_sync_function_in_async(condition, ctx, pipeline)
+
+
+class Actor(PipelineComponent):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.
-
-    :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
-        While the graph is being initialized, it is validated and then used for the dialog.
-    :param start_label: The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
-    :param fallback_label: The label of :py:class:`~chatsky.script.Script`.
-        Dialog comes into that label if all other transitions failed,
-        or there was an error while executing the scenario.
-        Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
-        where there is no priority. Defaults to `1.0`.
-    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
-    :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~chatsky.script.Actor`.
-
-        - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
-        - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    def __init__(
-        self,
-        script: Union[Script, dict],
-        start_label: NodeLabel2Type,
-        fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
-        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-    ):
-        self.script = script if isinstance(script, Script) else Script(script=script)
-        self.label_priority = label_priority
+    script: Union[Script, Dict]
+    """
+    The dialog scenario: a graph described by the :py:class:`.Keywords`.
+    While the graph is being initialized, it is validated and then used for the dialog.
+    """
+    start_label: NodeLabel2Type
+    """
+    The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
+    """
+    fallback_label: Optional[NodeLabel2Type] = None
+    """
+    The label of :py:class:`~chatsky.script.Script`.
+    Dialog comes into that label if all other transitions failed,
+    or there was an error while executing the scenario. Defaults to `None`.
+    """
+    label_priority: float = 1.0
+    """
+    Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
+    where there is no priority. Defaults to `1.0`.
+    """
+    condition_handler: Callable = Field(default=default_condition_handler)
+    """
+    Handler that processes a call of condition functions. Defaults to `None`.
+    """
+    handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
+    """
+    This variable is responsible for the usage of external handlers on
+    the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-        self.start_label = normalize_label(start_label)
+    - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
+    - value (`List[Callable]`) - The list of called handlers for each stage.  Defaults to an empty `dict`.
+
+    """
+    # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+    _clean_turn_cache: bool = True
+
+    @model_validator(mode="after")
+    def __tick_async_flag__(self):
+        self.calculated_async_flag = False
+        return self
+
+    @model_validator(mode="after")
+    def __start_label_validator__(self):
+        """
+        Validate :py:data:`~.Actor.start_label`.
+
+        :raises ValueError: If `start_label` doesn't exist in the given :py:class:`~.Script`.
+        """
+        if not isinstance(self.script, Script):
+            self.script = Script(script=self.script)
+        self.start_label = normalize_label(self.start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
+        return self
 
-        if fallback_label is None:
+    @model_validator(mode="after")
+    def __fallback_label_validator__(self):
+        """
+        Validate :py:data:`~.Actor.fallback_label`.
+        :raises ValueError: If `fallback_label` doesn't exist in the given :py:class:`~.Script`.
+        """
+        if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:
-            self.fallback_label = normalize_label(fallback_label)
+            self.fallback_label = normalize_label(self.fallback_label)
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
-        self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
+        return self
 
-        self.handlers = {} if handlers is None else handlers
+    @property
+    def computed_name(self) -> str:
+        return "actor"
 
-        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
-        self._clean_turn_cache = True
-
-    async def __call__(self, pipeline: Pipeline, ctx: Context):
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)
 
         # get previous node
@@ -364,16 +409,3 @@ class Actor:
         else:
             chosen_label = self.fallback_label
         return chosen_label
-
-
-async def default_condition_handler(
-    condition: Callable, ctx: Context, pipeline: Pipeline
-) -> Callable[[Context, Pipeline], bool]:
-    """
-    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
-
-    :param condition: Condition to copy.
-    :param ctx: Context of current condition.
-    :param pipeline: Pipeline we use in this condition.
-    """
-    return await wrap_sync_function_in_async(condition, ctx, pipeline)

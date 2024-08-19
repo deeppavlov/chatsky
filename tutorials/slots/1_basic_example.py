@@ -217,8 +217,8 @@ HAPPY_PATH = [
 ]
 
 # %%
-pipeline = Pipeline.from_script(
-    script,
+pipeline = Pipeline(
+    script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     slots=SLOTS,

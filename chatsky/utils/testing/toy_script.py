@@ -39,14 +39,19 @@ An example of a simple script.
 :meta hide-value:
 """
 
-TOY_SCRIPT_ARGS = (TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node"))
+TOY_SCRIPT_KWARGS = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
+}
 """
-Arguments to pass to :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline.from_script` in order to
+# There should be a better description of this
+Keyword arguments to pass to :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline` in order to
 use :py:data:`~.TOY_SCRIPT`:
 
 .. code-block::
 
-    Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=..., ...)
+    Pipeline(**TOY_SCRIPT_KWARGS, context_storage=...)
 
 :meta hide-value:
 """
