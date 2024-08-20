@@ -107,13 +107,13 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             # populate history with global and local prompts
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
-                history_messages.append(message_to_langchain(Message(node_prompt), source="system"))
+                history_messages.append(message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
-                history_messages.append(message_to_langchain(Message(global_prompt), source="system"))
+                history_messages.append(message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system"))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
-                history_messages.append(message_to_langchain(Message(local_prompt), source="system"))
+                history_messages.append(message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system"))
 
         # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
@@ -123,17 +123,17 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             )
             if history != -1:
                 for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-history:]):
-                    history_messages.append(message_to_langchain(req))
-                    history_messages.append(message_to_langchain(resp, source="ai"))
+                    history_messages.append(message_to_langchain(req, pipeline=pipeline))
+                    history_messages.append(message_to_langchain(resp, pipeline=pipeline, source="ai"))
             else:
                 # TODO: Fix redundant code
                 for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
-                    history_messages.append(message_to_langchain(req))
-                    history_messages.append(message_to_langchain(resp, source="ai"))
+                    history_messages.append(message_to_langchain(req, pipeline=pipeline))
+                    history_messages.append(message_to_langchain(resp, pipeline=pipeline, source="ai"))
 
         if prompt:
-            history_messages.append(message_to_langchain(Message(prompt), source="system"))
-        history_messages.append(message_to_langchain(ctx.last_request, source="human"))
+            history_messages.append(message_to_langchain(Message(prompt), pipeline=pipeline, source="system"))
+        history_messages.append(message_to_langchain(ctx.last_request, pipeline=pipeline, source="human"))
         return await model.respond(history_messages, message_schema=message_schema)
 
     return wrapped
@@ -142,7 +142,7 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
 def llm_condition(model_name: str, prompt: str, method: BaseMethod):
     """
     Basic function for using LLM in condition cases.
-    
+
     :param model_name: Key of the model from the `Pipeline.models` dictionary.
     :param prompt: Prompt for the model to use on users input.
     :param method: Method that takes models output and returns boolean.
@@ -161,29 +161,34 @@ async def __attachment_to_content(attachment: Image, iface) -> str:
     """
     image_bytes = await attachment.get_bytes(iface)
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-    extension = attachment.source.split(".")[-1]
+    extension = str(attachment.source).split(".")[-1]
     if image_b64 == "" or extension is None:
         raise ValueError("Data image is not accessible.")
     image_b64 = f"data:image/{extension};base64,{image_b64}"
     return image_b64
 
 
-def message_to_langchain(message: Message, source: str = "human"):
+def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int=1000):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
     :param Message message: ~chatsky.script.core.message.Message object.
+    :param Pipeline pipeline: ~chatsky.pipeline.Pipeline object.
     :param str source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
+    :param int max_size: Maximum size of the message in symbols. If exceed the limit will raise ValueError.
 
-    Returns:
-        HumanMessage|AIMessage|SystemMessage: langchain message object.
+    :return: Langchain message object.
+    :rtype: HumanMessage|AIMessage|SystemMessage
     """
+    if len(message.text) > max_size:
+        raise ValueError("Message is too long.")
+
     content = [{"type": "text", "text": message.text}]
 
     if message.attachments:
         for image in message.attachments:
             if isinstance(image, Image):
-                content.append({"type": "image_url", "image_url": {"url": __attachment_to_content(image)}})
+                content.append({"type": "image_url", "image_url": {"url": __attachment_to_content(image, pipeline.messenger_interface)}})
 
     if source == "human":
         return HumanMessage(content=content)

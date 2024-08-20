@@ -9,7 +9,6 @@ In Chatsky we can do that using Structured Output.
 # %pip install chatsky[llm]
 # %%
 from chatsky.script import Message
-from chatsky.script.conditions import exact_match
 from chatsky.script.conditions import std_conditions as cnd
 from chatsky.script import labels as lbl
 from chatsky.script import RESPONSE, TRANSITIONS, GLOBAL

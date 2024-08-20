@@ -30,6 +30,12 @@ class Contains(BaseMethod):
     """
     pattern: str
 
-    async def __call__(self, ctx: Context, model_result: str, pattern: str = "") -> bool:
+    async def __call__(self, ctx: Context, model_result: str) -> bool:
         print("Model result:", model_result)
         return await bool(self.pattern.lower() in model_result.lower())
+
+
+class LogProb(BaseMethod):
+    treshold: float = 0.7
+    async def __call__(self, ctx: Context, model_result: dict) -> bool:
+        raise NotImplementedError
