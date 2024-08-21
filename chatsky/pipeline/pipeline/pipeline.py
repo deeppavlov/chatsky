@@ -21,7 +21,7 @@ from asyncio import AbstractEventLoop
 from functools import partial
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable, Callable
+from typing import Union, List, Dict, Optional, Hashable, Callable, Any
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
@@ -132,7 +132,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     of the script should be parallelized over respective groups.
     """
     _clean_turn_cache: Optional[bool]
-    context_lock: Optional[Any] = ContextLock()
+    context_lock: Optional[Any] = None
 
     @computed_field
     @cached_property
@@ -166,6 +166,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         if self.optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
+
+        self.context_lock = ContextLock()
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
