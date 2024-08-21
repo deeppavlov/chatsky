@@ -118,7 +118,9 @@ class TestTemplateFilling:
     async def test_normal_execution(self, context, manager):
         await manager.extract_all(context)
 
-        assert await rsp.FilledTemplate("{0} {1}").wrapped_call(context) == Message("4 5")
+        template_message = Message(text="{0} {1}")
+        assert await rsp.FilledTemplate(template_message).wrapped_call(context) == Message("4 5")
+        assert template_message.text == "{0} {1}"
 
     @pytest.mark.parametrize("on_exception,result", [
         ("return_none", Message()),

@@ -112,3 +112,14 @@ def test_response_from_dict_validation():
 
 def test_destination_from_dict_validation():
     Transition.model_validate({"dst": {"flow_name": "flow", "node_name": "node"}})
+
+
+async def test_const_object_immutability():
+    message = Message(text="text1")
+    response = ConstResponse.model_validate(message)
+
+    response_result = await response.wrapped_call(Context.init(("", "")))
+
+    response_result.text = "text2"
+
+    assert message.text == "text1"
