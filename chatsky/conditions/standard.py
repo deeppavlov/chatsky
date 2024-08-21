@@ -7,6 +7,7 @@ This module provides basic conditions.
 - :py:class:`.HasText`, :py:class:`.Regexp`, :py:class:`.HasCallbackQuery` are last-request-based conditions.
 - :py:class:`.CheckLastLabels` is a label-based condition.
 """
+
 import asyncio
 from typing import Pattern, Union, List, Optional
 import logging
@@ -28,10 +29,11 @@ class ExactMatch(BaseCondition):
 
     If :py:attr:`.skip_none`, will not compare ``None`` fields of :py:attr:`.match`.
     """
+
     match: Message
     """
     Message to compare last request with.
-    
+
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
     skip_none: bool = True
@@ -61,6 +63,7 @@ class HasText(BaseCondition):
     Check if the :py:attr:`~.Message.text` attribute of :py:attr:`~.Context.last_request`
     contains :py:attr:`.text`.
     """
+
     text: str
     """
     Text to search for in the last request.
@@ -81,6 +84,7 @@ class Regexp(BaseCondition):
     Check if the :py:attr:`~.Message.text` attribute of :py:attr:`~.Context.last_request`
     contains :py:attr:`.pattern`.
     """
+
     pattern: Union[str, Pattern]
     """
     The `RegExp` pattern to search for in the last request.
@@ -110,6 +114,7 @@ class Any(BaseCondition):
     """
     Check if any condition from the :py:attr:`.conditions` list is True.
     """
+
     conditions: List[BaseCondition]
     """
     List of conditions.
@@ -126,6 +131,7 @@ class All(BaseCondition):
     """
     Check if all conditions from the :py:attr:`.conditions` list is True.
     """
+
     conditions: List[BaseCondition]
     """
     List of conditions.
@@ -142,6 +148,7 @@ class Negation(BaseCondition):
     """
     Return the negation of the result of :py:attr:`~.Negation.condition`.
     """
+
     condition: BaseCondition
     """
     Condition to negate.
@@ -165,6 +172,7 @@ class CheckLastLabels(BaseCondition):
     Check if any label in the last :py:attr:`.last_n_indices` of :py:attr:`.Context.labels` is in
     :py:attr:`.labels` or if its :py:attr:`~.AbsoluteNodeLabel.flow_name` is in :py:attr:`.flow_labels`.
     """
+
     flow_labels: List[str] = Field(default_factory=list)
     """
     List of flow names to find in the last labels.
@@ -172,7 +180,7 @@ class CheckLastLabels(BaseCondition):
     labels: List[AbsoluteNodeLabel] = Field(default_factory=list)
     """
     List of labels to find in the last labels.
-    
+
     Is initialized according to :py:data:`~.AbsoluteNodeLabelInitTypes`.
     """
     last_n_indices: int = Field(default=1, ge=1)
@@ -180,7 +188,9 @@ class CheckLastLabels(BaseCondition):
     Number of labels to check.
     """
 
-    def __init__(self, *, flow_labels=None, labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None, last_n_indices=1):
+    def __init__(
+        self, *, flow_labels=None, labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None, last_n_indices=1
+    ):
         if flow_labels is None:
             flow_labels = []
         if labels is None:
@@ -188,7 +198,7 @@ class CheckLastLabels(BaseCondition):
         super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
 
     async def call(self, ctx: Context) -> bool:
-        labels = list(ctx.labels.values())[-self.last_n_indices:]
+        labels = list(ctx.labels.values())[-self.last_n_indices :]  # noqa: E203
         for label in labels:
             if label.flow_name in self.flow_labels or label in self.labels:
                 return True
@@ -200,6 +210,7 @@ class HasCallbackQuery(BaseCondition):
     Check if :py:attr:`~.Context.last_request` contains a :py:class:`.CallbackQuery` attachment
     with :py:attr:`.CallbackQuery.query_string` matching :py:attr:`.HasCallbackQuery.query_string`.
     """
+
     query_string: str
     """
     Query string to find in last request's attachments.

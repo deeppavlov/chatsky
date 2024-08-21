@@ -210,4 +210,3 @@ ComponentExtraHandlerInitTypes: TypeAlias = Union[
     Annotated[List[Callable], "functions for the extra handler"],
 ]
 """Types that :py:class:`~.ComponentExtraHandler` can be validated from."""
-

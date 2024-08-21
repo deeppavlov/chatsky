@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 class PipelineServiceGroup(ServiceGroup):
     """A service group that allows actor inside."""
+
     components: List[Union[Actor, Service, ServiceGroup]]
 
 
@@ -65,15 +66,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     fallback_label: AbsoluteNodeLabel
     """
     Node which will is used if :py:class:`Actor` cannot find the next node.
-    
+
     This most commonly happens when there are not suitable transitions.
-    
+
     Defaults to :py:attr:`start_label`.
     """
     default_priority: float = 1.0
     """
     Default priority value for :py:class:`~chatsky.core.transition.Transition`.
-    
+
     Defaults to ``1.0``.
     """
     slots: GroupSlot = Field(default_factory=GroupSlot)
@@ -83,7 +84,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
     A `MessengerInterface` instance for this pipeline.
-    
+
     It handles connections to interfaces that provide user requests and accept bot responses.
     """
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
@@ -120,22 +121,22 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
 
     def __init__(
-            self,
-            script: Union[Script, dict],
-            start_label: AbsoluteNodeLabelInitTypes,
-            fallback_label: AbsoluteNodeLabelInitTypes = None,
-            *,
-            default_priority: float = None,
-            slots: GroupSlot = None,
-            messenger_interface: MessengerInterface = None,
-            context_storage: Union[DBContextStorage, dict] = None,
-            pre_services: ServiceGroupInitTypes = None,
-            post_services: ServiceGroupInitTypes = None,
-            before_handler: ComponentExtraHandlerInitTypes = None,
-            after_handler: ComponentExtraHandlerInitTypes = None,
-            timeout: float = None,
-            optimization_warnings: bool = None,
-            parallelize_processing: bool = None,
+        self,
+        script: Union[Script, dict],
+        start_label: AbsoluteNodeLabelInitTypes,
+        fallback_label: AbsoluteNodeLabelInitTypes = None,
+        *,
+        default_priority: float = None,
+        slots: GroupSlot = None,
+        messenger_interface: MessengerInterface = None,
+        context_storage: Union[DBContextStorage, dict] = None,
+        pre_services: ServiceGroupInitTypes = None,
+        post_services: ServiceGroupInitTypes = None,
+        before_handler: ComponentExtraHandlerInitTypes = None,
+        after_handler: ComponentExtraHandlerInitTypes = None,
+        timeout: float = None,
+        optimization_warnings: bool = None,
+        parallelize_processing: bool = None,
     ):
         if fallback_label is None:
             fallback_label = start_label

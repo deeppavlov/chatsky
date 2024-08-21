@@ -25,19 +25,22 @@ class FilledTemplate(BaseResponse):
     it would return a copy of the message with the following text:
     "Your username is admin".
     """
+
     template: AnyResponse
     """A response to use as a template."""
     on_exception: Literal["keep_template", "return_none"] = "return_none"
     """
     What to do if template filling fails.
-    
+
     - "keep_template": :py:attr:`template` is returned, unfilled.
     - "return_none": an empty message is returned.
     """
 
-    def __init__(self,
-                 template: Union[MessageInitTypes, BaseResponse],
-                 on_exception: Literal["keep_template", "return_none"] = "return_none"):
+    def __init__(
+        self,
+        template: Union[MessageInitTypes, BaseResponse],
+        on_exception: Literal["keep_template", "return_none"] = "return_none",
+    ):
         super().__init__(template=template, on_exception=on_exception)
 
     async def call(self, ctx: Context) -> MessageInitTypes:

@@ -5,6 +5,7 @@ This module provides base classes for functions used in :py:class:`~chatsky.core
 
 These functions allow dynamic script configuration and are essential to the scripting process.
 """
+
 from __future__ import annotations
 
 from types import NoneType
@@ -29,6 +30,7 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
 
     Defines :py:meth:`wrapped_call` that wraps :py:meth:`call` and handles exceptions and types conversions.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
     """Return type of the script function."""
 
@@ -78,6 +80,7 @@ class ConstScriptFunc(BaseScriptFunc):
     """
     Base class for script functions that return a constant value.
     """
+
     root: None
     """Value to return."""
 
@@ -97,6 +100,7 @@ class BaseCondition(BaseScriptFunc, ABC):
 
     These are used in :py:attr:`chatsky.core.transition.Transition.cnd`.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = bool
 
     @abstractmethod
@@ -134,6 +138,7 @@ class BaseResponse(BaseScriptFunc, ABC):
 
     These are used in :py:attr:`chatsky.core.script.Node.response`.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = Message
 
     @abstractmethod
@@ -164,6 +169,7 @@ class BaseDestination(BaseScriptFunc, ABC):
 
     These are used in :py:attr:`chatsky.core.transition.Transition.dst`.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = AbsoluteNodeLabel
 
     @abstractmethod
@@ -195,6 +201,7 @@ class BaseProcessing(BaseScriptFunc, ABC):
     These are used in :py:attr:`chatsky.core.script.Node.pre_transition`
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = NoneType
 
     @abstractmethod
@@ -220,6 +227,7 @@ class BasePriority(BaseScriptFunc, ABC):
     - ``True`` or ``None``: Transition successful with the :py:attr:`~chatsky.core.pipeline.Pipeline.default_priority`;
     - ``False``: Transition unsuccessful.
     """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = (float, NoneType, bool)
 
     @abstractmethod

@@ -173,9 +173,7 @@ def test_get_slot_by_name(empty_slot_manager):
         ),
     ],
 )
-async def test_slot_extraction(
-    slot_name, expected_slot_storage, empty_slot_manager, context_with_request
-):
+async def test_slot_extraction(slot_name, expected_slot_storage, empty_slot_manager, context_with_request):
     await empty_slot_manager.extract_slot(slot_name, context_with_request)
     assert empty_slot_manager.slot_storage == expected_slot_storage
 
@@ -311,24 +309,28 @@ async def test_old_slot_storage_update():
     manager = SlotManager()
     manager.set_root_slot(old_group_slot)
 
-    assert manager.slot_storage == ExtractedGroupSlot.model_validate({
-        "0": {"0": init_slot1, "1": init_slot2},
-        "1": {"0": init_slot1, "1": init_slot2},
-        "2": {"0": init_slot1, "1": init_slot2},
-        "3": init_slot1,
-        "4": init_slot1,
-        "5": init_slot1,
-    })
+    assert manager.slot_storage == ExtractedGroupSlot.model_validate(
+        {
+            "0": {"0": init_slot1, "1": init_slot2},
+            "1": {"0": init_slot1, "1": init_slot2},
+            "2": {"0": init_slot1, "1": init_slot2},
+            "3": init_slot1,
+            "4": init_slot1,
+            "5": init_slot1,
+        }
+    )
 
     await manager.extract_all(ctx)
-    assert manager.slot_storage == ExtractedGroupSlot.model_validate({
-        "0": {"0": extracted_value1, "1": extracted_value2},
-        "1": {"0": extracted_value1, "1": extracted_value2},
-        "2": {"0": extracted_value1, "1": extracted_value2},
-        "3": extracted_value1,
-        "4": extracted_value1,
-        "5": extracted_value1,
-    })
+    assert manager.slot_storage == ExtractedGroupSlot.model_validate(
+        {
+            "0": {"0": extracted_value1, "1": extracted_value2},
+            "1": {"0": extracted_value1, "1": extracted_value2},
+            "2": {"0": extracted_value1, "1": extracted_value2},
+            "3": extracted_value1,
+            "4": extracted_value1,
+            "5": extracted_value1,
+        }
+    )
 
     new_group_slot = GroupSlot.model_validate(
         {
@@ -345,11 +347,13 @@ async def test_old_slot_storage_update():
 
     manager.set_root_slot(new_group_slot)
 
-    assert manager.slot_storage == ExtractedGroupSlot.model_validate({
-        "-1": {"0": init_slot1, "2": init_slot2},
-        "0": {"0": extracted_value1, "2": init_slot2},
-        "1": init_slot2,
-        "3": extracted_value1,
-        "4": {"0": init_slot1, "2": init_slot2},
-        "6": init_slot2
-    })
+    assert manager.slot_storage == ExtractedGroupSlot.model_validate(
+        {
+            "-1": {"0": init_slot1, "2": init_slot2},
+            "0": {"0": extracted_value1, "2": init_slot2},
+            "1": init_slot2,
+            "3": extracted_value1,
+            "4": {"0": init_slot1, "2": init_slot2},
+            "6": init_slot2,
+        }
+    )

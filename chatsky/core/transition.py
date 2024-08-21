@@ -4,6 +4,7 @@ Transition
 This module defines a transition class that is used to
 specify conditions and destinations for transitions to nodes.
 """
+
 from __future__ import annotations
 
 from typing import Union, List, TYPE_CHECKING, Optional, Tuple
@@ -27,6 +28,7 @@ class Transition(BaseModel):
     """
     A basic class for a transition to a node.
     """
+
     cnd: AnyCondition = Field(default=True, validate_default=True)
     """A condition that determines if transition is allowed to happen."""
     dst: AnyDestination
@@ -34,15 +36,19 @@ class Transition(BaseModel):
     priority: AnyPriority = Field(default=None, validate_default=True)
     """Priority of the transition. Higher priority transitions are resolved first."""
 
-    def __init__(self, *,
-                 cnd: Union[bool, BaseCondition] = True,
-                 dst: Union[NodeLabelInitTypes, BaseDestination],
-                 priority: Union[Optional[float], BasePriority] = None
-                 ):
+    def __init__(
+        self,
+        *,
+        cnd: Union[bool, BaseCondition] = True,
+        dst: Union[NodeLabelInitTypes, BaseDestination],
+        priority: Union[Optional[float], BasePriority] = None,
+    ):
         super().__init__(cnd=cnd, dst=dst, priority=priority)
 
 
-async def get_next_label(ctx: Context, transitions: List[Transition], default_priority: float) -> Optional[AbsoluteNodeLabel]:
+async def get_next_label(
+    ctx: Context, transitions: List[Transition], default_priority: float
+) -> Optional[AbsoluteNodeLabel]:
     """
     Determine the next node based on ``transitions`` and ``ctx``.
 
@@ -67,14 +73,10 @@ async def get_next_label(ctx: Context, transitions: List[Transition], default_pr
     :return: Label of the next node or ``None`` if no transition is left by the end of the process.
     """
     filtered_transitions: List[Transition] = transitions.copy()
-    condition_results = await asyncio.gather(
-        *[transition.cnd.wrapped_call(ctx) for transition in filtered_transitions]
-    )
+    condition_results = await asyncio.gather(*[transition.cnd.wrapped_call(ctx) for transition in filtered_transitions])
 
     filtered_transitions = [
-        transition
-        for transition, condition in zip(filtered_transitions, condition_results)
-        if condition is True
+        transition for transition, condition in zip(filtered_transitions, condition_results) if condition is True
     ]
 
     priority_results = await asyncio.gather(

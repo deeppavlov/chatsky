@@ -27,7 +27,7 @@ class Repeat(BaseDestination):
     shift: int = Field(default=0, ge=0)
     """
     Position of the node in the history from the last element.
-    
+
     Shift 0 means last label; shift 1 means second to last label; e.t.c.
     """
 
@@ -36,8 +36,10 @@ class Repeat(BaseDestination):
         shifted_index = index - self.shift
         result = ctx.labels.get(shifted_index)
         if result is None:
-            raise KeyError(f"No label with index {shifted_index!r}. "
-                           f"Current label index: {index!r}; Repeat.shift: {self.shift!r}.")
+            raise KeyError(
+                f"No label with index {shifted_index!r}. "
+                f"Current label index: {index!r}; Repeat.shift: {self.shift!r}."
+            )
         return result
 
 
@@ -84,8 +86,9 @@ def get_next_node_in_flow(
     node_index = node_keys.index(node_label.node_name)
     node_index = node_index + 1 if increment else node_index - 1
     if not (loop or (0 <= node_index < len(node_keys))):
-        raise IndexError(f"Node index {node_index!r} out of range for node_keys: {node_keys!r}."
-                         f"Consider using the `loop` flag.")
+        raise IndexError(
+            f"Node index {node_index!r} out of range for node_keys: {node_keys!r}. Consider using the `loop` flag."
+        )
     node_index %= len(node_keys)
 
     return AbsoluteNodeLabel(flow_name=node_label.flow_name, node_name=node_keys[node_index])
@@ -95,6 +98,7 @@ class Forward(BaseDestination):
     """
     Return the next node relative to the current node in the current flow.
     """
+
     loop: bool = False
     """
     Whether to return the first node of the flow if the current node is the last one.
@@ -102,18 +106,14 @@ class Forward(BaseDestination):
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
-        return get_next_node_in_flow(
-            ctx.last_label,
-            ctx,
-            increment=True,
-            loop=self.loop
-        )
+        return get_next_node_in_flow(ctx.last_label, ctx, increment=True, loop=self.loop)
 
 
 class Backward(BaseDestination):
     """
     Return the previous node relative to the current node in the current flow.
     """
+
     loop: bool = False
     """
     Whether to return the last node of the flow if the current node is the first one.
@@ -121,9 +121,4 @@ class Backward(BaseDestination):
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
-        return get_next_node_in_flow(
-            ctx.last_label,
-            ctx,
-            increment=False,
-            loop=self.loop
-        )
+        return get_next_node_in_flow(ctx.last_label, ctx, increment=False, loop=self.loop)

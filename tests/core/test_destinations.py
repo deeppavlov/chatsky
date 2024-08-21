@@ -34,20 +34,28 @@ async def test_fallback(ctx):
 
 
 class TestForwardBackward:
-    @pytest.mark.parametrize("node,inc,loop,result", [
-        (("flow", "node1"), True, False, ("flow", "node2")),
-        (("flow", "node1"), False, True, ("flow", "node3")),
-        (("flow", "node2"), True, False, ("flow", "node3")),
-        (("flow", "node2"), False, False, ("flow", "node1")),
-        (("flow", "node3"), True, True, ("flow", "node1")),
-    ])
+    @pytest.mark.parametrize(
+        "node,inc,loop,result",
+        [
+            (("flow", "node1"), True, False, ("flow", "node2")),
+            (("flow", "node1"), False, True, ("flow", "node3")),
+            (("flow", "node2"), True, False, ("flow", "node3")),
+            (("flow", "node2"), False, False, ("flow", "node1")),
+            (("flow", "node3"), True, True, ("flow", "node1")),
+        ],
+    )
     def test_get_next_node_in_flow(self, ctx, node, inc, loop, result):
-        assert dst.get_next_node_in_flow(node, ctx, increment=inc, loop=loop) == AbsoluteNodeLabel.model_validate(result)
+        assert dst.get_next_node_in_flow(node, ctx, increment=inc, loop=loop) == AbsoluteNodeLabel.model_validate(
+            result
+        )
 
-    @pytest.mark.parametrize("node,inc,loop", [
-        (("flow", "node1"), False, False),
-        (("flow", "node3"), True, False),
-    ])
+    @pytest.mark.parametrize(
+        "node,inc,loop",
+        [
+            (("flow", "node1"), False, False),
+            (("flow", "node3"), True, False),
+        ],
+    )
     def test_loop_exception(self, ctx, node, inc, loop):
         with pytest.raises(IndexError):
             dst.get_next_node_in_flow(node, ctx, increment=inc, loop=loop)

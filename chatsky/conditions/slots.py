@@ -17,6 +17,7 @@ class SlotsExtracted(BaseCondition):
 
     :param mode: Whether to check if all slots are extracted or any slot is extracted.
     """
+
     slots: List[SlotName]
     """
     Names of the slots that need to be checked.

@@ -6,7 +6,7 @@ in tutorials.
 """
 
 from chatsky.conditions import ExactMatch
-from chatsky.core import TRANSITIONS, RESPONSE, Message, Transition as Tr
+from chatsky.core import TRANSITIONS, RESPONSE, Transition as Tr
 
 TOY_SCRIPT = {
     "greeting_flow": {

@@ -1,7 +1,6 @@
 import pytest
 
 from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr
-from chatsky import conditions as cnd
 from chatsky.slots.slots import SlotNotExtracted
 
 

@@ -32,7 +32,7 @@ async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandler
     return {
         "flow": last_label.flow_name,
         "node": last_label.node_name,
-        "label": f"{last_label.flow_name}: {last_label.node_name}"
+        "label": f"{last_label.flow_name}: {last_label.node_name}",
     }
 
 

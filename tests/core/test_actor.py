@@ -13,22 +13,16 @@ from chatsky.core import RESPONSE, TRANSITIONS, PRE_TRANSITION, PRE_RESPONSE
 
 class TestRequestProcessing:
     async def test_normal_execution(self):
-        script = Script.model_validate({"flow": {
-            "node1": {
-                RESPONSE: "node1",
-                TRANSITIONS: [{"dst": "node2"}]
-            },
-            "node2": {
-                RESPONSE: "node2",
-                TRANSITIONS: [{"dst": "node3"}]
-            },
-            "node3": {
-                RESPONSE: "node3"
-            },
-            "fallback": {
-                RESPONSE: "fallback"
+        script = Script.model_validate(
+            {
+                "flow": {
+                    "node1": {RESPONSE: "node1", TRANSITIONS: [{"dst": "node2"}]},
+                    "node2": {RESPONSE: "node2", TRANSITIONS: [{"dst": "node3"}]},
+                    "node3": {RESPONSE: "node3"},
+                    "fallback": {RESPONSE: "fallback"},
+                }
             }
-        }})
+        )
 
         ctx = Context.init(start_label=("flow", "node1"))
         actor = Actor()
@@ -36,21 +30,19 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
-            start_label=("flow", "node1")
+            start_label=("flow", "node1"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
-            0: AbsoluteNodeLabel(flow_name="flow", node_name="node2")
+            0: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
         }
         assert ctx.responses == {0: Message("node2")}
 
     async def test_fallback_node(self):
-        script = Script.model_validate({
-            "flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}
-        })
+        script = Script.model_validate({"flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}})
 
         ctx = Context.init(start_label=("flow", "node"))
         actor = Actor()
@@ -58,28 +50,36 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
-            start_label=("flow", "node")
+            start_label=("flow", "node"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
-            0: AbsoluteNodeLabel(flow_name="flow", node_name="fallback")
+            0: AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
         }
         assert ctx.responses == {0: Message("fallback")}
 
-    @pytest.mark.parametrize("default_priority,result", [
-        (1, "node3"),
-        (2, "node2"),
-        (3, "node2"),
-    ])
+    @pytest.mark.parametrize(
+        "default_priority,result",
+        [
+            (1, "node3"),
+            (2, "node2"),
+            (3, "node2"),
+        ],
+    )
     async def test_default_priority(self, default_priority, result):
-        script = Script.model_validate({
-            "flow": {"node1": {
-                TRANSITIONS: [{"dst": "node2"}, {"dst": "node3", "priority": 2}]
-            }, "node2": {}, "node3": {}, "fallback": {}}
-        })
+        script = Script.model_validate(
+            {
+                "flow": {
+                    "node1": {TRANSITIONS: [{"dst": "node2"}, {"dst": "node3", "priority": 2}]},
+                    "node2": {},
+                    "node3": {},
+                    "fallback": {},
+                }
+            }
+        )
 
         ctx = Context.init(start_label=("flow", "node1"))
         actor = Actor()
@@ -88,7 +88,7 @@ class TestRequestProcessing:
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             default_priority=default_priority,
-            start_label=("flow", "node1")
+            start_label=("flow", "node1"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
@@ -109,7 +109,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
-            start_label=("flow", "node")
+            start_label=("flow", "node"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
@@ -129,7 +129,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
-            start_label=("flow", "node")
+            start_label=("flow", "node"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
@@ -152,7 +152,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
-            start_label=("flow", "node")
+            start_label=("flow", "node"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
@@ -175,7 +175,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
             script=script,
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
-            start_label=("flow", "node")
+            start_label=("flow", "node"),
         )
 
         await actor(ctx, ctx.framework_data.pipeline)
@@ -201,18 +201,10 @@ async def test_pre_processing():
 
     ctx = Context.init(start_label=("flow", "node"))
 
-    ctx.framework_data.pipeline = Pipeline(
-        parallelize_processing=True,
-        script={"": {"": {}}},
-        start_label=("", "")
-    )
+    ctx.framework_data.pipeline = Pipeline(parallelize_processing=True, script={"": {"": {}}}, start_label=("", ""))
     await Actor._run_processing(procs, ctx)
     assert contested_resource[""] == 1
 
-    ctx.framework_data.pipeline = Pipeline(
-        parallelize_processing=False,
-        script={"": {"": {}}},
-        start_label=("", "")
-    )
+    ctx.framework_data.pipeline = Pipeline(parallelize_processing=False, script={"": {"": {}}}, start_label=("", ""))
     await Actor._run_processing(procs, ctx)
     assert contested_resource[""] == 2

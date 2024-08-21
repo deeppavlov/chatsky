@@ -8,13 +8,16 @@ from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabel
 
 
 class TestBaseFunctionCallWrapper:
-    @pytest.mark.parametrize("func_type,data,return_value", [
-        (BaseResponse, "text", Message(text="text")),
-        (BaseCondition, False, False),
-        (BaseDestination, ("flow", "node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
-        (BaseProcessing, None, None),
-        (BasePriority, 1.0, 1.0)
-    ])
+    @pytest.mark.parametrize(
+        "func_type,data,return_value",
+        [
+            (BaseResponse, "text", Message(text="text")),
+            (BaseCondition, False, False),
+            (BaseDestination, ("flow", "node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
+            (BaseProcessing, None, None),
+            (BasePriority, 1.0, 1.0),
+        ],
+    )
     async def test_validation(self, func_type, data, return_value):
         class MyFunc(func_type):
             async def call(self, ctx):
@@ -59,16 +62,29 @@ class TestBaseFunctionCallWrapper:
             await MyProc().wrapped_call(None)
 
 
-@pytest.mark.parametrize("func_type,data,root_value,return_value", [
-    (ConstResponse, "response_text", Message(text="response_text"), Message(text="response_text")),
-    (ConstResponse, {"text": "response_text"}, Message(text="response_text"), Message(text="response_text")),
-    (ConstResponse, Message(text="response_text"), Message(text="response_text"), Message(text="response_text")),
-    (ConstDestination, ("flow", "node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
-    (ConstDestination, NodeLabel(flow_name="flow", node_name="node"), NodeLabel(flow_name="flow", node_name="node"), AbsoluteNodeLabel(flow_name="flow", node_name="node")),
-    (ConstPriority, 1.0, 1.0, 1.0),
-    (ConstPriority, None, None, None),
-    (ConstCondition, False, False, False),
-])
+@pytest.mark.parametrize(
+    "func_type,data,root_value,return_value",
+    [
+        (ConstResponse, "response_text", Message(text="response_text"), Message(text="response_text")),
+        (ConstResponse, {"text": "response_text"}, Message(text="response_text"), Message(text="response_text")),
+        (ConstResponse, Message(text="response_text"), Message(text="response_text"), Message(text="response_text")),
+        (
+            ConstDestination,
+            ("flow", "node"),
+            NodeLabel(flow_name="flow", node_name="node"),
+            AbsoluteNodeLabel(flow_name="flow", node_name="node"),
+        ),
+        (
+            ConstDestination,
+            NodeLabel(flow_name="flow", node_name="node"),
+            NodeLabel(flow_name="flow", node_name="node"),
+            AbsoluteNodeLabel(flow_name="flow", node_name="node"),
+        ),
+        (ConstPriority, 1.0, 1.0, 1.0),
+        (ConstPriority, None, None, None),
+        (ConstCondition, False, False, False),
+    ],
+)
 async def test_const_functions(func_type, data, root_value, return_value):
     func = func_type.model_validate(data)
     assert func.root == root_value
@@ -87,6 +103,7 @@ class TestNodeLabelValidation:
             ctx = Context.init((flow_name, "node"))
             ctx.framework_data.pipeline = pipeline
             return ctx
+
         return factory
 
     @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))

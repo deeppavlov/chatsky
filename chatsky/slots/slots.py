@@ -133,7 +133,9 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    __pydantic_extra__: dict[str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]]
+    __pydantic_extra__: dict[
+        str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
+    ]
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -253,9 +255,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
         return self
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
-        child_values = await asyncio.gather(
-            *(child.get_value(ctx) for child in self.__pydantic_extra__.values())
-        )
+        child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
         return ExtractedGroupSlot(
             **{child_name: child_value for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys())}
         )
@@ -417,5 +417,5 @@ class SlotManager(BaseModel):
         try:
             return self.KwargOnlyFormatter().format(template, **dict(self.slot_storage.__pydantic_extra__.items()))
         except Exception as exc:
-            logger.exception("An exception occurred during template filling.",  exc_info=exc)
+            logger.exception("An exception occurred during template filling.", exc_info=exc)
             return None

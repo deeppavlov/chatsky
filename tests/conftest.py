@@ -54,6 +54,7 @@ def log_event_catcher():
 
     Optionally, the function accepts `level` to set minimum log level.
     """
+
     def inner(logger, *, level=logging.DEBUG):
         logs = []
 
@@ -65,4 +66,5 @@ def log_event_catcher():
         logger.addHandler(Handler())
         logger.setLevel(level)
         return logs
+
     return inner

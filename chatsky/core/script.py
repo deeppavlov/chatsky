@@ -27,6 +27,7 @@ class Node(BaseModel):
 
     Usually used to represent a specific state of a conversation.
     """
+
     transitions: List[Transition] = Field(default_factory=list)
     """List of transitions possible from this node."""
     response: Optional[AnyResponse] = Field(default=None)
@@ -44,7 +45,7 @@ class Node(BaseModel):
     misc: dict = Field(default_factory=dict)
     """
     A dictionary that is used to store metadata about the node.
-    
+
     Can be accessed at runtime via :py:attr:`~chatsky.core.context.Context.current_node`.
     """
 
@@ -70,6 +71,7 @@ class Flow(BaseModel, extra="allow"):
     Flow is a collection of nodes.
     This is used to group them by a specific purpose.
     """
+
     local_node: Node = Field(alias="local", default_factory=Node)
     """Node from which all other nodes in this Flow inherit properties according to :py:meth:`Node.merge`."""
     __pydantic_extra__: dict[str, Node]
@@ -97,6 +99,7 @@ class Script(BaseModel, extra="allow"):
     A script is a collection of nodes.
     It represents an entire dialog graph.
     """
+
     global_node: Node = Field(alias="global", default_factory=Node)
     """Node from which all other nodes in this Script inherit properties according to :py:meth:`Node.merge`."""
     __pydantic_extra__: dict[str, Flow]

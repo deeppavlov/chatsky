@@ -89,7 +89,7 @@ class Context(BaseModel):
 
         - key - `id` of the turn.
         - value - `label` on this turn.
-    
+
     Start label is stored at the ``-1`` key.
     """
     requests: Dict[int, Message] = Field(default_factory=dict)

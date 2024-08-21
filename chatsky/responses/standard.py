@@ -15,6 +15,7 @@ class RandomChoice(BaseResponse):
     """
     Return a random message from :py:attr:`responses`.
     """
+
     responses: List[Message]
     """A list of messages to choose from."""
 

@@ -61,10 +61,10 @@ class Actor(PipelineComponent):
         try:
             ctx.framework_data.current_node = pipeline.script.get_inherited_node(ctx.last_label)
 
-            logger.debug(f"Running pre_transition")
+            logger.debug("Running pre_transition")
             await self._run_processing(ctx.current_node.pre_transition, ctx)
 
-            logger.debug(f"Running transitions")
+            logger.debug("Running transitions")
 
             destination_result = await get_next_label(ctx, ctx.current_node.transitions, pipeline.default_priority)
             if destination_result is not None:
@@ -81,7 +81,7 @@ class Actor(PipelineComponent):
         try:
             ctx.framework_data.current_node = pipeline.script.get_inherited_node(next_label)
 
-            logger.debug(f"Running pre_response")
+            logger.debug("Running pre_response")
             await self._run_processing(ctx.current_node.pre_response, ctx)
 
             node_response = ctx.current_node.response

@@ -200,6 +200,6 @@ ServiceGroupInitTypes: TypeAlias = Union[
     ServiceGroup,
     Annotated[List[Union[Actor, ServiceInitTypes, "ServiceGroupInitTypes"]], "list of components"],
     Annotated[Union[Actor, ServiceInitTypes, "ServiceGroupInitTypes"], "single component of the group"],
-    Annotated[dict, "dict following the ServiceGroup data model"]
+    Annotated[dict, "dict following the ServiceGroup data model"],
 ]
 """Types that :py:class:`~.ServiceGroup` can be validated from."""

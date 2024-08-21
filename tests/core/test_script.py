@@ -1,9 +1,6 @@
 import pytest
 
 from chatsky.core import Transition as Tr, BaseProcessing, Context, AbsoluteNodeLabel
-import chatsky.conditions as cnd
-import chatsky.destinations as dst
-import chatsky.responses as rsp
 from chatsky.core.script import Node, Flow, Script
 
 
@@ -36,20 +33,16 @@ class MyProcessing(BaseProcessing):
             Node(
                 pre_response={"key": MyProcessing(value="1")},
                 pre_transition={"key": MyProcessing(value="3")},
-                misc={"k1": "v1"}
+                misc={"k1": "v1"},
             ),
-            Node(
-                pre_response={"key": MyProcessing(value="2")},
-                pre_transition={},
-                misc={"k2": "v2"}
-            ),
+            Node(pre_response={"key": MyProcessing(value="2")}, pre_transition={}, misc={"k2": "v2"}),
             Node(
                 pre_response={"key": MyProcessing(value="2")},
                 pre_transition={"key": MyProcessing(value="3")},
-                misc={"k1": "v1", "k2": "v2"}
+                misc={"k1": "v1", "k2": "v2"},
             ),
         ),
-    ]
+    ],
 )
 def test_node_merge(first, second, result):
     assert first.merge(second) == result
@@ -75,27 +68,13 @@ def test_script_get_methods():
 
 
 def test_get_inherited_node():
-    global_node = Node(
-        misc={"k1": "g1", "k2": "g2", "k3": "g3"}
-    )
-    local_node = Node(
-        misc={"k2": "l1", "k3": "l2", "k4": "l3"}
-    )
-    node = Node(
-        misc={"k3": "n1", "k4": "n2", "k5": "n3"}
-    )
-    script = Script.model_validate(
-        {
-            "global": global_node,
-            "flow": {
-                "local": local_node,
-                "node": node
-            }
-        }
-    )
+    global_node = Node(misc={"k1": "g1", "k2": "g2", "k3": "g3"})
+    local_node = Node(misc={"k2": "l1", "k3": "l2", "k4": "l3"})
+    node = Node(misc={"k3": "n1", "k4": "n2", "k5": "n3"})
+    script = Script.model_validate({"global": global_node, "flow": {"local": local_node, "node": node}})
 
-    assert script.get_inherited_node(AbsoluteNodeLabel(flow_name="", node_name="")) == None
-    assert script.get_inherited_node(AbsoluteNodeLabel(flow_name="flow", node_name="")) == None
+    assert script.get_inherited_node(AbsoluteNodeLabel(flow_name="", node_name="")) is None
+    assert script.get_inherited_node(AbsoluteNodeLabel(flow_name="flow", node_name="")) is None
     assert script.get_inherited_node(AbsoluteNodeLabel(flow_name="flow", node_name="node")) == Node(
         misc={"k1": "g1", "k2": "l1", "k3": "n1", "k4": "n2", "k5": "n3"}
     )

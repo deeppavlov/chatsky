@@ -46,10 +46,12 @@ def manager(context):
 def call_logger_factory():
     def inner():
         logs = []
+
         def func(*args, **kwargs):
             logs.append({"args": args, "kwargs": kwargs})
 
         return logs, func
+
     return inner
 
 
@@ -122,10 +124,9 @@ class TestTemplateFilling:
         assert await rsp.FilledTemplate(template_message).wrapped_call(context) == Message("4 5")
         assert template_message.text == "{0} {1}"
 
-    @pytest.mark.parametrize("on_exception,result", [
-        ("return_none", Message()),
-        ("keep_template", Message("{0} {1} {2}"))
-    ])
+    @pytest.mark.parametrize(
+        "on_exception,result", [("return_none", Message()), ("keep_template", Message("{0} {1} {2}"))]
+    )
     async def test_on_exception(self, context, manager, on_exception, result):
         await manager.extract_all(context)
 

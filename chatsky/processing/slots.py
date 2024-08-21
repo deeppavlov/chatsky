@@ -4,6 +4,7 @@ Slot Processing
 This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API as :py:class:`.BaseProcessing`
 subclasses.
 """
+
 import asyncio
 import logging
 from typing import List
@@ -20,6 +21,7 @@ class Extract(BaseProcessing):
     Extract slots listed slots.
     This will override all slots even if they are already extracted.
     """
+
     slots: List[SlotName]
     """A list of slot names to extract."""
 
@@ -28,7 +30,9 @@ class Extract(BaseProcessing):
 
     async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
-        results = await asyncio.gather(*(manager.extract_slot(slot, ctx) for slot in self.slots), return_exceptions=True)
+        results = await asyncio.gather(
+            *(manager.extract_slot(slot, ctx) for slot in self.slots), return_exceptions=True
+        )
 
         for result in results:
             if isinstance(result, Exception):
@@ -49,6 +53,7 @@ class Unset(BaseProcessing):
     """
     Mark specified slots as not extracted and clear extracted values.
     """
+
     slots: List[SlotName]
     """A list of slot names to extract."""
 

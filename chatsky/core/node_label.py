@@ -28,6 +28,7 @@ class NodeLabel(BaseModel):
     such ``NodeLabel`` will reference a node with the name :py:attr:`node_name`
     in the current flow.
     """
+
     flow_name: Optional[str] = None
     """
     Name of the flow in the script.
@@ -65,7 +66,7 @@ NodeLabelInitTypes: TypeAlias = Union[
     NodeLabel,
     Annotated[str, "node_name, flow name equal to current flow's name"],
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
-    Annotated[dict, "dict following the NodeLabel data model"]
+    Annotated[dict, "dict following the NodeLabel data model"],
 ]
 """Types that :py:class:`~.NodeLabel` can be validated from."""
 
@@ -74,6 +75,7 @@ class AbsoluteNodeLabel(NodeLabel):
     """
     A label for a node. (a way to address a specific node in the script)
     """
+
     flow_name: str
     """
     Name of the flow in the script.
@@ -121,6 +123,6 @@ AbsoluteNodeLabelInitTypes: TypeAlias = Union[
     AbsoluteNodeLabel,
     NodeLabel,
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
-    Annotated[dict, "dict following the AbsoluteNodeLabel data model"]
+    Annotated[dict, "dict following the AbsoluteNodeLabel data model"],
 ]
 """Types that :py:class:`~.AbsoluteNodeLabel` can be validated from."""

@@ -8,11 +8,14 @@ from chatsky.core.pipeline import Pipeline
 from chatsky.core import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
 
 
-@pytest.mark.parametrize("dict,result", [
-    ({}, -1),
-    ({1: None, 5: None}, 5),
-    ({5: None, 1: None}, 5),
-])
+@pytest.mark.parametrize(
+    "dict,result",
+    [
+        ({}, -1),
+        ({1: None, 5: None}, 5),
+        ({5: None, 1: None}, 5),
+    ],
+)
 def test_get_last_index(dict, result):
     assert get_last_index(dict) == result
 
@@ -33,7 +36,10 @@ def test_labels():
 
     assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
     ctx.add_label(("flow", "node2"))
-    assert ctx.labels == {5: AbsoluteNodeLabel(flow_name="flow", node_name="node1"), 6: AbsoluteNodeLabel(flow_name="flow", node_name="node2")}
+    assert ctx.labels == {
+        5: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
+        6: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
+    }
     assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
 
     ctx.labels = {}
@@ -81,13 +87,14 @@ async def test_pipeline_available():
 
 async def test_current_node_available():
     log = []
+
     class MyProcessing(BaseProcessing):
         async def call(self, ctx: Context) -> None:
             log.append(ctx.current_node)
 
     pipeline = Pipeline(
         script={"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}, PRE_TRANSITION: {"": MyProcessing()}}}},
-        start_label=("flow", "node")
+        start_label=("flow", "node"),
     )
     ctx = await pipeline._run_pipeline(Message(""))
     assert len(log) == 2

@@ -141,7 +141,7 @@ class TestPipelineValidation:
             Pipeline(
                 script=TOY_SCRIPT,
                 start_label=("greeting_flow", "start_node"),
-                fallback_label=("nonexistent", "nonexistent")
+                fallback_label=("nonexistent", "nonexistent"),
             )
 
     def test_pipeline_services_cached(self):
