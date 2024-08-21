@@ -25,15 +25,7 @@ async def test_get_current_label():
     assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context",
-    [
-        Context(),
-        Context(labels={0: ("a", "b")}),
-    ],
-)
-async def test_otlp_integration(context, tracer_exporter_and_provider, log_exporter_and_provider):
+async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
@@ -46,7 +38,7 @@ async def test_otlp_integration(context, tracer_exporter_and_provider, log_expor
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    _ = await default_extractors.get_current_label(context, tutorial_module.pipeline, runtime_info)
+    _ = await default_extractors.get_current_label(Context.init(("a", "b")), tutorial_module.pipeline, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

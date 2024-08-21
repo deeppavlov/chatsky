@@ -23,9 +23,6 @@ from chatsky.core.node_label import NodeLabel, NodeLabelInitTypes, AbsoluteNodeL
 logger = logging.getLogger(__name__)
 
 
-ReturnType = TypeVar("ReturnType")
-
-
 class BaseScriptFunc(BaseModel, ABC, frozen=True):
     """
     Base class for any script function.
