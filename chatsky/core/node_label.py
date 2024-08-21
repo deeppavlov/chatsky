@@ -20,7 +20,7 @@ def _get_current_flow_name(ctx: Context) -> str:
     return current_node.flow_name
 
 
-class NodeLabel(BaseModel):
+class NodeLabel(BaseModel, frozen=True):
     """
     A label for a node. (a way to address a specific node in the script)
 
