@@ -121,11 +121,11 @@ class TestTemplateFilling:
         await manager.extract_all(context)
 
         template_message = Message(text="{0} {1}")
-        assert await rsp.FilledTemplate(template_message).wrapped_call(context) == Message("4 5")
+        assert await rsp.FilledTemplate(template_message).wrapped_call(context) == Message(text="4 5")
         assert template_message.text == "{0} {1}"
 
     @pytest.mark.parametrize(
-        "on_exception,result", [("return_none", Message()), ("keep_template", Message("{0} {1} {2}"))]
+        "on_exception,result", [("return_none", Message()), ("keep_template", Message(text="{0} {1} {2}"))]
     )
     async def test_on_exception(self, context, manager, on_exception, result):
         await manager.extract_all(context)
@@ -144,4 +144,4 @@ class TestTemplateFilling:
 
         await proc.FillTemplate().wrapped_call(context)
 
-        assert context.current_node.response == rsp.FilledTemplate(template=Message("text"))
+        assert context.current_node.response == rsp.FilledTemplate(template=Message(text="text"))

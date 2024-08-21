@@ -39,7 +39,7 @@ class TestRequestProcessing:
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
             0: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
         }
-        assert ctx.responses == {0: Message("node2")}
+        assert ctx.responses == {0: Message(text="node2")}
 
     async def test_fallback_node(self):
         script = Script.model_validate({"flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}})
@@ -59,7 +59,7 @@ class TestRequestProcessing:
             -1: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             0: AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
         }
-        assert ctx.responses == {0: Message("fallback")}
+        assert ctx.responses == {0: Message(text="fallback")}
 
     @pytest.mark.parametrize(
         "default_priority,result",

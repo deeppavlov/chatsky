@@ -49,10 +49,10 @@ def test_labels():
 
 def test_requests():
     ctx = Context(labels={}, requests={5: "text1"})
-    assert ctx.last_request == Message("text1")
+    assert ctx.last_request == Message(text="text1")
     ctx.add_request("text2")
-    assert ctx.requests == {5: Message("text1"), 6: Message("text2")}
-    assert ctx.last_request == Message("text2")
+    assert ctx.requests == {5: Message(text="text1"), 6: Message(text="text2")}
+    assert ctx.last_request == Message(text="text2")
 
     ctx.requests = {}
     with pytest.raises(ContextError):
@@ -61,10 +61,10 @@ def test_requests():
 
 def test_responses():
     ctx = Context(labels={}, responses={5: "text1"})
-    assert ctx.last_response == Message("text1")
+    assert ctx.last_response == Message(text="text1")
     ctx.add_response("text2")
-    assert ctx.responses == {5: Message("text1"), 6: Message("text2")}
-    assert ctx.last_response == Message("text2")
+    assert ctx.responses == {5: Message(text="text1"), 6: Message(text="text2")}
+    assert ctx.last_response == Message(text="text2")
 
     ctx.responses = {}
     assert ctx.last_response is None
@@ -76,9 +76,9 @@ async def test_pipeline_available():
             return ctx.pipeline.start_label.node_name
 
     pipeline = Pipeline(script={"flow": {"node": {RESPONSE: MyResponse()}}}, start_label=("flow", "node"))
-    ctx = await pipeline._run_pipeline(Message(""))
+    ctx = await pipeline._run_pipeline(Message(text=""))
 
-    assert ctx.last_response == Message("node")
+    assert ctx.last_response == Message(text="node")
 
     ctx.framework_data.pipeline = None
     with pytest.raises(ContextError):
@@ -96,7 +96,7 @@ async def test_current_node_available():
         script={"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}, PRE_TRANSITION: {"": MyProcessing()}}}},
         start_label=("flow", "node"),
     )
-    ctx = await pipeline._run_pipeline(Message(""))
+    ctx = await pipeline._run_pipeline(Message(text=""))
     assert len(log) == 2
 
     ctx.framework_data.current_node = None

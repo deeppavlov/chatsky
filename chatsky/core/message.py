@@ -283,35 +283,6 @@ class Message(DataModel):
     misc: Optional[JSONSerializableDict] = None
     original_message: Optional[PickleEncodedValue] = None
 
-    def __init__(
-        self,
-        text: Optional[str] = None,
-        attachments: Optional[
-            List[
-                Union[
-                    CallbackQuery,
-                    Location,
-                    Contact,
-                    Invoice,
-                    Poll,
-                    Audio,
-                    Video,
-                    Animation,
-                    Image,
-                    Sticker,
-                    Document,
-                    VoiceMessage,
-                    VideoMessage,
-                    MediaGroup,
-                ]
-            ]
-        ] = None,
-        annotations: Optional[JSONSerializableDict] = None,
-        misc: Optional[JSONSerializableDict] = None,
-        **kwargs,
-    ):
-        super().__init__(text=text, attachments=attachments, annotations=annotations, misc=misc, **kwargs)
-
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
 

@@ -17,19 +17,19 @@ class SubclassMessage(Message):
 @pytest.fixture
 def request_based_ctx(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
-    ctx.add_request(Message("text", misc={"key": "value"}))
+    ctx.add_request(Message(text="text", misc={"key": "value"}))
     return ctx
 
 
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.ExactMatch(Message("text", misc={"key": "value"})), True),
-        (cnd.ExactMatch(Message("text"), skip_none=True), True),
-        (cnd.ExactMatch(Message("text"), skip_none=False), False),
+        (cnd.ExactMatch(Message(text="text", misc={"key": "value"})), True),
+        (cnd.ExactMatch(Message(text="text"), skip_none=True), True),
+        (cnd.ExactMatch(Message(text="text"), skip_none=False), False),
         (cnd.ExactMatch("text", skip_none=True), True),
-        (cnd.ExactMatch(Message("")), False),
-        (cnd.ExactMatch(Message("text", misc={"key": None})), False),
+        (cnd.ExactMatch(Message(text="")), False),
+        (cnd.ExactMatch(Message(text="text", misc={"key": None})), False),
         (cnd.ExactMatch(Message(), skip_none=True), True),
         (cnd.ExactMatch({}, skip_none=True), True),
         (cnd.ExactMatch(SubclassMessage(text="text", misc={"key": "value"}, additional_field="")), False),

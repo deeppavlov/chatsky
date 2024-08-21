@@ -53,4 +53,4 @@ def test_callback_messenger_interface(monkeypatch):
     pipeline.run()
 
     for _ in range(0, 5):
-        assert interface.on_request(Message("Ping"), 0).last_response == Message("Pong")
+        assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")

@@ -13,9 +13,9 @@ async def test_update_ctx_misc():
     toy_script = {
         "root": {
             "start": {TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
-            "success": {RESPONSE: Message("success"), TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
+            "success": {RESPONSE: "success", TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
             "failure": {
-                RESPONSE: Message("failure"),
+                RESPONSE: "failure",
             },
         }
     }

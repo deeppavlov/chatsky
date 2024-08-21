@@ -79,7 +79,12 @@ MULTIFLOW_SCRIPT = {
                 Tr(dst=("news", "what_news"), cnd=ExactMatch("let's talk about news")),
             ],
         },
-        "fallback": {RESPONSE: "Oops"},
+        "fallback": {
+            RESPONSE: "Oops",
+            TRANSITIONS: [
+                Tr(dst="start")
+            ]
+        },
     },
     "animals": {
         "have_pets": {
@@ -178,6 +183,9 @@ MULTIFLOW_REQUEST_OPTIONS = {
             "hi",
             "i like animals",
             "let's talk about animals",
+        ],
+        "fallback": [
+            "to start",
         ]
     },
     "animals": {
