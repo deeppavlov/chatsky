@@ -196,8 +196,8 @@ happy_path = (
 )
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("global_flow", "start_node"),
     fallback_label=("global_flow", "fallback_node"),
 )

@@ -20,7 +20,7 @@ is used in creating a JSON Schema for the endpoint.
 from chatsky.messengers.common.interface import CallbackMessengerInterface
 from chatsky.script import Message
 from chatsky.pipeline import Pipeline
-from chatsky.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
 from pydantic import BaseModel
@@ -83,8 +83,8 @@ communication between the pipeline on the server side and the messenger client.
 # %%
 messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS, messenger_interface=messenger_interface
 )
 
 

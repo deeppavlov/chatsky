@@ -21,7 +21,6 @@ from chatsky.pipeline import (
     not_condition,
     service_successful_condition,
     ServiceRuntimeInfo,
-    ACTOR,
 )
 
 from chatsky.utils.testing.common import (
@@ -37,10 +36,10 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as `ServiceGroupBuilder` objects:
-      lists of `ServiceBuilders` and `ServiceGroupBuilders` or objects.
-The objects should contain `components` -
-a `ServiceBuilder` and `ServiceGroupBuilder` object list.
+Service groups can be defined as `ServiceGroup` objects:
+      lists of `Service` or more `ServiceGroup` objects.
+`ServiceGroup` objects should contain `components` -
+a list of `Service` and `ServiceGroup` objects.
 
 To receive serialized information about service,
     service group or pipeline a property `info_dict` can be used,
@@ -96,12 +95,10 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        Service(
-            handler=always_running_service,
-            name="always_running_service",
-        ),
-        ACTOR,
+    "pre_services": Service(
+        handler=always_running_service, name="always_running_service"
+    ),
+    "post_services": [
         Service(
             handler=never_running_service,
             start_condition=not_condition(
@@ -117,7 +114,7 @@ pipeline_dict = {
 
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
