@@ -390,7 +390,18 @@ class Pipeline:
             # Graceful termination for Linux / macOS / other.
             async_loop.add_signal_handler(signal.SIGINT, partial(self.sigint_handler, async_loop))
 
-        asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
+        interface_task = asyncio.create_task(self.messenger_interface.connect(self._run_pipeline))
+
+        try:
+            await interface_task
+        except asyncio.CancelledError:
+            # Making sure shutdown() has control during cancellation.
+            await asyncio.sleep(0)
+        finally:
+            await self.messenger_interface.cleanup()
+            self.messenger_interface.finished_working = True
+
+        asyncio.run(self.messenger_interface.connect(self._run_pipeline, self))
         logger.info(f"pipeline finished working")
 
     def __call__(
@@ -416,6 +427,6 @@ class ContextLock:
         self.locks = {}
 
     def __getitem__(self, key):
-        if not key in self.locks:
+        if key not in self.locks:
             self.locks[key] = asyncio.Lock()
         return self.locks[key]

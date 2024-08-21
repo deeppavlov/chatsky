@@ -93,8 +93,6 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install chatsky[telegram]`.")
 
         self.application = Application.builder().token(token).build()
-        self.application.add_handler(MessageHandler(ALL, self.on_message))
-        self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
     async def get_attachment_bytes(self, source: str) -> bytes:
         file = await self.application.bot.get_file(source)

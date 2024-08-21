@@ -31,8 +31,6 @@ class MessengerInterface(abc.ABC):
     """
 
     def __init__(self):
-        self.task = None
-        self.pipeline = None
         # I guess, it sounds more like "self.still_accepting_requests".
         self.running = True
         """
@@ -47,10 +45,6 @@ class MessengerInterface(abc.ABC):
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        poll_timeout: float = None,
-        worker_timeout: float = None,
-        timeout: float = 0,
     ):
         """
         Method invoked when message interface is instantiated and connection is established.
@@ -69,38 +63,6 @@ class MessengerInterface(abc.ABC):
         Note you need to call cleanup() of the parent class.
         """
         pass
-
-    async def run_in_foreground(
-        self,
-        pipeline: Pipeline,
-        pipeline_runner: PipelineRunnerFunction,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        poll_timeout: float = None,
-        worker_timeout: float = None,
-        timeout: float = 0,
-    ):
-        self.pipeline = pipeline
-
-        # TODO: correctly redefine connect() in all interfaces.
-        self.task = asyncio.create_task(
-            self.connect(
-                pipeline_runner,
-                loop=loop,
-                poll_timeout=poll_timeout,
-                worker_timeout=worker_timeout,
-                timeout=timeout,
-            )
-        )
-
-        try:
-            await self.task
-        except asyncio.CancelledError:
-            # Making sure shutdown() has control during cancellation.
-            await asyncio.sleep(0)
-        finally:
-            await self.cleanup()
-
-        self.finished_working = True
 
     async def shutdown(self):
         """
@@ -176,7 +138,8 @@ class PollingMessengerInterface(MessengerInterface):
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
 
-    def __init__(self, number_of_workers: int = 2):
+    def __init__(self, pipeline: Pipeline = None, number_of_workers: int = 2):
+        self.pipeline = pipeline
         self.request_queue = asyncio.Queue()
         self.number_of_workers = number_of_workers
         self._worker_tasks = []
@@ -187,12 +150,13 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method used for sending users responses for their last input.
 
-        :param ctx_id: Context id, specifies the user id. Without multiple messenger interfaces it's basically a redundant parameter, because this function is just a more complex `print(last_response)`. (Change before merge)
+        :param ctx_id: Context id, specifies the user id. Without multiple messenger interfaces it's basically a
+         redundant parameter, because this function is just a more complex `print(last_response)`. (Change before merge)
         :param last_response: Latest response from the pipeline which should be relayed to the specified user.
         """
         raise NotImplementedError
 
-    async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
+    async def _process_request(self, ctx_id: Any, update: Message, pipeline: Pipeline):
         """
         Process a new update for ctx.
         """
@@ -212,15 +176,6 @@ class PollingMessengerInterface(MessengerInterface):
                     await self._process_request(ctx_id, update, self.pipeline),
                     timeout=worker_timeout,
                 )
-                # Doesn't work in a thread for some reason - it goes into an infinite cycle.
-                """
-                await asyncio.wait_for(
-                    await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
-                        self._process_request, ctx_id, update, self.pipeline
-                    ),
-                    timeout=worker_timeout,
-                )
-                """
             return False
         else:
             return True
@@ -331,10 +286,6 @@ class CallbackMessengerInterface(MessengerInterface):
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        poll_timeout: float = None,
-        worker_timeout: float = None,
-        timeout: float = 0,
     ):
         self._pipeline_runner = pipeline_runner
 
