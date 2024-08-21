@@ -129,7 +129,7 @@ class Script(BaseModel, extra="allow"):
             return None
         return flow.get_node(label.node_name)
 
-    def get_global_local_inherited_node(self, label: AbsoluteNodeLabel) -> Optional[Node]:
+    def get_inherited_node(self, label: AbsoluteNodeLabel) -> Optional[Node]:
         """
         Return a new node that inherits (using :py:meth:`Node.merge`)
         properties from :py:attr:`Script.global_node`, :py:attr:`Flow.local_node`

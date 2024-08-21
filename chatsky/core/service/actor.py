@@ -59,7 +59,7 @@ class Actor(PipelineComponent):
         next_label = pipeline.fallback_label
 
         try:
-            ctx.framework_data.current_node = pipeline.script.get_global_local_inherited_node(ctx.last_label)
+            ctx.framework_data.current_node = pipeline.script.get_inherited_node(ctx.last_label)
 
             logger.debug(f"Running pre_transition")
             await self._run_processing(ctx.current_node.pre_transition, ctx)
@@ -79,7 +79,7 @@ class Actor(PipelineComponent):
         response = Message()
 
         try:
-            ctx.framework_data.current_node = pipeline.script.get_global_local_inherited_node(next_label)
+            ctx.framework_data.current_node = pipeline.script.get_inherited_node(next_label)
 
             logger.debug(f"Running pre_response")
             await self._run_processing(ctx.current_node.pre_response, ctx)

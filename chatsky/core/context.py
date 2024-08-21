@@ -59,7 +59,7 @@ class FrameworkData(BaseModel):
     "Statuses of all the pipeline services. Cleared at the end of every turn."
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
-    A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_global_local_inherited_node`.
+    A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.
     This node can be safely modified by Processing functions to alter current node fields.
     """
     pipeline: Optional[Pipeline] = Field(default=None, exclude=True)
