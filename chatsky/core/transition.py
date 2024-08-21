@@ -51,14 +51,18 @@ async def get_next_label(ctx: Context, transitions: List[Transition], default_pr
     1. Condition result is calculated for every transition.
     2. Transitions are filtered by the calculated condition.
     3. Priority result is calculated for every transition that is left.
-       ``default_priority`` is used for priority that return ``True`` or ``None``
+       ``default_priority`` is used for priorities that return ``True`` or ``None``
        as per :py:class:`.BasePriority`.
        Those that return ``False`` are filtered out.
     4. Destination result is calculated for every transition that is left.
     5. The highest priority transition is chosen.
+       If there are multiple transition of the higher priority,
+       choose the first one of that priority in the ``transitions`` list.
+       Order of ``transitions`` is as follows:
+       ``node transitions, local transitions, global transitions``.
 
     If at any point any :py:class:`.BaseCondition`, :py:class:`.BaseDestination` or :py:class:`.BasePriority`
-    produces an exception, the respective transition is filtered out.
+    produces an exception, the corresponding transition is filtered out.
 
     :return: Label of the next node or ``None`` if no transition is left by the end of the process.
     """

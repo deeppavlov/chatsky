@@ -20,7 +20,7 @@ class MyProcessing(BaseProcessing):
         (
             Node(transitions=[Tr(dst="node1"), Tr(dst="node2")]),
             Node(transitions=[Tr(dst="node3"), Tr(dst="node4")]),
-            Node(transitions=[Tr(dst="node1"), Tr(dst="node2"), Tr(dst="node3"), Tr(dst="node4")]),
+            Node(transitions=[Tr(dst="node3"), Tr(dst="node4"), Tr(dst="node1"), Tr(dst="node2")]),
         ),
         (
             Node(response="msg1"),

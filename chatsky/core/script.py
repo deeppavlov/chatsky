@@ -52,11 +52,11 @@ class Node(BaseModel):
         """
         Merge another node into this one:
 
-        - Extend :py:attr:`transitions`;
+        - Prepend :py:attr:`transitions` of the other node;
         - Replace response if ``other.response`` is not ``None``;
         - Update :py:attr:`pre_transition`, :py:attr:`pre_response` and :py:attr:`misc` dictionaries.
         """
-        self.transitions.extend(other.transitions)
+        self.transitions = [*other.transitions, *self.transitions]
         if other.response is not None:
             self.response = other.response
         self.pre_transition.update(**other.pre_transition)
