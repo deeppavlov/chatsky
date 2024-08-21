@@ -5,7 +5,7 @@ This module contains several functions which are used to run demonstrations in t
 """
 
 from os import getenv
-from typing import Tuple
+from typing import Tuple, Iterable
 from uuid import uuid4
 
 from chatsky.core import Message, Pipeline
@@ -31,7 +31,8 @@ def is_interactive_mode() -> bool:  # pragma: no cover
 
 def check_happy_path(
     pipeline: Pipeline,
-    happy_path: Tuple[Tuple[MessageInitTypes, MessageInitTypes], ...],
+    happy_path: Iterable[Tuple[MessageInitTypes, MessageInitTypes]],
+    printout: bool = False,
 ):
     """
     Running tutorial with provided pipeline for provided requests, comparing responses with correct expected responses.
@@ -39,16 +40,21 @@ def check_happy_path(
     :param pipeline: The Pipeline instance, that will be used for checking.
     :param happy_path: A tuple of (request, response) tuples, so-called happy path,
         its requests are passed to pipeline and the pipeline responses are compared to its responses.
+    :param printout: Whether to print the requests/responses during iteration.
     """
     ctx_id = uuid4()  # get random ID for current context
     for step_id, (request_raw, reference_response_raw) in enumerate(happy_path):
 
         request = Message.model_validate(request_raw)
         reference_response = Message.model_validate(reference_response_raw)
+        if printout:
+            print(f"USER: {request!r}")
 
         ctx = pipeline(request, ctx_id)
 
         actual_response = ctx.last_response
+        if printout:
+            print(f"BOT : {actual_response!r}")
 
         if reference_response != actual_response:
             raise AssertionError(
