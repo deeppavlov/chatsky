@@ -182,6 +182,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         It has :py:attr:`.Pipeline.before_handler` and :py:attr:`.Pipeline.after_handler` applied to it.
         """
         components = [self.pre_services, self.actor, self.post_services]
+        self.pre_services.name = "pre"
+        self.post_services.name = "post"
         services_pipeline = PipelineServiceGroup(
             components=components,
             before_handler=self.before_handler,
