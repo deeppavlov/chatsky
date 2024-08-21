@@ -64,19 +64,3 @@ reference response: {reference_response}
 actual response: {actual_response}
 """
             )
-
-
-def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
-    """
-    Running tutorial with provided pipeline in interactive mode, just like with CLI messenger interface.
-    The dialog won't be stored anywhere, it will only be outputted to STDOUT.
-
-    :param pipeline: The Pipeline instance, that will be used for running.
-    """
-
-    ctx_id = uuid4()  # Random UID
-    print("Start a dialogue with the bot")
-    while True:
-        request = input(">>> ")
-        ctx = pipeline(request=Message(text=request), ctx_id=ctx_id)
-        print(f"<<< {repr(ctx.last_response)}")
