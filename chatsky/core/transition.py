@@ -6,7 +6,7 @@ specify conditions and destinations for transitions to nodes.
 """
 from __future__ import annotations
 
-from typing import Union, List, TYPE_CHECKING, Optional
+from typing import Union, List, TYPE_CHECKING, Optional, Tuple
 import logging
 import asyncio
 
@@ -66,8 +66,10 @@ async def get_next_label(ctx: Context, transitions: List[Transition], default_pr
 
     :return: Label of the next node or ``None`` if no transition is left by the end of the process.
     """
-    filtered_transitions = transitions.copy()
-    condition_results = await asyncio.gather(*[transition.cnd(ctx) for transition in filtered_transitions])
+    filtered_transitions: List[Transition] = transitions.copy()
+    condition_results = await asyncio.gather(
+        *[transition.cnd.wrapped_call(ctx) for transition in filtered_transitions]
+    )
 
     filtered_transitions = [
         transition
@@ -75,18 +77,22 @@ async def get_next_label(ctx: Context, transitions: List[Transition], default_pr
         if condition is True
     ]
 
-    priority_results = await asyncio.gather(*[transition.priority(ctx) for transition in filtered_transitions])
+    priority_results = await asyncio.gather(
+        *[transition.priority.wrapped_call(ctx) for transition in filtered_transitions]
+    )
 
-    transitions_with_priorities = [
+    transitions_with_priorities: List[Tuple[Transition, float]] = [
         (transition, (priority_result if isinstance(priority_result, float) else default_priority))
         for transition, priority_result in zip(filtered_transitions, priority_results)
-        if priority_result is True or priority_result is None or isinstance(priority_result, float)
+        if (priority_result is True or priority_result is None or isinstance(priority_result, float))
     ]
     logger.debug(f"Possible transitions: {transitions_with_priorities!r}")
 
     transitions_with_priorities = sorted(transitions_with_priorities, key=lambda x: x[1], reverse=True)
 
-    destination_results = await asyncio.gather(*[transition.dst(ctx) for transition, _ in transitions_with_priorities])
+    destination_results = await asyncio.gather(
+        *[transition.dst.wrapped_call(ctx) for transition, _ in transitions_with_priorities]
+    )
 
     for destination in destination_results:
         if isinstance(destination, AbsoluteNodeLabel):

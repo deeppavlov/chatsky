@@ -12,12 +12,14 @@ def ctx(context_factory):
 
 async def test_repeat(ctx):
     assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
-    assert isinstance(await dst.Repeat(shift=1)(ctx), KeyError)
+    with pytest.raises(KeyError):
+        await dst.Repeat(shift=1)(ctx)
 
     ctx.add_label(("flow", "node1"))
     assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
     assert await dst.Repeat(shift=1)(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
-    assert isinstance(await dst.Repeat(shift=2)(ctx), KeyError)
+    with pytest.raises(KeyError):
+        await dst.Repeat(shift=2)(ctx)
 
     ctx.add_label(("flow", "node2"))
     assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
@@ -48,7 +50,7 @@ class TestForwardBackward:
     ])
     def test_loop_exception(self, ctx, node, inc, loop):
         with pytest.raises(IndexError):
-            assert isinstance(dst.get_next_node_in_flow(node, ctx, increment=inc, loop=loop), IndexError)
+            dst.get_next_node_in_flow(node, ctx, increment=inc, loop=loop)
 
     def test_non_existent_node_exception(self, ctx):
         with pytest.raises(ValidationError):
@@ -60,7 +62,8 @@ class TestForwardBackward:
 
         ctx.add_label(("flow", "node3"))
         assert await dst.Forward(loop=True)(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
-        assert isinstance(await dst.Forward(loop=False)(ctx), IndexError)
+        with pytest.raises(IndexError):
+            await dst.Forward(loop=False)(ctx)
 
     async def test_backward(self, ctx):
         ctx.add_label(("flow", "node2"))
@@ -68,4 +71,5 @@ class TestForwardBackward:
 
         ctx.add_label(("flow", "node1"))
         assert await dst.Backward(loop=True)(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node3")
-        assert isinstance(await dst.Backward(loop=False)(ctx), IndexError)
+        with pytest.raises(IndexError):
+            await dst.Backward(loop=False)(ctx)

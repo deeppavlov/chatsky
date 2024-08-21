@@ -106,8 +106,8 @@ class TestTemplateFilling:
             async def call(self, ctx: Context) -> MessageInitTypes:
                 raise RuntimeError()
 
-        with pytest.raises(ValueError):
-            await rsp.FilledTemplate(MyResponse()).call(context)
+        with pytest.raises(RuntimeError):
+            await rsp.FilledTemplate(MyResponse())(context)
 
     async def test_missing_text(self, context, log_event_catcher):
         logs = log_event_catcher(rsp_logger, level=logging.WARN)

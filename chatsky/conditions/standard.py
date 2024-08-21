@@ -119,7 +119,7 @@ class Any(BaseCondition):
         super().__init__(conditions=list(conditions))
 
     async def call(self, ctx: Context) -> bool:
-        return any(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
+        return any(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
 
 class All(BaseCondition):
@@ -135,7 +135,7 @@ class All(BaseCondition):
         super().__init__(conditions=list(conditions))
 
     async def call(self, ctx: Context) -> bool:
-        return all(await asyncio.gather(*(cnd(ctx) for cnd in self.conditions)))
+        return all(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
 
 class Negation(BaseCondition):
@@ -151,8 +151,7 @@ class Negation(BaseCondition):
         super().__init__(condition=condition)
 
     async def call(self, ctx: Context) -> bool:
-        result = await self.condition.wrapped_call(ctx)
-        return result is not True
+        return not await self.condition.is_true(ctx)
 
 
 Not = Negation

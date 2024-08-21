@@ -23,9 +23,9 @@ class TestBaseFunctionCallWrapper:
         assert await MyFunc().wrapped_call(None) == return_value
 
     async def test_wrong_type(self):
-        class MyProc(BaseProcessing):
+        class MyProc(BasePriority):
             async def call(self, ctx):
-                return 1
+                return "w"
 
         assert isinstance(await MyProc().wrapped_call(None), TypeError)
 

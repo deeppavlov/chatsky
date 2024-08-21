@@ -86,7 +86,7 @@ class Actor(PipelineComponent):
 
             node_response = ctx.current_node.response
             if node_response is not None:
-                response_result = await node_response(ctx)
+                response_result = await node_response.wrapped_call(ctx)
                 if isinstance(response_result, Message):
                     response = response_result
                 else:

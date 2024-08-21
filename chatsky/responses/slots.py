@@ -41,9 +41,7 @@ class FilledTemplate(BaseResponse):
         super().__init__(template=template, on_exception=on_exception)
 
     async def call(self, ctx: Context) -> MessageInitTypes:
-        result = await self.template.wrapped_call(ctx)
-        if not isinstance(result, Message):
-            raise ValueError("Cannot fill template: response did not return Message.")
+        result = await self.template(ctx)
 
         if result.text is not None:
             filled = ctx.framework_data.slot_manager.fill_template(result.text)
