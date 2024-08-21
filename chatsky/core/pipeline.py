@@ -165,6 +165,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
+        self.services_pipeline  # cache services
 
     @computed_field
     @cached_property
