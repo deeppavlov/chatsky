@@ -151,6 +151,7 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": False,
     "private-members": True,
+    "special-members": "__call__",
     "member-order": "bysource",
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }

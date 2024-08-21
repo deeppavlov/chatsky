@@ -335,6 +335,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         Basically, it is a shortcut for :py:meth:`_run_pipeline`.
         NB! When pipeline is executed this way, :py:attr:`messenger_interface` won't be initiated nor connected.
 
-        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))

@@ -63,7 +63,6 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
 
         :return: An instance of :py:attr:`return_type`.
         :raises TypeError: If :py:meth:`call` returned value of incorrect type.
-        :meta public:
         """
         result = await wrap_sync_function_in_async(self.call, ctx)
         if not isinstance(self.return_type, tuple) and issubclass(self.return_type, BaseModel):
