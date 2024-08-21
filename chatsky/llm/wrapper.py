@@ -44,7 +44,7 @@ class LLM_API:
         :param system_prompt: System prompt for the model.
         """
         self.__check_imports()
-        self.model: ChatOpenAI = model
+        self.model: BaseChatModel = model
         self.name = ""
         self.parser = StrOutputParser()
         self.system_prompt = system_prompt
@@ -78,10 +78,12 @@ class LLM_API:
 
     async def condition(self, prompt: str, method: BaseMethod):
         async def process_input(ctx: Context, _: Pipeline) -> bool:
-            result = method(ctx, await self.parser.ainvoke(await self.model.ainvoke([prompt + "\n" + ctx.last_request.text])))
+            condition_history = [await message_to_langchain(Message(prompt), pipeline=_, source="system"),
+                await message_to_langchain(ctx.last_request, pipeline=_, source="human")]
+            result = method(ctx, await self.model.ainvoke(condition_history))
             return result
 
-        return await process_input
+        return process_input
 
 
 def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True, message_schema: Union[None, Type[Message], Type[BaseModel]] = None):
@@ -107,13 +109,13 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             # populate history with global and local prompts
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
-                history_messages.append(message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(await message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
-                history_messages.append(message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(await message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system"))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
-                history_messages.append(message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(await message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system"))
 
         # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
@@ -123,17 +125,17 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             )
             if history != -1:
                 for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-history:]):
-                    history_messages.append(message_to_langchain(req, pipeline=pipeline))
-                    history_messages.append(message_to_langchain(resp, pipeline=pipeline, source="ai"))
+                    history_messages.append(await message_to_langchain(req, pipeline=pipeline))
+                    history_messages.append(await message_to_langchain(resp, pipeline=pipeline, source="ai"))
             else:
                 # TODO: Fix redundant code
                 for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
-                    history_messages.append(message_to_langchain(req, pipeline=pipeline))
-                    history_messages.append(message_to_langchain(resp, pipeline=pipeline, source="ai"))
+                    history_messages.append(await message_to_langchain(req, pipeline=pipeline))
+                    history_messages.append(await message_to_langchain(resp, pipeline=pipeline, source="ai"))
 
         if prompt:
-            history_messages.append(message_to_langchain(Message(prompt), pipeline=pipeline, source="system"))
-        history_messages.append(message_to_langchain(ctx.last_request, pipeline=pipeline, source="human"))
+            history_messages.append(await message_to_langchain(Message(prompt), pipeline=pipeline, source="system"))
+        history_messages.append(await message_to_langchain(ctx.last_request, pipeline=pipeline, source="human"))
         return await model.respond(history_messages, message_schema=message_schema)
 
     return wrapped
@@ -168,7 +170,7 @@ async def __attachment_to_content(attachment: Image, iface) -> str:
     return image_b64
 
 
-def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int=1000):
+async def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int=1000):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
@@ -183,12 +185,13 @@ def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "hu
     if len(message.text) > max_size:
         raise ValueError("Message is too long.")
 
+    if message.text is None: message.text = ""
     content = [{"type": "text", "text": message.text}]
 
     if message.attachments:
         for image in message.attachments:
             if isinstance(image, Image):
-                content.append({"type": "image_url", "image_url": {"url": __attachment_to_content(image, pipeline.messenger_interface)}})
+                content.append({"type": "image_url", "image_url": {"url": await __attachment_to_content(image, pipeline.messenger_interface)}})
 
     if source == "human":
         return HumanMessage(content=content)

@@ -7,6 +7,7 @@ including regex search, semantic distance (cosine) etc.
 
 from chatsky.script import Context
 from pydantic import BaseModel
+from langchain_core.messages import BaseMessage
 import abc
 
 
@@ -15,7 +16,7 @@ class BaseMethod(BaseModel, abc.ABC):
     Base class to evaluate models response as condition.
     """
     @abc.abstractmethod
-    async def __call__(self, ctx: Context, model_result: str) -> bool:
+    async def __call__(self, ctx: Context, model_result: BaseMessage) -> bool:
         raise NotImplementedError
 
 
@@ -30,12 +31,18 @@ class Contains(BaseMethod):
     """
     pattern: str
 
-    async def __call__(self, ctx: Context, model_result: str) -> bool:
+    async def __call__(self, ctx: Context, model_result: BaseMessage) -> bool:
         print("Model result:", model_result)
-        return await bool(self.pattern.lower() in model_result.lower())
+        return bool(self.pattern.lower() in model_result.content.lower())
 
 
 class LogProb(BaseMethod):
+    target_token: str
     treshold: float = 0.7
-    async def __call__(self, ctx: Context, model_result: dict) -> bool:
-        raise NotImplementedError
+    async def __call__(self, ctx: Context, model_result: BaseMessage) -> bool:
+        result = model_result.response_metadata["logprobs"]["content"]
+        for tok in result:
+            if tok["token"] == self.target_token and tok["logprob"] > self.treshold:
+                return True
+
+        return False

@@ -72,14 +72,14 @@ def pipeline(mock_model):
     return MockPipeline(mock_model)
 
 
-def test_message_to_langchain():
-    assert message_to_langchain(Message(text="hello"), source="human") == HumanMessage(
+async def test_message_to_langchain(pipeline):
+    assert await message_to_langchain(Message(text="hello"), pipeline, source="human") == HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-    assert message_to_langchain(Message(text="hello"), source="ai") != HumanMessage(
+    assert await message_to_langchain(Message(text="hello"), pipeline, source="ai") != HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-    assert message_to_langchain(Message(text="hello"), source="ai") == AIMessage(
+    assert await message_to_langchain(Message(text="hello"), pipeline, source="ai") == AIMessage(
         content=[{"type": "text", "text": "hello"}]
     )
 
