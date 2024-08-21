@@ -62,9 +62,7 @@ class LongpollingInterface(_AbstractTelegramInterface, PollingMessengerInterface
 
     async def _respond(self, ctx_id, last_response):
         if last_response is not None:
-            await self.cast_message_to_telegram_and_send(
-                self.application.bot, ctx_id, last_response
-            )
+            await self.cast_message_to_telegram_and_send(self.application.bot, ctx_id, last_response)
 
 
 class WebhookInterface(_AbstractTelegramInterface):

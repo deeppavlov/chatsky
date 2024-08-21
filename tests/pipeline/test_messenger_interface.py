@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from chatsky.script import RESPONSE, TRANSITIONS, Message, Context
+from chatsky.script import RESPONSE, TRANSITIONS, Message
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import CallbackMessengerInterface
 from chatsky.pipeline import Pipeline

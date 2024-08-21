@@ -41,8 +41,7 @@ try:
         Update,
         Message as TelegramMessage,
     )
-    from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler
-    from telegram.ext.filters import ALL
+    from telegram.ext import Application, ExtBot
 
     telegram_available = True
 except ImportError:

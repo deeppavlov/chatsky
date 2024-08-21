@@ -74,7 +74,7 @@ def test_echo_responses():
 
     for i in range(4):
         assert interface.expected_updates[i] == interface.received_updates[i]
-    assert interface.not_obtained_updates() == False
+    assert interface.not_obtained_updates() is False
 
 
 def test_context_lock():
@@ -108,7 +108,7 @@ def test_context_lock():
     asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_updates))
     for i in range(3):
         assert interface.expected_updates[i][1] == interface.received_updates[i]
-    assert interface.not_obtained_updates() == False
+    assert interface.not_obtained_updates() is False
 
 
 def test_worker_shielding():
@@ -230,5 +230,5 @@ def test_shielding():
     print(interface.received_updates)
     for i in range(len(interface.expected_updates)):
         assert interface.expected_updates[i] == interface.received_updates[i]
-    assert interface.not_obtained_updates() == False
-    assert interface.not_obtained_requests() == True
+    assert interface.not_obtained_updates() is False
+    assert interface.not_obtained_requests() is True

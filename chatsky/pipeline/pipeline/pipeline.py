@@ -359,7 +359,7 @@ class Pipeline:
         Stops Pipeline and all it's interfaces.
         """
         self.stopped_by_signal = True
-        logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
+        logger.info("pipeline received SIGINT - stopping pipeline and all interfaces")
         # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
         if self.messenger_interface.running:
             loop.run_until_complete(self.messenger_interface.shutdown())
@@ -402,7 +402,7 @@ class Pipeline:
             self.messenger_interface.finished_working = True
 
         asyncio.run(self.messenger_interface.connect(self._run_pipeline, self))
-        logger.info(f"pipeline finished working")
+        logger.info("pipeline finished working")
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

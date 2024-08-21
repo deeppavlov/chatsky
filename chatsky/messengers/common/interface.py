@@ -69,7 +69,7 @@ class MessengerInterface(abc.ABC):
         This cancels the main task (if it hasn't finished) and sets a flag self.running to False,
         so that any async tasks in loops can see that and turn off as soon as they are done.
         """
-        logger.info(f"messenger_interface.shutdown() called - shutting down interface")
+        logger.info("messenger_interface.shutdown() called - shutting down interface")
         self.running = False
         self.task.cancel()
         try:
@@ -187,7 +187,7 @@ class PollingMessengerInterface(MessengerInterface):
             try:
                 no_more_jobs = self._worker_job(worker_timeout=worker_timeout)
                 if no_more_jobs:
-                    logger.info(f"Worker finished working - all remaining requests have been processed.")
+                    logger.info("Worker finished working - all remaining requests have been processed.")
                     # Polling_loop should give the required data on whether the stop signal was sent or if
                     # the loop() function gave 'False'.
                     break
@@ -227,9 +227,9 @@ class PollingMessengerInterface(MessengerInterface):
             # If loop() is somehow True after being False once, this logging will be wrong.
             # But no user would want to break their own logging, right?
             if loop() is False:
-                logger.info(f"polling_loop stopped working - the loop() condition was False")
+                logger.info("polling_loop stopped working - the loop() condition was False")
             else:
-                logger.info(f"polling_loop stopped working - the stop signal was received.")
+                logger.info("polling_loop stopped working - the stop signal was received.")
             # If there are no more jobs/stop signal received, a special 'None' request is
             # sent to the queue (one for each worker), they shut down the workers.
             # In case of more workers than two, change the number of 'None' requests to the new number of workers.
