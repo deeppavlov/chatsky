@@ -20,14 +20,11 @@ from .types import (
     ExtraHandlerRuntimeInfo,
     ExtraHandlerFunction,
     ServiceFunction,
-    ExtraHandlerBuilder,
-    ServiceBuilder,
-    ServiceGroupBuilder,
-    PipelineBuilder,
 )
 
-from .pipeline.pipeline import Pipeline, ACTOR
-
-from .service.extra import BeforeHandler, AfterHandler
-from .service.group import ServiceGroup
+from .service.extra import BeforeHandler, AfterHandler, ComponentExtraHandler
 from .service.service import Service, to_service
+from .service.group import ServiceGroup
+
+from .pipeline.actor import Actor
+from .pipeline.pipeline import Pipeline

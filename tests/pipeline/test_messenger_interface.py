@@ -31,8 +31,8 @@ SCRIPT = {
     }
 }
 
-pipeline = Pipeline.from_script(
-    SCRIPT,
+pipeline = Pipeline(
+    script=SCRIPT,
     start_label=("pingpong_flow", "start_node"),
     fallback_label=("pingpong_flow", "fallback_node"),
 )

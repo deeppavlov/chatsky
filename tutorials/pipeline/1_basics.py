@@ -22,16 +22,16 @@ from chatsky.utils.testing import (
     is_interactive_mode,
     HAPPY_PATH,
     TOY_SCRIPT,
-    TOY_SCRIPT_ARGS,
+    TOY_SCRIPT_KWARGS,
 )
 
 
 # %% [markdown]
 """
 `Pipeline` is an object, that automates script execution and context management.
-`from_script` method can be used to create
+It's constructor method can be used to create
 a pipeline of the most basic structure:
-"preprocessors -> actor -> postprocessors"
+"pre-services -> actor -> post-services"
 as well as to define `context_storage` and `messenger_interface`.
 Actor is a component of :py:class:`.Pipeline`, that contains the
 :py:class:`.Script` and handles it. It is responsible for processing
@@ -42,7 +42,7 @@ These parameters usage will be shown in tutorials 2, 3 and 6.
 Here only required parameters are provided to pipeline.
 `context_storage` will default to simple Python dict and
 `messenger_interface` will never be used.
-pre- and postprocessors lists are empty.
+pre- and post-services lists are empty.
 `Pipeline` object can be called with user input
 as first argument and dialog id (any immutable object).
 This call will return `Context`,
@@ -50,8 +50,8 @@ its `last_response` property will be actors response.
 """
 
 # %%
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
+pipeline = Pipeline(
+    script=TOY_SCRIPT,
     # Pipeline script object, defined in `chatsky.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
@@ -61,15 +61,15 @@ pipeline = Pipeline.from_script(
 # %% [markdown]
 """
 For the sake of brevity, other tutorials
-might use `TOY_SCRIPT_ARGS` to initialize pipeline:
+might use `TOY_SCRIPT_KWARGS` (keyword arguments) to initialize pipeline:
 """
 
 # %%
-assert TOY_SCRIPT_ARGS == (
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node"),
-)
+assert TOY_SCRIPT_KWARGS == {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
+}
 
 
 # %%

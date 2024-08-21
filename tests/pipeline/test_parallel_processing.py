@@ -29,14 +29,14 @@ async def test_parallel_processing():
     }
 
     # test sequential processing
-    pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), parallelize_processing=False)
+    pipeline = Pipeline(script=toy_script, start_label=("root", "start"), parallelize_processing=False)
 
     ctx = await pipeline._run_pipeline(Message(), 0)
 
     assert ctx.last_response.text == "fast: slow: text"
 
     # test parallel processing
-    pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), parallelize_processing=True)
+    pipeline = Pipeline(script=toy_script, start_label=("root", "start"), parallelize_processing=True)
 
     ctx = await pipeline._run_pipeline(Message(), 0)
 
