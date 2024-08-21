@@ -80,7 +80,7 @@ class LLM_API:
         async def process_input(ctx: Context, _: Pipeline) -> bool:
             condition_history = [await message_to_langchain(Message(prompt), pipeline=_, source="system"),
                 await message_to_langchain(ctx.last_request, pipeline=_, source="human")]
-            result = method(ctx, await self.model.ainvoke(condition_history))
+            result = method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
             return result
 
         return process_input
