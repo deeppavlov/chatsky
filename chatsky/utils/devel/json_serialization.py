@@ -16,12 +16,10 @@ Tools that provide JSON serialization via Pickle for unserializable objects.
 from base64 import decodebytes, encodebytes
 from copy import deepcopy
 from pickle import dumps, loads
-from typing import Any, Dict, List, Union
-from typing_extensions import Annotated, TypeAlias
+from typing import Any, Dict, List, Union, Optional
+from typing_extensions import TypeAlias
 from pydantic import (
     JsonValue,
-    PlainSerializer,
-    PlainValidator,
     RootModel,
     BaseModel,
     model_validator,
@@ -119,43 +117,6 @@ def json_pickle_validator(model: Serializable) -> Serializable:
         del model_copy[_JSON_EXTRA_FIELDS_KEYS]
 
     return model_copy
-
-
-PickleSerializer = PlainSerializer(pickle_serializer, when_used="json")
-"""Pydantic wrapper of :py:func:`~.pickle_serializer`."""
-PickleValidator = PlainValidator(pickle_validator)
-"""Pydantic wrapper of :py:func:`~.pickle_validator`."""
-PickleEncodedValue = Annotated[Any, PickleSerializer, PickleValidator]
-"""
-Annotation for field that makes it JSON serializable via pickle:
-
-This field is always a normal object when inside its class but is a string encoding of the object
-outside of the class -- either after serialization or before initialization.
-As such this field cannot be used during initialization and the only way to use it is to bypass validation.
-
-.. code:: python
-
-    class MyClass(BaseModel):
-        my_field: Optional[PickleEncodedValue] = None  # the field must have a default value
-
-    my_obj = MyClass()  # the field cannot be set during init
-    my_obj.my_field = unserializable_object  # can be set manually to avoid validation
-
-Alternatively, ``BaseModel.model_construct`` may be used to bypass validation,
-though it would bypass validation of all fields.
-"""
-
-JSONPickleSerializer = PlainSerializer(json_pickle_serializer, when_used="json")
-"""Pydantic wrapper of :py:func:`~.json_pickle_serializer`."""
-JSONPickleValidator = PlainValidator(json_pickle_validator)
-"""Pydantic wrapper of :py:func:`~.json_pickle_validator`."""
-JSONSerializableDict = Annotated[Serializable, JSONPickleSerializer, JSONPickleValidator]
-"""
-Annotation for dictionary or Pydantic model that makes all its fields JSON serializable.
-
-This uses a reserved dictionary key :py:data:`~._JSON_EXTRA_FIELDS_KEYS` to store
-fields serialized that way.
-"""
 
 
 class JSONSerializableExtras(BaseModel, extra="allow"):

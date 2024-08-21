@@ -15,10 +15,10 @@ import logging
 from functools import reduce
 from string import Formatter
 
-from pydantic import BaseModel, model_validator, Field
+from pydantic import BaseModel, model_validator, Field, field_serializer, field_validator
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
-from chatsky.utils.devel.json_serialization import PickleEncodedValue
+from chatsky.utils.devel.json_serialization import pickle_serializer, pickle_validator
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
@@ -112,8 +112,29 @@ class ExtractedValueSlot(ExtractedSlot):
     """Value extracted from :py:class:`~.ValueSlot`."""
 
     is_slot_extracted: bool
-    extracted_value: PickleEncodedValue
-    default_value: PickleEncodedValue = None
+    extracted_value: Any
+    default_value: Any = None
+
+    @field_serializer("extracted_value", "default_value", when_used="json")
+    def pickle_serialize_values(self, value):
+        """
+        Cast values to string via pickle.
+        Allows storing arbitrary data in these fields when using context storages.
+        """
+        if value is not None:
+            return pickle_serializer(value)
+        return value
+
+    @field_validator("extracted_value", "default_value", mode="before")
+    @classmethod
+    def pickle_validate_values(cls, value):
+        """
+        Restore values after being processed with
+        :py:meth:`pickle_serialize_values`.
+        """
+        if value is not None:
+            return pickle_validator(value)
+        return value
 
     @property
     def __slot_extracted__(self) -> bool:

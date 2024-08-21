@@ -6,17 +6,17 @@ The Message class is a universal data model for representing a message.
 It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Literal, Optional, List, Union, TypeAlias, Annotated
+from typing import Literal, Optional, List, Union, TypeAlias, Annotated, Dict, Any
 from pathlib import Path
 from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import Field, FilePath, HttpUrl, model_validator
+from pydantic import Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
 from pydantic_core import Url
 
 from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
-from chatsky.utils.devel import JSONSerializableDict, PickleEncodedValue, JSONSerializableExtras
+from chatsky.utils.devel import json_pickle_validator, json_pickle_serializer, pickle_serializer, pickle_validator, JSONSerializableExtras
 
 
 class DataModel(JSONSerializableExtras):
@@ -279,9 +279,48 @@ class Message(DataModel):
             ]
         ]
     ] = None
-    annotations: Optional[JSONSerializableDict] = None
-    misc: Optional[JSONSerializableDict] = None
-    original_message: Optional[PickleEncodedValue] = None
+    annotations: Optional[Dict[str, Any]] = None
+    misc: Optional[Dict[str, Any]] = None
+    original_message: Optional[Any] = None
+
+    @field_serializer("annotations", "misc", when_used="json")
+    def pickle_serialize_dicts(self, value):
+        """
+        Serialize values that are not json-serializable via pickle.
+        Allows storing arbitrary data in misc/annotations when using context storages.
+        """
+        if isinstance(value, dict):
+            return json_pickle_serializer(value)
+        return value
+
+    @field_validator("annotations", "misc", mode="before")
+    @classmethod
+    def pickle_validate_dicts(cls, value):
+        """Restore values serialized with :py:meth:`pickle_serialize_dicts`."""
+        if isinstance(value, dict):
+            return json_pickle_validator(value)
+        return value
+
+    @field_serializer("original_message", when_used="json")
+    def pickle_serialize_original_message(self, value):
+        """
+        Cast :py:attr:`original_message` to string via pickle.
+        Allows storing arbitrary data in this field when using context storages.
+        """
+        if value is not None:
+            return pickle_serializer(value)
+        return value
+
+    @field_validator("original_message", mode="before")
+    @classmethod
+    def pickle_validate_original_message(cls, value):
+        """
+        Restore :py:attr:`original_message` after being processed with
+        :py:meth:`pickle_serialize_original_message`.
+        """
+        if value is not None:
+            return pickle_validator(value)
+        return value
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])

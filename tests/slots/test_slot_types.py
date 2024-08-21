@@ -159,3 +159,28 @@ async def test_str_representation():
         )
         == "{'first_name': 'Tom', 'last_name': 'Smith'}"
     )
+
+
+class UnserializableClass:
+    def __init__(self):
+        self.exc = RuntimeError("exception")
+
+    def __eq__(self, other):
+        if not isinstance(other, UnserializableClass):
+            return False
+        return type(self.exc) == type(other.exc) and self.exc.args == other.exc.args  # noqa: E721
+
+
+async def test_serialization():
+    extracted_slot = ExtractedValueSlot.model_construct(
+        is_slot_extracted=True,
+        extracted_value=UnserializableClass(),
+        default_value=UnserializableClass()
+    )
+    serialized = extracted_slot.model_dump_json()
+    validated = ExtractedValueSlot.model_validate_json(serialized)
+    assert extracted_slot == validated
+
+    dump = extracted_slot.model_dump(mode="json")
+    assert isinstance(dump["extracted_value"], str)
+    assert isinstance(dump["default_value"], str)
