@@ -16,7 +16,7 @@ Tools that provide JSON serialization via Pickle for unserializable objects.
 from base64 import decodebytes, encodebytes
 from copy import deepcopy
 from pickle import dumps, loads
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Union
 from typing_extensions import TypeAlias
 from pydantic import (
     JsonValue,

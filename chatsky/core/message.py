@@ -16,7 +16,13 @@ from pydantic import Field, FilePath, HttpUrl, model_validator, field_validator,
 from pydantic_core import Url
 
 from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
-from chatsky.utils.devel import json_pickle_validator, json_pickle_serializer, pickle_serializer, pickle_validator, JSONSerializableExtras
+from chatsky.utils.devel import (
+    json_pickle_validator,
+    json_pickle_serializer,
+    pickle_serializer,
+    pickle_validator,
+    JSONSerializableExtras,
+)
 
 
 class DataModel(JSONSerializableExtras):

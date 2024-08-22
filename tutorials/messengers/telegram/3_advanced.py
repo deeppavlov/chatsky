@@ -208,8 +208,7 @@ script = {
         },
         "formatted_node": {
             RESPONSE: Message(
-                text=formatted_text,
-                parse_mode=ParseMode.MARKDOWN_V2
+                text=formatted_text, parse_mode=ParseMode.MARKDOWN_V2
             ),
         },
         "attachments_node": {

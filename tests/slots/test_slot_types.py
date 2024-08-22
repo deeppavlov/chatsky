@@ -173,9 +173,7 @@ class UnserializableClass:
 
 async def test_serialization():
     extracted_slot = ExtractedValueSlot.model_construct(
-        is_slot_extracted=True,
-        extracted_value=UnserializableClass(),
-        default_value=UnserializableClass()
+        is_slot_extracted=True, extracted_value=UnserializableClass(), default_value=UnserializableClass()
     )
     serialized = extracted_slot.model_dump_json()
     validated = ExtractedValueSlot.model_validate_json(serialized)

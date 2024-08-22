@@ -84,7 +84,7 @@ happy_path = (
         Message(
             text="here's my picture!",
             attachments=[Image(source=img_url)],
-        )
+        ),
     ),
     ("ok", "Final node reached, send any message to restart."),
     ("ok", "Please, send me a picture url"),
@@ -93,7 +93,7 @@ happy_path = (
         Message(
             text="Look at my pictures",
             attachments=[Image(source=img_url)] * 10,
-        )
+        ),
     ),
     ("ok", "Final node reached, send any message to restart."),
 )

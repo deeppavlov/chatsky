@@ -150,8 +150,8 @@ script = {
         },
         "intro_node": {
             RESPONSE: f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'
-                      f" or {QUOTED_ATTACHMENTS[-1]}"
-                      f" to receive a corresponding attachment!",
+            f" or {QUOTED_ATTACHMENTS[-1]}"
+            f" to receive a corresponding attachment!",
         },
         "location_node": {
             RESPONSE: Message(
@@ -242,9 +242,9 @@ script = {
         },
         "fallback_node": {
             RESPONSE: f"Unknown attachment type, try again! "
-                      f"Supported attachments are: "
-                      f'{", ".join(QUOTED_ATTACHMENTS[:-1])} '
-                      f"and {QUOTED_ATTACHMENTS[-1]}.",
+            f"Supported attachments are: "
+            f'{", ".join(QUOTED_ATTACHMENTS[:-1])} '
+            f"and {QUOTED_ATTACHMENTS[-1]}.",
         },
     },
 }

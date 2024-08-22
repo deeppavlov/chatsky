@@ -29,8 +29,7 @@ toy_script = {
                 misc={
                     "messages": [
                         Message(
-                            text="Hi, what is up?",
-                            misc={"confidences": 0.85}
+                            text="Hi, what is up?", misc={"confidences": 0.85}
                         ),
                         Message(
                             text="Hello, how are you?",

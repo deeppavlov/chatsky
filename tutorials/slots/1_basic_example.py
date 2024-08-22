@@ -188,7 +188,7 @@ HAPPY_PATH = [
     ("my username is groot", "Write your email (my email is ...):"),
     (
         "my email is groot@gmail.com",
-        "Please, name me one of your friends: (John Doe)"
+        "Please, name me one of your friends: (John Doe)",
     ),
     ("Bob Page", "Your friend is Bob Page"),
     ("ok", "Your username is groot. Your email is groot@gmail.com."),
