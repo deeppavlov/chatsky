@@ -104,7 +104,7 @@ class YDBContextStorage(DBContextStorage):
                 commit_tx=True,
             )
             if result_sets[0].rows:
-                return Context.model_validate(result_sets[0].rows[0].context)
+                return Context.model_validate_json(result_sets[0].rows[0].context)
             else:
                 raise KeyError
 
