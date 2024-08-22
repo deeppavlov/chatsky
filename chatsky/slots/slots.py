@@ -9,8 +9,8 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Annotated, Optional
-from typing_extensions import TypeAlias
+from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Optional, Dict
+from typing_extensions import TypeAlias, Annotated
 import logging
 from functools import reduce
 from string import Formatter
@@ -154,7 +154,7 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    __pydantic_extra__: dict[
+    __pydantic_extra__: Dict[
         str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
     ]
 
@@ -258,7 +258,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    __pydantic_extra__: dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)

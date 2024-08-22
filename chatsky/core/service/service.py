@@ -13,7 +13,8 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import TYPE_CHECKING, Any, Optional, Callable, TypeAlias, Union, Annotated
+from typing import TYPE_CHECKING, Any, Optional, Callable, Union
+from typing_extensions import TypeAlias, Annotated
 from pydantic import model_validator, Field
 
 from chatsky.core.context import Context

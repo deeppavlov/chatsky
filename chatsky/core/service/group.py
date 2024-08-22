@@ -12,7 +12,8 @@ allowing for easier management and organization of the services within the pipel
 from __future__ import annotations
 import asyncio
 import logging
-from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional, TypeAlias, Annotated
+from typing import List, Union, Awaitable, TYPE_CHECKING, Any, Optional
+from typing_extensions import TypeAlias, Annotated
 
 from pydantic import model_validator, Field
 

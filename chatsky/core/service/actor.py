@@ -15,7 +15,7 @@ More details on the processing can be found in the documentation for
 from __future__ import annotations
 import logging
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 from pydantic import model_validator
 
 from chatsky.core.service.component import PipelineComponent
@@ -99,7 +99,7 @@ class Actor(PipelineComponent):
         ctx.add_response(response)
 
     @staticmethod
-    async def _run_processing_parallel(processing: dict[str, BaseProcessing], ctx: Context) -> None:
+    async def _run_processing_parallel(processing: Dict[str, BaseProcessing], ctx: Context) -> None:
         """
         Execute :py:class:`.BaseProcessing` functions simultaneously, independent of the order.
 
@@ -110,7 +110,7 @@ class Actor(PipelineComponent):
         )
 
     @staticmethod
-    async def _run_processing_sequential(processing: dict[str, BaseProcessing], ctx: Context) -> None:
+    async def _run_processing_sequential(processing: Dict[str, BaseProcessing], ctx: Context) -> None:
         """
         Execute :py:class:`.BaseProcessing` functions in-order.
 
@@ -120,7 +120,7 @@ class Actor(PipelineComponent):
             await func.wrapped_call(ctx, info=f"processing_name={name!r}")
 
     @staticmethod
-    async def _run_processing(processing: dict[str, BaseProcessing], ctx: Context) -> None:
+    async def _run_processing(processing: Dict[str, BaseProcessing], ctx: Context) -> None:
         """
         Run :py:class:`.BaseProcessing` functions.
 

@@ -1,3 +1,5 @@
+from typing import Union
+
 import pytest
 
 from chatsky.core import Transition as Tr, BaseDestination, BaseCondition, BasePriority, Context
@@ -16,17 +18,17 @@ class FaultyCondition(BaseCondition):
 
 
 class FaultyPriority(BasePriority):
-    async def call(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> Union[float, bool, None]:
         raise RuntimeError()
 
 
 class TruePriority(BasePriority):
-    async def call(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> Union[float, bool, None]:
         return True
 
 
 class FalsePriority(BasePriority):
-    async def call(self, ctx: Context) -> float | bool | None:
+    async def call(self, ctx: Context) -> Union[float, bool, None]:
         return False
 
 

@@ -9,7 +9,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, TypeAlias, Union, Annotated, Callable
+from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Union, Callable
+from typing_extensions import Annotated, TypeAlias
 from pydantic import BaseModel, computed_field, model_validator, Field
 
 from chatsky.core.context import Context

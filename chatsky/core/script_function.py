@@ -8,8 +8,8 @@ These functions allow dynamic script configuration and are essential to the scri
 
 from __future__ import annotations
 
-from types import NoneType
-from typing import Union, Tuple, ClassVar, Optional, Annotated
+from typing import Union, Tuple, ClassVar, Optional
+from typing_extensions import Annotated
 from abc import abstractmethod, ABC
 import logging
 
@@ -201,7 +201,7 @@ class BaseProcessing(BaseScriptFunc, ABC):
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
 
-    return_type: ClassVar[Union[type, Tuple[type, ...]]] = NoneType
+    return_type: ClassVar[Union[type, Tuple[type, ...]]] = type(None)
 
     @abstractmethod
     async def call(self, ctx: Context) -> None:
@@ -227,7 +227,7 @@ class BasePriority(BaseScriptFunc, ABC):
     - ``False``: Transition unsuccessful.
     """
 
-    return_type: ClassVar[Union[type, Tuple[type, ...]]] = (float, NoneType, bool)
+    return_type: ClassVar[Union[type, Tuple[type, ...]]] = (float, type(None), bool)
 
     @abstractmethod
     async def call(self, ctx: Context) -> Union[float, bool, None]:

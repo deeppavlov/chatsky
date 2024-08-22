@@ -6,7 +6,8 @@ The Message class is a universal data model for representing a message.
 It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Literal, Optional, List, Union, TypeAlias, Annotated, Dict, Any
+from typing import Literal, Optional, List, Union, Dict, Any
+from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
 from urllib.request import urlopen
 import uuid

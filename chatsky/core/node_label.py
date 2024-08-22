@@ -6,7 +6,8 @@ This module defines classes for addressing nodes.
 
 from __future__ import annotations
 
-from typing import Optional, TypeAlias, Union, Tuple, TYPE_CHECKING, Annotated
+from typing import Optional, Union, Tuple, TYPE_CHECKING
+from typing_extensions import TypeAlias, Annotated
 
 from pydantic import BaseModel, model_validator, ValidationInfo
 

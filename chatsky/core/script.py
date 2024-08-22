@@ -74,10 +74,10 @@ class Flow(BaseModel, extra="allow"):
 
     local_node: Node = Field(alias="local", default_factory=Node)
     """Node from which all other nodes in this Flow inherit properties according to :py:meth:`Node.merge`."""
-    __pydantic_extra__: dict[str, Node]
+    __pydantic_extra__: Dict[str, Node]
 
     @property
-    def nodes(self) -> dict[str, Node]:
+    def nodes(self) -> Dict[str, Node]:
         """
         A dictionary of all non-local nodes in this flow.
 
@@ -102,10 +102,10 @@ class Script(BaseModel, extra="allow"):
 
     global_node: Node = Field(alias="global", default_factory=Node)
     """Node from which all other nodes in this Script inherit properties according to :py:meth:`Node.merge`."""
-    __pydantic_extra__: dict[str, Flow]
+    __pydantic_extra__: Dict[str, Flow]
 
     @property
-    def flows(self) -> dict[str, Flow]:
+    def flows(self) -> Dict[str, Flow]:
         """
         A dictionary of all flows in this script.
 

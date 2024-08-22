@@ -7,7 +7,7 @@ store and retrieve context data.
 """
 
 import asyncio
-from typing import Hashable
+from typing import Hashable, Dict
 
 try:
     import aiofiles
@@ -24,7 +24,7 @@ from chatsky.core import Context
 
 
 class SerializableStorage(BaseModel, extra="allow"):
-    __pydantic_extra__: dict[str, Context]
+    __pydantic_extra__: Dict[str, Context]
 
 
 class JSONContextStorage(DBContextStorage):
