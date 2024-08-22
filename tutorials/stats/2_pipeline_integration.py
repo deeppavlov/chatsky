@@ -29,13 +29,12 @@ docker compose --profile stats up
 # %%
 import asyncio
 
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
     ServiceGroup,
     GlobalExtraHandlerType,
 )
-from chatsky.script import Context
+from chatsky import Context, Pipeline
 from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
 from chatsky.stats import (
     OtelInstrumentor,
@@ -135,6 +134,6 @@ pipeline.add_global_handler(
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_service_state)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         pipeline.run()

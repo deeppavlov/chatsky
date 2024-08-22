@@ -2,104 +2,109 @@
 """
 # Core: 7. Pre-response processing
 
-This tutorial shows pre-response processing feature.
-
-Here, %mddoclink(api,script.core.keywords,Keywords.PRE_RESPONSE_PROCESSING)
+Here, %mddoclink(api,core.script,PRE_RESPONSE)
 is demonstrated which can be used for
 additional context processing before response handlers.
-
-There are also some other %mddoclink(api,script.core.keywords,Keywords)
-worth attention used in this tutorial.
-
-First of all, let's do all the necessary imports from Chatsky.
 """
 
 # %pip install chatsky
 
 # %%
-from chatsky.script import (
+from chatsky.core import (
     GLOBAL,
     LOCAL,
     RESPONSE,
     TRANSITIONS,
-    PRE_RESPONSE_PROCESSING,
+    PRE_RESPONSE,
     Context,
     Message,
+    MessageInitTypes,
+    Transition as Tr,
+    Pipeline,
+    BaseProcessing,
+    BaseResponse,
 )
-import chatsky.script.labels as lbl
-import chatsky.script.conditions as cnd
+import chatsky.destinations as dst
 
-from chatsky.pipeline import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
-
-
-# %%
-def add_prefix(prefix):
-    def add_prefix_processing(ctx: Context, _: Pipeline):
-        processed_node = ctx.current_node
-        processed_node.response = Message(
-            text=f"{prefix}: {processed_node.response.text}"
-        )
-
-    return add_prefix_processing
 
 
 # %% [markdown]
 """
-`PRE_RESPONSE_PROCESSING` is a keyword that
-can be used in `GLOBAL`, `LOCAL` or nodes.
+Here we define a processing function that will modify the
+`response` field of the current node to prefix specific text.
 """
+
+
+# %%
+class AddPrefix(BaseProcessing):
+    prefix: str
+
+    def __init__(self, prefix: str):
+        # basemodel does not allow positional arguments by default
+        super().__init__(prefix=prefix)
+
+    class PrefixedResponse(BaseResponse):
+        prefix: str
+        base_response: BaseResponse
+
+        async def call(self, ctx: Context) -> MessageInitTypes:
+            result = await self.base_response(ctx)
+            # get the result of the original response
+            if result.text is not None:
+                result.text = f"{self.prefix}: {result.text}"
+            return result
+
+    async def call(self, ctx: Context) -> None:  # processing has no return
+        if ctx.current_node.response is not None:
+            ctx.current_node.response = self.PrefixedResponse(
+                prefix=self.prefix, base_response=ctx.current_node.response
+            )
 
 
 # %%
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Message(),
-            TRANSITIONS: {("flow", "step_0"): cnd.true()},
+            TRANSITIONS: [Tr(dst=("flow", "step_0"))],
         },
-        "fallback": {RESPONSE: Message("the end")},
+        "fallback": {RESPONSE: "the end"},
     },
     GLOBAL: {
-        PRE_RESPONSE_PROCESSING: {
-            "proc_name_1": add_prefix("l1_global"),
-            "proc_name_2": add_prefix("l2_global"),
+        PRE_RESPONSE: {
+            "proc_name_1": AddPrefix("l1_global"),
+            "proc_name_2": AddPrefix("l2_global"),
         }
     },
     "flow": {
         LOCAL: {
-            PRE_RESPONSE_PROCESSING: {
-                "proc_name_2": add_prefix("l2_local"),
-                "proc_name_3": add_prefix("l3_local"),
-            }
+            PRE_RESPONSE: {
+                "proc_name_2": AddPrefix("l2_local"),
+                "proc_name_3": AddPrefix("l3_local"),
+            },
+            TRANSITIONS: [Tr(dst=dst.Forward(loop=True))],
         },
         "step_0": {
-            RESPONSE: Message("first"),
-            TRANSITIONS: {lbl.forward(): cnd.true()},
+            RESPONSE: "first",
         },
         "step_1": {
-            PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
-            RESPONSE: Message("second"),
-            TRANSITIONS: {lbl.forward(): cnd.true()},
+            PRE_RESPONSE: {"proc_name_1": AddPrefix("l1_step_1")},
+            RESPONSE: "second",
         },
         "step_2": {
-            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_step_2")},
-            RESPONSE: Message("third"),
-            TRANSITIONS: {lbl.forward(): cnd.true()},
+            PRE_RESPONSE: {"proc_name_2": AddPrefix("l2_step_2")},
+            RESPONSE: "third",
         },
         "step_3": {
-            PRE_RESPONSE_PROCESSING: {"proc_name_3": add_prefix("l3_step_3")},
-            RESPONSE: Message("fourth"),
-            TRANSITIONS: {lbl.forward(): cnd.true()},
+            PRE_RESPONSE: {"proc_name_3": AddPrefix("l3_step_3")},
+            RESPONSE: "fourth",
         },
         "step_4": {
-            PRE_RESPONSE_PROCESSING: {"proc_name_4": add_prefix("l4_step_4")},
-            RESPONSE: Message("fifth"),
-            TRANSITIONS: {"step_0": cnd.true()},
+            PRE_RESPONSE: {"proc_name_4": AddPrefix("l4_step_4")},
+            RESPONSE: "fifth",
         },
     },
 }
@@ -124,6 +129,6 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path)
+    check_happy_path(pipeline, happy_path, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

@@ -25,7 +25,7 @@ is used to process requests.
 
 # %%
 from chatsky.messengers.common.interface import CallbackMessengerInterface
-from chatsky.core import Message, Pipeline
+from chatsky import Message, Pipeline
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
@@ -42,8 +42,9 @@ pipeline = Pipeline(
 
 # %%
 app = FastAPI()
+PORT = 8000
 
-html = """
+html = f"""
 <!DOCTYPE html>
 <html>
     <head>
@@ -59,20 +60,20 @@ html = """
         </ul>
         <script>
             var client_id = Date.now();
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
-            ws.onmessage = function(event) {
+            var ws = new WebSocket(`ws://localhost:{PORT}/ws/${{client_id}}`);
+            ws.onmessage = function(event) {{
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
                 var content = document.createTextNode(event.data)
                 message.appendChild(content)
                 messages.appendChild(message)
-            };
-            function sendMessage(event) {
+            }};
+            function sendMessage(event) {{
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
                 input.value = ''
                 event.preventDefault()
-            }
+            }}
         </script>
     </body>
 </html>
@@ -91,7 +92,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         while True:
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
-            request = Message(data)
+            request = Message(text=data)
             context = await messenger_interface.on_request_async(
                 request, client_id
             )
@@ -111,5 +112,5 @@ if __name__ == "__main__":
         uvicorn.run(
             app,
             host="127.0.0.1",
-            port=8000,
+            port=PORT,
         )

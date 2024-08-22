@@ -6,16 +6,14 @@ The following tutorial shows basic usage of `pipeline`
 module as an extension to `chatsky.script.core`.
 
 Here, `__call__` (same as
-%mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
+%mddoclink(api,core.pipeline,Pipeline.run))
 method is used to execute pipeline once.
 """
 
 # %pip install chatsky
 
 # %%
-from chatsky.script import Context, Message
-
-from chatsky.pipeline import Pipeline
+from chatsky import Pipeline
 
 from chatsky.utils.testing import (
     check_happy_path,
@@ -33,9 +31,10 @@ It's constructor method can be used to create
 a pipeline of the most basic structure:
 "pre-services -> actor -> post-services"
 as well as to define `context_storage` and `messenger_interface`.
-Actor is a component of :py:class:`.Pipeline`, that contains the
-:py:class:`.Script` and handles it. It is responsible for processing
-user input and determining the appropriate response based on the
+Actor is a component of %mddoclink(api,core.pipeline,Pipeline),
+that contains the %mddoclink(api,core.script,Script) and handles it.
+It is responsible for processing user input and
+determining the appropriate response based on the
 current state of the conversation and the script.
 These parameters usage will be shown in tutorials 2, 3 and 6.
 
@@ -74,14 +73,10 @@ assert TOY_SCRIPT_KWARGS == {
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     # a function for automatic tutorial running (testing) with HAPPY_PATH
 
     # This runs tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        ctx_id = 0  # 0 will be current dialog (context) identification.
-        while True:
-            message = Message(input("Send request: "))
-            ctx: Context = pipeline(message, ctx_id)
-            print(ctx.last_response)
+        pipeline.run()

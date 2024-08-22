@@ -4,8 +4,8 @@
 
 The following example shows `pipeline` service group usage and start conditions.
 
-Here, %mddoclink(api,pipeline.service.service,Service)s
-and %mddoclink(api,pipeline.service.group,ServiceGroup)s
+Here, %mddoclink(api,core.service.service,Service)s
+and %mddoclink(api,core.service.group,ServiceGroup)s
 are shown for advanced data pre- and postprocessing based on conditions.
 """
 
@@ -15,18 +15,17 @@ are shown for advanced data pre- and postprocessing based on conditions.
 import json
 import logging
 
-from chatsky.pipeline import (
+from chatsky.core.service import (
     Service,
-    Pipeline,
     not_condition,
     service_successful_condition,
     ServiceRuntimeInfo,
 )
+from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -102,7 +101,9 @@ pipeline_dict = {
         Service(
             handler=never_running_service,
             start_condition=not_condition(
-                service_successful_condition(".pipeline.always_running_service")
+                service_successful_condition(
+                    ".pipeline.pre.always_running_service"
+                )  # pre services belong to the "pre" group; post -- to "post"
             ),
         ),
         Service(
@@ -117,6 +118,6 @@ pipeline_dict = {
 pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

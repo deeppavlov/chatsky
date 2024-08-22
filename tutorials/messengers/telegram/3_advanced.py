@@ -22,8 +22,7 @@ from pydantic import HttpUrl
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 
-from chatsky import conditions as cnd
-from chatsky.core import (
+from chatsky import (
     RESPONSE,
     TRANSITIONS,
     GLOBAL,
@@ -31,7 +30,8 @@ from chatsky.core import (
     Pipeline,
     BaseResponse,
     Context,
-    Transition as Tr,
+    Tr,
+    cnd,
 )
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.core.message import (
@@ -110,7 +110,9 @@ document_data = {
 class DataAttachmentHash(BaseResponse):
     async def call(self, ctx: Context) -> MessageInitTypes:
         attachment = [
-            a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
+            a
+            for a in ctx.last_request.attachments
+            if isinstance(a, DataAttachment)
         ]
         if len(attachment) > 0:
             attachment_bytes = await attachment[0].get_bytes(
@@ -118,18 +120,17 @@ class DataAttachmentHash(BaseResponse):
             )
             attachment_hash = sha256(attachment_bytes).hexdigest()
             resp_format = (
-                "Here's your previous request first attachment sha256 hash: `{}`!\n"
-                + "Run /start command again to restart."
+                "Here's your previous request first attachment sha256 hash: "
+                "`{}`!\n"
+                "Run /start command again to restart."
             )
-            return Message(
-                resp_format.format(
-                    attachment_hash, parse_mode=ParseMode.MARKDOWN_V2
-                )
+            return resp_format.format(
+                attachment_hash, parse_mode=ParseMode.MARKDOWN_V2
             )
         else:
-            return Message(
+            return (
                 "Last request did not contain any data attachment!\n"
-                + "Run /start command again to restart."
+                "Run /start command again to restart."
             )
 
 
@@ -194,7 +195,10 @@ script = {
             ),
             TRANSITIONS: [
                 Tr(dst="formatted_node", cnd=cnd.HasCallbackQuery("formatted")),
-                Tr(dst="attachments_node", cnd=cnd.HasCallbackQuery("attachments")),
+                Tr(
+                    dst="attachments_node",
+                    cnd=cnd.HasCallbackQuery("attachments"),
+                ),
                 Tr(dst="secret_node", cnd=cnd.HasCallbackQuery("secret")),
                 Tr(dst="thumbnail_node", cnd=cnd.HasCallbackQuery("thumbnail")),
                 Tr(dst="hash_init_node", cnd=cnd.HasCallbackQuery("hash")),
@@ -203,11 +207,14 @@ script = {
             ],
         },
         "formatted_node": {
-            RESPONSE: Message(formatted_text, parse_mode=ParseMode.MARKDOWN_V2),
+            RESPONSE: Message(
+                text=formatted_text,
+                parse_mode=ParseMode.MARKDOWN_V2
+            ),
         },
         "attachments_node": {
             RESPONSE: Message(
-                "Here's your message with multiple attachments "
+                text="Here's your message with multiple attachments "
                 + "(a location and a sticker)!\n"
                 + "Run /start command again to restart.",
                 attachments=[
@@ -218,21 +225,21 @@ script = {
         },
         "secret_node": {
             RESPONSE: Message(
-                "Here's your secret image! "
+                text="Here's your secret image! "
                 + "Run /start command again to restart.",
                 attachments=[Image(**image_data)],
             ),
         },
         "thumbnail_node": {
             RESPONSE: Message(
-                "Here's your document with tumbnail! "
+                text="Here's your document with tumbnail! "
                 + "Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
         },
         "hash_init_node": {
             RESPONSE: Message(
-                "Alright! Now send me a message with data attachment "
+                text="Alright! Now send me a message with data attachment "
                 + "(audio, video, animation, image, sticker or document)!"
             ),
             TRANSITIONS: [Tr(dst="hash_request_node")],
@@ -242,7 +249,7 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message(
-                "Bot has entered unrecoverable state:"
+                text="Bot has entered unrecoverable state:"
                 + "/\nRun /start command again to restart."
             ),
         },

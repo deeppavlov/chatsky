@@ -19,12 +19,11 @@ import json
 import logging
 import urllib.request
 
-from chatsky.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
-from chatsky.script import Context
+from chatsky.core.service import ServiceGroup, ServiceRuntimeInfo
+from chatsky import Context, Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -147,6 +146,6 @@ pipeline_dict = {
 pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

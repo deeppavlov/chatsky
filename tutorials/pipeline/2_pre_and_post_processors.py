@@ -5,7 +5,7 @@
 The following tutorial shows more advanced usage of `pipeline`
 module as an extension to `chatsky.script.core`.
 
-Here, %mddoclink(api,script.core.context,Context.misc)
+Here, %mddoclink(api,core.context,Context.misc)
 dictionary of context is used for storing additional data.
 """
 
@@ -15,9 +15,7 @@ dictionary of context is used for storing additional data.
 import logging
 
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.script import Context, Message
-
-from chatsky.pipeline import Pipeline
+from chatsky import Context, Message, Pipeline
 
 from chatsky.utils.testing import (
     check_happy_path,
@@ -79,11 +77,11 @@ pipeline = Pipeline(
 
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            message = Message(input("Send request: "))
+            message = Message(text=input("Send request: "))
             ctx: Context = pipeline(message, ctx_id)
             print(f"Response: {ctx.last_response}")
             ping_pong = ctx.misc.get("ping", False) and ctx.misc.get(

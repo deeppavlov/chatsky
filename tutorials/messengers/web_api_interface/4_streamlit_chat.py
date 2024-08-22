@@ -40,7 +40,7 @@ import requests
 import streamlit as st
 from streamlit_chat import message
 import streamlit.components.v1 as components
-from chatsky.core import Message
+from chatsky import Message
 
 
 # %% [markdown]
@@ -122,12 +122,12 @@ def send_and_receive():
     st.session_state["user_requests"].append(user_request)
 
     bot_response = query(
-        Message(user_request).model_dump(),
+        Message(text=user_request).model_dump(),
         user_id=st.session_state["user_id"],
     )
     bot_response.raise_for_status()
 
-    bot_message = Message.model_validate(bot_response.json()["response"]).text
+    bot_message = Message.model_validate(bot_response.json()).text
 
     # # Implementation without using Message:
     # bot_response = query(
