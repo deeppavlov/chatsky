@@ -62,13 +62,13 @@ class LLM_API:
 
         elif issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
-            structured_model = await self.model.with_structured_output(message_schema)
-            result = Message.model_validate(await structured_model.invoke(history))
+            structured_model = self.model.with_structured_output(message_schema)
+            result = Message.model_validate(await structured_model.ainvoke(history))
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
-            structured_model = await self.model.with_structured_output(message_schema)
-            result = await structured_model.invoke(history)
-            result = Message(text=str(result.json()))
+            structured_model = self.model.with_structured_output(message_schema)
+            result = await structured_model.ainvoke(history)
+            result = Message(text=str(result))
 
         if result.annotations:
             result.annotations["__generated_by_model__"] = self.name
@@ -76,10 +76,9 @@ class LLM_API:
             result.annotations = {"__generated_by_model__": self.name}
         return result
 
-    async def condition(self, prompt: str, method: BaseMethod):
+    async def condition(self, prompt: str, method: BaseMethod, return_schema=None):
         async def process_input(ctx: Context, _: Pipeline) -> bool:
-            condition_history = [await message_to_langchain(Message(prompt), pipeline=_, source="system"),
-                await message_to_langchain(ctx.last_request, pipeline=_, source="human")]
+            condition_history = [await message_to_langchain(Message(prompt), pipeline=_, source="system"), await message_to_langchain(ctx.last_request, pipeline=_, source="human")]
             result = method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
             return result
 

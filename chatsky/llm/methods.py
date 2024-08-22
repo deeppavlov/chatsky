@@ -19,6 +19,12 @@ class BaseMethod(BaseModel, abc.ABC):
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         raise NotImplementedError
 
+    async def model_result_to_text(self, model_result: LLMResult) -> str:
+        """
+        Converts raw model generation to a string.
+        """
+        return model_result.generations[0][0].text
+
 
 class Contains(BaseMethod):
     """
@@ -32,7 +38,8 @@ class Contains(BaseMethod):
     pattern: str
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
-        return bool(self.pattern.lower() in model_result.generations[0][0].text.lower())
+        text = await self.model_result_to_text(model_result)
+        return bool(self.pattern.lower() in text.lower())
 
 
 class LogProb(BaseMethod):
@@ -48,7 +55,10 @@ class LogProb(BaseMethod):
     target_token: str
     threshold: float = -0.5
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
-        result = model_result.generations[0][0].generation_info['logprobs']['content'][0]['top_logprobs']
+        try:
+            result = model_result.generations[0][0].generation_info['logprobs']['content'][0]['top_logprobs']
+        except ValueError:
+            raise ValueError("LogProb method can only be applied to OpenAI models.")
         for tok in result:
             if tok["token"] == self.target_token and tok["logprob"] > self.threshold:
                 return True
