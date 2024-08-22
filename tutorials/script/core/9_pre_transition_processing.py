@@ -71,11 +71,11 @@ Previous node can be accessed another way.
 
 Instead of storing the node response in misc,
 one can obtain previous label
-with `ctx.labels[-2]` and then get the node from the
+with `dst.Repeat(shift=1)(ctx)` and then get the node from the
 %mddoclink(api,core.script,Script) object:
 
 ```python
-ctx.pipeline.script.get_inherited_node(ctx.labels[-2])
+ctx.pipeline.script.get_inherited_node(dst.Repeat(shift=1)(ctx))
 ```
 
 </div>
