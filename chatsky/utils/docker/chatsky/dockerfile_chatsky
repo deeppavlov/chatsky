@@ -26,6 +26,4 @@ COPY --from=builder /build/dist/*.whl .
 
 RUN pip install *.whl
 
-COPY . .
-
-CMD python json_import_examples/yaml/pipeline.py
+CMD ["python", "pipeline.py"]

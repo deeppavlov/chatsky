@@ -175,6 +175,14 @@ services:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
 
+  chatsky:
+    build:
+      context: .
+      dockerfile: chatsky/utils/docker/chatsky/dockerfile_chatsky
+
+    volumes:
+      - ./json_import_examples/yaml/:/app/
+
 volumes:
   ch-data:
   dashboard-data:
@@ -184,3 +192,4 @@ volumes:
   mongo-data:
   ydb-data:
   ydb-certs:
+  # new_volume:
