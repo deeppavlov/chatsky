@@ -19,7 +19,7 @@ async def test_update_ctx_misc():
         }
     }
 
-    pipeline = Pipeline.from_script(toy_script, ("root", "start"), ("root", "failure"))
+    pipeline = Pipeline(script=toy_script, start_label=("root", "start"), fallback_label=("root", "failure"))
 
     ctx = await pipeline._run_pipeline(Message(), 0, update_ctx_misc={"condition": True})
 

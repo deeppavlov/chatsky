@@ -14,7 +14,7 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 # %%
 import asyncio
 
-from chatsky.pipeline import Pipeline, ACTOR
+from chatsky.pipeline import Pipeline
 
 from chatsky.utils.testing.common import (
     is_interactive_mode,
@@ -50,14 +50,11 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [time_consuming_service for _ in range(0, 10)],
-        ACTOR,
-    ],
+    "pre_services": [time_consuming_service for _ in range(0, 10)],
 }
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)

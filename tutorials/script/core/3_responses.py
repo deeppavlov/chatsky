@@ -189,8 +189,8 @@ happy_path = (
 random.seed(31415)  # predestination of choice
 
 
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
