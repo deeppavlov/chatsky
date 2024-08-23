@@ -15,9 +15,13 @@ to structure and manage the messages processing flow.
 """
 
 import asyncio
+import os
+import signal
+from asyncio import AbstractEventLoop
+from functools import partial
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable, Callable
+from typing import Union, List, Dict, Optional, Hashable, Callable, Any
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
@@ -58,30 +62,20 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """
     script: Union[Script, Dict]
-    """
-    (required) A :py:class:`~.Script` instance (object or dict).
-    """
+    """(required) A :py:class:`~.Script` instance (object or dict)."""
     start_label: NodeLabel2Type
-    """
-    (required) :py:class:`~.Actor` start label.
-    """
+    """(required) :py:class:`~.Actor` start label."""
     fallback_label: Optional[NodeLabel2Type] = None
-    """
-    :py:class:`~.Actor` fallback label.
-    """
+    """:py:class:`~.Actor` fallback label."""
     label_priority: float = 1.0
     """
     Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
     where there is no priority. Defaults to `1.0`.
     """
     condition_handler: Callable = Field(default=default_condition_handler)
-    """
-    Handler that processes a call of actor condition functions. Defaults to `None`.
-    """
+    """Handler that processes a call of actor condition functions. Defaults to `None`."""
     slots: GroupSlot = Field(default_factory=GroupSlot)
-    """
-    Slots configuration.
-    """
+    """Slots configuration."""
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
@@ -92,26 +86,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
-    """
-    An `AbsMessagingInterface` instance for this pipeline.
-    """
+    """An `AbsMessagingInterface` instance for this pipeline."""
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
     """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
-    """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
-    """
+    """List of :py:class:`~._ComponentExtraHandler` to add to the group."""
     after_handler: ComponentExtraHandler = Field(default_factory=list)
-    """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
-    """
+    """List of :py:class:`~._ComponentExtraHandler` to add to the group."""
     timeout: Optional[float] = None
-    """
-    Timeout to add to pipeline root service group.
-    """
+    """Timeout to add to pipeline root service group."""
     optimization_warnings: bool = False
     """
     Asynchronous pipeline optimization check request flag;
@@ -128,6 +114,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     of the script should be parallelized over respective groups.
     """
     _clean_turn_cache: Optional[bool]
+    context_lock: Optional[Any] = None
 
     @computed_field
     @cached_property
@@ -161,6 +148,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         if self.optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
+
+        self.context_lock = ContextLock()
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
@@ -259,15 +248,62 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         return ctx
 
+    def sigint_handler(self, loop: AbstractEventLoop) -> None:
+        """
+        Method that is called when SIGINT is received.
+        Stops Pipeline and all it's interfaces.
+        """
+        logger.info("pipeline received SIGINT - stopping pipeline and all interfaces")
+        self.stopped_by_signal = True
+        # replace 'messenger_interface' with 'messenger_interfaces' after merging with MultipleInterfaces
+        for interface in self.messenger_interface:
+            interface.running = False
+        self._interface_task.cancel()
+        try:
+            loop.run_until_complete(self._interface_task)
+        except asyncio.CancelledError:
+            pass
+
     def run(self):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
-        It passes `_run_pipeline` to `messenger_interface` as a callbacks,
+        It passes `_run_pipeline` to `messenger_interface` as a callback,
         so every time user request is received, `_run_pipeline` will be called.
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
+        Wraps it's code in a_run() to start an asyncio 'event loop' needed for graceful termination.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        asyncio.run(self.a_run())
+
+    async def a_run(self):
+        async_loop = asyncio.get_running_loop()
+        if os.name == "nt":
+            # Graceful termination for Windows.
+            def placeholder_func(signum, frame):
+                self.sigint_handler(async_loop)
+
+            signal.signal(signal.SIGINT, placeholder_func)
+        else:
+            # Graceful termination for Linux / macOS / other.
+            async_loop.add_signal_handler(signal.SIGINT, partial(self.sigint_handler, async_loop))
+
+        self._interface_task = asyncio.create_task(self.messenger_interface.connect(self._run_pipeline))
+
+        try:
+            await self._interface_task
+        except asyncio.CancelledError:
+            pass
+            # Making sure shutdown() has control during cancellation.
+            # await asyncio.sleep(0)
+        finally:
+            await asyncio.gather(*[interface.cleanup() for interface in self.messenger_interfaces()])
+            """
+            for interface in self.messenger_interface:
+                interface.finished_working = True
+            """
+
+        asyncio.run(self.messenger_interface.connect(self._run_pipeline, self))
+        logger.info("pipeline finished working")
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
@@ -284,3 +320,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     @property
     def script(self) -> Script:
         return self.actor.script
+
+
+class ContextLock:
+    # locks: dict[ctx_id, asyncio.Lock] = {}
+    def __init__(self):
+        self.locks = {}
+
+    def __getitem__(self, key):
+        if key not in self.locks:
+            self.locks[key] = asyncio.Lock()
+        return self.locks[key]

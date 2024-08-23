@@ -11,25 +11,36 @@ import asyncio
 import logging
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
+
+from typing import Optional, Any, Hashable, TYPE_CHECKING, Type
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from chatsky.script import Context, Message
     from chatsky.pipeline.types import PipelineRunnerFunction
     from chatsky.messengers.common.types import PollingInterfaceLoopFunction
     from chatsky.script.core.message import Attachment
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
 
-class MessengerInterface(abc.ABC):
+class MessengerInterface(abc.ABC, BaseModel):
     """
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
+    running: bool = True
+    """Shows whether the interface is still accepting new requests."""
+    finished_working: bool = False
+    """Shows whether the interface has finished processing all of the requests received."""
+
     @abc.abstractmethod
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+    ):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
@@ -38,6 +49,15 @@ class MessengerInterface(abc.ABC):
             usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         """
         raise NotImplementedError
+
+    async def cleanup(self):
+        """
+        A placeholder method for any cleanup code you want to be
+        called before shutting down the program.
+        You can redefine this method in your class.
+        Note you also need to call cleanup() of the parent class.
+        """
+        pass
 
 
 class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
@@ -93,25 +113,123 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
+    number_of_workers: int = 2
+    _request_queue = asyncio.Queue()
+    _worker_tasks = []
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Message, Hashable]]:
-        """
-        Method used for sending users request for their input.
-
-        :return: A list of tuples: user inputs and context ids (any user ids) associated with the inputs.
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _respond(self, responses: List[Context]):
+    async def _respond(self, ctx_id, last_response):
         """
         Method used for sending users responses for their last input.
 
-        :param responses: A list of contexts, representing dialogs with the users;
-            `last_response`, `id` and some dialog info can be extracted from there.
+        :param ctx_id: Context id, specifies the user id. Without multiple messenger interfaces it's basically a
+         redundant parameter, because this function is just a more complex `print(last_response)`. (Change before merge)
+        :param last_response: Latest response from the pipeline which should be relayed to the specified user.
         """
         raise NotImplementedError
+
+    async def _process_request(self, ctx_id: Any, update: Message, pipeline_runner: PipelineRunnerFunction):
+        """Process a new update for ctx."""
+        context = await pipeline_runner(update, ctx_id)
+        await self._respond(ctx_id, context.last_response)
+
+    async def _worker_job(self, pipeline_runner: PipelineRunnerFunction, worker_timeout: float):
+        """
+        Obtain Lock over the current context,
+        Process the update and send it.
+        """
+        request = await self._request_queue.get()
+        if request is not None:
+            (ctx_id, update) = request
+            async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
+                await asyncio.wait_for(
+                    self._process_request(ctx_id, update, pipeline_runner),
+                    timeout=worker_timeout,
+                )
+            return False
+        else:
+            return True
+
+    # This worker doesn't save the request and basically deletes it from the queue in case it can't process it.
+    # An option to save the request may be fitting? Maybe with an amount of retries.
+    async def _worker(self, pipeline_runner: PipelineRunnerFunction, worker_timeout: float):
+        while self.running or not self._request_queue.empty():
+            try:
+                no_more_jobs = self._worker_job(pipeline_runner, worker_timeout)
+                if no_more_jobs:
+                    logger.info("Worker finished working - all remaining requests have been processed.")
+                    # Polling_loop should give the required data on whether the stop signal was sent or if
+                    # the loop() function gave 'False'.
+                    break
+            except TimeoutError:
+                logger.info("worker couldn't process request in time. A request *may* have been lost.")
+
+    @abc.abstractmethod
+    async def _get_updates(self) -> list[tuple[Any, Message]]:
+        """
+        Obtain updates from another server
+
+        Example:
+            self.bot.request_updates()
+        """
+
+    async def _polling_job(self, poll_timeout: float):
+        try:
+            received_updates = await asyncio.wait_for(self._get_updates(), timeout=poll_timeout)
+            if received_updates is not None:
+                for update in received_updates:
+                    await self._request_queue.put(update)
+        except TimeoutError:
+            logger.debug("polling_job failed - timed out")
+
+    async def _polling_loop(
+        self,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        poll_timeout: float = None,
+        timeout: float = 0,
+    ):
+        try:
+            while loop() and self.running:
+                await asyncio.shield(self._polling_job(poll_timeout))  # shield from cancellation
+                await asyncio.sleep(timeout)
+        finally:
+            self.running = False
+            # If loop() is somehow True after being False once, this logging will be wrong.
+            # But no user would want to break their own logging, right?
+            if loop() is False:
+                logger.info("polling_loop stopped working - the loop() condition was False")
+            else:
+                logger.info("polling_loop stopped working - the stop signal was received.")
+            # If there are no more jobs/stop signal received, a special 'None' request is
+            # sent to the queue (one for each worker), they shut down the workers.
+            # In case of more workers than two, change the number of 'None' requests to the new number of workers.
+            for i in range(self.number_of_workers):
+                self._request_queue.put_nowait(None)
+
+    async def connect(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        poll_timeout: float = None,
+        worker_timeout: float = None,
+        timeout: float = 0,
+    ):
+        # Saving strong references to workers, so that they can be cleaned up properly.
+        # shield() creates a task just like create_task() according to docs.
+        # But for safety we have two task wrappers, I guess.
+        for i in range(self.number_of_workers):
+            task = asyncio.create_task(asyncio.shield(self._worker(pipeline_runner, worker_timeout)))
+            self._worker_tasks.append(task)
+        print("worker tasks:", self._worker_tasks)
+        await self._polling_loop(loop=loop, poll_timeout=poll_timeout, timeout=timeout)
+
+    # Maybe "worker_cleanup" instead of this function name?
+    async def cleanup(self):
+        """
+        Blocks until all workers are done.
+        """
+        await super().cleanup()
+        await asyncio.wait(self._worker_tasks)
 
     def _on_exception(self, e: BaseException):
         """
@@ -125,44 +243,6 @@ class PollingMessengerInterface(MessengerInterface):
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
-    async def _polling_loop(
-        self,
-        pipeline_runner: PipelineRunnerFunction,
-        timeout: float = 0,
-    ):
-        """
-        Method running the request - response cycle once.
-        """
-        user_updates = self._request()
-        responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
-        self._respond(responses)
-        await asyncio.sleep(timeout)
-
-    async def connect(
-        self,
-        pipeline_runner: PipelineRunnerFunction,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        timeout: float = 0,
-    ):
-        """
-        Method, running a request - response cycle in a loop.
-        The looping behavior is determined by `loop` and `timeout`,
-        for most cases the loop itself shouldn't be overridden.
-
-        :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
-        :param loop: a function that determines whether polling should be continued;
-            called in each cycle, should return `True` to continue polling or `False` to stop.
-        :param timeout: a time interval between polls (in seconds).
-        """
-        while loop():
-            try:
-                await self._polling_loop(pipeline_runner, timeout)
-
-            except BaseException as e:
-                self._on_exception(e)
-                break
-
 
 class CallbackMessengerInterface(MessengerInterface):
     """
@@ -171,8 +251,12 @@ class CallbackMessengerInterface(MessengerInterface):
 
     def __init__(self) -> None:
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
+        super().__init__()
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+    ):
         self._pipeline_runner = pipeline_runner
 
     async def on_request_async(

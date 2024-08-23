@@ -1,8 +1,6 @@
 from typing import Any, Hashable, List, Optional, TextIO, Tuple
 from uuid import uuid4
 from chatsky.messengers.common.interface import PollingMessengerInterface
-from chatsky.pipeline.types import PipelineRunnerFunction
-from chatsky.script.core.context import Context
 from chatsky.script.core.message import Message
 
 
@@ -11,9 +9,6 @@ class CLIMessengerInterface(PollingMessengerInterface):
     Command line message interface is the default message interface, communicating with user via `STDIN/STDOUT`.
     This message interface can maintain dialog with one user at a time only.
     """
-
-    supported_request_attachment_types = set()
-    supported_response_attachment_types = set()
 
     def __init__(
         self,
@@ -29,13 +24,13 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._prompt_response: str = prompt_response
         self._descriptor: Optional[TextIO] = out_descriptor
 
-    def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(input(self._prompt_request)), self._ctx_id)]
+    async def _get_updates(self) -> List[Tuple[Any, Message]]:
+        return [(self._ctx_id, Message(input(self._prompt_request)))]
 
-    def _respond(self, responses: List[Context]):
-        print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
+    async def _respond(self, ctx_id, last_response: Message):
+        print(f"{self._prompt_response}{last_response.text}", file=self._descriptor)
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
+    async def connect(self, *args, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
@@ -46,4 +41,4 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._ctx_id = uuid4()
         if self._intro is not None:
             print(self._intro)
-        await super().connect(pipeline_runner, **kwargs)
+        await super().connect(*args, **kwargs)
