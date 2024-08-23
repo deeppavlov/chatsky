@@ -34,6 +34,8 @@ def test_parallel_services():
 
     def asserter_service(ctx: Context, __: Pipeline):
         assert ctx.current_node.misc["misc"] is ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
+        # Checking if the test will fail from this. If it does, then the test is correct.
+        assert False
 
     pipeline_dict = {
         "script": TOY_SCRIPT,
