@@ -24,7 +24,7 @@ from chatsky.script import Context
 from chatsky.pipeline import Pipeline
 from chatsky.llm.methods import BaseMethod
 
-from typing import Union, Callable, Type
+from typing import Union, Callable, Type, Optional
 from pydantic import BaseModel
 
 
@@ -37,7 +37,7 @@ class LLM_API:
     def __init__(
         self,
         model: BaseChatModel,
-        system_prompt: str = "",
+        system_prompt: Optional[str] = "",
     ) -> None:
         """
         :param model: Model object.
@@ -85,7 +85,7 @@ class LLM_API:
         return process_input
 
 
-def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True, message_schema: Union[None, Type[Message], Type[BaseModel]] = None):
+def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True, message_schema: Union[None, Type[Message], Type[BaseModel]] = None, max_size: int=1000):
     """
     Basic function for receiving LLM responses.
     :param ctx: Context object. (Assigned automatically)
@@ -94,6 +94,9 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
     :param prompt: Prompt for the model.
     :param history: Number of messages to keep in history. `-1` for full history.
     :param filter_func: filter function to filter messages that will go the models context.
+    :param max_size: Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.
+
+    :raise ValueError: If any message longer than `max_size`.
     """
 
     async def wrapped(ctx: Context, pipeline: Pipeline) -> Message:
@@ -106,15 +109,15 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
         current_misc = current_node.misc if current_node is not None else None
         if current_misc is not None:
             # populate history with global and local prompts
-            if "prompt" in current_misc:
-                node_prompt = current_misc["prompt"]
-                history_messages.append(await message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
                 history_messages.append(await message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system"))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
                 history_messages.append(await message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system"))
+            if "prompt" in current_misc:
+                node_prompt = current_misc["prompt"]
+                history_messages.append(await message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
 
         # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
