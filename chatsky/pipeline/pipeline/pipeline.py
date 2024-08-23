@@ -62,30 +62,20 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     service group by merging `pre_services` + actor + `post_services`. It will always be named pipeline.
     """
     script: Union[Script, Dict]
-    """
-    (required) A :py:class:`~.Script` instance (object or dict).
-    """
+    """(required) A :py:class:`~.Script` instance (object or dict)."""
     start_label: NodeLabel2Type
-    """
-    (required) :py:class:`~.Actor` start label.
-    """
+    """(required) :py:class:`~.Actor` start label."""
     fallback_label: Optional[NodeLabel2Type] = None
-    """
-    :py:class:`~.Actor` fallback label.
-    """
+    """:py:class:`~.Actor` fallback label."""
     label_priority: float = 1.0
     """
     Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
     where there is no priority. Defaults to `1.0`.
     """
     condition_handler: Callable = Field(default=default_condition_handler)
-    """
-    Handler that processes a call of actor condition functions. Defaults to `None`.
-    """
+    """Handler that processes a call of actor condition functions. Defaults to `None`."""
     slots: GroupSlot = Field(default_factory=GroupSlot)
-    """
-    Slots configuration.
-    """
+    """Slots configuration."""
     handlers: Dict[ActorStage, List[Callable]] = Field(default_factory=dict)
     """
     This variable is responsible for the usage of external handlers on
@@ -96,26 +86,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
-    """
-    An `AbsMessagingInterface` instance for this pipeline.
-    """
+    """An `AbsMessagingInterface` instance for this pipeline."""
     context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
     """
     before_handler: ComponentExtraHandler = Field(default_factory=list)
-    """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
-    """
+    """List of :py:class:`~._ComponentExtraHandler` to add to the group."""
     after_handler: ComponentExtraHandler = Field(default_factory=list)
-    """
-    List of :py:class:`~._ComponentExtraHandler` to add to the group.
-    """
+    """List of :py:class:`~._ComponentExtraHandler` to add to the group."""
     timeout: Optional[float] = None
-    """
-    Timeout to add to pipeline root service group.
-    """
+    """Timeout to add to pipeline root service group."""
     optimization_warnings: bool = False
     """
     Asynchronous pipeline optimization check request flag;
@@ -271,19 +253,21 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         Method that is called when SIGINT is received.
         Stops Pipeline and all it's interfaces.
         """
-        self.stopped_by_signal = True
         logger.info("pipeline received SIGINT - stopping pipeline and all interfaces")
-        # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
-        if self.messenger_interface.running:
-            loop.run_until_complete(self.messenger_interface.shutdown())
-        # In case someone launched a pipeline with connect() instead of
-        # run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal
-        # is still changed to True.
+        self.stopped_by_signal = True
+        # replace 'messenger_interface' with 'messenger_interfaces' after merging with MultipleInterfaces
+        for interface in self.messenger_interface:
+            interface.running = False
+        self._interface_task.cancel()
+        try:
+            loop.run_until_complete(self._interface_task)
+        except asyncio.CancelledError:
+            pass
 
     def run(self):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
-        It passes `_run_pipeline` to `messenger_interface` as a callbacks,
+        It passes `_run_pipeline` to `messenger_interface` as a callback,
         so every time user request is received, `_run_pipeline` will be called.
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
@@ -303,16 +287,21 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             # Graceful termination for Linux / macOS / other.
             async_loop.add_signal_handler(signal.SIGINT, partial(self.sigint_handler, async_loop))
 
-        interface_task = asyncio.create_task(self.messenger_interface.connect(self._run_pipeline))
+        self._interface_task = asyncio.create_task(self.messenger_interface.connect(self._run_pipeline))
 
         try:
-            await interface_task
+            await self._interface_task
         except asyncio.CancelledError:
+            pass
             # Making sure shutdown() has control during cancellation.
-            await asyncio.sleep(0)
+            # await asyncio.sleep(0)
         finally:
-            await self.messenger_interface.cleanup()
-            self.messenger_interface.finished_working = True
+            await asyncio.gather(*[interface.cleanup() for interface in self.messenger_interfaces()])
+            """
+            for interface in self.messenger_interface:
+                interface.finished_working = True
+            """
+
 
         asyncio.run(self.messenger_interface.connect(self._run_pipeline, self))
         logger.info("pipeline finished working")

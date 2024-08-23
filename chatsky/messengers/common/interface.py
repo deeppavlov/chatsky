@@ -13,6 +13,7 @@ from pathlib import Path
 from tempfile import gettempdir
 
 from typing import Optional, Any, Hashable, TYPE_CHECKING, Type
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from chatsky.script import Context, Message
@@ -24,22 +25,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class MessengerInterface(abc.ABC):
+class MessengerInterface(abc.ABC, BaseModel):
     """
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
-    def __init__(self):
-        # I guess, it sounds more like "self.still_accepting_requests".
-        self.running = True
-        """
-        Shows whether the interface is still accepting new requests.
-        """
-        self.finished_working = False
-        """
-        Shows whether the interface has finished processing all of the requests received.
-        """
+    running: bool = True
+    """Shows whether the interface is still accepting new requests."""
+    finished_working: bool = False
+    """Shows whether the interface has finished processing all of the requests received."""
 
     @abc.abstractmethod
     async def connect(
@@ -60,28 +55,9 @@ class MessengerInterface(abc.ABC):
         A placeholder method for any cleanup code you want to be
         called before shutting down the program.
         You can redefine this method in your class.
-        Note you need to call cleanup() of the parent class.
+        Note you also need to call cleanup() of the parent class.
         """
         pass
-
-    async def shutdown(self):
-        """
-        This cancels the main task (if it hasn't finished) and sets a flag self.running to False,
-        so that any async tasks in loops can see that and turn off as soon as they are done.
-        """
-        logger.info("messenger_interface.shutdown() called - shutting down interface")
-        self.running = False
-        self.task.cancel()
-        try:
-            await self.task
-        except asyncio.CancelledError:
-            # Awaiting self.task() throws an exception, but if the main task
-            # of this interface has finished through any means (like a loop() function running out of loops),
-            # the exception would break the program (nothing is there to catch it anymore),
-            # so instead the exception will be suppressed.
-            if not self.finished_working:
-                raise asyncio.CancelledError
-        logger.info(f"{type(self).__name__} has stopped working - SIGINT received")
 
 
 class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
@@ -173,7 +149,7 @@ class PollingMessengerInterface(MessengerInterface):
             (ctx_id, update) = request
             async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
                 await asyncio.wait_for(
-                    await self._process_request(ctx_id, update, self.pipeline),
+                    self._process_request(ctx_id, update, self.pipeline),
                     timeout=worker_timeout,
                 )
             return False
