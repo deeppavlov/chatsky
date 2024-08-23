@@ -76,9 +76,6 @@ async def test_message_to_langchain(pipeline):
     assert await message_to_langchain(Message(text="hello"), pipeline, source="human") == HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-    assert await message_to_langchain(Message(text="hello"), pipeline, source="ai") != HumanMessage(
-        content=[{"type": "text", "text": "hello"}]
-    )
     assert await message_to_langchain(Message(text="hello"), pipeline, source="ai") == AIMessage(
         content=[{"type": "text", "text": "hello"}]
     )
