@@ -113,13 +113,9 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
-
-    def __init__(self, pipeline: Pipeline = None, number_of_workers: int = 2):
-        self.pipeline = pipeline
-        self.request_queue = asyncio.Queue()
-        self.number_of_workers = number_of_workers
-        self._worker_tasks = []
-        super().__init__()
+    number_of_workers: int = 2
+    _request_queue = asyncio.Queue()
+    _worker_tasks = []
 
     @abc.abstractmethod
     async def _respond(self, ctx_id, last_response):
@@ -132,24 +128,22 @@ class PollingMessengerInterface(MessengerInterface):
         """
         raise NotImplementedError
 
-    async def _process_request(self, ctx_id: Any, update: Message, pipeline: Pipeline):
-        """
-        Process a new update for ctx.
-        """
-        context = await pipeline._run_pipeline(update, ctx_id)
+    async def _process_request(self, ctx_id: Any, update: Message, pipeline_runner: PipelineRunnerFunction):
+        """Process a new update for ctx."""
+        context = await pipeline_runner(update, ctx_id)
         await self._respond(ctx_id, context.last_response)
 
-    async def _worker_job(self, worker_timeout: float):
+    async def _worker_job(self, pipeline_runner: PipelineRunnerFunction, worker_timeout: float):
         """
         Obtain Lock over the current context,
         Process the update and send it.
         """
-        request = await self.request_queue.get()
+        request = await self._request_queue.get()
         if request is not None:
             (ctx_id, update) = request
             async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
                 await asyncio.wait_for(
-                    self._process_request(ctx_id, update, self.pipeline),
+                    self._process_request(ctx_id, update, pipeline_runner),
                     timeout=worker_timeout,
                 )
             return False
@@ -158,10 +152,10 @@ class PollingMessengerInterface(MessengerInterface):
 
     # This worker doesn't save the request and basically deletes it from the queue in case it can't process it.
     # An option to save the request may be fitting? Maybe with an amount of retries.
-    async def _worker(self, worker_timeout: float):
-        while self.running or not self.request_queue.empty():
+    async def _worker(self, pipeline_runner: PipelineRunnerFunction, worker_timeout: float):
+        while self.running or not self._request_queue.empty():
             try:
-                no_more_jobs = self._worker_job(worker_timeout=worker_timeout)
+                no_more_jobs = self._worker_job(pipeline_runner, worker_timeout)
                 if no_more_jobs:
                     logger.info("Worker finished working - all remaining requests have been processed.")
                     # Polling_loop should give the required data on whether the stop signal was sent or if
@@ -184,7 +178,7 @@ class PollingMessengerInterface(MessengerInterface):
             received_updates = await asyncio.wait_for(self._get_updates(), timeout=poll_timeout)
             if received_updates is not None:
                 for update in received_updates:
-                    await self.request_queue.put(update)
+                    await self._request_queue.put(update)
         except TimeoutError:
             logger.debug("polling_job failed - timed out")
 
@@ -210,7 +204,7 @@ class PollingMessengerInterface(MessengerInterface):
             # sent to the queue (one for each worker), they shut down the workers.
             # In case of more workers than two, change the number of 'None' requests to the new number of workers.
             for i in range(self.number_of_workers):
-                self.request_queue.put_nowait(None)
+                self._request_queue.put_nowait(None)
 
     async def connect(
         self,
@@ -224,7 +218,7 @@ class PollingMessengerInterface(MessengerInterface):
         # shield() creates a task just like create_task() according to docs.
         # But for safety we have two task wrappers, I guess.
         for i in range(self.number_of_workers):
-            task = asyncio.create_task(asyncio.shield(self._worker(worker_timeout)))
+            task = asyncio.create_task(asyncio.shield(self._worker(pipeline_runner, worker_timeout)))
             self._worker_tasks.append(task)
         print("worker tasks:", self._worker_tasks)
         await self._polling_loop(loop=loop, poll_timeout=poll_timeout, timeout=timeout)

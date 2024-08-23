@@ -302,7 +302,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 interface.finished_working = True
             """
 
-
         asyncio.run(self.messenger_interface.connect(self._run_pipeline, self))
         logger.info("pipeline finished working")
 
