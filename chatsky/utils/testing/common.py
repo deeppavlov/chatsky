@@ -32,6 +32,8 @@ def is_interactive_mode() -> bool:  # pragma: no cover
 def check_happy_path(
     pipeline: Pipeline,
     happy_path: Iterable[Tuple[MessageInitTypes, MessageInitTypes]],
+    *,
+    response_comparator=Message.__eq__,
     printout: bool = False,
 ):
     """
@@ -40,6 +42,9 @@ def check_happy_path(
     :param pipeline: The Pipeline instance, that will be used for checking.
     :param happy_path: A tuple of (request, response) tuples, so-called happy path,
         its requests are passed to pipeline and the pipeline responses are compared to its responses.
+    :param response_comparator:
+        Function that checks reference response (first argument) with the actual response (second argument).
+        Defaults to ``Message.__eq__``.
     :param printout: Whether to print the requests/responses during iteration.
     """
     ctx_id = uuid4()  # get random ID for current context
@@ -56,7 +61,7 @@ def check_happy_path(
         if printout:
             print(f"BOT : {actual_response!r}")
 
-        if reference_response != actual_response:
+        if not response_comparator(reference_response, actual_response):
             raise AssertionError(
                 f"""check_happy_path failed
 step id: {step_id}
