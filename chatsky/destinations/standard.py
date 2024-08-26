@@ -3,7 +3,7 @@ Standard Destinations
 ---------------------
 This module provides basic destinations.
 
-- :py:class:`Repeat` -- history-based destination;
+- :py:class:`FromHistory`, :py:class:`Current` and :py:class:`Previous` -- history-based destinations;
 - :py:class:`Start` and :py:class:`Fallback` -- config-based destinations;
 - :py:class:`Forward` and :py:class:`Backward` -- script-based destinations.
 """
@@ -17,30 +17,49 @@ from chatsky.core.node_label import NodeLabelInitTypes, AbsoluteNodeLabel
 from chatsky.core.script_function import BaseDestination
 
 
-class Repeat(BaseDestination):
+class FromHistory(BaseDestination):
     """
     Return label of the node located at a certain position in the label history.
-
-    Return label of the last visited node by default.
     """
 
-    shift: int = Field(default=0, ge=0)
+    position: int = Field(le=-1)
     """
-    Position of the node in the history from the last element.
+    Position of the label in label history.
 
-    Shift 0 means last label; shift 1 means second to last label; e.t.c.
+    Should be negative:
+
+    - ``-1`` refers to the current node (same as ``ctx.last_label``);
+    - ``-2`` -- to the previous node.
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
         index = get_last_index(ctx.labels)
-        shifted_index = index - self.shift
+        shifted_index = index + self.position + 1
         result = ctx.labels.get(shifted_index)
         if result is None:
             raise KeyError(
                 f"No label with index {shifted_index!r}. "
-                f"Current label index: {index!r}; Repeat.shift: {self.shift!r}."
+                f"Current label index: {index!r}; FromHistory.position: {self.position!r}."
             )
         return result
+
+
+class Current(FromHistory):
+    """
+    Return label of the current node.
+    """
+
+    position: int = -1
+    """Position is set to ``-1`` to get the last node."""
+
+
+class Previous(FromHistory):
+    """
+    Return label of the previous node.
+    """
+
+    position: int = -2
+    """Position is set to ``-2`` to get the second to last node."""
 
 
 class Start(BaseDestination):

@@ -54,7 +54,7 @@ script = {
         },
         "greeting_node": {
             RESPONSE: "Hi",
-            TRANSITIONS: [Tr(dst=dst.Repeat())],
+            TRANSITIONS: [Tr(dst=dst.Current())],
         },
         "fallback_node": {
             RESPONSE: "Please, repeat the request",

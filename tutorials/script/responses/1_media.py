@@ -57,7 +57,7 @@ toy_script = {
                     cnd=cnd.Regexp(f"{img_url} repeat 10 times"),
                 ),
                 Tr(
-                    dst=dst.Repeat(),
+                    dst=dst.Current(),
                 ),
             ],
         },

@@ -89,7 +89,7 @@ toy_script = {
                 ),
             ),
             Tr(
-                dst=dst.Repeat(),
+                dst=dst.Current(),
                 cnd=cnd.All(
                     cnd.Regexp(r"repeat", flags=re.I),
                     cnd.Negation(
@@ -106,7 +106,7 @@ toy_script = {
             RESPONSE: "Ooops",
             TRANSITIONS: [
                 Tr(
-                    dst=dst.Repeat(shift=1),
+                    dst=dst.Previous(),
                     cnd=cnd.Regexp(r"previous", flags=re.I),
                 )
             ],
@@ -126,7 +126,7 @@ toy_script = {
                     priority=0.5,
                 ),
                 Tr(
-                    dst=dst.Repeat(shift=1),
+                    dst=dst.Previous(),
                     cnd=cnd.Regexp(r"previous", flags=re.I),
                 ),
             ],

@@ -114,7 +114,7 @@ Example flow & script
             },
             "response_node": {
                 RESPONSE: "Pong!",
-                TRANSITIONS: [Tr(dst=dst.Repeat(), cnd=cnd.ExactMatch("Ping!"))],
+                TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.ExactMatch("Ping!"))],
             },
         },
     }
@@ -164,7 +164,7 @@ Below is a breakdown of key features used in the example:
   This is a list of ``Transition`` instances. They specify the destination node of the potential transition
   and a condition for the transition to be valid.
   In the example script, we use build-in functions: ``ExactMatch`` requires the user request to
-  fully match the provided text, while ``Repeat`` makes a transition to the same node.
+  fully match the provided text, while ``Current`` makes a transition to the current node.
   However, passing custom callbacks that implement arbitrary logic is also an option.
 
 * ``start_node`` is the initial node, which contains an empty response and only transfers user to another node

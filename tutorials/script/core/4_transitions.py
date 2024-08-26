@@ -95,9 +95,9 @@ class GreetingFlowNode2(BaseDestination):
 Chatsky provides several basic transitions as part of
 the %mddoclink(api,destinations.standard) module:
 
-- `Repeat` returns the last visited node (i.e. the current node).
-    Optionally, `shift` may be passed to get a more distant node in history
-    (e.g. second to last instead of the last one).
+- `FromHistory` returns a node from label history.
+    `Current` and `Previous` are subclasses of it that return specific nodes
+    (current node and previous node respectively).
 - `Start` returns the start node.
 - `Fallback` returns the fallback node.
 - `Forward` returns the next node (in order of definition)
@@ -140,11 +140,11 @@ toy_script = {
                     cnd=cnd.Regexp(r"hi|hello", flags=re.IGNORECASE),
                 ),
                 Tr(
-                    dst=dst.Repeat(shift=1),  # this goes to the previous node
+                    dst=dst.Previous(),
                     cnd=cnd.Regexp(r"previous", flags=re.IGNORECASE),
                 ),
                 Tr(
-                    dst=dst.Repeat(),  # this goes to the current node
+                    dst=dst.Current(),  # this goes to the current node
                     # i.e. fallback node
                 ),
             ],
@@ -183,7 +183,7 @@ toy_script = {
                     cnd=cnd.Regexp(r"talk about music"),
                 ),  # this transition is the first candidate
                 Tr(
-                    dst=dst.Repeat(shift=1),
+                    dst=dst.Previous(),
                     cnd=cnd.Regexp(r"previous", flags=re.IGNORECASE),
                 ),  # this transition is the second candidate
             ],
@@ -222,7 +222,7 @@ toy_script = {
                     cnd=cnd.Regexp(r"next", flags=re.IGNORECASE),
                 ),
                 Tr(
-                    dst=dst.Repeat(),
+                    dst=dst.Current(),
                     cnd=cnd.Regexp(r"repeat", flags=re.IGNORECASE),
                 ),
             ],
@@ -240,7 +240,7 @@ toy_script = {
                     cnd=cnd.Regexp(r"back", flags=re.IGNORECASE),
                 ),
                 Tr(
-                    dst=dst.Repeat(),
+                    dst=dst.Current(),
                     cnd=cnd.Regexp(r"repeat", flags=re.IGNORECASE),
                 ),
             ],

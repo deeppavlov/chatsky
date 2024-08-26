@@ -10,19 +10,32 @@ def ctx(context_factory):
     return context_factory(forbidden_fields=("requests", "responses", "misc"))
 
 
-async def test_repeat(ctx):
-    assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
+async def test_from_history(ctx):
+    assert (
+        await dst.FromHistory(position=-1)(ctx)
+        == await dst.Current()(ctx)
+        == AbsoluteNodeLabel(flow_name="service", node_name="start")
+    )
     with pytest.raises(KeyError):
-        await dst.Repeat(shift=1)(ctx)
+        await dst.FromHistory(position=-2)(ctx)
 
     ctx.add_label(("flow", "node1"))
-    assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
-    assert await dst.Repeat(shift=1)(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
+    assert (
+        await dst.FromHistory(position=-1)(ctx)
+        == await dst.Current()(ctx)
+        == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
+    )
+    assert (
+        await dst.FromHistory(position=-2)(ctx)
+        == await dst.Previous()(ctx)
+        == AbsoluteNodeLabel(flow_name="service", node_name="start")
+    )
     with pytest.raises(KeyError):
-        await dst.Repeat(shift=2)(ctx)
+        await dst.FromHistory(position=-3)(ctx)
 
     ctx.add_label(("flow", "node2"))
-    assert await dst.Repeat()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
+    assert await dst.Current()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
+    assert await dst.FromHistory(position=-3)(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
 
 
 async def test_start(ctx):
