@@ -23,21 +23,25 @@ def test_script_getting_and_setting():
 
 
 def test_parallel_services():
-    def clean_ctx_misc(ctx: Context, __: Pipeline):
-        ctx.current_node.misc = {"misc": []}
+    def clean_run_order(run_order: list):
+        async def inner(_: Context, __: Pipeline):
+            run_order.clear()
+        return inner
 
-    def interact(stage: str):
+    def interact(stage: str, run_order: list):
         async def slow_service(ctx: Context, __: Pipeline):
-            ctx.current_node.misc["misc"].append(stage)
+            run_order.append(stage)
             # This test is now about 0.3 seconds. Is that okay? We have lots of these tests.
             await asyncio.sleep(0.05)
 
         return slow_service
 
-    def asserter_service(ctx: Context, __: Pipeline):
-        assert ctx.current_node.misc["misc"] is ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
-        # Checking if the test will fail from this. If it does, then the test is correct.
-        assert False
+    def asserter_service(run_order: list):
+        async def inner(_: Context, __: Pipeline):
+            assert run_order is ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
+            # Checking if the test will fail from this. If it does, then the test is correct.
+            assert False
+        return inner
 
     # Extracting Context like this, because I don't recall easier ways to access it.
     def context_extractor(result: list):
@@ -45,46 +49,43 @@ def test_parallel_services():
             result.append(ctx)
         return inner
 
+    running_order = []
     context = []
     pipeline_dict = {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": ServiceGroup(
-            components=[clean_ctx_misc for _ in range(0, 10)],
-            all_async=True,
-        ),
         "post_services": [
-            clean_ctx_misc,
+            clean_run_order,
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[
-                    interact("A1"),
-                    interact("A2"),
-                    interact("A3"),
+                    interact("A1", running_order),
+                    interact("A2", running_order),
+                    interact("A3", running_order),
                 ],
                 asynchronous=True,
             ),
             ServiceGroup(
                 name="InteractWithServiceB",
                 components=[
-                    interact("B1"),
-                    interact("B2"),
-                    interact("B3"),
+                    interact("B1", running_order),
+                    interact("B2", running_order),
+                    interact("B3", running_order),
                 ],
                 asynchronous=True,
             ),
             ServiceGroup(
                 name="InteractWithServiceC",
                 components=[
-                    interact("C1"),
-                    interact("C2"),
-                    interact("C3"),
+                    interact("C1", running_order),
+                    interact("C2", running_order),
+                    interact("C3", running_order),
                 ],
                 asynchronous=False,
             ),
-            asserter_service,
-            context_extractor(context),
+            asserter_service(running_order),
+            context_extractor(context)
         ],
     }
     pipeline = Pipeline(**pipeline_dict)
