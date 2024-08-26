@@ -29,7 +29,8 @@ def test_parallel_services():
     def interact(stage: str):
         async def slow_service(ctx: Context, __: Pipeline):
             ctx.current_node.misc["misc"].append(stage)
-            await asyncio.sleep(0.1)
+            # This test is now about 0.3 seconds. Is that okay? We have lots of these tests.
+            await asyncio.sleep(0.05)
 
         return slow_service
 
@@ -54,6 +55,7 @@ def test_parallel_services():
             all_async=True,
         ),
         "post_services": [
+            clean_ctx_misc,
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[
