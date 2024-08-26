@@ -10,6 +10,8 @@ from chatsky.utils.testing.common import check_happy_path
 from chatsky.utils.testing.toy_script import HAPPY_PATH
 import chatsky.script.conditions as cnd
 
+from chatsky.chatsky.pipeline import ComponentExecutionState
+
 
 def test_script_getting_and_setting():
     script = {"old_flow": {"": {RESPONSE: lambda _, __: Message(), TRANSITIONS: {"": cnd.true()}}}}
@@ -37,6 +39,13 @@ def test_parallel_services():
         # Checking if the test will fail from this. If it does, then the test is correct.
         assert False
 
+    # Extracting Context like this, because I don't recall easier ways to access it.
+    def context_extractor(result: list):
+        async def inner(ctx: Context, __: Pipeline):
+            result.append(ctx)
+        return inner
+
+    context = []
     pipeline_dict = {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
@@ -74,7 +83,11 @@ def test_parallel_services():
                 asynchronous=False,
             ),
             asserter_service,
+            context_extractor(context),
         ],
     }
     pipeline = Pipeline(**pipeline_dict)
     check_happy_path(pipeline, HAPPY_PATH)
+    # Checking if 'asserter_service()' passed execution.
+    # If everything is done correctly, this test should fail.
+    assert pipeline._services_pipeline[-2].get_state(*context) is ComponentExecutionState.FINISHED
