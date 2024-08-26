@@ -93,4 +93,4 @@ def test_parallel_services():
     check_happy_path(pipeline, HAPPY_PATH)
     # Checking if 'asserter_service()' passed execution.
     # If everything is done correctly, this test should fail.
-    assert pipeline._services_pipeline[-2].get_state(*context) is ComponentExecutionState.FINISHED
+    assert pipeline._services_pipeline.components[-2].get_state(*context) is ComponentExecutionState.FINISHED
