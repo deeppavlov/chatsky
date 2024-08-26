@@ -68,7 +68,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     name: Optional[str] = None
     """
     Component name (should be unique in single :py:class:`~.pipeline.service.group.ServiceGroup`),
-    should not be blank or contain `.` symbol.
+    should not be blank or contain the ``.`` character.
     """
     path: Optional[str] = None
     """
@@ -76,11 +76,12 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
 
     @model_validator(mode="after")
-    def __pipeline_component_validator(self):
+    def __pipeline_component_validator__(self):
         """
-        Validates this component. Raises `ValueError` if component's
-        name is blank or if it contains dots. In case component can't be async
-        but was requested to be, raises an `Exception`.
+        Validate this component.
+
+        :raises ValueError: If component's name is blank or if it contains dots.
+        :raises Exception: In case component can't be async, but was requested to be.
         """
         if self.name is not None:
             if self.name == "":

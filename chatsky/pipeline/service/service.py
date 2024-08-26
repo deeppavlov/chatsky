@@ -57,9 +57,9 @@ class Service(PipelineComponent):
 
     @model_validator(mode="before")
     @classmethod
-    def __handler_constructor(cls, data: Any):
+    def handler_validator(cls, data: Any):
         """
-        Adds support for initializing from a `Callable`.
+        Add support for initializing from a `Callable`.
         """
         if isinstance(data, Callable):
             return {"handler": data}
