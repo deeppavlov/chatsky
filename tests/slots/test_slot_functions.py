@@ -30,7 +30,7 @@ def root_slot():
 
 @pytest.fixture
 def context(root_slot):
-    ctx = Context()
+    ctx = Context.init(("", ""))
     ctx.add_request("text")
     ctx.framework_data.slot_manager = SlotManager()
     ctx.framework_data.slot_manager.set_root_slot(root_slot)

@@ -228,7 +228,6 @@ becomes as easy as calling the `model_dump_json` method:
 
 .. code-block:: python
 
-    context = Context()
     serialized_context = context.model_dump_json()
 
 Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.

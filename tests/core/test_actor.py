@@ -36,10 +36,10 @@ class TestRequestProcessing:
         await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
-            -1: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
-            0: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
+            0: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
+            1: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
         }
-        assert ctx.responses == {0: Message(text="node2")}
+        assert ctx.responses == {1: Message(text="node2")}
 
     async def test_fallback_node(self):
         script = Script.model_validate({"flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}})
@@ -56,10 +56,10 @@ class TestRequestProcessing:
         await actor(ctx, ctx.framework_data.pipeline)
 
         assert ctx.labels == {
-            -1: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
-            0: AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
+            0: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
+            1: AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
         }
-        assert ctx.responses == {0: Message(text="fallback")}
+        assert ctx.responses == {1: Message(text="fallback")}
 
     @pytest.mark.parametrize(
         "default_priority,result",
@@ -134,7 +134,7 @@ class TestRequestProcessing:
 
         await actor(ctx, ctx.framework_data.pipeline)
 
-        assert ctx.responses == {0: Message()}
+        assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Node has empty response."
 
     async def test_bad_response(self, log_event_catcher):
@@ -157,7 +157,7 @@ class TestRequestProcessing:
 
         await actor(ctx, ctx.framework_data.pipeline)
 
-        assert ctx.responses == {0: Message()}
+        assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Response was not produced."
 
     async def test_response_exception_handling(self, log_event_catcher):
@@ -180,7 +180,7 @@ class TestRequestProcessing:
 
         await actor(ctx, ctx.framework_data.pipeline)
 
-        assert ctx.responses == {0: Message()}
+        assert ctx.responses == {1: Message()}
         assert log_list[0].msg == "Exception occurred during response processing."
         assert str(log_list[0].exc_info[1]) == "Current node is not set."
 

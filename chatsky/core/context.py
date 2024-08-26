@@ -37,13 +37,16 @@ logger = logging.getLogger(__name__)
 
 def get_last_index(dictionary: dict) -> int:
     """
-    Obtain the last index from the `dictionary`. Return `-1` if the `dict` is empty.
+    Obtain the last index from the `dictionary`.
 
     :param dictionary: Dictionary with unsorted keys.
     :return: Last index from the `dictionary`.
+    :raises ValueError: If the dictionary is empty.
     """
+    if len(dictionary) == 0:
+        raise ValueError("Dictionary is empty.")
     indices = list(dictionary)
-    return max([*indices, -1])
+    return max(indices)
 
 
 class ContextError(Exception):
@@ -80,35 +83,42 @@ class Context(BaseModel):
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
-    `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    ``id`` is the unique context identifier. By default, randomly generated using ``uuid4``.
+    ``id`` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, AbsoluteNodeLabel] = Field(default_factory=dict)
     """
-    `labels` stores the history of all passed `labels`
+    ``labels`` stores the history of labels for all passed nodes.
 
-        - key - `id` of the turn.
-        - value - `label` on this turn.
+        - key - ``id`` of the turn.
+        - value - ``label`` of this turn.
 
-    Start label is stored at the ``-1`` key.
+    Start label is stored at key ``0``.
+    IDs go up by ``1`` after that.
     """
     requests: Dict[int, Message] = Field(default_factory=dict)
     """
-    `requests` stores the history of all `requests` received by the agent
+    ``requests`` stores the history of all requests received by the pipeline.
 
-        - key - `id` of the turn.
-        - value - `request` on this turn.
+        - key - ``id`` of the turn.
+        - value - ``request`` of this turn.
+
+    First request is stored at key ``1``.
+    IDs go up by ``1`` after that.
     """
     responses: Dict[int, Message] = Field(default_factory=dict)
     """
-    `responses` stores the history of all agent `responses`
+    ``responses`` stores the history of all responses produced by the pipeline.
 
-        - key - `id` of the turn.
-        - value - `response` on this turn.
+        - key - ``id`` of the turn.
+        - value - ``response`` of this turn.
+
+    First response is stored at key ``1``.
+    IDs go up by ``1`` after that.
     """
     misc: Dict[str, Any] = Field(default_factory=dict)
     """
-    `misc` stores any custom data. The framework doesn't use this dictionary,
+    ``misc`` stores any custom data. The framework doesn't use this dictionary,
     so storage of any data won't reflect on the work of the internal Chatsky functions.
 
         - key - Arbitrary data name.
@@ -123,42 +133,45 @@ class Context(BaseModel):
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
         """Initialize new context from ``start_label`` and, optionally, context ``id``."""
-        labels = {-1: AbsoluteNodeLabel.model_validate(start_label)}
+        init_kwargs = {
+            "labels": {0: AbsoluteNodeLabel.model_validate(start_label)},
+        }
         if id is None:
-            return cls(labels=labels)
+            return cls(**init_kwargs)
         else:
-            return cls(labels=labels, id=id)
+            return cls(**init_kwargs, id=id)
 
     def add_request(self, request: MessageInitTypes):
         """
-        Add a new `request` to the context.
-        The new `request` is added with the index of `last_index + 1`.
-
-        :param request: `request` to be added to the context.
+        Add a new ``request`` to the context.
         """
         request_message = Message.model_validate(request)
-        last_index = get_last_index(self.requests)
-        self.requests[last_index + 1] = request_message
+        if len(self.requests) == 0:
+            self.requests[1] = request_message
+        else:
+            last_index = get_last_index(self.requests)
+            self.requests[last_index + 1] = request_message
 
     def add_response(self, response: MessageInitTypes):
         """
-        Add a new `response` to the context.
-        The new `response` is added with the index of `last_index + 1`.
-
-        :param response: `response` to be added to the context.
+        Add a new ``response`` to the context.
         """
         response_message = Message.model_validate(response)
-        last_index = get_last_index(self.responses)
-        self.responses[last_index + 1] = response_message
+        if len(self.responses) == 0:
+            self.responses[1] = response_message
+        else:
+            last_index = get_last_index(self.responses)
+            self.responses[last_index + 1] = response_message
 
     def add_label(self, label: AbsoluteNodeLabelInitTypes):
         """
         Add a new :py:class:`~.AbsoluteNodeLabel` to the context.
-        The new `label` is added with the index of `last_index + 1`.
 
-        :param label: `label` that we need to add to the context.
+        :raises ContextError: If :py:attr:`labels` is empty.
         """
         label = AbsoluteNodeLabel.model_validate(label)
+        if len(self.labels) == 0:
+            raise ContextError("Labels are empty. Use `Context.init` to initialize context with labels.")
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
@@ -167,33 +180,37 @@ class Context(BaseModel):
         """
         Return the last :py:class:`~.AbsoluteNodeLabel` of
         the :py:class:`~.Context`.
+
+        :raises ContextError: If :py:attr:`labels` is empty.
         """
+        if len(self.labels) == 0:
+            raise ContextError("Labels are empty. Use `Context.init` to initialize context with labels.")
         last_index = get_last_index(self.labels)
-        label = self.labels.get(last_index)
-        if label is None:
-            raise ContextError("Labels are empty.")
-        return label
+        return self.labels[last_index]
 
     @property
     def last_response(self) -> Optional[Message]:
         """
-        Return the last `response` of the current :py:class:`~.Context`.
-        Return `None` if `responses` is empty.
+        Return the last response of the current :py:class:`~.Context`.
+        Return ``None`` if no responses have been added yet.
         """
+        if len(self.responses) == 0:
+            return None
         last_index = get_last_index(self.responses)
-        return self.responses.get(last_index)
+        response = self.responses[last_index]
+        return response
 
     @property
     def last_request(self) -> Message:
         """
-        Return the last `request` of the current :py:class:`~.Context`.
-        Return `None` if `requests` is empty.
+        Return the last request of the current :py:class:`~.Context`.
+
+        :raises ContextError: If :py:attr:`responses` is empty.
         """
+        if len(self.requests) == 0:
+            raise ContextError("No requests have been added.")
         last_index = get_last_index(self.requests)
-        request = self.requests.get(last_index)
-        if request is None:
-            raise ContextError("Requests are empty.")
-        return request
+        return self.requests[last_index]
 
     @property
     def pipeline(self) -> Pipeline:

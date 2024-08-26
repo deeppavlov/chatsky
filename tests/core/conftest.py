@@ -15,8 +15,11 @@ def pipeline():
 
 @pytest.fixture
 def context_factory(pipeline):
-    def _context_factory(forbidden_fields=None):
-        ctx = Context.init(("service", "start"))
+    def _context_factory(forbidden_fields=None, add_start_label=True):
+        if add_start_label:
+            ctx = Context.init(("service", "start"))
+        else:
+            ctx = Context()
         ctx.framework_data.pipeline = pipeline
         if forbidden_fields is not None:
 
