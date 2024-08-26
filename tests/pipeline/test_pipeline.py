@@ -47,6 +47,7 @@ def test_parallel_services():
     # Extracting Context like this, because I don't recall easier ways to access it.
     def context_extractor(result: list):
         async def inner(ctx: Context, __: Pipeline):
+            result.clear()
             result.append(ctx)
         return inner
 
@@ -57,7 +58,7 @@ def test_parallel_services():
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
         "post_services": [
-            clean_run_order,
+            clean_run_order(running_order),
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[
