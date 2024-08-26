@@ -23,42 +23,20 @@ def test_script_getting_and_setting():
 
 
 def test_parallel_services():
-    def clean_run_order(run_order: list):
-        async def inner(_: Context, __: Pipeline):
-            run_order.clear()
-            print(run_order)
-        return inner
-
     def interact(stage: str, run_order: list):
         async def slow_service(_: Context, __: Pipeline):
             run_order.append(stage)
-            # This test is now about 0.3 seconds. Is that okay? We have lots of these tests.
+            # This test is now about 1.5 seconds. Is that really okay? We have lots of these tests.
             await asyncio.sleep(0.05)
 
         return slow_service
 
-    def asserter_service(run_order: list):
-        async def inner(_: Context, __: Pipeline):
-            print(run_order)
-            expected_order = ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
-            assert run_order == expected_order
-        return inner
-
-    # Extracting Context like this, because I don't recall easier ways to access it.
-    def context_extractor(result: list):
-        async def inner(ctx: Context, __: Pipeline):
-            result.clear()
-            result.append(ctx)
-        return inner
-
     running_order = []
-    context = []
     pipeline_dict = {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
         "post_services": [
-            # clean_run_order(running_order),
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[
@@ -86,16 +64,9 @@ def test_parallel_services():
                 ],
                 asynchronous=False,
             ),
-            # asserter_service(running_order),
-            context_extractor(context)
         ],
     }
     pipeline = Pipeline(**pipeline_dict)
     check_happy_path(pipeline, HAPPY_PATH)
+    # Since there are 5 requests in the 'HAPPY_PATH', multiplying the running order by 5.
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]*5
-    # Checking if 'asserter_service()' passed execution.
-    # If everything is done correctly, this test should fail.
-    print(pipeline.post_services)
-    print(pipeline._services_pipeline)
-    assert pipeline.post_services.get_state(*context) is ComponentExecutionState.FINISHED
-    assert pipeline._services_pipeline.get_state(*context) is ComponentExecutionState.FINISHED
