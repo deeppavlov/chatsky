@@ -9,8 +9,8 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Annotated, Callable, Any, Awaitable, TYPE_CHECKING, Union
-from typing_extensions import TypeAlias
+from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union
+from typing_extensions import TypeAlias, Annotated
 import logging
 from functools import reduce
 
