@@ -17,7 +17,6 @@ to structure and manage the messages processing flow.
 import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
-from collections import defaultdict
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -26,7 +25,7 @@ from chatsky.utils.turn_caching import cache_clear
 
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
-from chatsky.slots.slots import GroupSlot, RegexpSlot, FunctionSlot
+from chatsky.slots.slots import GroupSlot
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
