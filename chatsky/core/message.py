@@ -329,7 +329,7 @@ class Message(DataModel):
             return pickle_validator(value)
         return value
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
 
     @model_validator(mode="before")

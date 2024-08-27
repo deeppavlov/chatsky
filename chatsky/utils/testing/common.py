@@ -53,13 +53,13 @@ def check_happy_path(
         request = Message.model_validate(request_raw)
         reference_response = Message.model_validate(reference_response_raw)
         if printout:
-            print(f"USER: {request!r}")
+            print(f"USER: {request}")
 
         ctx = pipeline(request, ctx_id)
 
         actual_response = ctx.last_response
         if printout:
-            print(f"BOT : {actual_response!r}")
+            print(f"BOT : {actual_response}")
 
         if not response_comparator(reference_response, actual_response):
             raise AssertionError(
