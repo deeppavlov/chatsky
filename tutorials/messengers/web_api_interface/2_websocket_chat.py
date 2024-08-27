@@ -92,7 +92,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         while True:
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
-            request = Message(text=data)
+            request = Message(data)
             context = await messenger_interface.on_request_async(
                 request, client_id
             )

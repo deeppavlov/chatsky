@@ -290,6 +290,44 @@ class Message(DataModel):
     misc: Optional[Dict[str, Any]] = None
     original_message: Optional[Any] = None
 
+    def __init__(  # this allows initializing Message with string as positional argument
+        self,
+        text: Optional[str] = None,
+        *,
+        attachments: Optional[
+            List[
+                Union[
+                    CallbackQuery,
+                    Location,
+                    Contact,
+                    Invoice,
+                    Poll,
+                    Audio,
+                    Video,
+                    Animation,
+                    Image,
+                    Sticker,
+                    Document,
+                    VoiceMessage,
+                    VideoMessage,
+                    MediaGroup,
+                ]
+            ]
+        ] = None,
+        annotations: Optional[Dict[str, Any]] = None,
+        misc: Optional[Dict[str, Any]] = None,
+        original_message: Optional[Any] = None,
+        **kwargs,
+    ):
+        super().__init__(
+            text=text,
+            attachments=attachments,
+            annotations=annotations,
+            misc=misc,
+            original_message=original_message,
+            **kwargs,
+        )
+
     @field_serializer("annotations", "misc", when_used="json")
     def pickle_serialize_dicts(self, value):
         """

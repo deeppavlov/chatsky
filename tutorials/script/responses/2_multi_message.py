@@ -70,10 +70,8 @@ happy_path = (
         Message(
             misc={
                 "messages": [
-                    Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                    Message(
-                        text="Hello, how are you?", misc={"confidences": 0.9}
-                    ),
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message("Hello, how are you?", misc={"confidences": 0.9}),
                 ]
             }
         ),
@@ -92,10 +90,8 @@ happy_path = (
         Message(
             misc={
                 "messages": [
-                    Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                    Message(
-                        text="Hello, how are you?", misc={"confidences": 0.9}
-                    ),
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message("Hello, how are you?", misc={"confidences": 0.9}),
                 ]
             }
         ),
@@ -122,10 +118,8 @@ happy_path = (
         Message(
             misc={
                 "messages": [
-                    Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                    Message(
-                        text="Hello, how are you?", misc={"confidences": 0.9}
-                    ),
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message("Hello, how are you?", misc={"confidences": 0.9}),
                 ]
             }
         ),

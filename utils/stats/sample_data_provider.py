@@ -84,7 +84,7 @@ async def worker(queue: asyncio.Queue):
     label = ctx.last_label
     answers = list(MULTIFLOW_REQUEST_OPTIONS.get(label.flow_name, {}).get(label.node_name, []))
     in_text = random.choice(answers) if answers else "go to fallback"
-    in_message = Message(text=in_text)
+    in_message = Message(in_text)
     await asyncio.sleep(random.random() * 3)
     ctx = await pipeline._run_pipeline(in_message, ctx.id)
     await asyncio.sleep(random.random() * 3)

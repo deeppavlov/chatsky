@@ -181,7 +181,7 @@ happy_path = (
                 "previous_node": AbsoluteNodeLabel(
                     flow_name="greeting_flow", node_name="node1"
                 ),
-                "last_request": Message(text="stop"),
+                "last_request": Message("stop"),
             }
         ),
     ),
@@ -193,7 +193,7 @@ happy_path = (
                 "previous_node": AbsoluteNodeLabel(
                     flow_name="greeting_flow", node_name="fallback_node"
                 ),
-                "last_request": Message(text="one"),
+                "last_request": Message("one"),
             }
         ),
     ),  # f_n->f_n
@@ -204,7 +204,7 @@ happy_path = (
                 "previous_node": AbsoluteNodeLabel(
                     flow_name="greeting_flow", node_name="fallback_node"
                 ),
-                "last_request": Message(text="help"),
+                "last_request": Message("help"),
             }
         ),
     ),  # f_n->f_n
@@ -215,7 +215,7 @@ happy_path = (
                 "previous_node": AbsoluteNodeLabel(
                     flow_name="greeting_flow", node_name="fallback_node"
                 ),
-                "last_request": Message(text="nope"),
+                "last_request": Message("nope"),
             }
         ),
     ),  # f_n->f_n
