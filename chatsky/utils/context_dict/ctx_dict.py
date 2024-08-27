@@ -1,12 +1,12 @@
 from hashlib import sha256
-from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 from .asyncronous import launch_coroutines
 
-K, V = TypeVar("K"), TypeVar("V")
+K, V = TypeVar("K", bound=Hashable), TypeVar("V", bound=BaseModel)
 
 
 class ContextDict(BaseModel, Generic[K, V]):
@@ -36,7 +36,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = dict) -> "ContextDict":
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = lambda x: x) -> "ContextDict":
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
         hashes = {k: sha256(v).digest() for k, v in items}
         objected = {k: storage.serializer.loads(v) for k, v in items}
@@ -116,8 +116,8 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def values(self) -> List[V]:
         return await self[:]
 
-    async def items(self) -> Set[Tuple[K, V]]:
-        return tuple(zip(self.keys(), await self.values()))
+    async def items(self) -> List[Tuple[K, V]]:
+        return [(k, v) for k, v in zip(self.keys(), await self.values())]
 
     async def pop(self, key: K, default: V = _marker) -> V:
         try:
@@ -186,20 +186,26 @@ class ContextDict(BaseModel, Generic[K, V]):
     def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":
         instance = handler(dict())
         instance._items = {k: v for k, v in value.items()}
+        instance._keys = set(value.keys())
         return instance
 
-    @model_serializer()
+    @model_serializer(when_used="json")
     def _serialize_model(self) -> Dict[K, V]:
         if self._storage is None:
             return self._items
         elif self._storage.rewrite_existing:
-            return {k: v for k, v in self._items.items() if sha256(self._storage.serializer.dumps(v)).digest() != self._hashes.get(k, None)}
+            result = dict()
+            for k, v in self._items.items():
+                byted = self._storage.serializer.dumps(v.model_dump())
+                if sha256(byted).digest() != self._hashes.get(k, None):
+                    result.update({k: byted})
+            return result
         else:
             return {k: self._items[k] for k in self._added}
 
     async def store(self) -> None:
         if self._storage is not None:
-            byted = [(k, self._storage.serializer.dumps(v)) for k, v in self.model_dump(mode="json").items()]
+            byted = [(k, v) for k, v in self.model_dump(mode="json").items()]
             await launch_coroutines(
                 [
                     self._storage.update_field_items(self._ctx_id, self._field_name, byted),

@@ -1,250 +1,230 @@
-from time import sleep
-from typing import Dict, Union
-from chatsky.context_storages import DBContextStorage, ALL_ITEMS
-from chatsky.context_storages.context_schema import SchemaField
+from typing import Any, Optional
+
+from chatsky.context_storages import DBContextStorage
+from chatsky.context_storages.database import FieldConfig
 from chatsky.pipeline import Pipeline
 from chatsky.script import Context, Message
+from chatsky.script.core.context import FrameworkData
+from chatsky.utils.context_dict.ctx_dict import ContextDict
 from chatsky.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
 
 
-def simple_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Operation WRITE
-    db[context_id] = testing_context
-
-    # Operation LENGTH
-    assert len(db) == 1
-
-    # Operation CONTAINS
-    assert context_id in db
-
-    # Operation READ
-    assert db[context_id] is not None
-
-    # Operation DELETE
-    del db[context_id]
-
-    # Operation CLEAR
-    db.clear()
-
-
-def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    assert len(db) == 0
-    assert testing_context.storage_key is None
-
-    # Test write operations
-    db[context_id] = Context()
-    assert context_id in db
-    assert len(db) == 1
-
-    # Here we have to sleep because of timestamp calculations limitations:
-    # On some platforms, current time can not be calculated with accuracy less than microsecond,
-    # so the contexts added won't be stored in the correct order.
-    # We sleep for a microsecond to ensure that new contexts' timestamp will be surely more than
-    # the previous ones'.
-    sleep(0.001)
-
-    db[context_id] = testing_context  # overwriting a key
-    assert len(db) == 1
-    assert db.keys() == {context_id}
-
-    # Test read operations
-    new_ctx = db[context_id]
-    assert isinstance(new_ctx, Context)
-    assert new_ctx.model_dump() == testing_context.model_dump()
-
-    # Check storage_key has been set up correctly
-    if not isinstance(db, dict):
-        assert testing_context.storage_key == new_ctx.storage_key == context_id
-
-    # Test delete operations
-    del db[context_id]
-    assert context_id not in db
-
-    # Test `get` method
-    assert db.get(context_id) is None
+def _setup_context_storage(
+        db: DBContextStorage,
+        serializer: Optional[Any] = None,
+        rewrite_existing: Optional[bool] = None,
+        labels_config: Optional[FieldConfig] = None,
+        requests_config: Optional[FieldConfig] = None,
+        responses_config: Optional[FieldConfig] = None,
+        misc_config: Optional[FieldConfig] = None,
+        all_config: Optional[FieldConfig] = None,
+    ) -> None:
+    if serializer is not None:
+        db.serializer = serializer
+    if rewrite_existing is not None:
+        db.rewrite_existing = rewrite_existing
+    if all_config is not None:
+        labels_config = requests_config = responses_config = misc_config = all_config
+    if labels_config is not None:
+        db.labels_config = labels_config
+    if requests_config is not None:
+        db.requests_config = requests_config
+    if responses_config is not None:
+        db.responses_config = responses_config
+    if misc_config is not None:
+        db.misc_config = misc_config
 
 
-def pipeline_test(db: DBContextStorage, _: Context, __: str):
+def _attach_ctx_to_db(context: Context, db: DBContextStorage) -> None:
+    context._storage = db
+    context.labels._storage = db
+    context.requests._storage = db
+    context.responses._storage = db
+    context.misc._storage = db
+
+
+async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
+    # Test nothing exists in database
+    nothing = await db.load_main_info(testing_context.primary_id)
+    assert nothing is None
+
+    # Test context main info can be stored and loaded
+    await db.update_main_info(testing_context.primary_id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    created_at, updated_at, framework_data = await db.load_main_info(testing_context.primary_id)
+    assert testing_context._created_at == created_at
+    assert testing_context._updated_at == updated_at
+    assert testing_context.framework_data == FrameworkData.model_validate(db.serializer.loads(framework_data))
+
+    # Test context main info can be updated
+    testing_context.framework_data.stats["key"] = "value"
+    await db.update_main_info(testing_context.primary_id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    created_at, updated_at, framework_data = await db.load_main_info(testing_context.primary_id)
+    assert testing_context.framework_data == FrameworkData.model_validate(db.serializer.loads(framework_data))
+
+    # Test context fields can be stored and loaded
+    await db.update_field_items(testing_context.primary_id, db.requests_config.name, [(k, db.serializer.dumps(v)) for k, v in await testing_context.requests.items()])
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    assert testing_context.requests.model_dump(mode="json") == {k: db.serializer.loads(v) for k, v in requests}
+
+    # Test context fields keys can be loaded
+    req_keys = await db.load_field_keys(testing_context.primary_id, db.requests_config.name)
+    assert testing_context.requests.keys() == set(req_keys)
+
+    # Test context values can be loaded
+    req_vals = await db.load_field_items(testing_context.primary_id, db.requests_config.name, set(req_keys))
+    assert await testing_context.requests.values() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+
+    # Test context values can be updated
+    testing_context.requests.update({0: Message("new message text"), 1: Message("other message text")})
+    await db.update_field_items(testing_context.primary_id, db.requests_config.name, await testing_context.requests.items())
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    req_keys = await db.load_field_keys(testing_context.primary_id, db.requests_config.name)
+    req_vals = await db.load_field_items(testing_context.primary_id, db.requests_config.name, set(req_keys))
+    assert testing_context.requests == dict(requests)
+    assert testing_context.requests.keys() == set(req_keys)
+    assert testing_context.requests.values() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+
+    # Test context values can be deleted
+    await db.delete_field_keys(testing_context.primary_id, db.requests_config.name, testing_context.requests.keys())
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    req_keys = await db.load_field_keys(testing_context.primary_id, db.requests_config.name)
+    req_vals = await db.load_field_items(testing_context.primary_id, db.requests_config.name, set(req_keys))
+    assert dict() == dict(requests)
+    assert set() == set(req_keys)
+    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+
+    # Test context main info can be deleted
+    await db.update_field_items(testing_context.primary_id, db.requests_config.name, await testing_context.requests.items())
+    await db.delete_main_info(testing_context.primary_id)
+    nothing = await db.load_main_info(testing_context.primary_id)
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    req_keys = await db.load_field_keys(testing_context.primary_id, db.requests_config.name)
+    req_vals = await db.load_field_items(testing_context.primary_id, db.requests_config.name, set(req_keys))
+    assert nothing is None
+    assert dict() == dict(requests)
+    assert set() == set(req_keys)
+    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+
+    # Test all database can be cleared
+    await db.update_main_info(testing_context.primary_id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_field_items(testing_context.primary_id, db.requests_config.name, await testing_context.requests.items())
+    await db.clear_all()
+    nothing = await db.load_main_info(testing_context.primary_id)
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    req_keys = await db.load_field_keys(testing_context.primary_id, db.requests_config.name)
+    req_vals = await db.load_field_items(testing_context.primary_id, db.requests_config.name, set(req_keys))
+    assert nothing is None
+    assert dict() == dict(requests)
+    assert set() == set(req_keys)
+    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+
+
+async def partial_storage_test(db: DBContextStorage, testing_context: Context) -> None:
+    # Store some data in storage
+    await db.update_main_info(testing_context.primary_id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_field_items(testing_context.primary_id, db.requests_config.name, await testing_context.requests.items())
+
+    # Test getting keys with 0 subscription
+    _setup_context_storage(db, requests_config=FieldConfig(subscript="__none__"))
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    assert 0 == len(requests)
+
+    # Test getting keys with standard (3) subscription
+    _setup_context_storage(db, requests_config=FieldConfig(subscript=3))
+    requests = await db.load_field_latest(testing_context.primary_id, db.requests_config.name)
+    assert len(testing_context.requests.keys()) == len(requests)
+
+
+async def large_misc_test(db: DBContextStorage, testing_context: Context) -> None:
+    # Store data main info in storage
+    await db.update_main_info(testing_context.primary_id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+
+    # Fill context misc with data and store it in database
+    testing_context.misc = ContextDict.model_validate({f"key_{i}": f"data number #{i}" for i in range(100000)})
+    await db.update_field_items(testing_context.primary_id, db.misc_config.name, await testing_context.misc.items())
+
+    # Check data keys stored in context
+    misc = await db.load_field_keys(testing_context.primary_id, db.misc_config.name)
+    assert len(testing_context.misc.keys()) == len(misc)
+
+    # Check data values stored in context
+    misc_keys = await db.load_field_keys(testing_context.primary_id, db.misc_config.name)
+    misc_vals = await db.load_field_items(testing_context.primary_id, db.misc_config.name, set(misc_keys))
+    for k, v in zip(misc_keys, misc_vals):
+        assert testing_context.misc[k] == db.serializer.loads(v)
+
+
+async def many_ctx_test(db: DBContextStorage, _: Context) -> None:
+    # Fill database with contexts with one misc value and two requests
+    for i in range(1, 101):
+        ctx = await Context.connected(db, f"ctx_id_{i}")
+        ctx.responses.update({f"key_{i}": f"ctx misc value {i}"})
+        ctx.requests[0] = Message("useful message")
+        ctx.requests[i] = Message("some message")
+        await ctx.store()
+
+    # Check that both misc and requests are read as expected
+    for i in range(1, 101):
+        ctx = await Context.connected(db, f"ctx_id_{i}")
+        assert ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
+        assert ctx.requests[0].text == "useful message"
+        assert ctx.requests[i].text == "some message"
+
+
+async def integration_test(db: DBContextStorage, testing_context: Context) -> None:
+    # Attach context to context storage to perform operations on context level
+    _attach_ctx_to_db(testing_context, db)
+
+    # Check labels storing, deleting and retrieveing
+    await testing_context.labels.store()
+    labels = await ContextDict.connected(db, testing_context.primary_id, db.labels_config.name, Message.model_validate)
+    await db.delete_field_keys(testing_context.primary_id, db.labels_config.name)
+    assert testing_context.labels == labels
+
+    # Check requests storing, deleting and retrieveing
+    await testing_context.requests.store()
+    requests = await ContextDict.connected(db, testing_context.primary_id, db.requests_config.name, Message.model_validate)
+    await db.delete_field_keys(testing_context.primary_id, db.requests_config.name)
+    assert testing_context.requests == requests
+
+    # Check responses storing, deleting and retrieveing
+    await testing_context.responses.store()
+    responses = await ContextDict.connected(db, testing_context.primary_id, db.responses_config.name, Message.model_validate)
+    await db.delete_field_keys(testing_context.primary_id, db.responses_config.name)
+    assert testing_context.responses == responses
+
+    # Check misc storing, deleting and retrieveing
+    await testing_context.misc.store()
+    misc = await ContextDict.connected(db, testing_context.primary_id, db.misc_config.name, Message.model_validate)
+    await db.delete_field_keys(testing_context.primary_id, db.misc_config.name)
+    assert testing_context.misc == misc
+
+    # Check whole context storing, deleting and retrieveing
+    await testing_context.store()
+    context = await Context.connected(db, testing_context.primary_id)
+    await db.delete_main_info(testing_context.primary_id)
+    assert testing_context == context
+
+
+async def pipeline_test(db: DBContextStorage, _: Context) -> None:
     # Test Pipeline workload on DB
     pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
     check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 
-def partial_storage_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Write and read initial context
-    db[context_id] = testing_context
-    read_context = db[context_id]
-    assert testing_context.model_dump() == read_context.model_dump()
-
-    # Remove key
-    del db[context_id]
-
-    # Add key to misc and request to requests
-    read_context.misc.update(new_key="new_value")
-    for i in range(1, 5):
-        read_context.add_request(Message(text=f"new message: {i}"))
-    write_context = read_context.model_dump()
-
-    # Patch context to use with dict context storage, that doesn't follow read limits
-    if not isinstance(db, dict):
-        for i in sorted(write_context["requests"].keys())[:-3]:
-            del write_context["requests"][i]
-
-    # Write and read updated context
-    db[context_id] = read_context
-    read_context = db[context_id]
-    assert write_context == read_context.model_dump()
-
-
-def midair_subscript_change_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Set all appended request to be written
-    db.context_schema.append_single_log = False
-
-    # Add new requests to context
-    for i in range(1, 10):
-        testing_context.add_request(Message(text=f"new message: {i}"))
-
-    # Make read limit larger (7)
-    db[context_id] = testing_context
-    db.context_schema.requests.subscript = 7
-
-    # Create a copy of context that simulates expected read value (last 7 requests)
-    write_context = testing_context.model_dump()
-    for i in sorted(write_context["requests"].keys())[:-7]:
-        del write_context["requests"][i]
-
-    # Check that expected amount of requests was read only
-    read_context = db[context_id]
-    assert write_context == read_context.model_dump()
-
-    # Make read limit smaller (2)
-    db.context_schema.requests.subscript = 2
-
-    # Create a copy of context that simulates expected read value (last 2 requests)
-    write_context = testing_context.model_dump()
-    for i in sorted(write_context["requests"].keys())[:-2]:
-        del write_context["requests"][i]
-
-    # Check that expected amount of requests was read only
-    read_context = db[context_id]
-    assert write_context == read_context.model_dump()
-
-
-def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Fill context misc with data
-    for i in range(100000):
-        testing_context.misc[f"key_{i}"] = f"data number #{i}"
-    db[context_id] = testing_context
-
-    # Check data stored in context
-    new_context = db[context_id]
-    assert len(new_context.misc) == len(testing_context.misc)
-    for i in range(100000):
-        assert new_context.misc[f"key_{i}"] == f"data number #{i}"
-
-
-def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
-    # Set all appended request to be written
-    db.context_schema.append_single_log = False
-
-    # Setup schema so that only last request will be written to database
-    db.context_schema.requests.subscript = 1
-
-    # Fill database with contexts with one misc value and two requests
-    for i in range(1, 101):
-        db[f"{context_id}_{i}"] = Context(
-            misc={f"key_{i}": f"ctx misc value {i}"},
-            requests={0: Message(text="useful message"), i: Message(text="some message")},
-        )
-        sleep(0.001)
-
-    # Setup schema so that all requests will be read from database
-    db.context_schema.requests.subscript = ALL_ITEMS
-
-    # Check database length
-    assert len(db) == 100
-
-    # Check that both misc and requests are read as expected
-    for i in range(1, 101):
-        read_ctx = db[f"{context_id}_{i}"]
-        assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
-        assert read_ctx.requests[0].text == "useful message"
-        assert read_ctx.requests[i].text == "some message"
-
-    # Check clear
-    db.clear()
-    assert len(db) == 0
-
-
-def keys_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Fill database with contexts
-    for i in range(1, 11):
-        db[f"{context_id}_{i}"] = Context()
-        sleep(0.001)
-
-    # Add and delete a context
-    db[context_id] = testing_context
-    del db[context_id]
-
-    # Check database keys
-    keys = db.keys()
-    assert len(keys) == 10
-    for i in range(1, 11):
-        assert f"{context_id}_{i}" in keys
-
-
-def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Set only one request to be included into CONTEXTS table
-    db.context_schema.requests.subscript = 1
-
-    # Add new requestgs to context
-    for i in range(1, 10):
-        testing_context.add_request(Message(text=f"new message: {i}"))
-    db[context_id] = testing_context
-
-    # Setup schema so that all requests will be read from database
-    db.context_schema.requests.subscript = ALL_ITEMS
-
-    # Read context and check only the two last context was read - one from LOGS, one from CONTEXT
-    read_context = db[context_id]
-    assert len(read_context.requests) == 2
-    assert read_context.requests[8] == testing_context.requests[8]
-    assert read_context.requests[9] == testing_context.requests[9]
-
-
-simple_test.no_dict = False
-basic_test.no_dict = False
-pipeline_test.no_dict = False
-partial_storage_test.no_dict = False
-midair_subscript_change_test.no_dict = True
-large_misc_test.no_dict = False
-many_ctx_test.no_dict = True
-keys_test.no_dict = False
-single_log_test.no_dict = True
 _TEST_FUNCTIONS = [
-    simple_test,
     basic_test,
-    pipeline_test,
     partial_storage_test,
-    midair_subscript_change_test,
     large_misc_test,
     many_ctx_test,
-    keys_test,
-    single_log_test,
+    integration_test,
+    pipeline_test,
 ]
 
 
-def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Context, context_id: str):
+async def run_all_functions(db: DBContextStorage, testing_context: Context):
     frozen_ctx = testing_context.model_dump_json()
     for test in _TEST_FUNCTIONS:
-        if isinstance(db, DBContextStorage):
-            db.context_schema.append_single_log = True
-            db.context_schema.duplicate_context_in_logs = False
-            for field_props in [value for value in dict(db.context_schema).values() if isinstance(value, SchemaField)]:
-                field_props.subscript = 3
-        if not (getattr(test, "no_dict", False) and isinstance(db, dict)):
-            if isinstance(db, dict):
-                db.clear()
-            else:
-                db.clear(prune_history=True)
-            test(db, Context.model_validate_json(frozen_ctx), context_id)
+        ctx = Context.model_validate_json(frozen_ctx)
+        await db.clear_all()
+        await test(db, ctx)

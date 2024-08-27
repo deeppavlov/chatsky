@@ -8,7 +8,6 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 
-import pickle
 from abc import ABC, abstractmethod
 from importlib import import_module
 from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
@@ -16,6 +15,7 @@ from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Uni
 from pydantic import BaseModel, Field, field_validator, validate_call
 
 from .protocol import PROTOCOLS
+from .serializer import BaseSerializer, PickleSerializer
 
 
 class FieldConfig(BaseModel, validate_assignment=True):
@@ -63,7 +63,7 @@ class DBContextStorage(ABC):
     def __init__(
         self,
         path: str,
-        serializer: Optional[Any] = None,
+        serializer: Optional[BaseSerializer] = None,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
     ):
@@ -72,7 +72,7 @@ class DBContextStorage(ABC):
         """Full path to access the context storage, as it was provided by user."""
         self.path = file_path
         """`full_path` without a prefix defining db used."""
-        self.serializer = pickle if serializer is None else serializer
+        self.serializer = PickleSerializer() if serializer is None else serializer
         """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
@@ -136,7 +136,14 @@ class DBContextStorage(ABC):
         Delete field keys.
         """
         await self.update_field_items(ctx_id, field_name, [(k, None) for k in keys])
-    
+
+    @abstractmethod
+    async def clear_all(self) -> None:
+        """
+        Clear all the chatsky tables and records.
+        """
+        raise NotImplementedError
+
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, DBContextStorage):
             return False

@@ -20,6 +20,7 @@ from typing import Any, Callable, Collection, Dict, Hashable, List, Optional, Se
 
 from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
+from .serializer import BaseSerializer
 
 try:
     from sqlalchemy import (
@@ -143,7 +144,7 @@ class SQLContextStorage(DBContextStorage):
 
     def __init__(
         self, path: str,
-        serializer: Optional[Any] = None,
+        serializer: Optional[BaseSerializer] = None,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
         table_name_prefix: str = "chatsky_table",
@@ -195,7 +196,7 @@ class SQLContextStorage(DBContextStorage):
         Create tables required for context storing, if they do not exist yet.
         """
         async with self.engine.begin() as conn:
-            for table in self.tables.values():
+            for table in [self._main_table, self._turns_table, self._misc_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
 
@@ -302,3 +303,7 @@ class SQLContextStorage(DBContextStorage):
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
+
+    async def clear_all(self) -> None:
+        async with self.engine.begin() as conn:
+            await conn.execute(delete(self._main_table))

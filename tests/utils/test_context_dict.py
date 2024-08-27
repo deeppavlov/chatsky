@@ -1,5 +1,3 @@
-from pickle import dumps
-
 import pytest
 
 from chatsky.context_storages import MemoryContextStorage
@@ -10,29 +8,29 @@ from chatsky.utils.context_dict import ContextDict
 
 
 class TestContextDict:
-    @pytest.fixture
+    @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
         # Empty (disconnected) context dictionary
         return ContextDict()
 
-    @pytest.fixture
+    @pytest.fixture(scope="function")
     async def attached_dict(self) -> ContextDict:
         # Attached, but not backed by any data context dictionary
         storage = MemoryContextStorage()
         return await ContextDict.new(storage, "ID", "requests")
 
-    @pytest.fixture
+    @pytest.fixture(scope="function")
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
         config = {"requests": FieldConfig(name="requests", subscript="__none__")}
         storage = MemoryContextStorage(rewrite_existing=True, configuration=config)
-        await storage.update_main_info("ctx1", 0, 0, dumps(FrameworkData()))
-        requests = [(1, dumps(Message("longer text", misc={"k": "v"}))), (2, dumps(Message("text 2", misc={1: 0, 2: 8})))]
+        await storage.update_main_info("ctx1", 0, 0, storage.serializer.dumps(FrameworkData().model_dump(mode="json")))
+        requests = [(1, storage.serializer.dumps(Message("longer text", misc={"k": "v"}).model_dump(mode="json"))), (2, storage.serializer.dumps(Message("text 2", misc={"1": 0, "2": 8}).model_dump(mode="json")))]
         await storage.update_field_items("ctx1", "requests", requests)
         return await ContextDict.connected(storage, "ctx1", "requests", Message.model_validate)
 
     @pytest.mark.asyncio
-    async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict):
+    async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         # Checking creation correctness
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             assert ctx_dict._storage is not None or ctx_dict == empty_dict
@@ -41,7 +39,7 @@ class TestContextDict:
             assert ctx_dict._keys == set() if ctx_dict != prefilled_dict else {1, 2}
 
     @pytest.mark.asyncio
-    async def test_get_set_del(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict):
+    async def test_get_set_del(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Setting 1 item
             message = Message("message")
@@ -68,7 +66,7 @@ class TestContextDict:
             assert e
 
     @pytest.mark.asyncio
-    async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict):
+    async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict) -> None:
         # Checking keys
         assert len(prefilled_dict) == 2
         assert prefilled_dict._keys == {1, 2}
@@ -95,7 +93,7 @@ class TestContextDict:
         assert prefilled_dict._added == set()
 
     @pytest.mark.asyncio
-    async def test_other_methods(self, prefilled_dict: ContextDict):
+    async def test_other_methods(self, prefilled_dict: ContextDict) -> None:
         # Loading items
         assert len(await prefilled_dict.items()) == 2
         # Poppong first item
@@ -119,7 +117,7 @@ class TestContextDict:
         assert prefilled_dict.keys() == set()
 
     @pytest.mark.asyncio
-    async def test_eq_validate(self, empty_dict: ContextDict):
+    async def test_eq_validate(self, empty_dict: ContextDict) -> None:
         # Checking empty dict validation
         assert empty_dict == ContextDict.model_validate(dict())
         # Checking non-empty dict validation
@@ -128,7 +126,7 @@ class TestContextDict:
         assert empty_dict == ContextDict.model_validate({0: Message("msg")})
 
     @pytest.mark.asyncio
-    async def test_serialize_store(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict):
+    async def test_serialize_store(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Adding an item
             ctx_dict[0] = Message("message")
@@ -139,7 +137,7 @@ class TestContextDict:
             # Removing the first added item
             del ctx_dict[0]
             # Checking only the changed keys were serialized
-            assert set(ctx_dict.model_dump().keys()) == {2}
+            assert set(ctx_dict.model_dump(mode="json").keys()) == {"2"}
         # Throw error if store in disconnected
         if ctx_dict == empty_dict:
             with pytest.raises(KeyError) as e:

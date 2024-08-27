@@ -1,11 +1,14 @@
-from typing import Any, Dict, Hashable, List, Optional, Set, Tuple
+import asyncio
+from typing import Dict, Hashable, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
+from .serializer import BaseSerializer, JsonSerializer
 
 
 class MemoryContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` storing contexts in memory, wthout file backend.
+    Uses :py:class:`.JsonSerializer` as the default serializer.
     By default it sets path to an empty string.
 
     Keeps data in a dictionary and two lists:
@@ -20,16 +23,13 @@ class MemoryContextStorage(DBContextStorage):
     def __init__(
         self, 
         path: str = "",
-        serializer: Optional[Any] = None,
+        serializer: Optional[BaseSerializer] = None,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
     ):
+        serializer = JsonSerializer() if serializer is None else serializer
         DBContextStorage.__init__(self, path, serializer, rewrite_existing, configuration)
-        self._storage = {
-            self._main_table_name: dict(),
-            self._turns_table_name: list(),
-            self.misc_config.name: list(),
-        }
+        asyncio.run(self.clear_all())
 
     def _get_table_field_and_config(self, field_name: str) -> Tuple[List, int, FieldConfig]:
         if field_name == self.labels_config.name:
@@ -76,7 +76,7 @@ class MemoryContextStorage(DBContextStorage):
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_table, field_idx, _ = self._get_table_field_and_config(field_name)
         while len(items) > 0:
-            nx = items.pop()
+            nx = items.pop(0)
             for i in range(len(field_table)):
                 if field_table[i][0] == ctx_id and field_table[i][1] == nx[0]:
                     field_table[i][field_idx] = nx[1]
@@ -87,3 +87,10 @@ class MemoryContextStorage(DBContextStorage):
                 else:
                     field_table.append([ctx_id, nx[0], None, None, None])
                 field_table[-1][field_idx] = nx[1]
+
+    async def clear_all(self) -> None:
+        self._storage = {
+            self._main_table_name: dict(),
+            self._turns_table_name: list(),
+            self.misc_config.name: list(),
+        }

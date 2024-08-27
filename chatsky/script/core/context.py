@@ -18,12 +18,12 @@ This allows developers to save the context data and resume the conversation late
 """
 
 from __future__ import annotations
-import logging
+from logging import getLogger
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
+from typing import Any, Callable, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 from chatsky.script.core.message import Message
@@ -35,7 +35,7 @@ from chatsky.utils.context_dict import ContextDict, launch_coroutines
 if TYPE_CHECKING:
     from chatsky.script.core.script import Node
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 """
 class Turn(BaseModel):
@@ -109,7 +109,7 @@ class Context(BaseModel):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    async def connect(cls, storage: DBContextStorage, id: Optional[str] = None) -> Context:
+    async def connected(cls, storage: DBContextStorage, id: Optional[str] = None) -> Context:
         if id is None:
             id = str(uuid4())
             labels = ContextDict.new(storage, id, storage.labels_config.name)
@@ -131,7 +131,7 @@ class Context(BaseModel):
             if main is None:
                 raise ValueError(f"Context with id {id} not found in the storage!")
             crt_at, upd_at, fw_data = main
-            objected = storage.serializer.loads(fw_data)
+            objected = FrameworkData.model_validate(storage.serializer.loads(fw_data))
             instance = cls(primary_id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
@@ -139,7 +139,7 @@ class Context(BaseModel):
     async def store(self) -> None:
         if self._storage is not None:
             self._updated_at = time_ns()
-            byted = self._storage.serializer.dumps(self.framework_data)
+            byted = self._storage.serializer.dumps(self.framework_data.model_dump(mode="json"))
             await launch_coroutines(
                 [
                     self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, byted),
@@ -243,3 +243,12 @@ class Context(BaseModel):
             )
         else:
             return False
+
+    @model_validator(mode="wrap")
+    def _validate_model(value: Dict, handler: Callable[[Dict], "Context"]) -> "Context":
+        instance = handler(value)
+        instance.labels = ContextDict.model_validate(TypeAdapter(Dict[int, NodeLabel2Type]).validate_python(value.get("labels", dict())))
+        instance.requests = ContextDict.model_validate(TypeAdapter(Dict[int, Message]).validate_python(value.get("requests", dict())))
+        instance.responses = ContextDict.model_validate(TypeAdapter(Dict[int, Message]).validate_python(value.get("responses", dict())))
+        instance.misc = ContextDict.model_validate(TypeAdapter(Dict[str, Any]).validate_python(value.get("misc", dict())))
+        return instance
