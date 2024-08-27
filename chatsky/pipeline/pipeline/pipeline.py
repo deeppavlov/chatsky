@@ -296,8 +296,11 @@ class Pipeline:
                 return tuple(i)
             return i
 
-        config = JSONImporter(file).replace_script_objects(script["CONFIG"])
-        params = {param: to_tuple(script["CONFIG"].get(param)) for param in config.keys() if param != "custom_dir"}
+        params = {
+            param: to_tuple(script["CONFIG"].get(param))
+            for param in script["CONFIG"].keys()
+            if param != JSONImporter.CUSTOM_DIR_CONFIG_OPTION
+        }
         del script["CONFIG"]  # todo: add support for CONFIG
 
         return cls(
