@@ -9,22 +9,22 @@
   "flow": {
     "node": {
       "RESPONSE": {
-        "dff.rsp.choice": [
+        "chatsky.rsp.choice": [
           {
-            "dff.Message": {
+            "chatsky.Message": {
               "text": "Hi",
               "attachments": [
                 {
-                  "dff.Link": {
+                  "chatsky.Link": {
                     "source": "https://github.com/deeppavlov/dialog_flow_framework",
-                    "title": "DFF"
+                    "title": "Chatsky"
                   }
                 }
               ]
             }
           },
           {
-            "dff.Message": "message"
+            "chatsky.Message": "message"
           }
         ]
       },

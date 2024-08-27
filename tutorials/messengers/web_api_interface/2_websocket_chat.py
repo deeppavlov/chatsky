@@ -21,13 +21,13 @@ is used to process requests.
 %mddoclink(api,script.core.message,Message) is used to represent text messages.
 """
 
-# %pip install dff uvicorn fastapi
+# %pip install chatsky uvicorn fastapi
 
 # %%
-from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Message
-from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.messengers.common.interface import CallbackMessengerInterface
+from chatsky.script import Message
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect

@@ -2,7 +2,7 @@
 """
 # Web API: 1. FastAPI
 
-This tutorial shows how to create an API for DFF using FastAPI and
+This tutorial shows how to create an API for Chatsky using FastAPI and
 introduces messenger interfaces.
 
 You can see the result at http://127.0.0.1:8000/docs.
@@ -14,13 +14,13 @@ is used to process requests.
 is used in creating a JSON Schema for the endpoint.
 """
 
-# %pip install dff uvicorn fastapi
+# %pip install chatsky uvicorn fastapi
 
 # %%
-from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Message
-from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.messengers.common.interface import CallbackMessengerInterface
+from chatsky.script import Message
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
 
 import uvicorn
 from pydantic import BaseModel

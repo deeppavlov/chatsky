@@ -27,7 +27,7 @@ in its turn batches and persists data to Clickhouse or other OLAP storages.
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
 during statistics collection.
-If you cloned the DFF repo, launch them using `docker compose`:
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```
@@ -41,22 +41,22 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 
 """
 
-# %pip install dff[stats]
+# %pip install chatsky[stats]
 
 # %%
 import asyncio
 
-from dff.script import Context
-from dff.pipeline import (
+from chatsky.script import Context
+from chatsky.pipeline import (
     Pipeline,
     ACTOR,
     Service,
     ExtraHandlerRuntimeInfo,
     to_service,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.stats import OtelInstrumentor, default_extractors
-from dff.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.stats import OtelInstrumentor, default_extractors
+from chatsky.utils.testing import is_interactive_mode, check_happy_path
 
 
 # %% [markdown]
@@ -84,14 +84,14 @@ by calling the `instrument` method.
 
 
 # %%
-dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
-dff_instrumentor.instrument()
+chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+chatsky_instrumentor.instrument()
 
 # %% [markdown]
 """
 The following cell shows a custom extractor function. The data obtained from
 the context and the runtime information gets shaped as a dict and returned
-from the function body. The `dff_instrumentor` decorator then ensures
+from the function body. The `chatsky_instrumentor` decorator then ensures
 that the output is logged by OpenTelemetry.
 
 """
@@ -99,7 +99,7 @@ that the output is logged by OpenTelemetry.
 
 # %%
 # decorated by an OTLP Instrumentor instance
-@dff_instrumentor
+@chatsky_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {

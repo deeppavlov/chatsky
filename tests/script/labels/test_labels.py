@@ -1,6 +1,6 @@
-from dff.pipeline import Pipeline
-from dff.script import Context
-from dff.script.labels import forward, repeat, previous, to_fallback, to_start, backward
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context
+from chatsky.script.labels import forward, repeat, previous, to_fallback, to_start, backward
 
 
 def test_labels():

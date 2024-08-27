@@ -12,19 +12,19 @@ Pipeline's %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_dict)
 static method is used for pipeline creation (from dictionary).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.pipeline import Service, Pipeline, ACTOR
+from chatsky.pipeline import Service, Pipeline, ACTOR
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +33,16 @@ logger = logging.getLogger(__name__)
 """
 When Pipeline is created using `from_dict` method,
 pipeline should be defined as a dictionary.
-It should contain `services` - a `ServiceGroupBuilder` object,
+It should contain `components` - a `ServiceGroupBuilder` object,
 basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
 see tutorial 4.
 
-On pipeline execution services from `services`
+On pipeline execution services from `components`
 list are run without difference between pre- and postprocessors.
 Actor constant "ACTOR" is required to be passed as one of the services.
-ServiceBuilder object can be defined either with callable
+`ServiceBuilder` object can be defined either with callable
 (see tutorial 2) or with dict / object.
-It should contain `handler` - a ServiceBuilder object.
+It should contain `handler` - a `ServiceBuilder` object.
 
 Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
