@@ -287,6 +287,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         :return: Modified context ``ctx_id``.
         """
+        logger.info(f"Running pipeline for context {ctx_id}.")
+        logger.debug(f"Received request: {request}.")
         if ctx_id is None:
             ctx = Context.init(self.start_label)
         elif isinstance(self.context_storage, DBContextStorage):
@@ -328,6 +330,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         This method can be both blocking and non-blocking. It depends on current :py:attr:`messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
+        logger.info("Pipeline is accepting requests.")
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(

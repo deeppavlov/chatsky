@@ -72,7 +72,7 @@ class Actor(PipelineComponent):
         except Exception as exc:
             logger.exception("Exception occurred during transition processing.", exc_info=exc)
 
-        logger.debug(f"Next label: {next_label!r}")
+        logger.debug(f"Next label: {next_label}")
 
         ctx.add_label(next_label)
 
@@ -89,6 +89,7 @@ class Actor(PipelineComponent):
                 response_result = await node_response.wrapped_call(ctx)
                 if isinstance(response_result, Message):
                     response = response_result
+                    logger.debug(f"Produced response {response}.")
                 else:
                     logger.debug("Response was not produced.")
             else:
