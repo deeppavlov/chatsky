@@ -24,9 +24,6 @@ from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.core.script_function import BaseProcessing
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-
 logger = logging.getLogger(__name__)
 
 
@@ -40,7 +37,7 @@ class Actor(PipelineComponent):
     def computed_name(self) -> str:
         return "actor"
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context) -> None:
         """
         Process the context in the following way:
 
@@ -50,17 +47,17 @@ class Actor(PipelineComponent):
         3. Run pre-response of the :py:attr:`.Context.current_node`.
         4. Determine and save the response of the :py:attr:`.Context.current_node`
         """
-        next_label = pipeline.fallback_label
+        next_label = ctx.pipeline.fallback_label
 
         try:
-            ctx.framework_data.current_node = pipeline.script.get_inherited_node(ctx.last_label)
+            ctx.framework_data.current_node = ctx.pipeline.script.get_inherited_node(ctx.last_label)
 
             logger.debug("Running pre_transition")
             await self._run_processing(ctx.current_node.pre_transition, ctx)
 
             logger.debug("Running transitions")
 
-            destination_result = await get_next_label(ctx, ctx.current_node.transitions, pipeline.default_priority)
+            destination_result = await get_next_label(ctx, ctx.current_node.transitions, ctx.pipeline.default_priority)
             if destination_result is not None:
                 next_label = destination_result
         except Exception as exc:
@@ -73,7 +70,7 @@ class Actor(PipelineComponent):
         response = Message()
 
         try:
-            ctx.framework_data.current_node = pipeline.script.get_inherited_node(next_label)
+            ctx.framework_data.current_node = ctx.pipeline.script.get_inherited_node(next_label)
 
             logger.debug("Running pre_response")
             await self._run_processing(ctx.current_node.pre_response, ctx)
