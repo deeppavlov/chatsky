@@ -69,4 +69,4 @@ def test_parallel_services():
     pipeline = Pipeline(**pipeline_dict)
     check_happy_path(pipeline, HAPPY_PATH)
     # Since there are 5 requests in the 'HAPPY_PATH', multiplying the running order by 5.
-    assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]*5
+    assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"] * 5

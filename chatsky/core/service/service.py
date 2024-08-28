@@ -44,7 +44,7 @@ class Service(PipelineComponent):
     """
     A :py:data:`~.ServiceFunction`.
     """
-    # Inherited fields repeated. Don't delete these, they're needed for documentation!
+    # Repeating inherited fields for better documentation.
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
