@@ -106,7 +106,7 @@ services:
   dashboard:
     env_file: [.env_file]
     build:
-      context: ./chatsky/utils/docker
+      context: ./chatsky/utils/docker/stats
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     depends_on:
