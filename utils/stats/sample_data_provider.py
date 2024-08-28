@@ -11,8 +11,8 @@ to the service by multiple users.
 import random
 import asyncio
 from tqdm import tqdm
-from chatsky.script import Context, Message
-from chatsky.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from chatsky.core import Context, Message, Pipeline
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from chatsky.stats import (
     default_extractors,
     OtelInstrumentor,
@@ -78,19 +78,11 @@ async def worker(queue: asyncio.Queue):
     The client message is chosen randomly from a predetermined set of options.
     It simulates pauses in between messages by calling the sleep function.
 
-    The function also starts a new dialog as a new user, if the current dialog
-    ended in the fallback_node.
-
     :param queue: Queue for sharing context variables.
     """
     ctx: Context = await queue.get()
-    label = ctx.last_label if ctx.last_label else pipeline.actor.fallback_label
-    flow, node = label[:2]
-    if [flow, node] == ["root", "fallback"]:
-        await asyncio.sleep(random.random() * 3)
-        ctx = Context()
-        flow, node = ["root", "start"]
-    answers = list(MULTIFLOW_REQUEST_OPTIONS.get(flow, {}).get(node, []))
+    label = ctx.last_label
+    answers = list(MULTIFLOW_REQUEST_OPTIONS.get(label.flow_name, {}).get(label.node_name, []))
     in_text = random.choice(answers) if answers else "go to fallback"
     in_message = Message(in_text)
     await asyncio.sleep(random.random() * 3)
@@ -111,7 +103,7 @@ async def main(n_iterations: int = 100, n_workers: int = 4):
     ctxs = asyncio.Queue()
     parallel_iterations = n_iterations // n_workers
     for _ in range(n_workers):
-        await ctxs.put(Context())
+        await ctxs.put(Context.init(("root", "start")))
     for _ in tqdm(range(parallel_iterations)):
         await asyncio.gather(*(worker(ctxs) for _ in range(n_workers)))
 

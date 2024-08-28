@@ -56,7 +56,7 @@ full advantage of its predictions.
     from chatsky.script import Message
 
     # we assume that there is a 'NER' service running on port 5000 
-    def extract_first_name(utterance: Message) -> str:
+    async def extract_first_name(utterance: Message) -> str:
         """Return the first entity of type B-PER (first name) found in the utterance."""
         ner_request = requests.post(
             "http://localhost:5000/model",
@@ -89,7 +89,7 @@ That slot is a root slot: it contains all other group and value slots.
 
     from chatsky.pipeline import Pipeline
 
-    pipeline = Pipeline.from_script(..., slots=profile_slot)
+    pipeline = Pipeline(..., slots=profile_slot)
 
 Slot names
 ==========
@@ -113,30 +113,30 @@ In this example ``name_slot`` would be accessible by the "profile.name" name.
 Using slots
 ===========
 
-Slots can be extracted at the ``PRE_TRANSITIONS_PROCESSING`` stage
-using the `extract <../apiref/chatsky.slots.processing.html#chatsky.slots.processing.extract>`_
+Slots can be extracted at the ``PRE_TRANSITION`` stage
+using the `Extract <../apiref/chatsky.processing.slots.html#chatsky.processing.slots.Extract>`_
 function from the `processing` submodule.
 You can pass any number of names of the slots that you want to extract to this function.
 
 .. code-block:: python
 
-    from chatsky.slots.processing import extract
+    from chatsky import proc
 
-    PRE_TRANSITIONS_PROCESSING: {"extract_first_name": extract("name", "email")}
+    PRE_TRANSITION: {"extract_first_name": proc.Extract("name", "email")}
 
 The `conditions` submodule provides a function for checking if specific slots have been extracted.
 
 .. code-block:: python
     
-    from chatsky.slots.conditions import slots_extracted
+    from chatsky import cnd
 
-    TRANSITIONS: {"all_information": slots_extracted("name", "email", mode="all")}
-    TRANSITIONS: {"partial_information": slots_extracted("name", "email", mode="any")}
+    TRANSITIONS: [Tr(dst="all_information", cnd=cnd.SlotsExtracted("name", "email", mode="all"))]
+    TRANSITIONS: [Tr(dst="partial_information", cnd=cnd.SlotsExtracted("name", "email", mode="any"))]
 
 .. note::
 
     You can combine ``slots_extracted`` with the
-    `negation <../apiref/chatsky.script.conditions.std_conditions.html#chatsky.script.conditions.std_conditions.negation>`_
+    `Negation <../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.Negation>`_
     condition to make a transition to an extractor node if a slot has not been extracted yet.
 
 Both `processing` and `response` submodules provide functions for filling templates with
@@ -145,14 +145,13 @@ Choose whichever one you like, there's not much difference between them at the m
 
 .. code-block:: python
     
-    from chatsky.slots.processing import fill_template
-    from chatsky.slots.response import filled_template
+    from chatsky import proc, rsp
 
-    PRE_RESPONSE_PROCESSING: {"fill_response_slots": slot_procs.fill_template()}
-    RESPONSE: Message(text="Your first name: {name}")
+    PRE_RESPONSE: {"fill_response_slots": proc.FillTemplate()}
+    RESPONSE: "Your first name: {name}"
 
 
-    RESPONSE: filled_template(Message(text="Your first name: {name}"))
+    RESPONSE: rsp.FilledTemplate("Your first name: {name}")
 
 Some real examples of scripts utilizing slot extraction can be found in the
 `tutorials section <../tutorials/tutorials.slots.1_basic_example.html>`_.

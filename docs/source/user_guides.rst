@@ -13,7 +13,7 @@ about current script execution.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``slot extraction`` guide demonstrates the slot extraction functionality
-currently integrated in the library. ``Chatsky`` only provides basic building blocks for this task,
+currently integrated in the library. Chatsky only provides basic building blocks for this task,
 which can be trivially extended to support any NLU engine or slot extraction model
 of your liking.
 

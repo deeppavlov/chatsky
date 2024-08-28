@@ -33,7 +33,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter, LogExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter, MetricExporter
 
-from chatsky.pipeline import ExtraHandlerRuntimeInfo
+from chatsky.core.service.extra import ExtraHandlerRuntimeInfo
 
 SERVICE_NAME = "chatsky"
 

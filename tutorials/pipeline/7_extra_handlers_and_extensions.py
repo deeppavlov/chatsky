@@ -5,7 +5,7 @@
 The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
 
-Here, %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.add_global_handler)
+Here, %mddoclink(api,core.pipeline,Pipeline.add_global_handler)
 function is shown, that can be used to add extra handlers before
 and/or after all pipeline services.
 """
@@ -19,17 +19,16 @@ import logging
 import random
 from datetime import datetime
 
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
 )
+from chatsky import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -134,6 +133,6 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER, after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, after_all)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

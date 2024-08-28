@@ -1,9 +1,6 @@
 # %% [markdown]
 """
 # Core: 6. Context serialization
-
-This tutorial shows context serialization.
-First of all, let's do all the necessary imports from Chatsky.
 """
 
 # %pip install chatsky
@@ -11,35 +8,34 @@ First of all, let's do all the necessary imports from Chatsky.
 # %%
 import logging
 
-from chatsky.script import TRANSITIONS, RESPONSE, Context, Message
-import chatsky.script.conditions as cnd
+from chatsky.core import (
+    TRANSITIONS,
+    RESPONSE,
+    Context,
+    Pipeline,
+    Transition as Tr,
+    BaseResponse,
+    MessageInitTypes,
+)
 
-from chatsky.pipeline import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 
 
-# %% [markdown]
-"""
-This function returns the user request number.
-"""
+# %%
+class RequestCounter(BaseResponse):
+    async def call(self, ctx: Context) -> MessageInitTypes:
+        return f"answer {len(ctx.requests)}"
 
 
 # %%
-def response_handler(ctx: Context, _: Pipeline) -> Message:
-    return Message(f"answer {len(ctx.requests)}")
-
-
-# %%
-# a dialog script
 toy_script = {
     "flow_start": {
         "node_start": {
-            RESPONSE: response_handler,
-            TRANSITIONS: {("flow_start", "node_start"): cnd.true()},
+            RESPONSE: RequestCounter(),
+            TRANSITIONS: [Tr(dst=("flow_start", "node_start"))],
         }
     }
 }
@@ -84,6 +80,6 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path)
+    check_happy_path(pipeline, happy_path, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

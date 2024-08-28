@@ -14,10 +14,10 @@ from tempfile import gettempdir
 from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
-    from chatsky.script import Context, Message
-    from chatsky.pipeline.types import PipelineRunnerFunction
+    from chatsky.core import Context
+    from chatsky.core.service.types import PipelineRunnerFunction
     from chatsky.messengers.common.types import PollingInterfaceLoopFunction
-    from chatsky.script.core.message import Attachment
+    from chatsky.core.message import Message, Attachment
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class MessengerInterface(abc.ABC):
         May be used for sending an introduction message or displaying general bot information.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.core.pipeline.Pipeline._run_pipeline` function.
         """
         raise NotImplementedError
 
@@ -150,7 +150,7 @@ class PollingMessengerInterface(MessengerInterface):
         for most cases the loop itself shouldn't be overridden.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.core.pipeline.Pipeline._run_pipeline` function.
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
@@ -180,7 +180,7 @@ class CallbackMessengerInterface(MessengerInterface):
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
@@ -189,6 +189,6 @@ class CallbackMessengerInterface(MessengerInterface):
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self.on_request_async(request, ctx_id, update_ctx_misc))

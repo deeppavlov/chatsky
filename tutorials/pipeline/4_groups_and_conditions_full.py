@@ -14,20 +14,19 @@ This tutorial is a more advanced version of the
 # %%
 import logging
 
-from chatsky.pipeline import (
+from chatsky.core.service import (
     Service,
-    Pipeline,
     ServiceGroup,
     not_condition,
     service_successful_condition,
     all_condition,
     ServiceRuntimeInfo,
 )
+from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -173,7 +172,7 @@ pipeline_dict = {
         simple_service,  # This simple service
         # will be named `simple_service_1`
     ],  # Despite this is the unnamed service group in the root
-    # service group, it will be named `service_group_0`
+    # service group, it will be named `pre` as it holds pre services
     "post_services": [
         ServiceGroup(
             name="named_group",
@@ -182,13 +181,13 @@ pipeline_dict = {
                     handler=simple_service,
                     start_condition=all_condition(
                         service_successful_condition(
-                            ".pipeline.service_group_0.simple_service_0"
+                            ".pipeline.pre.simple_service_0"
                         ),
                         service_successful_condition(
-                            ".pipeline.service_group_0.simple_service_1"
+                            ".pipeline.pre.simple_service_1"
                         ),
                     ),  # Alternative:
-                    # service_successful_condition(".pipeline.service_group_0")
+                    # service_successful_condition(".pipeline.pre")
                     name="running_service",
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
@@ -196,11 +195,12 @@ pipeline_dict = {
                     handler=never_running_service,
                     start_condition=not_condition(
                         service_successful_condition(
-                            ".pipeline.named_group.running_service"
+                            ".pipeline.post.named_group.running_service"
                         )
                     ),
                 ),
             ],
+            requested_async_flag=False,  # forbid services from running in async
         ),
         runtime_info_printing_service,
     ],
@@ -212,7 +212,6 @@ pipeline = Pipeline.model_validate(pipeline_dict)
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        logger.info(f"Pipeline structure:\n{pipeline.pretty_format()}")
-        run_interactive_mode(pipeline)
+        pipeline.run()
