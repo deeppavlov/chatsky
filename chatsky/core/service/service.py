@@ -18,6 +18,7 @@ from typing_extensions import TypeAlias, Annotated
 from pydantic import model_validator, Field
 
 from chatsky.core.context import Context
+from chatsky.core.script_function import BaseProcessing
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.core.service.conditions import always_start_condition
 from chatsky.core.service.types import (
@@ -40,7 +41,7 @@ class Service(PipelineComponent):
     Service can be asynchronous only if its handler is a coroutine.
     """
 
-    handler: ServiceFunction
+    handler: BaseProcessing
     """
     A :py:data:`~.ServiceFunction`.
     """
@@ -60,8 +61,17 @@ class Service(PipelineComponent):
         Add support for initializing from a `Callable`.
         """
         if isinstance(data, Callable):
-            return {"handler": data}
+            # Rename if this works at all.
+            class PlaceholderClass(BaseProcessing):
+                async def call(self, ctx: Context) -> None:
+                    data(ctx)
+            return {"handler": PlaceholderClass()}
         return data
+
+    async def call(self, ctx: Context) -> None:
+        if self.handler is None:
+            raise
+        self.handler(ctx)
 
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
