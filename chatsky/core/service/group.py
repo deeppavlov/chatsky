@@ -33,9 +33,6 @@ from .service import Service, ServiceInitTypes
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-
 
 class ServiceGroup(PipelineComponent):
     """
@@ -103,7 +100,6 @@ class ServiceGroup(PipelineComponent):
         only if all components in it finished successfully.
 
         :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         """
         if self.all_async:
             await asyncio.gather(*[service(ctx, pipeline) for service in self.components])
