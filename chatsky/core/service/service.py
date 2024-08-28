@@ -13,13 +13,12 @@ Actor wrapping service is asynchronous.
 from __future__ import annotations
 import logging
 import inspect
-from typing import TYPE_CHECKING, Any, Optional, Callable, Union
+from typing import Any, Optional, Callable, Union
 from typing_extensions import TypeAlias, Annotated
 from pydantic import model_validator, Field
 
 from chatsky.core.context import Context
 from chatsky.core.script_function import BaseProcessing
-from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.core.service.conditions import always_start_condition
 from chatsky.core.service.types import (
     ServiceFunction,
@@ -64,6 +63,7 @@ class Service(PipelineComponent):
             class PlaceholderClass(BaseProcessing):
                 async def call(self, ctx: Context) -> None:
                     data(ctx)
+
             return {"handler": PlaceholderClass()}
         return data
 

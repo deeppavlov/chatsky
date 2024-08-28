@@ -15,7 +15,7 @@ More details on the processing can be found in the documentation for
 from __future__ import annotations
 import logging
 import asyncio
-from typing import TYPE_CHECKING, Dict
+from typing import Dict
 
 from chatsky.core.service.component import PipelineComponent
 from chatsky.core.transition import get_next_label
