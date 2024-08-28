@@ -6,6 +6,7 @@ The conditions module contains functions that determine whether the pipeline com
 The standard set of them allows user to set up dependencies between pipeline components.
 """
 
+import asyncio
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
@@ -31,7 +32,7 @@ def always_start_condition(_: Context, __: Pipeline) -> bool:
     return True
 
 
-def service_successful_condition(path: Optional[str] = None) -> StartConditionCheckerFunction:
+def service_successful_condition(path: Optional[str] = None, wait: bool = False) -> StartConditionCheckerFunction:
     """
     Condition that allows service execution, only if the other service was executed successfully.
     Returns :py:data:`~.StartConditionCheckerFunction`.
@@ -39,8 +40,13 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
     :param path: The path of the condition pipeline component.
     """
 
-    def check_service_state(ctx: Context, _: Pipeline):
+    def check_service_state(ctx: Context):
         state = ctx.framework_data.service_states.get(path, ComponentExecutionState.NOT_RUN)
+        if wait:
+            while (state is ComponentExecutionState.RUNNING) or (state is ComponentExecutionState.NOT_RUN):
+                await asyncio.sleep(1)
+                state = ctx.framework_data.service_states.get(path, ComponentExecutionState.NOT_RUN)
+
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
 
     return check_service_state
