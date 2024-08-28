@@ -179,6 +179,7 @@ services:
     build:
       context: .
       dockerfile: chatsky/utils/docker/chatsky/dockerfile_chatsky
+    command: python pipeline.py
 
     volumes:
       - ./json_import_examples/yaml/:/app/
