@@ -6,8 +6,8 @@ The conditions module contains functions that determine whether the pipeline com
 The standard set of them allows user to set up dependencies between pipeline components.
 """
 
-import asyncio
 from __future__ import annotations
+import asyncio
 from typing import Optional, TYPE_CHECKING
 
 from chatsky.core.context import Context
