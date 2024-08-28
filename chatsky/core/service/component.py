@@ -149,11 +149,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param pipeline: This :py:class:`~.Pipeline`.
         """
         try:
-            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
+            if await wrap_sync_function_in_async(self.start_condition, ctx):
                 await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
-                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
+                if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
                 await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
@@ -163,7 +163,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
-    async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
+    async def __call__(self, ctx: Context) -> Optional[Awaitable]:
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`_run` method.
@@ -173,10 +173,10 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :return: ``None`` if the service is synchronous; an ``Awaitable`` otherwise.
         """
         if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, pipeline))
+            task = asyncio.create_task(self._run(ctx))
             return asyncio.wait_for(task, timeout=self.timeout)
         else:
-            return await self._run(ctx, pipeline)
+            return await self._run(ctx)
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """

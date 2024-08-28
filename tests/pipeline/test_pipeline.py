@@ -7,7 +7,7 @@ from chatsky.core import Pipeline, Message, RESPONSE, TRANSITIONS
 from chatsky.core.service import ServiceGroup
 from chatsky.utils.testing.common import check_happy_path
 from chatsky.utils.testing.toy_script import HAPPY_PATH
-import chatsky.script.conditions as cnd
+import chatsky.conditions as cnd
 
 
 def test_script_getting_and_setting():

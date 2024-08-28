@@ -98,7 +98,7 @@ class ExtraHandlerType(str, Enum):
     AFTER = "AFTER"
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[["Context", "Pipeline"], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[["Context"], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and pipeline, returns boolean (whether service can be launched).
