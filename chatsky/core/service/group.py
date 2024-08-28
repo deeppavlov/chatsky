@@ -33,9 +33,6 @@ from .service import Service, ServiceInitTypes
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-
 
 class ServiceGroup(PipelineComponent):
     """
@@ -90,16 +87,15 @@ class ServiceGroup(PipelineComponent):
                 result["components"] = [result["components"]]
         return result
 
-    async def _run_async_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
+    async def _run_async_components(self, ctx: Context, components: List) -> None:
         """
         Method for running a group of asynchronous components in parallel to each other.
         No check if they are asynchronous or not happens.
 
         :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         :param components: The components to run in parallel to each other.
         """
-        service_futures = [service(ctx, pipeline) for service in components]
+        service_futures = [service(ctx) for service in components]
         for service, future in zip(components, await asyncio.gather(*service_futures, return_exceptions=True)):
             service_result = future
             if service.asynchronous and isinstance(service_result, Awaitable):
@@ -107,19 +103,18 @@ class ServiceGroup(PipelineComponent):
             elif isinstance(service_result, asyncio.TimeoutError):
                 logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
 
-    async def _run_sync_component(self, ctx: Context, pipeline: Pipeline, component: Any) -> None:
+    async def _run_sync_component(self, ctx: Context, component: Any) -> None:
         """
         Method for running a single synchronous component.
 
         :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         :param component: The component be run.
         """
-        service_result = await component(ctx, pipeline)
+        service_result = await component(ctx)
         if component.asynchronous and isinstance(service_result, Awaitable):
             await service_result
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+    async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
         """
         Method for running this service group. It doesn't include extra handlers execution,
         start condition checking or error handling - pure execution only.
@@ -131,20 +126,19 @@ class ServiceGroup(PipelineComponent):
         only if all components in it finished successfully.
 
         :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         """
         if self.all_async:
-            await self._run_async_components(ctx, pipeline, self.components)
+            await self._run_async_components(ctx, self.components)
         else:
             current_subgroup = []
             for component in self.components:
                 if component.asynchronous:
                     current_subgroup.append(component)
                 else:
-                    await self._run_async_components(ctx, pipeline, current_subgroup)
-                    await self._run_sync_component(ctx, pipeline, component)
+                    await self._run_async_components(ctx, current_subgroup)
+                    await self._run_sync_component(ctx, component)
                     current_subgroup = []
-            await self._run_async_components(ctx, pipeline, current_subgroup)
+            await self._run_async_components(ctx, current_subgroup)
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         if failed:

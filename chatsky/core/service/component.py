@@ -122,12 +122,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+    async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
         """
         Run this component.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param pipeline: This :py:class:`~.Pipeline`.
         """
         raise NotImplementedError
 
@@ -140,23 +139,22 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         return "noname_service"
 
-    async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def _run(self, ctx: Context) -> None:
         """
         A method for running a pipeline component. Executes extra handlers before and after execution,
         launches :py:meth:`.run_component` method. This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param pipeline: This :py:class:`~.Pipeline`.
         """
         try:
             if await wrap_sync_function_in_async(self.start_condition, ctx):
-                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
+                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, ctx.pipeline)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
                 if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
-                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, ctx.pipeline)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
         except Exception as exc:
@@ -169,7 +167,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`_run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param pipeline: This :py:class:`~.Pipeline`.
         :return: ``None`` if the service is synchronous; an ``Awaitable`` otherwise.
         """
         if self.asynchronous:

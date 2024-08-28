@@ -30,9 +30,6 @@ from .extra import BeforeHandler, AfterHandler
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-
 
 class Service(PipelineComponent):
     """
@@ -61,7 +58,9 @@ class Service(PipelineComponent):
         Add support for initializing from a `Callable`.
         """
         if isinstance(data, Callable):
-            # Rename if this works at all.
+            # Rename, if this works at all.
+            # What happens when a class is redefined? They'll have the same name,
+            # meaning they'll be conflicting, right?
             class PlaceholderClass(BaseProcessing):
                 async def call(self, ctx: Context) -> None:
                     data(ctx)
@@ -71,31 +70,17 @@ class Service(PipelineComponent):
     async def call(self, ctx: Context) -> None:
         if self.handler is None:
             raise
-        self.handler(ctx)
+        await self.handler(ctx)
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context) -> None:
         """
-        Method for running this service. Service 'handler' has three possible signatures,
-        so this method picks the right one to invoke. These possible signatures are:
-
-        - (ctx: Context) - accepts current dialog context only.
-        - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
-        - | (ctx: Context, pipeline: Pipeline, info: ServiceRuntimeInfo) - accepts context,
-              pipeline and service runtime info dictionary.
+        Method for running this service.
 
         :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
         :return: `None`
         """
-        handler_params = len(inspect.signature(self.handler).parameters)
-        if handler_params == 1:
-            await wrap_sync_function_in_async(self.handler, ctx)
-        elif handler_params == 2:
-            await wrap_sync_function_in_async(self.handler, ctx, pipeline)
-        elif handler_params == 3:
-            await wrap_sync_function_in_async(self.handler, ctx, pipeline, self._get_runtime_info(ctx))
-        else:
-            raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
+        # Well, ServiceGroup needs a large run_component(), so this is fine.
+        await self.handler(ctx)
 
     @property
     def computed_name(self) -> str:
@@ -111,12 +96,7 @@ class Service(PipelineComponent):
         Adds `handler` key to base info dictionary.
         """
         representation = super(Service, self).info_dict
-        # Need to carefully remove this
-        if callable(self.handler):
-            service_representation = f"Callable '{self.handler.__name__}'"
-        else:
-            service_representation = "[Unknown]"
-        representation.update({"handler": service_representation})
+        representation.update({"handler": self.computed_name})
         return representation
 
 
