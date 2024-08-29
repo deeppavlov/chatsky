@@ -23,10 +23,12 @@ async def wrap_sync_function_in_async(func: Callable, *args, **kwargs) -> Any:
     else:
         return func(*args, **kwargs)
 
+
 async def async_infinite_sleep() -> None:
     """Utility function that awaits for infinity"""
     while True:
         await asyncio.sleep(3600)
+
 
 async def async_do_nothing() -> None:
     """An async utility function that does nothing"""

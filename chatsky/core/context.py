@@ -18,6 +18,7 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 import logging
+import asyncio
 from uuid import UUID, uuid4
 from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 

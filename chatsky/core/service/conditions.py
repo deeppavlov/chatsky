@@ -46,20 +46,21 @@ def service_successful_condition(path: Optional[str] = None, wait: bool = False)
     """
 
     def check_service_state(ctx: Context):
-        # Just making sure that 'path' was given (or it would break the code.)
-        if wait and path:
-            # Placeholder task solution (needs review)
-            # The point is, the task gets cancelled by PipelineComponent.__call__(self, ctx)
-            # I feel like this is fairly efficient, but most importantly,
-            # there won't be any delays to the code. 'wait' is just True or False now.
+        # Placeholder task solution (needs review)
+        # The point is, the task gets cancelled by PipelineComponent.__call__(self, ctx)
+        # I feel like this is fairly efficient, but most importantly,
+        # there won't be any delays to the code. 'wait' is just True or False now.
 
-            # There's just one problem, I'm heavily using 'framework_data' from Context,
-            # and now it's kinda dirty. I could maybe make a class ServiceData or something
-            # so that 'framework_data' is more concise.
+        # There's just one problem, I'm heavily using 'framework_data' from Context,
+        # and now it's kinda dirty. I could maybe make a class ServiceData or something
+        # so that 'framework_data' is more concise.
 
-            # Also, if the 'path' is wrong, this will go into an infinite cycle.
-            # Could make a maximum waiting time, though. And add a logger message.
-            # Or just check if a path is taken somehow.
+        # Also, if the 'path' is wrong, this will go into an infinite cycle.
+        # Could make a maximum waiting time, though. And add a logger message.
+        # Or just check if a path is taken somehow.
+
+        # This could maybe go into async_helpers, but it's only used here, really.
+        async def await_service(path: str, ctx: Context):
             service_started_task = ctx.framework_data.service_started_flag_tasks.get(path, None)
             if not service_started_task:
                 service_started_task = asyncio.create_task(async_infinite_sleep())
@@ -73,6 +74,9 @@ def service_successful_condition(path: Optional[str] = None, wait: bool = False)
             service_task = ctx.framework_data.service_asyncio_tasks.get(path, None)
             await service_task
 
+        # Just making sure that 'path' was given (or it would break the code.)
+        if wait and path:
+            asyncio.run(await_service(path, ctx))
         state = ctx.framework_data.service_states.get(path, ComponentExecutionState.NOT_RUN)
 
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
