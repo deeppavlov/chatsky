@@ -75,9 +75,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
                 result["functions"] = [result["functions"]]
         return result
 
-    async def _run_function(
-        self, func: ExtraHandlerFunction, ctx: Context, component_info: ServiceRuntimeInfo
-    ):
+    async def _run_function(self, func: ExtraHandlerFunction, ctx: Context, component_info: ServiceRuntimeInfo):
         handler_params = len(inspect.signature(func).parameters)
         if handler_params == 1:
             await wrap_sync_function_in_async(func, ctx)
