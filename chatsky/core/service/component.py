@@ -147,7 +147,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
 
         async def _inner_run():
-            if await wrap_sync_function_in_async(self.start_condition, ctx):
+            if await self.start_condition(ctx):
                 await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)

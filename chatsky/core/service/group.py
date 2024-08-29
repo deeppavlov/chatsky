@@ -101,17 +101,17 @@ class ServiceGroup(PipelineComponent):
         :param ctx: Current dialog context.
         """
         if self.all_async:
-            await asyncio.gather(*[service(ctx, pipeline) for service in self.components])
+            await asyncio.gather(*[service(ctx) for service in self.components])
         else:
             current_subgroup = []
             for component in self.components:
                 if component.asynchronous:
                     current_subgroup.append(component)
                 else:
-                    await asyncio.gather(*[service(ctx, pipeline) for service in current_subgroup])
-                    await component(ctx, pipeline)
+                    await asyncio.gather(*[service(ctx) for service in current_subgroup])
+                    await component(ctx)
                     current_subgroup = []
-            await asyncio.gather(*[service(ctx, pipeline) for service in current_subgroup])
+            await asyncio.gather(*[service(ctx) for service in current_subgroup])
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         if failed:
