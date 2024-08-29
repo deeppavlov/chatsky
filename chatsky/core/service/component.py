@@ -29,7 +29,6 @@ from ...utils.devel.async_helpers import async_do_nothing
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
     from chatsky.core.context import Context
 
 
@@ -107,7 +106,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
 
-    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context, pipeline: Pipeline):
+    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context):
         extra_handler = None
         if stage == ExtraHandlerType.BEFORE:
             extra_handler = self.before_handler
@@ -116,7 +115,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         if extra_handler is None:
             return
         try:
-            extra_handler_result = await extra_handler(ctx, pipeline, self._get_runtime_info(ctx))
+            extra_handler_result = await extra_handler(ctx, self._get_runtime_info(ctx))
             if extra_handler.asynchronous and isinstance(extra_handler_result, Awaitable):
                 await extra_handler_result
         except asyncio.TimeoutError:
@@ -149,13 +148,13 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         try:
             if await wrap_sync_function_in_async(self.start_condition, ctx):
-                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, ctx.pipeline)
+                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
                 if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
-                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, ctx.pipeline)
+                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
         except Exception as exc:

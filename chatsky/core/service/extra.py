@@ -10,7 +10,7 @@ import asyncio
 import logging
 import inspect
 
-from typing import Optional, List, TYPE_CHECKING, Any, ClassVar, Union, Callable
+from typing import Optional, List, Any, ClassVar, Union, Callable
 from typing_extensions import Annotated, TypeAlias
 from pydantic import BaseModel, model_validator, Field
 
@@ -26,9 +26,6 @@ from chatsky.core.service.types import (
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from chatsky.core.pipeline import Pipeline
-
 
 class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
@@ -36,7 +33,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
-    Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
+    Extra handlers should NOT edit `Context`, use services for that purpose instead.
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
@@ -79,35 +76,32 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         return result
 
     async def _run_function(
-        self, func: ExtraHandlerFunction, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo
+        self, func: ExtraHandlerFunction, ctx: Context, component_info: ServiceRuntimeInfo
     ):
         handler_params = len(inspect.signature(func).parameters)
         if handler_params == 1:
             await wrap_sync_function_in_async(func, ctx)
         elif handler_params == 2:
-            await wrap_sync_function_in_async(func, ctx, pipeline)
-        elif handler_params == 3:
             extra_handler_runtime_info = ExtraHandlerRuntimeInfo(func=func, stage=self.stage, component=component_info)
-            await wrap_sync_function_in_async(func, ctx, pipeline, extra_handler_runtime_info)
+            await wrap_sync_function_in_async(func, ctx, extra_handler_runtime_info)
         else:
             raise Exception(
                 f"Too many parameters required for component {component_info.name} {self.stage}"
                 f" wrapper handler '{func.__name__}': {handler_params}!"
             )
 
-    async def _run(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
+    async def _run(self, ctx: Context, component_info: ServiceRuntimeInfo):
         """
         Method for executing one of the extra handler functions (before or after).
         If the function is not set, nothing happens.
 
         :param ctx: current dialog context.
-        :param pipeline: the current pipeline.
         :param component_info: associated component's info dictionary.
         :return: `None`
         """
 
         if self.asynchronous:
-            futures = [self._run_function(func, ctx, pipeline, component_info) for func in self.functions]
+            futures = [self._run_function(func, ctx, component_info) for func in self.functions]
             for func, future in zip(self.functions, asyncio.as_completed(futures)):
                 try:
                     await future
@@ -116,23 +110,22 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
         else:
             for func in self.functions:
-                await self._run_function(func, ctx, pipeline, component_info)
+                await self._run_function(func, ctx, component_info)
 
-    async def __call__(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
+    async def __call__(self, ctx: Context, component_info: ServiceRuntimeInfo):
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
 
         :param ctx: (required) Current dialog `Context`.
-        :param pipeline: This `Pipeline`.
         :return: `Context` if this is a synchronous service or
             `Awaitable` if this is an asynchronous component or `None`.
         """
         if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, pipeline, component_info))
+            task = asyncio.create_task(self._run(ctx, component_info))
             return await asyncio.wait_for(task, timeout=self.timeout)
         else:
-            return await self._run(ctx, pipeline, component_info)
+            return await self._run(ctx, component_info)
 
     @property
     def info_dict(self) -> dict:
