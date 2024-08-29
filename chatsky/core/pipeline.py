@@ -143,7 +143,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "before_handler": before_handler,
             "after_handler": after_handler,
             "timeout": timeout,
-            "optimization_warnings": optimization_warnings,
             "parallelize_processing": parallelize_processing,
         }
         empty_fields = set()
