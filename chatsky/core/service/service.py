@@ -37,9 +37,9 @@ class Service(PipelineComponent):
     Service can be asynchronous only if its handler is a coroutine.
     """
 
-    handler: BaseProcessing
+    handler: Union[BaseProcessing, Callable]
     """
-    A :py:data:`~.ServiceFunction`.
+    A :py:data:`~.ServiceFunction` or an instance of `BaseProcessing`.
     """
     # Repeating inherited fields for better documentation.
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -54,20 +54,20 @@ class Service(PipelineComponent):
     @classmethod
     def handler_validator(cls, data: Any):
         """
-        Add support for initializing from a `Callable`.
+        Add support for initializing from a `Callable` or `BaseProcessing`.
         """
         if isinstance(data, Callable):
-            # Rename, if this works at all.
-            # What happens when a class is redefined? They'll have the same name,
-            # meaning they'll be conflicting, right?
-            class PlaceholderClass(BaseProcessing):
-                async def call(self, ctx: Context) -> None:
-                    data(ctx)
-
-            return {"handler": PlaceholderClass()}
+            return {"handler": data}
         return data
 
     async def call(self, ctx: Context) -> None:
+        """
+        A placeholder method which the user can redefine in their own derivative of `Service`.
+        This allows direct access to the `self` object, from which they could
+        extract information about this :py:class:`~chatsky.core.service.Service`.
+
+        :param ctx: Current dialog context.
+        """
         if self.handler is None:
             raise
         await self.handler(ctx)
@@ -79,8 +79,7 @@ class Service(PipelineComponent):
         :param ctx: Current dialog context.
         :return: `None`
         """
-        # Well, ServiceGroup needs a large run_component(), so this is fine.
-        await self.handler(ctx)
+        await self.call(ctx)
 
     @property
     def computed_name(self) -> str:
