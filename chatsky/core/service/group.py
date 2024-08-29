@@ -110,7 +110,7 @@ class ServiceGroup(PipelineComponent):
         :param component: The component be run.
         """
         service_result = await component(ctx)
-        if component.asynchronous and isinstance(service_result, Awaitable):
+        if isinstance(service_result, Awaitable):
             await service_result
 
     async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:

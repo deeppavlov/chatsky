@@ -291,12 +291,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.framework_data.pipeline = self
 
         ctx.add_request(request)
-        result = await self.services_pipeline(ctx, self)
+        result = await self.services_pipeline(ctx)
 
         if asyncio.iscoroutine(result):
             await result
 
         ctx.framework_data.service_states.clear()
+        ctx.framework_data.service_asyncio_tasks.clear()
+        ctx.framework_data.service_started_flag_tasks.clear()
         ctx.framework_data.pipeline = None
 
         if isinstance(self.context_storage, DBContextStorage):

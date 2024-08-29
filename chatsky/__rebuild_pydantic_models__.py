@@ -1,6 +1,6 @@
 # flake8: noqa: F401
 
-from chatsky.core.service.types import ExtraHandlerRuntimeInfo, StartConditionCheckerFunction, ComponentExecutionState
+from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ComponentExecutionState
 from chatsky.core import Context, Script
 from chatsky.core.script import Node
 from chatsky.core.pipeline import Pipeline
