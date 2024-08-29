@@ -18,8 +18,7 @@ from typing_extensions import TypeAlias, Annotated
 from pydantic import model_validator, Field
 
 from chatsky.core.context import Context
-from chatsky.core.script_function import BaseProcessing
-from chatsky.core.service.conditions import always_start_condition
+from chatsky.core.script_function import BaseProcessing, AnyCondition
 from chatsky.core.service.types import (
     ServiceFunction,
     StartConditionCheckerFunction,
@@ -46,7 +45,7 @@ class Service(PipelineComponent):
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
-    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    start_condition: AnyCondition = Field(default=True, validate_default=True)
     name: Optional[str] = None
     path: Optional[str] = None
 
@@ -104,7 +103,7 @@ def to_service(
     after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
     asynchronous: bool = False,
-    start_condition: StartConditionCheckerFunction = always_start_condition,
+    start_condition: AnyCondition = True,
     name: Optional[str] = None,
 ):
     """

@@ -6,7 +6,6 @@ This module defines services -- a way to process context outside the Script.
 
 from .component import PipelineComponent
 from .conditions import (
-    always_start_condition,
     service_successful_condition,
     not_condition,
     all_condition,

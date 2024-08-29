@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 
 if TYPE_CHECKING:
-    from chatsky.core import Context, Message, Pipeline
+    from chatsky.core import Context, Message
 
 
 class PipelineRunnerFunction(Protocol):
@@ -98,20 +98,6 @@ class ExtraHandlerType(str, Enum):
     AFTER = "AFTER"
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[["Context"], bool]
-"""
-A function type for components `start_conditions`.
-Accepts context and pipeline, returns boolean (whether service can be launched).
-"""
-
-
-StartConditionCheckerAggregationFunction: TypeAlias = Callable[[Iterable[bool]], bool]
-"""
-A function type for creating aggregation `start_conditions` for components.
-Accepts list of functions (other start_conditions to aggregate), returns boolean (whether service can be launched).
-"""
-
-
 ExtraHandlerConditionFunction: TypeAlias = Callable[[str], bool]
 """
 A function type used during global extra handler initialization to determine
@@ -138,12 +124,11 @@ class ServiceRuntimeInfo(BaseModel):
 
 ExtraHandlerFunction: TypeAlias = Union[
     Callable[["Context"], Any],
-    Callable[["Context", "Pipeline"], Any],
-    Callable[["Context", "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
+    Callable[["Context", "ExtraHandlerRuntimeInfo"], Any],
 ]
 """
 A function type for creating extra handler (before and after functions).
-Can accept current dialog context, pipeline, and current extra handler info.
+Can accept current dialog context and current extra handler info.
 """
 
 
@@ -163,13 +148,9 @@ Also contains `component` - runtime info of the component this wrapper is attach
 ServiceFunction: TypeAlias = Union[
     Callable[["Context"], None],
     Callable[["Context"], Awaitable[None]],
-    Callable[["Context", "Pipeline"], None],
-    Callable[["Context", "Pipeline"], Awaitable[None]],
-    Callable[["Context", "Pipeline", ServiceRuntimeInfo], None],
-    Callable[["Context", "Pipeline", ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
-Can accept current dialog context, pipeline, and current service info.
+Accepts current dialog context.
 Can be both synchronous and asynchronous.
 """

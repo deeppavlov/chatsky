@@ -14,7 +14,7 @@ from typing import Optional, Awaitable, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator
 
 from chatsky.core.service.extra import BeforeHandler, AfterHandler
-from chatsky.core.service.conditions import always_start_condition
+from chatsky.core.script_function import AnyCondition
 from chatsky.core.service.types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
@@ -55,9 +55,9 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     Optional flag that indicates whether this component
     should be executed asynchronously with adjacent async components.
     """
-    start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
+    start_condition: AnyCondition = Field(default=True, validate_default=True)
     """
-    :py:data:`.StartConditionCheckerFunction` that is invoked before each component execution;
+    :py:data:`~.AnyCondition` that is invoked before each component execution;
     component is executed only if it returns ``True``.
     """
     name: Optional[str] = None
