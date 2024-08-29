@@ -27,7 +27,6 @@ from chatsky.core.service.types import (
     GlobalExtraHandlerType,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
-    StartConditionCheckerFunction,
 )
 from .service import Service, ServiceInitTypes
 

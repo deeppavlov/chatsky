@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field, model_validator
 from chatsky.core.service.extra import BeforeHandler, AfterHandler
 from chatsky.core.script_function import AnyCondition
 from chatsky.core.service.types import (
-    StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceRuntimeInfo,
     GlobalExtraHandlerType,

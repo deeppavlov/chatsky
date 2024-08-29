@@ -19,10 +19,6 @@ from pydantic import model_validator, Field
 
 from chatsky.core.context import Context
 from chatsky.core.script_function import BaseProcessing, AnyCondition
-from chatsky.core.service.types import (
-    ServiceFunction,
-    StartConditionCheckerFunction,
-)
 from chatsky.core.service.component import PipelineComponent
 from .extra import BeforeHandler, AfterHandler
 
@@ -114,7 +110,7 @@ def to_service(
     before_handler = BeforeHandler() if before_handler is None else before_handler
     after_handler = AfterHandler() if after_handler is None else after_handler
 
-    def inner(handler: ServiceFunction) -> Service:
+    def inner(handler: Union[BaseProcessing, Callable]) -> Service:
         return Service(
             handler=handler,
             before_handler=before_handler,

@@ -9,7 +9,7 @@ data structures, and other types that are defined for type hinting.
 
 from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
+from typing import Callable, Union, Awaitable, Dict, Optional, Any, Protocol, Hashable, TYPE_CHECKING
 from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
