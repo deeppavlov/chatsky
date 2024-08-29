@@ -24,6 +24,7 @@ from chatsky.core.service.types import (
     ExtraHandlerType,
 )
 from ...utils.devel import wrap_sync_function_in_async
+from ...utils.devel.async_helpers import async_do_nothing
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +171,14 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :return: ``None`` if the service is synchronous; an ``Awaitable`` otherwise.
         """
         if self.asynchronous:
+            service_started_task = ctx.framework_data.service_started_flag_tasks.get(self.path, None)
+            if service_started_task:
+                service_started_task.cancel()
+            else:
+                ctx.framework_data.service_started_flag_tasks[self.path] = asyncio.create_task(async_do_nothing())
+
             task = asyncio.create_task(self._run(ctx))
+            ctx.framework_data.service_asyncio_tasks[self.path] = task
             return asyncio.wait_for(task, timeout=self.timeout)
         else:
             return await self._run(ctx)
