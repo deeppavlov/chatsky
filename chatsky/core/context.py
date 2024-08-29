@@ -60,6 +60,16 @@ class FrameworkData(BaseModel):
 
     service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
+    service_asyncio_tasks: Dict[str, asyncio.Task] = Field(default_factory=dict, exclude=True)
+    """
+    Pointers to asyncio tasks, one for each :py:class:`~chatsky.core.service.PipelineComponent`.
+    Cleared at the end of every turn.
+    """
+    service_started_flag_tasks: Dict[str, asyncio.Task] = Field(default_factory=dict, exclude=True)
+    """
+    Special tasks that act as semaphores, one for each :py:class:`~chatsky.core.service.PipelineComponent`.
+    Required for optimal performance of 'service condition functions'. Cleared at the end of every turn.
+    """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
     A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.

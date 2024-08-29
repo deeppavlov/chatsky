@@ -24,6 +24,7 @@ from chatsky.core.service.types import (
     ExtraHandlerType,
 )
 from ...utils.devel import wrap_sync_function_in_async
+from ...utils.devel.async_helpers import async_do_nothing
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +175,14 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :return: ``None``
         """
+        service_started_task = ctx.framework_data.service_started_flag_tasks.get(self.path, None)
+        if service_started_task:
+            service_started_task.cancel()
+        else:
+            ctx.framework_data.service_started_flag_tasks[self.path] = asyncio.create_task(async_do_nothing())
+
         task = asyncio.create_task(self._run(ctx))
+        ctx.framework_data.service_asyncio_tasks[self.path] = task
         await task
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):

@@ -18,6 +18,8 @@ from chatsky.core.service.types import (
     StartConditionCheckerAggregationFunction,
 )
 
+from chatsky.utils.devel.async_helpers import async_infinite_sleep
+
 if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
 
@@ -38,14 +40,40 @@ def service_successful_condition(path: Optional[str] = None, wait: bool = False)
     Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param path: The path of the condition pipeline component.
+    :param wait: Whether the function should wait for the service to be finished.
+        By default, the service is not awaited.
+    :type wait: bool
     """
 
     def check_service_state(ctx: Context):
+        # Just making sure that 'path' was given (or it would break the code.)
+        if wait and path:
+            # Placeholder task solution (needs review)
+            # The point is, the task gets cancelled by PipelineComponent.__call__(self, ctx)
+            # I feel like this is fairly efficient, but most importantly,
+            # there won't be any delays to the code. 'wait' is just True or False now.
+
+            # There's just one problem, I'm heavily using 'framework_data' from Context,
+            # and now it's kinda dirty. I could maybe make a class ServiceData or something
+            # so that 'framework_data' is more concise.
+
+            # Also, if the 'path' is wrong, this will go into an infinite cycle.
+            # Could make a maximum waiting time, though. And add a logger message.
+            # Or just check if a path is taken somehow.
+            service_started_task = ctx.framework_data.service_started_flag_tasks.get(path, None)
+            if not service_started_task:
+                service_started_task = asyncio.create_task(async_infinite_sleep())
+                ctx.framework_data.service_started_flag_tasks[path] = service_started_task
+
+            try:
+                await service_started_task
+            except asyncio.CancelledError:
+                pass
+
+            service_task = ctx.framework_data.service_asyncio_tasks.get(path, None)
+            await service_task
+
         state = ctx.framework_data.service_states.get(path, ComponentExecutionState.NOT_RUN)
-        if wait:
-            while (state is ComponentExecutionState.RUNNING) or (state is ComponentExecutionState.NOT_RUN):
-                await asyncio.sleep(1)
-                state = ctx.framework_data.service_states.get(path, ComponentExecutionState.NOT_RUN)
 
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
 
