@@ -170,3 +170,6 @@ if __name__ == "__main__":
 
     if is_interactive_mode():
         pipeline.run()
+        # this method runs the pipeline with the preconfigured interface
+        # which is CLI by default: it allows chatting with the bot
+        # via command line
