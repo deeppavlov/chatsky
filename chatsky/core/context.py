@@ -54,7 +54,7 @@ class ContextError(Exception):
     """Raised when context methods are not used correctly."""
 
 
-class FrameworkData(BaseModel):
+class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     Framework uses this to store data related to any of its modules.
     """

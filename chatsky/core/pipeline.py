@@ -126,7 +126,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         before_handler: ComponentExtraHandlerInitTypes = None,
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
-        optimization_warnings: bool = None,
         parallelize_processing: bool = None,
     ):
         if fallback_label is None:
