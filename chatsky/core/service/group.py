@@ -6,7 +6,7 @@ The Service Group module contains the ServiceGroup class, which is used to repre
 This class provides a way to organize and manage multiple services as a single unit,
 allowing for easier management and organization of the services within the pipeline.
 
-:py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
+:py:class:`~.ServiceGroup` serves the important function of grouping services to work together asynchronously.
 """
 
 from __future__ import annotations
@@ -59,7 +59,8 @@ class ServiceGroup(PipelineComponent):
     all_async: bool = False
     """
     Optional flag that, if set to True, makes the `ServiceGroup` run
-    all components inside it asynchronously. Default value is False.
+    all components inside it asynchronously. This is not recursive
+    (applies only to first level components). Default value is False.
     """
     # Inherited fields repeated. Don't delete these, they're needed for documentation!
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -90,35 +91,6 @@ class ServiceGroup(PipelineComponent):
                 result["components"] = [result["components"]]
         return result
 
-    async def _run_async_components(self, ctx: Context, pipeline: Pipeline, components: List) -> None:
-        """
-        Method for running a group of asynchronous components in parallel to each other.
-        No check if they are asynchronous or not happens.
-
-        :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
-        :param components: The components to run in parallel to each other.
-        """
-        service_futures = [service(ctx, pipeline) for service in components]
-        for service, future in zip(components, await asyncio.gather(*service_futures, return_exceptions=True)):
-            service_result = future
-            if service.asynchronous and isinstance(service_result, Awaitable):
-                await service_result
-            elif isinstance(service_result, asyncio.TimeoutError):
-                logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
-
-    async def _run_sync_component(self, ctx: Context, pipeline: Pipeline, component: Any) -> None:
-        """
-        Method for running a single synchronous component.
-
-        :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
-        :param component: The component be run.
-        """
-        service_result = await component(ctx, pipeline)
-        if component.asynchronous and isinstance(service_result, Awaitable):
-            await service_result
-
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
         """
         Method for running this service group. It doesn't include extra handlers execution,
@@ -134,17 +106,17 @@ class ServiceGroup(PipelineComponent):
         :param pipeline: The current pipeline.
         """
         if self.all_async:
-            await self._run_async_components(ctx, pipeline, self.components)
+            await asyncio.gather(*[service(ctx, pipeline) for service in self.components])
         else:
             current_subgroup = []
             for component in self.components:
                 if component.asynchronous:
                     current_subgroup.append(component)
                 else:
-                    await self._run_async_components(ctx, pipeline, current_subgroup)
-                    await self._run_sync_component(ctx, pipeline, component)
+                    await asyncio.gather(*[service(ctx, pipeline) for service in current_subgroup])
+                    await component(ctx, pipeline)
                     current_subgroup = []
-            await self._run_async_components(ctx, pipeline, current_subgroup)
+            await asyncio.gather(*[service(ctx, pipeline) for service in current_subgroup])
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         if failed:

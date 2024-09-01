@@ -30,19 +30,16 @@ Services and service groups are `PipelineComponent`s,
 which can be synchronous or asynchronous.
 All `ServiceGroup`s are made of these `PipelineComponent`s.
 
-Synchronous components are executed consequently,
-    some of them can even return `Context` object,
-    modifying it.
-Asynchronous components are executed
-    simultaneously and should not return anything,
-    neither modify `Context`.
+Synchronous components are executed consequently, while
+Asynchronous components work simultaneously.
 By default, all `PipelineComponent`s are synchronous,
 but can be marked as 'asynchronous'.
 
 It should be noted that only adjacent asynchronous components in a
 `ServiceGroup` are executed simultaneously.
-To put it bluntly, [a, s, a, a, a, s] -> a, s, (a, a, a), s,
-those three adjacent async functions will run simultaneously.
+To put it bluntly, if "s" means sync component and "a" means async,
+then [a, s, a, a, a, s] -> a, s, (a, a, a), s.
+Those three adjacent async functions will run simultaneously.
 Basically, the order of your services in the list matters.
 
 Service groups have a flag 'all_async' which makes it treat

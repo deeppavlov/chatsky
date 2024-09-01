@@ -47,13 +47,13 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     timeout: Optional[float] = None
     """
-    (for asynchronous only!) Maximum component execution time (in seconds),
+    Maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted.
     """
     asynchronous: bool = False
     """
     Optional flag that indicates whether this component
-    should be executed concurrently with adjacent async components.
+    should be executed asynchronously with adjacent async components.
     """
     start_condition: StartConditionCheckerFunction = Field(default=always_start_condition)
     """
@@ -149,34 +149,33 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param pipeline: This :py:class:`~.Pipeline`.
         """
         try:
-            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
-                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
+            async with asyncio.timeout(self.timeout):
+                if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
+                    await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
-                self._set_state(ctx, ComponentExecutionState.RUNNING)
-                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
-                    self._set_state(ctx, ComponentExecutionState.FINISHED)
+                    self._set_state(ctx, ComponentExecutionState.RUNNING)
+                    if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
+                        self._set_state(ctx, ComponentExecutionState.FINISHED)
 
-                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-            else:
-                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+                    await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+                else:
+                    self._set_state(ctx, ComponentExecutionState.NOT_RUN)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
-    async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
+    async def __call__(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         A method for calling pipeline components.
-        It sets up timeout if this component is asynchronous and executes it using :py:meth:`_run` method.
+        It sets up timeout and executes it using :py:meth:`_run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
-        :return: ``None`` if the service is synchronous; an ``Awaitable`` otherwise.
+        :return: ``None``
         """
-        if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, pipeline))
-            return asyncio.wait_for(task, timeout=self.timeout)
-        else:
-            return await self._run(ctx, pipeline)
+        task = asyncio.create_task(self._run(ctx, pipeline))
+        await task
+        return asyncio.wait_for(task, timeout=self.timeout)
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """

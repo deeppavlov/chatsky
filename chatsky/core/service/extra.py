@@ -55,7 +55,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     asynchronous: bool = False
     """
     A flag that indicates whether the extra handler's functions
-    should be executed concurrently. The default value of the flag is False.
+    should be executed asynchronously. The default value of the flag is False.
     """
 
     @model_validator(mode="before")
@@ -159,7 +159,7 @@ class BeforeHandler(ComponentExtraHandler):
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed concurrently. The default value of the flag is False.
+        should be executed asynchronously. The default value of the flag is False.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.BEFORE
@@ -175,7 +175,7 @@ class AfterHandler(ComponentExtraHandler):
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed concurrently. The default value of the flag is False.
+        should be executed asynchronously. The default value of the flag is False.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER
