@@ -16,17 +16,12 @@ def test_parallel_services():
     def interact(stage: str, run_order: list):
         async def slow_service(_: Context, __: Pipeline):
             run_order.append(stage)
-            # This test is now about 1.5 seconds. Is that really okay? We have lots of these tests.
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0)
 
         return slow_service
 
     running_order = []
-    pipeline_dict = {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "post_services": [
+    test_group = ServiceGroup(components=[
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[
@@ -55,8 +50,8 @@ def test_parallel_services():
                 asynchronous=False,
             ),
         ],
-    }
-    pipeline = Pipeline(**pipeline_dict)
-    check_happy_path(pipeline, HAPPY_PATH)
-    # Since there are 5 requests in the 'HAPPY_PATH', multiplying the running order by 5.
-    assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]*5
+    )
+
+    pipeline = Pipeline(script={}, start_label=("old_flow", ""))
+    test_group(Context(), pipeline)
+    assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
