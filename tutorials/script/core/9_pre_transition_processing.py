@@ -23,12 +23,28 @@ from chatsky import (
     MessageInitTypes,
     Transition as Tr,
     destinations as dst,
+    processing as proc,
 )
 
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
 )
+
+
+# %% [markdown]
+"""
+Processing functions can be used at two stages:
+
+1. Pre-transition. Triggers after response is received but before
+   the next node is considered.
+2. Pre-response. Triggers after transition is chosen and current node is
+   changed but before response of that node is calculated.
+
+In this tutorial we'll save the response function of the current node
+during pre-transition and extract it during pre-response
+(at which point current node is already changed).
+"""
 
 
 # %%
@@ -41,24 +57,18 @@ class SavePreviousNodeResponse(BaseProcessing):
         # when we reach the Pre-response step
 
 
-class PrependPreviousNodeResponse(BaseProcessing):
-    class CombinedResponse(BaseResponse):
-        first: BaseResponse
-        second: BaseResponse
+class PrependPreviousNodeResponse(proc.ModifyResponse):
+    async def modified_response(
+        self, original_response: BaseResponse, ctx: Context
+    ) -> MessageInitTypes:
+        result = await original_response(ctx)
 
-        async def call(self, ctx: Context) -> MessageInitTypes:
-            first = await self.first(ctx)
-            second = await self.second(ctx)
-            return f"previous={first.text}: current={second.text}"
-
-    async def call(self, ctx: Context) -> None:
-        if ctx.current_node.response is not None:
-            previous_node_response = ctx.misc.get("previous_node_response")
-            if previous_node_response is not None:
-                ctx.current_node.response = self.CombinedResponse(
-                    first=previous_node_response,
-                    second=ctx.current_node.response,
-                )
+        previous_node_response = ctx.misc.get("previous_node_response")
+        if previous_node_response is None:
+            return result
+        else:
+            previous_result = await previous_node_response(ctx)
+        return f"previous={previous_result.text}: current={result.text}"
 
 
 # %% [markdown]

@@ -19,11 +19,11 @@ from chatsky import (
     Context,
     Message,
     MessageInitTypes,
+    BaseResponse,
     Transition as Tr,
     Pipeline,
-    BaseProcessing,
-    BaseResponse,
     destinations as dst,
+    processing as proc,
 )
 
 from chatsky.utils.testing.common import (
@@ -34,35 +34,71 @@ from chatsky.utils.testing.common import (
 
 # %% [markdown]
 """
-Here we define a processing function that will modify the
-`response` field of the current node to prefix specific text.
+Processing functions have the same signature as
+conditions, responses or destinations
+except they don't return anything:
+
+.. python:
+
+    class MyProcessing(BaseProcessing):
+        async def call(self, ctx: Context) -> None:
+            ...
+
+
+The main way for processing functions to interact with the script
+is modifying `ctx.current_node`, which is used by pipeline
+to store a copy of the current node in script.
+Any of its attributes can be safely edited, and these changes will
+only have an effect during the current turn of the current context.
+"""
+
+
+# %% [markdown]
+"""
+In this tutorial we'll subclass
+%mddoclink(api,processing.standard,ModifyResponse)
+processing function so that it would modify response
+of the current node to include a prefix.
 """
 
 
 # %%
-class AddPrefix(BaseProcessing):
+class AddPrefix(proc.ModifyResponse):
     prefix: str
 
     def __init__(self, prefix: str):
         # basemodel does not allow positional arguments by default
         super().__init__(prefix=prefix)
 
-    class PrefixedResponse(BaseResponse):
-        prefix: str
-        base_response: BaseResponse
+    async def modified_response(
+        self, original_response: BaseResponse, ctx: Context
+    ) -> MessageInitTypes:
+        result = await original_response(ctx)
 
-        async def call(self, ctx: Context) -> MessageInitTypes:
-            result = await self.base_response(ctx)
-            # get the result of the original response
-            if result.text is not None:
-                result.text = f"{self.prefix}: {result.text}"
-            return result
+        if result.text is not None:
+            result.text = f"{self.prefix}: {result.text}"
+        return result
 
-    async def call(self, ctx: Context) -> None:  # processing has no return
-        if ctx.current_node.response is not None:
-            ctx.current_node.response = self.PrefixedResponse(
-                prefix=self.prefix, base_response=ctx.current_node.response
-            )
+
+# %% [markdown]
+"""
+<div class="alert alert-info">
+
+Tip
+
+You can use `ModifyResponse` to catch exceptions in response functions:
+
+.. python:
+
+    class ExceptionHandler(proc.ModifyResponse):
+        async def modified_response(self, original_response, ctx):
+            try:
+                return await original_response(ctx)
+            except Exception as exc:
+                return str(exc)
+
+</div>
+"""
 
 
 # %%
