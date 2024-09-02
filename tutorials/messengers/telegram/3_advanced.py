@@ -30,8 +30,8 @@ from chatsky import (
     Pipeline,
     BaseResponse,
     Context,
-    Tr,
-    cnd,
+    Transition as Tr,
+    conditions as cnd,
 )
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.core.message import (

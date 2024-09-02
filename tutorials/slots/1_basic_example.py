@@ -17,10 +17,10 @@ from chatsky import (
     GLOBAL,
     LOCAL,
     Pipeline,
-    Tr,
-    cnd,
-    proc,
-    rsp,
+    Transition as Tr,
+    conditions as cnd,
+    processing as proc,
+    responses as rsp,
 )
 
 from chatsky.slots import RegexpSlot

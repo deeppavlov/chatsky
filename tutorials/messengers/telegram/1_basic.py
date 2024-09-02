@@ -17,7 +17,14 @@ Telegram API token is required to access telegram API.
 # %%
 import os
 
-from chatsky import RESPONSE, TRANSITIONS, Pipeline, Tr, cnd, dst
+from chatsky import (
+    RESPONSE,
+    TRANSITIONS,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+)
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.utils.testing.common import is_interactive_mode
 

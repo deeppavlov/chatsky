@@ -19,7 +19,15 @@ import os
 
 from pydantic import HttpUrl
 
-from chatsky import GLOBAL, RESPONSE, TRANSITIONS, Message, Pipeline, Tr, cnd
+from chatsky import (
+    GLOBAL,
+    RESPONSE,
+    TRANSITIONS,
+    Message,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+)
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.core.message import (
     Animation,

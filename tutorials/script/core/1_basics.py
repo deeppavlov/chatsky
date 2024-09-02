@@ -20,8 +20,10 @@ from chatsky import (
     RESPONSE,
     Pipeline,
     Transition as Tr,
+    conditions as cnd,
+    # all the aliases used in tutorials are available for direct import
+    # e.g. you can do `from chatsky import Tr` instead
 )
-import chatsky.conditions as cnd
 
 from chatsky.utils.testing.common import (
     check_happy_path,

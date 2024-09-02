@@ -11,7 +11,14 @@ to the messenger interface instead of a final response.
 
 # %%
 
-from chatsky import TRANSITIONS, RESPONSE, Message, Pipeline, Tr, cnd
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    Message,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+)
 
 from chatsky.utils.testing.common import (
     check_happy_path,

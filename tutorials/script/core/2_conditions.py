@@ -22,8 +22,8 @@ from chatsky import (
     Pipeline,
     BaseCondition,
     Transition as Tr,
+    conditions as cnd,
 )
-import chatsky.conditions as cnd
 
 from chatsky.utils.testing.common import (
     check_happy_path,

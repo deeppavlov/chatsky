@@ -22,13 +22,13 @@ from chatsky import (
     Message,
     Pipeline,
     Transition as Tr,
+    conditions as cnd,
+    responses as rsp,
     BaseResponse,
     MessageInitTypes,
     AnyResponse,
     AbsoluteNodeLabel,
 )
-import chatsky.responses as rsp
-import chatsky.conditions as cnd
 
 from chatsky.utils.testing.common import (
     check_happy_path,
