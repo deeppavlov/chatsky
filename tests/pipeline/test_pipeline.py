@@ -1,15 +1,7 @@
 import asyncio
 
-from chatsky import Context
-from chatsky.utils.testing import TOY_SCRIPT
-
-from chatsky.script import Message
-from chatsky.pipeline import Pipeline, ServiceGroup
-from chatsky.pipeline.types import ComponentExecutionState
-from chatsky.script.core.keywords import RESPONSE, TRANSITIONS
-from chatsky.utils.testing.common import check_happy_path
-from chatsky.utils.testing.toy_script import HAPPY_PATH
-import chatsky.script.conditions as cnd
+from chatsky.core import Context, Pipeline, Message, RESPONSE, TRANSITIONS, Transition as Tr
+from chatsky.core.service import ServiceGroup
 
 
 def test_parallel_services():
