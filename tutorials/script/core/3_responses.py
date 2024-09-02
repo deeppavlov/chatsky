@@ -24,6 +24,7 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     responses as rsp,
+    destinations as dst,
     BaseResponse,
     MessageInitTypes,
     AnyResponse,
@@ -106,7 +107,7 @@ class FallbackTrace(BaseResponse):
     async def call(self, ctx: Context) -> MessageInitTypes:
         return Message(
             misc={
-                "previous_node": list(ctx.labels.values())[-2],
+                "previous_node": await dst.Previous()(ctx),
                 "last_request": ctx.last_request,
             }
         )
