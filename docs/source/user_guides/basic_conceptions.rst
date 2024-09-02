@@ -82,7 +82,7 @@ Example flow & script
 .. code-block:: python
     :linenos:
 
-    from chatsky.core import Pipeline, TRANSITIONS, RESPONSE, Transition as Tr
+    from chatsky import Pipeline, TRANSITIONS, RESPONSE, Transition as Tr
     import chatsky.conditions as cnd
     import chatsky.destinations as dst
 

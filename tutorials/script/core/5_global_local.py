@@ -9,15 +9,15 @@
 # %%
 import re
 
-from chatsky.core import (
+from chatsky import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
     Pipeline,
     Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
 )
-import chatsky.conditions as cnd
-import chatsky.destinations as dst
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

@@ -15,7 +15,7 @@ import re
 import random
 from typing import Union
 
-from chatsky.core import (
+from chatsky import (
     TRANSITIONS,
     RESPONSE,
     Context,

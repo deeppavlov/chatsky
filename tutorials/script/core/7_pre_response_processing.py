@@ -10,7 +10,7 @@ additional context processing before response handlers.
 # %pip install chatsky
 
 # %%
-from chatsky.core import (
+from chatsky import (
     GLOBAL,
     LOCAL,
     RESPONSE,
@@ -23,8 +23,8 @@ from chatsky.core import (
     Pipeline,
     BaseProcessing,
     BaseResponse,
+    destinations as dst,
 )
-import chatsky.destinations as dst
 
 from chatsky.utils.testing.common import (
     check_happy_path,

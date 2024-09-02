@@ -10,7 +10,7 @@ processing before transitioning to the next step.
 # %pip install chatsky
 
 # %%
-from chatsky.core import (
+from chatsky import (
     GLOBAL,
     RESPONSE,
     TRANSITIONS,
@@ -22,8 +22,8 @@ from chatsky.core import (
     BaseResponse,
     MessageInitTypes,
     Transition as Tr,
+    destinations as dst,
 )
-import chatsky.destinations as dst
 
 from chatsky.utils.testing.common import (
     check_happy_path,

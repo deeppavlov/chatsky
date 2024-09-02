@@ -17,7 +17,7 @@ Some of the destination steps can be set using
 # %%
 import re
 
-from chatsky.core import (
+from chatsky import (
     TRANSITIONS,
     RESPONSE,
     Context,
@@ -25,9 +25,9 @@ from chatsky.core import (
     Pipeline,
     Transition as Tr,
     BaseDestination,
+    conditions as cnd,
+    destinations as dst,
 )
-import chatsky.conditions as cnd
-import chatsky.destinations as dst
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,

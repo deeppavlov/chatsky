@@ -15,7 +15,7 @@ Let's do all the necessary imports from Chatsky:
 # %pip install chatsky
 
 # %%
-from chatsky.core import (
+from chatsky import (
     TRANSITIONS,
     RESPONSE,
     Pipeline,

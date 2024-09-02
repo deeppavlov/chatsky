@@ -53,7 +53,7 @@ full advantage of its predictions.
 
     import requests
     from chatsky.slots import FunctionSlot
-    from chatsky.script import Message
+    from chatsky import Message
 
     # we assume that there is a 'NER' service running on port 5000 
     async def extract_first_name(utterance: Message) -> str:
@@ -87,7 +87,7 @@ That slot is a root slot: it contains all other group and value slots.
 
 .. code-block:: python
 
-    from chatsky.pipeline import Pipeline
+    from chatsky import Pipeline
 
     pipeline = Pipeline(..., slots=profile_slot)
 

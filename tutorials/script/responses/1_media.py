@@ -15,16 +15,16 @@ They can be attached to any message but will only work if the chosen
 # %pip install chatsky
 
 # %%
-from chatsky.core import (
+from chatsky import (
     RESPONSE,
     TRANSITIONS,
     Message,
     Pipeline,
     Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
 )
 from chatsky.core.message import Image
-import chatsky.conditions as cnd
-import chatsky.destinations as dst
 
 from chatsky.utils.testing import (
     check_happy_path,

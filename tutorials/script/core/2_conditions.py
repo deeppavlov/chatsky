@@ -14,7 +14,7 @@ for script transitions are shown.
 # %%
 import re
 
-from chatsky.core import (
+from chatsky import (
     Context,
     TRANSITIONS,
     RESPONSE,
