@@ -2,31 +2,23 @@ import asyncio
 import sys
 import pathlib
 
-from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky.core import RESPONSE, TRANSITIONS, Message, Pipeline, Transition as Tr
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import CallbackMessengerInterface
-from chatsky.pipeline import Pipeline
-import chatsky.script.conditions as cnd
+import chatsky.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {
         "start_node": {
-            RESPONSE: {
-                "text": "",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
         "node1": {
-            RESPONSE: {
-                "text": "Pong",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            RESPONSE: "Pong",
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
         "fallback_node": {
-            RESPONSE: {
-                "text": "Ooops",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            RESPONSE: "Ooops",
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
     }
 }
@@ -61,4 +53,4 @@ def test_callback_messenger_interface(monkeypatch):
     pipeline.run()
 
     for _ in range(0, 5):
-        assert interface.on_request(Message("Ping"), 0).last_response == Message("Pong")
+        assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")

@@ -93,10 +93,7 @@ that may help you improve the efficiency of your service.
 
 * Using caching for resource-consuming callbacks and actions may also prove to be a helpful strategy.
   In this manner, you can improve the computational efficiency of your pipeline,
-  while making very few changes to the code itself. Chatsky includes a caching mechanism
-  for response functions. However, the simplicity
-  of the Chatsky API makes it easy to integrate any custom caching solutions that you may come up with.
-  See the `Cache tutorial <../tutorials/tutorials.utils.1_cache.py>`__.
+  while making very few changes to the code itself.
 
 * Finally, be mindful about the use of computationally expensive algorithms, like NLU classifiers
   or LLM-based generative networks, since those require a great deal of time and resources

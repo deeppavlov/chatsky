@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 
@@ -42,3 +44,27 @@ def pytest_addoption(parser):
         " If not passed, every test is permitted to skip."
         " Pass `none` to disallow any test from skipping.",
     )
+
+
+@pytest.fixture
+def log_event_catcher():
+    """
+    Return a function that takes a logger and returns a list.
+    Logger will put `LogRecord` objects into the list.
+
+    Optionally, the function accepts `level` to set minimum log level.
+    """
+
+    def inner(logger, *, level=logging.DEBUG):
+        logs = []
+
+        class Handler(logging.Handler):
+            def emit(self, record) -> bool:
+                logs.append(record)
+                return True
+
+        logger.addHandler(Handler())
+        logger.setLevel(level)
+        return logs
+
+    return inner
