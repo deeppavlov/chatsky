@@ -79,7 +79,14 @@ All the abstractions used in this example are thoroughly explained in the dedica
 [user guide](https://deeppavlov.github.io/chatsky/user_guides/basic_conceptions.html).
 
 ```python
-from chatsky import GLOBAL, TRANSITIONS, RESPONSE, Pipeline, cnd, Tr
+from chatsky import (
+    GLOBAL,
+    TRANSITIONS,
+    RESPONSE,
+    Pipeline,
+    conditions as cnd,
+    Transition as Tr,
+)
 
 # create a dialog script
 script = {
