@@ -55,7 +55,7 @@ range of applications, such as social networks, call centers, websites, personal
 Chatsky has several important concepts:
 
 **Script**: First of all, to create a dialog agent it is necessary
-to create a dialog :py:class:`~chatsky.script.core.script.Script`.
+to create a dialog :py:class:`~chatsky.core.script.Script`.
 A dialog `script` is a dictionary, where keys correspond to different `flows`.
 A script can contain multiple scripts, which are flows too, what is needed in order to divide
 a dialog into sub-dialogs and process them separately.

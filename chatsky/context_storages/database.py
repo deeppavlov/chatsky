@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, Hashable, Optional
 
 from .protocol import PROTOCOLS
-from ..script import Context
+from chatsky.core import Context
 
 
 class DBContextStorage(ABC):
