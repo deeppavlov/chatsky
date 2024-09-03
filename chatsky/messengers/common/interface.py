@@ -9,10 +9,9 @@ from __future__ import annotations
 import abc
 import asyncio
 import logging
-import uuid
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING, Type
+from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -193,43 +192,3 @@ class CallbackMessengerInterface(MessengerInterface):
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self.on_request_async(request, ctx_id, update_ctx_misc))
-
-
-class CLIMessengerInterface(PollingMessengerInterface):
-    """
-    Command line message interface is the default message interface, communicating with user via `STDIN/STDOUT`.
-    This message interface can maintain dialog with one user at a time only.
-    """
-
-    def __init__(
-        self,
-        intro: Optional[str] = None,
-        prompt_request: str = "request: ",
-        prompt_response: str = "response: ",
-        out_descriptor: Optional[TextIO] = None,
-    ):
-        super().__init__()
-        self._ctx_id: Optional[Hashable] = None
-        self._intro: Optional[str] = intro
-        self._prompt_request: str = prompt_request
-        self._prompt_response: str = prompt_response
-        self._descriptor: Optional[TextIO] = out_descriptor
-
-    def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(input(self._prompt_request)), self._ctx_id)]
-
-    def _respond(self, responses: List[Context]):
-        print(f"{self._prompt_response}{responses[0].last_response.text}; attachments: {responses[0].last_response.attachments}", file=self._descriptor)
-
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
-        """
-        The CLIProvider generates new dialog id used to user identification on each `connect` call.
-
-        :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
-        :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
-        """
-        self._ctx_id = uuid.uuid4()
-        if self._intro is not None:
-            print(self._intro)
-        await super().connect(pipeline_runner, **kwargs)
