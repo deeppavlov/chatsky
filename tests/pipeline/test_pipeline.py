@@ -4,7 +4,7 @@ from chatsky.core import Context, Pipeline, Message, RESPONSE, TRANSITIONS, Tran
 from chatsky.core.service import ServiceGroup
 
 
-def test_parallel_services():
+def test_async_services():
     def interact(stage: str, run_order: list):
         async def slow_service(_: Context, __: Pipeline):
             run_order.append(stage)
