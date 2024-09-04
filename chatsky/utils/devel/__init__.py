@@ -6,8 +6,10 @@ parts of the framework.
 """
 
 from .json_serialization import (
-    JSONSerializableDict,
-    PickleEncodedValue,
+    json_pickle_serializer,
+    json_pickle_validator,
+    pickle_serializer,
+    pickle_validator,
     JSONSerializableExtras,
 )
 from .extra_field_helpers import grab_extra_fields

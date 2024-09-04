@@ -18,7 +18,7 @@ import importlib
 import json
 from typing import Hashable
 
-from chatsky.script import Context
+from chatsky.core import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
@@ -115,7 +115,7 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
-        value = value if isinstance(value, Context) else Context.cast(value)
+        value = Context.model_validate(value)
         value = json.loads(value.model_dump_json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
@@ -132,7 +132,7 @@ class SQLContextStorage(DBContextStorage):
             result = await conn.execute(stmt)
             row = result.fetchone()
             if row:
-                return Context.cast(row[0])
+                return Context.model_validate(row[0])
         raise KeyError
 
     @threadsafe_method

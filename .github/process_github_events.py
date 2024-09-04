@@ -50,6 +50,9 @@ Here's a release checklist:
 - [ ] Change PR merge option
 - [ ] Update template repo
 - [ ] Search for objects to be deprecated
+- [ ] Test parts not covered with pytest:
+    - [ ] web_api tutorials
+    - [ ] Test integrations with external services (telegram; stats)
 """
 
 

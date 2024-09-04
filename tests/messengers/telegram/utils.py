@@ -9,8 +9,7 @@ from telegram import InputFile, InputMedia, Update
 from typing_extensions import TypeAlias
 
 from chatsky.messengers.telegram.abstract import _AbstractTelegramInterface
-from chatsky.script import Message
-from chatsky.script.core.context import Context
+from chatsky.core import Message, Context
 
 PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
