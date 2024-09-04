@@ -3,6 +3,8 @@ import asyncio
 from chatsky.core import Context, Pipeline, Message, RESPONSE, TRANSITIONS, Transition as Tr
 from chatsky.core.service import ServiceGroup
 
+from chatsky.utils.testing import TOY_SCRIPT
+
 
 def test_async_services():
     def interact(stage: str, run_order: list):
@@ -44,6 +46,6 @@ def test_async_services():
         ],
     )
 
-    pipeline = Pipeline(script={}, start_label=("old_flow", ""))
+    pipeline = Pipeline(script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
     test_group(Context(), pipeline)
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]

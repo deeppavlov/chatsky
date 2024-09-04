@@ -149,7 +149,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param pipeline: This :py:class:`~.Pipeline`.
         """
         try:
-            async with asyncio.timeout(self.timeout):
+            async def _inner_run():
                 if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
                     await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
@@ -160,6 +160,8 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
                     await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
                 else:
                     self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+            await asyncio.wait_for(_inner_run(), timeout=self.timeout)
+
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
@@ -175,7 +177,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         task = asyncio.create_task(self._run(ctx, pipeline))
         await task
-        return asyncio.wait_for(task, timeout=self.timeout)
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """
