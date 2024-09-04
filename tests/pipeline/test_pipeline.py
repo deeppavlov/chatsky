@@ -47,5 +47,6 @@ def test_async_services():
     )
 
     pipeline = Pipeline(script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
-    test_group(Context(), pipeline)
+    ctx = Context.init(("greeting_flow", "start_node"))
+    asyncio.run(test_group(ctx, pipeline))
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
