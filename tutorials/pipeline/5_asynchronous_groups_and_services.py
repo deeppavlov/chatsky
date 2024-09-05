@@ -5,7 +5,7 @@
 The following tutorial shows `pipeline` asynchronous
 service and service group usage.
 
-Here, %mddoclink(api,pipeline.service.group,ServiceGroup)s
+Here, %mddoclink(api,core.service.group,ServiceGroup)s
 are shown for advanced and asynchronous data pre- and postprocessing.
 """
 
