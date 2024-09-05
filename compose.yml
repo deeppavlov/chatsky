@@ -181,6 +181,8 @@ services:
       dockerfile: chatsky/utils/docker/chatsky/dockerfile_chatsky
     command: python pipeline.py
 
+    ports:
+      - 8020:8020
     volumes:
       - ./json_import_examples/yaml/:/app/
 
@@ -193,4 +195,3 @@ volumes:
   mongo-data:
   ydb-data:
   ydb-certs:
-  # new_volume:

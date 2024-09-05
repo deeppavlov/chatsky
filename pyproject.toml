@@ -75,6 +75,8 @@ opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
 pyyaml = "^6.0.1"
+fastapi = "^0.112.1"
+uvicorn = "^0.30.6"
 
 [tool.poetry.extras]
 json = ["aiofiles"]
