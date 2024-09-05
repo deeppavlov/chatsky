@@ -14,8 +14,8 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 # %%
 import asyncio
 
-from chatsky import Context
-from chatsky.pipeline import Pipeline, ServiceGroup
+from chatsky.core import Context, Pipeline
+from chatsky.core.service import ServiceGroup
 
 from chatsky.utils.testing.common import (
     is_interactive_mode,
