@@ -148,18 +148,19 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
+        async def _inner_run():
+            if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
+                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
+
+                self._set_state(ctx, ComponentExecutionState.RUNNING)
+                if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
+                    self._set_state(ctx, ComponentExecutionState.FINISHED)
+
+                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+            else:
+                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
+
         try:
-            async def _inner_run():
-                if await wrap_sync_function_in_async(self.start_condition, ctx, pipeline):
-                    await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
-
-                    self._set_state(ctx, ComponentExecutionState.RUNNING)
-                    if await self.run_component(ctx, pipeline) is not ComponentExecutionState.FAILED:
-                        self._set_state(ctx, ComponentExecutionState.FINISHED)
-
-                    await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-                else:
-                    self._set_state(ctx, ComponentExecutionState.NOT_RUN)
             await asyncio.wait_for(_inner_run(), timeout=self.timeout)
 
         except Exception as exc:

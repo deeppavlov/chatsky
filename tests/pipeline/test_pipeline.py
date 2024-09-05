@@ -11,6 +11,7 @@ def test_async_services():
         async def slow_service(_: Context, __: Pipeline):
             run_order.append(stage)
             await asyncio.sleep(0)
+            print("Hi or something.")
 
         return slow_service
 
@@ -46,7 +47,7 @@ def test_async_services():
         ],
     )
 
-    pipeline = Pipeline(script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
     ctx = Context.init(("greeting_flow", "start_node"))
-    asyncio.run(test_group(ctx, pipeline))
+    pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+    asyncio.run(pipeline.pre_services(ctx, pipeline))
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
