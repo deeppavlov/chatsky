@@ -1,6 +1,6 @@
 import asyncio
 
-from chatsky.core import Context, Pipeline, Message, RESPONSE, TRANSITIONS, Transition as Tr
+from chatsky.core import Context, Pipeline
 from chatsky.core.service import ServiceGroup
 
 from chatsky.utils.testing import TOY_SCRIPT
@@ -16,7 +16,8 @@ def test_async_services():
         return slow_service
 
     running_order = []
-    test_group = ServiceGroup(components=[
+    test_group = ServiceGroup(
+        components=[
             ServiceGroup(
                 name="InteractWithServiceA",
                 components=[

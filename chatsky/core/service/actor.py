@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 import asyncio
 from typing import TYPE_CHECKING, Dict
-from pydantic import model_validator
 
 from chatsky.core.service.component import PipelineComponent
 from chatsky.core.transition import get_next_label
