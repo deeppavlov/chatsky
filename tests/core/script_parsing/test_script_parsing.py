@@ -57,6 +57,15 @@ class TestResolveStringReference:
 
         assert json_importer.resolve_string_reference(obj) == val
 
+    def test_alternative_domain_names(self, monkeypatch):
+        monkeypatch.setattr(JSONImporter, "CHATSKY_NAMESPACE_PREFIX", "_chatsky:")
+        monkeypatch.setattr(JSONImporter, "CUSTOM_DIR_NAMESPACE_PREFIX", "_custom:")
+
+        json_importer = JSONImporter(custom_dir=current_dir / "custom")
+
+        assert json_importer.resolve_string_reference("_chatsky:Message") == chatsky.Message
+        assert json_importer.resolve_string_reference("_custom:V") == 1
+
     def test_non_existent_custom_dir(self):
         json_importer = JSONImporter(custom_dir=current_dir / "none")
         with pytest.raises(JSONImportError, match="Could not find directory"):
@@ -64,7 +73,7 @@ class TestResolveStringReference:
 
     def test_wrong_prefix(self):
         json_importer = JSONImporter(custom_dir=current_dir / "none")
-        with pytest.raises(JSONImportError):
+        with pytest.raises(RuntimeError):
             json_importer.resolve_string_reference("wrong_domain.VAR")
 
     def test_non_existent_object(self):

@@ -1,5 +1,4 @@
 from typing import Union, Optional, Any, List, Tuple
-from types import ModuleType
 import importlib
 import importlib.util
 import importlib.machinery
@@ -28,8 +27,8 @@ class JSONImportError(Exception):
 
 
 class JSONImporter:
-    CHATSKY_NAMESPACE_PREFIX: str = "chatsky"
-    CUSTOM_DIR_NAMESPACE_PREFIX: str = "custom"
+    CHATSKY_NAMESPACE_PREFIX: str = "chatsky."
+    CUSTOM_DIR_NAMESPACE_PREFIX: str = "custom."
 
     def __init__(self, custom_dir: Union[str, Path]):
         self.custom_dir: Path = Path(custom_dir).absolute()
@@ -38,8 +37,8 @@ class JSONImporter:
 
     @staticmethod
     def is_resolvable(value: str) -> bool:
-        return value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX + ".") or value.startswith(
-            JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX + "."
+        return value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX) or value.startswith(
+            JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX
         )
 
     @staticmethod
@@ -50,30 +49,36 @@ class JSONImporter:
         yield
         sys.path = sys_path
 
-    def import_module(self, module_name: str) -> ModuleType:
-        if module_name.startswith(self.CUSTOM_DIR_NAMESPACE_PREFIX):
-            module_name = self.custom_dir_stem + module_name[len(self.CUSTOM_DIR_NAMESPACE_PREFIX) :]  # noqa: E203
+    @staticmethod
+    def replace_prefix(string, old_prefix, new_prefix):
+        if not string.startswith(old_prefix):
+            raise ValueError(f"String {string!r} does not start with {old_prefix!r}")
+        return new_prefix + string[len(old_prefix) :]  # noqa: E203
 
-            with self.sys_path_append(self.custom_dir_location):
-                return importlib.import_module(module_name)
-        else:
-            return importlib.import_module(module_name)
-
-    def check_custom_dir_exists(self, obj: str) -> None:
+    def resolve_string_reference(self, obj: str) -> Any:
+        # prepare obj string
         if obj.startswith(self.CUSTOM_DIR_NAMESPACE_PREFIX):
             if not self.custom_dir.exists():
                 raise JSONImportError(f"Could not find directory {self.custom_dir}")
+            obj = self.replace_prefix(obj, self.CUSTOM_DIR_NAMESPACE_PREFIX, self.custom_dir_stem + ".")
 
-    def resolve_string_reference(self, obj: str) -> Any:
+        elif obj.startswith(self.CHATSKY_NAMESPACE_PREFIX):
+            obj = self.replace_prefix(obj, self.CHATSKY_NAMESPACE_PREFIX, "chatsky.")
+
+        else:
+            raise RuntimeError()
+
+        # import obj
         split = obj.split(".")
         exceptions: List[Exception] = []
-        self.check_custom_dir_exists(obj)
 
         for module_split in range(1, len(split)):
             module_name = ".".join(split[:module_split])
             object_name = split[module_split:]
             try:
-                return reduce(getattr, [self.import_module(module_name), *object_name])
+                with self.sys_path_append(self.custom_dir_location):
+                    module = importlib.import_module(module_name)
+                return reduce(getattr, [module, *object_name])
             except Exception as exc:
                 exceptions.append(exc)
                 logger.debug(f"Exception attempting to import {object_name} from {module_name!r}", exc_info=exc)
