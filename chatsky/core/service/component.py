@@ -22,7 +22,6 @@ from chatsky.core.service.types import (
     ExtraHandlerFunction,
     ExtraHandlerType,
 )
-from ...utils.devel import wrap_sync_function_in_async
 from ...utils.devel.async_helpers import async_do_nothing
 
 logger = logging.getLogger(__name__)

@@ -2,7 +2,7 @@ import importlib
 
 import pytest
 
-from chatsky.core import Context, Pipeline
+from chatsky.core import Context
 from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 
 try:

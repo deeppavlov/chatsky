@@ -20,7 +20,7 @@ import urllib.request
 
 from chatsky import Context, Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.core.service import Service, ServiceRuntimeInfo
+from chatsky.core.service import Service
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -104,6 +104,7 @@ def prepreprocess(ctx: Context):
 class PreProcess(Service):
     def do_nothing(self):
         pass
+
     handler = do_nothing
 
     def call(self, ctx: Context):
