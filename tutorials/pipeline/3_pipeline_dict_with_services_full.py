@@ -135,6 +135,7 @@ def postprocess(ctx: Context):
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
+PreProcess.model_rebuild()
 # %%
 pipeline_dict = {
     "script": TOY_SCRIPT,
