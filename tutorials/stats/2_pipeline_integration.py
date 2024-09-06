@@ -54,7 +54,7 @@ chatsky_instrumentor.instrument()
 
 # example extractor function
 @chatsky_instrumentor
-async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
         "execution_state": info.component.execution_state,

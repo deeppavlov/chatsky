@@ -87,7 +87,7 @@ class ServiceGroup(PipelineComponent):
                 result["components"] = [result["components"]]
         return result
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> Optional[ComponentExecutionState]:
+    async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
         """
         Method for running this service group. It doesn't include extra handlers execution,
         start condition checking or error handling - pure execution only.

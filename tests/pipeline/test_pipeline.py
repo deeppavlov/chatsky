@@ -8,7 +8,7 @@ from chatsky.utils.testing import TOY_SCRIPT
 
 def test_async_services():
     def interact(stage: str, run_order: list):
-        async def slow_service(_: Context, __: Pipeline):
+        async def slow_service(_: Context):
             run_order.append(stage)
             await asyncio.sleep(0)
             print("Hi or something.")
@@ -50,5 +50,5 @@ def test_async_services():
 
     ctx = Context.init(("greeting_flow", "start_node"))
     pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
-    asyncio.run(pipeline.pre_services(ctx, pipeline))
+    asyncio.run(pipeline.pre_services(ctx))
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]

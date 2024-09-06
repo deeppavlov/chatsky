@@ -97,7 +97,7 @@ that the output is logged by OpenTelemetry.
 # %%
 # decorated by an OTLP Instrumentor instance
 @chatsky_instrumentor
-async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {
         "execution_state": info.component.execution_state,

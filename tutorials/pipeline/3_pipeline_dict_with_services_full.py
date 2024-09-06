@@ -30,7 +30,6 @@ from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 
-
 # %% [markdown]
 """
 When Pipeline is created using Pydantic's `model_validate` method
@@ -102,28 +101,34 @@ def prepreprocess(ctx: Context):
     # service output dedicated to current pipeline run
 
 
-def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
-    logger.info(
-        f"another preprocession web-based annotator Service"
-        f"(defined as a callable), named '{info.name}'"
-    )
-    with urllib.request.urlopen("https://example.com/") as webpage:
-        web_content = webpage.read().decode(
-            webpage.headers.get_content_charset()
+class PreProcess(Service):
+    def do_nothing(self):
+        pass
+    handler = do_nothing
+
+    def call(self, ctx: Context):
+        logger.info(
+            f"another preprocession web-based annotator Service"
+            f"(defined as a callable), named '{self.name}'"
         )
-        ctx.misc["another_detection"] = {
-            ctx.last_request.text: (
-                "online" if "Example Domain" in web_content else "offline"
+        with urllib.request.urlopen("https://example.com/") as webpage:
+            web_content = webpage.read().decode(
+                webpage.headers.get_content_charset()
             )
-        }
+            ctx.misc["another_detection"] = {
+                ctx.last_request.text: (
+                    "online" if "Example Domain" in web_content else "offline"
+                )
+            }
 
 
-def postprocess(ctx: Context, pl: Pipeline):
+def postprocess(ctx: Context):
     logger.info("postprocession Service (defined as an object)")
     logger.info(
         f"resulting misc looks like:"
         f"{json.dumps(ctx.misc, indent=4, default=str)}"
     )
+    pl = ctx.pipeline
     received_response = pl.script.get_inherited_node(pl.fallback_label).response
     responses_match = received_response == ctx.last_response
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
@@ -149,11 +154,10 @@ pipeline_dict = {
             "handler": prepreprocess,
             "name": "preprocessor",
         },
-        preprocess,
+        PreProcess(),
     ],
     "post_services": Service(handler=postprocess, name="postprocessor"),
 }
-
 
 # %%
 pipeline = Pipeline.model_validate(pipeline_dict)
