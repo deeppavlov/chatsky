@@ -13,7 +13,6 @@ except ImportError:
 
 async def test_get_current_label():
     context = Context.init(("a", "b"))
-    pipeline = Pipeline(script={"greeting_flow": {"start_node": {}}}, start_label=("greeting_flow", "start_node"))
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -21,7 +20,7 @@ async def test_get_current_label():
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    result = await default_extractors.get_current_label(context, pipeline, runtime_info)
+    result = await default_extractors.get_current_label(context, runtime_info)
     assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
@@ -38,7 +37,7 @@ async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_p
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    _ = await default_extractors.get_current_label(Context.init(("a", "b")), tutorial_module.pipeline, runtime_info)
+    _ = await default_extractors.get_current_label(Context.init(("a", "b")), runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

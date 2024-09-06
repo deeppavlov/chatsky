@@ -157,7 +157,7 @@ class OtelInstrumentor(BaseInstrumentor):
         :param args: Positional arguments of the decorated function.
         :param kwargs: Keyword arguments of the decorated function.
         """
-        ctx, _, info = args
+        ctx, info = args
         pipeline_component = get_extra_handler_name(info)
         attributes = {
             "context_id": str(ctx.id),
@@ -167,9 +167,9 @@ class OtelInstrumentor(BaseInstrumentor):
 
         result: Optional[dict]
         if asyncio.iscoroutinefunction(wrapped):
-            result = await wrapped(ctx, _, info)
+            result = await wrapped(ctx, info)
         else:
-            result = wrapped(ctx, _, info)
+            result = wrapped(ctx, info)
 
         if result is None or not self.is_instrumented_by_opentelemetry:
             # self.is_instrumented_by_opentelemetry allows to disable
