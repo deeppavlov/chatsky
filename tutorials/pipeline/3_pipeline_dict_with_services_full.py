@@ -21,6 +21,7 @@ import urllib.request
 from chatsky import Context, Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.core.service import Service
+from chatsky.core import BaseProcessing
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -101,12 +102,7 @@ def prepreprocess(ctx: Context):
     # service output dedicated to current pipeline run
 
 
-class PreProcess(Service):
-    def do_nothing(self):
-        pass
-
-    handler = do_nothing
-
+class PreProcess(BaseProcessing):
     def call(self, ctx: Context):
         logger.info(
             f"another preprocession web-based annotator Service"
@@ -135,7 +131,6 @@ def postprocess(ctx: Context):
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
-PreProcess.model_rebuild()
 # %%
 pipeline_dict = {
     "script": TOY_SCRIPT,
