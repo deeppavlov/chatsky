@@ -14,14 +14,10 @@ This tutorial is a more advanced version of the
 # %%
 import logging
 
-from chatsky.core.service import (
-    Service,
-    ServiceGroup,
-    not_condition,
-    service_successful_condition,
-    all_condition,
-    ServiceRuntimeInfo,
-)
+from chatsky.conditions import Not, All
+from chatsky.core.service import ServiceFinishedCondition
+
+from chatsky.core.service import Service, ServiceGroup
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -146,19 +142,32 @@ this should never happen.
 
 
 # %%
-def simple_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(f"Service '{info.name}' is running...")
+def do_nothing_service():
+    pass
 
 
-def never_running_service(_, __, info: ServiceRuntimeInfo):
-    raise Exception(f"Oh no! The '{info.name}' service is running!")
+class SimpleService(Service):
+    handler = do_nothing_service
+
+    def call(self):
+        logger.info(f"Service '{self.name}' is running...")
 
 
-def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(
-        f"Service '{info.name}' runtime execution info:"
-        f"{info.model_dump_json(indent=4)}"
-    )
+class NeverRunningService(Service):
+    handler = do_nothing_service
+
+    def call(self):
+        raise Exception(f"Oh no! The '{self.name}' service is running!")
+
+
+class RuntimeInfoPrintingService(Service):
+    handler = do_nothing_service
+
+    def call(self):
+        logger.info(
+            f"Service '{self.name}' runtime execution info:"
+            f"{self.model_dump_json(self.info_dict, indent=4)}"
+        )
 
 
 # %%
@@ -167,10 +176,10 @@ pipeline_dict = {
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
     "pre_services": [
-        simple_service,  # This simple service
-        # will be named `simple_service_0`
-        simple_service,  # This simple service
-        # will be named `simple_service_1`
+        SimpleService,  # This simple service
+        # will be named `do_nothing_service_0`
+        SimpleService,  # This simple service
+        # will be named `do_nothing_service_1`
     ],  # Despite this is the unnamed service group in the root
     # service group, it will be named `pre` as it holds pre services
     "post_services": [
@@ -178,13 +187,13 @@ pipeline_dict = {
             name="named_group",
             components=[
                 Service(
-                    handler=simple_service,
-                    start_condition=all_condition(
-                        service_successful_condition(
-                            ".pipeline.pre.simple_service_0"
+                    handler=SimpleService,
+                    start_condition=All(
+                        ServiceFinishedCondition(
+                            ".pipeline.pre.do_nothing_service_0"
                         ),
-                        service_successful_condition(
-                            ".pipeline.pre.simple_service_1"
+                        ServiceFinishedCondition(
+                            ".pipeline.pre.do_nothing_service_1"
                         ),
                     ),  # Alternative:
                     # service_successful_condition(".pipeline.pre")
@@ -192,17 +201,17 @@ pipeline_dict = {
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
                 Service(
-                    handler=never_running_service,
-                    start_condition=not_condition(
-                        service_successful_condition(
-                            ".pipeline.post.named_group.running_service"
+                    handler=NeverRunningService,
+                    start_condition=Not(
+                        ServiceFinishedCondition(
+                            ".pipeline.post.named_group.SimpleService"
                         )
                     ),
                 ),
             ],
             requested_async_flag=False,  # forbid services from running in async
         ),
-        runtime_info_printing_service,
+        RuntimeInfoPrintingService,
     ],
 }
 

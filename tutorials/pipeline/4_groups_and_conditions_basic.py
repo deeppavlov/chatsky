@@ -15,12 +15,9 @@ are shown for advanced data pre- and postprocessing based on conditions.
 import json
 import logging
 
-from chatsky.core.service import (
-    Service,
-    not_condition,
-    service_successful_condition,
-    ServiceRuntimeInfo,
-)
+from chatsky.core.service import Service
+from chatsky.conditions import Not
+from chatsky.core.service import ServiceFinishedCondition
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -74,19 +71,32 @@ that contains execution state of all previously run services.
 
 
 # %%
-def always_running_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(f"Service '{info.name}' is running...")
+def do_nothing():
+    pass
 
 
-def never_running_service(_, __, info: ServiceRuntimeInfo):
-    raise Exception(f"Oh no! The '{info.name}' service is running!")
+class AlwaysRunningService(Service):
+    handler = do_nothing
+
+    def call(self):
+        logger.info(f"Service '{self.name}' is running...")
 
 
-def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(
-        f"Service '{info.name}' runtime execution info:"
-        f"{json.dumps(info, indent=4, default=str)}"
-    )
+class NeverRunningService(Service):
+    handler = do_nothing
+
+    def call(self):
+        raise Exception(f"Oh no! The '{self.name}' service is running!")
+
+
+class RuntimeInfoPrintingService(Service):
+    handler = None
+
+    def call(self):
+        logger.info(
+            f"Service '{self.name}' runtime execution info:"
+            f"{json.dumps(self.info_dict, indent=4, default=str)}"
+        )
 
 
 # %%
@@ -95,19 +105,19 @@ pipeline_dict = {
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
     "pre_services": Service(
-        handler=always_running_service, name="always_running_service"
+        handler=AlwaysRunningService(), name="always_running_service"
     ),
     "post_services": [
         Service(
-            handler=never_running_service,
-            start_condition=not_condition(
-                service_successful_condition(
-                    ".pipeline.pre.always_running_service"
+            handler=NeverRunningService(),
+            start_condition=Not(
+                ServiceFinishedCondition(
+                    path=".pipeline.pre.AlwaysRunningService"
                 )  # pre services belong to the "pre" group; post -- to "post"
             ),
         ),
         Service(
-            handler=runtime_info_printing_service,
+            handler=RuntimeInfoPrintingService,
             name="runtime_info_printing_service",
         ),
     ],
