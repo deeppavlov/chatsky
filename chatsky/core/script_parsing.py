@@ -29,6 +29,7 @@ class JSONImportError(Exception):
 class JSONImporter:
     CHATSKY_NAMESPACE_PREFIX: str = "chatsky."
     CUSTOM_DIR_NAMESPACE_PREFIX: str = "custom."
+    EXTERNAL_LIB_NAMESPACE_PREFIX: str = "external:"
 
     def __init__(self, custom_dir: Union[str, Path]):
         self.custom_dir: Path = Path(custom_dir).absolute()
@@ -39,7 +40,7 @@ class JSONImporter:
     def is_resolvable(value: str) -> bool:
         return value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX) or value.startswith(
             JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX
-        )
+        ) or value.startswith(JSONImporter.EXTERNAL_LIB_NAMESPACE_PREFIX)
 
     @staticmethod
     @contextmanager
@@ -64,6 +65,9 @@ class JSONImporter:
 
         elif obj.startswith(self.CHATSKY_NAMESPACE_PREFIX):
             obj = self.replace_prefix(obj, self.CHATSKY_NAMESPACE_PREFIX, "chatsky.")
+
+        elif obj.startswith(self.EXTERNAL_LIB_NAMESPACE_PREFIX):
+            obj = self.replace_prefix(obj, self.EXTERNAL_LIB_NAMESPACE_PREFIX, "")
 
         else:
             raise RuntimeError()

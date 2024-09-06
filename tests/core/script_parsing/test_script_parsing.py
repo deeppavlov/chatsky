@@ -57,6 +57,11 @@ class TestResolveStringReference:
 
         assert json_importer.resolve_string_reference(obj) == val
 
+    def test_resolve_external_objects(self):
+        json_importer = JSONImporter(custom_dir=current_dir / "none")
+
+        assert json_importer.resolve_string_reference("external:logging.DEBUG") == 10
+
     def test_alternative_domain_names(self, monkeypatch):
         monkeypatch.setattr(JSONImporter, "CHATSKY_NAMESPACE_PREFIX", "_chatsky:")
         monkeypatch.setattr(JSONImporter, "CUSTOM_DIR_NAMESPACE_PREFIX", "_custom:")
