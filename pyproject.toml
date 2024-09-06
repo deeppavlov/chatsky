@@ -225,5 +225,4 @@ concurrency = [
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
-    "raise RuntimeError",
     ]

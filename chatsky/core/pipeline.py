@@ -32,6 +32,7 @@ from .service import Service
 from .utils import finalize_service_group
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
+from chatsky.core.script_parsing import JSONImporter, Path
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +167,19 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             del init_dict[field]
         super().__init__(**init_dict)
         self.services_pipeline  # cache services
+
+    @classmethod
+    def from_file(
+        cls,
+        file: Union[str, Path],
+        custom_code_directory: Union[str, Path] = "custom",
+        **overrides,
+    ) -> "Pipeline":
+        pipeline = JSONImporter(custom_dir=custom_code_directory).import_pipeline_file(file)
+
+        pipeline.update(overrides)
+
+        return cls(**pipeline)
 
     @computed_field
     @cached_property
