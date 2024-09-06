@@ -3,7 +3,27 @@ This module defines core feature of the Chatsky framework.
 """
 
 from chatsky.core.context import Context
-from chatsky.core.message import Message, MessageInitTypes
+from chatsky.core.message import (
+    Message,
+    MessageInitTypes,
+    Attachment,
+    CallbackQuery,
+    Location,
+    Contact,
+    Invoice,
+    PollOption,
+    Poll,
+    DataAttachment,
+    Audio,
+    Video,
+    Animation,
+    Image,
+    Sticker,
+    Document,
+    VoiceMessage,
+    VideoMessage,
+    MediaGroup,
+)
 from chatsky.core.pipeline import Pipeline
 from chatsky.core.script import Node, Flow, Script
 from chatsky.core.script_function import BaseCondition, BaseResponse, BaseDestination, BaseProcessing, BasePriority

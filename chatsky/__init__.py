@@ -43,8 +43,5 @@ import chatsky.destinations as dst
 import chatsky.responses as rsp
 import chatsky.processing as proc
 
-from chatsky.msg import *
-
-Script.model_rebuild()
 
 import chatsky.__rebuild_pydantic_models__

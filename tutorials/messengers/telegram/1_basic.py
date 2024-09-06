@@ -48,6 +48,20 @@ argument for a bot to run is a token. Some other parameters
 
 Either of the two interfaces connect the bot to Telegram.
 They can be passed directly to a Chatsky `Pipeline` instance.
+
+
+<div class="alert alert-info">
+
+Note
+
+You can also import `LongpollingInterface`
+under the alias of `TelegramInterface` from `chatsky.messengers`:
+
+```python
+from chatsky.messengers import TelegramInterface
+```
+
+</div>
 """
 
 
