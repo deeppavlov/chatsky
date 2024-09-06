@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 import chatsky
-from chatsky.core.script_parsing import JSONImporter, JSONImportError
+from chatsky.core.script_parsing import JSONImporter, JSONImportError, get_chatsky_objects
 
 
 current_dir = Path(__file__).parent.absolute()
@@ -145,3 +145,18 @@ class TestImportPipelineFile:
     def test_wrong_object_type(self):
         with pytest.raises(JSONImportError, match="dict"):
             chatsky.Pipeline.from_file(current_dir / "wrong_type.json")
+
+
+@pytest.mark.parametrize("key,value", [
+    ("chatsky.cnd.ExactMatch", chatsky.conditions.ExactMatch),
+    ("chatsky.core.Image", chatsky.core.message.Image),
+    ("chatsky.core.Message", chatsky.Message),
+    ("chatsky.context_storages.SQLContextStorage", chatsky.context_storages.sql.SQLContextStorage),
+    ("chatsky.messengers.TelegramInterface", chatsky.messengers.telegram.LongpollingInterface),
+    ("chatsky.slots.RegexpSlot", chatsky.slots.RegexpSlot),
+])
+def test_get_chatsky_objects(key, value):
+    json_importer = JSONImporter(custom_dir=current_dir / "none")
+
+    assert json_importer.resolve_string_reference(key) == value
+    assert get_chatsky_objects()[key] == value

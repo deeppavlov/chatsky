@@ -137,8 +137,10 @@ class JSONImporter:
 
 
 def get_chatsky_objects():
+    json_importer = JSONImporter(custom_dir="none")
+
     def get_objects_from_submodule(submodule_name: str, alias: Optional[str] = None):
-        module = importlib.import_module(submodule_name)
+        module = json_importer.resolve_string_reference(submodule_name)
 
         return {
             ".".join([alias or submodule_name, name]): obj
@@ -157,8 +159,9 @@ def get_chatsky_objects():
             "chatsky.core.service",
             "chatsky.slots",
             "chatsky.context_storages",
+            "chatsky.messengers",
             # "chatsky.stats",
             # "chatsky.utils",
         )
-        for k, v in get_objects_from_submodule(module)
+        for k, v in get_objects_from_submodule(module).items()
     }
