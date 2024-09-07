@@ -185,14 +185,13 @@ class JSONImporter:
         """
         args = []
         kwargs = {}
+        value = self.replace_resolvable_objects(value)
         if isinstance(value, dict):
-            for k, v in value.items():
-                kwargs[k] = self.replace_resolvable_objects(v)
+            kwargs = value
         elif isinstance(value, list):
-            for item in value:
-                args.append(self.replace_resolvable_objects(item))
+            args = value
         elif value is not None:  # none is used when no argument is passed: e.g. `dst.Previous:` does not accept args
-            args.append(self.replace_resolvable_objects(value))
+            args = [value]
 
         return args, kwargs
 

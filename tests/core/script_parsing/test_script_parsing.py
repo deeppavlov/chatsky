@@ -105,12 +105,43 @@ class TestResolveStringReference:
         ({"chatsky.Message": ["text"]}, chatsky.Message("text")),
         ({"chatsky.Message": {"text": "text", "misc": {}}}, chatsky.Message("text", misc={})),
         ({"chatsky.Message": ["chatsky.stats.utils.SERVICE_NAME"]}, chatsky.Message("chatsky")),
+        ({"chatsky.Message": {"text": "chatsky.stats.utils.SERVICE_NAME"}}, chatsky.Message("chatsky")),
     ],
 )
 def test_replace_resolvable_objects(obj, replaced):
     json_importer = JSONImporter(custom_dir=current_dir / "custom")
 
     assert json_importer.replace_resolvable_objects(obj) == replaced
+
+
+def test_nested_replacement():
+    json_importer = JSONImporter(custom_dir=current_dir / "none")
+
+    obj = json_importer.replace_resolvable_objects({
+        "chatsky.cnd.Negation": {
+            "chatsky.cnd.HasText": {
+                "text": "text"
+            }
+        }
+    })
+
+    assert isinstance(obj, chatsky.cnd.Negation)
+    assert isinstance(obj.condition, chatsky.cnd.HasText)
+    assert obj.condition.text == "text"
+
+
+def test_no_recursion():
+    json_importer = JSONImporter(custom_dir=current_dir / "custom")
+
+    obj = json_importer.replace_resolvable_objects({
+        "chatsky.cnd.Negation": {
+            "chatsky.cnd.HasText": {
+                "text": "custom.recurse"
+            }
+        }
+    })
+
+    assert obj.condition.text == "custom.V"
 
 
 class TestImportPipelineFile:
