@@ -48,8 +48,7 @@ class TestResolveStringReference:
             ("chatsky.Message", chatsky.Message),
             ("chatsky.context_storages.sql.SQLContextStorage", chatsky.context_storages.sql.SQLContextStorage),
             ("chatsky.messengers.telegram.LongpollingInterface", chatsky.messengers.telegram.LongpollingInterface),
-            ("chatsky.stats.cli.DASHBOARD_SLUG", "chatsky-stats"),
-            ("chatsky.stats.utils.SERVICE_NAME", "chatsky"),
+            ("chatsky.LOCAL", "LOCAL"),
         ],
     )
     def test_resolve_chatsky_objects(self, obj, val):
@@ -96,7 +95,7 @@ class TestResolveStringReference:
         (True, True),
         ("string", "string"),
         ("custom.V", 1),
-        ("chatsky.stats.utils.SERVICE_NAME", "chatsky"),
+        ("chatsky.LOCAL", "LOCAL"),
         ({"text": "custom.V"}, {"text": 1}),
         ({"1": {"2": "custom.V"}}, {"1": {"2": 1}}),
         ({"1": "custom.V", "2": "custom.V"}, {"1": 1, "2": 1}),
@@ -104,8 +103,8 @@ class TestResolveStringReference:
         ({"chatsky.Message": None}, chatsky.Message()),
         ({"chatsky.Message": ["text"]}, chatsky.Message("text")),
         ({"chatsky.Message": {"text": "text", "misc": {}}}, chatsky.Message("text", misc={})),
-        ({"chatsky.Message": ["chatsky.stats.utils.SERVICE_NAME"]}, chatsky.Message("chatsky")),
-        ({"chatsky.Message": {"text": "chatsky.stats.utils.SERVICE_NAME"}}, chatsky.Message("chatsky")),
+        ({"chatsky.Message": ["chatsky.LOCAL"]}, chatsky.Message("LOCAL")),
+        ({"chatsky.Message": {"text": "LOCAL"}}, chatsky.Message("LOCAL")),
     ],
 )
 def test_replace_resolvable_objects(obj, replaced):
