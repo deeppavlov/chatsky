@@ -94,10 +94,10 @@ nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
 
-html_logo = "_static/images/logo-simple.svg"
+html_logo = "_static/images/Chatsky-full-dark.svg"
 
 nbsphinx_thumbnails = {
-    "tutorials/*": "_static/images/logo-simple.svg",
+    "tutorials/*": "_static/images/Chatsky-min-light.svg",
 }
 
 html_context = {
@@ -114,10 +114,6 @@ html_css_files = [
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
-    "logo": {
-        "alt_text": "Chatsky logo (simple and nice)",
-        "text": "Chatsky",
-    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
@@ -143,7 +139,7 @@ html_theme_options = {
 
 
 favicons = [
-    {"href": "images/logo-dff.svg"},
+    {"href": "images/Chatsky-min-light.svg"},
 ]
 
 
