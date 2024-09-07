@@ -38,6 +38,12 @@ The ``optimization guide`` demonstrates various tools provided by the library
 that you can use to profile your conversational service,
 and to locate and remove performance bottlenecks.
 
+:doc:`YAML import guide <./user_guides/pipeline_import>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``yaml import guide`` shows another option for initializing ``Pipeline``
+objects -- from yaml or json files.
+
 .. toctree::
    :hidden:
 
@@ -46,3 +52,4 @@ and to locate and remove performance bottlenecks.
    user_guides/context_guide
    user_guides/superset_guide
    user_guides/optimization_guide
+   user_guides/pipeline_import

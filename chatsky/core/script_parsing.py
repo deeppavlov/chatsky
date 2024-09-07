@@ -36,7 +36,10 @@ logger = logging.getLogger(__name__)
 class JSONImportError(Exception):
     """An exception for incorrect usage of :py:class:`JSONImporter`."""
 
-    __notes__ = ["Please read the guide on YAML-formatted scripts: url here"]  # todo: update placeholder string
+    __notes__ = [
+        "Read the guide on Pipeline import from file: "
+        "https://deeppavlov.github.io/chatsky/user_guides/pipeline_import.html"
+    ]
 
 
 class JSONImporter:
