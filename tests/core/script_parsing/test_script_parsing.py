@@ -78,7 +78,7 @@ class TestResolveStringReference:
 
     def test_wrong_prefix(self):
         json_importer = JSONImporter(custom_dir=current_dir / "none")
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ValueError, match="prefix"):
             json_importer.resolve_string_reference("wrong_domain.VAR")
 
     def test_non_existent_object(self):
@@ -117,7 +117,7 @@ class TestImportPipelineFile:
     def test_normal_import(self):
         pipeline = chatsky.Pipeline.from_file(
             current_dir / "pipeline.yaml",
-            custom_code_directory=current_dir / "custom",
+            custom_dir=current_dir / "custom",
             fallback_label=("flow", "node"),  # override the parameter
         )
 
@@ -133,7 +133,7 @@ class TestImportPipelineFile:
 
     def test_import_json(self):
         pipeline = chatsky.Pipeline.from_file(
-            current_dir / "pipeline.json", custom_code_directory=current_dir / "custom"
+            current_dir / "pipeline.json", custom_dir=current_dir / "custom"
         )
 
         assert pipeline.script.get_node(pipeline.start_label).misc == {"key": 1}

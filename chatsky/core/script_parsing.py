@@ -1,3 +1,13 @@
+"""
+Pipeline File Import
+--------------------
+This module introduces tools that allow importing Pipeline objects from
+json/yaml files.
+
+- :py:class:`JSONImporter` is a class that imports pipeline from files
+- :py:func:`get_chatsky_objects` is a function that provides an index of objects commonly used in a Pipeline definition.
+"""
+
 from typing import Union, Optional, Any, List, Tuple
 import importlib
 import importlib.util
@@ -23,13 +33,46 @@ logger = logging.getLogger(__name__)
 
 
 class JSONImportError(Exception):
+    """An exception for incorrect usage of :py:class:`JSONImporter`."""
     __notes__ = ["Please read the guide on YAML-formatted scripts: url here"]  # todo: update placeholder string
 
 
 class JSONImporter:
+    """
+    Enables pipeline import from file.
+
+    Since Pipeline and all its components are already pydantic ``BaseModel``,
+    the only purpose of this class is to allow importing and instantiating arbitrary objects.
+
+    Import is done by replacing strings of certain patterns with corresponding objects.
+    This process is implemented in :py:meth:`resolve_string_reference`.
+
+    Instantiating is done by replacing dictionaries where a single key is an imported object
+    with an initialized object where arguments are specified by the dictionary values.
+    This process is implemented in :py:meth:`replace_resolvable_objects` and
+    :py:meth:`parse_args`.
+
+    :param custom_dir: Path to the directory containing custom code available for import under the
+        :py:attr:`CUSTOM_DIR_NAMESPACE_PREFIX`.
+    """
     CHATSKY_NAMESPACE_PREFIX: str = "chatsky."
+    """
+    Prefix that indicates an import from the `chatsky` library.
+
+    This class variable can be changed to allow using a different prefix.
+    """
     CUSTOM_DIR_NAMESPACE_PREFIX: str = "custom."
+    """
+    Prefix that indicates an import from the custom directory.
+
+    This class variable can be changed to allow using a different prefix.
+    """
     EXTERNAL_LIB_NAMESPACE_PREFIX: str = "external:"
+    """
+    Prefix that indicates an import from any library.
+
+    This class variable can be changed to allow using a different prefix.
+    """
 
     def __init__(self, custom_dir: Union[str, Path]):
         self.custom_dir: Path = Path(custom_dir).absolute()
@@ -38,6 +81,15 @@ class JSONImporter:
 
     @staticmethod
     def is_resolvable(value: str) -> bool:
+        """
+        Check if ``value`` starts with any of the namespace prefixes:
+
+        - :py:attr:`CHATSKY_NAMESPACE_PREFIX`;
+        - :py:attr:`CUSTOM_DIR_NAMESPACE_PREFIX`;
+        - :py:attr:`EXTERNAL_LIB_NAMESPACE_PREFIX`.
+
+        :return: Whether the value should be resolved (starts with a namespace prefix).
+        """
         return value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX) or value.startswith(
             JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX
         ) or value.startswith(JSONImporter.EXTERNAL_LIB_NAMESPACE_PREFIX)
@@ -45,18 +97,50 @@ class JSONImporter:
     @staticmethod
     @contextmanager
     def sys_path_append(path):
+        """
+        Append ``path`` to ``sys.path`` before yielding and
+        restore ``sys.path`` to initial state after returning.
+        """
         sys_path = sys.path.copy()
         sys.path.append(path)
         yield
         sys.path = sys_path
 
     @staticmethod
-    def replace_prefix(string, old_prefix, new_prefix):
+    def replace_prefix(string, old_prefix, new_prefix) -> str:
+        """
+        Replace ``old_prefix`` in ``string`` with ``new_prefix``.
+
+        :raises ValueError: If the ``string`` does not begin with ``old_prefix``.
+        :return: A new string with a new prefix.
+        """
         if not string.startswith(old_prefix):
             raise ValueError(f"String {string!r} does not start with {old_prefix!r}")
         return new_prefix + string[len(old_prefix) :]  # noqa: E203
 
     def resolve_string_reference(self, obj: str) -> Any:
+        """
+        Import an object indicated by ``obj``.
+
+        First, ``obj`` is pre-processed -- prefixes are replaced to allow import:
+
+        - :py:attr:`CUSTOM_DIR_NAMESPACE_PREFIX` is replaced ``{stem}.`` where `stem` is the stem of the custom dir;
+        - :py:attr:`CHATSKY_NAMESPACE_PREFIX` is replaced with ``chatsky.``;
+        - :py:attr:`EXTERNAL_LIB_NAMESPACE_PREFIX` is removed.
+
+        Next the resulting string is imported:
+        If the string is ``a.b.c.d``, the following is tried in order:
+
+        1. ``from a import b; return b.c.d``
+        2. ``from a.b import c; return c.d``
+        3. ``from a.b.c import d; return d``
+
+        For custom dir imports; parent of the custom dir is appended to ``sys.path`` via :py:meth:`sys_path_append`.
+
+        :return: An imported object.
+        :raises ValueError: If ``obj`` does not begin with any of the prefixes (is not :py:meth:`is_resolvable`).
+        :raises JSONImportError: If a string could not be imported. Includes exceptions raised on every import attempt.
+        """
         # prepare obj string
         if obj.startswith(self.CUSTOM_DIR_NAMESPACE_PREFIX):
             if not self.custom_dir.exists():
@@ -70,7 +154,7 @@ class JSONImporter:
             obj = self.replace_prefix(obj, self.EXTERNAL_LIB_NAMESPACE_PREFIX, "")
 
         else:
-            raise RuntimeError()
+            raise ValueError(f"Could not find a namespace prefix: {obj}")
 
         # import obj
         split = obj.split(".")
@@ -89,6 +173,16 @@ class JSONImporter:
         raise JSONImportError(f"Could not import {obj}") from Exception(exceptions)
 
     def parse_args(self, value: JsonValue) -> Tuple[list, dict]:
+        """
+        Parse ``value`` into args and kwargs:
+
+        - If ``value`` is a dictionary, it is returned as kwargs;
+        - If ``value`` is a list, it is returned as args;
+        - If ``value`` is ``None``, both args and kwargs are empty;
+        - If ``value`` is anything else, it is returned as the only arg.
+
+        :return: A tuple of args and kwargs.
+        """
         args = []
         kwargs = {}
         if isinstance(value, dict):
@@ -103,6 +197,23 @@ class JSONImporter:
         return args, kwargs
 
     def replace_resolvable_objects(self, obj: JsonValue) -> Any:
+        """
+        Replace any resolvable objects inside ``obj`` with their resolved versions and
+        initialize any that are the only key of a dictionary.
+
+        This method iterates over every value inside ``obj`` (which is ``JsonValue``).
+        Any string that :py:meth:`is_resolvable` is replaced with an object return from
+        :py:meth:`resolve_string_reference`.
+        This is done only once (i.e. if a string is resolved to another resolvable string,
+        that string is not resolved).
+
+        Any dictionaries that contain only one resolvable key are replaced with a result of
+        ``resolve_string_reference(key)(*args, **kwargs)`` (the object is initialized)
+        where ``args`` and ``kwargs`` is the result of :py:meth:`parse_args`
+        on the value of the dictionary.
+
+        :return: A new object with replaced resolvable strings and dictionaries.
+        """
         if isinstance(obj, dict):
             keys = obj.keys()
             if len(keys) == 1:
@@ -120,6 +231,13 @@ class JSONImporter:
         return obj
 
     def import_pipeline_file(self, file: Union[str, Path]) -> dict:
+        """
+        Import a dictionary from a json/yaml file and replace resolvable objects in it.
+
+        :return: A result of :py:meth:`replace_resolvable_objects` on the dictionary.
+        :raises JSONImportError: If a file does not have a correct file extension.
+        :raises JSONImportError: If an imported object from file is not a dictionary.
+        """
         file = Path(file).absolute()
 
         with open(file, "r", encoding="utf-8") as fd:
@@ -137,6 +255,23 @@ class JSONImporter:
 
 
 def get_chatsky_objects():
+    """
+    Return an index of most commonly used ``chatsky`` objects (in the context of pipeline initialization).
+
+    :return: A dictionary where keys are names of the objects (e.g. ``chatsky.core.Message``) and values
+        are the objects.
+        The items in the dictionary are all the objects from the ``__init__`` files of the following modules:
+
+        - "chatsky.cnd";
+        - "chatsky.rsp";
+        - "chatsky.dst";
+        - "chatsky.proc";
+        - "chatsky.core";
+        - "chatsky.core.service";
+        - "chatsky.slots";
+        - "chatsky.context_storages";
+        - "chatsky.messengers".
+    """
     json_importer = JSONImporter(custom_dir="none")
 
     def get_objects_from_submodule(submodule_name: str, alias: Optional[str] = None):

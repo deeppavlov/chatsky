@@ -172,10 +172,22 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     def from_file(
         cls,
         file: Union[str, Path],
-        custom_code_directory: Union[str, Path] = "custom",
+        custom_dir: Union[str, Path] = "custom",
         **overrides,
     ) -> "Pipeline":
-        pipeline = JSONImporter(custom_dir=custom_code_directory).import_pipeline_file(file)
+        """
+        Create Pipeline by importing it from a file.
+        A file (json or yaml) should contain a dictionary with keys being a subset of pipeline init parameters.
+
+        See :py:meth:`.JSONImporter.import_pipeline_file` for more information.
+
+        :param file: Path to a file containing pipeline init parameters.
+        :param custom_dir: Path to a directory containing custom code.
+            Defaults to "./custom".
+            If ``file`` does not use custom code, this parameter will not have any effect.
+        :param overrides: You can pass init parameters to override those imported from the ``file``.
+        """
+        pipeline = JSONImporter(custom_dir=custom_dir).import_pipeline_file(file)
 
         pipeline.update(overrides)
 
