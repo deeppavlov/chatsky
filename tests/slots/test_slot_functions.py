@@ -88,16 +88,6 @@ async def test_basic_functions(context, manager, log_event_catcher):
     assert await cnd.SlotsExtracted("0", "1", mode="any").wrapped_call(context) is False
 
 
-async def test_extract_all(context, manager, monkeypatch, call_logger_factory):
-    logs, func = call_logger_factory()
-
-    monkeypatch.setattr(SlotManager, "extract_all", func)
-
-    await proc.ExtractAll().wrapped_call(context)
-
-    assert logs == [{"args": (manager, context), "kwargs": {}}]
-
-
 async def test_unset_all(context, manager, monkeypatch, call_logger_factory):
     logs, func = call_logger_factory()
 

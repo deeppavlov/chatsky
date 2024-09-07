@@ -41,16 +41,6 @@ class Extract(BaseProcessing):
                 logger.exception("An exception occurred during slot extraction.", exc_info=result)
 
 
-class ExtractAll(BaseProcessing):
-    """
-    Extract all slots defined in the pipeline.
-    """
-
-    async def call(self, ctx: Context):
-        manager = ctx.framework_data.slot_manager
-        await manager.extract_all(ctx)
-
-
 class Unset(BaseProcessing):
     """
     Mark specified slots as not extracted and clear extracted values.
