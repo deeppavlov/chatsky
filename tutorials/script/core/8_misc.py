@@ -92,30 +92,30 @@ happy_path = (
     (
         Message(),
         "node_name=step_0: current_node.misc="
-        "{'var1': 'global_data', "
+        "{'var3': 'this overwrites local values - step_0', "
         "'var2': 'global data is overwritten by local', "
-        "'var3': 'this overwrites local values - step_0'}",
+        "'var1': 'global_data'}",
     ),
     (
         Message(),
         "node_name=step_1: current_node.misc="
-        "{'var1': 'global_data', "
+        "{'var3': 'this overwrites local values - step_1', "
         "'var2': 'global data is overwritten by local', "
-        "'var3': 'this overwrites local values - step_1'}",
+        "'var1': 'global_data'}",
     ),
     (
         Message(),
         "node_name=step_2: current_node.misc="
-        "{'var1': 'global_data', "
+        "{'var3': 'this overwrites local values - step_2', "
         "'var2': 'global data is overwritten by local', "
-        "'var3': 'this overwrites local values - step_2'}",
+        "'var1': 'global_data'}",
     ),
     (
         Message(),
         "node_name=step_0: current_node.misc="
-        "{'var1': 'global_data', "
+        "{'var3': 'this overwrites local values - step_0', "
         "'var2': 'global data is overwritten by local', "
-        "'var3': 'this overwrites local values - step_0'}",
+        "'var1': 'global_data'}",
     ),
 )
 
