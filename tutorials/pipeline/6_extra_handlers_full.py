@@ -17,21 +17,17 @@ import random
 from datetime import datetime
 
 import psutil
-from chatsky.script import Context
 
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     ServiceGroup,
-    to_service,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
+    to_service,
 )
-
+from chatsky import Context, Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -74,6 +70,8 @@ Extra handlers can be attached to pipeline component in a few different ways:
 2. (Services only) `to_service` decorator -
     transforms function to service with extra handlers
     from `before_handler` and `after_handler` arguments.
+3. Using `add_extra_handler` function of `PipelineComponent` Example:
+component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,
@@ -172,21 +170,18 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        ServiceGroup(
-            before_handler=[time_measure_before_handler],
-            after_handler=[time_measure_after_handler],
-            components=[heavy_service for _ in range(0, 5)],
-        ),
-        ACTOR,
-        logging_service,
-    ],
+    "pre_services": ServiceGroup(
+        before_handler=[time_measure_before_handler],
+        after_handler=[time_measure_after_handler],
+        components=[heavy_service for _ in range(0, 5)],
+    ),
+    "post_services": logging_service,
 }
 
 # %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

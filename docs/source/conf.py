@@ -16,7 +16,7 @@ from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
-copyright = "2023, DeepPavlov"
+copyright = "2022 - 2024, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
@@ -94,10 +94,10 @@ nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
 
-html_logo = "_static/images/logo-simple.svg"
+html_logo = "_static/images/Chatsky-full-dark.svg"
 
 nbsphinx_thumbnails = {
-    "tutorials/*": "_static/images/logo-simple.svg",
+    "tutorials/*": "_static/images/Chatsky-min-light.svg",
 }
 
 html_context = {
@@ -114,10 +114,6 @@ html_css_files = [
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
-    "logo": {
-        "alt_text": "Chatsky logo (simple and nice)",
-        "text": "Chatsky",
-    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
@@ -143,7 +139,7 @@ html_theme_options = {
 
 
 favicons = [
-    {"href": "images/logo-dff.svg"},
+    {"href": "images/Chatsky-min-light.svg"},
 ]
 
 
@@ -151,6 +147,7 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": False,
     "private-members": True,
+    "special-members": "__call__",
     "member-order": "bysource",
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
@@ -184,20 +181,22 @@ def setup(_):
                 ],
             ),
             ("tutorials.slots", "Slots"),
-            ("tutorials.utils", "Utils"),
             ("tutorials.stats", "Stats"),
         ]
     )
     regenerate_apiref(
         [
+            ("chatsky.core.service", "Core.Service"),
+            ("chatsky.core", "Core"),
+            ("chatsky.conditions", "Conditions"),
+            ("chatsky.destinations", "Destinations"),
+            ("chatsky.responses", "Responses"),
+            ("chatsky.processing", "Processing"),
             ("chatsky.context_storages", "Context Storages"),
             ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.pipeline", "Pipeline"),
-            ("chatsky.script", "Script"),
             ("chatsky.slots", "Slots"),
             ("chatsky.stats", "Stats"),
             ("chatsky.utils.testing", "Testing Utils"),
-            ("chatsky.utils.turn_caching", "Caching"),
             ("chatsky.utils.db_benchmark", "DB Benchmark"),
             ("chatsky.utils.devel", "Development Utils"),
         ]

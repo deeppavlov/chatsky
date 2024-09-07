@@ -59,16 +59,19 @@ and handle any other messages as exceptions. The pseudo-code for the said flow w
 
 .. code-block:: text
 
+    1. User starts a conversation
+    2. Respond with "Hi!"
+
     If user writes "Hello!":
-        Respond with "Hi! Let's play ping-pong!"
+        3. Respond with "Let's play ping-pong!"
 
         If user afterwards writes "Ping" or "ping" or "Ping!" or "ping!":
-            Respond with "Pong!"
+            4. Respond with "Pong!"
             Repeat this behaviour
 
     If user writes something else:
-        Respond with "That was against the rules"
-        Go to responding with "Hi! Let's play ping-pong!" if user writes anything
+        5. Respond with "That was against the rules"
+        Go to responding with "2" after user replies
 
 This leaves us with a single dialog flow in the dialog graph that we lay down below, with the annotations for
 each part of the graph available under the code snippet.
@@ -79,52 +82,44 @@ Example flow & script
 .. code-block:: python
     :linenos:
 
-    from chatsky.pipeline import Pipeline
-    from chatsky.script import TRANSITIONS, RESPONSE, Message
-    import chatsky.script.conditions as cnd
+    from chatsky import Pipeline, TRANSITIONS, RESPONSE, Transition as Tr
+    import chatsky.conditions as cnd
+    import chatsky.destinations as dst
 
     ping_pong_script = {
         "greeting_flow": {
             "start_node": {
-                RESPONSE: Message(),  # the response of the initial node is skipped
-                TRANSITIONS: {
-                    ("greeting_flow", "greeting_node"):
-                        cnd.exact_match("/start"),
-                },
+                TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))]
+                # start node handles the initial handshake (command /start)
             },
             "greeting_node": {
-                RESPONSE: Message("Hi!"),
-                TRANSITIONS: {
-                    ("ping_pong_flow", "game_start_node"):
-                        cnd.exact_match("Hello!")
-                }
+                RESPONSE: "Hi!",
+                TRANSITIONS: [
+                    Tr(
+                        dst=("ping_pong_flow", "game_start_node"),
+                        cnd=cnd.ExactMatch("Hello!")
+                    )
+                ]
             },
             "fallback_node": {
-                RESPONSE: fallback_response,
-                TRANSITIONS: {
-                    ("greeting_flow", "greeting_node"): cnd.true(),
-                },
+                RESPONSE: "That was against the rules",
+                TRANSITIONS: [Tr(dst="greeting_node")],
+                                # this transition is unconditional
             },
         },
         "ping_pong_flow": {
             "game_start_node": {
-                RESPONSE: Message("Let's play ping-pong!"),
-                TRANSITIONS: {
-                    ("ping_pong_flow", "response_node"):
-                        cnd.exact_match("Ping!"),
-                },
+                RESPONSE: "Let's play ping-pong!",
+                TRANSITIONS: [Tr(dst="response_node", cnd=cnd.ExactMatch("Ping!"))],
             },
             "response_node": {
-                RESPONSE: Message("Pong!"),
-                TRANSITIONS: {
-                    ("ping_pong_flow", "response_node"):
-                        cnd.exact_match("Ping!"),
-                },
+                RESPONSE: "Pong!",
+                TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.ExactMatch("Ping!"))],
             },
         },
     }
 
-    pipeline = Pipeline.from_script(
+    pipeline = Pipeline(
         ping_pong_script,
         start_label=("greeting_flow", "start_node"),
         fallback_label=("greeting_flow", "fallback_node"),
@@ -133,8 +128,26 @@ Example flow & script
     if __name__ == "__main__":
         pipeline.run()
 
-The code snippet defines a script with a single dialogue flow that emulates a ping-pong game.
-Likewise, if additional scenarios need to be covered, additional flow objects can be embedded into the same script object.
+An example chat with this bot:
+
+.. code-block::
+
+    request: /start
+    response: text='Hi!'
+    request: Hello!
+    response: text='Let's play ping-pong!'
+    request: Ping!
+    response: text='Pong!'
+    request: Bye
+    response: text='That was against the rules'
+
+The order of request processing is, essentially:
+
+1. Obtain user request
+2. Travel to the next node (chosen based on transitions of the current node)
+3. Send the response of the new node
+
+Below is a breakdown of key features used in the example:
 
 * ``ping_pong_script``: The dialog **script** mentioned above is a dictionary that has one or more
   dialog flows as its values.
@@ -148,12 +161,11 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
 * The ``RESPONSE`` field specifies the response that the dialog agent gives to the user in the current turn.
 
 * The ``TRANSITIONS`` field specifies the edges of the dialog graph that link the dialog states.
-  This is a dictionary that maps labels of other nodes to conditions, i.e. callback functions that
-  return `True` or `False`. These conditions determine whether respective nodes can be visited
-  in the next turn.
-  In the example script, we use standard transitions: ``exact_match`` requires the user request to
-  fully match the provided text, while ``true`` always allows a transition. However, passing custom
-  callbacks that implement arbitrary logic is also an option.
+  This is a list of ``Transition`` instances. They specify the destination node of the potential transition
+  and a condition for the transition to be valid.
+  In the example script, we use build-in functions: ``ExactMatch`` requires the user request to
+  fully match the provided text, while ``Current`` makes a transition to the current node.
+  However, passing custom callbacks that implement arbitrary logic is also an option.
 
 * ``start_node`` is the initial node, which contains an empty response and only transfers user to another node
   according to the first message user sends.
@@ -173,7 +185,7 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
   It is also capable of executing custom actions that you want to run on every turn of the conversation.
   The pipeline can be initialized with a script, and with labels of two nodes:
   the entrypoint of the graph, aka the 'start node', and the 'fallback node'
-  (if not provided it defaults to the same node as 'start node').
+  (if not provided it defaults to 'start node').
 
 .. note::
 
@@ -187,15 +199,15 @@ Processing Definition
     The topic of this section is explained in greater detail in the following tutorials:
 
     * `Pre-response processing <../tutorials/tutorials.script.core.7_pre_response_processing.html>`_
-    * `Pre-transitions processing <../tutorials/tutorials.script.core.9_pre_transitions_processing.html>`_
+    * `Pre-transition processing <../tutorials/tutorials.script.core.9_pre_transition_processing.html>`_
     * `Pipeline processors <../tutorials/tutorials.pipeline.2_pre_and_post_processors.html>`_
 
 Processing user requests and extracting additional parameters is a crucial part of building a conversational bot. 
 Chatsky allows you to define how user requests will be processed to extract additional parameters.
 This is done by passing callbacks to a special ``PROCESSING`` fields in a Node dict.
 
-* User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
-* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation but **before** transition to the next node. See `tutorial on pre-transition processing`_.
+* ``PRE_RESPONSE`` will happen **after** a transition has been made but **before** response generation. See `tutorial on pre-response processing`_.
+* ``PRE_TRANSITION`` will happen **after** obtaining user request but **before** transition to the next node. See `tutorial on pre-transition processing`_.
 
 Depending on the requirements of your bot and the dialog goal, you may need to interact with external databases or APIs to retrieve data. 
 For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.
@@ -203,15 +215,17 @@ For instance, if a user wants to know a schedule, you may need to access a datab
 .. code-block:: python
 
     import requests
+    from chatsky import BaseProcessing, PRE_TRANSITION
     ...
-    def use_api_processing(ctx: Context, _: Pipeline):
-        # save to the context field for custom info
-        ctx.misc["api_call_results"] = requests.get("http://schedule.api/day1").json()
+    class UseAPI(BaseProcessing):
+        async def call(self, ctx):
+            # save to the context field for custom info
+            ctx.misc["api_call_results"] = requests.get("http://schedule.api/day1").json()
     ...
     node = {
         RESPONSE: ...
         TRANSITIONS: ...
-        PRE_TRANSITIONS_PROCESSING: {"use_api": use_api_processing}
+        PRE_TRANSITION: {"use_api": UseAPI()}
     }
 
 .. note::
@@ -223,25 +237,28 @@ For instance, if a user wants to know a schedule, you may need to access a datab
 
 If you retrieve data from the database or API, it's important to validate it to ensure it meets expectations.
 
-Since Chatsky extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
-For instance, given that each processing routine is a callback, you can use tools like pydantic's `validate_call`
-to ensure that the returned values match the function signature.
-Error handling logic can also be incorporated into these callbacks.
-
 Generating a bot Response
 =========================
 
-Generating a bot response involves creating a text or multimedia response that will be delivered to the user.
 Response is defined in the ``RESPONSE`` section of each node and should be either a ``Message`` object,
 that can contain text, images, audios, attachments, etc., or a callback that returns a ``Message``.
 The latter allows you to customize the response based on the specific scenario and user input.
 
+.. note::
+
+    ``Message`` object can be instantiated from a string (filling its ``text`` field).
+    We've used this feature for ``RESPONSE`` and will use it now.
+
 .. code-block:: python
 
-    def sample_response(ctx: Context, _: Pipeline) -> Message:
-        if ctx.misc["user"] == 'vegan':
-            return Message("Here is a list of vegan cafes.")
-        return Message("Here is a list of cafes.")
+    class MyResponse(BaseResponse):
+        async def call(self, ctx):
+            if ctx.misc["user"] == 'vegan':
+                return "Here is a list of vegan cafes."
+            return "Here is a list of cafes."
+
+
+For more information on responses, see the `tutorial on response functions`_.
 
 Handling Fallbacks
 ==================
@@ -258,21 +275,19 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 
 .. code-block:: python
 
-    def fallback_response(ctx: Context, _: Pipeline) -> Message:
+    class MyResponse(BaseResponse):
         """
         Generate a special fallback response depending on the situation.
         """
-        if ctx.last_request is not None:
-            if ctx.last_request.text != "/start" and ctx.last_label is None:
-                # an empty last_label indicates start_node
-                return Message("You should've started the dialog with '/start'")
+        async def call(self, ctx):
+            if ctx.last_label == ctx.pipeline.start_label and ctx.last_request.text != "/start":
+                # start_label can be obtained from the pipeline instance stored inside context
+                return "You should've started the dialog with '/start'"
             else:
-                return Message(
-                    text=f"That was against the rules!\n"
-                         f"You should've written 'Ping', not '{ctx.last_request.text}'!"
+                return (
+                    f"That was against the rules!\n"
+                    f"You should've written 'Ping', not '{ctx.last_request.text}'!"
                 )
-        else:
-            raise RuntimeError("Error occurred: last request is None!")
 
 Testing and Debugging
 ~~~~~~~~~~~~~~~~~~~~~
@@ -351,10 +366,10 @@ that you may have in your project, using Python docstrings.
 
 .. code-block:: python
 
-    def fav_kitchen_response(ctx: Context, _: Pipeline) -> Message:
+    class FavCuisineResponse(BaseResponse):
         """
         This function returns a user-targeted response depending on the value
-        of the 'kitchen preference' slot.
+        of the 'cuisine preference' slot.
         """
         ...
 
@@ -380,8 +395,8 @@ Further reading
 * `Tutorial on conditions <../tutorials/tutorials.script.core.2_conditions.html>`_
 * `Tutorial on response functions <../tutorials/tutorials.script.core.3_responses.html>`_
 * `Tutorial on pre-response processing <../tutorials/tutorials.script.core.7_pre_response_processing.html>`_
-* `Tutorial on pre-transition processing <../tutorials/tutorials.script.core.9_pre_transitions_processing.html>`_
+* `Tutorial on pre-transition processing <../tutorials/tutorials.script.core.9_pre_transition_processing.html>`_
 * `Guide on Context <../user_guides/context_guide.html>`_
-* `Tutorial on global transitions <../tutorials/tutorials.script.core.5_global_transitions.html>`_
+* `Tutorial on global and local nodes <../tutorials/tutorials.script.core.5_global_local.html>`_
 * `Tutorial on context serialization <../tutorials/tutorials.script.core.6_context_serialization.html>`_
 * `Tutorial on script MISC <../tutorials/tutorials.script.core.8_misc.html>`_
