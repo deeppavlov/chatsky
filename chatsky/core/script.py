@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import List, Optional, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AliasChoices
 
 from chatsky.core.script_function import AnyResponse, BaseProcessing
 from chatsky.core.node_label import AbsoluteNodeLabel
@@ -21,28 +21,34 @@ from chatsky.core.transition import Transition
 logger = logging.getLogger(__name__)
 
 
-class Node(BaseModel):
+class Node(BaseModel, extra="forbid"):
     """
     Node is a basic element of the dialog graph.
 
     Usually used to represent a specific state of a conversation.
     """
 
-    transitions: List[Transition] = Field(default_factory=list)
+    transitions: List[Transition] = Field(
+        validation_alias=AliasChoices("transitions", "TRANSITIONS"), default_factory=list
+    )
     """List of transitions possible from this node."""
-    response: Optional[AnyResponse] = Field(default=None)
+    response: Optional[AnyResponse] = Field(validation_alias=AliasChoices("response", "RESPONSE"), default=None)
     """Response produced when this node is entered."""
-    pre_transition: Dict[str, BaseProcessing] = Field(default_factory=dict)
+    pre_transition: Dict[str, BaseProcessing] = Field(
+        validation_alias=AliasChoices("pre_transition", "PRE_TRANSITION"), default_factory=dict
+    )
     """
     A dictionary of :py:class:`.BaseProcessing` functions that are executed before transitions are processed.
     Keys of the dictionary act as names for the processing functions.
     """
-    pre_response: Dict[str, BaseProcessing] = Field(default_factory=dict)
+    pre_response: Dict[str, BaseProcessing] = Field(
+        validation_alias=AliasChoices("pre_response", "PRE_RESPONSE"), default_factory=dict
+    )
     """
     A dictionary of :py:class:`.BaseProcessing` functions that are executed before response is processed.
     Keys of the dictionary act as names for the processing functions.
     """
-    misc: dict = Field(default_factory=dict)
+    misc: dict = Field(validation_alias=AliasChoices("misc", "MISC"), default_factory=dict)
     """
     A dictionary that is used to store metadata about the node.
 
@@ -72,7 +78,9 @@ class Flow(BaseModel, extra="allow"):
     This is used to group them by a specific purpose.
     """
 
-    local_node: Node = Field(alias="local", default_factory=Node)
+    local_node: Node = Field(
+        validation_alias=AliasChoices("local", "LOCAL", "local_node", "LOCAL_NODE"), default_factory=Node
+    )
     """Node from which all other nodes in this Flow inherit properties according to :py:meth:`Node.merge`."""
     __pydantic_extra__: Dict[str, Node]
 
@@ -100,7 +108,9 @@ class Script(BaseModel, extra="allow"):
     It represents an entire dialog graph.
     """
 
-    global_node: Node = Field(alias="global", default_factory=Node)
+    global_node: Node = Field(
+        validation_alias=AliasChoices("global", "GLOBAL", "global_node", "GLOBAL_NODE"), default_factory=Node
+    )
     """Node from which all other nodes in this Script inherit properties according to :py:meth:`Node.merge`."""
     __pydantic_extra__: Dict[str, Flow]
 
@@ -157,17 +167,17 @@ class Script(BaseModel, extra="allow"):
         return inheritant_node.merge(self.global_node).merge(flow.local_node).merge(node)
 
 
-GLOBAL = "global"
+GLOBAL = "GLOBAL"
 """Key for :py:attr:`~chatsky.core.script.Script.global_node`."""
-LOCAL = "local"
+LOCAL = "LOCAL"
 """Key for :py:attr:`~chatsky.core.script.Flow.local_node`."""
-TRANSITIONS = "transitions"
+TRANSITIONS = "TRANSITIONS"
 """Key for :py:attr:`~chatsky.core.script.Node.transitions`."""
-RESPONSE = "response"
+RESPONSE = "RESPONSE"
 """Key for :py:attr:`~chatsky.core.script.Node.response`."""
-MISC = "misc"
+MISC = "MISC"
 """Key for :py:attr:`~chatsky.core.script.Node.misc`."""
-PRE_RESPONSE = "pre_response"
+PRE_RESPONSE = "PRE_RESPONSE"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_response`."""
-PRE_TRANSITION = "pre_transition"
+PRE_TRANSITION = "PRE_TRANSITION"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_transition`."""

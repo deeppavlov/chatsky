@@ -6,7 +6,8 @@ The Message class is a universal data model for representing a message.
 It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Literal, Optional, List, Union, Dict, Any
+from __future__ import annotations
+from typing import Literal, Optional, List, Union, Dict, Any, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
 from urllib.request import urlopen
@@ -16,7 +17,6 @@ import abc
 from pydantic import Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
 from pydantic_core import Url
 
-from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 from chatsky.utils.devel import (
     json_pickle_validator,
     json_pickle_serializer,
@@ -24,6 +24,9 @@ from chatsky.utils.devel import (
     pickle_validator,
     JSONSerializableExtras,
 )
+
+if TYPE_CHECKING:
+    from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 
 
 class DataModel(JSONSerializableExtras):
@@ -283,6 +286,7 @@ class Message(DataModel):
                 VoiceMessage,
                 VideoMessage,
                 MediaGroup,
+                DataModel,
             ]
         ]
     ] = None

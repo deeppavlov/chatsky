@@ -1,0 +1,28 @@
+script:
+  flow:
+    node:
+      response:
+        text: hi
+        misc:
+          key: custom.V
+      transitions:
+        - dst:
+            chatsky.dst.Previous:
+          cnd:
+            chatsky.cnd.HasText: t
+start_label:
+  - flow
+  - node
+fallback_label:
+  - other_flow
+  - other_node
+slots:
+  person:
+    likes:
+      chatsky.slots.RegexpSlot:
+        regexp: "I like (.+)"
+        match_group_idx: 1
+    age:
+      chatsky.slots.RegexpSlot:
+        regexp: "I'm ([0-9]+) years old"
+        match_group_idx: 1
