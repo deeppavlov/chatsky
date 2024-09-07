@@ -174,7 +174,39 @@ def test_get_slot_by_name(empty_slot_manager):
     ],
 )
 async def test_slot_extraction(slot_name, expected_slot_storage, empty_slot_manager, context_with_request):
-    await empty_slot_manager.extract_slot(slot_name, context_with_request)
+    await empty_slot_manager.extract_slot(slot_name, context_with_request, success_only=False)
+    assert empty_slot_manager.slot_storage == expected_slot_storage
+
+
+@pytest.mark.parametrize(
+    "slot_name,expected_slot_storage",
+    [
+        (
+            "person.name",
+            ExtractedGroupSlot(
+                person=ExtractedGroupSlot(
+                    name=extracted_slot_values["person.name"],
+                    surname=init_value_slot,
+                    email=init_value_slot,
+                ),
+                msg_len=init_value_slot,
+            ),
+        ),
+        (
+            "person.surname",
+            ExtractedGroupSlot(
+                person=ExtractedGroupSlot(
+                    name=init_value_slot,
+                    surname=init_value_slot,
+                    email=init_value_slot,
+                ),
+                msg_len=init_value_slot,
+            ),
+        ),
+    ],
+)
+async def test_successful_extraction(slot_name, expected_slot_storage, empty_slot_manager, context_with_request):
+    await empty_slot_manager.extract_slot(slot_name, context_with_request, success_only=True)
     assert empty_slot_manager.slot_storage == expected_slot_storage
 
 

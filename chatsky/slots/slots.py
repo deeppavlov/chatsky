@@ -239,6 +239,8 @@ class ValueSlot(BaseSlot, frozen=True):
             logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
             extracted_value = error
         finally:
+            if not is_slot_extracted:
+                logger.debug(f"Slot {self.__class__.__name__!r} was not extracted: {extracted_value}")
             return ExtractedValueSlot.model_construct(
                 is_slot_extracted=is_slot_extracted,
                 extracted_value=extracted_value,
@@ -362,16 +364,21 @@ class SlotManager(BaseModel):
             return slot
         raise KeyError(f"Could not find slot {slot_name!r}.")
 
-    async def extract_slot(self, slot_name: SlotName, ctx: Context) -> None:
+    async def extract_slot(self, slot_name: SlotName, ctx: Context, success_only: bool) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
 
         :raises KeyError: If the slot with the specified name does not exist.
+
+        :param slot_name: Name of the slot to extract.
+        :param ctx: Context.
+        :param success_only: Whether to store the value only if it is successfully extracted.
         """
         slot = self.get_slot(slot_name)
         value = await slot.get_value(ctx)
 
-        recursive_setattr(self.slot_storage, slot_name, value)
+        if value.__slot_extracted__ or success_only is False:
+            recursive_setattr(self.slot_storage, slot_name, value)
 
     async def extract_all(self, ctx: Context):
         """
