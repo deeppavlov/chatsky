@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 class JSONImportError(Exception):
     """An exception for incorrect usage of :py:class:`JSONImporter`."""
+
     __notes__ = ["Please read the guide on YAML-formatted scripts: url here"]  # todo: update placeholder string
 
 
@@ -55,6 +56,7 @@ class JSONImporter:
     :param custom_dir: Path to the directory containing custom code available for import under the
         :py:attr:`CUSTOM_DIR_NAMESPACE_PREFIX`.
     """
+
     CHATSKY_NAMESPACE_PREFIX: str = "chatsky."
     """
     Prefix that indicates an import from the `chatsky` library.
@@ -90,9 +92,11 @@ class JSONImporter:
 
         :return: Whether the value should be resolved (starts with a namespace prefix).
         """
-        return value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX) or value.startswith(
-            JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX
-        ) or value.startswith(JSONImporter.EXTERNAL_LIB_NAMESPACE_PREFIX)
+        return (
+            value.startswith(JSONImporter.CHATSKY_NAMESPACE_PREFIX)
+            or value.startswith(JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX)
+            or value.startswith(JSONImporter.EXTERNAL_LIB_NAMESPACE_PREFIX)
+        )
 
     @staticmethod
     @contextmanager

@@ -117,13 +117,7 @@ def test_replace_resolvable_objects(obj, replaced):
 def test_nested_replacement():
     json_importer = JSONImporter(custom_dir=current_dir / "none")
 
-    obj = json_importer.replace_resolvable_objects({
-        "chatsky.cnd.Negation": {
-            "chatsky.cnd.HasText": {
-                "text": "text"
-            }
-        }
-    })
+    obj = json_importer.replace_resolvable_objects({"chatsky.cnd.Negation": {"chatsky.cnd.HasText": {"text": "text"}}})
 
     assert isinstance(obj, chatsky.cnd.Negation)
     assert isinstance(obj.condition, chatsky.cnd.HasText)
@@ -133,13 +127,9 @@ def test_nested_replacement():
 def test_no_recursion():
     json_importer = JSONImporter(custom_dir=current_dir / "custom")
 
-    obj = json_importer.replace_resolvable_objects({
-        "chatsky.cnd.Negation": {
-            "chatsky.cnd.HasText": {
-                "text": "custom.recurse"
-            }
-        }
-    })
+    obj = json_importer.replace_resolvable_objects(
+        {"chatsky.cnd.Negation": {"chatsky.cnd.HasText": {"text": "custom.recurse"}}}
+    )
 
     assert obj.condition.text == "custom.V"
 
@@ -163,9 +153,7 @@ class TestImportPipelineFile:
         assert pipeline.slots.person.age == chatsky.slots.RegexpSlot(regexp="I'm ([0-9]+) years old", match_group_idx=1)
 
     def test_import_json(self):
-        pipeline = chatsky.Pipeline.from_file(
-            current_dir / "pipeline.json", custom_dir=current_dir / "custom"
-        )
+        pipeline = chatsky.Pipeline.from_file(current_dir / "pipeline.json", custom_dir=current_dir / "custom")
 
         assert pipeline.script.get_node(pipeline.start_label).misc == {"key": 1}
 
@@ -178,14 +166,17 @@ class TestImportPipelineFile:
             chatsky.Pipeline.from_file(current_dir / "wrong_type.json")
 
 
-@pytest.mark.parametrize("key,value", [
-    ("chatsky.cnd.ExactMatch", chatsky.conditions.ExactMatch),
-    ("chatsky.core.Image", chatsky.core.message.Image),
-    ("chatsky.core.Message", chatsky.Message),
-    ("chatsky.context_storages.SQLContextStorage", chatsky.context_storages.sql.SQLContextStorage),
-    ("chatsky.messengers.TelegramInterface", chatsky.messengers.telegram.LongpollingInterface),
-    ("chatsky.slots.RegexpSlot", chatsky.slots.RegexpSlot),
-])
+@pytest.mark.parametrize(
+    "key,value",
+    [
+        ("chatsky.cnd.ExactMatch", chatsky.conditions.ExactMatch),
+        ("chatsky.core.Image", chatsky.core.message.Image),
+        ("chatsky.core.Message", chatsky.Message),
+        ("chatsky.context_storages.SQLContextStorage", chatsky.context_storages.sql.SQLContextStorage),
+        ("chatsky.messengers.TelegramInterface", chatsky.messengers.telegram.LongpollingInterface),
+        ("chatsky.slots.RegexpSlot", chatsky.slots.RegexpSlot),
+    ],
+)
 def test_get_chatsky_objects(key, value):
     json_importer = JSONImporter(custom_dir=current_dir / "none")
 
