@@ -143,7 +143,7 @@ html_theme_options = {
 
 
 favicons = [
-    {"href": "images/logo-chatsky.svg"},
+    {"href": "images/logo-dff.svg"},
 ]
 
 
