@@ -21,12 +21,13 @@ from functools import reduce
 from contextlib import contextmanager
 
 from pydantic import JsonValue
-import yaml
 
 try:
-    from yaml import CLoader as Loader
+    import yaml
+
+    yaml_available = True
 except ImportError:
-    from yaml import Loader
+    yaml_available = False
 
 
 logger = logging.getLogger(__name__)
@@ -247,7 +248,9 @@ class JSONImporter:
             if file.suffix == ".json":
                 pipeline = json.load(fd)
             elif file.suffix in (".yaml", ".yml"):
-                pipeline = yaml.load(fd, Loader=Loader)
+                if not yaml_available:
+                    raise ImportError("`pyyaml` package is missing.\nRun `pip install chatsky[yaml]`.")
+                pipeline = yaml.safe_load(fd)
             else:
                 raise JSONImportError("File should have a `.json`, `.yaml` or `.yml` extension")
         if not isinstance(pipeline, dict):

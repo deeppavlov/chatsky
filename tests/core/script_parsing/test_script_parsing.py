@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 import chatsky
-from chatsky.core.script_parsing import JSONImporter, JSONImportError, get_chatsky_objects
+from chatsky.core.script_parsing import JSONImporter, JSONImportError, get_chatsky_objects, yaml_available
 
 
 current_dir = Path(__file__).parent.absolute()
@@ -135,6 +135,7 @@ def test_no_recursion():
 
 
 class TestImportPipelineFile:
+    @pytest.mark.skipif(not yaml_available, reason="YAML dependencies missing")
     def test_normal_import(self):
         pipeline = chatsky.Pipeline.from_file(
             current_dir / "pipeline.yaml",
