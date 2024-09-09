@@ -65,7 +65,7 @@ class Service(PipelineComponent):
         :param ctx: Current dialog context.
         """
         if self.handler is None:
-            raise
+            raise NotImplementedError
         await wrap_sync_function_in_async(self.handler, ctx)
 
     async def run_component(self, ctx: Context) -> None:

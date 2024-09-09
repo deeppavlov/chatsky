@@ -39,9 +39,12 @@ class ServiceFinishedCondition(BaseCondition):
     # This still needs one field in the Context() object, but I think this is required.
     async def call(self, ctx: Context) -> bool:
         if self.wait:
-            service_finished = asyncio.Event()
-            ctx.framework_data.service_finished[self.path] = service_finished
+            service_finished = ctx.framework_data.service_finished.get(self.path, None)
+            if service_finished is None:
+                service_finished = asyncio.Event()
+                ctx.framework_data.service_finished[self.path] = service_finished
             await service_finished.wait()
+
         state = ctx.framework_data.service_states.get(self.path, ComponentExecutionState.NOT_RUN)
 
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED

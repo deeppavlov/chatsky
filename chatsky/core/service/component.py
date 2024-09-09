@@ -163,6 +163,8 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
         finally:
+            if ctx.framework_data.service_finished.get(self.path, None) is None:
+                ctx.framework_data.service_finished[self.path] = asyncio.Event()
             ctx.framework_data.service_finished[self.path].set()
 
     async def __call__(self, ctx: Context) -> None:
@@ -174,7 +176,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :return: ``None``
         """
         task = asyncio.create_task(self._run(ctx))
-        ctx.framework_data.service_asyncio_tasks[self.path] = task
         await task
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
