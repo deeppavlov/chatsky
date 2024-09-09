@@ -25,7 +25,7 @@ class ServiceFinishedCondition(BaseCondition):
     Check if a :py:class:`~.chatsky.core.service.Service` was executed successfully.
     """
 
-    path: Optional[str] = None
+    path: str
     """The path of the condition pipeline component."""
     wait: bool = False
     """
@@ -36,33 +36,12 @@ class ServiceFinishedCondition(BaseCondition):
     def __init__(self, path, wait=False):
         super().__init__(path=path, wait=wait)
 
-    # Placeholder task solution for efficient awaiting(needs review)
-    # The point is, the task gets cancelled by PipelineComponent.__call__(self, ctx)
-    # I feel like this is fairly efficient, but most importantly,
-    # there won't be any delays to the code. 'wait' is just True or False now, not an 'int'.
+    # This still needs one field in the Context() object, but I think this is required.
     async def call(self, ctx: Context) -> bool:
-        # Just making sure that 'path' was given (or it would break the code.)
-        if self.wait and self.path:
-            service_started_task = ctx.framework_data.service_started_flag_tasks.get(self.path, None)
-            if not service_started_task:
-                service_started_task = asyncio.create_task(async_infinite_sleep())
-                ctx.framework_data.service_started_flag_tasks[self.path] = service_started_task
-
-            try:
-                await service_started_task
-            except asyncio.CancelledError:
-                pass
-
-            service_task = ctx.framework_data.service_asyncio_tasks.get(self.path, None)
-            await service_task
+        if self.wait:
+            service_finished = asyncio.Event()
+            ctx.framework_data.service_finished[self.path] = service_finished
+            await service_finished.wait()
         state = ctx.framework_data.service_states.get(self.path, ComponentExecutionState.NOT_RUN)
 
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
-
-    # There's just one problem, I'm heavily using 'framework_data' from Context,
-    # and now it's kinda dirty. I could maybe make a class ServiceData or something
-    # so that 'framework_data' is more concise.
-
-    # Also, if the 'path' is wrong, this will go into an infinite cycle.
-    # Could make a maximum waiting time, though. And add a logger message.
-    # Or just check if a path is taken somehow.

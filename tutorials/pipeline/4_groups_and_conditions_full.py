@@ -14,10 +14,9 @@ This tutorial is a more advanced version of the
 # %%
 import logging
 
+from chatsky.core import Context, BaseProcessing
 from chatsky.conditions import Not, All
-from chatsky.core.service import ServiceFinishedCondition
-
-from chatsky.core.service import Service, ServiceGroup
+from chatsky.core.service import ServiceFinishedCondition, Service, ServiceGroup
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -142,28 +141,18 @@ this should never happen.
 
 
 # %%
-def do_nothing_service():
-    pass
-
-
 class SimpleService(Service):
-    handler = do_nothing_service
-
-    def call(self):
+    def call(self, _: Context):
         logger.info(f"Service '{self.name}' is running...")
 
 
 class NeverRunningService(Service):
-    handler = do_nothing_service
-
-    def call(self):
+    def call(self, _: Context):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
 
 class RuntimeInfoPrintingService(Service):
-    handler = do_nothing_service
-
-    def call(self):
+    def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
             f"{self.model_dump_json(self.info_dict, indent=4)}"
@@ -190,10 +179,10 @@ pipeline_dict = {
                     handler=SimpleService,
                     start_condition=All(
                         ServiceFinishedCondition(
-                            ".pipeline.pre.do_nothing_service_0"
+                            ".pipeline.pre.SimpleService_0"
                         ),
                         ServiceFinishedCondition(
-                            ".pipeline.pre.do_nothing_service_1"
+                            ".pipeline.pre.SimpleService_1"
                         ),
                     ),  # Alternative:
                     # service_successful_condition(".pipeline.pre")

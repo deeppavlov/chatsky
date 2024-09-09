@@ -61,15 +61,11 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
 
     service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
-    service_asyncio_tasks: Dict[str, asyncio.Task] = Field(default_factory=dict, exclude=True)
+    # I don't know how to document the field below properly.
+    service_finished: Dict[str, asyncio.Event] = Field(default_factory=dict, exclude=True)
     """
-    Pointers to asyncio tasks, one for each :py:class:`~chatsky.core.service.PipelineComponent`.
-    Cleared at the end of every turn.
-    """
-    service_started_flag_tasks: Dict[str, asyncio.Task] = Field(default_factory=dict, exclude=True)
-    """
-    Special tasks that act as semaphores, one for each :py:class:`~chatsky.core.service.PipelineComponent`.
-    Required for optimal performance of 'service condition functions'. Cleared at the end of every turn.
+    Asyncio `Event`s which can be awaited until the corresponding service finishes.
+    Takes a `str` path to awaited service. Cleared at the end of every turn.
     """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """

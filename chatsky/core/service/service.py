@@ -21,6 +21,7 @@ from chatsky.core.context import Context
 from chatsky.core.script_function import BaseProcessing, AnyCondition
 from chatsky.core.service.component import PipelineComponent
 from .extra import BeforeHandler, AfterHandler
+from chatsky.utils.devel import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class Service(PipelineComponent):
     Service can be asynchronous only if its handler is a coroutine.
     """
 
-    handler: Union[BaseProcessing, Callable]
+    handler: Union[BaseProcessing, Callable] = None
     """
     A :py:data:`~.ServiceFunction` or an instance of `BaseProcessing`.
     """
@@ -65,7 +66,7 @@ class Service(PipelineComponent):
         """
         if self.handler is None:
             raise
-        await self.handler(ctx)
+        await wrap_sync_function_in_async(self.handler, ctx)
 
     async def run_component(self, ctx: Context) -> None:
         """
@@ -74,12 +75,14 @@ class Service(PipelineComponent):
         :param ctx: Current dialog context.
         :return: `None`
         """
-        await self.call(ctx)
+        await wrap_sync_function_in_async(self.call, ctx)
 
     @property
     def computed_name(self) -> str:
         if inspect.isfunction(self.handler):
             return self.handler.__name__
+        elif self.handler is None:
+            return self.__class__.__name__
         else:
             return self.handler.__class__.__name__
 

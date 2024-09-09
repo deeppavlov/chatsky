@@ -92,7 +92,7 @@ Final service logs `ctx.misc` dict.
 
 
 # %%
-def prepreprocess(ctx: Context):
+async def prepreprocess(ctx: Context):
     logger.info(
         "preprocession intent-detection Service running (defined as a dict)"
     )
@@ -102,8 +102,8 @@ def prepreprocess(ctx: Context):
     # service output dedicated to current pipeline run
 
 
-class PreProcess(BaseProcessing):
-    def call(self, ctx: Context):
+class PreProcess(Service):
+    async def call(self, ctx: Context):
         logger.info(
             f"another preprocession web-based annotator Service"
             f"(defined as a callable), named '{self.name}'"
@@ -119,7 +119,7 @@ class PreProcess(BaseProcessing):
             }
 
 
-def postprocess(ctx: Context):
+async def postprocess(ctx: Context):
     logger.info("postprocession Service (defined as an object)")
     logger.info(
         f"resulting misc looks like:"

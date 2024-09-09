@@ -15,9 +15,9 @@ are shown for advanced data pre- and postprocessing based on conditions.
 import json
 import logging
 
-from chatsky.core.service import Service
+from chatsky.core import Context, BaseProcessing
+from chatsky.core.service import Service, ServiceFinishedCondition
 from chatsky.conditions import Not
-from chatsky.core.service import ServiceFinishedCondition
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -71,28 +71,18 @@ that contains execution state of all previously run services.
 
 
 # %%
-def do_nothing():
-    pass
-
-
 class AlwaysRunningService(Service):
-    handler = do_nothing
-
-    def call(self):
+    def call(self, _: Context):
         logger.info(f"Service '{self.name}' is running...")
 
 
 class NeverRunningService(Service):
-    handler = do_nothing
-
-    def call(self):
+    def call(self, _: Context):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
 
 class RuntimeInfoPrintingService(Service):
-    handler = None
-
-    def call(self):
+    def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
             f"{json.dumps(self.info_dict, indent=4, default=str)}"

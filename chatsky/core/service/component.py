@@ -159,10 +159,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
         try:
             await asyncio.wait_for(_inner_run(), timeout=self.timeout)
-
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
+        finally:
+            ctx.framework_data.service_finished[self.path].set()
 
     async def __call__(self, ctx: Context) -> None:
         """
@@ -172,12 +173,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :return: ``None``
         """
-        service_started_task = ctx.framework_data.service_started_flag_tasks.get(self.path, None)
-        if service_started_task:
-            service_started_task.cancel()
-        else:
-            ctx.framework_data.service_started_flag_tasks[self.path] = asyncio.create_task(async_do_nothing())
-
         task = asyncio.create_task(self._run(ctx))
         ctx.framework_data.service_asyncio_tasks[self.path] = task
         await task
