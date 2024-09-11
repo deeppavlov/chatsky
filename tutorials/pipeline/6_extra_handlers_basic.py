@@ -51,11 +51,11 @@ In the end `ctx.misc` is logged to info channel.
 
 
 # %%
-def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+def collect_timestamp_before(ctx: Context, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info.component.name}": datetime.now()})
 
 
-def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+def collect_timestamp_after(ctx: Context, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update(
         {
             f"{info.component.name}": datetime.now()

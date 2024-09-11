@@ -79,6 +79,19 @@ list are run without difference between pre- and postprocessors.
         (keep in mind that names in one ServiceGroup should be unique),
         see tutorial 4.
 
+Services can also be defined as a child class of `Service`, so that
+you can get access to the `self` object to get more
+information about your `Service` and log it.
+To do that you need to derive your class from `Service`,
+then add an async `call()` method which now will be called
+instead of the `handler`. (see the `PreProcess` example below)
+You do not need to worry about the `handler` field, it can be empty.
+
+Please note that if you are defining a Service this way,
+`handler` won't run automatically. So, you could add a line
+like "await self.handler(ctx)" or "self.handler(ctx)" directly to your
+`call()` method, depending on what your `handler` is.
+
 Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.

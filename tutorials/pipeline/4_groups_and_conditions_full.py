@@ -85,14 +85,28 @@ can be used to get all pipeline properties as a formatted string
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
-These functions should have following signature:
+They have the following signature
 
-    (ctx: Context, pipeline: Pipeline) -> bool.
+    class MyCondition(BaseCondition):
+        async def call(self, ctx: Context) -> bool:
 
 Service is only executed if its start_condition returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions as well
-as possibility to create custom ones.
+as possibility to create custom ones. You can check which
+condition functions are there in the `Script` tutorial about conditions,
+or check the API directly.
+
+There is also a built-in condition `ServiceFinishedCondition`
+that returns `True` if a `Service` with a given path completed successfully,
+returns `False` otherwise.
+
+`ServiceFinishedCondition` accepts the following constructor parameters:
+
+* `path` (required) - a path to the `Service`.
+* `wait` - whether it should wait for the said `Service` to complete.
+        defaults to `False`.
+
 Custom condition functions can rely on data in `ctx.misc`
 as well as on any external data source.
 Built-in condition functions check other service states.
@@ -105,33 +119,9 @@ All of the services store their execution status in context,
 * `FINISHED` - Service finished successfully.
 * `FAILED` - Service execution failed (that also throws an exception).
 
-There are following built-in condition functions:
-
-* `always_start_condition` - Default condition function,
-    always starts service.
-* `service_successful_condition(path)` -
-    Function that checks, whether service
-    with given `path` executed successfully (is `FINISHED`).
-* `not_condition(function)` -
-    Function that returns result opposite
-    from the one returned by
-    the `function` (condition function) argument.
-* `aggregate_condition(aggregator, *functions)` -
-    Function that aggregated results of
-    numerous `functions` (condition functions)
-    using special `aggregator` function.
-* `all_condition(*functions)` -
-    Function that returns True only if all
-    of the given `functions`
-    (condition functions) return `True`.
-* `any_condition(*functions)` -
-    Function that returns `True`
-    if any of the given `functions`
-    (condition functions) return `True`.
-
 Here there are two conditionally executed services:
 a service named `running_service` is executed
-    only if both `simple_services` in `service_group_0`
+    only if both `SimpleServices` in `service_group_0`
     are finished successfully.
 `never_running_service` is executed only if `running_service` is not finished,
 this should never happen.
@@ -166,9 +156,9 @@ pipeline_dict = {
     "fallback_label": ("greeting_flow", "fallback_node"),
     "pre_services": [
         SimpleService,  # This simple service
-        # will be named `do_nothing_service_0`
+        # will be named `SimpleService_0`
         SimpleService,  # This simple service
-        # will be named `do_nothing_service_1`
+        # will be named `SimpleService_1`
     ],  # Despite this is the unnamed service group in the root
     # service group, it will be named `pre` as it holds pre services
     "post_services": [

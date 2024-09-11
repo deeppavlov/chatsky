@@ -78,18 +78,18 @@ start_times = dict()  # Place to temporarily store service start times
 pipeline_info = dict()  # Pipeline information storage
 
 
-def before_all(_, __, info: ExtraHandlerRuntimeInfo):
+def before_all(_, info: ExtraHandlerRuntimeInfo):
     global start_times, pipeline_info
     now = datetime.now()
     pipeline_info = {"start_time": now}
     start_times = {info.component.path: now}
 
 
-def before(_, __, info: ExtraHandlerRuntimeInfo):
+def before(_, info: ExtraHandlerRuntimeInfo):
     start_times.update({info.component.path: datetime.now()})
 
 
-def after(_, __, info: ExtraHandlerRuntimeInfo):
+def after(_, info: ExtraHandlerRuntimeInfo):
     start_time = start_times[info.component.path]
     pipeline_info.update(
         {
@@ -101,7 +101,7 @@ def after(_, __, info: ExtraHandlerRuntimeInfo):
     )
 
 
-def after_all(_, __, info: ExtraHandlerRuntimeInfo):
+def after_all(_, info: ExtraHandlerRuntimeInfo):
     pipeline_info.update(
         {"total_time": datetime.now() - start_times[info.component.path]}
     )
@@ -110,7 +110,7 @@ def after_all(_, __, info: ExtraHandlerRuntimeInfo):
     )
 
 
-async def long_service(_, __, info: ServiceRuntimeInfo):
+async def long_service(_, info: ServiceRuntimeInfo):
     timeout = random.randint(0, 5) / 100
     logger.info(f"Service {info.name} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)

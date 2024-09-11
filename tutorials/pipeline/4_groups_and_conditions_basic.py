@@ -43,22 +43,23 @@ To receive serialized information about service,
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
-These functions should have following signature:
+They have the following signature
 
-    (ctx: Context, pipeline: Pipeline) -> bool.
+    class MyCondition(BaseCondition):
+        async def call(self, ctx: Context) -> bool:
 
-Service is only executed if its start_condition returned `True`.
+Service is only executed if its `start_condition` returned `True`.
 By default all the services start unconditionally.
-There are number of built-in condition functions.
-Built-in condition functions check other service states.
-These are most important built-in condition functions:
+There are number of built-in condition functions. (see `Script` tutorial 2)
+Though there is also a built-in condition `ServiceFinishedCondition`
+that returns `True` if a `Service` with a given path completed successfully,
+returns `False` otherwise.
 
-* `always_start_condition` - Default condition function, always starts service.
-* `service_successful_condition(path)` - Function that checks,
-    whether service with given `path` executed successfully.
-* `not_condition(function)` - Function that returns result
-    opposite from the one returned
-    by the `function` (condition function) argument.
+`ServiceFinishedCondition` accepts the following constructor parameters:
+
+* `path` (required) - a path to the `Service`.
+* `wait` - whether it should wait for the said `Service` to complete.
+        defaults to `False`.
 
 Here there is a conditionally executed service named
 `never_running_service` is always executed.

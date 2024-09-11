@@ -37,14 +37,9 @@ They are being turned into special `Service` or `ServiceGroup` objects
 that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
-Service callable signature can be one of the following:
-`[ctx]`, `[ctx, pipeline]` or `[ctx, actor, info]` (see tutorial 3),
-where:
-
-* `ctx` - Context of the current dialog.
-* `pipeline` - The current pipeline.
-* `info` - dictionary, containing information about
-        current service and pipeline execution state (see tutorial 4).
+Service callables only take one parameter: `ctx`,
+where `ctx` is the `Context` object of the current dialog.
+(see tutorial 3)
 
 Here a preprocessor ("ping") and a postprocessor ("pong") are added to pipeline.
 They share data in `context.misc` -

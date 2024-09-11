@@ -63,6 +63,10 @@ list are run without difference between pre- and postprocessors.
 (see tutorial 2) or with `Service` constructor / dict.
 It must contain `handler` - a callable (function).
 
+Services can also be defined as a child class of `Service`, so that
+you can get access to the `self` object to get more
+information about your `Service` and log it. (see full tutorial)
+
 Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.

@@ -58,10 +58,9 @@ NB! Extra handlers don't have execution state,
 so their names shouldn't appear in built-in condition functions.
 
 Extra handlers callable signature can be one of the following:
-`[ctx]`, `[ctx, pipeline]` or `[ctx, pipeline, info]`, where:
+`[ctx]` or `[ctx, info]`, where:
 
 * `ctx` - `Context` of the current dialog.
-* `pipeline` - The current pipeline.
 * `info` - Dictionary, containing information about current extra handler
             and pipeline execution state (see tutorial 4).
 
@@ -72,8 +71,11 @@ Extra handlers can be attached to pipeline component in a few different ways:
 2. (Services only) `to_service` decorator -
     transforms function to service with extra handlers
     from `before_handler` and `after_handler` arguments.
-3. Using `add_extra_handler` function of `PipelineComponent` Example:
-component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
+3. Using `add_extra_handler` function of `PipelineComponent`
+
+Example:
+
+    component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,
@@ -94,13 +96,13 @@ def get_extra_handler_misc_field(
     return f"{info.component.name}-{postfix}"
 
 
-def time_measure_before_handler(ctx, _, info):
+def time_measure_before_handler(ctx, info):
     ctx.misc.update(
         {get_extra_handler_misc_field(info, "time"): datetime.now()}
     )
 
 
-def time_measure_after_handler(ctx, _, info):
+def time_measure_after_handler(ctx, info):
     ctx.misc.update(
         {
             get_extra_handler_misc_field(info, "time"): datetime.now()
@@ -109,7 +111,7 @@ def time_measure_after_handler(ctx, _, info):
     )
 
 
-def ram_measure_before_handler(ctx, _, info):
+def ram_measure_before_handler(ctx, info):
     ctx.misc.update(
         {
             get_extra_handler_misc_field(
@@ -119,7 +121,7 @@ def ram_measure_before_handler(ctx, _, info):
     )
 
 
-def ram_measure_after_handler(ctx, _, info):
+def ram_measure_after_handler(ctx, info):
     ctx.misc.update(
         {
             get_extra_handler_misc_field(info, "ram"): ctx.misc[
@@ -130,7 +132,7 @@ def ram_measure_after_handler(ctx, _, info):
     )
 
 
-def json_converter_before_handler(ctx, _, info):
+def json_converter_before_handler(ctx, info):
     ctx.misc.update(
         {
             get_extra_handler_misc_field(info, "str"): json.dumps(
@@ -140,7 +142,7 @@ def json_converter_before_handler(ctx, _, info):
     )
 
 
-def json_converter_after_handler(ctx, _, info):
+def json_converter_after_handler(ctx, info):
     ctx.misc.pop(get_extra_handler_misc_field(info, "str"))
 
 
@@ -162,7 +164,7 @@ def heavy_service(ctx: Context):
     before_handler=[json_converter_before_handler],
     after_handler=[json_converter_after_handler],
 )
-def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
+def logging_service(ctx: Context, info: ServiceRuntimeInfo):
     str_misc = ctx.misc[f"{info.name}-str"]
     assert isinstance(str_misc, str)
     print(f"Stringified misc: {str_misc}")
