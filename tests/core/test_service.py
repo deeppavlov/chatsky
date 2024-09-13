@@ -75,7 +75,7 @@ def test_extra_handler_function_signatures():
 
 # Checking that async functions can be run as extra_handlers.
 def test_async_extra_handler_func():
-    def append_list(record: list[str]):
+    def append_list(record: list):
         async def async_func(_, __):
             record.append("Value")
 
