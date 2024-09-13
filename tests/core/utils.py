@@ -1,0 +1,59 @@
+import asyncio
+
+from chatsky.core import Context, Pipeline
+from chatsky.core.service import ServiceGroup, Service, ExtraHandlerType
+from chatsky.core.service.extra import ComponentExtraHandler
+
+from chatsky.utils.testing import TOY_SCRIPT
+
+
+def make_test_service_group(running_order: list[str]) -> ServiceGroup:
+
+    def interact(stage: str, run_order: list):
+        async def slow_service(_: Context):
+            run_order.append(stage)
+            await asyncio.sleep(0)
+
+        return slow_service
+
+    test_group = ServiceGroup(
+        components=[
+            ServiceGroup(
+                name="InteractWithServiceA",
+                components=[
+                    interact("A1", running_order),
+                    interact("A2", running_order),
+                    interact("A3", running_order),
+                ],
+            ),
+            ServiceGroup(
+                name="InteractWithServiceB",
+                components=[
+                    interact("B1", running_order),
+                    interact("B2", running_order),
+                    interact("B3", running_order),
+                ],
+            ),
+            ServiceGroup(
+                name="InteractWithServiceC",
+                components=[
+                    interact("C1", running_order),
+                    interact("C2", running_order),
+                    interact("C3", running_order),
+                ],
+            ),
+        ],
+    )
+    return test_group
+
+
+def run_test_group(test_group: ServiceGroup) -> None:
+    ctx = Context.init(("greeting_flow", "start_node"))
+    pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+    asyncio.run(pipeline.pre_services(ctx))
+
+
+def run_extra_handler(extra_handler: ComponentExtraHandler) -> None:
+    ctx = Context.init(("greeting_flow", "start_node"))
+    service = Service(handler=lambda _: None, before_handler=extra_handler)
+    asyncio.run(service.run_extra_handler(ExtraHandlerType.BEFORE, ctx))

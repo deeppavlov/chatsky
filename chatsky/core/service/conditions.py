@@ -34,7 +34,8 @@ class ServiceFinishedCondition(BaseCondition):
     """
 
     def __init__(self, path, wait=False):
-        super().__init__(path=path, wait=wait)
+        self.path = path
+        self.wait = wait
 
     # This still needs one field in the Context() object, but I think this is required.
     async def call(self, ctx: Context) -> bool:

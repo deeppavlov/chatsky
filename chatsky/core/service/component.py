@@ -7,6 +7,8 @@ This is a base class for pipeline processing and is responsible for performing a
 """
 
 from __future__ import annotations
+
+import inspect
 import logging
 import abc
 import asyncio
@@ -216,12 +218,17 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
         :return: Info dict, containing most important component public fields as well as its type.
         """
+        if inspect.isfunction(self.start_condition):
+            start_condition = self.start_condition.__name__
+        else:
+            start_condition = self.start_condition.__class__.__name__
+
         return {
             "type": type(self).__name__,
             "name": self.name,
             "path": self.path if self.path is not None else "[None]",
             "asynchronous": self.asynchronous,
-            "start_condition": self.start_condition.__name__,
+            "start_condition": start_condition,
             "extra_handlers": {
                 "before": self.before_handler.info_dict,
                 "after": self.after_handler.info_dict,

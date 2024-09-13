@@ -25,21 +25,13 @@ class UserFunctionSamples:
     def correct_service_function_1(_: Context):
         pass
 
-    @staticmethod
-    def correct_service_function_2(_: Context, __: Pipeline):
-        pass
-
-    @staticmethod
-    def correct_service_function_3(_: Context, __: Pipeline, ___: ServiceRuntimeInfo):
-        pass
-
 
 # Could make a test for returning an awaitable from a ServiceFunction, ExtraHandlerFunction
 class TestServiceValidation:
     def test_model_validator(self):
         with pytest.raises(ValidationError):
             # Can't pass a list to handler, it has to be a single function
-            Service(handler=[UserFunctionSamples.correct_service_function_2])
+            Service(handler=[UserFunctionSamples.correct_service_function_1])
         with pytest.raises(NotImplementedError):
             # Can't pass 'None' to handler, it has to be a callable function
             # Though I wonder if empty Services should be allowed.
@@ -57,7 +49,7 @@ class TestServiceValidation:
 
 class TestExtraHandlerValidation:
     def test_correct_functions(self):
-        funcs = [UserFunctionSamples.correct_service_function_1, UserFunctionSamples.correct_service_function_2]
+        funcs = [UserFunctionSamples.correct_service_function_1, UserFunctionSamples.correct_service_function_1]
         handler = BeforeHandler(functions=funcs)
         assert handler.functions == funcs
 
@@ -87,7 +79,7 @@ class TestExtraHandlerValidation:
 # It's not a test though.
 class TestServiceGroupValidation:
     def test_single_service(self):
-        func = UserFunctionSamples.correct_service_function_2
+        func = UserFunctionSamples.correct_service_function_1
         group = ServiceGroup(components=Service(handler=func, after_handler=func))
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
@@ -97,7 +89,7 @@ class TestServiceGroupValidation:
         assert group.components[0].after_handler.functions[0] == func
 
     def test_several_correct_services(self):
-        func = UserFunctionSamples.correct_service_function_2
+        func = UserFunctionSamples.correct_service_function_1
         services = [Service.model_validate(func), Service(handler=func, timeout=10)]
         group = ServiceGroup(components=services, timeout=15)
         assert group.components == services
