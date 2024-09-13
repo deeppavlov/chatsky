@@ -7,7 +7,6 @@ import pytest
 from chatsky.core.service import (
     Service,
     ServiceGroup,
-    ServiceRuntimeInfo,
     BeforeHandler,
     PipelineComponent,
 )

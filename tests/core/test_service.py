@@ -2,8 +2,8 @@ import asyncio
 import pytest
 
 from chatsky import Context, BaseProcessing
-from chatsky.core.service import ServiceRuntimeInfo, Service, ExtraHandlerType, ServiceGroup
-from chatsky.core.service.extra import ComponentExtraHandler, BeforeHandler
+from chatsky.core.service import Service, ServiceGroup
+from chatsky.core.service.extra import BeforeHandler
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
 

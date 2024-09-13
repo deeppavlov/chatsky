@@ -15,7 +15,7 @@ are shown for advanced data pre- and postprocessing based on conditions.
 import json
 import logging
 
-from chatsky.core import Context, BaseProcessing
+from chatsky.core import Context
 from chatsky.core.service import Service, ServiceFinishedCondition
 from chatsky.conditions import Not
 from chatsky import Pipeline

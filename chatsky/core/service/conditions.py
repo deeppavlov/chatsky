@@ -8,7 +8,6 @@ The standard set of them allows user to set up dependencies between pipeline com
 
 from __future__ import annotations
 import asyncio
-from typing import Optional
 
 from chatsky.core.context import Context
 from chatsky.core.script_function import BaseCondition
@@ -16,8 +15,6 @@ from chatsky.core.script_function import BaseCondition
 from chatsky.core.service.types import (
     ComponentExecutionState,
 )
-
-from chatsky.utils.devel.async_helpers import async_infinite_sleep
 
 
 class ServiceFinishedCondition(BaseCondition):

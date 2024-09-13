@@ -14,7 +14,7 @@ This tutorial is a more advanced version of the
 # %%
 import logging
 
-from chatsky.core import Context, BaseProcessing
+from chatsky.core import Context
 from chatsky.conditions import Not, All
 from chatsky.core.service import ServiceFinishedCondition, Service, ServiceGroup
 from chatsky import Pipeline
