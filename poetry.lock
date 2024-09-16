@@ -2277,14 +2277,17 @@ files = [
 
 [[package]]
 name = "idna"
-version = "3.8"
+version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "idna-3.8-py3-none-any.whl", hash = "sha256:050b4e5baadcd44d760cedbd2b8e639f2ff89bbc7a5730fcc662954303377aac"},
-    {file = "idna-3.8.tar.gz", hash = "sha256:d838c2c0ed6fced7693d5e8ab8e734d5f8fda53a039c0164afb0b82e771e3603"},
+    {file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
+    {file = "idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9"},
 ]
+
+[package.extras]
+all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
 name = "imagesize"
@@ -3832,8 +3835,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -6895,13 +6898,13 @@ multidict = ">=4.0"
 
 [[package]]
 name = "ydb"
-version = "3.16.1"
+version = "3.17.1"
 description = "YDB Python SDK"
 optional = true
 python-versions = "*"
 files = [
-    {file = "ydb-3.16.1-py2.py3-none-any.whl", hash = "sha256:b6278f6e4dac51519b0db705d667e9a279fab72b987b358e386014dbeff4ee26"},
-    {file = "ydb-3.16.1.tar.gz", hash = "sha256:fd18976146ff4d65cff13a8265911bb40ff67312398b0ca80529d74564c4c6fa"},
+    {file = "ydb-3.17.1-py2.py3-none-any.whl", hash = "sha256:b6b18dbcfb7393ebafe133e8fd22f8f99ac8e52ae48daba1385b607afff088bc"},
+    {file = "ydb-3.17.1.tar.gz", hash = "sha256:579b00fc879ac1356319248e7909e0292b3665217a467715e7c5c892e97b7d41"},
 ]
 
 [package.dependencies]
