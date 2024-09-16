@@ -1,9 +1,11 @@
 import asyncio
 import pytest
 
-from chatsky import Context, BaseProcessing
-from chatsky.core.service import Service, ServiceGroup, ComponentExecutionState
+from chatsky import Context, BaseProcessing, Pipeline
+from chatsky.core.service import Service, ServiceGroup, ComponentExecutionState, ServiceFinishedCondition, \
+    GlobalExtraHandlerType
 from chatsky.core.service.extra import BeforeHandler
+from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
 
@@ -103,5 +105,65 @@ def test_service_computed_names():
     assert service.computed_name == "MyProcessing"
 
 
+# all_async flag will try to run all services simultaneously, but the 'wait' option
+# makes it so that A waits for B, which waits for C. So "C" is first, "A" is last.
 def test_waiting_for_service_to_finish_condition():
-    pass
+    def service_func(record: list, value: str):
+        async def inner(_: Context) -> None:
+            record.append(value)
+            await asyncio.sleep(0)
+
+        return inner
+
+    running_order = []
+    test_group = make_test_service_group(running_order)
+    test_group.all_async = True
+    test_group.components[0].start_condition = ServiceFinishedCondition(
+        path=".pipeline.pre.InteractWithServiceB", wait=True
+    )
+    test_group.components[1].start_condition = ServiceFinishedCondition(
+        path=".pipeline.pre.InteractWithServiceC", wait=True
+    )
+
+    run_test_group(test_group)
+    assert running_order == ["C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
+
+
+def test_bad_service():
+    def bad_service_func(_: Context) -> None:
+        raise Exception("Custom exception")
+
+    test_group = ServiceGroup.model_validate(bad_service_func)
+    assert run_test_group(test_group) == ComponentExecutionState.FAILED
+
+
+def test_service_not_run():
+    service = Service(handler=lambda ctx: None, start_condition=False)
+    assert run_test_group(service) == ComponentExecutionState.NOT_RUN
+
+
+def test_inherited_extra_handlers_for_service_groups_with_conditions():
+    def extra_handler_func(counter: list):
+        def inner(_: Context) -> None:
+            counter.append("Value")
+        return inner
+
+    def condition_func(path: str):
+        if path == ".pipeline.pre.InteractWithServiceA" or path == ".pipeline.pre.service":
+            return True
+        return False
+
+    counter_list = []
+    test_group = make_test_service_group(list())
+
+    service = Service(handler=lambda _: None, name="service")
+    test_group.components.append(service)
+
+    ctx = Context.init(("greeting_flow", "start_node"))
+    pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+
+    test_group.add_extra_handler(GlobalExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
+
+    asyncio.run(pipeline.pre_services(ctx))
+    # One for original ServiceGroup, one for each of the defined paths in the condition function.
+    assert counter_list == ["Value"]*3

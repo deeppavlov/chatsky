@@ -30,10 +30,6 @@ class ServiceFinishedCondition(BaseCondition):
     By default, the service is not awaited.
     """
 
-    def __init__(self, path, wait=False):
-        self.path = path
-        self.wait = wait
-
     # This still needs one field in the Context() object, but I think this is required.
     async def call(self, ctx: Context) -> bool:
         if self.wait:

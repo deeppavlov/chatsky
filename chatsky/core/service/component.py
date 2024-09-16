@@ -138,6 +138,8 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
                 if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
+                else:
+                    self._set_state(ctx, ComponentExecutionState.FAILED)
 
                 await self.after_handler(ctx, self)
             else:
