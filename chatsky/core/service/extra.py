@@ -10,7 +10,7 @@ import asyncio
 import logging
 import inspect
 
-from typing import Optional, List, Any, ClassVar, Union, Callable
+from typing import Optional, List, Any, ClassVar, Union, Callable, TYPE_CHECKING
 from typing_extensions import Annotated, TypeAlias
 from pydantic import BaseModel, model_validator, Field
 
@@ -25,6 +25,9 @@ from chatsky.core.service.types import (
 )
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from chatsky.core.service import PipelineComponent
 
 
 class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
@@ -75,12 +78,14 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
                 result["functions"] = [result["functions"]]
         return result
 
-    async def _run_function(self, func: ExtraHandlerFunction, ctx: Context, component_info: ServiceRuntimeInfo):
+    async def _run_function(self, func: ExtraHandlerFunction, ctx: Context, component_info: PipelineComponent):
         handler_params = len(inspect.signature(func).parameters)
         if handler_params == 1:
             await wrap_sync_function_in_async(func, ctx)
         elif handler_params == 2:
-            extra_handler_runtime_info = ExtraHandlerRuntimeInfo(func=func, stage=self.stage, component=component_info)
+            extra_handler_runtime_info = ExtraHandlerRuntimeInfo(
+                func=func, stage=self.stage, component=component_info._get_runtime_info(ctx)
+            )
             await wrap_sync_function_in_async(func, ctx, extra_handler_runtime_info)
         else:
             raise Exception(
@@ -88,29 +93,23 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
                 f" wrapper handler '{func.__name__}': {handler_params}!"
             )
 
-    async def _run(self, ctx: Context, component_info: ServiceRuntimeInfo):
+    async def _run(self, ctx: Context, component_info: PipelineComponent):
         """
         Method for executing one of the extra handler functions (before or after).
         If the function is not set, nothing happens.
 
         :param ctx: current dialog context.
-        :param component_info: associated component's info dictionary.
+        :param component_info: associated component's `self` object.
         :return: `None`
         """
 
         if self.asynchronous:
-            futures = [self._run_function(func, ctx, component_info) for func in self.functions]
-            for func, future in zip(self.functions, asyncio.as_completed(futures)):
-                try:
-                    await future
-                except asyncio.TimeoutError:
-                    logger.warning(f"Component {component_info.name} {self.stage} wrapper '{func.__name__}' timed out!")
-
+            await asyncio.gather(*[self._run_function(func, ctx, component_info) for func in self.functions])
         else:
             for func in self.functions:
                 await self._run_function(func, ctx, component_info)
 
-    async def __call__(self, ctx: Context, component_info: ServiceRuntimeInfo):
+    async def __call__(self, ctx: Context, component_info: PipelineComponent):
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
@@ -119,26 +118,8 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         :return: `Context` if this is a synchronous service or
             `Awaitable` if this is an asynchronous component or `None`.
         """
-        if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, component_info))
-            return await asyncio.wait_for(task, timeout=self.timeout)
-        else:
-            return await self._run(ctx, component_info)
-
-    @property
-    def info_dict(self) -> dict:
-        """
-        Property for retrieving info dictionary about this extra handler.
-
-        :return: Info dict, containing its fields as well as its type.
-            All not set fields there are replaced with `None`.
-        """
-        return {
-            "type": type(self).__name__,
-            "timeout": self.timeout,
-            "asynchronous": self.asynchronous,
-            "functions": [func.__name__ for func in self.functions],
-        }
+        task = asyncio.create_task(self._run(ctx, component_info))
+        return await asyncio.wait_for(task, timeout=self.timeout)
 
 
 class BeforeHandler(ComponentExtraHandler):

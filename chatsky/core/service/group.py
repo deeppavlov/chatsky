@@ -148,16 +148,6 @@ class ServiceGroup(PipelineComponent):
     def computed_name(self) -> str:
         return "service_group"
 
-    @property
-    def info_dict(self) -> dict:
-        """
-        See `Component.info_dict` property.
-        Adds `services` key to base info dictionary.
-        """
-        representation = super(ServiceGroup, self).info_dict
-        representation.update({"services": [service.info_dict for service in self.components]})
-        return representation
-
 
 ServiceGroupInitTypes: TypeAlias = Union[
     ServiceGroup,

@@ -86,16 +86,6 @@ class Service(PipelineComponent):
         else:
             return self.handler.__class__.__name__
 
-    @property
-    def info_dict(self) -> dict:
-        """
-        See `Component.info_dict` property.
-        Adds `handler` key to base info dictionary.
-        """
-        representation = super(Service, self).info_dict
-        representation.update({"handler": self.computed_name})
-        return representation
-
 
 def to_service(
     before_handler: BeforeHandler = None,

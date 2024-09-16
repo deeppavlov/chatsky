@@ -105,21 +105,6 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
 
-    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context):
-        extra_handler = None
-        if stage == ExtraHandlerType.BEFORE:
-            extra_handler = self.before_handler
-        if stage == ExtraHandlerType.AFTER:
-            extra_handler = self.after_handler
-        if extra_handler is None:
-            return
-        try:
-            extra_handler_result = await extra_handler(ctx, self._get_runtime_info(ctx))
-            if extra_handler.asynchronous and isinstance(extra_handler_result, Awaitable):
-                await extra_handler_result
-        except asyncio.TimeoutError:
-            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
-
     @abc.abstractmethod
     async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
         """
@@ -148,13 +133,13 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
         async def _inner_run():
             if await self.start_condition(ctx):
-                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx)
+                await self.before_handler(ctx, self)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
                 if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
                     self._set_state(ctx, ComponentExecutionState.FINISHED)
 
-                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx)
+                await self.after_handler(ctx, self)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 
@@ -208,28 +193,3 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             asynchronous=self.asynchronous,
             execution_state=ctx.framework_data.service_states.copy(),
         )
-
-    @property
-    def info_dict(self) -> dict:
-        """
-        Property for retrieving info dictionary about this component.
-        All not set fields there are replaced with `[None]`.
-
-        :return: Info dict, containing most important component public fields as well as its type.
-        """
-        if inspect.isfunction(self.start_condition):
-            start_condition = self.start_condition.__name__
-        else:
-            start_condition = self.start_condition.__class__.__name__
-
-        return {
-            "type": type(self).__name__,
-            "name": self.name,
-            "path": self.path if self.path is not None else "[None]",
-            "asynchronous": self.asynchronous,
-            "start_condition": start_condition,
-            "extra_handlers": {
-                "before": self.before_handler.info_dict,
-                "after": self.after_handler.info_dict,
-            },
-        }

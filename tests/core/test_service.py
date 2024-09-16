@@ -2,7 +2,7 @@ import asyncio
 import pytest
 
 from chatsky import Context, BaseProcessing
-from chatsky.core.service import Service, ServiceGroup
+from chatsky.core.service import Service, ServiceGroup, ComponentExecutionState
 from chatsky.core.service.extra import BeforeHandler
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
@@ -26,29 +26,24 @@ def test_all_async_flag():
     assert running_order == ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3"]
 
 
-"""
-def test_undefined_extra_handler_type():
-    extra_handler = ComponentExtraHandler
-    service = Service()
-"""
-
-
 def test_extra_handler_timeouts():
-    def bad_function(timeout: float):
+    def bad_function(timeout: float, bad_func_completed: list):
         def inner(_, __) -> None:
             asyncio.run(asyncio.sleep(timeout))
-            raise Exception("ExtraHandler timeout didn't trigger!")
+            bad_func_completed.append(True)
 
         return inner
 
     # Timeout expires before the exception is raised, which is then logged.
-    extra_handler = BeforeHandler(functions=bad_function(1.0), timeout=0.0, asynchronous=True)
+    test_list = []
+    extra_handler = BeforeHandler(functions=bad_function(1.0, test_list), timeout=0.0, asynchronous=True)
     run_extra_handler(extra_handler)
+    assert test_list == []
 
-    # This is here just to demonstrate that the exception is working.
-    with pytest.raises(Exception):
-        extra_handler = BeforeHandler(functions=bad_function(0.0), timeout=1.0, asynchronous=True)
-        run_extra_handler(extra_handler)
+    # This is here just to demonstrate that the timeout is working.
+    extra_handler = BeforeHandler(functions=bad_function(0.0, test_list), timeout=1.0, asynchronous=True)
+    run_extra_handler(extra_handler)
+    assert test_list == [True]
 
 
 def test_extra_handler_function_signatures():
@@ -64,13 +59,11 @@ def test_extra_handler_function_signatures():
     def no_parameters_func() -> None:
         pass
 
-    run_extra_handler(one_parameter_func)
-    run_extra_handler(two_parameter_func)
+    assert run_extra_handler(one_parameter_func) == ComponentExecutionState.FINISHED
+    assert run_extra_handler(two_parameter_func) == ComponentExecutionState.FINISHED
 
-    with pytest.raises(Exception):
-        run_extra_handler(three_parameter_func)
-    with pytest.raises(Exception):
-        run_extra_handler(no_parameters_func)
+    assert run_extra_handler(three_parameter_func) == ComponentExecutionState.FAILED
+    assert run_extra_handler(no_parameters_func) == ComponentExecutionState.FAILED
 
 
 # Checking that async functions can be run as extra_handlers.
@@ -85,34 +78,6 @@ def test_async_extra_handler_func():
     extra_handler = BeforeHandler(functions=append_list(test_list), asynchronous=True)
     run_extra_handler(extra_handler)
     assert test_list == ["Value"]
-
-
-"""
-def test_nested_async_extra_handler_func():
-    def append_list(record: list[str]):
-        async def async_func(_, __):
-            async def inner(_, __):
-                record.append("Value")
-            return inner
-        return async_func
-
-    test_list = []
-    extra_handler = BeforeHandler(functions=append_list(test_list), asynchronous=True)
-    run_extra_handler(extra_handler)
-    assert test_list == ["Value"]
-"""
-
-
-def test_components_info_dict():
-    def empty_func(_):
-        pass
-
-    test_extra_handler = BeforeHandler(functions=empty_func)
-    test_service = Service(handler=empty_func)
-    test_group = ServiceGroup(components=test_service)
-    assert test_extra_handler.info_dict is not None
-    assert test_service.info_dict is not None
-    assert test_group.info_dict is not None
 
 
 def test_service_computed_names():
