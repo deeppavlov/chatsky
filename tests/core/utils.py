@@ -7,7 +7,7 @@ from chatsky.core.service.extra import ComponentExtraHandler
 from chatsky.utils.testing import TOY_SCRIPT
 
 
-def make_test_service_group(running_order: list[str]) -> ServiceGroup:
+def make_test_service_group(running_order: list) -> ServiceGroup:
 
     def interact(stage: str, run_order: list):
         async def slow_service(_: Context):
