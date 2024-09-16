@@ -1,9 +1,13 @@
 import asyncio
-import pytest
 
 from chatsky import Context, BaseProcessing, Pipeline
-from chatsky.core.service import Service, ServiceGroup, ComponentExecutionState, ServiceFinishedCondition, \
-    GlobalExtraHandlerType
+from chatsky.core.service import (
+    Service,
+    ServiceGroup,
+    ComponentExecutionState,
+    ServiceFinishedCondition,
+    GlobalExtraHandlerType,
+)
 from chatsky.core.service.extra import BeforeHandler
 from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
@@ -146,6 +150,7 @@ def test_inherited_extra_handlers_for_service_groups_with_conditions():
     def extra_handler_func(counter: list):
         def inner(_: Context) -> None:
             counter.append("Value")
+
         return inner
 
     def condition_func(path: str):
@@ -166,4 +171,4 @@ def test_inherited_extra_handlers_for_service_groups_with_conditions():
 
     asyncio.run(pipeline.pre_services(ctx))
     # One for original ServiceGroup, one for each of the defined paths in the condition function.
-    assert counter_list == ["Value"]*3
+    assert counter_list == ["Value"] * 3

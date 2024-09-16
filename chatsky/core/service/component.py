@@ -8,11 +8,10 @@ This is a base class for pipeline processing and is responsible for performing a
 
 from __future__ import annotations
 
-import inspect
 import logging
 import abc
 import asyncio
-from typing import Optional, Awaitable, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator
 
 from chatsky.core.service.extra import BeforeHandler, AfterHandler
@@ -22,7 +21,6 @@ from chatsky.core.service.types import (
     ServiceRuntimeInfo,
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
-    ExtraHandlerType,
 )
 
 logger = logging.getLogger(__name__)

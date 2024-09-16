@@ -18,7 +18,6 @@ from chatsky.core.context import Context
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.core.service.types import (
-    ServiceRuntimeInfo,
     ExtraHandlerType,
     ExtraHandlerFunction,
     ExtraHandlerRuntimeInfo,
