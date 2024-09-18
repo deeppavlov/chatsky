@@ -113,7 +113,9 @@ def after_all(_, info: ExtraHandlerRuntimeInfo):
 class LongService(Service):
     def call(self, _):
         timeout = random.randint(0, 5) / 100
-        logger.info(f"Service {self.name} is going to sleep for {timeout} seconds.")
+        logger.info(
+            f"Service {self.name} is going to sleep for {timeout} seconds."
+        )
         await asyncio.sleep(timeout)
 
 

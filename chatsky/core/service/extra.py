@@ -82,9 +82,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         if handler_params == 1:
             await wrap_sync_function_in_async(func, ctx)
         elif handler_params == 2:
-            extra_handler_runtime_info = ExtraHandlerRuntimeInfo(
-                func=func, stage=self.stage, component=component
-            )
+            extra_handler_runtime_info = ExtraHandlerRuntimeInfo(func=func, stage=self.stage, component=component)
             await wrap_sync_function_in_async(func, ctx, extra_handler_runtime_info)
         else:
             raise Exception(

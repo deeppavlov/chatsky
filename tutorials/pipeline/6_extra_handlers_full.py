@@ -21,7 +21,8 @@ import psutil
 from chatsky.core.service import (
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
-    to_service, Service,
+    to_service,
+    Service,
 )
 from chatsky import Context, Pipeline
 from chatsky.utils.testing.common import (
