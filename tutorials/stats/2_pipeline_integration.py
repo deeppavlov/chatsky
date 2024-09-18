@@ -57,7 +57,7 @@ chatsky_instrumentor.instrument()
 async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
-        "execution_state": info.component.execution_state,
+        "execution_state": info.component.get_state(ctx),
     }
     # return a record to save into connected database
     return data

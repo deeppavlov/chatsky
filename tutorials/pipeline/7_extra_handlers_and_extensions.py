@@ -23,7 +23,7 @@ from chatsky.core.service import (
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
-    ServiceRuntimeInfo,
+    Service,
 )
 from chatsky import Pipeline
 from chatsky.utils.testing.common import (
@@ -110,10 +110,11 @@ def after_all(_, info: ExtraHandlerRuntimeInfo):
     )
 
 
-async def long_service(_, info: ServiceRuntimeInfo):
-    timeout = random.randint(0, 5) / 100
-    logger.info(f"Service {info.name} is going to sleep for {timeout} seconds.")
-    await asyncio.sleep(timeout)
+class LongService(Service):
+    def call(self, _):
+        timeout = random.randint(0, 5) / 100
+        logger.info(f"Service {self.name} is going to sleep for {timeout} seconds.")
+        await asyncio.sleep(timeout)
 
 
 # %%
@@ -121,7 +122,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [long_service for _ in range(0, 25)],
+    "pre_services": [LongService for _ in range(0, 25)],
 }
 
 # %%

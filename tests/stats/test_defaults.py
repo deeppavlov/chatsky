@@ -3,7 +3,8 @@ import importlib
 import pytest
 
 from chatsky.core import Context
-from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from chatsky.core.service import Service
+from chatsky.core.service.types import ExtraHandlerRuntimeInfo
 
 try:
     from chatsky.stats import default_extractors
@@ -16,8 +17,8 @@ async def test_get_current_label():
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
-        component=ServiceRuntimeInfo(
-            path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
+        component=Service(
+            handler=lambda ctx: None, path="-", name="-", timeout=None, asynchronous=False
         ),
     )
     result = await default_extractors.get_current_label(context, runtime_info)
@@ -33,8 +34,8 @@ async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_p
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
-        component=ServiceRuntimeInfo(
-            path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
+        component=Service(
+            handler=lambda ctx: None, path="-", name="-", timeout=None, asynchronous=False
         ),
     )
     _ = await default_extractors.get_current_label(Context.init(("a", "b")), runtime_info)

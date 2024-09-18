@@ -21,8 +21,7 @@ import psutil
 from chatsky.core.service import (
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
-    ServiceRuntimeInfo,
-    to_service,
+    to_service, Service,
 )
 from chatsky import Context, Pipeline
 from chatsky.utils.testing.common import (
@@ -160,14 +159,11 @@ def heavy_service(ctx: Context):
     ]
 
 
-@to_service(
-    before_handler=[json_converter_before_handler],
-    after_handler=[json_converter_after_handler],
-)
-def logging_service(ctx: Context, info: ServiceRuntimeInfo):
-    str_misc = ctx.misc[f"{info.name}-str"]
-    assert isinstance(str_misc, str)
-    print(f"Stringified misc: {str_misc}")
+class LoggingService(Service):
+    def call(self, ctx: Context):
+        str_misc = ctx.misc[f"{self.name}-str"]
+        assert isinstance(str_misc, str)
+        print(f"Stringified misc: {str_misc}")
 
 
 pipeline_dict = {
@@ -179,7 +175,7 @@ pipeline_dict = {
         after_handler=[time_measure_after_handler],
         components=[heavy_service for _ in range(0, 5)],
     ),
-    "post_services": logging_service,
+    "post_services": LoggingService,
 }
 
 # %%

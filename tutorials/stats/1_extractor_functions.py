@@ -100,7 +100,7 @@ that the output is logged by OpenTelemetry.
 async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {
-        "execution_state": info.component.execution_state,
+        "execution_state": info.component.get_state(ctx),
     }
     # return the state as an arbitrary dict for further logging
     return data

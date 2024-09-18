@@ -77,18 +77,18 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
                 result["functions"] = [result["functions"]]
         return result
 
-    async def _run_function(self, func: ExtraHandlerFunction, ctx: Context, component_info: PipelineComponent):
+    async def _run_function(self, func: ExtraHandlerFunction, ctx: Context, component: PipelineComponent):
         handler_params = len(inspect.signature(func).parameters)
         if handler_params == 1:
             await wrap_sync_function_in_async(func, ctx)
         elif handler_params == 2:
             extra_handler_runtime_info = ExtraHandlerRuntimeInfo(
-                func=func, stage=self.stage, component=component_info._get_runtime_info(ctx)
+                func=func, stage=self.stage, component=component
             )
             await wrap_sync_function_in_async(func, ctx, extra_handler_runtime_info)
         else:
             raise Exception(
-                f"Too many parameters required for component {component_info.name} {self.stage}"
+                f"Too many parameters required for component {component.name} {self.stage}"
                 f" wrapper handler '{func.__name__}': {handler_params}!"
             )
 
@@ -110,10 +110,11 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
     async def __call__(self, ctx: Context, component_info: PipelineComponent):
         """
-        A method for calling pipeline components.
-        It sets up timeout if this component is asynchronous and executes it using `_run` method.
+        A method for calling an extra handler.
+        It sets up a timeout and executes it using `_run` method.
 
         :param ctx: (required) Current dialog `Context`.
+        :param component_info: associated component's `self` object.
         :return: `Context` if this is a synchronous service or
             `Awaitable` if this is an asynchronous component or `None`.
         """

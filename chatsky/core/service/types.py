@@ -9,13 +9,14 @@ data structures, and other types that are defined for type hinting.
 
 from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, Optional, Any, Protocol, Hashable, TYPE_CHECKING
+from typing import Callable, Union, Awaitable, Optional, Any, Protocol, Hashable, TYPE_CHECKING
 from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
+    from chatsky.core.service import PipelineComponent
 
 
 class PipelineRunnerFunction(Protocol):
@@ -85,7 +86,7 @@ class GlobalExtraHandlerType(str, Enum):
 @unique
 class ExtraHandlerType(str, Enum):
     """
-    Enum, representing wrapper execution stage: before or after the wrapped function.
+    Enum, representing extra handler execution stage: before or after the wrapped function.
     The following types are supported:
 
     - UNDEFINED: extra handler function with undetermined execution stage,
@@ -107,21 +108,6 @@ Accepts str (component path), returns boolean (whether extra handler should be a
 """
 
 
-class ServiceRuntimeInfo(BaseModel):
-    """
-    Type of object, that is passed to components in runtime.
-    Contains current component info (`name`, `path`, `timeout`, `asynchronous`).
-    Also contains `execution_state` - a dictionary,
-    containing execution states of other components mapped to their paths.
-    """
-
-    name: str
-    path: str
-    timeout: Optional[float]
-    asynchronous: bool
-    execution_state: Dict[str, ComponentExecutionState]
-
-
 ExtraHandlerFunction: TypeAlias = Union[
     Callable[["Context"], Any],
     Callable[["Context", "ExtraHandlerRuntimeInfo"], Any],
@@ -135,13 +121,13 @@ Can accept current dialog context and current extra handler info.
 class ExtraHandlerRuntimeInfo(BaseModel):
     func: ExtraHandlerFunction
     stage: ExtraHandlerType
-    component: ServiceRuntimeInfo
+    component: PipelineComponent
 
 
 """
-Type of object, that is passed to wrappers in runtime.
+Type of object, that is passed to extra handlers in runtime.
 Contains current wrapper info (`name`, `stage`).
-Also contains `component` - runtime info of the component this wrapper is attached to.
+Also contains `component` - `self` object of the component this extra handler is attached to.
 """
 
 

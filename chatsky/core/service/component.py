@@ -18,7 +18,6 @@ from chatsky.core.service.extra import BeforeHandler, AfterHandler
 from chatsky.core.script_function import AnyCondition
 from chatsky.core.service.types import (
     ComponentExecutionState,
-    ServiceRuntimeInfo,
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
 )
@@ -177,19 +176,3 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             self.before_handler if global_extra_handler_type is GlobalExtraHandlerType.BEFORE else self.after_handler
         )
         target.functions.append(extra_handler)
-
-    def _get_runtime_info(self, ctx: Context) -> ServiceRuntimeInfo:
-        """
-        Method for retrieving runtime info about this component.
-
-        :param ctx: Current dialog :py:class:`~.Context`.
-        :return: :py:class:`.ServiceRuntimeInfo`
-            object where all not set fields are replaced with `[None]`.
-        """
-        return ServiceRuntimeInfo(
-            name=self.name if self.name is not None else "[None]",
-            path=self.path if self.path is not None else "[None]",
-            timeout=self.timeout,
-            asynchronous=self.asynchronous,
-            execution_state=ctx.framework_data.service_states.copy(),
-        )
