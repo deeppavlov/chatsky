@@ -89,7 +89,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: :py:class:`~.Context` to keep state in.
         :param value: State to set.
         """
-        ctx.framework_data.service_states[self.path] = value
+        ctx.framework_data.service_states[self.path].execution_status = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
@@ -100,7 +100,10 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             (usually it's :py:attr:`~.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`.ComponentExecutionState` of this service or default if not found.
         """
-        return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
+        state = ctx.framework_data.service_states.get(self.path, default if default is not None else None)
+        if state != default:
+            return state.execution_status
+        return default
 
     @abc.abstractmethod
     async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
@@ -148,9 +151,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
         finally:
-            if ctx.framework_data.service_finished.get(self.path, None) is None:
-                ctx.framework_data.service_finished[self.path] = asyncio.Event()
-            ctx.framework_data.service_finished[self.path].set()
+            ctx.framework_data.service_states[self.path].finished_event.set()
 
     async def __call__(self, ctx: Context) -> None:
         """

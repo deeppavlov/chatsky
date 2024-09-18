@@ -19,6 +19,7 @@ This allows developers to save the context data and resume the conversation late
 from __future__ import annotations
 import logging
 import asyncio
+from collections import defaultdict
 from uuid import UUID, uuid4
 from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 
@@ -29,9 +30,9 @@ from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:
+    from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
-    from chatsky.core.service.types import ComponentExecutionState
 
 logger = logging.getLogger(__name__)
 
@@ -54,19 +55,23 @@ class ContextError(Exception):
     """Raised when context methods are not used correctly."""
 
 
+class ServiceState(BaseModel, arbitrary_types_allowed=True):
+    execution_status: ComponentExecutionState = "NOT_RUN"
+    "Execution status of this pipeline service. Cleared at the end of every turn."
+    finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
+    """
+    Asyncio `Event` which can be awaited until this service finishes.
+    Cleared at the end of every turn.
+    """
+
+
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     Framework uses this to store data related to any of its modules.
     """
 
-    service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
+    service_states: Dict[str, ServiceState] = Field(default_factory=defaultdict(ServiceState))
     "Statuses of all the pipeline services. Cleared at the end of every turn."
-    # I don't know how to document the field below properly.
-    service_finished: Dict[str, asyncio.Event] = Field(default_factory=dict, exclude=True)
-    """
-    Asyncio `Event`s which can be awaited until the corresponding service finishes.
-    Takes a `str` path to awaited service. Cleared at the end of every turn.
-    """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
     A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.

@@ -20,12 +20,11 @@ import random
 from datetime import datetime
 
 from chatsky.core.service import (
-    ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
     Service,
 )
-from chatsky import Pipeline
+from chatsky import Pipeline, Context
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -89,14 +88,12 @@ def before(_, info: ExtraHandlerRuntimeInfo):
     start_times.update({info.component.path: datetime.now()})
 
 
-def after(_, info: ExtraHandlerRuntimeInfo):
+def after(ctx: Context, info: ExtraHandlerRuntimeInfo):
     start_time = start_times[info.component.path]
     pipeline_info.update(
         {
             f"{info.component.path}_duration": datetime.now() - start_time,
-            f"{info.component.path}_state": info.component.execution_state.get(
-                info.component.path, ComponentExecutionState.NOT_RUN
-            ),
+            f"{info.component.path}_state": info.component.get_state(ctx),
         }
     )
 
@@ -111,7 +108,7 @@ def after_all(_, info: ExtraHandlerRuntimeInfo):
 
 
 class LongService(Service):
-    def call(self, _):
+    async def call(self, _):
         timeout = random.randint(0, 5) / 100
         logger.info(
             f"Service {self.name} is going to sleep for {timeout} seconds."

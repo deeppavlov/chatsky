@@ -169,10 +169,10 @@ pipeline_dict = {
                     handler=SimpleService,
                     start_condition=All(
                         ServiceFinishedCondition(
-                            ".pipeline.pre.SimpleService_0"
+                            path=".pipeline.pre.SimpleService_0"
                         ),
                         ServiceFinishedCondition(
-                            ".pipeline.pre.SimpleService_1"
+                            path=".pipeline.pre.SimpleService_1"
                         ),
                     ),  # Alternative:
                     # service_successful_condition(".pipeline.pre")
@@ -183,7 +183,7 @@ pipeline_dict = {
                     handler=NeverRunningService,
                     start_condition=Not(
                         ServiceFinishedCondition(
-                            ".pipeline.post.named_group.SimpleService"
+                            path=".pipeline.post.named_group.SimpleService"
                         )
                     ),
                 ),
