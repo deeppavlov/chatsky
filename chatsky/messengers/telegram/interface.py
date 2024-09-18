@@ -8,7 +8,7 @@ This module provides concrete implementations of the
 from pathlib import Path
 from typing import Any, Optional
 
-from chatsky.pipeline.types import PipelineRunnerFunction
+from chatsky.core.service.types import PipelineRunnerFunction
 
 from .abstract import _AbstractTelegramInterface
 

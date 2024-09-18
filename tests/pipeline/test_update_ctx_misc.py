@@ -1,20 +1,21 @@
 import pytest
 
-from chatsky.pipeline import Pipeline
-from chatsky.script import Message, RESPONSE, TRANSITIONS
+from chatsky import Context
+from chatsky.core import Message, RESPONSE, TRANSITIONS, Pipeline, Transition as Tr, BaseCondition
 
 
 @pytest.mark.asyncio
 async def test_update_ctx_misc():
-    def condition(ctx, _):
-        return ctx.misc["condition"]
+    class MyCondition(BaseCondition):
+        async def call(self, ctx: Context) -> bool:
+            return ctx.misc["condition"]
 
     toy_script = {
         "root": {
-            "start": {TRANSITIONS: {"success": condition}},
-            "success": {RESPONSE: Message("success"), TRANSITIONS: {"success": condition}},
+            "start": {TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
+            "success": {RESPONSE: "success", TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
             "failure": {
-                RESPONSE: Message("failure"),
+                RESPONSE: "failure",
             },
         }
     }

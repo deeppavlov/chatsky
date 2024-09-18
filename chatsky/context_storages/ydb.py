@@ -16,7 +16,7 @@ from typing import Hashable
 from urllib.parse import urlsplit
 
 
-from chatsky.script import Context
+from chatsky.core import Context
 
 from .database import DBContextStorage
 from .protocol import get_protocol_install_suggestion
@@ -51,7 +51,7 @@ class YDBContextStorage(DBContextStorage):
         self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, self.table_name))
 
     async def set_item_async(self, key: Hashable, value: Context):
-        value = value if isinstance(value, Context) else Context.cast(value)
+        value = Context.model_validate(value)
 
         async def callee(session):
             query = """
@@ -104,7 +104,7 @@ class YDBContextStorage(DBContextStorage):
                 commit_tx=True,
             )
             if result_sets[0].rows:
-                return Context.cast(result_sets[0].rows[0].context)
+                return Context.model_validate_json(result_sets[0].rows[0].context)
             else:
                 raise KeyError
 

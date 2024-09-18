@@ -15,7 +15,7 @@ import random
 from humanize import naturalsize
 from pympler import asizeof
 
-from chatsky.script import Message, Context
+from chatsky.core import Message, Context
 from chatsky.utils.db_benchmark.benchmark import BenchmarkConfig
 
 

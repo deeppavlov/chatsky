@@ -32,22 +32,27 @@ Let's consider some of the built-in callback instances to see how the context ca
 .. code-block:: python
     :linenos:
 
-      pattern = re.compile("[a-zA-Z]+")
+    class Regexp(BaseCondition):
+        pattern: str
 
-      def regexp_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
-          # retrieve the current request
-          request = ctx.last_request
-          if request.text is None:
-              return False
-          return bool(pattern.search(request.text))
+        @cached_property
+        def re_object(self) -> Pattern:
+            return re.compile(self.pattern)
 
-The code above is a condition function (see the `basic guide <./basic_conceptions.rst>`__)
+        async def call(self, ctx: Context) -> bool:
+            request = ctx.last_request
+            if request.text is None:
+                return False
+            return bool(self.re_object.search(request.text))
+
+The code above is a condition function (see the `conditions tutorial <../tutorials/tutorials.script.core.2_conditions.py>`__)
 that belongs to the ``TRANSITIONS`` section of the script and returns `True` or `False`
 depending on whether the current user request matches the given pattern.
+
 As can be seen from the code block, the current
-request (``last_request``) can be easily retrieved as one of the attributes of the ``Context`` object.
+request (``last_request``) can be retrieved as one of the attributes of the ``Context`` object.
 Likewise, the ``last_response`` (bot's current reply) or the ``last_label``
-(the name of the currently visited node) attributes can be used in the same manner.
+(the name of the current node) attributes can be used in the same manner.
 
 Another common use case is leveraging the ``misc`` field (see below for a detailed description):
 pipeline functions or ``PROCESSING`` callbacks can write arbitrary values to the misc field,
@@ -59,18 +64,17 @@ making those available for other context-dependent functions.
     import urllib.request
     import urllib.error
 
-    def ping_example_com(
-        ctx: Context, *_, **__
-    ):
-        try:
-            with urllib.request.urlopen("https://example.com/") as webpage:
-                web_content = webpage.read().decode(
-                    webpage.headers.get_content_charset()
-                )
-                result = "Example Domain" in web_content
-        except urllib.error.URLError:
-            result = False
-        ctx.misc["can_ping_example_com"] = result
+    class PingExample(BaseProcessing):
+        async def call(self, ctx):
+            try:
+                with urllib.request.urlopen("https://example.com/") as webpage:
+                    web_content = webpage.read().decode(
+                        webpage.headers.get_content_charset()
+                    )
+                    result = "Example Domain" in web_content
+            except urllib.error.URLError:
+                result = False
+            ctx.misc["can_ping_example_com"] = result
 
 ..
     todo: link to the user defined functions tutorial
@@ -84,7 +88,7 @@ API
 This sections describes the API of the ``Context`` class.
 
 For more information, such as method signatures, see
-`API reference <../apiref/chatsky.script.core.context.html#chatsky.script.core.context.Context>`__.
+`API reference <../apiref/chatsky.core.context.html#chatsky.core.context.Context>`__.
 
 Attributes
 ==========
@@ -111,6 +115,8 @@ Attributes
 
 * **framework_data**: This attribute is used for storing custom data required for pipeline execution.
   It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
+  But there are some methods that provide access to specific fields of framework data.
+  These methods are described in the next section.
 
 Methods
 =======
@@ -124,58 +130,40 @@ The methods of the ``Context`` class can be divided into two categories:
 Public methods
 ^^^^^^^^^^^^^^
 
-* **last_request**: Return the last request of the context, or `None` if the ``requests`` field is empty.
-
-  Note that a request is added right after the context is created/retrieved from db,
-  so an empty ``requests`` field usually indicates an issue with the messenger interface.
+* **last_request**: Return the last request of the context.
 
 * **last_response**: Return the last response of the context, or `None` if the ``responses`` field is empty.
 
   Responses are added at the end of each turn, so an empty ``response`` field is something you should definitely consider.
 
-* **last_label**: Return the last label of the context, or `None` if the ``labels`` field is empty.
-  Last label is always the name of the current node but not vice versa:
-
-  Since ``start_label`` is not added to the ``labels`` field,
-  empty ``labels`` usually indicates that the current node is the `start_node`.
-  After a transition is made from the `start_node`
-  the label of that transition is added to the field.
+* **last_label**: Return the last node label of the context (i.e. name of the current node).
 
 * **clear**: Clear all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
   You can specify which fields to clear using the `field_names` parameter. This method is designed for cases
   when contexts are shared over high latency networks.
 
-.. note::
+* **current_node**: Return the current node of the context.
+  Use this property to access properties of the current node.
+  You can safely modify properties of this. The changes will be reflected in
+  bot behaviour during this turn, bot are not permanent (the node stored inside the script is not changed).
 
-  See the `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__.
+  .. note::
+
+    See the `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__.
+
+* **pipeline**: Return ``Pipeline`` object that is used to process this context.
+  This can be used to get ``Script``, ``start_label`` or ``fallback_label``.
 
 Private methods
 ^^^^^^^^^^^^^^^
 
-* **set_last_response, set_last_request**: These methods allow you to set the last response or request for the current context.
-  This functionality can prove useful if you want to create a middleware component that overrides the pipeline functionality.
+These methods should not be used outside of the internal workings.
 
-* **add_request**: Add a request to the context.
-  It updates the `requests` dictionary. This method is called by the `Pipeline` component
-  before any of the `pipeline services <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic.py>`__ are executed,
-  including `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__.
-
-* **add_response**: Add a response to the context.
-  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
-  the `PRE_RESPONSE_PROCESSING <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__ functions.
-
-  To be more precise, this method is called between the ``CREATE_RESPONSE`` and ``FINISH_TURN`` stages.
-  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
-
-* **add_label**: Add a label to the context.
-  It updates the `labels` field. This method is called by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`_ component when transition conditions
-  have been resolved, and when `PRE_TRANSITIONS_PROCESSING <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`__ callbacks have been run.
-
-  To be more precise, this method is called between the ``GET_NEXT_NODE`` and ``REWRITE_NEXT_NODE`` stages.
-  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
-
-* **current_node**: Return the current node of the context. This is particularly useful for tracking the node during the conversation flow.
-  This method only returns a node inside ``PROCESSING`` callbacks yielding ``None`` in other contexts.
+* **set_last_response**
+* **set_last_request**
+* **add_request**
+* **add_response**
+* **add_label**
 
 Context storages
 ~~~~~~~~~~~~~~~~
@@ -240,7 +228,6 @@ becomes as easy as calling the `model_dump_json` method:
 
 .. code-block:: python
 
-    context = Context()
     serialized_context = context.model_dump_json()
 
 Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.

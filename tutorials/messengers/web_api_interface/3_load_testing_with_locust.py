@@ -32,6 +32,9 @@ created in the FastAPI tutorial in load testing.
 You should see the result at http://127.0.0.1:8089.
 
 Make sure that your POST endpoint is also running (run the FastAPI tutorial).
+
+If using the FastAPI tutorial, set "Host" to `http://127.0.0.1:8000`,
+when prompted by Locust.
 """
 
 
@@ -52,7 +55,7 @@ import sys
 
 from locust import FastHttpUser, task, constant, main
 
-from chatsky.script import Message
+from chatsky import Message
 from chatsky.utils.testing import HAPPY_PATH, is_interactive_mode
 
 
@@ -88,6 +91,7 @@ class ChatskyUser(FastHttpUser):
         user_id = str(uuid.uuid4())
 
         for request, response in happy_path:
+            request = Message.model_validate(request)
             with self.client.post(
                 f"/chat?user_id={user_id}",
                 headers={
@@ -95,12 +99,13 @@ class ChatskyUser(FastHttpUser):
                     "Content-Type": "application/json",
                 },
                 # Name is the displayed name of the request.
-                name=f"/chat?user_message={request.json()}",
-                data=request.json(),
+                name=f"/chat?user_message={request.model_dump_json()}",
+                data=request.model_dump_json(),
                 catch_response=True,
             ) as candidate_response:
+                candidate_response.raise_for_status()
                 text_response = Message.model_validate(
-                    candidate_response.json().get("response")
+                    candidate_response.json()
                 )
 
                 if response is not None:
@@ -108,7 +113,7 @@ class ChatskyUser(FastHttpUser):
                         error_message = response(text_response)
                         if error_message is not None:
                             candidate_response.failure(error_message)
-                    elif text_response != response:
+                    elif text_response != Message.model_validate(response):
                         candidate_response.failure(
                             f"Expected: {response.model_dump_json()}\n"
                             f"Got: {text_response.model_dump_json()}"
@@ -135,11 +140,11 @@ class ChatskyUser(FastHttpUser):
         self.check_happy_path(
             [
                 # a function can be used to check the return message
-                (Message("Hi"), check_first_message),
+                ("Hi", check_first_message),
                 # a None is used if return message should not be checked
-                (Message("i'm fine, how are you?"), None),
+                ("i'm fine, how are you?", None),
                 # this should fail
-                (Message("Hi"), check_first_message),
+                ("Hi", check_first_message),
             ]
         )
 

@@ -1,4 +1,4 @@
-# Chatsky
+![Chatsky](https://raw.githubusercontent.com/deeppavlov/chatsky/master/docs/source/_static/images/Chatsky-full-dark.svg)
 
 [![Documentation Status](https://github.com/deeppavlov/chatsky/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/chatsky)
 [![Codestyle](https://github.com/deeppavlov/chatsky/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/codestyle.yml)
@@ -6,7 +6,7 @@
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/chatsky/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
-[![Downloads](https://pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
+[![Downloads](https://static.pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
 
 Chatsky allows you to develop conversational services.
 Chatsky offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the Chatsky pipeline.
@@ -79,53 +79,47 @@ All the abstractions used in this example are thoroughly explained in the dedica
 [user guide](https://deeppavlov.github.io/chatsky/user_guides/basic_conceptions.html).
 
 ```python
-from chatsky.script import GLOBAL, TRANSITIONS, RESPONSE, Message
-from chatsky.pipeline import Pipeline
-import chatsky.script.conditions.std_conditions as cnd
+from chatsky import (
+    GLOBAL,
+    TRANSITIONS,
+    RESPONSE,
+    Pipeline,
+    conditions as cnd,
+    Transition as Tr,
+)
 
 # create a dialog script
 script = {
     GLOBAL: {
-        TRANSITIONS: {
-            ("flow", "node_hi"): cnd.exact_match("Hi"),
-            ("flow", "node_ok"): cnd.true()
-        }
+        TRANSITIONS: [
+            Tr(
+                dst=("flow", "node_hi"),
+                cnd=cnd.ExactMatch("Hi"),
+            ),
+            Tr(
+                dst=("flow", "node_ok")
+            )
+        ]
     },
     "flow": {
-        "node_hi": {RESPONSE: Message("Hi!")},
-        "node_ok": {RESPONSE: Message("OK")},
+        "node_hi": {RESPONSE: "Hi!"},
+        "node_ok": {RESPONSE: "OK"},
     },
 }
 
-# init pipeline
-pipeline = Pipeline.from_script(script, start_label=("flow", "node_hi"))
+# initialize Pipeline (needed to run the script)
+pipeline = Pipeline(script, start_label=("flow", "node_hi"))
 
 
-def turn_handler(in_request: Message, pipeline: Pipeline) -> Message:
-    # Pass user request into pipeline and get dialog context (message history)
-    # The pipeline will automatically choose the correct response using script
-    ctx = pipeline(in_request, 0)
-    # Get last response from the context
-    out_response = ctx.last_response
-    return out_response
-
-
-while True:
-    in_request = input("Your message: ")
-    out_response = turn_handler(Message(in_request), pipeline)
-    print("Response: ", out_response.text)
+pipeline.run()
 ```
 
 When you run this code, you get similar output:
 ```
-Your message: hi
-Response:  OK
-Your message: Hi
-Response:  Hi!
-Your message: ok
-Response:  OK
-Your message: ok
-Response:  OK
+request: hi
+response: text='OK'
+request: Hi
+response: text='Hi!'
 ```
 
 More advanced examples are available as a part of documentation:

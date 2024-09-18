@@ -24,7 +24,7 @@ except ImportError:
     pickle_available = False
 
 from .database import DBContextStorage, threadsafe_method
-from chatsky.script import Context
+from chatsky.core import Context
 
 
 class PickleContextStorage(DBContextStorage):
@@ -50,7 +50,7 @@ class PickleContextStorage(DBContextStorage):
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
         await self._load()
-        return Context.cast(self.dict.__getitem__(str(key)))
+        return Context.model_validate(self.dict.__getitem__(str(key)))
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):

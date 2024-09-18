@@ -26,7 +26,7 @@ from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExp
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
-from chatsky.script.core.context import get_last_index
+from chatsky.core.context import get_last_index
 from chatsky.stats.utils import (
     resource,
     get_extra_handler_name,
@@ -161,7 +161,7 @@ class OtelInstrumentor(BaseInstrumentor):
         pipeline_component = get_extra_handler_name(info)
         attributes = {
             "context_id": str(ctx.id),
-            "request_id": get_last_index(ctx.requests),
+            "request_id": get_last_index(ctx.labels),
             "pipeline_component": pipeline_component,
         }
 
