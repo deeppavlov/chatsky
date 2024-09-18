@@ -121,10 +121,10 @@ class Context(BaseModel):
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.labels_config.name, tuple),
-                    ContextDict.connected(storage, id, storage.requests_config.name, Message.model_validate),
-                    ContextDict.connected(storage, id, storage.responses_config.name, Message.model_validate),
-                    ContextDict.connected(storage, id, storage.misc_config.name)
+                    ContextDict.connected(storage, id, storage.labels_config.name, ...),  # TODO: LABELS class
+                    ContextDict.connected(storage, id, storage.requests_config.name, Message),
+                    ContextDict.connected(storage, id, storage.responses_config.name, Message),
+                    ContextDict.connected(storage, id, storage.misc_config.name, ...)  # TODO: MISC class
                 ],
                 storage.is_asynchronous,
             )

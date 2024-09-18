@@ -24,10 +24,10 @@ class TestContextDict:
         # Attached pre-filled context dictionary
         config = {"requests": FieldConfig(name="requests", subscript="__none__")}
         storage = MemoryContextStorage(rewrite_existing=True, configuration=config)
-        await storage.update_main_info("ctx1", 0, 0, storage.serializer.dumps(FrameworkData().model_dump(mode="json")))
-        requests = [(1, storage.serializer.dumps(Message("longer text", misc={"k": "v"}).model_dump(mode="json"))), (2, storage.serializer.dumps(Message("text 2", misc={"1": 0, "2": 8}).model_dump(mode="json")))]
+        await storage.update_main_info("ctx1", 0, 0, FrameworkData().model_dump_json())
+        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
         await storage.update_field_items("ctx1", "requests", requests)
-        return await ContextDict.connected(storage, "ctx1", "requests", Message.model_validate)
+        return await ContextDict.connected(storage, "ctx1", "requests", Message)
 
     @pytest.mark.asyncio
     async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:

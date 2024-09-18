@@ -2,7 +2,6 @@ import asyncio
 from typing import Dict, Hashable, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
-from .serializer import BaseSerializer, JsonSerializer
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -23,12 +22,10 @@ class MemoryContextStorage(DBContextStorage):
     def __init__(
         self, 
         path: str = "",
-        serializer: Optional[BaseSerializer] = None,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
     ):
-        serializer = JsonSerializer() if serializer is None else serializer
-        DBContextStorage.__init__(self, path, serializer, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
         asyncio.run(self.clear_all())
 
     def _get_table_field_and_config(self, field_name: str) -> Tuple[List, int, FieldConfig]:

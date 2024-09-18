@@ -1,5 +1,5 @@
 from hashlib import sha256
-from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
@@ -7,6 +7,10 @@ from chatsky.context_storages.database import DBContextStorage
 from .asyncronous import launch_coroutines
 
 K, V = TypeVar("K", bound=Hashable), TypeVar("V", bound=BaseModel)
+
+
+def get_hash(string: str) -> bytes:
+    return sha256(string.encode()).digest()
 
 
 class ContextDict(BaseModel, Generic[K, V]):
@@ -36,10 +40,10 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Callable[[Dict[str, Any]], V] = lambda x: x) -> "ContextDict":
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Type[V]) -> "ContextDict":
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
-        hashes = {k: sha256(v).digest() for k, v in items}
-        objected = {k: storage.serializer.loads(v) for k, v in items}
+        hashes = {k: get_hash(v) for k, v in items}
+        objected = {k: constructor.model_validate_json(v) for k, v in items}
         instance = cls.model_validate(objected)
         instance._storage = storage
         instance._ctx_id = id
@@ -52,10 +56,9 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, set(keys))
         for key, item in zip(keys, items):
-            objected = self._storage.serializer.loads(item)
-            self._items[key] = self._field_constructor(objected)
+            self._items[key] = self._field_constructor.model_validate_json(item)
             if self._storage.rewrite_existing:
-                self._hashes[key] = sha256(item).digest()
+                self._hashes[key] = get_hash(item)
 
     async def __getitem__(self, key: Union[K, slice]) -> Union[V, List[V]]:
         if self._storage is not None:
@@ -196,8 +199,8 @@ class ContextDict(BaseModel, Generic[K, V]):
         elif self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
-                byted = self._storage.serializer.dumps(v.model_dump())
-                if sha256(byted).digest() != self._hashes.get(k, None):
+                byted = v.model_dump_json()
+                if get_hash(byted) != self._hashes.get(k, None):
                     result.update({k: byted})
             return result
         else:

@@ -20,7 +20,6 @@ from typing import Any, Callable, Collection, Dict, Hashable, List, Optional, Se
 
 from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
-from .serializer import BaseSerializer
 
 try:
     from sqlalchemy import (
@@ -144,12 +143,11 @@ class SQLContextStorage(DBContextStorage):
 
     def __init__(
         self, path: str,
-        serializer: Optional[BaseSerializer] = None,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
         table_name_prefix: str = "chatsky_table",
     ):
-        DBContextStorage.__init__(self, path, serializer, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
 
         self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
