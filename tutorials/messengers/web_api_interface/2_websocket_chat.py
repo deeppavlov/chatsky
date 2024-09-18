@@ -18,16 +18,15 @@ As mentioned in that tutorial,
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 is used to process requests.
 
-%mddoclink(api,script.core.message,Message) is used to represent text messages.
+%mddoclink(api,core.message,Message) is used to represent text messages.
 """
 
 # %pip install chatsky uvicorn fastapi
 
 # %%
 from chatsky.messengers.common.interface import CallbackMessengerInterface
-from chatsky.script import Message
-from chatsky.pipeline import Pipeline
-from chatsky.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky import Message, Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -36,15 +35,16 @@ from fastapi.responses import HTMLResponse
 
 # %%
 messenger_interface = CallbackMessengerInterface()
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS, messenger_interface=messenger_interface
 )
 
 
 # %%
 app = FastAPI()
+PORT = 8000
 
-html = """
+html = f"""
 <!DOCTYPE html>
 <html>
     <head>
@@ -60,20 +60,20 @@ html = """
         </ul>
         <script>
             var client_id = Date.now();
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
-            ws.onmessage = function(event) {
+            var ws = new WebSocket(`ws://localhost:{PORT}/ws/${{client_id}}`);
+            ws.onmessage = function(event) {{
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
                 var content = document.createTextNode(event.data)
                 message.appendChild(content)
                 messages.appendChild(message)
-            };
-            function sendMessage(event) {
+            }};
+            function sendMessage(event) {{
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
                 input.value = ''
                 event.preventDefault()
-            }
+            }}
         </script>
     </body>
 </html>
@@ -112,5 +112,5 @@ if __name__ == "__main__":
         uvicorn.run(
             app,
             host="127.0.0.1",
-            port=8000,
+            port=PORT,
         )

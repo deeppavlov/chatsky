@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer, field_validator
 from copy import deepcopy
 
 import chatsky.utils.devel.json_serialization as json_ser
@@ -80,7 +80,20 @@ class TestJSONPickleSerialization:
 
     def test_serializable_value(self, unserializable_obj):
         class Class(BaseModel):
-            field: Optional[json_ser.PickleEncodedValue] = None
+            field: Optional[Any] = None
+
+            @field_serializer("field", when_used="json")
+            def pickle_serialize_field(self, value):
+                if value is not None:
+                    return json_ser.pickle_serializer(value)
+                return value
+
+            @field_validator("field", mode="before")
+            @classmethod
+            def pickle_validate_field(cls, value):
+                if value is not None:
+                    return json_ser.pickle_validator(value)
+                return value
 
         obj = Class()
         obj.field = unserializable_obj
@@ -99,7 +112,20 @@ class TestJSONPickleSerialization:
 
     def test_serializable_dict(self, unserializable_dict, non_serializable_fields, deserialized_dict):
         class Class(BaseModel):
-            field: json_ser.JSONSerializableDict
+            field: Optional[Dict[str, Any]] = None
+
+            @field_serializer("field", when_used="json")
+            def pickle_serialize_dicts(self, value):
+                if isinstance(value, dict):
+                    return json_ser.json_pickle_serializer(value)
+                return value
+
+            @field_validator("field", mode="before")
+            @classmethod
+            def pickle_validate_dicts(cls, value):
+                if isinstance(value, dict):
+                    return json_ser.json_pickle_validator(value)
+                return value
 
         obj = Class(field=unserializable_dict)
 
