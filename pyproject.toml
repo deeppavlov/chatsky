@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dff"
-version = "0.7.1"
+version = "0.7.2"
 description = "This package has been renamed to Chatsky."
 license = "Apache-2.0"
 authors = [
