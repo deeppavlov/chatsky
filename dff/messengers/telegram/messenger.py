@@ -157,9 +157,6 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
             )
 
 
-_default_messenger = TeleBot("")
-
-
 class UpdateType(Enum):
     """
     Represents a type of the telegram update
@@ -185,7 +182,7 @@ class UpdateType(Enum):
 
 
 def telegram_condition(
-    messenger: TeleBot = _default_messenger,
+    messenger: TeleBot = None,
     update_type: UpdateType = UpdateType.MESSAGE,
     commands: Optional[List[str]] = None,
     regexp: Optional[str] = None,
@@ -199,7 +196,7 @@ def telegram_condition(
 
     :param messenger:
         Messenger to test filters on. Used only for :py:attr:`Telebot.custom_filters`.
-        Defaults to :py:data:`._default_messenger`.
+        Defaults to the ``messenger`` attribute of :py:attr:`Pipeline.messenger_interface`.
     :param update_type:
         If set to any `UpdateType` other than `UpdateType.ALL`
         it will check that an update is of the same type.
@@ -221,7 +218,7 @@ def telegram_condition(
         See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
     """
 
-    update_handler = messenger._build_handler_dict(
+    update_handler = TeleBot._build_handler_dict(
         None,
         False,
         commands=commands,
@@ -232,7 +229,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
+    def condition(ctx: Context, pipeline: Pipeline, *__, **___):  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False
@@ -242,6 +239,9 @@ def telegram_condition(
             return False
         if update_type != UpdateType.ALL and request_update_type != update_type.value:
             return False
+        nonlocal messenger
+        if messenger is None:
+            messenger = pipeline.messenger_interface.messenger
         test_result = messenger._test_message_handler(update_handler, update)
         return test_result
 
