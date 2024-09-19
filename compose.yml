@@ -106,7 +106,7 @@ services:
   dashboard:
     env_file: [.env_file]
     build:
-      context: ./chatsky/utils/docker/stats
+      context: ./chatsky/utils/docker/superset_chatsky_dashboard
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     depends_on:
@@ -179,6 +179,7 @@ services:
     build:
       context: .
       dockerfile: chatsky/utils/docker/chatsky/dockerfile_chatsky
+    image: ghcr.io/deeppavlov/chatsky:latest
     command: python pipeline.py
 
     ports:
