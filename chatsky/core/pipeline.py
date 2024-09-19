@@ -14,11 +14,11 @@ from functools import cached_property
 from typing import Union, List, Dict, Optional, Hashable
 from pydantic import BaseModel, Field, model_validator, computed_field
 
-from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
 from chatsky.core.context import Context
 from chatsky.core.message import Message
 
+from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
@@ -88,7 +88,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     It handles connections to interfaces that provide user requests and accept bot responses.
     """
-    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    context_storage: DBContextStorage = Field(default_factory=MemoryContextStorage)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
@@ -130,7 +130,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         default_priority: float = None,
         slots: GroupSlot = None,
         messenger_interface: MessengerInterface = None,
-        context_storage: Union[DBContextStorage, dict] = None,
+        context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
         post_services: ServiceGroupInitTypes = None,
         before_handler: ComponentExtraHandlerInitTypes = None,
@@ -334,10 +334,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 
-        if isinstance(self.context_storage, DBContextStorage):
-            await self.context_storage.set_item_async(ctx_id, ctx)
-        else:
-            self.context_storage[ctx_id] = ctx
+        await ctx.store()
 
         return ctx
 
