@@ -5,7 +5,7 @@ The Utils module contains functions used to provide names to nameless pipeline c
 """
 
 import collections
-from typing import List, TYPE_CHECKING
+from typing import List
 
 from chatsky.core import Context
 from chatsky.core.context import ServiceState

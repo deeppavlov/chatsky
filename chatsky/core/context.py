@@ -19,7 +19,6 @@ This allows developers to save the context data and resume the conversation late
 from __future__ import annotations
 import logging
 import asyncio
-from collections import defaultdict
 from uuid import UUID, uuid4
 from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 
@@ -30,7 +29,7 @@ from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:
-    from chatsky.core.service import ComponentExecutionState, ServiceGroup
+    from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
 
