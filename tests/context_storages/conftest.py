@@ -1,7 +1,7 @@
 from typing import Iterator
 
 from chatsky.core import Context, Message
-from chatsky.script.core.context import FrameworkData
+from chatsky.core.context import FrameworkData
 from chatsky.utils.context_dict import ContextDict
 import pytest
 

@@ -4,7 +4,7 @@ from socket import AF_INET, SOCK_STREAM, socket
 
 import pytest
 
-from chatsky.script.core.context import Context
+from chatsky.core.context import Context
 from chatsky.context_storages import (
     get_protocol_install_suggestion,
     context_storage_factory,
