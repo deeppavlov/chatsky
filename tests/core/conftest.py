@@ -1,7 +1,6 @@
 import pytest
 
-from chatsky.core import Pipeline
-from chatsky.core import Context
+from chatsky import Pipeline, Context, AbsoluteNodeLabel
 
 
 @pytest.fixture
@@ -15,11 +14,10 @@ def pipeline():
 
 @pytest.fixture
 def context_factory(pipeline):
-    def _context_factory(forbidden_fields=None, add_start_label=True):
-        if add_start_label:
-            ctx = Context.init(("service", "start"))
-        else:
-            ctx = Context()
+    def _context_factory(forbidden_fields=None, start_label=None):
+        ctx = Context()
+        if start_label is not None:
+            ctx.labels[0] = AbsoluteNodeLabel.model_validate(start_label)
         ctx.framework_data.pipeline = pipeline
         if forbidden_fields is not None:
 

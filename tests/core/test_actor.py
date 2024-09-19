@@ -24,7 +24,8 @@ class TestRequestProcessing:
             }
         )
 
-        ctx = Context.init(start_label=("flow", "node1"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node1")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -44,7 +45,8 @@ class TestRequestProcessing:
     async def test_fallback_node(self):
         script = Script.model_validate({"flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -81,7 +83,8 @@ class TestRequestProcessing:
             }
         )
 
-        ctx = Context.init(start_label=("flow", "node1"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node1")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -103,7 +106,8 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {PRE_TRANSITION: {"": MyProcessing()}}, "fallback": {}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -123,7 +127,8 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -146,7 +151,8 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {RESPONSE: MyResponse()}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -169,7 +175,8 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
+        ctx = Context()
+        ctx.last_label = ("flow", "node")
         actor = Actor()
         ctx.framework_data.pipeline = Pipeline(
             parallelize_processing=True,
@@ -199,7 +206,8 @@ async def test_pre_processing():
 
     procs = {"1": Proc1(), "2": Proc2()}
 
-    ctx = Context.init(start_label=("flow", "node"))
+    ctx = Context()
+    ctx.last_label = ("flow", "node")
 
     ctx.framework_data.pipeline = Pipeline(parallelize_processing=True, script={"": {"": {}}}, start_label=("", ""))
     await Actor._run_processing(procs, ctx)

@@ -117,25 +117,14 @@ class Context(BaseModel):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
-        """Initialize new context from ``start_label`` and, optionally, context ``id``."""
-        init_kwargs = {
-            "labels": {0: AbsoluteNodeLabel.model_validate(start_label)},
-        }
-        if id is None:
-            return cls(**init_kwargs)
-        else:
-            return cls(**init_kwargs, id=id)
-        # todo: merge init and connected
-
-    @classmethod
-    async def connected(cls, storage: DBContextStorage, id: Optional[str] = None) -> Context:
+    async def connected(cls, storage: DBContextStorage, start_label: AbsoluteNodeLabel, id: Optional[str] = None) -> Context:
         if id is None:
             id = str(uuid4())
-            labels = ContextDict.new(storage, id, storage.labels_config.name)
-            requests = ContextDict.new(storage, id, storage.requests_config.name)
-            responses = ContextDict.new(storage, id, storage.responses_config.name)
-            misc = ContextDict.new(storage, id, storage.misc_config.name)
+            labels = await ContextDict.new(storage, id, storage.labels_config.name)
+            requests = await ContextDict.new(storage, id, storage.requests_config.name)
+            responses = await ContextDict.new(storage, id, storage.responses_config.name)
+            misc = await ContextDict.new(storage, id, storage.misc_config.name)
+            labels[0] = start_label
             return cls(primary_id=id, labels=labels, requests=requests, responses=responses, misc=misc)
         else:
             main, labels, requests, responses, misc = await launch_coroutines(
@@ -144,8 +133,7 @@ class Context(BaseModel):
                     ContextDict.connected(storage, id, storage.labels_config.name, AbsoluteNodeLabel),
                     ContextDict.connected(storage, id, storage.requests_config.name, Message),
                     ContextDict.connected(storage, id, storage.responses_config.name, Message),
-                    ContextDict.connected(storage, id, storage.misc_config.name, ...)  # TODO: MISC class
-                                                                                # maybe TypeAdapter[Any] would work?
+                    ContextDict.connected(storage, id, storage.misc_config.name, TypeAdapter[Any])
                 ],
                 storage.is_asynchronous,
             )

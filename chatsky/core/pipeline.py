@@ -315,12 +315,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
         logger.debug(f"Received request: {request}.")
-        if ctx_id is None:
-            ctx = Context.init(self.start_label)
-        elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context.init(self.start_label, id=ctx_id))
-        else:
-            ctx = self.context_storage.get(ctx_id, Context.init(self.start_label, id=ctx_id))
+        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)

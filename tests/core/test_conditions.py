@@ -101,8 +101,7 @@ async def test_neg(request_based_ctx, condition, result):
 
 
 async def test_has_last_labels(context_factory):
-    ctx = context_factory(forbidden_fields=("requests", "responses", "misc"))
-    ctx.add_label(("flow", "node1"))
+    ctx = context_factory(forbidden_fields=("requests", "responses", "misc"), start_label=("flow", "node1"))
 
     assert await cnd.CheckLastLabels(flow_labels=["flow"])(ctx) is True
     assert await cnd.CheckLastLabels(flow_labels=["flow1"])(ctx) is False

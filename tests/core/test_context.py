@@ -42,7 +42,7 @@ def test_init():
 class TestLabels:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["requests", "responses"], add_start_label=False)
+        return context_factory(forbidden_fields=["requests", "responses"])
 
     def test_raises_on_empty_labels(self, ctx):
         with pytest.raises(ContextError):
@@ -66,7 +66,7 @@ class TestLabels:
 class TestRequests:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["labels", "responses"], add_start_label=False)
+        return context_factory(forbidden_fields=["labels", "responses"])
 
     def test_existing_requests(self, ctx):
         ctx.requests = {5: Message(text="text1")}
@@ -87,7 +87,7 @@ class TestRequests:
 class TestResponses:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["labels", "requests"], add_start_label=False)
+        return context_factory(forbidden_fields=["labels", "requests"])
 
     def test_existing_responses(self, ctx):
         ctx.responses = {5: Message(text="text1")}
@@ -102,15 +102,6 @@ class TestResponses:
         ctx.add_response("text")
         assert ctx.last_response == Message(text="text")
         assert list(ctx.responses.keys()) == [1]
-
-
-def test_last_items_on_init():
-    ctx = Context.init(("flow", "node"))
-
-    assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node")
-    assert ctx.last_response is None
-    with pytest.raises(ContextError):
-        ctx.last_request
 
 
 async def test_pipeline_available():

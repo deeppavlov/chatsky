@@ -100,7 +100,8 @@ class TestNodeLabelValidation:
     @pytest.fixture
     def context_flow_factory(self, pipeline):
         def factory(flow_name: str):
-            ctx = Context.init((flow_name, "node"))
+            ctx = Context()
+            ctx.last_label = (flow_name, "node")
             ctx.framework_data.pipeline = pipeline
             return ctx
 
@@ -135,7 +136,7 @@ async def test_const_object_immutability():
     message = Message(text="text1")
     response = ConstResponse.model_validate(message)
 
-    response_result = await response.wrapped_call(Context.init(("", "")))
+    response_result = await response.wrapped_call(Context())
 
     response_result.text = "text2"
 

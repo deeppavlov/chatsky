@@ -5,7 +5,7 @@ from chatsky.core import NodeLabel, Context, AbsoluteNodeLabel, Pipeline
 
 
 def test_init_from_single_string():
-    ctx = Context.init(("flow", "node1"))
+    ctx = Context()
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     node = AbsoluteNodeLabel.model_validate("node2", context={"ctx": ctx})
@@ -35,7 +35,7 @@ def test_init_from_node_label():
     with pytest.raises(ValidationError):
         AbsoluteNodeLabel.model_validate(NodeLabel(node_name="node"))
 
-    ctx = Context.init(("flow", "node1"))
+    ctx = Context()
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     node = AbsoluteNodeLabel.model_validate(NodeLabel(node_name="node2"), context={"ctx": ctx})
@@ -44,7 +44,7 @@ def test_init_from_node_label():
 
 
 def test_check_node_exists():
-    ctx = Context.init(("flow", "node1"))
+    ctx = Context()
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     with pytest.raises(ValidationError, match="Cannot find node"):

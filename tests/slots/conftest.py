@@ -21,7 +21,8 @@ def pipeline():
 
 @pytest.fixture(scope="function")
 def context(pipeline):
-    ctx = Context.init(("flow", "node"))
+    ctx = Context()
+    ctx.last_label = ("flow", "node")
     ctx.add_request(Message(text="Hi"))
     ctx.framework_data.pipeline = pipeline
     return ctx

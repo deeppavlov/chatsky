@@ -7,7 +7,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 
 @pytest.fixture
 def ctx(context_factory):
-    return context_factory(forbidden_fields=("requests", "responses", "misc"))
+    return context_factory(forbidden_fields=("requests", "responses", "misc"), start_label=("service", "start"))
 
 
 async def test_from_history(ctx):
