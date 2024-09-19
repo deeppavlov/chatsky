@@ -11,7 +11,7 @@ try:
     import chatsky.utils.db_benchmark as bm
     from chatsky.utils.db_benchmark.basic_config import get_context, get_dict
     from chatsky.context_storages import JSONContextStorage
-    from chatsky.script import Context, Message
+    from chatsky.core import Context, Message
 except ImportError:
     pytest.skip(reason="`chatsky[benchmark,tests]` not installed", allow_module_level=True)
 

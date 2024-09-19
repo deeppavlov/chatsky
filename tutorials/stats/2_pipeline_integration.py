@@ -29,24 +29,21 @@ docker compose --profile stats up
 # %%
 import asyncio
 
-from chatsky.script import Context
-from chatsky.pipeline import (
-    Pipeline,
-    ACTOR,
-    Service,
+from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
     ServiceGroup,
     GlobalExtraHandlerType,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky import Context, Pipeline
+from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
 from chatsky.stats import (
     OtelInstrumentor,
     set_logger_destination,
     set_tracer_destination,
 )
-from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
 from chatsky.stats import default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
@@ -95,37 +92,39 @@ run stage: for instance, `get_current_label` needs to only be used as an
 
 """
 # %%
-pipeline = Pipeline.from_dict(
+pipeline = Pipeline.model_validate(
     {
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "components": [
-            ServiceGroup(
-                before_handler=[default_extractors.get_timing_before],
-                after_handler=[
-                    get_service_state,
-                    default_extractors.get_timing_after,
-                ],
-                components=[
-                    {"handler": heavy_service},
-                    {"handler": heavy_service},
-                ],
-            ),
-            Service(
-                handler=ACTOR,
-                before_handler=[
-                    default_extractors.get_timing_before,
-                ],
-                after_handler=[
-                    get_service_state,
-                    default_extractors.get_current_label,
-                    default_extractors.get_timing_after,
-                ],
-            ),
-        ],
+        "pre_services": ServiceGroup(
+            before_handler=[default_extractors.get_timing_before],
+            after_handler=[
+                get_service_state,
+                default_extractors.get_timing_after,
+            ],
+            components=[
+                {"handler": heavy_service},
+                {"handler": heavy_service},
+            ],
+        ),
     }
 )
+# These are Extra Handlers for Actor.
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, get_service_state
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_current_label
+)
+pipeline.actor.add_extra_handler(
+    GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after
+)
+
+# These are global Extra Handlers for Pipeline.
 pipeline.add_global_handler(
     GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before
 )
@@ -135,6 +134,6 @@ pipeline.add_global_handler(
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_service_state)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         pipeline.run()

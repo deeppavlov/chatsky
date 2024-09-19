@@ -23,7 +23,7 @@ try:
 except ImportError:
     redis_available = False
 
-from chatsky.script import Context
+from chatsky.core import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
@@ -49,7 +49,7 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
-        value = value if isinstance(value, Context) else Context.cast(value)
+        value = Context.model_validate(value)
         await self._redis.set(str(key), value.model_dump_json())
 
     @threadsafe_method
@@ -57,7 +57,7 @@ class RedisContextStorage(DBContextStorage):
         result = await self._redis.get(str(key))
         if result:
             result_dict = json.loads(result.decode("utf-8"))
-            return Context.cast(result_dict)
+            return Context.model_validate(result_dict)
         raise KeyError(f"No entry for key {key}.")
 
     @threadsafe_method
