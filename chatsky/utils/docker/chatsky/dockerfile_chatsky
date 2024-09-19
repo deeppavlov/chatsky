@@ -24,8 +24,8 @@ WORKDIR /app
 
 COPY --from=builder /build/dist/*.whl .
 
-RUN pip install *.whl[web-api]
+RUN pip install $(find . -name "*.whl")[web-api]
 
-COPY ../../../../json_import_examples/yaml/pipeline.py .
+COPY ./json_import_examples/yaml/pipeline.py .
 
 CMD ["python", "pipeline.py"]
