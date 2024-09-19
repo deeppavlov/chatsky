@@ -9,12 +9,13 @@ store and retrieve context data.
 import asyncio
 from pathlib import Path
 from base64 import encodebytes, decodebytes
-from typing import Any, List, Set, Tuple, Dict, Optional, Hashable
+from typing import Any, List, Set, Tuple, Dict, Optional, Hashable, TYPE_CHECKING
 
 from pydantic import BaseModel
 
 from .database import DBContextStorage, FieldConfig
-from chatsky.core import Context
+if TYPE_CHECKING:
+    from chatsky.core import Context
 
 try:
     from aiofiles import open
@@ -27,7 +28,7 @@ except ImportError:
 
 
 class SerializableStorage(BaseModel, extra="allow"):
-    __pydantic_extra__: Dict[str, Context]
+    __pydantic_extra__: Dict[str, "Context"]
 
 
 class StringSerializer:

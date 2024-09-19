@@ -1,10 +1,13 @@
+from __future__ import annotations
 from hashlib import sha256
-from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
 
-from chatsky.context_storages.database import DBContextStorage
 from .asyncronous import launch_coroutines
+
+if TYPE_CHECKING:
+    from chatsky.context_storages.database import DBContextStorage
 
 K, V = TypeVar("K", bound=Hashable), TypeVar("V", bound=BaseModel)
 
