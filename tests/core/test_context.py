@@ -1,42 +1,11 @@
 import pytest
 
-from chatsky.core.context import get_last_index, Context, ContextError
+from chatsky.core.context import Context, ContextError
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.script_function import BaseResponse, BaseProcessing
 from chatsky.core.pipeline import Pipeline
 from chatsky.core import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
-
-
-class TestGetLastIndex:
-    @pytest.mark.parametrize(
-        "dict,result",
-        [
-            ({1: None, 5: None}, 5),
-            ({5: None, 1: None}, 5),
-        ],
-    )
-    def test_normal(self, dict, result):
-        assert get_last_index(dict) == result
-
-    def test_exception(self):
-        with pytest.raises(ValueError):
-            get_last_index({})
-
-
-def test_init():
-    ctx1 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
-    ctx2 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
-    assert ctx1.labels == {0: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
-    assert ctx1.requests == {}
-    assert ctx1.responses == {}
-    assert ctx1.id != ctx2.id
-
-    ctx3 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"), id="id")
-    assert ctx3.labels == {0: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
-    assert ctx3.requests == {}
-    assert ctx3.responses == {}
-    assert ctx3.id == "id"
 
 
 class TestLabels:
