@@ -2,8 +2,8 @@ import pytest
 
 from chatsky.context_storages import MemoryContextStorage
 from chatsky.context_storages.database import FieldConfig
-from chatsky.script.core.context import FrameworkData
-from chatsky.script.core.message import Message
+from chatsky.core.context import FrameworkData
+from chatsky.core.message import Message
 from chatsky.utils.context_dict import ContextDict
 
 

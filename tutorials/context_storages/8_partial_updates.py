@@ -16,19 +16,19 @@ from chatsky.context_storages import (
     ALL_ITEMS,
 )
 
-from chatsky.pipeline import Pipeline
+from chatsky import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %%
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = context_storage_factory("shelve://dbs/partly.shlv")
 
-pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
 
 # %% [markdown]
 """

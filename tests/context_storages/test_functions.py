@@ -2,11 +2,10 @@ from typing import Any, Optional
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.context_storages.database import FieldConfig
-from chatsky.pipeline import Pipeline
-from chatsky.script import Context, Message
-from chatsky.script.core.context import FrameworkData
+from chatsky import Pipeline, Context, Message
+from chatsky.core.context import FrameworkData
 from chatsky.utils.context_dict.ctx_dict import ContextDict
-from chatsky.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_path
 
 
 def _setup_context_storage(
@@ -208,7 +207,7 @@ async def integration_test(db: DBContextStorage, testing_context: Context) -> No
 
 async def pipeline_test(db: DBContextStorage, _: Context) -> None:
     # Test Pipeline workload on DB
-    pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
+    pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
     check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 
