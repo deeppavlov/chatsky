@@ -117,7 +117,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
             `Awaitable` if this is an asynchronous component or `None`.
         """
         task = asyncio.create_task(self._run(ctx, component_info))
-        return await asyncio.wait_for(task, timeout=self.timeout)
+        await asyncio.wait_for(task, timeout=self.timeout)
 
 
 class BeforeHandler(ComponentExtraHandler):
