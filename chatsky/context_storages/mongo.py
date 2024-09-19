@@ -73,7 +73,7 @@ class MongoContextStorage(DBContextStorage):
         asyncio.run(
             asyncio.gather(
                 self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True
+                    [(ExtraFields.id.value, ASCENDING)], background=True, unique=True
                 ),
                 self.collections[self._CONTEXTS_TABLE].create_index(
                     [(ExtraFields.storage_key.value, HASHED)], background=True
@@ -82,7 +82,7 @@ class MongoContextStorage(DBContextStorage):
                     [(ExtraFields.active_ctx.value, HASHED)], background=True
                 ),
                 self.collections[self._LOGS_TABLE].create_index(
-                    [(ExtraFields.primary_id.value, ASCENDING)], background=True
+                    [(ExtraFields.id.value, ASCENDING)], background=True
                 ),
             )
         )
@@ -141,19 +141,19 @@ class MongoContextStorage(DBContextStorage):
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         packed = await self.collections[self._CONTEXTS_TABLE].find_one(
             {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.active_ctx.value: True}]},
-            [self._PACKED_COLUMN, ExtraFields.primary_id.value],
+            [self._PACKED_COLUMN, ExtraFields.id.value],
             sort=[(ExtraFields.updated_at.value, -1)],
         )
         if packed is not None:
-            return self.serializer.loads(packed[self._PACKED_COLUMN]), packed[ExtraFields.primary_id.value]
+            return self.serializer.loads(packed[self._PACKED_COLUMN]), packed[ExtraFields.id.value]
         else:
             return dict(), None
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
         logs = (
             await self.collections[self._LOGS_TABLE]
             .find(
-                {"$and": [{ExtraFields.primary_id.value: primary_id}, {self._FIELD_COLUMN: field_name}]},
+                {"$and": [{ExtraFields.id.value: id}, {self._FIELD_COLUMN: field_name}]},
                 [self._KEY_COLUMN, self._VALUE_COLUMN],
                 sort=[(self._KEY_COLUMN, -1)],
                 limit=keys_limit if keys_limit is not None else 0,
@@ -162,15 +162,15 @@ class MongoContextStorage(DBContextStorage):
         )
         return {log[self._KEY_COLUMN]: self.serializer.loads(log[self._VALUE_COLUMN]) for log in logs}
 
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
         await self.collections[self._CONTEXTS_TABLE].update_one(
-            {ExtraFields.primary_id.value: primary_id},
+            {ExtraFields.id.value: id},
             {
                 "$set": {
                     ExtraFields.active_ctx.value: True,
                     self._PACKED_COLUMN: self.serializer.dumps(data),
                     ExtraFields.storage_key.value: storage_key,
-                    ExtraFields.primary_id.value: primary_id,
+                    ExtraFields.id.value: id,
                     ExtraFields.created_at.value: created,
                     ExtraFields.updated_at.value: updated,
                 }
@@ -178,13 +178,13 @@ class MongoContextStorage(DBContextStorage):
             upsert=True,
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
         await self.collections[self._LOGS_TABLE].bulk_write(
             [
                 UpdateOne(
                     {
                         "$and": [
-                            {ExtraFields.primary_id.value: primary_id},
+                            {ExtraFields.id.value: id},
                             {self._FIELD_COLUMN: field},
                             {self._KEY_COLUMN: key},
                         ]
@@ -194,7 +194,7 @@ class MongoContextStorage(DBContextStorage):
                             self._FIELD_COLUMN: field,
                             self._KEY_COLUMN: key,
                             self._VALUE_COLUMN: self.serializer.dumps(value),
-                            ExtraFields.primary_id.value: primary_id,
+                            ExtraFields.id.value: id,
                             ExtraFields.updated_at.value: updated,
                         }
                     },

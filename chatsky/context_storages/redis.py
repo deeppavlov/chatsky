@@ -97,38 +97,38 @@ class RedisContextStorage(DBContextStorage):
         return {key.decode() for key in keys}
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
-        last_primary_id = await self._redis.hget(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key)
-        if last_primary_id is not None:
-            primary = last_primary_id.decode()
+        last_id = await self._redis.hget(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key)
+        if last_id is not None:
+            primary = last_id.decode()
             packed = await self._redis.get(f"{self._context_key}:{primary}")
             return self.serializer.loads(packed), primary
         else:
             return dict(), None
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
-        all_keys = await self._redis.smembers(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field_name}")
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
+        all_keys = await self._redis.smembers(f"{self._index_key}:{self._LOGS_INDEX}:{id}:{field_name}")
         keys_limit = keys_limit if keys_limit is not None else len(all_keys)
         read_keys = sorted([int(key) for key in all_keys], reverse=True)[:keys_limit]
         return {
-            key: self.serializer.loads(await self._redis.get(f"{self._logs_key}:{primary_id}:{field_name}:{key}"))
+            key: self.serializer.loads(await self._redis.get(f"{self._logs_key}:{id}:{field_name}:{key}"))
             for key in read_keys
         }
 
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
-        await self._redis.hset(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key, primary_id)
-        await self._redis.set(f"{self._context_key}:{primary_id}", self.serializer.dumps(data))
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
+        await self._redis.hset(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key, id)
+        await self._redis.set(f"{self._context_key}:{id}", self.serializer.dumps(data))
         await self._redis.set(
-            f"{self._context_key}:{primary_id}:{ExtraFields.created_at.value}", self.serializer.dumps(created)
+            f"{self._context_key}:{id}:{ExtraFields.created_at.value}", self.serializer.dumps(created)
         )
         await self._redis.set(
-            f"{self._context_key}:{primary_id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated)
+            f"{self._context_key}:{id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated)
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
         for field, key, value in data:
-            await self._redis.sadd(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field}", str(key))
-            await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}", self.serializer.dumps(value))
+            await self._redis.sadd(f"{self._index_key}:{self._LOGS_INDEX}:{id}:{field}", str(key))
+            await self._redis.set(f"{self._logs_key}:{id}:{field}:{key}", self.serializer.dumps(value))
             await self._redis.set(
-                f"{self._logs_key}:{primary_id}:{field}:{key}:{ExtraFields.updated_at.value}",
+                f"{self._logs_key}:{id}:{field}:{key}:{ExtraFields.updated_at.value}",
                 self.serializer.dumps(updated),
             )

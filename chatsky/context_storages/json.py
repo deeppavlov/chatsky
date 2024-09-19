@@ -137,10 +137,10 @@ class JSONContextStorage(DBContextStorage):
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         """
-        Get the last (active) context `_primary_id` for given storage key.
+        Get the last (active) context `id` for given storage key.
 
         :param storage_key: the key the context is associated with.
-        :return: Context `_primary_id` or None if not found.
+        :return: Context `id` or None if not found.
         """
         timed = sorted(
             self.context_table[1].model_extra.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True
@@ -152,24 +152,24 @@ class JSONContextStorage(DBContextStorage):
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         self.context_table = await self._load(self.context_table)
-        primary_id = await self._get_last_ctx(storage_key)
-        if primary_id is not None:
-            return self.serializer.loads(self.context_table[1].model_extra[primary_id][self._PACKED_COLUMN]), primary_id
+        id = await self._get_last_ctx(storage_key)
+        if id is not None:
+            return self.serializer.loads(self.context_table[1].model_extra[id][self._PACKED_COLUMN]), id
         else:
             return dict(), None
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
         self.log_table = await self._load(self.log_table)
-        key_set = [int(k) for k in self.log_table[1].model_extra[primary_id][field_name].keys()]
+        key_set = [int(k) for k in self.log_table[1].model_extra[id][field_name].keys()]
         key_set = [int(k) for k in sorted(key_set, reverse=True)]
         keys = key_set if keys_limit is None else key_set[:keys_limit]
         return {
-            k: self.serializer.loads(self.log_table[1].model_extra[primary_id][field_name][str(k)][self._VALUE_COLUMN])
+            k: self.serializer.loads(self.log_table[1].model_extra[id][field_name][str(k)][self._VALUE_COLUMN])
             for k in keys
         }
 
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
-        self.context_table[1].model_extra[primary_id] = {
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
+        self.context_table[1].model_extra[id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
             self._PACKED_COLUMN: self.serializer.dumps(data),
@@ -178,9 +178,9 @@ class JSONContextStorage(DBContextStorage):
         }
         await self._save(self.context_table)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
         for field, key, value in data:
-            self.log_table[1].model_extra.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(
+            self.log_table[1].model_extra.setdefault(id, dict()).setdefault(field, dict()).setdefault(
                 key,
                 {
                     self._VALUE_COLUMN: self.serializer.dumps(value),

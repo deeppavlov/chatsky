@@ -49,7 +49,7 @@ class FieldConfig(BaseModel, validate_assignment=True):
 class DBContextStorage(ABC):
     _main_table_name: Literal["main"] = "main"
     _turns_table_name: Literal["turns"] = "turns"
-    _primary_id_column_name: Literal["primary_id"] = "primary_id"
+    _id_column_name: Literal["id"] = "id"
     _created_at_column_name: Literal["created_at"] = "created_at"
     _updated_at_column_name: Literal["updated_at"] = "updated_at"
     _framework_data_column_name: Literal["framework_data"] = "framework_data"

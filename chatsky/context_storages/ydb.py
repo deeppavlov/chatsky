@@ -40,10 +40,10 @@ class YDBContextStorage(DBContextStorage):
     Version of the :py:class:`.DBContextStorage` for YDB.
 
     CONTEXT table is represented by `contexts` table.
-    Columns of the table are: active_ctx, primary_id, storage_key, data, created_at and updated_at.
+    Columns of the table are: active_ctx, id, storage_key, data, created_at and updated_at.
 
     LOGS table is represented by `logs` table.
-    Columns of the table are: primary_id, field, key, value and updated_at.
+    Columns of the table are: id, field, key, value and updated_at.
 
     :param path: Standard sqlalchemy URI string. One of `grpc` or `grpcs` can be chosen as a protocol.
         Example: `grpc://localhost:2134/local`.
@@ -179,7 +179,7 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT {ExtraFields.primary_id.value}, {self._PACKED_COLUMN}, {ExtraFields.updated_at.value}
+                SELECT {ExtraFields.id.value}, {self._PACKED_COLUMN}, {ExtraFields.updated_at.value}
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
                 WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
                 ORDER BY {ExtraFields.updated_at.value} DESC
@@ -195,24 +195,24 @@ class YDBContextStorage(DBContextStorage):
             if len(result_sets[0].rows) > 0:
                 return (
                     self.serializer.loads(result_sets[0].rows[0][self._PACKED_COLUMN]),
-                    result_sets[0].rows[0][ExtraFields.primary_id.value],
+                    result_sets[0].rows[0][ExtraFields.id.value],
                 )
             else:
                 return dict(), None
 
         return await self.pool.retry_operation(callee)
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
         async def callee(session):
             limit = 1001 if keys_limit is None else keys_limit
 
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+                DECLARE ${ExtraFields.id.value} AS Utf8;
                 DECLARE ${self._FIELD_COLUMN} AS Utf8;
                 SELECT {self._KEY_COLUMN}, {self._VALUE_COLUMN}
                 FROM {self.table_prefix}_{self._LOGS_TABLE}
-                WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value} AND {self._FIELD_COLUMN} = ${self._FIELD_COLUMN}
+                WHERE {ExtraFields.id.value} = ${ExtraFields.id.value} AND {self._FIELD_COLUMN} = ${self._FIELD_COLUMN}
                 ORDER BY {self._KEY_COLUMN} DESC
                 LIMIT {limit}
                 """  # noqa: E501
@@ -225,7 +225,7 @@ class YDBContextStorage(DBContextStorage):
                 final_query = f"{query} OFFSET {final_offset};"
                 result_sets = await session.transaction(SerializableReadWrite()).execute(
                     await session.prepare(final_query),
-                    {f"${ExtraFields.primary_id.value}": primary_id, f"${self._FIELD_COLUMN}": field_name},
+                    {f"${ExtraFields.id.value}": id, f"${self._FIELD_COLUMN}": field_name},
                     commit_tx=True,
                 )
 
@@ -241,24 +241,24 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${self._PACKED_COLUMN} AS String;
-                DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+                DECLARE ${ExtraFields.id.value} AS Utf8;
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
                 DECLARE ${ExtraFields.created_at.value} AS Uint64;
                 DECLARE ${ExtraFields.updated_at.value} AS Uint64;
-                UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
-                VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.primary_id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
+                UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
+                VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
                 """  # noqa: E501
 
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
                     f"${self._PACKED_COLUMN}": self.serializer.dumps(data),
-                    f"${ExtraFields.primary_id.value}": primary_id,
+                    f"${ExtraFields.id.value}": id,
                     f"${ExtraFields.storage_key.value}": storage_key,
                     f"${ExtraFields.created_at.value}": created,
                     f"${ExtraFields.updated_at.value}": updated,
@@ -268,7 +268,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
         async def callee(session):
             for field, key, value in data:
                 query = f"""
@@ -276,10 +276,10 @@ class YDBContextStorage(DBContextStorage):
                     DECLARE ${self._FIELD_COLUMN} AS Utf8;
                     DECLARE ${self._KEY_COLUMN} AS Uint64;
                     DECLARE ${self._VALUE_COLUMN} AS String;
-                    DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+                    DECLARE ${ExtraFields.id.value} AS Utf8;
                     DECLARE ${ExtraFields.updated_at.value} AS Uint64;
-                    UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.primary_id.value}, {ExtraFields.updated_at.value})
-                    VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.primary_id.value}, ${ExtraFields.updated_at.value});
+                    UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.id.value}, {ExtraFields.updated_at.value})
+                    VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.id.value}, ${ExtraFields.updated_at.value});
                     """  # noqa: E501
 
                 await session.transaction(SerializableReadWrite()).execute(
@@ -288,7 +288,7 @@ class YDBContextStorage(DBContextStorage):
                         f"${self._FIELD_COLUMN}": field,
                         f"${self._KEY_COLUMN}": key,
                         f"${self._VALUE_COLUMN}": self.serializer.dumps(value),
-                        f"${ExtraFields.primary_id.value}": primary_id,
+                        f"${ExtraFields.id.value}": id,
                         f"${ExtraFields.updated_at.value}": updated,
                     },
                     commit_tx=True,
@@ -357,7 +357,7 @@ async def _create_contexts_table(pool, path, table_name):
         await session.create_table(
             "/".join([path, table_name]),
             TableDescription()
-            .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
+            .with_column(Column(ExtraFields.id.value, PrimitiveType.Utf8))
             .with_column(Column(ExtraFields.storage_key.value, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(ExtraFields.active_ctx.value, OptionalType(PrimitiveType.Bool)))
             .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Uint64)))
@@ -365,7 +365,7 @@ async def _create_contexts_table(pool, path, table_name):
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
             .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
             .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
-            .with_primary_key(ExtraFields.primary_id.value),
+            .with_primary_key(ExtraFields.id.value),
         )
 
     return await pool.retry_operation(callee)
@@ -384,15 +384,15 @@ async def _create_logs_table(pool, path, table_name):
         await session.create_table(
             "/".join([path, table_name]),
             TableDescription()
-            .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
+            .with_column(Column(ExtraFields.id.value, PrimitiveType.Utf8))
             .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Uint64)))
             .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
             .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex("logs_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
+            .with_index(TableIndex("logs_id_index").with_index_columns(ExtraFields.id.value))
             .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
             .with_primary_keys(
-                ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN
+                ExtraFields.id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN
             ),
         )
 

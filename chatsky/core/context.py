@@ -78,9 +78,9 @@ class Context(BaseModel):
     A structure that is used to store data about the context of a dialog.
     """
 
-    primary_id: str = Field(default_factory=lambda: str(uuid4()), exclude=True, frozen=True)
+    id: str = Field(default_factory=lambda: str(uuid4()), exclude=True, frozen=True)
     """
-    `primary_id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
+    `id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
     """
     _created_at: int = PrivateAttr(default_factory=time_ns)
     """
@@ -125,7 +125,7 @@ class Context(BaseModel):
             responses = await ContextDict.new(storage, id, storage.responses_config.name)
             misc = await ContextDict.new(storage, id, storage.misc_config.name)
             labels[0] = start_label
-            return cls(primary_id=id, labels=labels, requests=requests, responses=responses, misc=misc)
+            return cls(id=id, labels=labels, requests=requests, responses=responses, misc=misc)
         else:
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
@@ -142,7 +142,7 @@ class Context(BaseModel):
                 raise ValueError(f"Context with id {id} not found in the storage!")
             crt_at, upd_at, fw_data = main
             objected = FrameworkData.model_validate(storage.serializer.loads(fw_data))
-            instance = cls(primary_id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
+            instance = cls(id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
@@ -152,7 +152,7 @@ class Context(BaseModel):
             byted = self._storage.serializer.dumps(self.framework_data.model_dump(mode="json"))
             await launch_coroutines(
                 [
-                    self._storage.update_main_info(self.primary_id, self._created_at, self._updated_at, byted),
+                    self._storage.update_main_info(self.id, self._created_at, self._updated_at, byted),
                     self.labels.store(),
                     self.requests.store(),
                     self.responses.store(),
@@ -165,7 +165,7 @@ class Context(BaseModel):
 
     async def delete(self) -> None:
         if self._storage is not None:
-            await self._storage.delete_main_info(self.primary_id)
+            await self._storage.delete_main_info(self.id)
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
@@ -220,7 +220,7 @@ class Context(BaseModel):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Context):
             return (
-                self.primary_id == value.primary_id
+                self.id == value.id
                 and self.labels == value.labels
                 and self.requests == value.requests
                 and self.responses == value.responses

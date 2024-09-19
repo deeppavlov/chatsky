@@ -39,7 +39,7 @@ def test_get_context():
         responses={0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})},
         misc={"0": " d]", "1": " (b"},
     )
-    copy_ctx.primary_id = context.primary_id
+    copy_ctx.id = context.id
     assert context == copy_ctx
 
 
@@ -51,7 +51,7 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
     )
     context = config.get_context()
     actual_context = get_context(1, (2, 2), (3, 3, 3))
-    actual_context.primary_id = context.primary_id
+    actual_context.id = context.id
     assert context == actual_context
 
     info = config.info()
@@ -72,7 +72,7 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
             assert len(context.labels) == len(context.requests) == len(context.responses) == index + 1
 
             actual_context = get_context(index + 1, (2, 2), (3, 3, 3))
-            actual_context.primary_id = context.primary_id
+            actual_context.id = context.id
             assert context == actual_context
 
 
@@ -97,7 +97,7 @@ def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
             assert len(context.labels) == len(context.requests) == len(context.responses) == index
 
             actual_context = get_context(index, (2, 2), (3, 3, 3))
-            actual_context.primary_id = context.primary_id
+            actual_context.id = context.id
             assert context == actual_context
 
 
