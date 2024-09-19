@@ -3,6 +3,7 @@ import asyncio
 from chatsky.core import Context, Pipeline
 from chatsky.core.service import ServiceGroup, Service, ComponentExecutionState
 from chatsky.core.service.extra import ComponentExtraHandler
+from chatsky.core.utils import initialize_service_states
 
 from chatsky.utils.testing import TOY_SCRIPT
 
@@ -50,6 +51,7 @@ def make_test_service_group(running_order: list) -> ServiceGroup:
 def run_test_group(test_group: ServiceGroup) -> ComponentExecutionState:
     ctx = Context.init(("greeting_flow", "start_node"))
     pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+    initialize_service_states(ctx, pipeline.pre_services)
     asyncio.run(pipeline.pre_services(ctx))
     return test_group.get_state(ctx)
 
@@ -57,5 +59,6 @@ def run_test_group(test_group: ServiceGroup) -> ComponentExecutionState:
 def run_extra_handler(extra_handler: ComponentExtraHandler) -> ComponentExecutionState:
     ctx = Context.init(("greeting_flow", "start_node"))
     service = Service(handler=lambda _: None, before_handler=extra_handler)
+    initialize_service_states(ctx, service)
     asyncio.run(service(ctx))
     return service.get_state(ctx)

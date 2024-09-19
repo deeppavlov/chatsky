@@ -9,6 +9,7 @@ from chatsky.core.service import (
     GlobalExtraHandlerType,
 )
 from chatsky.core.service.extra import BeforeHandler
+from chatsky.core.utils import initialize_service_states
 from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
@@ -161,6 +162,7 @@ def test_inherited_extra_handlers_for_service_groups_with_conditions():
     pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
 
     test_group.add_extra_handler(GlobalExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
+    initialize_service_states(ctx, test_group)
 
     asyncio.run(pipeline.pre_services(ctx))
     # One for original ServiceGroup, one for each of the defined paths in the condition function.

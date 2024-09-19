@@ -30,7 +30,7 @@ from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:
-    from chatsky.core.service import ComponentExecutionState
+    from chatsky.core.service import ComponentExecutionState, ServiceGroup
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
 
@@ -56,7 +56,7 @@ class ContextError(Exception):
 
 
 class ServiceState(BaseModel, arbitrary_types_allowed=True):
-    execution_status: ComponentExecutionState = "NOT_RUN"
+    execution_status: ComponentExecutionState = Field(default="NOT_RUN")
     "Execution status of this pipeline service. Cleared at the end of every turn."
     finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
     """
@@ -70,7 +70,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     Framework uses this to store data related to any of its modules.
     """
 
-    service_states: Dict[str, ServiceState] = Field(default_factory=defaultdict(ServiceState))
+    service_states: Dict[str, ServiceState] = Field(default_factory=dict)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """

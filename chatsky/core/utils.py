@@ -5,8 +5,10 @@ The Utils module contains functions used to provide names to nameless pipeline c
 """
 
 import collections
-from typing import List
+from typing import List, TYPE_CHECKING
 
+from chatsky.core import Context
+from chatsky.core.context import ServiceState
 from .service.component import PipelineComponent
 from .service.group import ServiceGroup
 
@@ -54,3 +56,10 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> None
 
         if isinstance(component, ServiceGroup):
             finalize_service_group(component, f"{path}.{component.name}")
+
+
+def initialize_service_states(ctx: Context, service: PipelineComponent) -> None:
+    ctx.framework_data.service_states[service.path] = ServiceState()
+    if isinstance(service, ServiceGroup):
+        for component in service.components:
+            initialize_service_states(ctx, component)

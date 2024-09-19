@@ -29,7 +29,7 @@ from chatsky.core.service.types import (
     ExtraHandlerFunction,
 )
 from .service import Service
-from .utils import finalize_service_group
+from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
@@ -289,6 +289,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
         ctx.framework_data.pipeline = self
+        initialize_service_states(ctx, self.services_pipeline)
 
         ctx.add_request(request)
         result = await self.services_pipeline(ctx)

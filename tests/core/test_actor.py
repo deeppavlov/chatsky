@@ -9,6 +9,7 @@ from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.context import Context
 from chatsky.core.script import Script
 from chatsky.core import RESPONSE, TRANSITIONS, PRE_TRANSITION, PRE_RESPONSE
+from chatsky.core.utils import initialize_service_states
 
 
 class TestRequestProcessing:
@@ -32,6 +33,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node1"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
@@ -52,6 +54,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
@@ -90,6 +93,7 @@ class TestRequestProcessing:
             default_priority=default_priority,
             start_label=("flow", "node1"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
         assert ctx.last_label.node_name == result
@@ -111,6 +115,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
@@ -131,6 +136,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
@@ -154,6 +160,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
@@ -177,6 +184,7 @@ class TestRequestProcessing:
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
         )
+        initialize_service_states(ctx, actor)
 
         await actor(ctx)
 
