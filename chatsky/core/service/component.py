@@ -91,19 +91,14 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         ctx.framework_data.service_states[self.path].execution_status = value
 
-    def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
+    def get_state(self, ctx: Context) -> ComponentExecutionState:
         """
         Method for component runtime state getting, state is preserved in :py:attr:`.Context.framework_data`.
 
         :param ctx: :py:class:`~.Context` to get state from.
-        :param default: Default to return if no record found
-            (usually it's :py:attr:`~.ComponentExecutionState.NOT_RUN`).
-        :return: :py:class:`.ComponentExecutionState` of this service or default if not found.
+        :return: :py:class:`.ComponentExecutionState` of this service.
         """
-        state = ctx.framework_data.service_states.get(self.path, default if default is not None else None)
-        if state != default:
-            return state.execution_status
-        return default
+        return ctx.framework_data.service_states[self.path].execution_status
 
     @abc.abstractmethod
     async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
