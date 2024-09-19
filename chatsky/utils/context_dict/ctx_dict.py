@@ -75,19 +75,20 @@ class ContextDict(BaseModel, Generic[K, V]):
             return self._items[key]
 
     def __setitem__(self, key: Union[K, slice], value: Union[V, Sequence[V]]) -> None:
-        if isinstance(key, slice) and isinstance(value, Sequence):
-            key_slice = list(range(len(self._keys))[key])
-            if len(key_slice) != len(value):
-                raise ValueError("Slices must have the same length!")
-            for k, v in zip([self._key_list[k] for k in key_slice], value):
-                self[k] = v
-        elif not isinstance(key, slice) and not isinstance(value, Sequence):
+        if isinstance(key, slice):
+            if isinstance(value, Sequence):
+                key_slice = list(range(len(self._keys))[key])
+                if len(key_slice) != len(value):
+                    raise ValueError("Slices must have the same length!")
+                for k, v in zip([self._key_list[k] for k in key_slice], value):
+                    self[k] = v
+            else:
+                raise ValueError("Slice key must have sequence value!")
+        else:
             self._keys.add(key)
             self._added.add(key)
             self._removed.discard(key)
             self._items[key] = value
-        else:
-            raise ValueError("Slice key must have sequence value!")
 
     def __delitem__(self, key: Union[K, slice]) -> None:
         if isinstance(key, slice):
