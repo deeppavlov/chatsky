@@ -176,6 +176,7 @@ services:
       - "4318:4318"    # OTLP over HTTP receiver
 
   chatsky:
+    env_file: [.env_file]
     build:
       context: .
       dockerfile: chatsky/utils/docker/chatsky/dockerfile_chatsky
@@ -185,7 +186,7 @@ services:
     ports:
       - 8020:8020
     volumes:
-      - ./json_import_examples/yaml/:/app/
+      - ./utils/pipeline_yaml_import_example/:/app/
 
 volumes:
   ch-data:

@@ -24,7 +24,9 @@ WORKDIR /app
 
 COPY --from=builder /build/dist/*.whl .
 
-RUN pip install $(find . -name "*.whl")[web-api]
+RUN pip install $(find . -name "*.whl")[yaml] && \
+    pip install $(find . -name "*.whl")[web-api] && \
+    pip install $(find . -name "*.whl")[telegram]
 
 COPY ./utils/pipeline_yaml_import_example/pipeline.py .
 
