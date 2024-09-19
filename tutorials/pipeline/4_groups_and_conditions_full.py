@@ -76,12 +76,9 @@ If no name is specified for a service or service group,
 3. Otherwise, it will be named 'noname_service'.
 4. After that an index will be added to service name.
 
-To receive serialized information about service, service group
-or pipeline a property `info_dict` can be used,
-it returns important object properties as a dict.
-In addition to that `pretty_format` method of Pipeline
-can be used to get all pipeline properties as a formatted string
-(e.g. for logging or debugging purposes).
+To receive serialized information about service,
+    service group or pipeline `model_dump` method from Pydantic can be used,
+    which returns important object properties as a dict.
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
@@ -93,7 +90,7 @@ They have the following signature
 Service is only executed if its start_condition returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions as well
-as possibility to create custom ones. You can check which
+as is the possibility to create custom ones. You can check which
 condition functions are there in the `Script` tutorial about conditions,
 or check the API directly.
 
@@ -104,7 +101,7 @@ returns `False` otherwise.
 `ServiceFinishedCondition` accepts the following constructor parameters:
 
 * `path` (required) - a path to the `Service`.
-* `wait` - whether it should wait for the said `Service` to complete.
+* `wait` - whether it should wait for the said `Service` to complete,
         defaults to `False`.
 
 Custom condition functions can rely on data in `ctx.misc`
@@ -169,13 +166,13 @@ pipeline_dict = {
                     handler=SimpleService,
                     start_condition=All(
                         ServiceFinishedCondition(
-                            path=".pipeline.pre.SimpleService_0"
+                            ".pipeline.pre.SimpleService_0"
                         ),
                         ServiceFinishedCondition(
-                            path=".pipeline.pre.SimpleService_1"
+                            ".pipeline.pre.SimpleService_1"
                         ),
                     ),  # Alternative:
-                    # service_successful_condition(".pipeline.pre")
+                    # ServiceFinishedCondition(".pipeline.pre")
                     name="running_service",
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
@@ -183,12 +180,20 @@ pipeline_dict = {
                     handler=NeverRunningService,
                     start_condition=Not(
                         ServiceFinishedCondition(
-                            path=".pipeline.post.named_group.SimpleService"
+                            ".pipeline.post.named_group.SimpleService",
+                            wait=True,
+                            # The 'wait' flag makes the condition function
+                            # wait for the service to complete first.
+                            # Because this ServiceGroup is asynchronous,
+                            # this is important.
                         )
                     ),
                 ),
             ],
-            requested_async_flag=False,  # forbid services from running in async
+            all_async=True,
+            # Makes components in the group run asynchronously,
+            # unless one is waiting for another to complete,
+            # which is what happens with NeverRunningService.
         ),
         RuntimeInfoPrintingService,
     ],

@@ -62,7 +62,7 @@ class ServiceGroup(PipelineComponent):
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    requested_async_flag: Optional[bool] = None
+    asynchronous: bool = False
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     name: Optional[str] = None
     path: Optional[str] = None

@@ -84,7 +84,7 @@ information about your `Service` and log it.
 To do that you need to derive your class from `Service`,
 then add an async `call()` method which now will be called
 instead of the `handler`. (see the `PreProcess` example below)
-You do not need to worry about the `handler` field, it can be empty.
+You don't need to worry about the `handler` field, it can be empty.
 
 Please note that if you are defining a Service this way,
 `handler` won't run automatically. So, you could add a line
@@ -95,11 +95,12 @@ Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
 
-Here pipeline contains 3 services,
-defined in 3 different ways with different signatures.
+Here pipeline contains 3 services, used in 3 different ways.
 First two of them write sample feature detection data to `ctx.misc`.
-The first uses a constant expression and the second fetches from `example.com`.
-Final service logs `ctx.misc` dict.
+The first uses a constant expression and is defined as a Service function,
+while the second fetches from `example.com` and derives a class from Service.
+Final service logs `ctx.misc` dict, using access to the pipeline
+from `ctx.pipeline`.
 """
 
 

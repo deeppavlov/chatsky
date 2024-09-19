@@ -46,7 +46,7 @@ There are 4 types of global extra handlers:
     * `AFTER_ALL` is called after pipeline execution.
 
 Global extra handlers have the same signature as regular extra handlers.
-Actually `BEFORE_ALL` and `AFTER_ALL`
+Actually, `BEFORE_ALL` and `AFTER_ALL`
     are attached to root service group named 'pipeline',
     so they return its runtime info
 
@@ -69,7 +69,7 @@ Here basic functionality of `df-node-stats` library is emulated.
 Information about pipeline component execution time and
     result is collected and printed to info log after pipeline execution.
 Pipeline consists of actor and 25 `long_service`s
-that run random amount of time between 0 and 0.05 seconds.
+that run for a random amount of time between 0 and 0.05 seconds.
 """
 
 # %%

@@ -62,9 +62,13 @@ Extra handlers callable signature can be one of the following:
 
 * `ctx` - `Context` of the current dialog.
 * `info` - Dictionary, containing information about current extra handler
-            and pipeline execution state (see tutorial 4).
+            and the `self` object of this pipeline component.
+            For example, `info.stage` will tell you if this Extra Handler is a
+            BeforeHandler or AfterHandler; `info.component.name` will give
+            you the component's name; `info.component.get_state(ctx)` will
+            return the component's execution state.
 
-Extra handlers can be attached to pipeline component in a few different ways:
+Extra handlers can be attached to a pipeline component in a few different ways:
 
 1. Directly in constructor - by adding extra handlers to
     `before_handler` or `after_handler` constructor parameter.
@@ -76,6 +80,16 @@ Extra handlers can be attached to pipeline component in a few different ways:
 Example:
 
     component.add_extra_handler(GlobalExtraHandlerType.AFTER, get_service_state)
+
+`add_extra_handler(extra_handler_type, extra_handler_func, condition_func)`
+can also be added recursively to all components of a `ServiceGroup` through
+a condition function of the following signature:
+
+    def cond_func(path: str) -> bool:
+
+Basically, you can return `True` for some paths, and `False` for others,
+adding your Extra Handler to the services you
+want to measure on execution time, for example.
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,

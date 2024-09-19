@@ -38,8 +38,8 @@ Service groups can be defined as `ServiceGroup` objects:
 a list of `Service` and `ServiceGroup` objects.
 
 To receive serialized information about service,
-    service group or pipeline a property `info_dict` can be used,
-    it returns important object properties as a dict.
+    service group or pipeline `model_dump` method from Pydantic can be used,
+    which returns important object properties as a dict.
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
@@ -58,7 +58,7 @@ returns `False` otherwise.
 `ServiceFinishedCondition` accepts the following constructor parameters:
 
 * `path` (required) - a path to the `Service`.
-* `wait` - whether it should wait for the said `Service` to complete.
+* `wait` - whether it should wait for the said `Service` to complete,
         defaults to `False`.
 
 Here there is a conditionally executed service named
@@ -103,7 +103,7 @@ pipeline_dict = {
             handler=NeverRunningService(),
             start_condition=Not(
                 ServiceFinishedCondition(
-                    path=".pipeline.pre.AlwaysRunningService"
+                    ".pipeline.pre.AlwaysRunningService"
                 )  # pre services belong to the "pre" group; post -- to "post"
             ),
         ),

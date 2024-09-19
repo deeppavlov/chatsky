@@ -116,12 +116,8 @@ def test_waiting_for_service_to_finish_condition():
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.all_async = True
-    test_group.components[0].start_condition = ServiceFinishedCondition(
-        path=".pipeline.pre.InteractWithServiceB", wait=True
-    )
-    test_group.components[1].start_condition = ServiceFinishedCondition(
-        path=".pipeline.pre.InteractWithServiceC", wait=True
-    )
+    test_group.components[0].start_condition = ServiceFinishedCondition(".pipeline.pre.InteractWithServiceB", wait=True)
+    test_group.components[1].start_condition = ServiceFinishedCondition(".pipeline.pre.InteractWithServiceC", wait=True)
 
     run_test_group(test_group)
     assert running_order == ["C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]

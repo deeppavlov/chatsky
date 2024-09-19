@@ -72,7 +72,7 @@ for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
 
 Here, the pipeline contains 3 services,
-defined in 3 different ways with different signatures.
+which just send some info to the logger.
 """
 
 
