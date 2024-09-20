@@ -15,8 +15,8 @@ This tutorial is a more advanced version of the
 import logging
 
 from chatsky.core import Context
-from chatsky.conditions import Not, All
-from chatsky.core.service import ServiceFinishedCondition, Service, ServiceGroup
+from chatsky.conditions import Not, All, ServiceFinished
+from chatsky.core.service import Service, ServiceGroup
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -94,11 +94,11 @@ as is the possibility to create custom ones. You can check which
 condition functions are there in the `Script` tutorial about conditions,
 or check the API directly.
 
-There is also a built-in condition `ServiceFinishedCondition`
+There is also a built-in condition `ServiceFinished`
 that returns `True` if a `Service` with a given path completed successfully,
 returns `False` otherwise.
 
-`ServiceFinishedCondition` accepts the following constructor parameters:
+`ServiceFinished` accepts the following constructor parameters:
 
 * `path` (required) - a path to the `Service`.
 * `wait` - whether it should wait for the said `Service` to complete,
@@ -165,21 +165,17 @@ pipeline_dict = {
                 Service(
                     handler=SimpleService,
                     start_condition=All(
-                        ServiceFinishedCondition(
-                            ".pipeline.pre.SimpleService_0"
-                        ),
-                        ServiceFinishedCondition(
-                            ".pipeline.pre.SimpleService_1"
-                        ),
+                        ServiceFinished(".pipeline.pre.SimpleService_0"),
+                        ServiceFinished(".pipeline.pre.SimpleService_1"),
                     ),  # Alternative:
-                    # ServiceFinishedCondition(".pipeline.pre")
+                    # ServiceFinished(".pipeline.pre")
                     name="running_service",
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
                 Service(
                     handler=NeverRunningService,
                     start_condition=Not(
-                        ServiceFinishedCondition(
+                        ServiceFinished(
                             ".pipeline.post.named_group.SimpleService",
                             wait=True,
                             # The 'wait' flag makes the condition function

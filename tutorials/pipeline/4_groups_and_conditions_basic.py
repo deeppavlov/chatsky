@@ -16,8 +16,8 @@ import json
 import logging
 
 from chatsky.core import Context
-from chatsky.core.service import Service, ServiceFinishedCondition
-from chatsky.conditions import Not
+from chatsky.core.service import Service
+from chatsky.conditions import Not, ServiceFinished
 from chatsky import Pipeline
 
 from chatsky.utils.testing.common import (
@@ -51,11 +51,11 @@ They have the following signature
 Service is only executed if its `start_condition` returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions. (see `Script` tutorial 2)
-Though there is also a built-in condition `ServiceFinishedCondition`
+Though there is also a built-in condition `ServiceFinished`
 that returns `True` if a `Service` with a given path completed successfully,
 returns `False` otherwise.
 
-`ServiceFinishedCondition` accepts the following constructor parameters:
+`ServiceFinished` accepts the following constructor parameters:
 
 * `path` (required) - a path to the `Service`.
 * `wait` - whether it should wait for the said `Service` to complete,
@@ -102,7 +102,7 @@ pipeline_dict = {
         Service(
             handler=NeverRunningService(),
             start_condition=Not(
-                ServiceFinishedCondition(
+                ServiceFinished(
                     ".pipeline.pre.AlwaysRunningService"
                 )  # pre services belong to the "pre" group; post -- to "post"
             ),
