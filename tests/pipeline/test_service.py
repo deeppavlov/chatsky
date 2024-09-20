@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 
 from chatsky import Context, BaseProcessing, Pipeline
 from chatsky.core.service import (
@@ -7,6 +8,7 @@ from chatsky.core.service import (
     ComponentExecutionState,
     ServiceFinishedCondition,
     GlobalExtraHandlerType,
+    ExtraHandlerRuntimeInfo,
 )
 from chatsky.core.service.extra import BeforeHandler
 from chatsky.core.utils import initialize_service_states
@@ -35,7 +37,7 @@ def test_all_async_flag():
 
 def test_extra_handler_timeouts():
     def bad_function(timeout: float, bad_func_completed: list):
-        def inner(_, __) -> None:
+        def inner(_: Context, __: ExtraHandlerRuntimeInfo) -> None:
             asyncio.run(asyncio.sleep(timeout))
             bad_func_completed.append(True)
 
@@ -54,13 +56,13 @@ def test_extra_handler_timeouts():
 
 
 def test_extra_handler_function_signatures():
-    def one_parameter_func(ctx: Context) -> None:
+    def one_parameter_func(_: Context) -> None:
         pass
 
-    def two_parameter_func(_, __) -> None:
+    def two_parameter_func(_: Context, __: ExtraHandlerRuntimeInfo) -> None:
         pass
 
-    def three_parameter_func(_, __, ___) -> None:
+    def three_parameter_func(_: Context, __: ExtraHandlerRuntimeInfo, ___: Any) -> None:
         pass
 
     def no_parameters_func() -> None:
@@ -76,7 +78,7 @@ def test_extra_handler_function_signatures():
 # Checking that async functions can be run as extra_handlers.
 def test_async_extra_handler_func():
     def append_list(record: list):
-        async def async_func(_, __):
+        async def async_func(_: Context, __: ExtraHandlerRuntimeInfo):
             record.append("Value")
 
         return async_func
@@ -88,21 +90,21 @@ def test_async_extra_handler_func():
 
 
 def test_service_computed_names():
-    def normal_func(ctx: Context) -> None:
+    def normal_func(_: Context) -> None:
         pass
 
     service = Service(handler=normal_func)
     assert service.computed_name == "normal_func"
 
     class MyService(Service):
-        async def call(self, ctx):
+        async def call(self, ctx: Context):
             pass
 
     service = MyService()
     assert service.computed_name == "MyService"
 
     class MyProcessing(BaseProcessing):
-        async def call(self, ctx):
+        async def call(self, ctx: Context):
             pass
 
     func_class = MyProcessing()
