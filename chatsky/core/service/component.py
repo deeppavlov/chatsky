@@ -130,10 +130,11 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
                 await self.before_handler(ctx, self)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
-                if await self.run_component(ctx) is not ComponentExecutionState.FAILED:
-                    self._set_state(ctx, ComponentExecutionState.FINISHED)
+                result = await self.run_component(ctx)
+                if isinstance(result, ComponentExecutionState):
+                    self._set_state(ctx, result)
                 else:
-                    self._set_state(ctx, ComponentExecutionState.FAILED)
+                    self._set_state(ctx, ComponentExecutionState.FINISHED)
 
                 await self.after_handler(ctx, self)
             else:
