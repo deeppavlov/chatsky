@@ -35,7 +35,6 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
-    Extra handlers should NOT edit `Context`, use services for that purpose instead.
     """
 
     functions: List[ExtraHandlerFunction] = Field(default_factory=list)
@@ -49,7 +48,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     """
     timeout: Optional[float] = None
     """
-    (for asynchronous only!) Maximum component execution time (in seconds),
+    Maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted.
     """
     asynchronous: bool = False
