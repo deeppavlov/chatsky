@@ -65,7 +65,10 @@ class Service(PipelineComponent):
         :param ctx: Current dialog context.
         """
         if self.handler is None:
-            raise NotImplementedError
+            raise NotImplementedError(
+                f"Received {self.__class__.__name__} object, which has it's 'handler' == 'None',"
+                f" while also not defining it's own 'call()' method."
+            )
         await wrap_sync_function_in_async(self.handler, ctx)
 
     async def run_component(self, ctx: Context) -> None:

@@ -12,7 +12,7 @@ import logging
 import abc
 import asyncio
 from typing import Optional, TYPE_CHECKING
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 from chatsky.core.service.extra import BeforeHandler, AfterHandler
 from chatsky.core.script_function import AnyCondition
@@ -66,20 +66,21 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     Separated by dots path to component, is universally unique.
     """
 
-    @model_validator(mode="after")
-    def __pipeline_component_validator__(self):
+    @field_validator("name")
+    @classmethod
+    def __pipeline_component_name_validator__(cls, name: str):
         """
-        Validate this component.
+        Validate this component's name.
 
         :raises ValueError: If component's name is blank or if it contains dots.
         """
-        if self.name is not None:
-            if self.name == "":
+        if name is not None:
+            if name == "":
                 raise ValueError("Name cannot be blank.")
-            if "." in self.name:
-                raise ValueError(f"Name cannot contain '.': {self.name!r}.")
+            if "." in name:
+                raise ValueError(f"Name cannot contain '.': {name!r}.")
 
-        return self
+        return name
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
