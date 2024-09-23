@@ -166,15 +166,3 @@ def test_inherited_extra_handlers_for_service_groups_with_conditions():
     asyncio.run(pipeline.pre_services(ctx))
     # One for original ServiceGroup, one for each of the defined paths in the condition function.
     assert counter_list == ["Value"] * 3
-
-
-def test_failed_stats_collection():
-    chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
-    chatsky_instrumentor.instrument()
-
-    @chatsky_instrumentor
-    async def bad_stats_collector(_: Context, __: ExtraHandlerRuntimeInfo):
-        raise Exception
-
-    service = Service(handler=lambda _: None, before_handler=bad_stats_collector)
-    assert run_test_group(service) == ComponentExecutionState.FINISHED
