@@ -100,34 +100,34 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[str, bytes]]:
         """
         Load the latest field data.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[str]:
         """
         Load all field keys.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[str]) -> List[bytes]:
         """
         Load field items.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[str, bytes]]) -> None:
         """
         Update field items.
         """
         raise NotImplementedError
 
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[str]) -> None:
         """
         Delete field keys.
         """

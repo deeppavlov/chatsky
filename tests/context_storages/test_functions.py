@@ -200,25 +200,25 @@ async def integration_test(db: DBContextStorage, testing_context: Context) -> No
     # Check labels storing, deleting and retrieveing
     await testing_context.labels.store()
     labels = await ContextDict.connected(db, testing_context.id, db.labels_config.name, int, Message)
-    await db.delete_field_keys(testing_context.id, db.labels_config.name, testing_context.labels.keys())
+    await db.delete_field_keys(testing_context.id, db.labels_config.name, [str(k) for k in testing_context.labels.keys()])
     assert testing_context.labels == labels
 
     # Check requests storing, deleting and retrieveing
     await testing_context.requests.store()
     requests = await ContextDict.connected(db, testing_context.id, db.requests_config.name, int, Message)
-    await db.delete_field_keys(testing_context.id, db.requests_config.name, testing_context.requests.keys())
+    await db.delete_field_keys(testing_context.id, db.requests_config.name, [str(k) for k in testing_context.requests.keys()])
     assert testing_context.requests == requests
 
     # Check responses storing, deleting and retrieveing
     await testing_context.responses.store()
     responses = await ContextDict.connected(db, testing_context.id, db.responses_config.name, int, Message)
-    await db.delete_field_keys(testing_context.id, db.responses_config.name, testing_context.responses.keys())
+    await db.delete_field_keys(testing_context.id, db.responses_config.name, [str(k) for k in testing_context.responses.keys()])
     assert testing_context.responses == responses
 
     # Check misc storing, deleting and retrieveing
     await testing_context.misc.store()
     misc = await ContextDict.connected(db, testing_context.id, db.misc_config.name, str, Any)
-    await db.delete_field_keys(testing_context.id, db.misc_config.name, testing_context.misc.keys())
+    await db.delete_field_keys(testing_context.id, db.misc_config.name, [f'"{k}"' for k in testing_context.misc.keys()])
     assert testing_context.misc == misc
 
     # Check whole context storing, deleting and retrieveing

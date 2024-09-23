@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, Hashable, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
 
@@ -51,7 +51,7 @@ class MemoryContextStorage(DBContextStorage):
         self._storage[self._turns_table_name] = [e for e in self._storage[self._turns_table_name] if e[0] != ctx_id]
         self._storage[self.misc_config.name] = [e for e in self._storage[self.misc_config.name] if e[0] != ctx_id]
 
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[str, bytes]]:
         field_table, field_idx, field_config = self._get_table_field_and_config(field_name)
         select = [e for e in field_table if e[0] == ctx_id]
         if field_name != self.misc_config.name:
@@ -62,15 +62,15 @@ class MemoryContextStorage(DBContextStorage):
             select = [e for e in select if e[1] in field_config.subscript]
         return [(e[1], e[field_idx]) for e in select]
 
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[str]:
         field_table, _, _ = self._get_table_field_and_config(field_name)
         return [e[1] for e in field_table if e[0] == ctx_id]
 
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[str]) -> List[bytes]:
         field_table, field_idx, _ = self._get_table_field_and_config(field_name)
         return [e[field_idx] for e in field_table if e[0] == ctx_id and e[1] in keys]
 
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[str, bytes]]) -> None:
         field_table, field_idx, _ = self._get_table_field_and_config(field_name)
         while len(items) > 0:
             nx = items.pop(0)

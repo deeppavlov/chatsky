@@ -17,17 +17,18 @@ class TestContextDict:
     async def attached_dict(self) -> ContextDict:
         # Attached, but not backed by any data context dictionary
         storage = MemoryContextStorage()
-        return await ContextDict.new(storage, "ID", "requests")
+        return await ContextDict.new(storage, "ID", storage.requests_config.name, int, Message)
 
     @pytest.fixture(scope="function")
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
+        ctx_id = "ctx1"
         config = {"requests": FieldConfig(name="requests", subscript="__none__")}
         storage = MemoryContextStorage(rewrite_existing=True, configuration=config)
-        await storage.update_main_info("ctx1", 0, 0, FrameworkData().model_dump_json())
-        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
-        await storage.update_field_items("ctx1", "requests", requests)
-        return await ContextDict.connected(storage, "ctx1", "requests", Message)
+        await storage.update_main_info(ctx_id, 0, 0, FrameworkData().model_dump_json())
+        requests = [("1", Message("longer text", misc={"k": "v"}).model_dump_json()), ("2", Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
+        await storage.update_field_items(ctx_id, storage.requests_config.name, requests)
+        return await ContextDict.connected(storage, ctx_id, storage.requests_config.name, int, Message)
 
     @pytest.mark.asyncio
     async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
@@ -71,7 +72,7 @@ class TestContextDict:
         assert len(prefilled_dict) == 2
         assert prefilled_dict._keys == {1, 2}
         assert prefilled_dict._added == set()
-        assert prefilled_dict.keys() == {1, 2}
+        assert prefilled_dict.keys() == [1, 2]
         assert 1 in prefilled_dict and 2 in prefilled_dict
         assert prefilled_dict._items == dict()
         # Loading item
@@ -86,7 +87,7 @@ class TestContextDict:
         assert len(prefilled_dict._items) == 0
         assert prefilled_dict._keys == {2}
         assert 1 not in prefilled_dict
-        assert prefilled_dict.keys() == {2}
+        assert set(prefilled_dict.keys()) == {2}
         # Checking remaining item
         assert len(await prefilled_dict.values()) == 1
         assert len(prefilled_dict._items) == 1
@@ -107,14 +108,14 @@ class TestContextDict:
         assert prefilled_dict._removed == {1, 2}
         # Updating dict with new values
         await prefilled_dict.update({1: Message("some"), 2: Message("random")})
-        assert prefilled_dict.keys() == {1, 2}
+        assert set(prefilled_dict.keys()) == {1, 2}
         # Adding default value to dict
         message = Message("message")
         assert await prefilled_dict.setdefault(3, message) == message
-        assert prefilled_dict.keys() == {1, 2, 3}
+        assert set(prefilled_dict.keys()) == {1, 2, 3}
         # Clearing all the items
         prefilled_dict.clear()
-        assert prefilled_dict.keys() == set()
+        assert set(prefilled_dict.keys()) == set()
 
     @pytest.mark.asyncio
     async def test_eq_validate(self, empty_dict: ContextDict) -> None:
@@ -127,9 +128,14 @@ class TestContextDict:
 
     @pytest.mark.asyncio
     async def test_serialize_store(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
+        # Check all the dict types
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
+            # Set overwriting existing keys to false
+            if ctx_dict._storage is not None:
+                ctx_dict._storage.rewrite_existing = False
             # Adding an item
             ctx_dict[0] = Message("message")
+            print("ALULA:", ctx_dict.__repr__())
             # Loading all pre-filled items
             await ctx_dict.values()
             # Changing one more item (might be pre-filled)
