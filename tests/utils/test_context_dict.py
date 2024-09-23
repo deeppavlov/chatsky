@@ -30,7 +30,6 @@ class TestContextDict:
         await storage.update_field_items(ctx_id, storage.requests_config.name, requests)
         return await ContextDict.connected(storage, ctx_id, storage.requests_config.name, int, Message)
 
-    @pytest.mark.asyncio
     async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         # Checking creation correctness
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
@@ -39,7 +38,6 @@ class TestContextDict:
             assert ctx_dict._added == ctx_dict._removed == set()
             assert ctx_dict._keys == set() if ctx_dict != prefilled_dict else {1, 2}
 
-    @pytest.mark.asyncio
     async def test_get_set_del(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Setting 1 item
@@ -66,7 +64,6 @@ class TestContextDict:
                 _ = await ctx_dict[0]
             assert e
 
-    @pytest.mark.asyncio
     async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict) -> None:
         # Checking keys
         assert len(prefilled_dict) == 2
@@ -93,7 +90,6 @@ class TestContextDict:
         assert len(prefilled_dict._items) == 1
         assert prefilled_dict._added == set()
 
-    @pytest.mark.asyncio
     async def test_other_methods(self, prefilled_dict: ContextDict) -> None:
         # Loading items
         assert len(await prefilled_dict.items()) == 2
@@ -117,7 +113,6 @@ class TestContextDict:
         prefilled_dict.clear()
         assert set(prefilled_dict.keys()) == set()
 
-    @pytest.mark.asyncio
     async def test_eq_validate(self, empty_dict: ContextDict) -> None:
         # Checking empty dict validation
         assert empty_dict == ContextDict.model_validate(dict())
@@ -126,7 +121,6 @@ class TestContextDict:
         empty_dict._added = set()
         assert empty_dict == ContextDict.model_validate({0: Message("msg")})
 
-    @pytest.mark.asyncio
     async def test_serialize_store(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         # Check all the dict types
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
