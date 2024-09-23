@@ -114,7 +114,7 @@ def after_all(_, info: ExtraHandlerRuntimeInfo):
 
 
 class LongService(Service):
-    async def call(self, _):
+    async def call(self, _: Context):
         timeout = random.randint(0, 5) / 100
         logger.info(
             f"Service {self.name} is going to sleep for {timeout} seconds."
@@ -127,7 +127,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [LongService for _ in range(0, 25)],
+    "pre_services": [LongService() for _ in range(0, 25)],
 }
 
 # %%

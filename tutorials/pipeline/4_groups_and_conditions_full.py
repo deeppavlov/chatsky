@@ -135,17 +135,17 @@ this should never happen.
 
 # %%
 class SimpleService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         logger.info(f"Service '{self.name}' is running...")
 
 
 class NeverRunningService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
 
 class RuntimeInfoPrintingService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
             f"{self.model_dump_json(self.info_dict, indent=4)}"
@@ -158,9 +158,9 @@ pipeline_dict = {
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
     "pre_services": [
-        SimpleService,  # This simple service
+        SimpleService(),  # This simple service
         # will be named `SimpleService_0`
-        SimpleService,  # This simple service
+        SimpleService(),  # This simple service
         # will be named `SimpleService_1`
     ],  # Despite this is the unnamed service group in the root
     # service group, it will be named `pre` as it holds pre services
@@ -169,7 +169,7 @@ pipeline_dict = {
             name="named_group",
             components=[
                 Service(
-                    handler=SimpleService,
+                    handler=SimpleService(),
                     start_condition=All(
                         ServiceFinished(".pipeline.pre.SimpleService_0"),
                         ServiceFinished(".pipeline.pre.SimpleService_1"),
@@ -179,7 +179,7 @@ pipeline_dict = {
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
                 Service(
-                    handler=NeverRunningService,
+                    handler=NeverRunningService(),
                     start_condition=Not(
                         ServiceFinished(
                             ".pipeline.post.named_group.SimpleService",
@@ -197,7 +197,7 @@ pipeline_dict = {
             # unless one is waiting for another to complete,
             # which is what happens with NeverRunningService.
         ),
-        RuntimeInfoPrintingService,
+        RuntimeInfoPrintingService(),
     ],
 }
 

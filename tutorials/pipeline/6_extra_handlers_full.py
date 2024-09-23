@@ -181,7 +181,7 @@ def heavy_service(ctx: Context):
 
 
 class LoggingService(Service):
-    def call(self, ctx: Context):
+    async def call(self, ctx: Context):
         str_misc = ctx.misc[f"{self.name}-str"]
         assert isinstance(str_misc, str)
         logger.info(f"Stringified misc: {str_misc}")
@@ -196,7 +196,7 @@ pipeline_dict = {
         after_handler=[time_measure_after_handler],
         components=[heavy_service for _ in range(0, 5)],
     ),
-    "post_services": LoggingService,
+    "post_services": LoggingService(),
 }
 
 # %%

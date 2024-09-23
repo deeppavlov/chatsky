@@ -79,17 +79,17 @@ that contains execution state of all previously run services.
 
 # %%
 class AlwaysRunningService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         logger.info(f"Service '{self.name}' is running...")
 
 
 class NeverRunningService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
 
 class RuntimeInfoPrintingService(Service):
-    def call(self, _: Context):
+    async def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
             f"{json.dumps(self.info_dict, indent=4, default=str)}"
