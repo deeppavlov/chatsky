@@ -196,7 +196,10 @@ pipeline_dict = {
         after_handler=[time_measure_after_handler],
         components=[heavy_service for _ in range(0, 5)],
     ),
-    "post_services": LoggingService(),
+    "post_services": LoggingService(
+        before_handler=[json_converter_before_handler],
+        after_handler=[json_converter_after_handler],
+    ),
 }
 
 # %%
