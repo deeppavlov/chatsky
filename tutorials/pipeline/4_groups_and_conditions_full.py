@@ -182,7 +182,7 @@ pipeline_dict = {
                     handler=NeverRunningService(),
                     start_condition=Not(
                         ServiceFinished(
-                            ".pipeline.post.named_group.SimpleService",
+                            ".pipeline.post.named_group.running_service",
                             wait=True,
                             # The 'wait' flag makes the condition function
                             # wait for the service to complete first.

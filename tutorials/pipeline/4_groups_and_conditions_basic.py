@@ -12,7 +12,6 @@ are shown for advanced data pre- and postprocessing based on conditions.
 # %pip install chatsky
 
 # %%
-import json
 import logging
 import sys
 from importlib import reload
@@ -109,7 +108,7 @@ pipeline_dict = {
             handler=NeverRunningService(),
             start_condition=Not(
                 ServiceFinished(
-                    ".pipeline.pre.AlwaysRunningService"
+                    ".pipeline.pre.always_running_service"
                 )  # pre services belong to the "pre" group; post -- to "post"
             ),
         ),
