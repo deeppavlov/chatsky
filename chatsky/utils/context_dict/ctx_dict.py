@@ -10,7 +10,8 @@ from .asyncronous import launch_coroutines
 if TYPE_CHECKING:
     from chatsky.context_storages.database import DBContextStorage
 
-K, V = TypeVar("K", bound=Hashable), TypeVar("V", bound=BaseModel)
+K = TypeVar("K", bound=Hashable)
+V = TypeVar("V", bound=BaseModel)
 
 _marker = object()
 
