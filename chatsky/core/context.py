@@ -117,39 +117,42 @@ class Context(BaseModel):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, start_label: AbsoluteNodeLabel, id: Optional[str] = None) -> Context:
+    async def connected(cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None) -> Context:
         if id is None:
-            id = str(uuid4())
-            labels = await ContextDict.new(storage, id, storage.labels_config.name)
-            requests = await ContextDict.new(storage, id, storage.requests_config.name)
-            responses = await ContextDict.new(storage, id, storage.responses_config.name)
-            misc = await ContextDict.new(storage, id, storage.misc_config.name)
-            labels[0] = start_label
-            return cls(id=id, labels=labels, requests=requests, responses=responses, misc=misc)
+            uid = str(uuid4())
+            instance = cls(id=uid)
+            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name)
+            instance.responses = await ContextDict.new(storage, uid, storage.responses_config.name)
+            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name)
+            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name)
+            instance.labels[0] = start_label
+            instance._storage = storage
+            return instance
         else:
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.labels_config.name, AbsoluteNodeLabel),
-                    ContextDict.connected(storage, id, storage.requests_config.name, Message),
-                    ContextDict.connected(storage, id, storage.responses_config.name, Message),
-                    ContextDict.connected(storage, id, storage.misc_config.name, TypeAdapter[Any])
+                    ContextDict.connected(storage, id, storage.labels_config.name, int, AbsoluteNodeLabel),
+                    ContextDict.connected(storage, id, storage.requests_config.name, int, Message),
+                    ContextDict.connected(storage, id, storage.responses_config.name, int, Message),
+                    ContextDict.connected(storage, id, storage.misc_config.name, str, Any)
                 ],
                 storage.is_asynchronous,
             )
             if main is None:
-                # todo: create new context instead
-                raise ValueError(f"Context with id {id} not found in the storage!")
-            crt_at, upd_at, fw_data = main
-            objected = FrameworkData.model_validate(storage.serializer.loads(fw_data))
-            instance = cls(id=id, framework_data=objected, labels=labels, requests=requests, responses=responses, misc=misc)
+                crt_at = upd_at = time_ns()
+                fw_data = FrameworkData()
+            else:
+                crt_at, upd_at, fw_data = main
+                fw_data = FrameworkData.model_validate(fw_data)
+            instance = cls(id=id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
     async def store(self) -> None:
         if self._storage is not None:
             self._updated_at = time_ns()
-            byted = self._storage.serializer.dumps(self.framework_data.model_dump(mode="json"))
+            byted = self.framework_data.model_dump(mode="json")
             await launch_coroutines(
                 [
                     self._storage.update_main_info(self.id, self._created_at, self._updated_at, byted),
@@ -232,10 +235,31 @@ class Context(BaseModel):
             return False
 
     @model_validator(mode="wrap")
-    def _validate_model(value: Dict, handler: Callable[[Dict], "Context"]) -> "Context":
-        instance = handler(value)
-        instance.labels = ContextDict.model_validate(TypeAdapter(Dict[int, AbsoluteNodeLabel]).validate_python(value.get("labels", dict())))
-        instance.requests = ContextDict.model_validate(TypeAdapter(Dict[int, Message]).validate_python(value.get("requests", dict())))
-        instance.responses = ContextDict.model_validate(TypeAdapter(Dict[int, Message]).validate_python(value.get("responses", dict())))
-        instance.misc = ContextDict.model_validate(TypeAdapter(Dict[str, Any]).validate_python(value.get("misc", dict())))
-        return instance
+    def _validate_model(value: Any, handler: Callable[[Any], "Context"], _) -> "Context":
+        if isinstance(value, Context):
+            return value
+        elif isinstance(value, Dict):
+            instance = handler(value)
+            labels_obj = value.get("labels", dict())
+            if isinstance(labels_obj, Dict):
+                labels_obj = TypeAdapter(Dict[int, AbsoluteNodeLabel]).validate_python(labels_obj)
+            instance.labels = ContextDict.model_validate(labels_obj)
+            instance.labels._ctx_id = instance.id
+            requests_obj = value.get("requests", dict())
+            if isinstance(requests_obj, Dict):
+                requests_obj = TypeAdapter(Dict[int, Message]).validate_python(requests_obj)
+            instance.requests = ContextDict.model_validate(requests_obj)
+            instance.requests._ctx_id = instance.id
+            responses_obj = value.get("responses", dict())
+            if isinstance(responses_obj, Dict):
+                responses_obj = TypeAdapter(Dict[int, Message]).validate_python(responses_obj)
+            instance.responses = ContextDict.model_validate(responses_obj)
+            instance.responses._ctx_id = instance.id
+            misc_obj = value.get("misc", dict())
+            if isinstance(misc_obj, Dict):
+                misc_obj = TypeAdapter(Dict[str, Any]).validate_python(misc_obj)
+            instance.misc = ContextDict.model_validate(misc_obj)
+            instance.misc._ctx_id = instance.id
+            return instance
+        else:
+            raise ValueError(f"Unknown type of Context value: {type(value).__name__}!")

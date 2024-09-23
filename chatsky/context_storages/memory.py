@@ -55,7 +55,7 @@ class MemoryContextStorage(DBContextStorage):
         field_table, field_idx, field_config = self._get_table_field_and_config(field_name)
         select = [e for e in field_table if e[0] == ctx_id]
         if field_name != self.misc_config.name:
-            select = sorted(select, key=lambda x: x[1], reverse=True)
+            select = sorted(select, key=lambda x: int(x[1]), reverse=True)
         if isinstance(field_config.subscript, int):
             select = select[:field_config.subscript]
         elif isinstance(field_config.subscript, Set):

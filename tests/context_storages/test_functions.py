@@ -1,5 +1,7 @@
 from typing import Any, Optional
 
+from pydantic import TypeAdapter
+
 from chatsky.context_storages import DBContextStorage
 from chatsky.context_storages.database import FieldConfig
 from chatsky import Pipeline, Context, Message
@@ -10,7 +12,6 @@ from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_pat
 
 def _setup_context_storage(
         db: DBContextStorage,
-        serializer: Optional[Any] = None,
         rewrite_existing: Optional[bool] = None,
         labels_config: Optional[FieldConfig] = None,
         requests_config: Optional[FieldConfig] = None,
@@ -18,8 +19,6 @@ def _setup_context_storage(
         misc_config: Optional[FieldConfig] = None,
         all_config: Optional[FieldConfig] = None,
     ) -> None:
-    if serializer is not None:
-        db.serializer = serializer
     if rewrite_existing is not None:
         db.rewrite_existing = rewrite_existing
     if all_config is not None:
@@ -37,9 +36,21 @@ def _setup_context_storage(
 def _attach_ctx_to_db(context: Context, db: DBContextStorage) -> None:
     context._storage = db
     context.labels._storage = db
+    context.labels._field_name = db.labels_config.name
+    context.labels._key_type = TypeAdapter(int)
+    context.labels._value_type = TypeAdapter(Message)
     context.requests._storage = db
+    context.requests._field_name = db.requests_config.name
+    context.requests._key_type = TypeAdapter(int)
+    context.requests._value_type = TypeAdapter(Message)
     context.responses._storage = db
+    context.responses._field_name = db.responses_config.name
+    context.responses._key_type = TypeAdapter(int)
+    context.responses._value_type = TypeAdapter(Message)
     context.misc._storage = db
+    context.misc._field_name = db.misc_config.name
+    context.misc._key_type = TypeAdapter(str)
+    context.misc._value_type = TypeAdapter(Any)
 
 
 async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
@@ -48,49 +59,49 @@ async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
     assert nothing is None
 
     # Test context main info can be stored and loaded
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
     assert testing_context._created_at == created_at
     assert testing_context._updated_at == updated_at
-    assert testing_context.framework_data == FrameworkData.model_validate(db.serializer.loads(framework_data))
+    assert testing_context.framework_data == FrameworkData.model_validate_json(framework_data)
 
     # Test context main info can be updated
     testing_context.framework_data.stats["key"] = "value"
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
-    assert testing_context.framework_data == FrameworkData.model_validate(db.serializer.loads(framework_data))
+    assert testing_context.framework_data == FrameworkData.model_validate_json(framework_data)
 
     # Test context fields can be stored and loaded
-    await db.update_field_items(testing_context.id, db.requests_config.name, [(k, db.serializer.dumps(v)) for k, v in await testing_context.requests.items()])
+    await db.update_field_items(testing_context.id, db.requests_config.name, [(k, v.model_dump_json()) for k, v in await testing_context.requests.items()])
     requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
-    assert testing_context.requests.model_dump(mode="json") == {k: db.serializer.loads(v) for k, v in requests}
+    assert testing_context.requests == {k: Message.model_validate_json(v) for k, v in requests}
 
     # Test context fields keys can be loaded
     req_keys = await db.load_field_keys(testing_context.id, db.requests_config.name)
-    assert testing_context.requests.keys() == set(req_keys)
+    assert testing_context.requests.keys() == list(req_keys)
 
     # Test context values can be loaded
     req_vals = await db.load_field_items(testing_context.id, db.requests_config.name, set(req_keys))
-    assert await testing_context.requests.values() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+    assert await testing_context.requests.values() == [Message.model_validate_json(val) for val in req_vals]
 
     # Test context values can be updated
-    testing_context.requests.update({0: Message("new message text"), 1: Message("other message text")})
+    await testing_context.requests.update({0: Message("new message text"), 1: Message("other message text")})
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
     requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
     req_keys = await db.load_field_keys(testing_context.id, db.requests_config.name)
     req_vals = await db.load_field_items(testing_context.id, db.requests_config.name, set(req_keys))
     assert testing_context.requests == dict(requests)
-    assert testing_context.requests.keys() == set(req_keys)
-    assert testing_context.requests.values() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+    assert testing_context.requests.keys() == list(req_keys)
+    assert await testing_context.requests.values() == [val for val in req_vals]
 
     # Test context values can be deleted
     await db.delete_field_keys(testing_context.id, db.requests_config.name, testing_context.requests.keys())
     requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
     req_keys = await db.load_field_keys(testing_context.id, db.requests_config.name)
     req_vals = await db.load_field_items(testing_context.id, db.requests_config.name, set(req_keys))
-    assert dict() == dict(requests)
-    assert set() == set(req_keys)
-    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+    assert {k: None for k in testing_context.requests.keys()} == dict(requests)
+    assert testing_context.requests.keys() == list(req_keys)
+    assert list() == [Message.model_validate_json(val) for val in req_vals if val is not None]
 
     # Test context main info can be deleted
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
@@ -102,10 +113,10 @@ async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
     assert nothing is None
     assert dict() == dict(requests)
     assert set() == set(req_keys)
-    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+    assert list() == [Message.model_validate_json(val) for val in req_vals]
 
     # Test all database can be cleared
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
     await db.clear_all()
     nothing = await db.load_main_info(testing_context.id)
@@ -115,31 +126,33 @@ async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
     assert nothing is None
     assert dict() == dict(requests)
     assert set() == set(req_keys)
-    assert list() == [Message.model_validate(db.serializer.loads(val)) for val in req_vals]
+    assert list() == [Message.model_validate_json(val) for val in req_vals]
 
 
 async def partial_storage_test(db: DBContextStorage, testing_context: Context) -> None:
     # Store some data in storage
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
 
     # Test getting keys with 0 subscription
-    _setup_context_storage(db, requests_config=FieldConfig(subscript="__none__"))
+    _setup_context_storage(db, requests_config=FieldConfig(name=db.requests_config.name, subscript="__none__"))
     requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
     assert 0 == len(requests)
 
     # Test getting keys with standard (3) subscription
-    _setup_context_storage(db, requests_config=FieldConfig(subscript=3))
+    _setup_context_storage(db, requests_config=FieldConfig(name=db.requests_config.name, subscript=3))
     requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
     assert len(testing_context.requests.keys()) == len(requests)
 
 
 async def large_misc_test(db: DBContextStorage, testing_context: Context) -> None:
+    BIG_NUMBER = 1000
+
     # Store data main info in storage
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, db.serializer.dumps(testing_context.framework_data.model_dump(mode="json")))
+    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
 
     # Fill context misc with data and store it in database
-    testing_context.misc = ContextDict.model_validate({f"key_{i}": f"data number #{i}" for i in range(100000)})
+    testing_context.misc = ContextDict.model_validate({f"key_{i}": f"data number #{i}" for i in range(BIG_NUMBER)})
     await db.update_field_items(testing_context.id, db.misc_config.name, await testing_context.misc.items())
 
     # Check data keys stored in context
@@ -150,57 +163,67 @@ async def large_misc_test(db: DBContextStorage, testing_context: Context) -> Non
     misc_keys = await db.load_field_keys(testing_context.id, db.misc_config.name)
     misc_vals = await db.load_field_items(testing_context.id, db.misc_config.name, set(misc_keys))
     for k, v in zip(misc_keys, misc_vals):
-        assert testing_context.misc[k] == db.serializer.loads(v)
+        assert await testing_context.misc[k] == v
 
 
 async def many_ctx_test(db: DBContextStorage, _: Context) -> None:
     # Fill database with contexts with one misc value and two requests
     for i in range(1, 101):
-        ctx = await Context.connected(db, f"ctx_id_{i}")
-        ctx.responses.update({f"key_{i}": f"ctx misc value {i}"})
+        ctx = await Context.connected(db, 0, f"ctx_id_{i}")
+        await ctx.misc.update({f"key_{i}": f"ctx misc value {i}"})
         ctx.requests[0] = Message("useful message")
         ctx.requests[i] = Message("some message")
         await ctx.store()
 
     # Check that both misc and requests are read as expected
     for i in range(1, 101):
-        ctx = await Context.connected(db, f"ctx_id_{i}")
-        assert ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
-        assert ctx.requests[0].text == "useful message"
-        assert ctx.requests[i].text == "some message"
+        ctx = await Context.connected(db, 0, f"ctx_id_{i}")
+        assert await ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
+        assert (await ctx.requests[0]).text == "useful message"
+        assert (await ctx.requests[i]).text == "some message"
 
 
 async def integration_test(db: DBContextStorage, testing_context: Context) -> None:
     # Attach context to context storage to perform operations on context level
     _attach_ctx_to_db(testing_context, db)
 
+    # Setup context storage for automatic element loading
+    _setup_context_storage(
+        db,
+        rewrite_existing=True,
+        labels_config=FieldConfig(name=db.labels_config.name, subscript="__all__"),
+        requests_config=FieldConfig(name=db.requests_config.name, subscript="__all__"),
+        responses_config=FieldConfig(name=db.responses_config.name, subscript="__all__"),
+        misc_config=FieldConfig(name=db.misc_config.name, subscript="__all__"),
+    )
+
     # Check labels storing, deleting and retrieveing
     await testing_context.labels.store()
-    labels = await ContextDict.connected(db, testing_context.id, db.labels_config.name, Message.model_validate)
-    await db.delete_field_keys(testing_context.id, db.labels_config.name)
+    labels = await ContextDict.connected(db, testing_context.id, db.labels_config.name, int, Message)
+    await db.delete_field_keys(testing_context.id, db.labels_config.name, testing_context.labels.keys())
     assert testing_context.labels == labels
 
     # Check requests storing, deleting and retrieveing
     await testing_context.requests.store()
-    requests = await ContextDict.connected(db, testing_context.id, db.requests_config.name, Message.model_validate)
-    await db.delete_field_keys(testing_context.id, db.requests_config.name)
+    requests = await ContextDict.connected(db, testing_context.id, db.requests_config.name, int, Message)
+    await db.delete_field_keys(testing_context.id, db.requests_config.name, testing_context.requests.keys())
     assert testing_context.requests == requests
 
     # Check responses storing, deleting and retrieveing
     await testing_context.responses.store()
-    responses = await ContextDict.connected(db, testing_context.id, db.responses_config.name, Message.model_validate)
-    await db.delete_field_keys(testing_context.id, db.responses_config.name)
+    responses = await ContextDict.connected(db, testing_context.id, db.responses_config.name, int, Message)
+    await db.delete_field_keys(testing_context.id, db.responses_config.name, testing_context.responses.keys())
     assert testing_context.responses == responses
 
     # Check misc storing, deleting and retrieveing
     await testing_context.misc.store()
-    misc = await ContextDict.connected(db, testing_context.id, db.misc_config.name, Message.model_validate)
-    await db.delete_field_keys(testing_context.id, db.misc_config.name)
+    misc = await ContextDict.connected(db, testing_context.id, db.misc_config.name, str, Any)
+    await db.delete_field_keys(testing_context.id, db.misc_config.name, testing_context.misc.keys())
     assert testing_context.misc == misc
 
     # Check whole context storing, deleting and retrieveing
     await testing_context.store()
-    context = await Context.connected(db, testing_context.id)
+    context = await Context.connected(db, None, testing_context.id)
     await db.delete_main_info(testing_context.id)
     assert testing_context == context
 

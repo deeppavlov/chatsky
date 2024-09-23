@@ -1,8 +1,9 @@
 from __future__ import annotations
 from hashlib import sha256
+from types import NoneType
 from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, TYPE_CHECKING
 
-from pydantic import BaseModel, PrivateAttr, model_serializer, model_validator
+from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
 from .asyncronous import launch_coroutines
 
@@ -19,20 +20,17 @@ def get_hash(string: str) -> bytes:
 class ContextDict(BaseModel, Generic[K, V]):
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
-    _keys: Set[K] = PrivateAttr(default_factory=set)
+    _keys: Dict[K, NoneType] = PrivateAttr(default_factory=set)
     _added: Set[K] = PrivateAttr(default_factory=set)
     _removed: Set[K] = PrivateAttr(default_factory=set)
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
     _field_name: str = PrivateAttr(default_factory=str)
-    _field_constructor: Callable[[Dict[str, Any]], V] = PrivateAttr(default_factory=dict)
+    _key_type: Optional[TypeAdapter[Type[K]]] = PrivateAttr(None)
+    _value_type: Optional[TypeAdapter[Type[V]]] = PrivateAttr(None)
 
     _marker: object = PrivateAttr(object())
-
-    @property
-    def _key_list(self) -> List[K]:
-        return sorted(list(self._keys))
 
     @classmethod
     async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
@@ -43,34 +41,40 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, constructor: Type[V]) -> "ContextDict":
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, key_type: Type[K], value_type: Type[V]) -> "ContextDict":
+        key_adapter = TypeAdapter(key_type)
+        val_adapter = TypeAdapter(value_type)
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
-        hashes = {k: get_hash(v) for k, v in items}
-        objected = {k: constructor.model_validate_json(v) for k, v in items}
+        val_key_items = [(key_adapter.validate_json(k), v) for k, v in items if v is not None]
+        hashes = {k: get_hash(v) for k, v in val_key_items}
+        objected = {k: val_adapter.validate_json(v) for k, v in val_key_items}
         instance = cls.model_validate(objected)
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._field_constructor = constructor
-        instance._keys = set(keys)
+        instance._key_type = key_adapter
+        instance._value_type = val_adapter
+        instance._keys = dict.fromkeys(keys)
         instance._hashes = hashes
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, set(keys))
         for key, item in zip(keys, items):
-            self._items[key] = self._field_constructor.model_validate_json(item)
-            if self._storage.rewrite_existing:
-                self._hashes[key] = get_hash(item)
+            if item is not None:
+                val_key = self._key_type.validate_json(key)
+                self._items[val_key] = self._value_type.validate_json(item)
+                if self._storage.rewrite_existing:
+                    self._hashes[val_key] = get_hash(item)
 
     async def __getitem__(self, key: Union[K, slice]) -> Union[V, List[V]]:
         if self._storage is not None:
             if isinstance(key, slice):
-                await self._load_items([self._key_list[k] for k in range(len(self._keys))[key] if k not in self._items.keys()])
+                await self._load_items([self.keys()[k] for k in range(len(self._keys))[key] if k not in self._items.keys()])
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
-            return [self._items[self._key_list[k]] for k in range(len(self._items.keys()))[key]]
+            return [self._items[self.keys()[k]] for k in range(len(self._items.keys()))[key]]
         else:
             return self._items[key]
 
@@ -80,31 +84,31 @@ class ContextDict(BaseModel, Generic[K, V]):
                 key_slice = list(range(len(self._keys))[key])
                 if len(key_slice) != len(value):
                     raise ValueError("Slices must have the same length!")
-                for k, v in zip([self._key_list[k] for k in key_slice], value):
+                for k, v in zip([self.keys()[k] for k in key_slice], value):
                     self[k] = v
             else:
                 raise ValueError("Slice key must have sequence value!")
         else:
-            self._keys.add(key)
+            self._keys.update({key: None})
             self._added.add(key)
             self._removed.discard(key)
             self._items[key] = value
 
     def __delitem__(self, key: Union[K, slice]) -> None:
         if isinstance(key, slice):
-            for i in [self._key_list[k] for k in range(len(self._keys))[key]]:
+            for i in [self.keys()[k] for k in range(len(self._keys))[key]]:
                 del self[i]
         else:
             self._removed.add(key)
             self._added.discard(key)
-            self._keys.discard(key)
+            del self._keys[key]
             del self._items[key]
 
     def __iter__(self) -> Sequence[K]:
-        return iter(self._keys if self._storage is not None else self._items.keys())
+        return iter(self._keys.keys() if self._storage is not None else self._items.keys())
     
     def __len__(self) -> int:
-        return len(self._keys if self._storage is not None else self._items.keys())
+        return len(self._keys.keys() if self._storage is not None else self._items.keys())
 
     async def get(self, key: K, default: V = _marker) -> V:
         try:
@@ -117,8 +121,8 @@ class ContextDict(BaseModel, Generic[K, V]):
     def __contains__(self, key: K) -> bool:
         return key in self.keys()
 
-    def keys(self) -> Set[K]:
-        return set(iter(self))
+    def keys(self) -> List[K]:
+        return list(self._keys.keys())
 
     async def values(self) -> List[V]:
         return await self[:]
@@ -151,7 +155,7 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     async def update(self, other: Any = (), /, **kwds) -> None:
         if isinstance(other, ContextDict):
-            self.update(zip(other.keys(), await other.values()))
+            await self.update(zip(other.keys(), await other.values()))
         elif isinstance(other, Mapping):
             for key in other:
                 self[key] = other[key]
@@ -174,27 +178,27 @@ class ContextDict(BaseModel, Generic[K, V]):
         return default
 
     def __eq__(self, value: object) -> bool:
-        if not isinstance(value, ContextDict):
+        if isinstance(value, ContextDict):
+            return self._items == value._items
+        elif isinstance(value, Dict):
+            return self._items == value
+        else:
             return False
-        return (
-            self._items == value._items
-            and self._hashes == value._hashes
-            and self._added == value._added
-            and self._removed == value._removed
-            and self._storage == value._storage
-            and self._ctx_id == value._ctx_id
-            and self._field_name == value._field_name
-        )
 
     def __repr__(self) -> str:
-        return f"ContextStorage(items={self._items}, hashes={self._hashes}, added={self._added}, removed={self._removed}, storage={self._storage}, ctx_id={self._ctx_id}, field_name={self._field_name})"
+        return f"ContextDict(items={self._items}, hashes={self._hashes}, added={self._added}, removed={self._removed}, storage={self._storage}, ctx_id={self._ctx_id}, field_name={self._field_name})"
 
     @model_validator(mode="wrap")
-    def _validate_model(value: Dict[K, V], handler: Callable[[Dict], "ContextDict"]) -> "ContextDict":
-        instance = handler(dict())
-        instance._items = {k: v for k, v in value.items()}
-        instance._keys = set(value.keys())
-        return instance
+    def _validate_model(value: Any, handler: Callable[[Any], "ContextDict"], _) -> "ContextDict":
+        if isinstance(value, ContextDict):
+            return value
+        elif isinstance(value, Dict):
+            instance = handler(dict())
+            instance._items = value.copy()
+            instance._keys = dict.fromkeys(value.keys())
+            return instance
+        else:
+            raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
     @model_serializer(when_used="json")
     def _serialize_model(self) -> Dict[K, V]:
@@ -203,12 +207,13 @@ class ContextDict(BaseModel, Generic[K, V]):
         elif self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
-                byted = v.model_dump_json()
-                if get_hash(byted) != self._hashes.get(k, None):
-                    result.update({k: byted})
+                val_key = self._key_type.dump_json(k).decode()
+                val_val = self._value_type.dump_json(v).decode()
+                if get_hash(val_val) != self._hashes.get(val_key, None):
+                    result.update({val_key: val_val})
             return result
         else:
-            return {k: self._items[k] for k in self._added}
+            return {self._key_type.dump_json(k).decode(): self._value_type.dump_json(self._items[k]).decode() for k in self._added}
 
     async def store(self) -> None:
         if self._storage is not None:

@@ -47,7 +47,7 @@ def check_happy_path(
         Defaults to ``Message.__eq__``.
     :param printout: Whether to print the requests/responses during iteration.
     """
-    ctx_id = uuid4()  # get random ID for current context
+    ctx_id = str(uuid4())  # get random ID for current context
     for step_id, (request_raw, reference_response_raw) in enumerate(happy_path):
 
         request = Message.model_validate(request_raw)
