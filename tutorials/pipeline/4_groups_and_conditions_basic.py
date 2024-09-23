@@ -92,7 +92,7 @@ class RuntimeInfoPrintingService(Service):
     async def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
-            f"{json.dumps(self.info_dict, indent=4, default=str)}"
+            f"{self.model_dump_json(indent=4, default=str)}"
         )
 
 

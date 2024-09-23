@@ -240,20 +240,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         self.services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
 
-    @property
-    def info_dict(self) -> dict:
-        """
-        Property for retrieving info dictionary about this pipeline.
-        Returns info dict, containing most important component public fields as well as its type.
-        All complex or unserializable fields here are replaced with 'Instance of [type]'.
-        """
-        return {
-            "type": type(self).__name__,
-            "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
-            "context_storage": f"Instance of {type(self.context_storage).__name__}",
-            "services": [self.services_pipeline.info_dict],
-        }
-
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
