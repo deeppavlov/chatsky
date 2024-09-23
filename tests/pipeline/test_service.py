@@ -12,7 +12,6 @@ from chatsky.core.service import (
 )
 from chatsky.core.service.extra import BeforeHandler
 from chatsky.core.utils import initialize_service_states
-from chatsky.stats import OtelInstrumentor
 from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 

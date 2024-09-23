@@ -197,4 +197,4 @@ class OtelInstrumentor(BaseInstrumentor):
             return result
 
         except Exception as exc:
-            logger.error(f"Stats collector execution failed!", exc_info=exc)
+            logger.error("Stats collector execution failed!", exc_info=exc)
