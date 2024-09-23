@@ -113,7 +113,7 @@ pipeline_dict = {
             ),
         ),
         Service(
-            handler=RuntimeInfoPrintingService,
+            handler=RuntimeInfoPrintingService(),
             name="runtime_info_printing_service",
         ),
     ],
