@@ -1,7 +1,7 @@
 from __future__ import annotations
 from hashlib import sha256
 from types import NoneType
-from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, TYPE_CHECKING
+from typing import Any, Callable, Dict, Generic, Hashable, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
@@ -69,7 +69,13 @@ class ContextDict(BaseModel, Generic[K, V]):
                 if self._storage.rewrite_existing:
                     self._hashes[key] = get_hash(item)
 
-    async def __getitem__(self, key: Union[K, slice]) -> Union[V, List[V]]:
+    @overload
+    async def __getitem__(self, key: K) -> V: ...
+
+    @overload
+    async def __getitem__(self, key: slice) -> List[V]: ...
+
+    async def __getitem__(self, key):
         if self._storage is not None:
             if isinstance(key, slice):
                 await self._load_items([self.keys()[k] for k in range(len(self.keys()))[key] if k not in self._items.keys()])
