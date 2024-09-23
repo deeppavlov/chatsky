@@ -77,6 +77,8 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def __getitem__(self, key: slice) -> List[V]: ...
 
     async def __getitem__(self, key):
+        if isinstance(key, int) and key < 0:
+            key = self.keys()[key]
         if self._storage is not None:
             if isinstance(key, slice):
                 await self._load_items([self.keys()[k] for k in range(len(self.keys()))[key] if k not in self._items.keys()])
@@ -88,6 +90,8 @@ class ContextDict(BaseModel, Generic[K, V]):
             return self._items[key]
 
     def __setitem__(self, key: Union[K, slice], value: Union[V, Sequence[V]]) -> None:
+        if isinstance(key, int) and key < 0:
+            key = self.keys()[key]
         if isinstance(key, slice):
             if isinstance(value, Sequence):
                 key_slice = list(range(len(self.keys()))[key])
@@ -104,6 +108,8 @@ class ContextDict(BaseModel, Generic[K, V]):
             self._items[key] = value
 
     def __delitem__(self, key: Union[K, slice]) -> None:
+        if isinstance(key, int) and key < 0:
+            key = self.keys()[key]
         if isinstance(key, slice):
             for i in [self.keys()[k] for k in range(len(self.keys()))[key]]:
                 del self[i]

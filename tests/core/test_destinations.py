@@ -16,7 +16,7 @@ async def test_from_history(ctx):
         == await dst.Current()(ctx)
         == AbsoluteNodeLabel(flow_name="service", node_name="start")
     )
-    with pytest.raises(KeyError):
+    with pytest.raises(IndexError):
         await dst.FromHistory(position=-2)(ctx)
 
     ctx.add_label(("flow", "node1"))
@@ -30,7 +30,7 @@ async def test_from_history(ctx):
         == await dst.Previous()(ctx)
         == AbsoluteNodeLabel(flow_name="service", node_name="start")
     )
-    with pytest.raises(KeyError):
+    with pytest.raises(IndexError):
         await dst.FromHistory(position=-3)(ctx)
 
     ctx.add_label(("flow", "node2"))

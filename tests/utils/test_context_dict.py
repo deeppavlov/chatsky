@@ -63,6 +63,9 @@ class TestContextDict:
             with pytest.raises(KeyError) as e:
                 _ = await ctx_dict[0]
             assert e
+            # negative index
+            (await ctx_dict[-1]).text = "4"
+            assert (await ctx_dict[3]).text == "4"
 
     async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict) -> None:
         # Checking keys
