@@ -10,6 +10,7 @@ For detailed reference, see `~OtelInstrumentor` class.
 """
 
 import asyncio
+import logging
 from typing import Collection, Optional
 
 from wrapt import wrap_function_wrapper, decorator
@@ -36,6 +37,7 @@ from chatsky.stats.utils import (
 )
 from chatsky.stats import default_extractors
 
+logger = logging.getLogger(__name__)
 
 INSTRUMENTS = ["chatsky"]
 
@@ -166,29 +168,33 @@ class OtelInstrumentor(BaseInstrumentor):
         }
 
         result: Optional[dict]
-        if asyncio.iscoroutinefunction(wrapped):
-            result = await wrapped(ctx, info)
-        else:
-            result = wrapped(ctx, info)
+        try:
+            if asyncio.iscoroutinefunction(wrapped):
+                result = await wrapped(ctx, info)
+            else:
+                result = wrapped(ctx, info)
 
-        if result is None or not self.is_instrumented_by_opentelemetry:
-            # self.is_instrumented_by_opentelemetry allows to disable
-            # the decorator programmatically if
-            # instrumentation is disabled.
+            if result is None or not self.is_instrumented_by_opentelemetry:
+                # self.is_instrumented_by_opentelemetry allows to disable
+                # the decorator programmatically if
+                # instrumentation is disabled.
+                return result
+
+            span: Span
+            with self._tracer.start_as_current_span(wrapped.__name__, kind=SpanKind.INTERNAL) as span:
+                span_ctx = span.get_span_context()
+                record = LogRecord(
+                    span_id=span_ctx.span_id,
+                    trace_id=span_ctx.trace_id,
+                    body=result,
+                    trace_flags=span_ctx.trace_flags,
+                    severity_text=None,
+                    severity_number=SeverityNumber(1),
+                    resource=resource,
+                    attributes=attributes,
+                )
+                self._logger.emit(record=record)
             return result
 
-        span: Span
-        with self._tracer.start_as_current_span(wrapped.__name__, kind=SpanKind.INTERNAL) as span:
-            span_ctx = span.get_span_context()
-            record = LogRecord(
-                span_id=span_ctx.span_id,
-                trace_id=span_ctx.trace_id,
-                body=result,
-                trace_flags=span_ctx.trace_flags,
-                severity_text=None,
-                severity_number=SeverityNumber(1),
-                resource=resource,
-                attributes=attributes,
-            )
-            self._logger.emit(record=record)
-        return result
+        except Exception as exc:
+            logger.error(f"Stats collector execution failed!", exc_info=exc)

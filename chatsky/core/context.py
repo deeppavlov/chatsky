@@ -69,7 +69,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     Framework uses this to store data related to any of its modules.
     """
 
-    service_states: Dict[str, ServiceState] = Field(default_factory=dict)
+    service_states: Dict[str, ServiceState] = Field(default_factory=dict, exclude=True)
     "Statuses of all the pipeline services. Cleared at the end of every turn."
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
