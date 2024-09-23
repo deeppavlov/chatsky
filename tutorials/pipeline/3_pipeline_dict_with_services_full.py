@@ -15,8 +15,10 @@ This tutorial is a more advanced version of the
 
 # %%
 import json
-import logging
 import urllib.request
+import logging
+import sys
+from importlib import reload
 
 from chatsky import Context, Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
@@ -28,6 +30,10 @@ from chatsky.utils.testing.common import (
 
 from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
+reload(logging)
+logging.basicConfig(
+    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+)
 logger = logging.getLogger(__name__)
 
 # %% [markdown]

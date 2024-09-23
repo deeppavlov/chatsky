@@ -13,6 +13,8 @@ This tutorial is a more advanced version of the
 
 # %%
 import logging
+import sys
+from importlib import reload
 
 from chatsky.core import Context
 from chatsky.conditions import Not, All, ServiceFinished
@@ -25,6 +27,10 @@ from chatsky.utils.testing.common import (
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
+reload(logging)
+logging.basicConfig(
+    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+)
 logger = logging.getLogger(__name__)
 
 # %% [markdown]

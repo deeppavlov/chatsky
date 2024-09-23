@@ -16,6 +16,8 @@ constructor method is used for pipeline creation (directly or from dictionary).
 
 # %%
 import logging
+import sys
+from importlib import reload
 
 from chatsky import Pipeline
 from chatsky.core.service import Service
@@ -26,6 +28,10 @@ from chatsky.utils.testing.common import (
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
+reload(logging)
+logging.basicConfig(
+    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+)
 logger = logging.getLogger(__name__)
 
 

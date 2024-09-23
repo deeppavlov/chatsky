@@ -13,9 +13,11 @@ dictionary of context is used for storing additional data.
 
 # %%
 import logging
+import sys
+from importlib import reload
 
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky import Context, Message, Pipeline
+from chatsky import Context, Pipeline
 
 from chatsky.utils.testing import (
     check_happy_path,
@@ -24,6 +26,10 @@ from chatsky.utils.testing import (
     TOY_SCRIPT_KWARGS,
 )
 
+reload(logging)
+logging.basicConfig(
+    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+)
 logger = logging.getLogger(__name__)
 
 
@@ -49,12 +55,16 @@ a common place for sharing data between services and actor.
 
 # %%
 def ping_processor(ctx: Context):
+    logger.info("ping - ...")
     ctx.misc["ping"] = True
 
 
 def pong_processor(ctx: Context):
-    ping = ctx.misc.get("ping", False)
-    ctx.misc["pong"] = ping
+    ping_pong = ctx.misc.get("ping", False)
+    logger.info("... - pong")
+    logger.info(
+        f"Ping-pong exchange: " f"{'completed' if ping_pong else 'failed'}."
+    )
 
 
 # %%
@@ -74,15 +84,4 @@ pipeline = Pipeline(
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        ctx_id = 0  # 0 will be current dialog (context) identification.
-        while True:
-            message = Message(input("Send request: "))
-            ctx: Context = pipeline(message, ctx_id)
-            print(f"Response: {ctx.last_response}")
-            ping_pong = ctx.misc.get("ping", False) and ctx.misc.get(
-                "pong", False
-            )
-            print(
-                f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}."
-            )
-            logger.info(f"Context misc: {ctx.misc}")
+        pipeline.run()

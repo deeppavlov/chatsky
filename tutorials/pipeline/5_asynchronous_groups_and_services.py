@@ -13,6 +13,9 @@ are shown for advanced and asynchronous data pre- and postprocessing.
 
 # %%
 import asyncio
+import logging
+import sys
+from importlib import reload
 
 from chatsky.core import Context, Pipeline
 from chatsky.core.service import ServiceGroup
@@ -22,6 +25,12 @@ from chatsky.utils.testing.common import (
     is_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+
+reload(logging)
+logging.basicConfig(
+    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+)
+logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
@@ -76,7 +85,7 @@ async def time_consuming_service(_):
 
 def interact(stage: str, service: str):
     async def slow_service(_: Context):
-        print(f"{stage} with service {service}")
+        logger.info(f"{stage} with service {service}")
         await asyncio.sleep(0.1)
 
     return slow_service
