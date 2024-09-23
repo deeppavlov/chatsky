@@ -5,7 +5,7 @@ In this file stored unified functions for some basic condition cases
 including regex search, semantic distance (cosine) etc.
 """
 
-from chatsky.script import Context
+from chatsky.core.context import Context
 from pydantic import BaseModel
 from langchain_core.outputs.llm_result import LLMResult
 import abc

@@ -19,9 +19,9 @@ except ImportError:
 
 import base64
 
-from chatsky.script.core.message import Image, Message
-from chatsky.script import Context
-from chatsky.pipeline import Pipeline
+from chatsky.core.message import Image, Message
+from chatsky.core.context import Context
+from chatsky.core.pipeline import Pipeline
 from chatsky.llm.methods import BaseMethod
 
 from typing import Union, Callable, Type, Optional

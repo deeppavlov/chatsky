@@ -4,8 +4,8 @@ Filters.
 This module contains a collection of basic functions for history filtering to avoid cluttering LLMs context window.
 """
 
-from chatsky.script.core.message import Message
-from chatsky.script import Context
+from chatsky.core.message import Message
+from chatsky.core.context import Context
 from pydantic import BaseModel
 import abc
 
