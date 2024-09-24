@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from chatsky.context_storages.database import DBContextStorage
 
 K = TypeVar("K", bound=Hashable)
-V = TypeVar("V", bound=BaseModel)
+V = TypeVar("V")
 
 _marker = object()
 
