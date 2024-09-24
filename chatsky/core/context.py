@@ -129,6 +129,9 @@ class Context(BaseModel):
             instance._storage = storage
             return instance
         else:
+            if not isinstance(id, str):
+                logger.warning(f"Id is not a string: {id}. Converting to string.")
+                id = str(id)
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
