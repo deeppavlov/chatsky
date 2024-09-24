@@ -1,6 +1,8 @@
 import pytest
 
-from chatsky import Pipeline, Context, AbsoluteNodeLabel
+from pydantic import TypeAdapter
+
+from chatsky import Pipeline, Context, AbsoluteNodeLabel, Message
 
 
 @pytest.fixture
@@ -16,6 +18,9 @@ def pipeline():
 def context_factory(pipeline):
     def _context_factory(forbidden_fields=None, start_label=None):
         ctx = Context()
+        ctx.labels._value_type = TypeAdapter(AbsoluteNodeLabel)
+        ctx.requests._value_type = TypeAdapter(Message)
+        ctx.responses._value_type = TypeAdapter(Message)
         if start_label is not None:
             ctx.labels[0] = AbsoluteNodeLabel.model_validate(start_label)
         ctx.framework_data.pipeline = pipeline

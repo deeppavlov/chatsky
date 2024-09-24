@@ -105,7 +105,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             self._keys.add(key)
             self._added.add(key)
             self._removed.discard(key)
-            self._items[key] = value
+            self._items[key] = self._value_type.validate_python(value)
 
     def __delitem__(self, key: Union[K, slice]) -> None:
         if isinstance(key, int) and key < 0:

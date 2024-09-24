@@ -1,5 +1,7 @@
 import pytest
 
+from pydantic import TypeAdapter
+
 from chatsky.context_storages import MemoryContextStorage
 from chatsky.context_storages.database import FieldConfig
 from chatsky.core.context import FrameworkData
@@ -11,7 +13,9 @@ class TestContextDict:
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
         # Empty (disconnected) context dictionary
-        return ContextDict()
+        ctx_dict = ContextDict()
+        ctx_dict._value_type = TypeAdapter(Message)
+        return ctx_dict
 
     @pytest.fixture(scope="function")
     async def attached_dict(self) -> ContextDict:
@@ -48,7 +52,7 @@ class TestContextDict:
             assert ctx_dict._added == {0}
             assert ctx_dict._items == {0: message}
             # Setting several items
-            ctx_dict[1] = ctx_dict[2] = ctx_dict[3] = None
+            ctx_dict[1] = ctx_dict[2] = ctx_dict[3] = Message()
             messages = (Message("1"), Message("2"), Message("3"))
             ctx_dict[1:] = messages
             assert await ctx_dict[1:] == list(messages)
