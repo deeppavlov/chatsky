@@ -154,17 +154,6 @@ Public methods
 * **pipeline**: Return ``Pipeline`` object that is used to process this context.
   This can be used to get ``Script``, ``start_label`` or ``fallback_label``.
 
-Private methods
-^^^^^^^^^^^^^^^
-
-These methods should not be used outside of the internal workings.
-
-* **set_last_response**
-* **set_last_request**
-* **add_request**
-* **add_response**
-* **add_label**
-
 Context storages
 ~~~~~~~~~~~~~~~~
 
