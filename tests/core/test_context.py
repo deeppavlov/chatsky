@@ -15,20 +15,14 @@ class TestLabels:
 
     def test_raises_on_empty_labels(self, ctx):
         with pytest.raises(ContextError):
-            ctx.add_label(("flow", "node"))
-
-        with pytest.raises(ContextError):
             ctx.last_label
 
     def test_existing_labels(self, ctx):
-        ctx.labels = {5: AbsoluteNodeLabel.model_validate(("flow", "node1"))}
+        ctx.labels[5] = ("flow", "node1")
 
         assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
-        ctx.add_label(("flow", "node2"))
-        assert ctx.labels == {
-            5: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
-            6: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
-        }
+        ctx.labels[6] = ("flow", "node2")
+        assert ctx.labels.keys() == [5, 6]
         assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
 
 
@@ -38,19 +32,19 @@ class TestRequests:
         return context_factory(forbidden_fields=["labels", "responses"])
 
     def test_existing_requests(self, ctx):
-        ctx.requests = {5: Message(text="text1")}
+        ctx.requests[5] = Message(text="text1")
         assert ctx.last_request == Message(text="text1")
-        ctx.add_request("text2")
-        assert ctx.requests == {5: Message(text="text1"), 6: Message(text="text2")}
+        ctx.requests[6] = "text2"
+        assert ctx.requests.keys() == [5, 6]
         assert ctx.last_request == Message(text="text2")
 
     def test_empty_requests(self, ctx):
         with pytest.raises(ContextError):
             ctx.last_request
 
-        ctx.add_request("text")
+        ctx.requests[1] = "text"
         assert ctx.last_request == Message(text="text")
-        assert list(ctx.requests.keys()) == [1]
+        assert ctx.requests.keys() == [1]
 
 
 class TestResponses:
@@ -59,18 +53,19 @@ class TestResponses:
         return context_factory(forbidden_fields=["labels", "requests"])
 
     def test_existing_responses(self, ctx):
-        ctx.responses = {5: Message(text="text1")}
+        ctx.responses[5] = Message(text="text1")
         assert ctx.last_response == Message(text="text1")
-        ctx.add_response("text2")
-        assert ctx.responses == {5: Message(text="text1"), 6: Message(text="text2")}
+        ctx.responses[6] = "text2"
+        assert ctx.responses.keys() == [5, 6]
         assert ctx.last_response == Message(text="text2")
 
     def test_empty_responses(self, ctx):
-        assert ctx.last_response is None
+        with pytest.raises(ContextError):
+            ctx.last_response
 
-        ctx.add_response("text")
+        ctx.responses[1] = "text"
         assert ctx.last_response == Message(text="text")
-        assert list(ctx.responses.keys()) == [1]
+        assert ctx.responses.keys() == [1]
 
 
 async def test_pipeline_available():

@@ -1,11 +1,11 @@
 import pytest
 from pydantic import ValidationError
 
-from chatsky.core import NodeLabel, Context, AbsoluteNodeLabel, Pipeline
+from chatsky.core import NodeLabel, AbsoluteNodeLabel, Pipeline
 
 
-def test_init_from_single_string():
-    ctx = Context()
+def test_init_from_single_string(context_factory):
+    ctx = context_factory(start_label=("flow", "node1"))
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     node = AbsoluteNodeLabel.model_validate("node2", context={"ctx": ctx})
@@ -31,11 +31,11 @@ def test_init_from_incorrect_iterables(data, msg):
         AbsoluteNodeLabel.model_validate(data)
 
 
-def test_init_from_node_label():
+def test_init_from_node_label(context_factory):
     with pytest.raises(ValidationError):
         AbsoluteNodeLabel.model_validate(NodeLabel(node_name="node"))
 
-    ctx = Context()
+    ctx = context_factory(start_label=("flow", "node1"))
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     node = AbsoluteNodeLabel.model_validate(NodeLabel(node_name="node2"), context={"ctx": ctx})
@@ -43,8 +43,8 @@ def test_init_from_node_label():
     assert node == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
 
 
-def test_check_node_exists():
-    ctx = Context()
+def test_check_node_exists(context_factory):
+    ctx = context_factory(start_label=("flow", "node1"))
     ctx.framework_data.pipeline = Pipeline({"flow": {"node2": {}}}, ("flow", "node2"))
 
     with pytest.raises(ValidationError, match="Cannot find node"):

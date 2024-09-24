@@ -1,6 +1,6 @@
 import pytest
 
-from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr
+from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr, AbsoluteNodeLabel
 from chatsky.slots.slots import SlotNotExtracted
 
 
@@ -22,7 +22,7 @@ def pipeline():
 @pytest.fixture(scope="function")
 def context(pipeline):
     ctx = Context()
-    ctx.last_label = ("flow", "node")
-    ctx.add_request(Message(text="Hi"))
+    ctx.labels[0] = AbsoluteNodeLabel(flow_name="flow", node_name="node")
+    ctx.requests[1] = Message(text="Hi")
     ctx.framework_data.pipeline = pipeline
     return ctx

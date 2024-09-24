@@ -1,6 +1,6 @@
 import pytest
 
-from chatsky.core import BaseCondition
+from chatsky.core import BaseCondition, AbsoluteNodeLabel
 from chatsky.core.message import Message, CallbackQuery
 import chatsky.conditions as cnd
 
@@ -17,7 +17,7 @@ class SubclassMessage(Message):
 @pytest.fixture
 def request_based_ctx(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
-    ctx.add_request(Message(text="text", misc={"key": "value"}))
+    ctx.requests[1] = Message(text="text", misc={"key": "value"})
     return ctx
 
 
@@ -109,7 +109,7 @@ async def test_has_last_labels(context_factory):
     assert await cnd.CheckLastLabels(labels=[("flow", "node1")])(ctx) is True
     assert await cnd.CheckLastLabels(labels=[("flow", "node2")])(ctx) is False
 
-    ctx.add_label(("service", "start"))
+    ctx.labels[1] = AbsoluteNodeLabel(flow_name="service", node_name="start")
 
     assert await cnd.CheckLastLabels(flow_labels=["flow"])(ctx) is False
     assert await cnd.CheckLastLabels(flow_labels=["flow"], last_n_indices=2)(ctx) is True
@@ -120,8 +120,8 @@ async def test_has_last_labels(context_factory):
 
 async def test_has_callback_query(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
-    ctx.add_request(
-        Message(attachments=[CallbackQuery(query_string="text", extra="extra"), CallbackQuery(query_string="text1")])
+    ctx.requests[1] = Message(
+        attachments=[CallbackQuery(query_string="text", extra="extra"), CallbackQuery(query_string="text1")]
     )
 
     assert await cnd.HasCallbackQuery("text")(ctx) is True
@@ -132,6 +132,6 @@ async def test_has_callback_query(context_factory):
 @pytest.mark.parametrize("cnd", [cnd.HasText(""), cnd.Regexp(""), cnd.HasCallbackQuery("")])
 async def test_empty_text(context_factory, cnd):
     ctx = context_factory()
-    ctx.add_request(Message())
+    ctx.requests[1] = Message()
 
     assert await cnd(ctx) is False
