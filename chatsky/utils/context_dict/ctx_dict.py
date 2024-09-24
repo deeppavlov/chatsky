@@ -30,40 +30,35 @@ class ContextDict(BaseModel, Generic[K, V]):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
     _field_name: str = PrivateAttr(default_factory=str)
-    _key_type: Optional[TypeAdapter[Type[K]]] = PrivateAttr(None)
     _value_type: Optional[TypeAdapter[Type[V]]] = PrivateAttr(None)
 
     @classmethod
-    async def new(cls, storage: DBContextStorage, id: str, field: str, key_type: Type[K], value_type: Type[V]) -> "ContextDict":
+    async def new(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
         instance = cls()
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._key_type = TypeAdapter(key_type)
         instance._value_type = TypeAdapter(value_type)
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, key_type: Type[K], value_type: Type[V]) -> "ContextDict":
-        key_adapter = TypeAdapter(key_type)
+    async def connected(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
         val_adapter = TypeAdapter(value_type)
         keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
-        val_key_items = [(key_adapter.validate_json(k), v) for k, v in items if v is not None]
+        val_key_items = [(k, v) for k, v in items if v is not None]
         hashes = {k: get_hash(v) for k, v in val_key_items}
         objected = {k: val_adapter.validate_json(v) for k, v in val_key_items}
         instance = cls.model_validate(objected)
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._key_type = key_adapter
         instance._value_type = val_adapter
-        instance._keys = {key_adapter.validate_json(k) for k in keys}
+        instance._keys = set(keys)
         instance._hashes = hashes
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
-        ser_keys = {self._key_type.dump_json(k).decode() for k in keys}
-        items = await self._storage.load_field_items(self._ctx_id, self._field_name, ser_keys)
+        items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
         for key, item in zip(keys, items):
             if item is not None:
                 self._items[key] = self._value_type.validate_json(item)
@@ -215,29 +210,26 @@ class ContextDict(BaseModel, Generic[K, V]):
         else:
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
-    @model_serializer(when_used="json")
+    @model_serializer()
     def _serialize_model(self) -> Dict[K, V]:
         if self._storage is None:
             return self._items
         elif self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
-                val_key = self._key_type.dump_json(k).decode()
-                val_val = self._value_type.dump_json(v).decode()
-                if get_hash(val_val) != self._hashes.get(val_key, None):
-                    result.update({val_key: val_val})
+                value = self._value_type.dump_json(v).decode()
+                if get_hash(value) != self._hashes.get(k, None):
+                    result.update({k: value})
             return result
         else:
-            return {self._key_type.dump_json(k).decode(): self._value_type.dump_json(self._items[k]).decode() for k in self._added}
+            return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
 
     async def store(self) -> None:
         if self._storage is not None:
-            byted = [(k, v) for k, v in self.model_dump(mode="json").items()]
-            set_keys = [self._key_type.dump_json(k).decode() for k in list(self._removed - self._added)]
             await launch_coroutines(
                 [
-                    self._storage.update_field_items(self._ctx_id, self._field_name, byted),
-                    self._storage.delete_field_keys(self._ctx_id, self._field_name, set_keys),
+                    self._storage.update_field_items(self._ctx_id, self._field_name, list(self.model_dump().items())),
+                    self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
                 ],
                 self._storage.is_asynchronous,
             )

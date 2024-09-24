@@ -21,7 +21,7 @@ class TestContextDict:
     async def attached_dict(self) -> ContextDict:
         # Attached, but not backed by any data context dictionary
         storage = MemoryContextStorage()
-        return await ContextDict.new(storage, "ID", storage.requests_config.name, int, Message)
+        return await ContextDict.new(storage, "ID", storage.requests_config.name, Message)
 
     @pytest.fixture(scope="function")
     async def prefilled_dict(self) -> ContextDict:
@@ -29,10 +29,10 @@ class TestContextDict:
         ctx_id = "ctx1"
         config = {"requests": FieldConfig(name="requests", subscript="__none__")}
         storage = MemoryContextStorage(rewrite_existing=True, configuration=config)
-        await storage.update_main_info(ctx_id, 0, 0, 0, FrameworkData().model_dump_json())
-        requests = [("1", Message("longer text", misc={"k": "v"}).model_dump_json()), ("2", Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
+        await storage.update_main_info(ctx_id, 0, 0, 0, FrameworkData().model_dump_json().encode())
+        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
         await storage.update_field_items(ctx_id, storage.requests_config.name, requests)
-        return await ContextDict.connected(storage, ctx_id, storage.requests_config.name, int, Message)
+        return await ContextDict.connected(storage, ctx_id, storage.requests_config.name, Message)
 
     async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
         # Checking creation correctness

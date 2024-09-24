@@ -20,14 +20,14 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Callable, Optional, Union, Dict, TYPE_CHECKING
+from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator, model_serializer
 
 from chatsky.context_storages.database import DBContextStorage
-from chatsky.core.message import Message, MessageInitTypes
+from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
-from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
+from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.utils.context_dict import ContextDict, launch_coroutines
 
 if TYPE_CHECKING:
@@ -122,10 +122,10 @@ class Context(BaseModel):
         if id is None:
             uid = str(uuid4())
             instance = cls(id=uid)
-            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name, int, Message)
-            instance.responses = await ContextDict.new(storage, uid, storage.responses_config.name, int, Message)
-            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name, int, Any)
-            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name, str, AbsoluteNodeLabel)
+            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name, Message)
+            instance.responses = await ContextDict.new(storage, uid, storage.responses_config.name, Message)
+            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name, Any)
+            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name, AbsoluteNodeLabel)
             instance.labels[0] = start_label
             instance._storage = storage
             return instance
@@ -136,10 +136,10 @@ class Context(BaseModel):
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.labels_config.name, int, AbsoluteNodeLabel),
-                    ContextDict.connected(storage, id, storage.requests_config.name, int, Message),
-                    ContextDict.connected(storage, id, storage.responses_config.name, int, Message),
-                    ContextDict.connected(storage, id, storage.misc_config.name, str, Any)
+                    ContextDict.connected(storage, id, storage.labels_config.name, AbsoluteNodeLabel),
+                    ContextDict.connected(storage, id, storage.requests_config.name, Message),
+                    ContextDict.connected(storage, id, storage.responses_config.name, Message),
+                    ContextDict.connected(storage, id, storage.misc_config.name, Any)
                 ],
                 storage.is_asynchronous,
             )
@@ -150,27 +150,10 @@ class Context(BaseModel):
                 labels[0] = start_label
             else:
                 turn_id, crt_at, upd_at, fw_data = main
-                fw_data = FrameworkData.model_validate(fw_data)
+                fw_data = FrameworkData.model_validate_json(fw_data)
             instance = cls(id=id, current_turn_id=turn_id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
-
-    async def store(self) -> None:
-        if self._storage is not None:
-            self._updated_at = time_ns()
-            byted = self.framework_data.model_dump(mode="json")
-            await launch_coroutines(
-                [
-                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, byted),
-                    self.labels.store(),
-                    self.requests.store(),
-                    self.responses.store(),
-                    self.misc.store(),
-                ],
-                self._storage.is_asynchronous,
-            )
-        else:
-            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     async def delete(self) -> None:
         if self._storage is not None:
@@ -256,3 +239,20 @@ class Context(BaseModel):
             return instance
         else:
             raise ValueError(f"Unknown type of Context value: {type(value).__name__}!")
+
+    async def store(self) -> None:
+        if self._storage is not None:
+            self._updated_at = time_ns()
+            byted = self.framework_data.model_dump_json().encode()
+            await launch_coroutines(
+                [
+                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, byted),
+                    self.labels.store(),
+                    self.requests.store(),
+                    self.responses.store(),
+                    self.misc.store(),
+                ],
+                self._storage.is_asynchronous,
+            )
+        else:
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
