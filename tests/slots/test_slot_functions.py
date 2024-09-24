@@ -29,9 +29,8 @@ def root_slot():
 
 
 @pytest.fixture
-def context(root_slot):
-    ctx = Context()
-    ctx.labels[0] = ("", "")
+def context(root_slot, context_factory):
+    ctx = context_factory(start_label=("", ""))
     ctx.requests[1] = "text"
     ctx.framework_data.slot_manager = SlotManager()
     ctx.framework_data.slot_manager.set_root_slot(root_slot)

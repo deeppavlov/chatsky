@@ -20,9 +20,8 @@ def pipeline():
 
 
 @pytest.fixture(scope="function")
-def context(pipeline):
-    ctx = Context()
-    ctx.labels[0] = AbsoluteNodeLabel(flow_name="flow", node_name="node")
+def context(pipeline, context_factory):
+    ctx = context_factory(start_label=("flow", "node"))
     ctx.requests[1] = Message(text="Hi")
     ctx.framework_data.pipeline = pipeline
     return ctx
