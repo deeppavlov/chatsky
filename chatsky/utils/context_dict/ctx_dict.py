@@ -78,7 +78,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
-            return [self._items[self.keys()[k]] for k in range(len(self._items.keys()))[key]]
+            return [self._items[k] for k in self.keys()[key]]
         else:
             return self._items[key]
 
@@ -87,10 +87,10 @@ class ContextDict(BaseModel, Generic[K, V]):
             key = self.keys()[key]
         if isinstance(key, slice):
             if isinstance(value, Sequence):
-                key_slice = list(range(len(self.keys()))[key])
+                key_slice = self.keys()[key]
                 if len(key_slice) != len(value):
                     raise ValueError("Slices must have the same length!")
-                for k, v in zip([self.keys()[k] for k in key_slice], value):
+                for k, v in zip(key_slice, value):
                     self[k] = v
             else:
                 raise ValueError("Slice key must have sequence value!")
@@ -104,8 +104,8 @@ class ContextDict(BaseModel, Generic[K, V]):
         if isinstance(key, int) and key < 0:
             key = self.keys()[key]
         if isinstance(key, slice):
-            for i in [self.keys()[k] for k in range(len(self.keys()))[key]]:
-                del self[i]
+            for k in self.keys()[key]:
+                del self[k]
         else:
             self._removed.add(key)
             self._added.discard(key)
