@@ -20,6 +20,7 @@ import urllib.request
 
 from chatsky import Context, Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.context_storages import MemoryContextStorage
 from chatsky.core.service import Service, ServiceRuntimeInfo
 from chatsky.utils.testing.common import (
     check_happy_path,
@@ -40,7 +41,7 @@ defined as a dictionary of a particular structure:
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
-        (dictionary or a `DBContextStorage` instance).
+        (a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
         see tutorial 4.
@@ -146,7 +147,8 @@ pipeline_dict = {
     #           on connection to interface (on `pipeline.run`)
     #     `prompt_request` - a string that will be displayed before user input
     #     `prompt_response` - an output prefix string
-    "context_storage": {},
+    "context_storage": MemoryContextStorage(),
+    # this is not necessary since "Memory" is the default context storage
     "pre_services": [
         {
             "handler": prepreprocess,
