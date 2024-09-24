@@ -13,8 +13,6 @@ if TYPE_CHECKING:
 K = TypeVar("K", bound=Hashable)
 V = TypeVar("V")
 
-_marker = object()
-
 
 def get_hash(string: str) -> bytes:
     return sha256(string.encode()).digest()
@@ -120,12 +118,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     def __len__(self) -> int:
         return len(self.keys() if self._storage is not None else self._items.keys())
 
-    async def get(self, key: K, default: V = _marker) -> V:
+    async def get(self, key: K, default = None) -> V:
         try:
             return await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             return default
 
     def __contains__(self, key: K) -> bool:
@@ -140,12 +136,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def items(self) -> List[Tuple[K, V]]:
         return [(k, v) for k, v in zip(self.keys(), await self.values())]
 
-    async def pop(self, key: K, default: V = _marker) -> V:
+    async def pop(self, key: K, default = None) -> V:
         try:
             value = await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             return default
         else:
             del self[key]
@@ -178,12 +172,10 @@ class ContextDict(BaseModel, Generic[K, V]):
         for key, value in kwds.items():
             self[key] = value
 
-    async def setdefault(self, key: K, default: V = _marker) -> V:
+    async def setdefault(self, key: K, default = None) -> V:
         try:
             return await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             self[key] = default
         return default
 
