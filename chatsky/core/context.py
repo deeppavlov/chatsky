@@ -121,10 +121,10 @@ class Context(BaseModel):
         if id is None:
             uid = str(uuid4())
             instance = cls(id=uid)
-            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name, int, AbsoluteNodeLabel)
+            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name, int, Message)
             instance.responses = await ContextDict.new(storage, uid, storage.responses_config.name, int, Message)
-            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name, int, Message)
-            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name, str, Any)
+            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name, int, Any)
+            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name, str, AbsoluteNodeLabel)
             instance.labels[0] = start_label
             instance._storage = storage
             return instance
@@ -142,6 +142,7 @@ class Context(BaseModel):
             if main is None:
                 crt_at = upd_at = time_ns()
                 fw_data = FrameworkData()
+                labels[0] = start_label
             else:
                 crt_at, upd_at, fw_data = main
                 fw_data = FrameworkData.model_validate(fw_data)

@@ -13,6 +13,7 @@ reliability and scalability. SQLite is a self-contained, high-reliability, embed
 public-domain, SQL database engine.
 """
 
+from __future__ import annotations
 import asyncio
 from importlib import import_module
 from os import getenv
