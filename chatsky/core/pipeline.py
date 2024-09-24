@@ -325,7 +325,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         ctx.framework_data.pipeline = self
 
-        ctx.add_turn_items(request=request)
+        ctx.current_turn_id = ctx.current_turn_id + 1
+
+        ctx.requests[ctx.current_turn_id] = request
         result = await self.services_pipeline(ctx, self)
 
         if asyncio.iscoroutine(result):

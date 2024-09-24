@@ -12,7 +12,7 @@ class MemoryContextStorage(DBContextStorage):
 
     Keeps data in a dictionary and two lists:
     
-    - `main`: {context_id: [created_at, updated_at, framework_data]}
+    - `main`: {context_id: [created_at, turn_id, updated_at, framework_data]}
     - `turns`: [context_id, turn_number, label, request, response]
     - `misc`: [context_id, turn_number, misc]
     """
@@ -40,11 +40,11 @@ class MemoryContextStorage(DBContextStorage):
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         return self._storage[self._main_table_name].get(ctx_id, None)
 
-    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
-        self._storage[self._main_table_name][ctx_id] = (crt_at, upd_at, fw_data)
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        self._storage[self._main_table_name][ctx_id] = (turn_id, crt_at, upd_at, fw_data)
 
     async def delete_main_info(self, ctx_id: str) -> None:
         self._storage[self._main_table_name].pop(ctx_id)

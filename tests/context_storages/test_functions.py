@@ -54,21 +54,23 @@ def _attach_ctx_to_db(context: Context, db: DBContextStorage) -> None:
 
 
 async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
+    _attach_ctx_to_db(testing_context, db)
     # Test nothing exists in database
     nothing = await db.load_main_info(testing_context.id)
     assert nothing is None
 
     # Test context main info can be stored and loaded
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
-    created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
+    await db.update_main_info(testing_context.id, testing_context.current_turn_id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
+    turn_id, created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
+    assert testing_context.current_turn_id == turn_id
     assert testing_context._created_at == created_at
     assert testing_context._updated_at == updated_at
     assert testing_context.framework_data == FrameworkData.model_validate_json(framework_data)
 
     # Test context main info can be updated
     testing_context.framework_data.stats["key"] = "value"
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
-    created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
+    await db.update_main_info(testing_context.id, testing_context.current_turn_id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
+    turn_id, created_at, updated_at, framework_data = await db.load_main_info(testing_context.id)
     assert testing_context.framework_data == FrameworkData.model_validate_json(framework_data)
 
     # Test context fields can be stored and loaded
@@ -116,7 +118,7 @@ async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
     assert list() == [Message.model_validate_json(val) for val in req_vals]
 
     # Test all database can be cleared
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
+    await db.update_main_info(testing_context.id, testing_context.current_turn_id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
     await db.clear_all()
     nothing = await db.load_main_info(testing_context.id)
@@ -130,8 +132,9 @@ async def basic_test(db: DBContextStorage, testing_context: Context) -> None:
 
 
 async def partial_storage_test(db: DBContextStorage, testing_context: Context) -> None:
+    _attach_ctx_to_db(testing_context, db)
     # Store some data in storage
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
+    await db.update_main_info(testing_context.id, testing_context.current_turn_id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
     await db.update_field_items(testing_context.id, db.requests_config.name, await testing_context.requests.items())
 
     # Test getting keys with 0 subscription
@@ -146,10 +149,11 @@ async def partial_storage_test(db: DBContextStorage, testing_context: Context) -
 
 
 async def large_misc_test(db: DBContextStorage, testing_context: Context) -> None:
+    _attach_ctx_to_db(testing_context, db)
     BIG_NUMBER = 1000
 
     # Store data main info in storage
-    await db.update_main_info(testing_context.id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
+    await db.update_main_info(testing_context.id, testing_context.current_turn_id, testing_context._created_at, testing_context._updated_at, testing_context.framework_data.model_dump_json())
 
     # Fill context misc with data and store it in database
     testing_context.misc = ContextDict.model_validate({f"key_{i}": f"data number #{i}" for i in range(BIG_NUMBER)})
@@ -169,7 +173,7 @@ async def large_misc_test(db: DBContextStorage, testing_context: Context) -> Non
 async def many_ctx_test(db: DBContextStorage, _: Context) -> None:
     # Fill database with contexts with one misc value and two requests
     for i in range(1, 101):
-        ctx = await Context.connected(db, 0, f"ctx_id_{i}")
+        ctx = await Context.connected(db, ("flow", "node"), f"ctx_id_{i}")
         await ctx.misc.update({f"key_{i}": f"ctx misc value {i}"})
         ctx.requests[0] = Message("useful message")
         ctx.requests[i] = Message("some message")
@@ -177,7 +181,7 @@ async def many_ctx_test(db: DBContextStorage, _: Context) -> None:
 
     # Check that both misc and requests are read as expected
     for i in range(1, 101):
-        ctx = await Context.connected(db, 0, f"ctx_id_{i}")
+        ctx = await Context.connected(db, ("flow", "node"), f"ctx_id_{i}")
         assert await ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
         assert (await ctx.requests[0]).text == "useful message"
         assert (await ctx.requests[i]).text == "some message"

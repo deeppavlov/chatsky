@@ -50,6 +50,7 @@ class DBContextStorage(ABC):
     _main_table_name: Literal["main"] = "main"
     _turns_table_name: Literal["turns"] = "turns"
     _id_column_name: Literal["id"] = "id"
+    _current_turn_id_column_name: Literal["current_turn_id"] = "current_turn_id"
     _created_at_column_name: Literal["created_at"] = "created_at"
     _updated_at_column_name: Literal["updated_at"] = "updated_at"
     _framework_data_column_name: Literal["framework_data"] = "framework_data"
@@ -79,14 +80,14 @@ class DBContextStorage(ABC):
         self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
 
     @abstractmethod
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         """
         Load main information about the context storage.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         """
         Update main information about the context storage.
         """

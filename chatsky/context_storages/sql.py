@@ -161,6 +161,7 @@ class SQLContextStorage(DBContextStorage):
             f"{table_name_prefix}_{self._main_table_name}",
             self._metadata,
             Column(self._id_column_name, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+            Column(self._current_turn_id_column_name, BigInteger(), nullable=False),
             Column(self._created_at_column_name, BigInteger(), nullable=False),
             Column(self._updated_at_column_name, BigInteger(), nullable=False),
             Column(self._framework_data_column_name, LargeBinary(), nullable=False),
@@ -227,16 +228,17 @@ class SQLContextStorage(DBContextStorage):
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         stmt = select(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return None if result is None else result[1:]
 
-    async def update_main_info(self, ctx_id: str, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         insert_stmt = self._INSERT_CALLABLE(self._main_table).values(
             {
                 self._id_column_name: ctx_id,
+                self._current_turn_id_column_name: turn_id,
                 self._created_at_column_name: crt_at,
                 self._updated_at_column_name: upd_at,
                 self._framework_data_column_name: fw_data,
@@ -245,7 +247,7 @@ class SQLContextStorage(DBContextStorage):
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [self._updated_at_column_name, self._framework_data_column_name],
+            [self._updated_at_column_name, self._framework_data_column_name, self._current_turn_id_column_name],
             [self._id_column_name],
         )
         async with self.engine.begin() as conn:

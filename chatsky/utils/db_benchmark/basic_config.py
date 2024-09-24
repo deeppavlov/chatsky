@@ -15,7 +15,7 @@ import random
 from humanize import naturalsize
 from pympler import asizeof
 
-from chatsky.core import Message, Context
+from chatsky.core import Message, Context, AbsoluteNodeLabel
 from chatsky.utils.db_benchmark.benchmark import BenchmarkConfig
 
 
@@ -166,9 +166,10 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
         start_len = len(context.labels)
         if start_len + self.step_dialog_len < self.to_dialog_len:
             for i in range(start_len, start_len + self.step_dialog_len):
-                context.add_label((f"flow_{i}", f"node_{i}"))
-                context.add_request(get_message(self.message_dimensions))
-                context.add_response(get_message(self.message_dimensions))
+                context.current_turn_id = context.current_turn_id + 1
+                context.labels[context.current_turn_id] = AbsoluteNodeLabel(flow_name="flow_{i}", node_name="node_{i}")
+                context.requests[context.current_turn_id] = get_message(self.message_dimensions)
+                context.responses[context.current_turn_id] =get_message(self.message_dimensions)
             return context
         else:
             return None

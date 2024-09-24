@@ -92,6 +92,7 @@ class Context(BaseModel):
     Timestamp when the context was **last time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
+    current_turn_id: int = Field(default=0)
     labels: ContextDict[int, AbsoluteNodeLabel] = Field(default_factory=ContextDict)
     requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
     responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
@@ -144,12 +145,13 @@ class Context(BaseModel):
             )
             if main is None:
                 crt_at = upd_at = time_ns()
+                turn_id = 0
                 fw_data = FrameworkData()
                 labels[0] = start_label
             else:
-                crt_at, upd_at, fw_data = main
+                turn_id, crt_at, upd_at, fw_data = main
                 fw_data = FrameworkData.model_validate(fw_data)
-            instance = cls(id=id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
+            instance = cls(id=id, current_turn_id=turn_id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
@@ -159,7 +161,7 @@ class Context(BaseModel):
             byted = self.framework_data.model_dump(mode="json")
             await launch_coroutines(
                 [
-                    self._storage.update_main_info(self.id, self._created_at, self._updated_at, byted),
+                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, byted),
                     self.labels.store(),
                     self.requests.store(),
                     self.responses.store(),
@@ -176,37 +178,23 @@ class Context(BaseModel):
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
-    def add_turn_items(self, label: Optional[AbsoluteNodeLabelInitTypes] = None, request: Optional[MessageInitTypes] = None, response: Optional[MessageInitTypes] = None):
-        self.labels[max(self.labels.keys(), default=-1) + 1] = label
-        self.requests[max(self.requests.keys(), default=-1) + 1] = request
-        self.responses[max(self.responses.keys(), default=-1) + 1] = response
+    @property
+    def last_label(self) -> AbsoluteNodeLabel:
+        if len(self.labels) == 0:
+            raise ContextError("Labels are empty.")
+        return self.labels._items[self.labels.keys()[-1]]
 
     @property
-    def last_label(self) -> Optional[AbsoluteNodeLabel]:
-        label_keys = [k for k in self.labels._items.keys() if self.labels._items[k] is not None]
-        return self.labels._items.get(max(label_keys, default=None), None)
-
-    @last_label.setter
-    def last_label(self, label: Optional[AbsoluteNodeLabelInitTypes]):
-        self.labels[max(self.labels.keys(), default=0)] = label
+    def last_response(self) -> Message:
+        if len(self.responses) == 0:
+            raise ContextError("Responses are empty.")
+        return self.responses._items[self.responses.keys()[-1]]
 
     @property
-    def last_response(self) -> Optional[Message]:
-        response_keys = [k for k in self.responses._items.keys() if self.responses._items[k] is not None]
-        return self.responses._items.get(max(response_keys, default=None), None)
-
-    @last_response.setter
-    def last_response(self, response: Optional[MessageInitTypes]):
-        self.responses[max(self.responses.keys(), default=0)] = response
-
-    @property
-    def last_request(self) -> Optional[Message]:
-        request_keys = [k for k in self.requests._items.keys() if self.requests._items[k] is not None]
-        return self.requests._items.get(max(request_keys, default=None), None)
-
-    @last_request.setter
-    def last_request(self, request: Optional[MessageInitTypes]):
-        self.requests[max(self.requests.keys(), default=0)] = request
+    def last_request(self) -> Message:
+        if len(self.requests) == 0:
+            raise ContextError("Requests are empty.")
+        return self.requests._items[self.requests.keys()[-1]]
 
     @property
     def pipeline(self) -> Pipeline:
@@ -228,6 +216,7 @@ class Context(BaseModel):
         if isinstance(value, Context):
             return (
                 self.id == value.id
+                and self.current_turn_id == value.current_turn_id
                 and self.labels == value.labels
                 and self.requests == value.requests
                 and self.responses == value.responses
