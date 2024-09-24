@@ -17,7 +17,7 @@ from __future__ import annotations
 import asyncio
 from importlib import import_module
 from os import getenv
-from typing import Any, Callable, Collection, Dict, Hashable, List, Optional, Set, Tuple
+from typing import Hashable, Callable, Collection, Dict, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, FieldConfig
 from .protocol import get_protocol_install_suggestion
@@ -169,7 +169,7 @@ class SQLContextStorage(DBContextStorage):
         self._turns_table = Table(
             f"{table_name_prefix}_{self._turns_table_name}",
             self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._id_column_name, ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self.labels_config.name, LargeBinary(), nullable=True),
             Column(self.requests_config.name, LargeBinary(), nullable=True),
@@ -179,7 +179,7 @@ class SQLContextStorage(DBContextStorage):
         self._misc_table = Table(
             f"{table_name_prefix}_{self.misc_config.name}",
             self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._id_column_name, ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
             Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
             Index(f"{self.misc_config.name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
@@ -275,32 +275,33 @@ class SQLContextStorage(DBContextStorage):
         field_table, _, _ = self._get_table_field_and_config(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
-            return list((await conn.execute(stmt)).fetchall())
+            return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
         field_table, field_name, _ = self._get_table_field_and_config(field_name)
         stmt = select(field_table.c[field_name])
         stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
         async with self.engine.begin() as conn:
-            return list((await conn.execute(stmt)).fetchall())
+            return [v[0] for v in (await conn.execute(stmt)).fetchall()]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_table, field_name, _ = self._get_table_field_and_config(field_name)
-        keys, values = zip(*items)
-        if field_name == self.misc_config.name and any(len(key) > self._FIELD_LENGTH for key in keys):
+        if field_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
             raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
         insert_stmt = self._INSERT_CALLABLE(field_table).values(
-            {
-                self._id_column_name: ctx_id,
-                self._KEY_COLUMN: keys,
-                field_name: values,
-            }
+            [
+                {
+                    self._id_column_name: ctx_id,
+                    self._KEY_COLUMN: k,
+                    field_name: v,
+                } for k, v in items
+            ]
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [self._KEY_COLUMN, field_name],
-            [self._id_column_name],
+            [field_name],
+            [self._id_column_name, self._KEY_COLUMN],
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
