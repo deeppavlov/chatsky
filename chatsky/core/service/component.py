@@ -157,8 +157,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :return: ``None``
         """
-        task = asyncio.create_task(self._run(ctx))
-        await task
+        await self._run(ctx)
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """
