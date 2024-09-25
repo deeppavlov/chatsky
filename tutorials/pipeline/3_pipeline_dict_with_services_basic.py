@@ -93,19 +93,18 @@ which send some information to the logger.
 # %%
 def prepreprocess(_):
     logger.info(
-        "preprocession intent-detection Service running (defined as a dict)"
+        "prepreprocessor Service running (defined as a dict)"
     )
 
 
 def preprocess(_):
     logger.info(
-        "another preprocession web-based annotator Service "
-        "(defined as a callable)"
+        "preprocessor Service running (defined as a callable)"
     )
 
 
 def postprocess(_):
-    logger.info("postprocession Service (defined as an object)")
+    logger.info("postprocessor Service running (defined as an object)")
 
 
 # %%

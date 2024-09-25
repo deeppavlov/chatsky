@@ -130,7 +130,7 @@ using access to the pipeline from `ctx.pipeline`.
 # %%
 async def prepreprocess(ctx: Context):
     logger.info(
-        "preprocession intent-detection Service running (defined as a dict)"
+        "prepreprocessor Service running (defined as a dict)"
     )
     ctx.misc["preprocess_detection"] = {
         ctx.last_request.text: "some_intent"
@@ -141,8 +141,7 @@ async def prepreprocess(ctx: Context):
 class PreProcess(Service):
     async def call(self, ctx: Context):
         logger.info(
-            f"another preprocession web-based annotator Service"
-            f"(defined as a callable), named '{self.name}'"
+            f"{self.name} Service running (defined as a callable)"
         )
         with urllib.request.urlopen("https://example.com/") as webpage:
             web_content = webpage.read().decode(
@@ -156,7 +155,7 @@ class PreProcess(Service):
 
 
 async def postprocess(ctx: Context):
-    logger.info("postprocession Service (defined as an object)")
+    logger.info("postprocessor Service running (defined as an object)")
     logger.info(
         f"resulting misc looks like:"
         f"{json.dumps(ctx.misc, indent=4, default=str)}"
