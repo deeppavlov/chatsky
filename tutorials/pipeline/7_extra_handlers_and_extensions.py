@@ -35,7 +35,7 @@ from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
 logging.basicConfig(
-    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+    stream=sys.stdout, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -79,24 +79,21 @@ that run for a random amount of time between 0 and 0.05 seconds.
 """
 
 # %%
-start_times = dict()  # Place to temporarily store service start times
-pipeline_info = dict()  # Pipeline information storage
 
 
-def before_all(_, info: ExtraHandlerRuntimeInfo):
-    global start_times, pipeline_info
+def before_all(ctx: Context, info: ExtraHandlerRuntimeInfo):
     now = datetime.now()
-    pipeline_info = {"start_time": now}
-    start_times = {info.component.path: now}
+    ctx.misc["pipeline_info"] = {"start_time": now}
+    ctx.misc["start_times"] = {info.component.path: now}
 
 
-def before(_, info: ExtraHandlerRuntimeInfo):
-    start_times.update({info.component.path: datetime.now()})
+def before(ctx: Context, info: ExtraHandlerRuntimeInfo):
+    ctx.misc["start_times"].update({info.component.path: datetime.now()})
 
 
 def after(ctx: Context, info: ExtraHandlerRuntimeInfo):
-    start_time = start_times[info.component.path]
-    pipeline_info.update(
+    start_time = ctx.misc["start_times"][info.component.path]
+    ctx.misc["pipeline_info"].update(
         {
             f"{info.component.path}_duration": datetime.now() - start_time,
             f"{info.component.path}_state": info.component.get_state(ctx),
@@ -104,10 +101,11 @@ def after(ctx: Context, info: ExtraHandlerRuntimeInfo):
     )
 
 
-def after_all(_, info: ExtraHandlerRuntimeInfo):
-    pipeline_info.update(
-        {"total_time": datetime.now() - start_times[info.component.path]}
+def after_all(ctx: Context, info: ExtraHandlerRuntimeInfo):
+    ctx.misc["pipeline_info"].update(
+        {"total_time": datetime.now() - ctx.misc["start_times"][info.component.path]}
     )
+    pipeline_info = ctx.misc["pipeline_info"]
     logger.info(
         f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}"
     )
@@ -127,7 +125,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [LongService() for _ in range(0, 25)],
+    "pre_services": [LongService() for _ in range(0, 5)],
 }
 
 # %%

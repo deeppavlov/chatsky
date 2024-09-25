@@ -64,6 +64,3 @@ def initialize_service_states(ctx: Context, service: PipelineComponent) -> None:
     if isinstance(service, ServiceGroup):
         for component in service.components:
             initialize_service_states(ctx, component)
-    if isinstance(service, Service):
-        if isinstance(service.handler, PipelineComponent):
-            initialize_service_states(ctx, service.handler)

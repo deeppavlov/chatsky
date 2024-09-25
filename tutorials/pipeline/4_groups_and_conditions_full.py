@@ -29,7 +29,7 @@ from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
 logging.basicConfig(
-    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+    stream=sys.stdout, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -168,8 +168,7 @@ pipeline_dict = {
         ServiceGroup(
             name="named_group",
             components=[
-                Service(
-                    handler=SimpleService(),
+                SimpleService(
                     start_condition=All(
                         ServiceFinished(".pipeline.pre.SimpleService_0"),
                         ServiceFinished(".pipeline.pre.SimpleService_1"),
@@ -178,8 +177,7 @@ pipeline_dict = {
                     name="running_service",
                 ),  # This simple service will be named `running_service`,
                 # because its name is manually overridden
-                Service(
-                    handler=NeverRunningService(),
+                NeverRunningService(
                     start_condition=Not(
                         ServiceFinished(
                             ".pipeline.post.named_group.running_service",
@@ -205,8 +203,6 @@ pipeline_dict = {
 pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
     check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         pipeline.run()

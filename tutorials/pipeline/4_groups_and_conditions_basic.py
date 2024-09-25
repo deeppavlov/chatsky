@@ -29,7 +29,7 @@ from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
 logging.basicConfig(
-    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+    stream=sys.stdout, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -100,20 +100,18 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": Service(
-        handler=AlwaysRunningService(), name="always_running_service"
+    "pre_services": AlwaysRunningService(
+        name="always_running_service",
     ),
     "post_services": [
-        Service(
-            handler=NeverRunningService(),
+        NeverRunningService(
             start_condition=Not(
                 ServiceFinished(
                     ".pipeline.pre.always_running_service"
                 )  # pre services belong to the "pre" group; post -- to "post"
             ),
         ),
-        Service(
-            handler=RuntimeInfoPrintingService(),
+        RuntimeInfoPrintingService(
             name="runtime_info_printing_service",
         ),
     ],

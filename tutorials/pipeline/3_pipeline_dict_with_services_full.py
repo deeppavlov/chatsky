@@ -32,7 +32,7 @@ from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 reload(logging)
 logging.basicConfig(
-    stream=sys.stdout, format="", level=logging.INFO, datefmt=None
+    stream=sys.stdout, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
