@@ -28,7 +28,7 @@ from chatsky.utils.testing.common import (
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="")
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +53,8 @@ They have the following signature
 
 Service is only executed if its `start_condition` returned `True`.
 By default all the services start unconditionally.
-There are number of built-in condition functions. (see `Script` tutorial %mddoclink(tutorials.pipeline.2_conditions.py))
+There are number of built-in condition functions.
+(see `Script` tutorial %mddoclink(tutorials.pipeline.2_conditions.py))
 Though there is also a built-in condition `ServiceFinished`
 that returns `True` if a `Service` with a given path completed successfully,
 returns `False` otherwise.

@@ -34,7 +34,7 @@ from chatsky.utils.testing.common import (
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="")
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
@@ -54,7 +54,7 @@ Actually, `BEFORE_ALL` and `AFTER_ALL`
     are attached to root service group named 'pipeline',
     so they return its runtime info
 
-All extra handlers warnings (see tutorial 7)
+All extra handlers warnings
 are applicable to global extra handlers.
 Pipeline `add_global_extra_handler` function is used to register
     global extra handlers. It accepts following arguments:
@@ -72,7 +72,7 @@ Pipeline `add_global_extra_handler` function is used to register
 Here basic functionality of `df-node-stats` library is emulated.
 Information about pipeline component execution time and
     result is collected and printed to info log after pipeline execution.
-Pipeline consists of actor and 25 `long_service`s
+Pipeline consists of actor and 5 `long_service`s
 that run for a random amount of time between 0 and 0.05 seconds.
 """
 
