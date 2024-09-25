@@ -48,26 +48,26 @@ Optional Pipeline parameters:
         (dictionary or a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
+        see %mddoclink(tutorial.pipeline.4_groups_and_conditions_full).
 * `post-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
+        see %mddoclink(tutorial.pipeline.4_groups_and_conditions_full).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
+        See tutorials %mddoclink(tutorial.pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial.pipeline.7_extra_handlers_and_extensions).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
+        See tutorials %mddoclink(tutorial.pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial.pipeline.7_extra_handlers_and_extensions).
 * `timeout` - Pipeline timeout, see
-        %mddoclink(tutorial, pipeline.5_asynchronous_groups_and_services).
+        %mddoclink(tutorial.pipeline.5_asynchronous_groups_and_services).
 
 On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
-(see %mddoclink(tutorial, pipeline.2_pre_and_post_processors))
+(see %mddoclink(tutorial.pipeline.2_pre_and_post_processors))
 or with `Service` constructor / dict.
 It must contain `handler` - a callable (function).
 
