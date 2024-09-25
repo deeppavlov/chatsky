@@ -23,13 +23,14 @@ class ServiceFinished(BaseCondition):
 
     path: str
     """The path of the condition pipeline component."""
-    wait: bool = False
+    wait: bool = True
     """
-    Whether the function should wait for the service to be finished.
-    By default, the service is not awaited.
+    Whether to wait for the service to be finished.
+
+    This eliminates possible service states ``NOT_RUN`` and ``RUNNING``.
     """
 
-    def __init__(self, path: str, *, wait: bool = False):
+    def __init__(self, path: str, *, wait: bool = True):
         super().__init__(path=path, wait=wait)
 
     async def call(self, ctx: Context) -> bool:

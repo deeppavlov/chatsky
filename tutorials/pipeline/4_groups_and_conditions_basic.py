@@ -63,7 +63,7 @@ completed successfully and `False` otherwise.
 
 * `path` (required) - a path to the `Service`.
 * `wait` - A boolean flag indicating whether it should wait for the specified
-        `Service` to complete (defaults to `False`).
+        `Service` to complete (defaults to `True`).
 
 In the following example, a conditionally executed service named
 `never_running_service` is executed only if `always_running_service`
