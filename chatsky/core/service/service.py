@@ -52,7 +52,7 @@ class Service(PipelineComponent):
         """
         Add support for initializing from a `Callable` or `BaseProcessing`.
         """
-        if isinstance(data, Callable):
+        if callable(data):
             return {"handler": data}
         return data
 
