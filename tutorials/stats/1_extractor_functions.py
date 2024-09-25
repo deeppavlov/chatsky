@@ -120,7 +120,7 @@ pipeline = Pipeline.model_validate(
         "script": TOY_SCRIPT,
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": heavy_service,
+        "pre_services": [heavy_service],
     }
 )
 

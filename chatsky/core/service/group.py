@@ -71,14 +71,12 @@ class ServiceGroup(PipelineComponent):
     @classmethod
     def components_validator(cls, data: Any):
         """
-        Add support for initializing from a `Callable`, `List`
+        Add support for initializing from a `Callable`,
         and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
         Casts `components` to `list` if it's not already.
         """
         if isinstance(data, list):
             result = {"components": data}
-        elif callable(data) or isinstance(data, PipelineComponent):
-            result = {"components": [data]}
         else:
             result = data
 

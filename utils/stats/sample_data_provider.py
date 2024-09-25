@@ -61,7 +61,7 @@ pipeline = Pipeline.model_validate(
             Service(handler=slot_processor_1, after_handler=[get_slots]),
             Service(handler=slot_processor_2, after_handler=[get_slots]),
         ],
-        "post_services": Service(handler=confidence_processor, after_handler=[get_confidence]),
+        "post_services": [Service(handler=confidence_processor, after_handler=[get_confidence])],
     }
 )
 pipeline.actor.add_extra_handler(GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before)

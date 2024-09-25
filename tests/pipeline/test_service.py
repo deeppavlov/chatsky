@@ -1,6 +1,8 @@
 import asyncio
 from typing import Any
 
+import pytest
+
 from chatsky import Context, BaseProcessing, Pipeline, Message
 from chatsky.conditions import ServiceFinished
 from chatsky.core.service import (
@@ -16,7 +18,12 @@ from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
 
-async def test_pipeline_component_order():
+@pytest.fixture
+def empty_context():
+    return Context.init(("", ""))
+
+
+async def test_pipeline_component_order(empty_context):
     logs = []
 
     class MyProcessing(BaseProcessing):
@@ -34,9 +41,8 @@ async def test_pipeline_component_order():
         pre_services=[MyProcessing(wait=0.02, text="A")],
         post_services=[MyProcessing(wait=0, text="C")],
     )
-    ctx = Context.init(("", ""))
-    initialize_service_states(ctx, pipeline.services_pipeline)
-    await pipeline._run_pipeline(Message(""), ctx.id)
+    initialize_service_states(empty_context, pipeline.services_pipeline)
+    await pipeline._run_pipeline(Message(""), empty_context.id)
     assert logs == ["A", "B", "C"]
 
 
@@ -153,13 +159,15 @@ def test_bad_service():
     def bad_service_func(_: Context) -> None:
         raise Exception("Custom exception")
 
-    test_group = ServiceGroup.model_validate(bad_service_func)
+    test_group = ServiceGroup.model_validate([bad_service_func])
     assert run_test_group(test_group) == ComponentExecutionState.FAILED
 
 
-def test_service_not_run():
+async def test_service_not_run(empty_context):
     service = Service(handler=lambda ctx: None, start_condition=False)
-    assert run_test_group(service) == ComponentExecutionState.NOT_RUN
+    initialize_service_states(empty_context, service)
+    await service(empty_context)
+    assert service.get_state(empty_context) == ComponentExecutionState.NOT_RUN
 
 
 def test_inherited_extra_handlers_for_service_groups_with_conditions():

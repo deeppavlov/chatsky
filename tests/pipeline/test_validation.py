@@ -79,11 +79,11 @@ class TestExtraHandlerValidation:
 class TestServiceGroupValidation:
     def test_single_service(self):
         func = UserFunctionSamples.correct_service_function_1
-        group = ServiceGroup(components=Service(handler=func, after_handler=func))
+        group = ServiceGroup(components=[Service(handler=func, after_handler=func)])
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
         # Same, but with model_validate
-        group = ServiceGroup.model_validate(Service(handler=func, after_handler=func))
+        group = ServiceGroup.model_validate([Service(handler=func, after_handler=func)])
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
 

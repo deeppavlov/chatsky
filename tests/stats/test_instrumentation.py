@@ -1,7 +1,7 @@
 import pytest
 
 from chatsky import Context
-from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, ComponentExecutionState
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, ComponentExecutionState, ServiceGroup
 from tests.pipeline.utils import run_test_group
 
 try:
@@ -55,6 +55,6 @@ def test_failed_stats_collection(log_event_catcher):
 
     log_list = log_event_catcher(logger=instrumentor_logger, level="ERROR")
 
-    assert run_test_group(service) == ComponentExecutionState.FINISHED
+    assert run_test_group(ServiceGroup(components=[service])) == ComponentExecutionState.FINISHED
 
     assert len(log_list) == 1
