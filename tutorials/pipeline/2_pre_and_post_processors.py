@@ -28,7 +28,7 @@ from chatsky.utils.testing import (
 
 reload(logging)
 logging.basicConfig(
-    stream=sys.stdout, level=logging.INFO
+    stream=sys.stdout, level=logging.INFO, format=''
 )
 logger = logging.getLogger(__name__)
 
