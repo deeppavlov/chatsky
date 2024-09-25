@@ -27,7 +27,7 @@ from chatsky.utils.testing import (
 # %% [markdown]
 """
 `Pipeline` is an object, that automates script execution and context management.
-It's constructor method can be used to create
+Its constructor method can be used to create
 a pipeline of the most basic structure:
 "pre-services -> actor -> post-services"
 as well as to define `context_storage` and `messenger_interface`.
@@ -39,16 +39,16 @@ current state of the conversation and the script.
 These parameters usage will be shown in
 [tutorial 2]%doclink(tutorial,pipeline.2_pre_and_post_processors),
 [tutorial 3]%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full)
-and [tutorial 6]%doclink(tutorials.pipeline.6_extra_handlers_full).
+and [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_full).
 
-Here only required parameters are provided to pipeline.
-`context_storage` will default to simple Python dict and
+Here only the required parameters are provided to the pipeline.
+`context_storage` will default to a simple Python dict and
 `messenger_interface` will never be used.
 pre- and post-services lists are empty.
-`Pipeline` object can be called with user input
-as first argument and dialog id (any immutable object).
+The `Pipeline` object can be called with user input
+as the first argument and dialog id (any immutable object).
 This call will return `Context`,
-its `last_response` property will be actors response.
+its `last_response` property will be the actor's response.
 """
 
 # %%

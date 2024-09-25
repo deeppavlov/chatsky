@@ -69,8 +69,9 @@ On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
-(see tutorial 2) or with dict of structure / `Service` object
- with following constructor arguments:
+(see [tutorial 2]%doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
+or with dict of structure / `Service` object
+with following constructor arguments:
 
 
 * `handler` (required) - ServiceFunction.
