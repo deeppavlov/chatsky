@@ -175,20 +175,26 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     json://file.json
     When using sqlite backend your prefix should contain three slashes if you use Windows, or four in other cases:
     sqlite:////file.db
+
+    For MemoryContextStorage pass an empty string as ``path``.
+
     If you want to use additional parameters in class constructors, you can pass them to this function as kwargs.
 
     :param path: Path to the file.
     """
-    prefix, _, _ = path.partition("://")
-    if "sql" in prefix:
-        prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
-    assert (
-        prefix in PROTOCOLS
-    ), f"""
-    URI path should be prefixed with one of the following:\n
-    {", ".join(PROTOCOLS.keys())}.\n
-    For more information, see the function doc:\n{context_storage_factory.__doc__}
-    """
-    _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
+    if path == "":
+        module = "memory"
+        _class = "MemoryContextStorage"
+    else:
+        prefix, _, _ = path.partition("://")
+        if "sql" in prefix:
+            prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
+        if prefix not in PROTOCOLS:
+            raise ValueError(f"""
+        URI path should be prefixed with one of the following:\n
+        {", ".join(PROTOCOLS.keys())}.\n
+        For more information, see the function doc:\n{context_storage_factory.__doc__}
+        """)
+        _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
     target_class = getattr(import_module(f".{module}", package="chatsky.context_storages"), _class)
     return target_class(path, **kwargs)
