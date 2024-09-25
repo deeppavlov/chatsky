@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any
 
-from chatsky import Context, BaseProcessing, Pipeline
+from chatsky import Context, BaseProcessing, Pipeline, Message
 from chatsky.conditions import ServiceFinished
 from chatsky.core.service import (
     Service,
@@ -14,6 +14,30 @@ from chatsky.core.service.extra import BeforeHandler
 from chatsky.core.utils import initialize_service_states
 from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
+
+
+async def test_pipeline_component_order():
+    logs = []
+
+    class MyProcessing(BaseProcessing):
+        wait: float
+        text: str
+
+        async def call(self, ctx: Context):
+            await asyncio.sleep(self.wait)
+            logs.append(self.text)
+
+    script = {"": {"": {"pre_response": {"": MyProcessing(wait=0.01, text="B")}}}}
+    pipeline = Pipeline(
+        script,
+        ("", ""),
+        pre_services=[MyProcessing(wait=0.02, text="A")],
+        post_services=[MyProcessing(wait=0, text="C")],
+    )
+    ctx = Context.init(("", ""))
+    initialize_service_states(ctx, pipeline.services_pipeline)
+    await pipeline._run_pipeline(Message(""), ctx.id)
+    assert logs == ["A", "B", "C"]
 
 
 def test_async_services():
