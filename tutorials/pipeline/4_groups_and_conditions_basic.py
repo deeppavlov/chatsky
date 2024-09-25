@@ -54,7 +54,7 @@ They have the following signature
 Service is only executed if its `start_condition` returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions.
-(see `Script` [tutorial]%doclink(tutorial,script.core.2_conditions.py))
+(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions.py)))
 Though there is also a built-in condition `ServiceFinished`
 that returns `True` if a `Service` with a given path completed successfully,
 returns `False` otherwise.

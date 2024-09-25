@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 """
 When Pipeline is created, additional pre-
 and post-services can be defined.
-These can be any callables, certain objects or dicts.
+These can be any callables, certain objects, or dicts.
 They are being turned into special `Service` or `ServiceGroup` objects
 (see [tutorial 3](
 %doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))),
@@ -44,11 +44,12 @@ These services can be used to access external APIs, annotate user input, etc.
 
 Service callables only take one parameter: `ctx`,
 where `ctx` is the `Context` object of the current dialog.
-(see [tutorial 3]%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))
+(see [tutorial 3](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full)))
 
-Here a preprocessor ("ping") and a postprocessor ("pong") are added to pipeline.
-They share data in `context.misc` -
-a common place for sharing data between services and actor.
+Here a preprocessor ("ping") and a postprocessor
+("pong") are added to the pipeline. They share data in `context.misc` -
+a common place for sharing data between services and the actor.
 """
 
 

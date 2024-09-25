@@ -51,12 +51,12 @@ Alternatively, the groups can be defined as objects
     `ServiceGroup` objects.
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `timeout` - Pipeline timeout, see [tutorial 5](
@@ -101,7 +101,7 @@ By default all the services start unconditionally.
 There are number of built-in condition functions as well
 as is the possibility to create custom ones. You can check which
 condition functions are there in the `Script` tutorial about conditions,
-(see `Script` [tutorial]%doclink(tutorial,script.core.2_conditions.py)),
+(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions.py))),
 or check the API directly.
 
 There is also a built-in condition `ServiceFinished`

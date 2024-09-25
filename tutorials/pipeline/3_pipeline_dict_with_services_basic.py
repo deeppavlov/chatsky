@@ -56,12 +56,12 @@ Optional Pipeline parameters:
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `timeout` - Pipeline timeout, see [tutorial 5](
@@ -71,7 +71,7 @@ On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
-(see [tutorial 2]%doclink(tutorial,pipeline.2_pre_and_post_processors))
+(see [tutorial 2](%doclink(tutorial,pipeline.2_pre_and_post_processors)))
 or with `Service` constructor / dict.
 It must contain `handler` - a callable (function).
 

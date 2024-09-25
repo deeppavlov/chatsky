@@ -37,11 +37,11 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 When Pipeline is created using Pydantic's `model_validate` method
-or `Pipeline`'s constructor method, pipeline should be
-defined as a dictionary of a particular structure:
+or `Pipeline`'s constructor, the pipeline should be
+defined as a dictionary of a specific structure:
 
 * `messenger_interface` - `MessengerInterface` instance,
-        is used to connect to channel and transfer IO to user.
+        is used to connect to the channel and transfer IO to the user.
 * `context_storage` - Place to store dialog contexts
         (dictionary or a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
@@ -54,12 +54,12 @@ defined as a dictionary of a particular structure:
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `timeout` - Pipeline timeout, see [tutorial 5](
@@ -69,20 +69,20 @@ On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
 list are run without difference between pre- and postprocessors.
 `Service` object can be defined either with callable
-(see [tutorial 2]%doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
+(see [tutorial 2](%doclink(tutorial,pipeline.7_extra_handlers_and_extensions))).
 or with dict of structure / `Service` object
-with following constructor arguments:
+with the following constructor arguments:
 
 
 * `handler` (required) - ServiceFunction.
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
         and [tutorial 7](
         %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `timeout` - service timeout, see [tutorial 5](
@@ -93,7 +93,7 @@ with following constructor arguments:
         %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
 * `start_condition` - service start condition, see [tutorial 4](
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
-* `name` - custom defined name for the service
+* `name` - custom-defined name for the service
         (keep in mind that names in one ServiceGroup should be unique),
         see [tutorial 4](
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
@@ -106,17 +106,17 @@ then add an async `call()` method which now will be called
 instead of the `handler`. (see the `PreProcess` example below)
 You don't need to worry about the `handler` field, it can be empty.
 
-Please note that if you are defining a Service this way,
+If you define a Service this way,
 `handler` won't run automatically. So, you could add a line
 like "await self.handler(ctx)" or "self.handler(ctx)" directly to your
 `call()` method, depending on what your `handler` is.
 
-Not only Pipeline can be run using `__call__` method,
+Not only Pipeline can be run using the `__call__` method,
 for most cases `run` method should be used.
-It starts pipeline asynchronously and connects to provided messenger interface.
+It starts the pipeline asynchronously and connects to the provided messenger interface.
 
 Here pipeline contains 3 services, used in 3 different ways.
-First two of them write sample feature detection data to `ctx.misc`.
+The first two of them write sample feature detection data to `ctx.misc`.
 The first uses a constant expression and is defined as a Service function,
 while the second fetches from `example.com` and derives a class from Service.
 Final service logs `ctx.misc` dict, using access to the pipeline
