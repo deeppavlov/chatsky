@@ -278,10 +278,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         initialize_service_states(ctx, self.services_pipeline)
 
         ctx.add_request(request)
-        result = await self.services_pipeline(ctx)
-
-        if asyncio.iscoroutine(result):
-            await result
+        await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
