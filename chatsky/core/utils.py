@@ -59,6 +59,11 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> None
 
 
 def initialize_service_states(ctx: Context, service: PipelineComponent) -> None:
+    """
+    Reset :py:class:`.ServiceState` of `service`.
+
+    Called at the beginning of every turn for the pipeline service group.
+    """
     ctx.framework_data.service_states[service.path] = ServiceState()
     if isinstance(service, ServiceGroup):
         for component in service.components:
