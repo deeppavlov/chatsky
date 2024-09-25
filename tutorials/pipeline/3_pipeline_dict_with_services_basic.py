@@ -35,11 +35,10 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created using it's constructor method or
-Pydantic's `model_validate` method,
-`Pipeline` should be defined as a dictionary of a particular structure,
-which must contain `script`, `start_label` and `fallback_label`,
-see `Script` tutorials.
+When a `Pipeline` is created using Pydantic's `model_validate` method or the
+`Pipeline` constructor, it should be defined as a dictionary
+with a specific structure that includes `script`,
+`start_label` and `fallback_label`, see `Script` tutorials.
 
 Optional Pipeline parameters:
 * `messenger_interface` - `MessengerInterface` instance,
@@ -47,11 +46,11 @@ Optional Pipeline parameters:
 * `context_storage` - Place to store dialog contexts
         (dictionary or a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
-        basically a list of `Service` objects or more `ServiceGroup` objects,
+        essentially a list of `Service` objects or more `ServiceGroup` objects,
         see [tutorial 4](
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `post-services` - A `ServiceGroup` object,
-        basically a list of `Service` objects or more `ServiceGroup` objects,
+        essentially a list of `Service` objects or more `ServiceGroup` objects,
         see [tutorial 4](
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
@@ -75,16 +74,18 @@ list are run without difference between pre- and postprocessors.
 or with `Service` constructor / dict.
 It must contain `handler` - a callable (function).
 
-Services can also be defined as a child class of `Service`, so that
-you can get access to the `self` object to get more
-information about your `Service` and log it. (see full tutorial)
+Services can also be defined as subclasses of `Service`,
+allowing access to the `self` object for logging and
+additional information. (see [full tutorial](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full)))
 
-Not only Pipeline can be run using `__call__` method,
+While a Pipeline can be executed using the  `__call__` method,
 for most cases `run` method should be used.
-It starts pipeline asynchronously and connects to provided messenger interface.
+It starts the pipeline asynchronously and connects
+to the provided messenger interface.
 
-Here, the pipeline contains 3 services,
-which just send some info to the logger.
+In this example, the pipeline contains three services,
+which send some information to the logger.
 """
 
 

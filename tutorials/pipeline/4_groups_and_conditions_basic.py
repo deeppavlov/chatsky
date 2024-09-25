@@ -42,7 +42,7 @@ a list of `Service` and `ServiceGroup` objects.
 
 To receive serialized information about service,
     service group or pipeline `model_dump` method from Pydantic can be used,
-    which returns important object properties as a dict.
+    which returns important object properties as a dictionary.
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
@@ -54,7 +54,7 @@ They have the following signature
 Service is only executed if its `start_condition` returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions.
-(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions.py)))
+(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions)))
 Though there is also a built-in condition `ServiceFinished`
 that returns `True` if a `Service` with a given path completed successfully,
 returns `False` otherwise.

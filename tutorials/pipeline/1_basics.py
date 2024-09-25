@@ -41,7 +41,7 @@ These parameters usage will be shown in
 [tutorial 3](%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))
 and [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_full)).
 
-Here only the required parameters are provided to the pipeline.
+In this example, only the required parameters are provided to the pipeline.
 `context_storage` will default to a simple Python dict and
 `messenger_interface` will never be used.
 pre- and post-services lists are empty.

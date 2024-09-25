@@ -36,9 +36,10 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created using Pydantic's `model_validate` method
-or `Pipeline`'s constructor, the pipeline should be
-defined as a dictionary of a specific structure:
+When a `Pipeline` is created using Pydantic's `model_validate` method or the
+`Pipeline` constructor, it should be defined as a dictionary
+with a specific structure that includes `script`,
+`start_label` and `fallback_label`, see `Script` tutorials.
 
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to the channel and transfer IO to the user.
@@ -98,29 +99,29 @@ with the following constructor arguments:
         see [tutorial 4](
         %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 
-Services can also be defined as a child class of `Service`, so that
-you can get access to the `self` object to get more
-information about your `Service` and log it.
-To do that you need to derive your class from `Service`,
-then add an async `call()` method which now will be called
-instead of the `handler`. (see the `PreProcess` example below)
-You don't need to worry about the `handler` field, it can be empty.
+Services can also be defined as subclasses of `Service`,
+allowing access to the `self` object for logging and
+additional information. To do this, derive
+your class from `Service`, then add an async `call()` method which will
+now replace the `handler`. (see the `PreProcess` example below)
+You don't need to worry about the `handler` field, it can be left empty.
 
-If you define a Service this way,
-`handler` won't run automatically. So, you could add a line
-like "await self.handler(ctx)" or "self.handler(ctx)" directly to your
-`call()` method, depending on what your `handler` is.
+If you define a Service this way, the `handler` won't run automatically.
+You can include a line like "await self.handler(ctx)" or
+"self.handler(ctx)" directly to your `call()` method,
+depending on what your `handler` is.
 
-Not only Pipeline can be run using the `__call__` method,
+While a Pipeline can be executed using the  `__call__` method,
 for most cases `run` method should be used.
-It starts the pipeline asynchronously and connects to the provided messenger interface.
+It starts the pipeline asynchronously and connects
+to the provided messenger interface.
 
-Here pipeline contains 3 services, used in 3 different ways.
-The first two of them write sample feature detection data to `ctx.misc`.
-The first uses a constant expression and is defined as a Service function,
-while the second fetches from `example.com` and derives a class from Service.
-Final service logs `ctx.misc` dict, using access to the pipeline
-from `ctx.pipeline`.
+In this example, the pipeline contains three services,
+used in three different ways. The first two write sample feature detection
+data to `ctx.misc`. The first uses a constant expression and is defined as
+a Service function, while the second fetches from `example.com` and derives
+a class from Service. Final service logs the `ctx.misc` dictionary,
+using access to the pipeline from `ctx.pipeline`.
 """
 
 
