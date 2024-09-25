@@ -96,11 +96,11 @@ They have the following signature
     class MyCondition(BaseCondition):
         async def call(self, ctx: Context) -> bool:
 
-Service is only executed if its start_condition returned `True`.
+A `Service` is executed only if its `start_condition` returns `True`.
 By default all the services start unconditionally.
-There are number of built-in condition functions as well
-as is the possibility to create custom ones. You can check which
-condition functions are there in the `Script` tutorial about conditions,
+There are several built-in condition functions available as well
+as the possibility to create custom ones. You can check the
+`Script` tutorial about conditions,
 (see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions))),
 or check the API directly.
 

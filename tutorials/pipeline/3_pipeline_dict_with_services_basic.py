@@ -41,6 +41,7 @@ with a specific structure that includes `script`,
 `start_label` and `fallback_label`, see `Script` tutorials.
 
 Optional Pipeline parameters:
+
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts

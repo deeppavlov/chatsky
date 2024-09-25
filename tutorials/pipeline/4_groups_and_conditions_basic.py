@@ -51,27 +51,26 @@ They have the following signature
     class MyCondition(BaseCondition):
         async def call(self, ctx: Context) -> bool:
 
-Service is only executed if its `start_condition` returned `True`.
+A `Service` is executed only if its `start_condition` returns `True`.
 By default all the services start unconditionally.
-There are number of built-in condition functions.
-(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions)))
-Though there is also a built-in condition `ServiceFinished`
-that returns `True` if a `Service` with a given path completed successfully,
-returns `False` otherwise.
+There are several built-in condition functions available
+(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions))).
+One notable built-in condition is `ServiceFinished`
+which returns `True` if a `Service` with a specified path
+completed successfully and `False` otherwise.
 
 `ServiceFinished` accepts the following constructor parameters:
 
 * `path` (required) - a path to the `Service`.
-* `wait` - whether it should wait for the said `Service` to complete,
-        defaults to `False`.
+* `wait` - A boolean flag indicating whether it should wait for the specified
+        `Service` to complete (defaults to `False`).
 
-Here there is a conditionally executed service named
-`never_running_service` is always executed.
-It is executed only if `always_running_service`
-is not finished, that should never happen.
+In the following example, a conditionally executed service named
+`never_running_service` is executed only if `always_running_service`
+does not finish successfully (which should never happen).
 The service named `context_printing_service`
 prints pipeline runtime information,
-that contains execution state of all previously run services.
+including the execution state of all previously run services.
 """
 
 
@@ -90,7 +89,7 @@ class RuntimeInfoPrintingService(Service):
     async def call(self, _: Context):
         logger.info(
             f"Service '{self.name}' runtime execution info:"
-            f"{self.model_dump_json(indent=4, default=str)}"
+            f"{self.model_dump_json(indent=4)}"
         )
 
 

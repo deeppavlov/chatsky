@@ -102,7 +102,6 @@ pipeline_dict = {
             name="InteractWithServiceA",
             components=[
                 interact("Starting interaction", "A"),
-                interact("Interacting", "A"),
                 interact("Finishing interaction", "A"),
             ],
             asynchronous=True,
@@ -111,7 +110,6 @@ pipeline_dict = {
             name="InteractWithServiceB",
             components=[
                 interact("Starting interaction", "B"),
-                interact("Interacting", "B"),
                 interact("Finishing interaction", "B"),
             ],
             asynchronous=True,
@@ -120,7 +118,6 @@ pipeline_dict = {
             name="InteractWithServiceC",
             components=[
                 interact("Starting interaction", "C"),
-                interact("Interacting", "C"),
                 interact("Finishing interaction", "C"),
             ],
             asynchronous=False,

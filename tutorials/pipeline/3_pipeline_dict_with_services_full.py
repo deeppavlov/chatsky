@@ -41,6 +41,8 @@ When a `Pipeline` is created using Pydantic's `model_validate` method or the
 with a specific structure that includes `script`,
 `start_label` and `fallback_label`, see `Script` tutorials.
 
+Optional Pipeline parameters:
+
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to the channel and transfer IO to the user.
 * `context_storage` - Place to store dialog contexts
