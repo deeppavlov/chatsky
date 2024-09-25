@@ -46,20 +46,24 @@ defined as a dictionary of a particular structure:
         (dictionary or a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see %mddoclink(tutorials.pipeline.4_groups_and_conditions_full).
+        see [tutorial 4](
+        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `post-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see %mddoclink(tutorials.pipeline.4_groups_and_conditions_full).
+        see [tutorial 4](
+        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorials.pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorials.pipeline.7_extra_handlers_and_extensions).
+        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        and [tutorial 7](
+        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorials.pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorials.pipeline.7_extra_handlers_and_extensions).
-* `timeout` - Pipeline timeout, see
-        %mddoclink(tutorials.pipeline.5_asynchronous_groups_and_services).
+        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        and [tutorial 7](
+        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
+* `timeout` - Pipeline timeout, see [tutorial 5](
+        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
 
 On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
@@ -72,22 +76,26 @@ list are run without difference between pre- and postprocessors.
 * `handler` (required) - ServiceFunction.
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorials.pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorials.pipeline.7_extra_handlers_and_extensions).
+        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        and [tutorial 7](
+        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials %mddoclink(tutorials.pipeline.6_extra_handlers_full)
-        and %mddoclink(tutorials.pipeline.7_extra_handlers_and_extensions).
-* `timeout` - service timeout, see
-        %mddoclink(tutorials.pipeline.5_asynchronous_groups_and_services).
+        See [tutorial 6]%doclink(tutorial,pipeline.6_extra_handlers_basic)
+        and [tutorial 7](
+        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
+* `timeout` - service timeout, see [tutorial 5](
+        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
 * `asynchronous` - whether or not this service _should_ be asynchronous
         (keep in mind that not all services _can_ be asynchronous),
-        see %mddoclink(tutorials.pipeline.5_asynchronous_groups_and_services).
-* `start_condition` - service start condition, see
-        %mddoclink(tutorials.pipeline.4_groups_and_conditions_full).
+        see [tutorial 5](
+        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
+* `start_condition` - service start condition, see [tutorial 4](
+        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 * `name` - custom defined name for the service
         (keep in mind that names in one ServiceGroup should be unique),
-        see %mddoclink(tutorials.pipeline.4_groups_and_conditions_full).
+        see [tutorial 4](
+        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 
 Services can also be defined as a child class of `Service`, so that
 you can get access to the `self` object to get more

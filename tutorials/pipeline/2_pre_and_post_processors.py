@@ -37,13 +37,14 @@ When Pipeline is created, additional pre-
 and post-services can be defined.
 These can be any callables, certain objects or dicts.
 They are being turned into special `Service` or `ServiceGroup` objects
-(see %mddoclink(tutorials.pipeline.3_pipeline_dict_with_services_full)),
+(see [tutorial 3](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))),
 that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
 Service callables only take one parameter: `ctx`,
 where `ctx` is the `Context` object of the current dialog.
-(see %mddoclink(tutorials.pipeline.3_pipeline_dict_with_services_full))
+(see [tutorial 3]%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))
 
 Here a preprocessor ("ping") and a postprocessor ("pong") are added to pipeline.
 They share data in `context.misc` -

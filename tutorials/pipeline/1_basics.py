@@ -36,10 +36,10 @@ that contains the %mddoclink(api,core.script,Script) and handles it.
 It is responsible for processing user input and
 determining the appropriate response based on the
 current state of the conversation and the script.
-These parameters usage will be shown in tutorials
-%mddoclink(tutorials.pipeline.2_pre_and_post_processors),
-%mddoclink(tutorials.pipeline.3_pipeline_dict_with_services_full)
-and %mddoclink(tutorials.pipeline.6_extra_handlers_full).
+These parameters usage will be shown in
+[tutorial 2]%doclink(tutorial,pipeline.2_pre_and_post_processors),
+[tutorial 3]%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full)
+and [tutorial 6]%doclink(tutorials.pipeline.6_extra_handlers_full).
 
 Here only required parameters are provided to pipeline.
 `context_storage` will default to simple Python dict and
