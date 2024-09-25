@@ -92,15 +92,11 @@ which send some information to the logger.
 
 # %%
 def prepreprocess(_):
-    logger.info(
-        "prepreprocessor Service running (defined as a dict)"
-    )
+    logger.info("prepreprocessor Service running (defined as a dict)")
 
 
 def preprocess(_):
-    logger.info(
-        "preprocessor Service running (defined as a callable)"
-    )
+    logger.info("preprocessor Service running (defined as a callable)")
 
 
 def postprocess(_):

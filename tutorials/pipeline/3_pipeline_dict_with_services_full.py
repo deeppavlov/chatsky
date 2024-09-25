@@ -129,9 +129,7 @@ using access to the pipeline from `ctx.pipeline`.
 
 # %%
 async def prepreprocess(ctx: Context):
-    logger.info(
-        "prepreprocessor Service running (defined as a dict)"
-    )
+    logger.info("prepreprocessor Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
         ctx.last_request.text: "some_intent"
     }  # Similar syntax can be used to access
@@ -140,9 +138,7 @@ async def prepreprocess(ctx: Context):
 
 class PreProcess(Service):
     async def call(self, ctx: Context):
-        logger.info(
-            f"{self.name} Service running (defined as a callable)"
-        )
+        logger.info(f"{self.name} Service running (defined as a callable)")
         with urllib.request.urlopen("https://example.com/") as webpage:
             web_content = webpage.read().decode(
                 webpage.headers.get_content_charset()
