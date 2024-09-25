@@ -24,7 +24,7 @@ from datetime import datetime
 from chatsky.core.service import (
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
-    Service,
+    Service, ServiceGroup,
 )
 from chatsky import Pipeline, Context
 from chatsky.utils.testing.common import (
@@ -126,7 +126,10 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [LongService() for _ in range(0, 5)],
+    "pre_services": ServiceGroup(
+        components=[LongService() for _ in range(0, 5)],
+        all_async=True,
+    )
 }
 
 # %%
