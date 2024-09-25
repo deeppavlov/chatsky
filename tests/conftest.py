@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import pytest
 
@@ -90,6 +91,7 @@ def context_factory(pipeline):
         ctx.labels._value_type = TypeAdapter(AbsoluteNodeLabel)
         ctx.requests._value_type = TypeAdapter(Message)
         ctx.responses._value_type = TypeAdapter(Message)
+        ctx.misc._value_type = TypeAdapter(Any)
         if start_label is not None:
             ctx.labels[0] = AbsoluteNodeLabel.model_validate(start_label)
         ctx.framework_data.pipeline = pipeline
