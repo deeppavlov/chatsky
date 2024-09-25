@@ -34,9 +34,7 @@ from chatsky.utils.testing.common import (
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 reload(logging)
-logging.basicConfig(
-    stream=sys.stdout, level=logging.INFO
-)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # %% [markdown]

@@ -31,9 +31,7 @@ from chatsky.utils.testing.common import (
 from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 reload(logging)
-logging.basicConfig(
-    stream=sys.stdout, level=logging.INFO
-)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
@@ -48,17 +46,20 @@ defined as a dictionary of a particular structure:
         (dictionary or a `DBContextStorage` instance).
 * `pre-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see tutorial 4.
+        see %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
 * `post-services` - A `ServiceGroup` object,
         basically a list of `Service` objects or more `ServiceGroup` objects,
-        see tutorial 4.
+        see %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials 6 and 7.
+        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials 6 and 7.
-* `timeout` - Pipeline timeout, see tutorial 5.
+        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
+* `timeout` - Pipeline timeout, see
+        %mddoclink(tutorial, pipeline.5_asynchronous_groups_and_services).
 
 On pipeline execution services from
 `components` = 'pre-services' + actor + 'post-services'
@@ -71,18 +72,22 @@ list are run without difference between pre- and postprocessors.
 * `handler` (required) - ServiceFunction.
 * `before_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials 6 and 7.
+        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
 * `after_handler` - a list of `ExtraHandlerFunction` objects or
         a `ComponentExtraHandler` object.
-        See tutorials 6 and 7.
-* `timeout` - service timeout, see tutorial 5.
+        See tutorials %mddoclink(tutorial, pipeline.6_extra_handlers_full)
+        and %mddoclink(tutorial, pipeline.7_extra_handlers_and_extensions).
+* `timeout` - service timeout, see
+        %mddoclink(tutorial, pipeline.5_asynchronous_groups_and_services).
 * `asynchronous` - whether or not this service _should_ be asynchronous
         (keep in mind that not all services _can_ be asynchronous),
-        see tutorial 5.
-* `start_condition` - service start condition, see tutorial 4.
+        see %mddoclink(tutorial, pipeline.5_asynchronous_groups_and_services).
+* `start_condition` - service start condition, see
+        %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
 * `name` - custom defined name for the service
         (keep in mind that names in one ServiceGroup should be unique),
-        see tutorial 4.
+        see %mddoclink(tutorial, pipeline.4_groups_and_conditions_full).
 
 Services can also be defined as a child class of `Service`, so that
 you can get access to the `self` object to get more
