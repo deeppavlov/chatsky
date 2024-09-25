@@ -126,13 +126,13 @@ All of the services store their execution status in context,
 * `FINISHED` - Service finished successfully.
 * `FAILED` - Service execution failed (that also throws an exception).
 
-Here there are two conditionally executed services:
-a service named `running_service` is executed
+In this example, two conditionally executed services are illustrated.
+The service named `running_service` is executed
     only if both `SimpleServices` in `service_group_0`
-    are finished successfully.
+    have finished successfully.
 `never_running_service` is executed only if `running_service` is not finished,
-this should never happen.
-`context_printing_service` prints pipeline runtime information,
+which should never happen.
+Lastly, `context_printing_service` prints pipeline runtime information,
     that contains execution state of all previously run services.
 """
 

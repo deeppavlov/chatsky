@@ -36,8 +36,8 @@ Services and service groups are `PipelineComponent`s,
 which can be synchronous or asynchronous.
 All `ServiceGroup`s are made of these `PipelineComponent`s.
 
-Synchronous components are executed consequently, while
-Asynchronous components work simultaneously.
+Synchronous components are executed sequentially, while
+asynchronous components work simultaneously.
 By default, all `PipelineComponent`s are synchronous,
 but can be marked as 'asynchronous'.
 
@@ -45,8 +45,8 @@ It should be noted that only adjacent asynchronous components in a
 `ServiceGroup` are executed simultaneously.
 To put it bluntly, if "s" means sync component and "a" means async,
 then [a, s, a, a, a, s] -> a, s, (a, a, a), s.
-Those three adjacent async functions will run simultaneously.
-Basically, the order of your services in the list matters.
+Those three adjacent async components will run simultaneously.
+Basically, the order of your services in the list is crucial.
 
 Service groups have a flag 'all_async' which makes it treat
 every component inside it as asynchronous,
@@ -55,22 +55,18 @@ This is convenient if you have a bunch of functions,
 that you want to run simultaneously,
 but don't want to make a service for each of them.
 
-Here, "pre_services" is a service group with the flag
-'all_async' set to 'True', that contains 10 services,
-each of them should sleep for 0.01 of a second.
-However, as the group is fully asynchronous,
-it is being executed for 0.01 of a second in total.
-The same would happen if all of those services were marked as 'asynchronous'.
-Once again, by default, all services inside a
-service group are executed sequentially if they
-weren't explicitly marked as asynchronous.
+In this example, there's a service group named "pre_services" with the
+`all_async` flag set to `True`, containing 10 services, each of which sleeps
+for 0.01 seconds. Since the group is fully asynchronous, the total execution
+time is just 0.01 seconds. The same would apply if all those services were
+marked as `asynchronous`. By default, if services are not explicitly marked as
+asynchronous, they will execute sequentially.
 
 To further demonstrate ServiceGroup's logic,
 "post_services" is a ServiceGroup with asynchronous components 'A' and 'B',
 which execute simultaneously, and also one non-async component 'C' at the end.
-If 'A' and 'B' weren't async, then all steps for component 'A'
-would pass first and only then would execution start for
-component 'B', but instead they start
+If 'A' and 'B' weren't async, all steps for component 'A' would complete
+before component 'B' begins its execution, but instead they start
 at the same time. Only after both of them have finished,
 does component 'C' start working.
 """
