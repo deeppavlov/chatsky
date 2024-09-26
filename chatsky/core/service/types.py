@@ -71,12 +71,10 @@ class ExtraHandlerType(str, Enum):
     Enum, representing extra handler execution stage: before or after the wrapped function.
     The following types are supported:
 
-    - UNDEFINED: extra handler function with undetermined execution stage,
     - BEFORE: extra handler function called before component,
     - AFTER: extra handler function called after component.
     """
 
-    UNDEFINED = "UNDEFINED"
     BEFORE = "BEFORE"
     AFTER = "AFTER"
 

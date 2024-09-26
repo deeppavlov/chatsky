@@ -9,9 +9,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import inspect
-
+import abc
 from typing import Optional, List, Any, ClassVar, Union, Callable, TYPE_CHECKING
 from typing_extensions import Annotated, TypeAlias
+
 from pydantic import BaseModel, model_validator, Field
 
 from chatsky.core.context import Context
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
     from chatsky.core.service import PipelineComponent
 
 
-class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
+class ComponentExtraHandler(BaseModel, abc.ABC, extra="forbid", arbitrary_types_allowed=True):
     """
     Class, representing an extra handler for pipeline components.
 
@@ -41,7 +42,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     """
     A list or instance of :py:data:`~.ExtraHandlerFunction`.
     """
-    stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.UNDEFINED
+    stage: ClassVar[ExtraHandlerType]
     """
     An :py:class:`~.ExtraHandlerType`, specifying whether this handler will
     be executed before or after pipeline component.
