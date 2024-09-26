@@ -129,14 +129,3 @@ Type of object, that is passed to extra handlers in runtime.
 Contains current wrapper info (`name`, `stage`).
 Also contains `component` - `self` object of the component this extra handler is attached to.
 """
-
-
-ServiceFunction: TypeAlias = Union[
-    Callable[["Context"], None],
-    Callable[["Context"], Awaitable[None]],
-]
-"""
-A function type for creating service handlers.
-Accepts current dialog context.
-Can be both synchronous and asynchronous.
-"""

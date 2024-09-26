@@ -16,5 +16,4 @@ from .types import (
     ComponentExecutionState,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
-    ServiceFunction,
 )
