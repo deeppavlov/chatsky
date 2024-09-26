@@ -9,7 +9,7 @@ of the framework and are organized into sections.
 The Context Storages section describes how to use context storages in Chatsky.
 The Messengers section covers how to use the Telegram messenger with Chatsky.
 The Pipeline section teaches the basics of the pipeline concept, how to use pre- and postprocessors,
-asynchronous groups and services, custom messenger interfaces, and extra handlers and extensions.
+concurrent groups and services, custom messenger interfaces, and extra handlers and extensions.
 The Script section covers the basics of the script concept, including conditions, responses, transitions,
 and serialization. It also includes tutorials on pre-response and pre-transition processing.
 Finally, the Utils section covers the cache and LRU cache utilities in Chatsky.

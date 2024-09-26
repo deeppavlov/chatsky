@@ -73,7 +73,7 @@ class TestExtraHandlerValidation:
             BeforeHandler.model_validate([1, 2, 3])
 
 
-# Note: I haven't tested components being asynchronous in any way,
+# Note: I haven't tested components being concurrent in any way,
 # other than in the async pipeline components tutorial.
 # It's not a test though.
 class TestServiceGroupValidation:

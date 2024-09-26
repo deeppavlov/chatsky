@@ -46,10 +46,10 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     Maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted.
     """
-    asynchronous: bool = False
+    concurrent: bool = False
     """
     Optional flag that indicates whether this component
-    should be executed asynchronously with adjacent async components.
+    should be executed concurrently with adjacent concurrent components.
     """
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     """

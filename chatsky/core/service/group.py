@@ -5,8 +5,6 @@ The Service Group module contains the ServiceGroup class, which is used to repre
 
 This class provides a way to organize and manage multiple services as a single unit,
 allowing for easier management and organization of the services within the pipeline.
-
-:py:class:`~.ServiceGroup` serves the important function of grouping services to work together asynchronously.
 """
 
 from __future__ import annotations
@@ -36,11 +34,6 @@ logger = logging.getLogger(__name__)
 class ServiceGroup(PipelineComponent):
     """
     A service group class.
-
-    Service group can be synchronous or asynchronous.
-    Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
-    Components in asynchronous groups are executed simultaneously.
-    Group can be asynchronous only if all components in it are asynchronous.
     """
 
     components: List[
@@ -52,17 +45,18 @@ class ServiceGroup(PipelineComponent):
     """
     A :py:class:`~.ServiceGroup` object, that will be added to the group.
     """
-    all_async: bool = False
+    fully_concurrent: bool = False
     """
-    Optional flag that, if set to True, makes the `ServiceGroup` run
-    all components inside it asynchronously. This is not recursive
-    (applies only to first level components). Default value is False.
+    Whether this should run all components inside it concurrently
+    (regardless of their `concurrent` attribute.
+    This is not recursive (applies only to first level components).
+    Default value is False.
     """
     # Repeating inherited fields for better documentation.
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    asynchronous: bool = False
+    concurrent: bool = False
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     name: Optional[str] = None
     path: Optional[str] = None
@@ -87,23 +81,23 @@ class ServiceGroup(PipelineComponent):
 
     async def run_component(self, ctx: Context) -> Optional[ComponentExecutionState]:
         """
-        Method for running this service group. It doesn't include extra handlers execution,
-        start condition checking or error handling - pure execution only.
-        If this ServiceGroup's `all_async` flag is set to True (it's False by default)
-        then all `components` will run simultaneously. Otherwise, ServiceGroup's default logic will apply,
-        which is running all sequential components one after another with groups of asynchronous components in between.
-        You could say that a group of adjacent 'asynchronous' components is a sequential component itself.
-        Collects information about components execution state - group is finished successfully
-        only if all components in it finished successfully.
+        Run components of this service group.
+
+        If :py:attr:`.fully_concurrent` flag is set to True, all ``components`` will run concurrently
+        (via ``asyncio.gather``).
+
+        Otherwise, all non-concurrent components execute one after another
+        while consecutive concurrent components are run concurrently (via ``asyncio.gather``).
 
         :param ctx: Current dialog context.
+        :return: :py:attr:`.ComponentExecutionState.FAILED` if any component failed.
         """
-        if self.all_async:
+        if self.fully_concurrent:
             await asyncio.gather(*[service(ctx) for service in self.components])
         else:
             current_subgroup = []
             for component in self.components:
-                if component.asynchronous:
+                if component.concurrent:
                     current_subgroup.append(component)
                 else:
                     await asyncio.gather(*[service(ctx) for service in current_subgroup])

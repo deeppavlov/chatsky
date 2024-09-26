@@ -51,10 +51,10 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     Maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted.
     """
-    asynchronous: bool = False
+    concurrent: bool = False
     """
     A flag that indicates whether the extra handler's functions
-    should be executed asynchronously. The default value of the flag is False.
+    should be executed concurrently. False by default.
     """
 
     @model_validator(mode="before")
@@ -99,7 +99,7 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
         :return: `None`
         """
 
-        if self.asynchronous:
+        if self.concurrent:
             await asyncio.gather(*[self._run_function(func, ctx, component_info) for func in self.functions])
         else:
             for func in self.functions:
@@ -112,8 +112,6 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
 
         :param ctx: (required) Current dialog `Context`.
         :param component_info: associated component's `self` object.
-        :return: `Context` if this is a synchronous service or
-            `Awaitable` if this is an asynchronous component or `None`.
         """
         task = asyncio.create_task(self._run(ctx, component_info))
         await asyncio.wait_for(task, timeout=self.timeout)
@@ -128,8 +126,8 @@ class BeforeHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. The default value of the flag is False.
+    :param concurrent: Optional flag that indicates whether the extra functions
+        should be executed concurrently. False by default.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.BEFORE
@@ -144,8 +142,8 @@ class AfterHandler(ComponentExtraHandler):
     :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
-    :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. The default value of the flag is False.
+    :param concurrent: Optional flag that indicates whether the extra functions
+        should be executed concurrently. False by default.
     """
 
     stage: ClassVar[ExtraHandlerType] = ExtraHandlerType.AFTER

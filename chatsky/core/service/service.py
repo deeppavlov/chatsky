@@ -5,9 +5,6 @@ The Service module contains the :py:class:`.Service` class which represents a si
 
 Pipeline consists of services and service groups.
 Service is an atomic part of a pipeline.
-
-Service can be asynchronous only if its handler is a coroutine.
-Actor wrapping service is asynchronous.
 """
 
 from __future__ import annotations
@@ -29,8 +26,6 @@ logger = logging.getLogger(__name__)
 class Service(PipelineComponent):
     """
     This class represents a service.
-
-    Service can be asynchronous only if its handler is a coroutine.
     """
 
     handler: Union[BaseProcessing, Callable] = None
@@ -41,7 +36,7 @@ class Service(PipelineComponent):
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
     after_handler: AfterHandler = Field(default_factory=AfterHandler)
     timeout: Optional[float] = None
-    asynchronous: bool = False
+    concurrent: bool = False
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     name: Optional[str] = None
     path: Optional[str] = None
@@ -94,7 +89,7 @@ def to_service(
     before_handler: BeforeHandler = None,
     after_handler: AfterHandler = None,
     timeout: Optional[int] = None,
-    asynchronous: bool = False,
+    concurrent: bool = False,
     start_condition: AnyCondition = True,
     name: Optional[str] = None,
 ):
@@ -112,7 +107,7 @@ def to_service(
             before_handler=before_handler,
             after_handler=after_handler,
             timeout=timeout,
-            asynchronous=asynchronous,
+            concurrent=concurrent,
             start_condition=start_condition,
             name=name,
         )

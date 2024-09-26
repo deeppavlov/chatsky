@@ -49,8 +49,8 @@ async def test_pipeline_component_order(empty_context):
 def test_async_services():
     running_order = []
     test_group = make_test_service_group(running_order)
-    test_group.components[0].asynchronous = True
-    test_group.components[1].asynchronous = True
+    test_group.components[0].concurrent = True
+    test_group.components[1].concurrent = True
 
     run_test_group(test_group)
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
@@ -59,7 +59,7 @@ def test_async_services():
 def test_all_async_flag():
     running_order = []
     test_group = make_test_service_group(running_order)
-    test_group.all_async = True
+    test_group.fully_concurrent = True
 
     run_test_group(test_group)
     assert running_order == ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3"]
@@ -75,12 +75,12 @@ def test_extra_handler_timeouts():
 
     # Timeout expires before the exception is raised, which is then logged.
     test_list = []
-    extra_handler = BeforeHandler(functions=bad_function(1.0, test_list), timeout=0.0, asynchronous=True)
+    extra_handler = BeforeHandler(functions=bad_function(1.0, test_list), timeout=0.0, concurrent=True)
     run_extra_handler(extra_handler)
     assert test_list == []
 
     # This is here just to demonstrate that the timeout is working.
-    extra_handler = BeforeHandler(functions=bad_function(0.0, test_list), timeout=1.0, asynchronous=True)
+    extra_handler = BeforeHandler(functions=bad_function(0.0, test_list), timeout=1.0, concurrent=True)
     run_extra_handler(extra_handler)
     assert test_list == [True]
 
@@ -114,7 +114,7 @@ def test_async_extra_handler_func():
         return async_func
 
     test_list = []
-    extra_handler = BeforeHandler(functions=append_list(test_list), asynchronous=True)
+    extra_handler = BeforeHandler(functions=append_list(test_list), concurrent=True)
     run_extra_handler(extra_handler)
     assert test_list == ["Value"]
 
@@ -142,12 +142,12 @@ def test_service_computed_names():
     assert service.computed_name == "MyProcessing"
 
 
-# 'all_async' flag will try to run all services simultaneously, but the 'wait' option
+# 'fully_concurrent' flag will try to run all services simultaneously, but the 'wait' option
 # makes it so that A waits for B, which waits for C. So "C" is first, "A" is last.
 def test_waiting_for_service_to_finish_condition():
     running_order = []
     test_group = make_test_service_group(running_order)
-    test_group.all_async = True
+    test_group.fully_concurrent = True
     test_group.components[0].start_condition = ServiceFinished(".pipeline.pre.InteractWithServiceB", wait=True)
     test_group.components[1].start_condition = ServiceFinished(".pipeline.pre.InteractWithServiceC", wait=True)
 
