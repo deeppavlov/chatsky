@@ -15,6 +15,7 @@ class BaseMethod(BaseModel, abc.ABC):
     """
     Base class to evaluate models response as condition.
     """
+
     @abc.abstractmethod
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         raise NotImplementedError
@@ -35,6 +36,7 @@ class Contains(BaseMethod):
     :return: True if pattern is contained in model result
     :rtype: bool
     """
+
     pattern: str
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
@@ -52,11 +54,13 @@ class LogProb(BaseMethod):
     :return: True if logprob is higher then threshold
     :rtype: bool
     """
+
     target_token: str
     threshold: float = -0.5
+
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         try:
-            result = model_result.generations[0][0].generation_info['logprobs']['content'][0]['top_logprobs']
+            result = model_result.generations[0][0].generation_info["logprobs"]["content"][0]["top_logprobs"]
         except ValueError:
             raise ValueError("LogProb method can only be applied to OpenAI models.")
         for tok in result:

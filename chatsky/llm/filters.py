@@ -14,6 +14,7 @@ class BaseFilter(BaseModel, abc.ABC):
     """
     Base class for all message history filters.
     """
+
     @abc.abstractmethod
     def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool:
         """
@@ -29,6 +30,7 @@ class IsImportant(BaseFilter):
     """
     Filter that checks if the "important" field in a Message.misc is True.
     """
+
     def __call__(
         self, ctx: Context = None, request: Message = None, response: Message = None, model_name: str = None
     ) -> bool:
@@ -43,6 +45,7 @@ class FromTheModel(BaseFilter):
     """
     Filter that checks if the message was sent by the model.
     """
+
     def __call__(
         self, ctx: Context = None, request: Message = None, response: Message = None, model_name: str = None
     ) -> bool:

@@ -35,7 +35,7 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    labels as lbl
+    labels as lbl,
 )
 from chatsky.utils.testing import (
     is_interactive_mode,
@@ -79,8 +79,13 @@ toy_script = {
         "greeting_node": {
             RESPONSE: llm_response(model_name="bank_model", history=0),
             TRANSITIONS: [
-                Tr(dst=("loan_flow", "start_node"), cnd=cnd.ExactMatch("/loan")),
-                Tr(dst=("hr_flow", "start_node"), cnd=cnd.ExactMatch("/vacancies")),
+                Tr(
+                    dst=("loan_flow", "start_node"), cnd=cnd.ExactMatch("/loan")
+                ),
+                Tr(
+                    dst=("hr_flow", "start_node"),
+                    cnd=cnd.ExactMatch("/vacancies"),
+                ),
                 Tr(dst=dst.Current(), cnd=cnd.true()),
             ],
         },
@@ -100,7 +105,10 @@ toy_script = {
         "start_node": {
             RESPONSE: llm_response(model_name="bank_model"),
             TRANSITIONS: [
-                Tr(dst=("greeting_flow", "greeting_node"), cnd=cnd.ExactMatch("/end")),
+                Tr(
+                    dst=("greeting_flow", "greeting_node"),
+                    cnd=cnd.ExactMatch("/end"),
+                ),
                 Tr(dst=dst.Current(), cnd=cnd.true()),
             ],
         },
@@ -115,7 +123,10 @@ toy_script = {
         "start_node": {
             RESPONSE: llm_response(model_name="bank_model"),
             TRANSITIONS: [
-                Tr(dst=("greeting_flow", "greeting_node"), cnd=cnd.ExactMatch("/end")),
+                Tr(
+                    dst=("greeting_flow", "greeting_node"),
+                    cnd=cnd.ExactMatch("/end"),
+                ),
                 Tr(dst="cook_node", cnd=cnd.Regexp(r".*cook.*")),
                 Tr(dst=dst.Current(), cnd=cnd.true()),
             ],

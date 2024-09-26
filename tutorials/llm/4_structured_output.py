@@ -17,7 +17,7 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    labels as lbl
+    labels as lbl,
 )
 from chatsky.utils.testing import (
     is_interactive_mode,
@@ -42,7 +42,7 @@ In this tutorial we will define two models.
 """
 # %%
 assistant_model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"))
-movie_model = LLM_API(ChatAnthropic(model='claude-3-opus-20240229'))
+movie_model = LLM_API(ChatAnthropic(model="claude-3-opus-20240229"))
 
 # %% [markdown]
 """
@@ -50,6 +50,8 @@ For the structured output we will use two classes to show two possible ways of u
 The `Movie`, inherited from the `BaseModel` will act as a schema for the response _text_, that will contain valid JSON containing desribed information.
 The `ImportantMessage`, inherited from the `Message` class, will otherwise define the fields of the output `Message`. In this example we will use this to mark the message as important.
 """
+
+
 # %%
 class Movie(BaseModel):
     name: str = Field(description="Name of the movie")
@@ -60,17 +62,23 @@ class Movie(BaseModel):
 
 class ImportantMessage(Message):
     text: str = Field(description="Text of the note")
-    misc: dict = Field(description="A dictonary with 'important' key and true/false value in it")
+    misc: dict = Field(
+        description="A dictonary with 'important' key and true/false value in it"
+    )
+
 
 # %%
 
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("greeting_flow", "start_node"), cnd=cnd.ExactMatch("/start")),
+            Tr(
+                dst=("greeting_flow", "start_node"),
+                cnd=cnd.ExactMatch("/start"),
+            ),
             Tr(dst=("movie_flow", "main_node"), cnd=cnd.ExactMatch("/movie")),
             Tr(dst=("note_flow", "main_node"), cnd=cnd.ExactMatch("/note")),
-        ]    
+        ]
     },
     "greeting_flow": {
         "start_node": {
@@ -79,20 +87,28 @@ script = {
         "fallback_node": {
             RESPONSE: Message("I did not quite understand you..."),
             TRANSITIONS: [Tr(dst="start_node", cnd=cnd.true())],
-        }
+        },
     },
     "movie_flow": {
         "main_node": {
-            RESPONSE: llm_response("movie_model", prompt="Ask user to request you for movie ideas.", message_schema=Movie),
+            RESPONSE: llm_response(
+                "movie_model",
+                prompt="Ask user to request you for movie ideas.",
+                message_schema=Movie,
+            ),
             TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
         }
     },
     "note_flow": {
         "main_node": {
-            RESPONSE: llm_response("note_model", prompt="Help user take notes and mark the important ones.", message_schema=ImportantMessage),
+            RESPONSE: llm_response(
+                "note_model",
+                prompt="Help user take notes and mark the important ones.",
+                message_schema=ImportantMessage,
+            ),
             TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
         }
-    }
+    },
 }
 
 # %%

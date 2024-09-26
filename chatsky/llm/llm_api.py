@@ -12,6 +12,7 @@ try:
     from langchain_mistralai import ChatMistralAI
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.language_models.chat_models import BaseChatModel
+
     langchain_available = True
 except ImportError:
     langchain_available = False
@@ -78,7 +79,10 @@ class LLM_API:
 
     async def condition(self, prompt: str, method: BaseMethod, return_schema=None):
         async def process_input(ctx: Context, _: Pipeline) -> bool:
-            condition_history = [await message_to_langchain(Message(prompt), pipeline=_, source="system"), await message_to_langchain(ctx.last_request, pipeline=_, source="human")]
+            condition_history = [
+                await message_to_langchain(Message(prompt), pipeline=_, source="system"),
+                await message_to_langchain(ctx.last_request, pipeline=_, source="human"),
+            ]
             result = method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
             return result
 

@@ -4,7 +4,7 @@ from chatsky.core.pipeline import Pipeline
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 
-async def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int=1000):
+async def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int = 1000):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
@@ -19,13 +19,19 @@ async def message_to_langchain(message: Message, pipeline: Pipeline, source: str
     if len(message.text) > max_size:
         raise ValueError("Message is too long.")
 
-    if message.text is None: message.text = ""
+    if message.text is None:
+        message.text = ""
     content = [{"type": "text", "text": message.text}]
 
     if message.attachments:
         for image in message.attachments:
             if isinstance(image, Image):
-                content.append({"type": "image_url", "image_url": {"url": await __attachment_to_content(image, pipeline.messenger_interface)}})
+                content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": await __attachment_to_content(image, pipeline.messenger_interface)},
+                    }
+                )
 
     if source == "human":
         return HumanMessage(content=content)

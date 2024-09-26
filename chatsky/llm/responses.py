@@ -7,7 +7,14 @@ from chatsky.llm.utils import message_to_langchain
 from pydantic import BaseModel
 
 
-def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_func: Callable = lambda *args: True, message_schema: Union[None, Type[Message], Type[BaseModel]] = None, max_size: int=1000):
+def llm_response(
+    model_name: str,
+    prompt: str = "",
+    history: int = 5,
+    filter_func: Callable = lambda *args: True,
+    message_schema: Union[None, Type[Message], Type[BaseModel]] = None,
+    max_size: int = 1000,
+):
     """
     Basic function for receiving LLM responses.
     :param ctx: Context object. (Assigned automatically)
@@ -33,19 +40,25 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
             # populate history with global and local prompts
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
-                history_messages.append(await message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(
+                    await message_to_langchain(Message(global_prompt), pipeline=pipeline, source="system")
+                )
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
-                history_messages.append(await message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(
+                    await message_to_langchain(Message(local_prompt), pipeline=pipeline, source="system")
+                )
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
-                history_messages.append(await message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system"))
+                history_messages.append(
+                    await message_to_langchain(Message(node_prompt), pipeline=pipeline, source="system")
+                )
 
         # iterate over context to retrieve history messages
         if not (history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
             pairs = zip(
-                [ctx.requests[x] for x in range(1, len(ctx.requests)+1)],
-                [ctx.responses[x] for x in range(1, len(ctx.responses)+1)],
+                [ctx.requests[x] for x in range(1, len(ctx.requests) + 1)],
+                [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
             )
             # print(f"Pairs: {[p for p in pairs]}")
             if history != -1:
@@ -64,4 +77,3 @@ def llm_response(model_name: str, prompt: str = "", history: int = 5, filter_fun
         return await model.respond(history_messages, message_schema=message_schema)
 
     return wrapped
-

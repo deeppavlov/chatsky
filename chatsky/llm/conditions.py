@@ -1,5 +1,6 @@
 from chatsky.llm.methods import BaseMethod
 
+
 def llm_condition(model_name: str, prompt: str, method: BaseMethod):
     """
     Basic function for using LLM in condition cases.

@@ -17,7 +17,7 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    labels as lbl
+    labels as lbl,
 )
 from chatsky.utils.testing import (
     is_interactive_mode,
@@ -73,7 +73,9 @@ toy_script = {
         },
         "greeting_node": {
             RESPONSE: llm_response(model_name="assistant_model", history=0),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))],
+            TRANSITIONS: [
+                Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
+            ],
         },
         "main_node": {
             RESPONSE: llm_response(model_name="assistant_model", history=3),

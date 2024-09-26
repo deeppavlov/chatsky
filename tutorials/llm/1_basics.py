@@ -17,7 +17,7 @@ from chatsky import (
     Pipeline,
     Transition as Tr,
     conditions as cnd,
-    destinations as dst
+    destinations as dst,
     # all the aliases used in tutorials are available for direct import
     # e.g. you can do `from chatsky import Tr` instead
 )
@@ -65,18 +65,29 @@ toy_script = {
         },
         "greeting_node": {
             RESPONSE: llm_response(model_name="barista_model", history=0),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))],
+            TRANSITIONS: [
+                Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
+            ],
         },
         "main_node": {
             RESPONSE: llm_response(model_name="barista_model"),
             TRANSITIONS: [
-                Tr(dst="latte_art_node", cnd=cnd.ExactMatch("Tell me about latte art.")),
-                Tr(dst="image_desc_node", cnd=cnd.ExactMatch("Tell me what coffee is it?")),
-                Tr(dst="boss_node", cnd=llm_condition(
-                    model_name="barista_model",
-                    prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
-                    method=Contains(pattern="TRUE"),
-                )),
+                Tr(
+                    dst="latte_art_node",
+                    cnd=cnd.ExactMatch("Tell me about latte art."),
+                ),
+                Tr(
+                    dst="image_desc_node",
+                    cnd=cnd.ExactMatch("Tell me what coffee is it?"),
+                ),
+                Tr(
+                    dst="boss_node",
+                    cnd=llm_condition(
+                        model_name="barista_model",
+                        prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
+                        method=Contains(pattern="TRUE"),
+                    ),
+                ),
                 Tr(dst=dst.Current(), cnd=cnd.true()),
             ],
         },
@@ -92,7 +103,9 @@ toy_script = {
                 model_name="barista_model",
                 prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it.",
             ),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))],
+            TRANSITIONS: [
+                Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))
+            ],
         },
         "image_desc_node": {
             # we expect user to send some images of coffee.
