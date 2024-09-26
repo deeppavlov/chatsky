@@ -43,7 +43,7 @@ def test_keyword_arguments():
     assert instrumentor._tracer_provider is not get_tracer_provider()
 
 
-def test_failed_stats_collection(log_event_catcher):
+async def test_failed_stats_collection(log_event_catcher):
     chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
     chatsky_instrumentor.instrument()
 
@@ -55,6 +55,6 @@ def test_failed_stats_collection(log_event_catcher):
 
     log_list = log_event_catcher(logger=instrumentor_logger, level="ERROR")
 
-    assert run_test_group(ServiceGroup(components=[service])) == ComponentExecutionState.FINISHED
+    assert await run_test_group(ServiceGroup(components=[service])) == ComponentExecutionState.FINISHED
 
     assert len(log_list) == 1

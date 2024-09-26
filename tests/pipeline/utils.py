@@ -48,17 +48,17 @@ def make_test_service_group(running_order: list) -> ServiceGroup:
     return test_group
 
 
-def run_test_group(test_group: ServiceGroup) -> ComponentExecutionState:
+async def run_test_group(test_group: ServiceGroup) -> ComponentExecutionState:
     ctx = Context.init(("greeting_flow", "start_node"))
     pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
     initialize_service_states(ctx, pipeline.pre_services)
-    asyncio.run(pipeline.pre_services(ctx))
+    await pipeline.pre_services(ctx)
     return test_group.get_state(ctx)
 
 
-def run_extra_handler(extra_handler: ComponentExtraHandler) -> ComponentExecutionState:
+async def run_extra_handler(extra_handler: ComponentExtraHandler) -> ComponentExecutionState:
     ctx = Context.init(("greeting_flow", "start_node"))
     service = Service(handler=lambda _: None, before_handler=extra_handler)
     initialize_service_states(ctx, service)
-    asyncio.run(service(ctx))
+    await service(ctx)
     return service.get_state(ctx)

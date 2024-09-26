@@ -46,26 +46,26 @@ async def test_pipeline_component_order(empty_context):
     assert logs == ["A", "B", "C"]
 
 
-def test_async_services():
+async def test_async_services():
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.components[0].concurrent = True
     test_group.components[1].concurrent = True
 
-    run_test_group(test_group)
+    await run_test_group(test_group)
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
 
 
-def test_all_async_flag():
+async def test_all_async_flag():
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.fully_concurrent = True
 
-    run_test_group(test_group)
+    await run_test_group(test_group)
     assert running_order == ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3"]
 
 
-def test_extra_handler_timeouts():
+async def test_extra_handler_timeouts():
     def bad_function(timeout: float, bad_func_completed: list):
         def inner(_: Context, __: ExtraHandlerRuntimeInfo) -> None:
             asyncio.run(asyncio.sleep(timeout))
@@ -76,16 +76,16 @@ def test_extra_handler_timeouts():
     # Timeout expires before the exception is raised, which is then logged.
     test_list = []
     extra_handler = BeforeHandler(functions=bad_function(1.0, test_list), timeout=0.0, concurrent=True)
-    run_extra_handler(extra_handler)
+    await run_extra_handler(extra_handler)
     assert test_list == []
 
     # This is here just to demonstrate that the timeout is working.
     extra_handler = BeforeHandler(functions=bad_function(0.0, test_list), timeout=1.0, concurrent=True)
-    run_extra_handler(extra_handler)
+    await run_extra_handler(extra_handler)
     assert test_list == [True]
 
 
-def test_extra_handler_function_signatures():
+async def test_extra_handler_function_signatures():
     def one_parameter_func(_: Context) -> None:
         pass
 
@@ -98,15 +98,15 @@ def test_extra_handler_function_signatures():
     def no_parameters_func() -> None:
         pass
 
-    assert run_extra_handler(one_parameter_func) == ComponentExecutionState.FINISHED
-    assert run_extra_handler(two_parameter_func) == ComponentExecutionState.FINISHED
+    assert await run_extra_handler(one_parameter_func) == ComponentExecutionState.FINISHED
+    assert await run_extra_handler(two_parameter_func) == ComponentExecutionState.FINISHED
 
-    assert run_extra_handler(three_parameter_func) == ComponentExecutionState.FAILED
-    assert run_extra_handler(no_parameters_func) == ComponentExecutionState.FAILED
+    assert await run_extra_handler(three_parameter_func) == ComponentExecutionState.FAILED
+    assert await run_extra_handler(no_parameters_func) == ComponentExecutionState.FAILED
 
 
 # Checking that async functions can be run as extra_handlers.
-def test_async_extra_handler_func():
+async def test_async_extra_handler_func():
     def append_list(record: list):
         async def async_func(_: Context, __: ExtraHandlerRuntimeInfo):
             record.append("Value")
@@ -115,7 +115,7 @@ def test_async_extra_handler_func():
 
     test_list = []
     extra_handler = BeforeHandler(functions=append_list(test_list), concurrent=True)
-    run_extra_handler(extra_handler)
+    await run_extra_handler(extra_handler)
     assert test_list == ["Value"]
 
 
@@ -186,23 +186,23 @@ def test_raise_on_name_collision():
 
 # 'fully_concurrent' flag will try to run all services simultaneously, but the 'wait' option
 # makes it so that A waits for B, which waits for C. So "C" is first, "A" is last.
-def test_waiting_for_service_to_finish_condition():
+async def test_waiting_for_service_to_finish_condition():
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.fully_concurrent = True
     test_group.components[0].start_condition = ServiceFinished(".pre.InteractWithServiceB", wait=True)
     test_group.components[1].start_condition = ServiceFinished(".pre.InteractWithServiceC", wait=True)
 
-    run_test_group(test_group)
+    await run_test_group(test_group)
     assert running_order == ["C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
 
 
-def test_bad_service():
+async def test_bad_service():
     def bad_service_func(_: Context) -> None:
         raise Exception("Custom exception")
 
     test_group = ServiceGroup.model_validate([bad_service_func])
-    assert run_test_group(test_group) == ComponentExecutionState.FAILED
+    assert await run_test_group(test_group) == ComponentExecutionState.FAILED
 
 
 async def test_service_not_run(empty_context):
@@ -212,7 +212,7 @@ async def test_service_not_run(empty_context):
     assert service.get_state(empty_context) == ComponentExecutionState.NOT_RUN
 
 
-def test_inherited_extra_handlers_for_service_groups_with_conditions():
+async def test_inherited_extra_handlers_for_service_groups_with_conditions():
     def extra_handler_func(counter: list):
         def inner(_: Context) -> None:
             counter.append("Value")
@@ -236,6 +236,6 @@ def test_inherited_extra_handlers_for_service_groups_with_conditions():
     test_group.add_extra_handler(GlobalExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
     initialize_service_states(ctx, test_group)
 
-    asyncio.run(pipeline.pre_services(ctx))
+    await pipeline.pre_services(ctx)
     # One for original ServiceGroup, one for each of the defined paths in the condition function.
     assert counter_list == ["Value"] * 3
