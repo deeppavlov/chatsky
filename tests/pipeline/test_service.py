@@ -9,7 +9,7 @@ from chatsky.core.service import (
     Service,
     ServiceGroup,
     ComponentExecutionState,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
     ExtraHandlerRuntimeInfo,
 )
 from chatsky.core.service.extra import BeforeHandler
@@ -233,7 +233,7 @@ async def test_inherited_extra_handlers_for_service_groups_with_conditions():
     ctx = Context.init(("greeting_flow", "start_node"))
     pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
 
-    test_group.add_extra_handler(GlobalExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
+    test_group.add_extra_handler(ExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
     initialize_service_states(ctx, test_group)
 
     await pipeline.pre_services(ctx)

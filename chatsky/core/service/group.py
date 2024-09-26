@@ -22,7 +22,7 @@ from chatsky.core.service.actor import Actor
 from chatsky.core.service.component import PipelineComponent
 from chatsky.core.service.types import (
     ComponentExecutionState,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
 )
@@ -111,30 +111,28 @@ class ServiceGroup(PipelineComponent):
 
     def add_extra_handler(
         self,
-        global_extra_handler_type: GlobalExtraHandlerType,
+        extra_handler_type: ExtraHandlerType,
         extra_handler: ExtraHandlerFunction,
-        condition: ExtraHandlerConditionFunction = lambda _: False,
+        condition: ExtraHandlerConditionFunction = lambda path: False,
     ):
         """
-        Method for adding a global extra handler to this group.
-        Adds extra handler to itself and propagates it to all inner components.
-        Uses a special condition function to determine whether to add extra handler to any particular inner component.
-        Condition checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
+        Add extra handler to this group.
 
-        :param global_extra_handler_type: A type of extra handler to add.
-        :param extra_handler: A `ExtraHandlerFunction` to add as an extra handler.
-        :type extra_handler: :py:data:`~.ExtraHandlerFunction`
-        :param condition: A condition function.
-        :return: `None`
+        For every component in the group, ``condition`` is called with the path of that component
+        to determine whether to add extra handler to that component.
+
+        :param extra_handler_type: Extra handler type (before or after).
+        :param extra_handler: Function to add as an extra handler.
+        :param condition: Condition function to determine if extra handler should be added to specific subcomponents.
         """
-        super().add_extra_handler(global_extra_handler_type, extra_handler)
+        super().add_extra_handler(extra_handler_type, extra_handler)
         for service in self.components:
             if not condition(service.path):
                 continue
             if isinstance(service, ServiceGroup):
-                service.add_extra_handler(global_extra_handler_type, extra_handler, condition)
+                service.add_extra_handler(extra_handler_type, extra_handler, condition)
             else:
-                service.add_extra_handler(global_extra_handler_type, extra_handler)
+                service.add_extra_handler(extra_handler_type, extra_handler)
 
     @property
     def computed_name(self) -> str:

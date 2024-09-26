@@ -18,7 +18,7 @@ from chatsky.core.service.extra import BeforeHandler, AfterHandler
 from chatsky.core.script_function import AnyCondition
 from chatsky.core.service.types import (
     ComponentExecutionState,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
     ExtraHandlerFunction,
 )
 
@@ -117,6 +117,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     def computed_name(self) -> str:
         """
         Default name that is used if :py:attr:`~.PipelineComponent.name` is not defined.
+
         In case two components in a :py:class:`~chatsky.core.service.group.ServiceGroup` have the same
         :py:attr:`.computed_name` an incrementing number is appended to the name.
         """
@@ -163,16 +164,17 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         await self._run(ctx)
 
-    def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
+    def add_extra_handler(self, extra_handler_type: ExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """
-        Method for adding a global extra handler to this particular component.
+        Add extra handler to this component.
 
-        :param global_extra_handler_type: A type of extra handler to add.
-        :param extra_handler: A :py:class:`~.GlobalExtraHandlerType` to add to the component as an extra handler.
-        :type extra_handler: :py:data:`~.ExtraHandlerFunction`
-        :return: `None`
+        :param extra_handler_type: A type of extra handler to add (before or after).
+        :param extra_handler: Function to add to the component as an extra handler.
         """
-        target = (
-            self.before_handler if global_extra_handler_type is GlobalExtraHandlerType.BEFORE else self.after_handler
-        )
+        if extra_handler_type == ExtraHandlerType.BEFORE:
+            target = self.before_handler
+        elif extra_handler_type == ExtraHandlerType.AFTER:
+            target = self.after_handler
+        else:
+            raise ValueError(f"Unrecognized ExtraHandlerType: {extra_handler_type}")
         target.functions.append(extra_handler)

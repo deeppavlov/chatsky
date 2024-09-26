@@ -24,10 +24,6 @@ from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
-from chatsky.core.service.types import (
-    GlobalExtraHandlerType,
-    ExtraHandlerFunction,
-)
 from .service import Service
 from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
@@ -199,46 +195,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
-
-    def add_global_handler(
-        self,
-        global_handler_type: GlobalExtraHandlerType,
-        extra_handler: ExtraHandlerFunction,
-        whitelist: Optional[List[str]] = None,
-        blacklist: Optional[List[str]] = None,
-    ):
-        """
-        Method for adding global wrappers to pipeline.
-        Different types of global wrappers are called before/after pipeline execution
-        or before/after each pipeline component.
-        They can be used for pipeline statistics collection or other functionality extensions.
-        NB! Global wrappers are still wrappers,
-        they shouldn't be used for much time-consuming tasks (see :py:mod:`chatsky.core.service.extra`).
-
-        :param global_handler_type: (required) indication where the wrapper
-            function should be executed.
-        :param extra_handler: (required) wrapper function itself.
-        :type extra_handler: ExtraHandlerFunction
-        :param whitelist: a list of services to only add this wrapper to.
-        :param blacklist: a list of services to not add this wrapper to.
-        :return: `None`
-        """
-
-        def condition(name: str) -> bool:
-            return (whitelist is None or name in whitelist) and (blacklist is None or name not in blacklist)
-
-        if (
-            global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-            or global_handler_type is GlobalExtraHandlerType.AFTER_ALL
-        ):
-            whitelist = ["pipeline"]
-            global_handler_type = (
-                GlobalExtraHandlerType.BEFORE
-                if global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-                else GlobalExtraHandlerType.AFTER
-            )
-
-        self.services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

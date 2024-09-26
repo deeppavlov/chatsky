@@ -10,7 +10,6 @@ from .group import ServiceGroup
 from .service import Service, to_service
 from .types import (
     ExtraHandlerRuntimeInfo,
-    GlobalExtraHandlerType,
     ExtraHandlerType,
     PipelineRunnerFunction,
     ComponentExecutionState,

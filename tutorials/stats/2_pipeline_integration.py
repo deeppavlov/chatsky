@@ -32,7 +32,7 @@ import asyncio
 from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
     ServiceGroup,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
 )
 from chatsky import Context, Pipeline
 from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
@@ -112,26 +112,28 @@ pipeline = Pipeline.model_validate(
 )
 # These are Extra Handlers for Actor.
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before
+    ExtraHandlerType.BEFORE, default_extractors.get_timing_before
 )
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, get_service_state
+    ExtraHandlerType.AFTER, get_service_state
 )
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, default_extractors.get_current_label
+    ExtraHandlerType.AFTER, default_extractors.get_current_label
 )
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after
+    ExtraHandlerType.AFTER, default_extractors.get_timing_after
 )
 
-# These are global Extra Handlers for Pipeline.
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before
+# These are global Extra Handlers for Pipeline service
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.BEFORE, default_extractors.get_timing_before
 )
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.AFTER_ALL, default_extractors.get_timing_after
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.AFTER, default_extractors.get_timing_after
 )
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_service_state)
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.AFTER, get_service_state
+)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH, printout=True)

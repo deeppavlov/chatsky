@@ -12,7 +12,7 @@ import random
 import asyncio
 from tqdm import tqdm
 from chatsky.core import Context, Message, Pipeline
-from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, ExtraHandlerType
 from chatsky.stats import (
     default_extractors,
     OtelInstrumentor,
@@ -64,11 +64,11 @@ pipeline = Pipeline.model_validate(
         "post_services": [Service(handler=confidence_processor, after_handler=[get_confidence])],
     }
 )
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_current_label)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_last_request)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_last_response)
+pipeline.actor.add_extra_handler(ExtraHandlerType.BEFORE, default_extractors.get_timing_before)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_timing_after)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_current_label)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_last_request)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_last_response)
 
 
 # %%

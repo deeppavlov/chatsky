@@ -66,24 +66,6 @@ class ComponentExecutionState(str, Enum):
 
 
 @unique
-class GlobalExtraHandlerType(str, Enum):
-    """
-    Enum, representing types of global extra handlers, that can be set applied for a pipeline.
-    The following types are supported:
-
-    - BEFORE_ALL: function called before each pipeline call,
-    - BEFORE: function called before each component,
-    - AFTER: function called after each component,
-    - AFTER_ALL: function called after each pipeline call.
-    """
-
-    BEFORE_ALL = "BEFORE_ALL"
-    BEFORE = "BEFORE"
-    AFTER = "AFTER"
-    AFTER_ALL = "AFTER_ALL"
-
-
-@unique
 class ExtraHandlerType(str, Enum):
     """
     Enum, representing extra handler execution stage: before or after the wrapped function.
@@ -101,10 +83,11 @@ class ExtraHandlerType(str, Enum):
 
 ExtraHandlerConditionFunction: TypeAlias = Callable[[str], bool]
 """
-A function type used during global extra handler initialization to determine
-whether extra handler should be applied to component with given path or not.
-Checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
-Accepts str (component path), returns boolean (whether extra handler should be applied).
+A function type used when adding an extra handler to a service group to determine
+whether extra handler should be added to components of the service group.
+
+Accepts a single argument - path of a subcomponent in a group.
+Return bool - whether to add extra handler to the subcomponent.
 """
 
 
