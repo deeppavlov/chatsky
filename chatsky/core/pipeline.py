@@ -179,8 +179,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             after_handler=self.after_handler,
             timeout=self.timeout,
         )
-        services_pipeline.name = "pipeline"
-        services_pipeline.path = ".pipeline"
+        services_pipeline.name = ""
+        services_pipeline.path = ""
 
         finalize_service_group(services_pipeline, path=services_pipeline.path)
 

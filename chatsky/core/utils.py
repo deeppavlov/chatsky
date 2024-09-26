@@ -35,7 +35,7 @@ def rename_component_incrementing(component: PipelineComponent, collisions: List
     return f"{base_name}_{name_index}"
 
 
-def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> None:
+def finalize_service_group(service_group: ServiceGroup, path: str = "") -> None:
     """
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
@@ -44,7 +44,7 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> None
     :param service_group: Service group to resolve name collisions in.
     :param path:
         A prefix for component paths -- path of `component` is equal to `{path}.{component.name}`.
-        Defaults to ".".
+        Defaults to "".
     """
     names_counter = collections.Counter([component.name for component in service_group.components])
     for component in service_group.components:
