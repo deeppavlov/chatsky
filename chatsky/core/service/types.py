@@ -50,7 +50,7 @@ class ComponentExecutionState(str, Enum):
     """
     Enum, representing pipeline component execution state.
     These states are stored in :py:attr:`~chatsky.core.context.FrameworkData.service_states`,
-    that should always be requested with `NOT_RUN` being default fallback.
+    that should always be requested with ``NOT_RUN`` being default fallback.
     Following states are supported:
 
     - NOT_RUN: component has not been executed yet (the default one),
@@ -108,5 +108,5 @@ class ExtraHandlerRuntimeInfo(BaseModel):
 """
 Type of object, that is passed to extra handlers in runtime.
 Contains current wrapper info (`name`, `stage`).
-Also contains `component` - `self` object of the component this extra handler is attached to.
+Also contains `component` - :py:class:`.PipelineComponent` this extra handler is attached to.
 """
