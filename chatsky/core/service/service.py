@@ -77,6 +77,9 @@ class Service(PipelineComponent):
 
     @property
     def computed_name(self) -> str:
+        """
+        Return name of the handler or name of this class if handler is empty.
+        """
         if inspect.isfunction(self.handler):
             return self.handler.__name__
         elif self.handler is None:

@@ -35,6 +35,9 @@ class Actor(PipelineComponent):
 
     @property
     def computed_name(self) -> str:
+        """
+        "actor"
+        """
         return "actor"
 
     async def run_component(self, ctx: Context) -> None:

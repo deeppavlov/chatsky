@@ -136,6 +136,9 @@ class ServiceGroup(PipelineComponent):
 
     @property
     def computed_name(self) -> str:
+        """
+        "service_group"
+        """
         return "service_group"
 
 
