@@ -70,15 +70,19 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     @classmethod
     def __pipeline_component_name_validator__(cls, name: str):
         """
-        Validate this component's name.
+        Validate this component's name:
 
-        :raises ValueError: If component's name is blank or if it contains dots.
+        Name cannot be empty or contain "." or "#".
+
+        :raises ValueError: If name failed validation.
         """
         if name is not None:
             if name == "":
                 raise ValueError("Name cannot be blank.")
             if "." in name:
                 raise ValueError(f"Name cannot contain '.': {name!r}.")
+            if "#" in name:
+                raise ValueError(f"Name cannot contain '#': {name!r}.")
 
         return name
 

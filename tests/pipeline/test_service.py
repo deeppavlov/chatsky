@@ -13,7 +13,7 @@ from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
 )
 from chatsky.core.service.extra import BeforeHandler
-from chatsky.core.utils import initialize_service_states
+from chatsky.core.utils import initialize_service_states, finalize_service_group
 from chatsky.utils.testing import TOY_SCRIPT
 from .utils import run_test_group, make_test_service_group, run_extra_handler
 
@@ -140,6 +140,48 @@ def test_service_computed_names():
     func_class = MyProcessing()
     service = Service(handler=func_class)
     assert service.computed_name == "MyProcessing"
+
+
+def test_rename_components():
+    def service(): ...
+
+    def service_0(): ...
+
+    def service_1(): ...
+
+    def service_2(): ...
+
+    group = ServiceGroup(
+        components=[
+            service,
+            service,
+            service_0,
+            service_1,
+            service_1,
+            service_2,
+            Service(handler=service, name="service_2"),
+        ]
+    )
+
+    finalize_service_group(group)
+
+    assert [component.name for component in group.components] == [
+        "service#0",
+        "service#1",
+        "service_0",
+        "service_1#0",
+        "service_1#1",
+        "service_2#0",
+        "service_2"
+    ]
+
+
+def test_raise_on_name_collision():
+    with pytest.raises(ValueError):
+        finalize_service_group(ServiceGroup(components=[
+            Service(name="service"),
+            Service(name="service")
+        ]))
 
 
 # 'fully_concurrent' flag will try to run all services simultaneously, but the 'wait' option
