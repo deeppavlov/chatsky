@@ -9,19 +9,23 @@ It must be a function that takes a single `Message` object and returns a boolean
 # %pip install chatsky[llm]
 
 # %%
-from chatsky.script import Message
-from chatsky.script.conditions import exact_match
-from chatsky.script.conditions import std_conditions as cnd
-from chatsky.script import labels as lbl
-from chatsky.script import RESPONSE, TRANSITIONS
-from chatsky.pipeline import Pipeline
-from chatsky.script import Context
+from chatsky.core.message import Message
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+    labels as lbl
+)
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response
+from chatsky.llm import LLM_API, llm_response
 from chatsky.llm.filters import BaseFilter
+from chatsky.core.context import Context
 
 import os
 
@@ -65,18 +69,18 @@ toy_script = {
     "main_flow": {
         "start_node": {
             RESPONSE: Message(""),
-            TRANSITIONS: {"greeting_node": exact_match("Hi")},
+            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
             RESPONSE: llm_response(model_name="assistant_model", history=0),
-            TRANSITIONS: {"main_node": exact_match("Who are you?")},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))],
         },
         "main_node": {
             RESPONSE: llm_response(model_name="assistant_model", history=3),
-            TRANSITIONS: {
-                "remind_node": cnd.exact_match("/remind"),
-                lbl.repeat(): cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
         },
         "remind_node": {
             RESPONSE: llm_response(
@@ -84,11 +88,11 @@ toy_script = {
                 history=15,
                 filter_func=FilterImportant(),
             ),
-            TRANSITIONS: {"main_node": cnd.true()},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
         },
         "fallback_node": {
             RESPONSE: Message("I did not quite understand you..."),
-            TRANSITIONS: {"main_node": cnd.true()},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
         },
     }
 }

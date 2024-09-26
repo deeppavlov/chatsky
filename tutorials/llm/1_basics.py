@@ -10,17 +10,22 @@ Chatsky uses langchain under the hood to connect to the remote models.
 # %pip install chatsky[llm]
 
 # %%
-from chatsky.script import Message
-from chatsky.script.conditions import exact_match
-from chatsky.script.conditions import std_conditions as cnd
-from chatsky.script import labels as lbl
-from chatsky.script import RESPONSE, TRANSITIONS
-from chatsky.pipeline import Pipeline
+from chatsky.core.message import Message
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst
+    # all the aliases used in tutorials are available for direct import
+    # e.g. you can do `from chatsky import Tr` instead
+)
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response, llm_condition
+from chatsky.llm import LLM_API, llm_response, llm_condition
 from chatsky.llm.methods import Contains
 
 import os
@@ -55,31 +60,31 @@ As you can see in this script, you can pass an additional prompt to the LLM. We 
 toy_script = {
     "main_flow": {
         "start_node": {
-            RESPONSE: Message(""),
-            TRANSITIONS: {"greeting_node": exact_match("Hi")},
+            RESPONSE: "",
+            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
             RESPONSE: llm_response(model_name="barista_model", history=0),
-            TRANSITIONS: {"main_node": exact_match("Who are you?")},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))],
         },
         "main_node": {
             RESPONSE: llm_response(model_name="barista_model"),
-            TRANSITIONS: {
-                "latte_art_node": exact_match("Tell me about latte art."),
-                "image_desc_node": exact_match("Tell me what coffee is it?"),
-                "boss_node": llm_condition(
+            TRANSITIONS: [
+                Tr(dst="latte_art_node", cnd=cnd.ExactMatch("Tell me about latte art.")),
+                Tr(dst="image_desc_node", cnd=cnd.ExactMatch("Tell me what coffee is it?")),
+                Tr(dst="boss_node", cnd=llm_condition(
                     model_name="barista_model",
                     prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
                     method=Contains(pattern="TRUE"),
-                ),
-                lbl.repeat(): cnd.true(),
-            },
+                )),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
         },
         "boss_node": {
             RESPONSE: Message("Input your ID number."),
-            TRANSITIONS: {
-                "main_node": cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst="main_node", cnd=cnd.true()),
+            ],
         },
         "latte_art_node": {
             # we can pass a node-specific prompt to a LLM.
@@ -87,7 +92,7 @@ toy_script = {
                 model_name="barista_model",
                 prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it.",
             ),
-            TRANSITIONS: {"main_node": exact_match("Ok, goodbye.")},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))],
         },
         "image_desc_node": {
             # we expect user to send some images of coffee.
@@ -95,11 +100,11 @@ toy_script = {
                 model_name="barista_model",
                 prompt="PROMPT: user will give you some images of coffee. Describe them.",
             ),
-            TRANSITIONS: {"main_node": cnd.true()},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
         },
         "fallback_node": {
             RESPONSE: Message("I didn't quite understand you..."),
-            TRANSITIONS: {"main_node": cnd.true()},
+            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
         },
     }
 }

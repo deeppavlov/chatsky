@@ -8,16 +8,22 @@ In Chatsky we can do that using Structured Output.
 
 # %pip install chatsky[llm]
 # %%
-from chatsky.script import Message
-from chatsky.script.conditions import std_conditions as cnd
-from chatsky.script import labels as lbl
-from chatsky.script import RESPONSE, TRANSITIONS, GLOBAL
-from chatsky.pipeline import Pipeline
+from chatsky.core.message import Message
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    GLOBAL,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+    labels as lbl
+)
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response
+from chatsky.llm import LLM_API, llm_response
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 
@@ -60,11 +66,11 @@ class ImportantMessage(Message):
 
 script = {
     GLOBAL: {
-        TRANSITIONS: {
-            ("greeting_flow", "start_node"): cnd.exact_match("/start"),
-            ("movie_flow", "main_node"): cnd.exact_match("/movie"),
-            ("note_flow", "main_node"): cnd.exact_match("/note"),
-        }    
+        TRANSITIONS: [
+            Tr(dst=("greeting_flow", "start_node"), cnd=cnd.ExactMatch("/start")),
+            Tr(dst=("movie_flow", "main_node"), cnd=cnd.ExactMatch("/movie")),
+            Tr(dst=("note_flow", "main_node"), cnd=cnd.ExactMatch("/note")),
+        ]    
     },
     "greeting_flow": {
         "start_node": {
@@ -72,25 +78,19 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message("I did not quite understand you..."),
-            TRANSITIONS: {
-                "start_node": cnd.true()
-            }
+            TRANSITIONS: [Tr(dst="start_node", cnd=cnd.true())],
         }
     },
     "movie_flow": {
         "main_node": {
             RESPONSE: llm_response("movie_model", prompt="Ask user to request you for movie ideas.", message_schema=Movie),
-            TRANSITIONS: {
-                lbl.repeat(0.1): cnd.true()
-            }
+            TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
         }
     },
     "note_flow": {
         "main_node": {
             RESPONSE: llm_response("note_model", prompt="Help user take notes and mark the important ones.", message_schema=ImportantMessage),
-            TRANSITIONS: {
-                lbl.repeat(0.1): cnd.true()
-            }
+            TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
         }
     }
 }
@@ -98,8 +98,8 @@ script = {
 # %%
 pipeline = Pipeline.from_script(
     script=script,
-    start_label=("main_flow", "start_node"),
-    fallback_label=("main_flow", "fallback_node"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
     models={"movie_model": movie_model, "note_model": assistant_model},
 )
 

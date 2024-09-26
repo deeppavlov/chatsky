@@ -24,17 +24,24 @@ This way you can specify a certain prompt for each flow or node to alter the mod
 # %pip install chatsky[llm]
 
 # %%
-from chatsky.script import Message
-from chatsky.script.conditions import exact_match
-from chatsky.script.conditions import std_conditions as cnd
-from chatsky.script import labels as lbl
-from chatsky.script import RESPONSE, TRANSITIONS, GLOBAL, LOCAL, MISC
-from chatsky.pipeline import Pipeline
+from chatsky.core.message import Message
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    GLOBAL,
+    LOCAL,
+    MISC,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+    labels as lbl
+)
 from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm.wrapper import LLM_API, llm_response
+from chatsky.llm import LLM_API, llm_response
 
 import os
 
@@ -67,19 +74,19 @@ toy_script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: Message(""),
-            TRANSITIONS: {"greeting_node": exact_match("Hi")},
+            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
             RESPONSE: llm_response(model_name="bank_model", history=0),
-            TRANSITIONS: {
-                ("loan_flow", "start_node"): cnd.exact_match("/loan"),
-                ("hr_flow", "start_node"): cnd.exact_match("/vacancies"),
-                lbl.repeat(): cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst=("loan_flow", "start_node"), cnd=cnd.ExactMatch("/loan")),
+                Tr(dst=("hr_flow", "start_node"), cnd=cnd.ExactMatch("/vacancies")),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
         },
         "fallback_node": {
             RESPONSE: Message("Something went wrong"),
-            TRANSITIONS: {"greeting_node": cnd.true()},
+            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.true())],
         },
     },
     "loan_flow": {
@@ -92,10 +99,10 @@ toy_script = {
         },
         "start_node": {
             RESPONSE: llm_response(model_name="bank_model"),
-            TRANSITIONS: {
-                ("greeting_flow", "greeting_node"): cnd.exact_match("/end"),
-                lbl.repeat(): cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst=("greeting_flow", "greeting_node"), cnd=cnd.ExactMatch("/end")),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
         },
     },
     "hr_flow": {
@@ -107,18 +114,18 @@ toy_script = {
         },
         "start_node": {
             RESPONSE: llm_response(model_name="bank_model"),
-            TRANSITIONS: {
-                ("greeting_flow", "greeting_node"): cnd.exact_match("/end"),
-                "cook_node": cnd.regexp(r".*cook.*"),
-                lbl.repeat(): cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst=("greeting_flow", "greeting_node"), cnd=cnd.ExactMatch("/end")),
+                Tr(dst="cook_node", cnd=cnd.Regexp(r".*cook.*")),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
         },
         "cook_node": {
             RESPONSE: llm_response(model_name="bank_model"),
-            TRANSITIONS: {
-                "start_node": cnd.exact_match("/end"),
-                lbl.repeat(): cnd.true(),
-            },
+            TRANSITIONS: [
+                Tr(dst="start_node", cnd=cnd.ExactMatch("/end")),
+                Tr(dst=dst.Current(), cnd=cnd.true()),
+            ],
             MISC: {
                 "prompt": "You were waiting for the cook employee from last week. Greet your user and tell them about the salary you can offer."
             },
