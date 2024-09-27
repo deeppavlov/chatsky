@@ -108,9 +108,10 @@ has the `FINISHED` status.
 `ServiceFinished` accepts the following constructor parameters:
 
 * `path` (required) - a path of another component.
-* `wait` - whether it should wait for the component to complete,
-    defaults to `True`. This means that the component status cannot be
+* `wait` - whether it should wait for the component to complete.
+    This means that the component status cannot be
     `NOT_RUN` or `RUNNING` at the time of the check.
+    Defaults to `False`.
 
 <div class="alert alert-warning">
 
@@ -153,9 +154,7 @@ class NeverRunningService(Service):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
     start_condition: AnyCondition = Not(
-        ServiceFinished(
-            ".post.named_group.running_service",
-        )
+        ServiceFinished(".post.named_group.running_service", wait=True)
     )
 
 
