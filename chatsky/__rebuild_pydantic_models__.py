@@ -8,7 +8,7 @@ from chatsky.slots.slots import SlotManager
 from chatsky.core.context import FrameworkData
 from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.utils.context_dict import ContextDict
-from chatsky.context_storages.json import SerializableStorage
+from chatsky.context_storages.file import SerializableStorage
 
 ContextDict.model_rebuild()
 Pipeline.model_rebuild()
