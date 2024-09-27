@@ -93,7 +93,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         # Cleaning outdated documentation build
         clean_docs(str(output_dir))
 
-        # doing DFF funcs before doc building
+        # Running Chatsky custom funcs before doc building
         scripts.doc.pre_sphinx_build_funcs(str(root_dir))
         setup_module.setup(str(root_dir), str(output_dir))
 

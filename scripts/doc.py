@@ -67,4 +67,4 @@ def docs(docker: Optional[DockerClient]):
 def pre_sphinx_build_funcs(root_dir: str):
     _build_drawio(root_dir)
     apiref_dir = root_dir + "/docs/source/apiref"
-    apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "dff"])
+    apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "chatsky"])
