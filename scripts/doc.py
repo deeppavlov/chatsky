@@ -64,8 +64,8 @@ def docs(docker: Optional[DockerClient]):
         exit(1)
 
 
-# Functions to be called from DffSphinxBuilder before build
-def dff_funcs(root_dir: str):
+# Functions to be called from ChatskySphinxBuilder before build
+def pre_sphinx_build_funcs(root_dir: str):
     _build_drawio(root_dir)
     apiref_dir = root_dir + "/docs/source/apiref"
     apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "dff"])

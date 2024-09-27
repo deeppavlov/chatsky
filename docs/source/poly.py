@@ -5,7 +5,7 @@ from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.git import closest_tag
 from sphinx_polyversion.pyvenv import Poetry
-from docs.source.builder import DffSphinxBuilder
+from docs.source.builder import ChatskySphinxBuilder
 from docs.source.switcher_gen import generate_switcher
 import git
 import os
@@ -13,8 +13,9 @@ import os
 # Generate switcher.json file
 generate_switcher()
 
-#: Regex matching the branches to build docs for
-# This regex stands for all branches except master, so docs can be built for any branch on demand. (if the workflow is launched from it)
+# Regex matching the branches to build docs for
+# This regex stands for all branches except master, so docs can be built for any branch on demand.
+# (if the workflow is launched from it)
 BRANCH_REGEX = r"((?!master).)*"
 # BRANCH_REGEX = r".*"
 
@@ -24,15 +25,15 @@ TAG_REGEX = r"-"
 repo = git.Repo('./')
 branch = repo.active_branch
 
-# This variable is set to True during workflow build. It is 'False' during local builds.
+# This variable is set to `False` during workflow build. It is 'True' during local builds.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
 
 if LOCAL_BUILD == "True":
-# Local builds only build docs for the current branch and no tags.
+    # Local builds only build docs for the current branch and no tags.
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
 elif str(branch) == "master":
-# Releases are handled here (pushes into master mean a release, so the latest tag is built)
+    # Releases are handled here (pushes into master mean a release, so the latest tag is built)
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
     latest_tag = tags[-1]
     TAG_REGEX = str(latest_tag)
@@ -76,7 +77,7 @@ DefaultDriver(
         buffer_size=1 * 10**9,  # 1 GB
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
-    builder=DffSphinxBuilder(src, args=SPHINX_ARGS),
+    builder=ChatskySphinxBuilder(src, args=SPHINX_ARGS),
     env=Poetry.factory(args=POETRY_ARGS),
     selector=partial(closest_tag, root),
     template_dir=root / src / "templates",

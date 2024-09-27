@@ -21,7 +21,7 @@ from scripts.clean import clean_docs
 from sphinx_polyversion.sphinx import CommandBuilder, Placeholder
 
 
-class DffSphinxBuilder(CommandBuilder):
+class ChatskySphinxBuilder(CommandBuilder):
     def __init__(
         self,
         source: str | PurePath,
@@ -94,16 +94,19 @@ class DffSphinxBuilder(CommandBuilder):
         clean_docs(str(output_dir))
 
         # doing DFF funcs before doc building
-        scripts.doc.dff_funcs(str(root_dir))
+        scripts.doc.pre_sphinx_build_funcs(str(root_dir))
         setup_module.setup(str(root_dir), str(output_dir))
 
         # Using the newest conf.py file instead of the old one
-        # This feature can be turned on, in case anyone needs it to build old versions with a newer design. Just don't forget to configure poly.py
-        NEW_SPHINX_CONFIGS = False
-        if NEW_SPHINX_CONFIGS:
+        # This feature can be turned on, in case anyone needs it to build old versions with a newer design.
+        # Just don't forget to configure poly.py
+        new_sphinx_configs = False
+        if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
             older_conf_path = str(source_dir) + "/conf.py"
             shutil.copyfile(newer_conf_path, older_conf_path)
+        # If you add your own conf.py path there, you could build with any conf.py,
+        # meaning you could add features like the version-switcher button.
 
         # pre hook
         if self.pre_cmd:
