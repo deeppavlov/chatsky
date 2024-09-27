@@ -122,6 +122,6 @@ ServiceInitTypes: TypeAlias = Union[
     Service,
     Annotated[dict, "dict following the Service data model"],
     Annotated[Callable, "handler for the service"],
-    Annotated[BaseProcessing, "handler for the service"]
+    Annotated[BaseProcessing, "handler for the service"],
 ]
 """Types that :py:class:`~.Service` can be validated from."""

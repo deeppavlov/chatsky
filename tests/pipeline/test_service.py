@@ -143,13 +143,17 @@ def test_service_computed_names():
 
 
 def test_rename_components():
-    def service(): ...
+    def service():
+        pass
 
-    def service_0(): ...
+    def service_0():
+        pass
 
-    def service_1(): ...
+    def service_1():
+        pass
 
-    def service_2(): ...
+    def service_2():
+        pass
 
     group = ServiceGroup(
         components=[
@@ -172,16 +176,13 @@ def test_rename_components():
         "service_1#0",
         "service_1#1",
         "service_2#0",
-        "service_2"
+        "service_2",
     ]
 
 
 def test_raise_on_name_collision():
     with pytest.raises(ValueError):
-        finalize_service_group(ServiceGroup(components=[
-            Service(name="service"),
-            Service(name="service")
-        ]))
+        finalize_service_group(ServiceGroup(components=[Service(name="service"), Service(name="service")]))
 
 
 # 'fully_concurrent' flag will try to run all services simultaneously, but the 'wait' option

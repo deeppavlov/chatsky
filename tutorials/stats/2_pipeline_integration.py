@@ -114,9 +114,7 @@ pipeline = Pipeline.model_validate(
 pipeline.actor.add_extra_handler(
     ExtraHandlerType.BEFORE, default_extractors.get_timing_before
 )
-pipeline.actor.add_extra_handler(
-    ExtraHandlerType.AFTER, get_service_state
-)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, get_service_state)
 pipeline.actor.add_extra_handler(
     ExtraHandlerType.AFTER, default_extractors.get_current_label
 )
