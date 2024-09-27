@@ -20,6 +20,10 @@ jobs:
     name: build and publish docs
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: set up python 3.9
         uses: actions/setup-python@v5
         with:
@@ -53,10 +57,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           cp docs/source/_static/switcher.json ./docs/build/switcher.json
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: save changes and checkout to gh-pages
         run: |
