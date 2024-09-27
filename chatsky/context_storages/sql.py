@@ -34,6 +34,7 @@ try:
         Integer,
         Index,
         Insert,
+        event,
         inspect,
         select,
         delete,
@@ -79,6 +80,10 @@ if not sqlalchemy_available:
 
 def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
+
+
+def _sqlite_pragma_enable_foreign_keys(dbapi_con, con_record):
+    dbapi_con.execute('pragma foreign_keys=ON')
 
 
 def _get_write_limit(dialect: str):
@@ -156,6 +161,9 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
+        if self.dialect == "sqlite":
+            event.listen(self.engine.sync_engine, "connect", _sqlite_pragma_enable_foreign_keys)
+
         self._metadata = MetaData()
         self._main_table = Table(
             f"{table_name_prefix}_{self._main_table_name}",
@@ -181,7 +189,7 @@ class SQLContextStorage(DBContextStorage):
             self._metadata,
             Column(self._id_column_name, ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
             Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
-            Column(self._VALUE_COLUMN, LargeBinary(), nullable=False),
+            Column(self._VALUE_COLUMN, LargeBinary(), nullable=True),
             Index(f"{self.misc_config.name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
         )
 
@@ -286,6 +294,8 @@ class SQLContextStorage(DBContextStorage):
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_table, field_name, _ = self._get_table_field_and_config(field_name)
+        if len(items) == 0:
+            return
         if field_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
             raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
         insert_stmt = self._INSERT_CALLABLE(field_table).values(

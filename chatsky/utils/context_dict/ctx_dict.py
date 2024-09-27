@@ -16,8 +16,8 @@ V = TypeVar("V", bound=BaseModel)
 _marker = object()
 
 
-def get_hash(string: str) -> bytes:
-    return sha256(string.encode()).digest()
+def get_hash(string: bytes) -> bytes:
+    return sha256(string).digest()
 
 
 class ContextDict(BaseModel, Generic[K, V]):
@@ -217,9 +217,9 @@ class ContextDict(BaseModel, Generic[K, V]):
         elif self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
-                value = self._value_type.dump_json(v).decode()
+                value = self._value_type.dump_json(v)
                 if get_hash(value) != self._hashes.get(k, None):
-                    result.update({k: value})
+                    result.update({k: value.decode()})
             return result
         else:
             return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
@@ -228,7 +228,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         if self._storage is not None:
             await launch_coroutines(
                 [
-                    self._storage.update_field_items(self._ctx_id, self._field_name, list(self.model_dump().items())),
+                    self._storage.update_field_items(self._ctx_id, self._field_name, [(k, e.encode()) for k, e in self.model_dump().items()]),
                     self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
                 ],
                 self._storage.is_asynchronous,
