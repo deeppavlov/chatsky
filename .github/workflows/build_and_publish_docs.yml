@@ -38,6 +38,11 @@ jobs:
           python -m pip install --upgrade pip poetry
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
+      - name: testing actions/checkout_v4
+        run: |
+          git branch
+          git status
+
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
