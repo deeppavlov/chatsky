@@ -53,7 +53,7 @@ from chatsky.core.service import (
 from chatsky import Context, Pipeline
 from chatsky.stats import OtelInstrumentor, default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %% [markdown]
 """
@@ -114,14 +114,7 @@ async def heavy_service(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.model_validate(
-    {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": [heavy_service],
-    }
-)
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, pre_services=[heavy_service])
 
 pipeline.actor.add_extra_handler(
     ExtraHandlerType.BEFORE, default_extractors.get_current_label

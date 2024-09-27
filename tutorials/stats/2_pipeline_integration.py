@@ -43,7 +43,7 @@ from chatsky.stats import (
 )
 from chatsky.stats import default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
@@ -92,23 +92,19 @@ run stage: for instance, `get_current_label` needs to only be used as an
 
 """
 # %%
-pipeline = Pipeline.model_validate(
-    {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": ServiceGroup(
-            before_handler=[default_extractors.get_timing_before],
-            after_handler=[
-                get_service_state,
-                default_extractors.get_timing_after,
-            ],
-            components=[
-                {"handler": heavy_service},
-                {"handler": heavy_service},
-            ],
-        ),
-    }
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
+    pre_services=ServiceGroup(
+        before_handler=[default_extractors.get_timing_before],
+        after_handler=[
+            get_service_state,
+            default_extractors.get_timing_after,
+        ],
+        components=[
+            heavy_service,
+            heavy_service,
+        ],
+    ),
 )
 # These are Extra Handlers for Actor.
 pipeline.actor.add_extra_handler(
