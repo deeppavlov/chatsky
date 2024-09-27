@@ -37,7 +37,7 @@ def slot_processor_2(ctx: Context):
 
 
 @chatsky_instrumentor
-async def get_slots(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_slots(ctx: Context, info: ExtraHandlerRuntimeInfo):
     return ctx.misc["slots"]
 
 
@@ -46,7 +46,7 @@ def confidence_processor(ctx: Context):
 
 
 @chatsky_instrumentor
-async def get_confidence(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_confidence(ctx: Context, info: ExtraHandlerRuntimeInfo):
     data = {"response_confidence": ctx.misc["response_confidence"]}
     return data
 
