@@ -43,21 +43,21 @@ The `Service` model has other arguments that modify its execution.
 * `handler` - Function or `BaseProcessing`.
 * `before_handler` - a list of functions that run before the service.
         You can read more about the handlers in this [tutorial](
-        %doclink(tutorial,pipeline.6_extra_handlers_basic)
+        %doclink(tutorial,service.5_extra_handlers)
         ).
 * `after_handler` - a list of functions that run after the service.
         You can read more about the handlers in this [tutorial](
-        %doclink(tutorial,pipeline.6_extra_handlers_basic)
+        %doclink(tutorial,service.5_extra_handlers)
         ).
 * `timeout` - service timeout.
 * `concurrent` - whether this service can run concurrently,
         see [tutorial 3](
-        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
+        %doclink(tutorial,service.3_groups)).
 * `start_condition` - service start condition, see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_full)).
+        %doclink(tutorial,service.4_conditions_and_paths)).
 * `name` - name of the service,
         see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_full)).
+        %doclink(tutorial,service.4_conditions_and_paths)).
 
 ## Service subclassing
 

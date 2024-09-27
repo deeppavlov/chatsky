@@ -3,8 +3,8 @@
 # 2. Pipeline Integration
 
 In the Chatsky ecosystem, extractor functions act as regular extra handlers (
-[see the pipeline module documentation](
-%doclink(tutorial,pipeline.6_extra_handlers_basic)
+[see the extra handlers tutorial](
+%doclink(tutorial,service.5_extra_handlers)
 )
 ).
 Hence, you can decorate any part of your pipeline, including services,

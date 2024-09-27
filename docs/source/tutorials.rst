@@ -10,8 +10,8 @@ The Context Storages section describes how to use context storages in Chatsky.
 
 The Messengers section covers how to use the Telegram messenger with Chatsky.
 
-The Pipeline section teaches the basics of the pipeline concept, how to use pre- and postprocessors,
-concurrent groups and services, custom messenger interfaces, and extra handlers and extensions.
+The Service section teaches how to use Services: objects that execute
+before or after the main part.
 
 The Script section covers the basics of the script concept, including conditions, responses, transitions,
 and serialization. It also includes tutorials on pre-response and pre-transition processing.
@@ -23,7 +23,6 @@ comprehensive overview of how to build a complete application.
 | To understand the basics of Chatsky, read the following tutorials:
 | 1) Script / Core / 1. Basics
 | 2) Script / Core / 2. Conditions
-| 3) Pipeline / 1. Basics
 
 .. toctree::
    :name: tutorials

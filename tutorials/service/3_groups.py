@@ -38,7 +38,7 @@ Service groups are used to combine several services
 
 Both services and service groups inherit interface from `PipelineComponent`
 class which defines all the fields described in the [previous tutorial](
-%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))
+%doclink(tutorial,service.2_advanced))
 except `handler`.
 
 Instead of `handler` service group defines `components`:
