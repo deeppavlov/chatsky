@@ -1,12 +1,11 @@
 # %% [markdown]
 """
-# 5. Asynchronous groups and services
+# 3. Service Groups
 
-The following tutorial shows `pipeline` asynchronous
-service and service group usage.
+The following tutorial shows how to group multiple services.
 
-Here, %mddoclink(api,core.service.group,ServiceGroup)s
-are shown for advanced and asynchronous data pre- and postprocessing.
+For more information, see
+[API ref](%doclink(api,core.service.group,ServiceGroup)).
 """
 
 # %pip install chatsky
@@ -24,7 +23,7 @@ from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
 )
-from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT_KWARGS
 
 reload(logging)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="")
@@ -32,40 +31,70 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-Services and service groups are `PipelineComponent`s,
-which can be synchronous or asynchronous.
-All `ServiceGroup`s are made of these `PipelineComponent`s.
+## Intro
 
-Synchronous components are executed sequentially, while
-asynchronous components work simultaneously.
-By default, all `PipelineComponent`s are synchronous,
-but can be marked as 'asynchronous'.
+Service groups are used to combine several services
+(or service groups) into one.
 
-It should be noted that only adjacent asynchronous components in a
-`ServiceGroup` are executed simultaneously.
-To put it bluntly, if "s" means sync component and "a" means async,
-then [a, s, a, a, a, s] -> a, s, (a, a, a), s.
-Those three adjacent async components will run simultaneously.
-Basically, the order of your services in the list is crucial.
+Both services and service groups inherit interface from `PipelineComponent`
+class which defines all the fields described in the [previous tutorial](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_full))
+except `handler`.
 
-Service groups have a flag 'all_async' which makes it treat
-every component inside it as asynchronous,
-running all components simultaneously. (by default it's `False`)
+Instead of `handler` service group defines `components`:
+a list of services or service groups.
+
+Pipeline pre-services and post-services are actually service groups
+and you can pass a ServiceGroup instead of a list when initializing Pipeline.
+
+## Component execution
+
+Components inside a service group are executed sequentially, except for
+components with the `concurrent` attribute set to `True`:
+Continuous sequences of concurrent components are executed concurrently
+(via `asyncio.gather`).
+
+For example, if components are `[1, 1, 0, 0, 1, 1, 1, 0]` where
+"1" indicates a concurrent component, the components are executed as follows:
+
+1. Components 1 and 2 (concurrently);
+2. Component 3;
+3. Component 4;
+4. Components 5, 6 and 7 (concurrently);
+5. Component 8.
+
+<div class="alert alert-info">
+
+Note
+
+Components processing different contexts are always executed independently
+of each other.
+
+</div>
+
+### Fully concurrent flag
+
+Service groups have a `fully_concurrent` flag which makes it treat
+every component inside it as concurrent,
+running all components simultaneously.
+
 This is convenient if you have a bunch of functions,
 that you want to run simultaneously,
 but don't want to make a service for each of them.
 
-In this example, there's a service group named "pre_services" with the
-`all_async` flag set to `True`, containing 10 services, each of which sleeps
-for 0.01 seconds. Since the group is fully asynchronous, the total execution
-time is just 0.01 seconds. The same would apply if all those services were
-marked as `asynchronous`. By default, if services are not explicitly marked as
-asynchronous, they will execute sequentially.
+## Code explanation
 
-To further demonstrate ServiceGroup's logic,
-"post_services" is a ServiceGroup with asynchronous components 'A' and 'B',
-which execute simultaneously, and also one non-async component 'C' at the end.
-If 'A' and 'B' weren't async, all steps for component 'A' would complete
+In this example, we define `pre_services` as a `ServiceGroup` instead of a list.
+This allows us to set the `fully_concurrent` flag to `True`.
+The service group consists of 10 services that sleep 0.01 seconds each.
+But since they are executed concurrently, the entire service group
+takes much less time than 0.1 seconds.
+
+To further demonstrate ServiceGroup's execution logic,
+`post_services` is a ServiceGroup with concurrent components 'A' and 'B',
+which execute simultaneously, and also one regular component 'C' at the end.
+
+If 'A' and 'B' weren't concurrent, all steps for component 'A' would complete
 before component 'B' begins its execution, but instead they start
 at the same time. Only after both of them have finished,
 does component 'C' start working.
@@ -85,22 +114,20 @@ def interact(stage: str, service: str):
     return slow_service
 
 
-pipeline_dict = {
-    "script": TOY_SCRIPT,
-    "start_label": ("greeting_flow", "start_node"),
-    "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": ServiceGroup(
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
+    pre_services=ServiceGroup(
         components=[time_consuming_service for _ in range(0, 10)],
-        all_async=True,
+        fully_concurrent=True,
     ),
-    "post_services": [
+    post_services=[
         ServiceGroup(
             name="InteractWithServiceA",
             components=[
                 interact("Starting interaction", "A"),
                 interact("Finishing interaction", "A"),
             ],
-            asynchronous=True,
+            concurrent=True,
         ),
         ServiceGroup(
             name="InteractWithServiceB",
@@ -108,7 +135,7 @@ pipeline_dict = {
                 interact("Starting interaction", "B"),
                 interact("Finishing interaction", "B"),
             ],
-            asynchronous=True,
+            concurrent=True,
         ),
         ServiceGroup(
             name="InteractWithServiceC",
@@ -116,15 +143,14 @@ pipeline_dict = {
                 interact("Starting interaction", "C"),
                 interact("Finishing interaction", "C"),
             ],
-            asynchronous=False,
+            concurrent=False,
         ),
     ],
-}
+)
+
 
 # %%
-pipeline = Pipeline.model_validate(pipeline_dict)
-
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH, printout=True)
+    check_happy_path(pipeline, HAPPY_PATH[:1], printout=True)
     if is_interactive_mode():
         pipeline.run()

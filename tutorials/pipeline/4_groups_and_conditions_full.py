@@ -1,12 +1,11 @@
 # %% [markdown]
 """
-# 4. Groups and conditions (full)
+# 4. Conditions and paths
 
-The following tutorial shows `pipeline`
-service group usage and start conditions.
+This tutorial explains how a unique path is generated for each component
+and how to add a condition for component execution.
 
-This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
+[API ref for service conditions](%doclink(api,conditions.service))
 """
 
 # %pip install chatsky
@@ -16,16 +15,15 @@ import logging
 import sys
 from importlib import reload
 
-from chatsky.core import Context
 from chatsky.conditions import Not, All, ServiceFinished
 from chatsky.core.service import Service, ServiceGroup
-from chatsky import Pipeline
+from chatsky import Pipeline, Context, AnyCondition
 
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
 )
-from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT_KWARGS
 
 reload(logging)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="")
@@ -33,107 +31,114 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as `ServiceGroup` objects:
-      lists of `Service` or more `ServiceGroup` objects.
-`ServiceGroup` objects should contain `components` -
-a list of `Service` and `ServiceGroup` objects.
+## Component paths
 
-Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as lists of `Service`
- or more `ServiceGroup` objects.
-    (in fact, all of the pipeline services are combined
-    into root service group named "pipeline").
-Alternatively, the groups can be defined as objects
-    with following constructor arguments:
+Each component has a unique path that can be used as an ID for that component.
 
-* `components` (required) - A list of `Service` objects,
-    `ServiceGroup` objects.
-* `before_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `after_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `timeout` - Pipeline timeout, see [tutorial 5](
-        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
-* `asynchronous` - Whether or not this service group should be
-    asynchronous to other components
-* `all_async` - Whether or not this service group should run
-    all it's components asynchronously.
-* `start_condition` - Service group start condition.
-* `name` - Custom defined name for the service group
-    (keep in mind that names in one ServiceGroup should be unique).
+A path of a component is a "." concatenation of names of service groups this
+component is in and the name of this component.
 
-Service (and service group) object fields
-are mostly the same as constructor parameters,
-however there are some differences:
+For example, if component "c" is in group "b" which itself is in group "a"
+then path of "c" is "a.b.c".
 
-* `path` - Contains globally unique (for pipeline)
-    path to the service or service group.
+<div class="alert alert-warning">
 
-If no name is specified for a service or service group,
-    the name will be generated according to the following rules:
+Naming services
 
-1. If service's handler is callable,
-    service will be named callable.
-2. Service group will be named 'service_group'.
-3. Otherwise, it will be named 'noname_service'.
-4. After that an index will be added to service name.
+When choosing a name for a component, keep in mind that
+it should be unique among other components in the same service group.
 
-To receive serialized information about service,
-    service group or pipeline `model_dump` method from Pydantic can be used,
-    which returns important object properties as a dict.
+</div>
 
-Services and service groups can be executed conditionally.
-Conditions are functions passed to `start_condition` argument.
-They have the following signature
+### Computed names
 
-    class MyCondition(BaseCondition):
-        async def call(self, ctx: Context) -> bool:
+If a component does not have a name, one is provided to it:
 
-A `Service` is executed only if its `start_condition` returns `True`.
-By default all the services start unconditionally.
-There are several built-in condition functions available as well
-as the possibility to create custom ones. You can check the
-`Script` tutorial about conditions,
-(see `Script` [tutorial](%doclink(tutorial,script.core.2_conditions))),
-or check the API directly.
+1. Each component has `computed_name` property which returns a default name.
+    All service groups have "service_group" as their computed name.
+    For services the computed name is the name of the handler **or** of the
+    service class if handler is not present.
 
-There is also a built-in condition `ServiceFinished`
-that returns `True` if a `Service` with a given path completed successfully,
-returns `False` otherwise.
+    E.g. A service with handler `my_func` has computed name "my_func";
+    and if service `MyService` is a subclass of `Service` and does not
+    define `handler` its computed name is "MyService".
+2. If there are two or more components in a service group with the same
+    computed name, they are assigned names with an incrementing postfix.
+    For example, if there are two service groups with no name in pre-services
+    they will be named "service_group#0" and "service_group#1".
+
+### Names of basic components
+
+* Main component (pipeline) has an empty name;
+* Name of the pre services group is "pre";
+* Name of the post services group is "post";
+* Name of the actor service is "actor".
+
+For example, if you have `pre_services=[my_func]`, the full path of the
+`my_func` component is ".pre.my_func".
+
+## Component start condition
+
+Any component (service or service group) can have a `start_condition`.
+
+Start condition is a `BaseCondition` that determines whether the component
+should be executed.
+
+For more information about conditions, see the [condition tutorial](
+%doclink(tutorial,script.core.2_conditions)).
+
+### Component status
+
+At any time each component has a certain status:
+
+* `NOT_RUN` - Component hasn't bee executed yet or
+    start condition returned False.
+* `RUNNING` - Component is currently being executed.
+* `FINISHED` - Component finished successfully.
+* `FAILED` - Component execution failed.
+
+For more information, see
+%mddoclink(api,core.context,FrameworkData.service_states).
+
+### ServiceFinished condition
+
+`ServiceFinished` is a condition that returns `True` if another service
+has the `FINISHED` status.
 
 `ServiceFinished` accepts the following constructor parameters:
 
-* `path` (required) - a path to the `Service`.
-* `wait` - whether it should wait for the said `Service` to complete,
-        defaults to `False`.
+* `path` (required) - a path of another component.
+* `wait` - whether it should wait for the component to complete,
+    defaults to `True`. This means that the component status cannot be
+    `NOT_RUN` or `RUNNING` at the time of the check.
 
-Custom condition functions can rely on data in `ctx.misc`
-as well as on any external data source.
-Built-in condition functions check other service states.
-All of the services store their execution status in context,
-    this status can be one of the following:
+<div class="alert alert-warning">
 
-* `NOT_RUN` - Service hasn't bee executed yet.
-* `RUNNING` - Service is currently being executed
-    (important for asynchronous services).
-* `FINISHED` - Service finished successfully.
-* `FAILED` - Service execution failed (that also throws an exception).
+Warning!
+
+It is possible for the pipeline to get stuck in infinite waiting
+with the `ServiceFinished` condition.
+
+Either disable `wait` or set a timeout for the service.
+
+</div>
+
+For more information about `ServiceFinished`, see [API ref](
+%doclink(api,conditions.service,ServiceFinished)).
+
+## Code explanation
 
 In this example, two conditionally executed services are illustrated.
+
 The service named `running_service` is executed
-    only if both `SimpleServices` in `service_group_0`
-    have finished successfully.
+only if both `SimpleServices` in pre service group
+have finished successfully.
+
 `never_running_service` is executed only if `running_service` is not finished,
 which should never happen.
+
 Lastly, `context_printing_service` prints pipeline runtime information,
-    that contains execution state of all previously run services.
+that contains execution state of all previously run services.
 """
 
 
@@ -147,6 +152,12 @@ class NeverRunningService(Service):
     async def call(self, _: Context):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
+    start_condition: AnyCondition = Not(
+        ServiceFinished(
+            ".post.named_group.running_service",
+        )
+    )
+
 
 class RuntimeInfoPrintingService(Service):
     async def call(self, _: Context):
@@ -157,56 +168,43 @@ class RuntimeInfoPrintingService(Service):
 
 
 # %%
-pipeline_dict = {
-    "script": TOY_SCRIPT,
-    "start_label": ("greeting_flow", "start_node"),
-    "fallback_label": ("greeting_flow", "fallback_node"),
-    "pre_services": [
-        SimpleService(),  # This simple service
-        # will be named `SimpleService_0`
-        SimpleService(),  # This simple service
-        # will be named `SimpleService_1`
-    ],  # Despite this is the unnamed service group in the root
-    # service group, it will be named `pre` as it holds pre services
-    "post_services": [
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
+    pre_services=[
+        SimpleService(),
+        # This service will be named "SimpleService#0"
+        SimpleService(),
+        # This service will be named "SimpleService#1"
+    ],
+    # this group is named "pre"
+    post_services=[
         ServiceGroup(
             name="named_group",
             components=[
                 SimpleService(
                     start_condition=All(
-                        ServiceFinished(".pipeline.pre.SimpleService_0"),
-                        ServiceFinished(".pipeline.pre.SimpleService_1"),
-                    ),  # Alternative:
-                    # ServiceFinished(".pipeline.pre")
-                    name="running_service",
-                ),  # This simple service will be named `running_service`,
-                # because its name is manually overridden
-                NeverRunningService(
-                    start_condition=Not(
-                        ServiceFinished(
-                            ".pipeline.post.named_group.running_service",
-                            wait=True,
-                            # The 'wait' flag makes the condition function
-                            # wait for the service to complete first.
-                            # Because this ServiceGroup is asynchronous,
-                            # this is important.
-                        )
+                        ServiceFinished(".pre.SimpleService#0"),
+                        ServiceFinished(".pre.SimpleService#1"),
                     ),
+                    # Alternative:
+                    # ServiceFinished(".pre")
+                    name="running_service",
                 ),
+                # This simple service is named "running_service"
+                NeverRunningService(),
+                # this service will be named "NeverRunningService"
             ],
-            all_async=True,
+            fully_concurrent=True,
             # Makes components in the group run asynchronously,
             # unless one is waiting for another to complete,
             # which is what happens with NeverRunningService.
         ),
         RuntimeInfoPrintingService(),
     ],
-}
+)
 
 # %%
-pipeline = Pipeline.model_validate(pipeline_dict)
-
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH, printout=True)
+    check_happy_path(pipeline, HAPPY_PATH[:1], printout=True)
     if is_interactive_mode():
         pipeline.run()

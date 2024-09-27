@@ -1,34 +1,28 @@
 # %% [markdown]
 """
-# 3. Pipeline dict with services (full)
+# 2. Advanced services
 
-The following tutorial shows `pipeline` creation from dict
-and most important pipeline components.
+This tutorial demonstrates various configuration options for services.
 
-This tutorial is a more advanced version of the
-[previous tutorial](
-%doclink(tutorial,pipeline.3_pipeline_dict_with_services_basic)
-).
+For more information, see
+[API ref](%doclink(api,core.service.service,Service)).
 """
 
 # %pip install chatsky
 
 # %%
-import json
-import urllib.request
 import logging
 import sys
 from importlib import reload
 
-from chatsky import Context, Pipeline
-from chatsky.messengers.console import CLIMessengerInterface
+from chatsky import Context, Pipeline, BaseProcessing
 from chatsky.core.service import Service
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
 )
 
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 reload(logging)
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="")
@@ -36,161 +30,114 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When a `Pipeline` is created using Pydantic's `model_validate` method or the
-`Pipeline` constructor, it should be defined as a dictionary
-with a specific structure that includes `script`,
-`start_label` and `fallback_label`, see `Script` tutorials.
+## Intro
 
-Optional Pipeline parameters:
+In the previous tutorial we used a function as a Service.
+Under the hood a function is converted to a `Service` object
+with the function as its `handler` argument.
 
-* `messenger_interface` - `MessengerInterface` instance,
-        is used to connect to the channel and transfer IO to the user.
-* `context_storage` - Place to store dialog contexts
-        (dictionary or a `DBContextStorage` instance).
-* `pre-services` - A `ServiceGroup` object,
-        basically a list of `Service` objects or more `ServiceGroup` objects,
-        see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
-* `post-services` - A `ServiceGroup` object,
-        basically a list of `Service` objects or more `ServiceGroup` objects,
-        see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
-* `before_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `after_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `timeout` - Pipeline timeout, see [tutorial 5](
-        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
+The `Service` model has other arguments that modify its execution.
 
-On pipeline execution services from
-`components` = 'pre-services' + actor + 'post-services'
-list are run without difference between pre- and postprocessors.
-`Service` object can be defined either with callable
-(see [tutorial 2](%doclink(tutorial,pipeline.7_extra_handlers_and_extensions))).
-or with dict of structure / `Service` object
-with the following constructor arguments:
+## Service Arguments
 
-
-* `handler` (required) - ServiceFunction.
-* `before_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `after_handler` - a list of `ExtraHandlerFunction` objects or
-        a `ComponentExtraHandler` object.
-        See [tutorial 6](%doclink(tutorial,pipeline.6_extra_handlers_basic))
-        and [tutorial 7](
-        %doclink(tutorial,pipeline.7_extra_handlers_and_extensions)).
-* `timeout` - service timeout, see [tutorial 5](
-        %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
-* `asynchronous` - whether or not this service _should_ be asynchronous
-        (keep in mind that not all services _can_ be asynchronous),
-        see [tutorial 5](
+* `handler` - Function or `BaseProcessing`.
+* `before_handler` - a list of functions that run before the service.
+        You can read more about the handlers in this [tutorial](
+        %doclink(tutorial,pipeline.6_extra_handlers_basic)
+        ).
+* `after_handler` - a list of functions that run after the service.
+        You can read more about the handlers in this [tutorial](
+        %doclink(tutorial,pipeline.6_extra_handlers_basic)
+        ).
+* `timeout` - service timeout.
+* `concurrent` - whether this service can run concurrently,
+        see [tutorial 3](
         %doclink(tutorial,pipeline.5_asynchronous_groups_and_services)).
 * `start_condition` - service start condition, see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
-* `name` - custom-defined name for the service
-        (keep in mind that names in one ServiceGroup should be unique),
+        %doclink(tutorial,pipeline.4_groups_and_conditions_full)).
+* `name` - name of the service,
         see [tutorial 4](
-        %doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
+        %doclink(tutorial,pipeline.4_groups_and_conditions_full)).
+
+## Service subclassing
 
 Services can also be defined as subclasses of `Service`,
-allowing access to the `self` object for logging and
-additional information. To do this, derive
-your class from `Service`, then add an async `call()` method which will
-now replace the `handler`. (see the `PreProcess` example below)
-You don't need to worry about the `handler` field, it can be left empty.
+allowing access to all the fields described above via `self`.
 
-If you define a Service this way, the `handler` won't run automatically.
-You can include a line like "await self.handler(ctx)" or
-"self.handler(ctx)" directly to your `call()` method,
-depending on what your `handler` is.
+To do this, derive your class from `Service`,
+then implement an async `call` method which will
+now replace the `handler` (see the `PreProcess` example below).
 
-While a Pipeline can be executed using the  `__call__` method,
-for most cases `run` method should be used.
-It starts the pipeline asynchronously and connects
-to the provided messenger interface.
+<div class="alert alert-info">
 
-In this example, the pipeline contains three services,
-used in three different ways. The first two write sample feature detection
-data to `ctx.misc`. The first uses a constant expression and is defined as
-a Service function, while the second fetches from `example.com` and derives
-a class from Service. Final service logs the `ctx.misc` dictionary,
-using access to the pipeline from `ctx.pipeline`.
+Tip
+
+When defining a service as a subclass of `Service`, you can also change
+default parameters such as `timeout` or `start_condition`.
+
+</div>
+
+## Code explanation
+
+In this example, pipeline contains three services,
+defined in three different ways.
+
+The first is defined as a Service with a function handler.
+
+The second derives from the `Service` class.
+
+The third is defined as a Service with a processing handler.
 """
 
 
 # %%
-async def prepreprocess(ctx: Context):
-    logger.info("prepreprocessor Service running (defined as a dict)")
-    ctx.misc["preprocess_detection"] = {
-        ctx.last_request.text: "some_intent"
-    }  # Similar syntax can be used to access
-    # service output dedicated to current pipeline run
-
-
-class PreProcess(Service):
-    async def call(self, ctx: Context):
-        logger.info(f"{self.name} Service running (defined as a callable)")
-        with urllib.request.urlopen("https://example.com/") as webpage:
-            web_content = webpage.read().decode(
-                webpage.headers.get_content_charset()
-            )
-            ctx.misc["another_detection"] = {
-                ctx.last_request.text: (
-                    "online" if "Example Domain" in web_content else "offline"
-                )
-            }
-
-
-async def postprocess(ctx: Context):
-    logger.info("postprocessor Service running (defined as an object)")
+async def function_handler(ctx: Context):
     logger.info(
-        f"resulting misc looks like:"
-        f"{json.dumps(ctx.misc, indent=4, default=str)}"
+        "function_handler running:\n"
+        "timeout of this service cannot be determined"
     )
-    pl = ctx.pipeline
-    received_response = pl.script.get_inherited_node(pl.fallback_label).response
-    responses_match = received_response == ctx.last_response
-    logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
-# %%
-pipeline_dict = {
-    "script": TOY_SCRIPT,
-    "start_label": ("greeting_flow", "start_node"),
-    "fallback_label": ("greeting_flow", "fallback_node"),
-    "messenger_interface": CLIMessengerInterface(
-        intro="Hi, this is a brand new Pipeline running!",
-        prompt_request="Request: ",
-        prompt_response="Response: ",
-    ),  # `CLIMessengerInterface` has the following constructor parameters:
-    #     `intro` - a string that will be displayed
-    #           on connection to interface (on `pipeline.run`)
-    #     `prompt_request` - a string that will be displayed before user input
-    #     `prompt_response` - an output prefix string
-    "context_storage": {},
-    "pre_services": [
-        {
-            "handler": prepreprocess,
-            "name": "preprocessor",
-        },
-        PreProcess(),
+class ServiceSubclass(Service):
+    async def call(self, ctx: Context):
+        logger.info(
+            f"{self.name or self.computed_name} running:\n"
+            f"timeout: {self.timeout}"
+        )
+
+    timeout: float = 1.0
+    # this overrides the default `None` timeout,
+    # but can still be overridden in class instances
+
+
+class ProcessingService(BaseProcessing):
+    async def call(self, ctx: Context) -> None:
+        try:
+            logger.info(self.timeout)
+        except AttributeError:
+            # this is BaseProcessing not Service so there's no `timeout` field
+            logger.info(
+                "ProcessingService running:\n"
+                "timeout of this service cannot be determined"
+            )
+
+
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
+    pre_services=[
+        Service(
+            handler=function_handler,
+            timeout=0.5,
+        ),
+        ServiceSubclass(name="ServiceSubclassWithCustomName", timeout=100),
+        ServiceSubclass(),
+        Service(handler=ProcessingService(), timeout=4),
     ],
-    "post_services": Service(handler=postprocess, name="postprocessor"),
-}
+)
+
 
 # %%
-pipeline = Pipeline.model_validate(pipeline_dict)
-
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH, printout=True)
+    check_happy_path(pipeline, HAPPY_PATH[:1], printout=True)
     if is_interactive_mode():
         pipeline.run()
