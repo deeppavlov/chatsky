@@ -15,7 +15,6 @@ except ImportError:
 async def test_get_current_label():
     context = Context.init(("a", "b"))
     runtime_info = ExtraHandlerRuntimeInfo(
-        func=lambda x: x,
         stage="BEFORE",
         component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
     )
@@ -30,7 +29,6 @@ async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_p
     tutorial_module.chatsky_instrumentor.uninstrument()
     tutorial_module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
-        func=lambda x: x,
         stage="BEFORE",
         component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
     )

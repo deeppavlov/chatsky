@@ -100,13 +100,15 @@ Can accept current dialog context and current extra handler info.
 
 
 class ExtraHandlerRuntimeInfo(BaseModel):
-    func: ExtraHandlerFunction
+    """
+    Information passed to :py:data:`.ExtraHandlerFunction`.
+    """
+
     stage: ExtraHandlerType
+    """
+    :py:data:`.ExtraHandlerType` -- either "BEFORE" or "AFTER".
+    """
     component: PipelineComponent
-
-
-"""
-Type of object, that is passed to extra handlers in runtime.
-Contains current wrapper info (`name`, `stage`).
-Also contains `component` - :py:class:`.PipelineComponent` this extra handler is attached to.
-"""
+    """
+    Component object that called the extra handler.
+    """
