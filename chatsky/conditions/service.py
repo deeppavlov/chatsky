@@ -1,9 +1,7 @@
 """
-Conditions
-----------
-The conditions module contains functions that determine whether the pipeline component should be executed or not.
-
-The standard set of them allows user to set up dependencies between pipeline components.
+Service Conditions
+------------------
+Provides service-related conditions
 """
 
 from __future__ import annotations
