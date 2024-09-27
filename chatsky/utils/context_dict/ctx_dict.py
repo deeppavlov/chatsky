@@ -11,9 +11,7 @@ if TYPE_CHECKING:
     from chatsky.context_storages.database import DBContextStorage
 
 K = TypeVar("K", bound=Hashable)
-V = TypeVar("V", bound=BaseModel)
-
-_marker = object()
+V = TypeVar("V")
 
 
 def get_hash(string: bytes) -> bytes:
@@ -80,7 +78,7 @@ class ContextDict(BaseModel, Generic[K, V]):
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
-            return [self._items[self.keys()[k]] for k in range(len(self._items.keys()))[key]]
+            return [self._items[k] for k in self.keys()[key]]
         else:
             return self._items[key]
 
@@ -89,10 +87,10 @@ class ContextDict(BaseModel, Generic[K, V]):
             key = self.keys()[key]
         if isinstance(key, slice):
             if isinstance(value, Sequence):
-                key_slice = list(range(len(self.keys()))[key])
+                key_slice = self.keys()[key]
                 if len(key_slice) != len(value):
                     raise ValueError("Slices must have the same length!")
-                for k, v in zip([self.keys()[k] for k in key_slice], value):
+                for k, v in zip(key_slice, value):
                     self[k] = v
             else:
                 raise ValueError("Slice key must have sequence value!")
@@ -106,8 +104,8 @@ class ContextDict(BaseModel, Generic[K, V]):
         if isinstance(key, int) and key < 0:
             key = self.keys()[key]
         if isinstance(key, slice):
-            for i in [self.keys()[k] for k in range(len(self.keys()))[key]]:
-                del self[i]
+            for k in self.keys()[key]:
+                del self[k]
         else:
             self._removed.add(key)
             self._added.discard(key)
@@ -120,12 +118,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     def __len__(self) -> int:
         return len(self.keys() if self._storage is not None else self._items.keys())
 
-    async def get(self, key: K, default: V = _marker) -> V:
+    async def get(self, key: K, default = None) -> V:
         try:
             return await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             return default
 
     def __contains__(self, key: K) -> bool:
@@ -140,12 +136,10 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def items(self) -> List[Tuple[K, V]]:
         return [(k, v) for k, v in zip(self.keys(), await self.values())]
 
-    async def pop(self, key: K, default: V = _marker) -> V:
+    async def pop(self, key: K, default = None) -> V:
         try:
             value = await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             return default
         else:
             del self[key]
@@ -178,12 +172,10 @@ class ContextDict(BaseModel, Generic[K, V]):
         for key, value in kwds.items():
             self[key] = value
 
-    async def setdefault(self, key: K, default: V = _marker) -> V:
+    async def setdefault(self, key: K, default = None) -> V:
         try:
             return await self[key]
         except KeyError:
-            if default is _marker:
-                raise
             self[key] = default
         return default
 
