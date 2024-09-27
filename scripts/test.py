@@ -7,31 +7,42 @@ from python_on_whales import DockerClient
 from .utils import docker_client
 
 
-def _test(coverage: bool, dependencies: bool) -> int:
+def _test(coverage: bool = False, dependencies: bool = False, quick: bool = False) -> int:
     """
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
     Please keep in mind that:
 
-    1. Skipping `telegram` tests is **always** allowed.
-    2. Enabling dependencies is effectively same as enabling docker
+    1. Enabling dependencies is effectively same as enabling docker
         (docker containers **should** be running in that case).
-    3. Coverage requires all dependencies and docker (will have no effect otherwise).
+    2. Coverage requires all dependencies and docker (will have no effect otherwise).
+
+    :param coverage: Enable coverage calculation
+    :param dependencies: Disallow skipping tests
+    :param quick: Deselect 'slow' and 'docker' marked tests
     """
     test_coverage_threshold = 90
 
     dotenv.load_dotenv(".env_file")
     args = ["tests/"]
 
+    if quick:
+        args = [
+            "-m",
+            "not docker",
+            "-m",
+            "not slow",
+            *args,
+        ]
+
     if dependencies and coverage:
         args = [
             "-m",
             "not no_coverage",
-            "--allow-skip=telegram",
             *args,
         ]
     elif dependencies:
         args = [
-            "--allow-skip=telegram,docker",
+            "--allow-skip=docker",
             *args,
         ]
     else:
@@ -53,7 +64,7 @@ def _test(coverage: bool, dependencies: bool) -> int:
             "html",
             "--cov-report",
             "term",
-            "--cov=dff",
+            "--cov=chatsky",
             *args,
         ]
     else:
@@ -65,6 +76,14 @@ def _test(coverage: bool, dependencies: bool) -> int:
         ]
 
     return pytest.main(args)
+
+
+def quick_test():
+    exit(_test(quick=True))
+
+
+def quick_test_coverage():
+    exit(_test(coverage=True, quick=True))
 
 
 @docker_client

@@ -3,27 +3,25 @@
 # 2. Pre- and postprocessors
 
 The following tutorial shows more advanced usage of `pipeline`
-module as an extension to `dff.script.core`.
+module as an extension to `chatsky.script.core`.
 
-Here, %mddoclink(api,script.core.context,Context.misc)
+Here, %mddoclink(api,core.context,Context.misc)
 dictionary of context is used for storing additional data.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.messengers.common import CLIMessengerInterface
-from dff.script import Context, Message
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky import Context, Message, Pipeline
 
-from dff.pipeline import Pipeline
-
-from dff.utils.testing import (
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     HAPPY_PATH,
-    TOY_SCRIPT_ARGS,
+    TOY_SCRIPT_KWARGS,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,11 +29,11 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-When Pipeline is created with `from_script` method, additional pre-
-and postprocessors can be defined.
-These can be any `ServiceBuilder` objects (defined in `types` module)
-- callables, objects or dicts.
-They are being turned into special `Service` objects (see tutorial 3),
+When Pipeline is created, additional pre-
+and post-services can be defined.
+These can be any callables, certain objects or dicts.
+They are being turned into special `Service` or `ServiceGroup` objects
+(see tutorial 3),
 that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
@@ -65,8 +63,8 @@ def pong_processor(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS,
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
     context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts
@@ -79,7 +77,7 @@ pipeline = Pipeline.from_script(
 
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:

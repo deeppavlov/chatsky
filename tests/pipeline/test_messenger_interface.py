@@ -2,36 +2,29 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+from chatsky.core import RESPONSE, TRANSITIONS, Message, Pipeline, Transition as Tr
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.messengers.common import CallbackMessengerInterface
+import chatsky.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {
         "start_node": {
-            RESPONSE: {
-                "text": "",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
         "node1": {
-            RESPONSE: {
-                "text": "Pong",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            RESPONSE: "Pong",
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
         "fallback_node": {
-            RESPONSE: {
-                "text": "Ooops",
-            },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            RESPONSE: "Ooops",
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
         },
     }
 }
 
-pipeline = Pipeline.from_script(
-    SCRIPT,
+pipeline = Pipeline(
+    script=SCRIPT,
     start_label=("pingpong_flow", "start_node"),
     fallback_label=("pingpong_flow", "fallback_node"),
 )
@@ -41,7 +34,7 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's Chatsky powered bot, let's chat!")
 
     def loop() -> bool:
         loop.runs_left -= 1
@@ -60,4 +53,4 @@ def test_callback_messenger_interface(monkeypatch):
     pipeline.run()
 
     for _ in range(0, 5):
-        assert interface.on_request(Message("Ping"), 0).last_response == Message("Pong")
+        assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")

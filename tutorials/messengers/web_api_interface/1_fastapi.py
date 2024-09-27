@@ -2,7 +2,7 @@
 """
 # Web API: 1. FastAPI
 
-This tutorial shows how to create an API for DFF using FastAPI and
+This tutorial shows how to create an API for Chatsky using FastAPI and
 introduces messenger interfaces.
 
 You can see the result at http://127.0.0.1:8000/docs.
@@ -10,20 +10,17 @@ You can see the result at http://127.0.0.1:8000/docs.
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 is used to process requests.
 
-%mddoclink(api,script.core.message,Message)
+%mddoclink(api,core.message,Message)
 is used in creating a JSON Schema for the endpoint.
 """
-
-# %pip install dff uvicorn fastapi
+# %pip install chatsky uvicorn fastapi
 
 # %%
-from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Message
-from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.messengers.common.interface import CallbackMessengerInterface
+from chatsky import Message, Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
-from pydantic import BaseModel
 from fastapi import FastAPI
 
 # %% [markdown]
@@ -83,8 +80,8 @@ communication between the pipeline on the server side and the messenger client.
 # %%
 messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS, messenger_interface=messenger_interface
 )
 
 
@@ -92,18 +89,13 @@ pipeline = Pipeline.from_script(
 app = FastAPI()
 
 
-class Output(BaseModel):
-    user_id: str
-    response: Message
-
-
-@app.post("/chat", response_model=Output)
+@app.post("/chat", response_model=Message)
 async def respond(
     user_id: str,
     user_message: Message,
 ):
     context = await messenger_interface.on_request_async(user_message, user_id)
-    return {"user_id": user_id, "response": context.last_response}
+    return context.last_response
 
 
 # %%

@@ -2,41 +2,66 @@
 """
 # Telegram: 1. Basic
 
-The following tutorial shows how to run a regular DFF script in Telegram.
+The following tutorial shows how to run a regular Chatsky script in Telegram.
 It asks users for the '/start' command and then loops in one place.
 
-Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
-class and [telebot](https://pytba.readthedocs.io/en/latest/index.html)
+Here, %mddoclink(api,messengers.telegram.interface,LongpollingInterface)
+class and [python-telegram-bot](https://docs.python-telegram-bot.org/)
 library are used for accessing telegram API in polling mode.
 
 Telegram API token is required to access telegram API.
 """
 
-# %pip install dff[telegram]
+# %pip install chatsky[telegram]
 
 # %%
 import os
 
-from dff.script import conditions as cnd
-from dff.script import labels as lbl
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import PollingTelegramInterface
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import is_interactive_mode
+from chatsky import (
+    RESPONSE,
+    TRANSITIONS,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+)
+from chatsky.messengers.telegram import LongpollingInterface
+from chatsky.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
 """
-In order to integrate your script with Telegram, you need an instance of
-`TelegramMessenger` class and one of the following interfaces:
-`PollingMessengerInterface` or `WebhookMessengerInterface`.
+In order to integrate your script with Telegram, you need an instance of the
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface) class.
+Two of its child subclasses that can be instantiated
+are %mddoclink(api,messengers.telegram.interface,LongpollingInterface) and
+%mddoclink(api,messengers.telegram.interface,WebhookInterface).
+The latter requires a webserver, so here we use long polling interface.
 
-`TelegramMessenger` encapsulates the bot logic. Like Telebot,
-`TelegramMessenger` only requires a token to run. However, all parameters
-from the Telebot class can be passed as keyword arguments.
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface)
+encapsulates the bot logic. The only required
+argument for a bot to run is a token. Some other parameters
+(such as host, port, interval, etc.) can be passed as keyword arguments
+(for their specs see [documentations of the child subclasses](
+%doclink(api,messengers.telegram.interface)
+).
 
-The two interfaces connect the bot to Telegram. They can be passed directly
-to the DFF `Pipeline` instance.
+Either of the two interfaces connect the bot to Telegram.
+They can be passed directly to a Chatsky `Pipeline` instance.
+
+
+<div class="alert alert-info">
+
+Note
+
+You can also import `LongpollingInterface`
+under the alias of `TelegramInterface` from `chatsky.messengers`:
+
+```python
+from chatsky.messengers import TelegramInterface
+```
+
+</div>
 """
 
 
@@ -44,33 +69,30 @@ to the DFF `Pipeline` instance.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
         },
         "greeting_node": {
-            RESPONSE: Message("Hi"),
-            TRANSITIONS: {lbl.repeat(): cnd.true()},
+            RESPONSE: "Hi",
+            TRANSITIONS: [Tr(dst=dst.Current())],
         },
         "fallback_node": {
-            RESPONSE: Message("Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            RESPONSE: "Please, repeat the request",
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
         },
     }
 }
 
-# this variable is only for testing
-happy_path = (
-    (Message("/start"), Message("Hi")),
-    (Message("Hi"), Message("Hi")),
-    (Message("Bye"), Message("Hi")),
-)
+
+# %%
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
-interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
-
-
-# %%
-pipeline = Pipeline.from_script(
+pipeline = Pipeline(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
@@ -79,10 +101,7 @@ pipeline = Pipeline.from_script(
 )
 
 
-def main():
-    pipeline.run()
-
-
-if __name__ == "__main__" and is_interactive_mode():
-    # prevent run during doc building
-    main()
+if __name__ == "__main__":
+    if is_interactive_mode():
+        # prevent run during doc building
+        pipeline.run()

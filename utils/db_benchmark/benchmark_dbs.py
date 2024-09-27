@@ -7,7 +7,7 @@ This module contains config presets for benchmarks.
 from pathlib import Path
 from platform import system
 
-from dff.utils.db_benchmark import benchmark_all, basic_configurations
+from chatsky.utils.db_benchmark import benchmark_all, basic_configurations
 
 
 # benchmarks will be saved to this directory

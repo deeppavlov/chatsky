@@ -5,23 +5,22 @@
 The following tutorial shows `pipeline` asynchronous
 service and service group usage.
 
-Here, %mddoclink(api,pipeline.service.group,ServiceGroup)s
+Here, %mddoclink(api,core.service.group,ServiceGroup)s
 are shown for advanced and asynchronous data pre- and postprocessing.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
 
-from dff.pipeline import Pipeline, ACTOR
+from chatsky import Pipeline
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
-    run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """
@@ -50,16 +49,13 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [time_consuming_service for _ in range(0, 10)],
-        ACTOR,
-    ],
+    "pre_services": [time_consuming_service for _ in range(0, 10)],
 }
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

@@ -1,8 +1,8 @@
-from docs.source.utils.notebook import py_percent_to_notebook
 from docs.source.utils.generate_tutorials import generate_tutorial_links_for_notebook_creation
 from docs.source.utils.link_misc_files import link_misc_files
 from docs.source.utils.regenerate_apiref import regenerate_apiref
 from pathlib import Path
+
 
 def setup(root_dir: str, output_dir: str):
     link_misc_files(
@@ -32,7 +32,7 @@ def setup(root_dir: str, output_dir: str):
                     ("responses", "Responses"),
                 ],
             ),
-            ("tutorials.utils", "Utils"),
+            ("tutorials.slots", "Slots"),
             ("tutorials.stats", "Stats"),
         ],
         source=(root_dir + "/tutorials"),
@@ -40,14 +40,19 @@ def setup(root_dir: str, output_dir: str):
     )
     regenerate_apiref(
         [
-            ("dff.context_storages", "Context Storages"),
-            ("dff.messengers", "Messenger Interfaces"),
-            ("dff.pipeline", "Pipeline"),
-            ("dff.script", "Script"),
-            ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Testing Utils"),
-            ("dff.utils.turn_caching", "Caching"),
-            ("dff.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.core.service", "Core.Service"),
+            ("chatsky.core", "Core"),
+            ("chatsky.conditions", "Conditions"),
+            ("chatsky.destinations", "Destinations"),
+            ("chatsky.responses", "Responses"),
+            ("chatsky.processing", "Processing"),
+            ("chatsky.context_storages", "Context Storages"),
+            ("chatsky.messengers", "Messenger Interfaces"),
+            ("chatsky.slots", "Slots"),
+            ("chatsky.stats", "Stats"),
+            ("chatsky.utils.testing", "Testing Utils"),
+            ("chatsky.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.utils.devel", "Development Utils"),
         ],
         root_dir=root_dir,
     )

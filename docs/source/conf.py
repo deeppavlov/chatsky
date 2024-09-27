@@ -16,10 +16,10 @@ from sphinx_polyversion.git import GitRef
 data = load(globals())  # adds variables `current` and `revisions`
 current: GitRef = data['current']
 
-_distribution_metadata = importlib.metadata.metadata('dff')
+_distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
-copyright = "2023, DeepPavlov"
+copyright = "2022 - 2024, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
@@ -96,15 +96,15 @@ nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
 
-html_logo = "_static/images/logo-simple.svg"
+html_logo = "_static/images/Chatsky-full-dark.svg"
 
 nbsphinx_thumbnails = {
-    "tutorials/*": "_static/images/logo-simple.svg",
+    "tutorials/*": "_static/images/Chatsky-min-light.svg",
 }
 
 html_context = {
     "github_user": "deeppavlov",
-    "github_repo": "dialog_flow_framework",
+    "github_repo": "chatsky",
     "github_version": "master",
     "doc_path": "docs/source",
 }
@@ -133,10 +133,6 @@ if LOCAL_BUILD:
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
-    "logo": {
-        "alt_text": "DFF logo (simple and nice)",
-        "text": "Dialog Flow Framework",
-    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
@@ -152,7 +148,7 @@ html_theme_options = {
         },
         {
             "name": "GitHub",
-            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "url": "https://github.com/deeppavlov/chatsky",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
@@ -168,7 +164,7 @@ html_theme_options = {
 }
 
 favicons = [
-    {"href": "images/logo-dff.svg"},
+    {"href": "images/Chatsky-min-light.svg"},
 ]
 
 
@@ -176,6 +172,7 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": False,
     "private-members": True,
+    "special-members": "__call__",
     "member-order": "bysource",
-    "exclude-members": "_abc_impl, model_fields",
+    "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }

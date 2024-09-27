@@ -11,60 +11,68 @@ This tutorial is a more advanced version of the
 ).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import json
 import logging
 import urllib.request
 
-from dff.script import Context
-from dff.messengers.common import CLIMessengerInterface
-from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
-from dff.utils.testing.common import (
+from chatsky import Context, Pipeline
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.core.service import Service, ServiceRuntimeInfo
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 
 
 # %% [markdown]
 """
-When Pipeline is created using `from_dict` method,
-pipeline should be defined as `PipelineBuilder` objects
-(defined in `types` module).
-These objects are dictionaries of particular structure:
+When Pipeline is created using Pydantic's `model_validate` method
+or `Pipeline`'s constructor method, pipeline should be
+defined as a dictionary of a particular structure:
 
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
         (dictionary or a `DBContextStorage` instance).
-* `services` (required) - A `ServiceGroupBuilder` object,
-        basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
+* `pre-services` - A `ServiceGroup` object,
+        basically a list of `Service` objects or more `ServiceGroup` objects,
         see tutorial 4.
-* `wrappers` - A list of pipeline wrappers, see tutorial 7.
+* `post-services` - A `ServiceGroup` object,
+        basically a list of `Service` objects or more `ServiceGroup` objects,
+        see tutorial 4.
+* `before_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `optimization_warnings` - Whether pipeline asynchronous structure
         should be checked during initialization,
         see tutorial 5.
 
-On pipeline execution services from `services` list are run
-without difference between pre- and postprocessors.
-If "ACTOR" constant is not found among `services` pipeline creation fails.
-There can be only one "ACTOR" constant in the pipeline.
-ServiceBuilder object can be defined either with callable (see tutorial 2) or
-with dict of structure / object with following constructor arguments:
+On pipeline execution services from
+`components` = 'pre-services' + actor + 'post-services'
+list are run without difference between pre- and postprocessors.
+`Service` object can be defined either with callable
+(see tutorial 2) or with dict of structure / `Service` object
+ with following constructor arguments:
 
-* `handler` (required) - ServiceBuilder,
-        if handler is an object or a dict itself,
-        it will be used instead of base ServiceBuilder.
-    NB! Fields of nested ServiceBuilder will be overridden
-        by defined fields of the base ServiceBuilder.
-* `wrappers` - a list of service wrappers, see tutorial 7.
+
+* `handler` (required) - ServiceFunction.
+* `before_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects or
+        a `ComponentExtraHandler` object.
+        See tutorials 6 and 7.
 * `timeout` - service timeout, see tutorial 5.
 * `asynchronous` - whether or not this service _should_ be asynchronous
         (keep in mind that not all services _can_ be asynchronous),
@@ -78,11 +86,10 @@ Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
 
-Here pipeline contains 4 services,
-defined in 4 different ways with different signatures.
+Here pipeline contains 3 services,
+defined in 3 different ways with different signatures.
 First two of them write sample feature detection data to `ctx.misc`.
 The first uses a constant expression and the second fetches from `example.com`.
-Third one is "ACTOR" constant (it acts like a _special_ service here).
 Final service logs `ctx.misc` dict.
 """
 
@@ -120,8 +127,7 @@ def postprocess(ctx: Context, pl: Pipeline):
         f"resulting misc looks like:"
         f"{json.dumps(ctx.misc, indent=4, default=str)}"
     )
-    fallback_flow, fallback_node, _ = pl.actor.fallback_label
-    received_response = pl.script[fallback_flow][fallback_node].response
+    received_response = pl.script.get_inherited_node(pl.fallback_label).response
     responses_match = received_response == ctx.last_response
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
@@ -141,29 +147,21 @@ pipeline_dict = {
     #     `prompt_request` - a string that will be displayed before user input
     #     `prompt_response` - an output prefix string
     "context_storage": {},
-    "components": [
+    "pre_services": [
         {
-            "handler": {
-                "handler": prepreprocess,
-                "name": "silly_service_name",
-            },
+            "handler": prepreprocess,
             "name": "preprocessor",
-        },  # This service will be named `preprocessor`
-        # handler name will be overridden
+        },
         preprocess,
-        ACTOR,
-        Service(
-            handler=postprocess,
-            name="postprocessor",
-        ),
     ],
+    "post_services": Service(handler=postprocess, name="postprocessor"),
 }
 
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

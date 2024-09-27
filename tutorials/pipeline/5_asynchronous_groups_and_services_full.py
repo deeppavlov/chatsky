@@ -11,7 +11,7 @@ This tutorial is a more advanced version of the
 ).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
@@ -19,16 +19,13 @@ import json
 import logging
 import urllib.request
 
-from dff.script import Context
-
-from dff.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo, ACTOR
-
-from dff.utils.testing.common import (
+from chatsky.core.service import ServiceGroup, ServiceRuntimeInfo
+from chatsky import Context, Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +33,7 @@ logger = logging.getLogger(__name__)
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently,
-    some of them (`ACTOR`) can even return `Context` object,
+    some of them can even return `Context` object,
     modifying it.
 In asynchronous service groups all services
     are executed simultaneously and should not return anything,
@@ -54,7 +51,6 @@ If the parameter is not set,
 the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
-ACTOR service is asynchronous.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,
@@ -78,7 +74,8 @@ Service group `service_group_1` is also asynchronous,
 it logs HTTPS requests (from 1 to 15),
     running simultaneously, in random order.
 Service group `pipeline` can't be asynchronous because
-`balanced_group` and ACTOR are synchronous.
+`balanced_group` and `Actor` are synchronous.
+(`Actor` is added into `Pipeline`'s 'components' during it's creation)
 """
 
 
@@ -127,29 +124,28 @@ pipeline_dict = {
     "fallback_label": ("greeting_flow", "fallback_node"),
     "optimization_warnings": True,
     # There are no warnings - pipeline is well-optimized
-    "components": [
-        ServiceGroup(
-            name="balanced_group",
-            asynchronous=False,
-            components=[
-                simple_asynchronous_service,
-                ServiceGroup(
-                    timeout=0.02,
-                    components=[time_consuming_service for _ in range(0, 6)],
-                ),
-                simple_asynchronous_service,
-            ],
-        ),
-        ACTOR,
+    "pre_services": ServiceGroup(
+        name="balanced_group",
+        requested_async_flag=False,
+        components=[
+            simple_asynchronous_service,
+            ServiceGroup(
+                timeout=0.02,
+                components=[time_consuming_service for _ in range(0, 6)],
+            ),
+            simple_asynchronous_service,
+        ],
+    ),
+    "post_services": [
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],
 }
 
 # %%
-pipeline = Pipeline.from_dict(pipeline_dict)
+pipeline = Pipeline.model_validate(pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

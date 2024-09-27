@@ -2,26 +2,18 @@ import importlib
 
 import pytest
 
-from dff.script import Context
-from dff.pipeline import Pipeline
-from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from chatsky.core import Context, Pipeline
+from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 
 try:
-    from dff.stats import default_extractors
+    from chatsky.stats import default_extractors
 except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context,expected",
-    [
-        (Context(), {"flow": "greeting_flow", "label": "greeting_flow: start_node", "node": "start_node"}),
-        (Context(labels={0: ("a", "b")}), {"flow": "a", "node": "b", "label": "a: b"}),
-    ],
-)
-async def test_get_current_label(context: Context, expected: set):
-    pipeline = Pipeline.from_script({"greeting_flow": {"start_node": {}}}, ("greeting_flow", "start_node"))
+async def test_get_current_label():
+    context = Context.init(("a", "b"))
+    pipeline = Pipeline(script={"greeting_flow": {"start_node": {}}}, start_label=("greeting_flow", "start_node"))
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -30,23 +22,15 @@ async def test_get_current_label(context: Context, expected: set):
         ),
     )
     result = await default_extractors.get_current_label(context, pipeline, runtime_info)
-    assert result == expected
+    assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context",
-    [
-        Context(),
-        Context(labels={0: ("a", "b")}),
-    ],
-)
-async def test_otlp_integration(context, tracer_exporter_and_provider, log_exporter_and_provider):
+async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
-    tutorial_module.dff_instrumentor.uninstrument()
-    tutorial_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    tutorial_module.chatsky_instrumentor.uninstrument()
+    tutorial_module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -54,7 +38,7 @@ async def test_otlp_integration(context, tracer_exporter_and_provider, log_expor
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    _ = await default_extractors.get_current_label(context, tutorial_module.pipeline, runtime_info)
+    _ = await default_extractors.get_current_label(Context.init(("a", "b")), tutorial_module.pipeline, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

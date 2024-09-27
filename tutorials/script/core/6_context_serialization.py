@@ -1,55 +1,51 @@
 # %% [markdown]
 """
 # Core: 6. Context serialization
-
-This tutorial shows context serialization.
-First of all, let's do all the necessary imports from DFF.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Message
-import dff.script.conditions as cnd
+from chatsky import (
+    TRANSITIONS,
+    RESPONSE,
+    Context,
+    Pipeline,
+    Transition as Tr,
+    BaseResponse,
+    MessageInitTypes,
+)
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 
 
-# %% [markdown]
-"""
-This function returns the user request number.
-"""
+# %%
+class RequestCounter(BaseResponse):
+    async def call(self, ctx: Context) -> MessageInitTypes:
+        return f"answer {len(ctx.requests)}"
 
 
 # %%
-def response_handler(ctx: Context, _: Pipeline) -> Message:
-    return Message(f"answer {len(ctx.requests)}")
-
-
-# %%
-# a dialog script
 toy_script = {
     "flow_start": {
         "node_start": {
-            RESPONSE: response_handler,
-            TRANSITIONS: {("flow_start", "node_start"): cnd.true()},
+            RESPONSE: RequestCounter(),
+            TRANSITIONS: [Tr(dst=("flow_start", "node_start"))],
         }
     }
 }
 
 # testing
 happy_path = (
-    (Message("hi"), Message("answer 1")),
-    (Message("how are you?"), Message("answer 2")),
-    (Message("ok"), Message("answer 3")),
-    (Message("good"), Message("answer 4")),
+    ("hi", "answer 1"),
+    ("how are you?", "answer 2"),
+    ("ok", "answer 3"),
+    ("good", "answer 4"),
 )
 
 # %% [markdown]
@@ -77,13 +73,13 @@ def process_response(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script,
+pipeline = Pipeline(
+    script=toy_script,
     start_label=("flow_start", "node_start"),
     post_services=[process_response],
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path)
+    check_happy_path(pipeline, happy_path, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

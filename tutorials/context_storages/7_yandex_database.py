@@ -7,24 +7,23 @@ This is a tutorial on how to use Yandex DataBase.
 See %mddoclink(api,context_storages.ydb,YDBContextStorage) class
 for storing you users' contexts in Yandex database.
 
-DFF uses [ydb.aio](https://ydb.tech/en/docs/)
+Chatsky uses [ydb.aio](https://ydb.tech/en/docs/)
 library for asynchronous access to Yandex DB.
 """
 
-# %pip install dff[ydb]
+# %pip install chatsky[ydb]
 
 # %%
 import os
 
-from dff.context_storages import context_storage_factory
+from chatsky.context_storages import context_storage_factory
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
-    run_interactive_mode,
     is_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 
 # %%
@@ -42,11 +41,11 @@ db_uri = "{}{}".format(
 )
 db = context_storage_factory(db_uri)
 
-pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
 
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()
