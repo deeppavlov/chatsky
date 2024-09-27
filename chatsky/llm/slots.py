@@ -5,27 +5,30 @@ This module contains Slots based on LLMs structured outputs, that can easily inf
 """
 
 from chatsky.slots.slots import ValueSlot, SlotNotExtracted
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field
 from langchain_core.language_models.chat_models import BaseChatModel
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Optional, Dict
+from typing import Union, Optional, Dict
 from chatsky.core import Context, Message
 
-class LLMSlot(ValueSlot, frozen=True):
+class LLMSlot(ValueSlot):
     """
     LLMSlot is a slot type that extract information described in `caption` parameter using LLM.
     """
     caption: str
     model: BaseChatModel
+
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         
         # Dynamically create a Pydantic model based on the caption
-        fields = {"value": self.caption}
-        DynamicModel = create_model("DynamicModel", **fields)
+        class DynamicModel(BaseModel):
+            value: str = Field(description=self.caption)
+
         try:
             structured_model = self.model.with_structured_output(DynamicModel)
         except Exception as e:
-            return Exception(f"This type of model cannot be used for structured output: {e}")
+            return SlotNotExtracted(f"This type of model cannot be used for structured output: {e}")
+        
         try:
             result = await structured_model.ainvoke(request_text)
             return result.value
