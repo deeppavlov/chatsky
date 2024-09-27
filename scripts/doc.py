@@ -6,7 +6,6 @@ from typing import Optional
 import dotenv
 import scripts.patch_sphinx  # noqa: F401
 import sphinx.ext.apidoc as apidoc
-import sphinx.cmd.build as build
 from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 

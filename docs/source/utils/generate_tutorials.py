@@ -1,5 +1,4 @@
 from pathlib import Path
-from shutil import copy
 from typing import List, Optional, Set, Union, Tuple
 
 
@@ -83,7 +82,8 @@ def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
 
 def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) -> List[Path]:
     """
-    Recursively travel through tutorials directory, creating copies for all files under /tmp_dir/docs/source/tutorials/ root.
+    Recursively travel through tutorials directory, creating copies
+    for all files under /tmp_dir/docs/source/tutorials/ root.
     Created copied files have absolute path name matching source file tree structure.
 
     :param source: Tutorials root (usually tutorials/).
@@ -141,6 +141,4 @@ def generate_tutorial_links_for_notebook_creation(
             filtered_links += [link]
 
     for included in include:
-        create_index_file(
-            included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst")
-        )
+        create_index_file(included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"))

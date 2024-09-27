@@ -2859,7 +2859,7 @@ files = [
 
 [[package]]
 name = "jupyterlab-server"
-version = "2.27.4"
+version = "2.27.3"
 description = "A set of server components for JupyterLab and JupyterLab like applications."
 optional = false
 python-versions = ">=3.8"
@@ -3832,8 +3832,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -4328,7 +4328,7 @@ files = [
 
 [[package]]
 name = "pyarrow"
-version = "17.0.2"
+version = "17.0.0"
 description = "Python library for Apache Arrow"
 optional = false
 python-versions = ">=3.8"
@@ -4861,7 +4861,7 @@ files = [
 
 [[package]]
 name = "python-on-whales"
-version = "0.73.1"
+version = "0.73.0"
 description = "A Docker client for Python, designed to be fun and intuitive!"
 optional = false
 python-versions = "<4,>=3.8"
@@ -7037,4 +7037,4 @@ ydb = ["six", "ydb"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1,!=3.9.7"
-content-hash = "511348f67731d8a26e0a269d3f8f032368a85289cdd4772df378335c57812201"
+content-hash = "bb7959496a75564782f4fa4eba7879a2db721bfb5ba8f26a22967d6cccbf15c2"
