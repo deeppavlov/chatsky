@@ -56,10 +56,16 @@ def call_logger_factory():
 
 
 async def test_basic_functions(context, manager, log_event_catcher):
+    await proc.Extract("0", "2", "err").wrapped_call(context)
+
+    assert manager.get_extracted_slot("0").value == 4
+    assert manager.is_slot_extracted("1") is False
+    assert isinstance(manager.get_extracted_slot("err").extracted_value, SlotNotExtracted)
+
     proc_logs = log_event_catcher(proc_logger, level=logging.ERROR)
     slot_logs = log_event_catcher(slot_logger, level=logging.ERROR)
 
-    await proc.Extract("0", "2", "err").wrapped_call(context)
+    await proc.Extract("0", "2", "err", success_only=False).wrapped_call(context)
 
     assert manager.get_extracted_slot("0").value == 4
     assert manager.is_slot_extracted("1") is False
@@ -80,16 +86,6 @@ async def test_basic_functions(context, manager, log_event_catcher):
     assert len(proc_logs) == 2
 
     assert await cnd.SlotsExtracted("0", "1", mode="any").wrapped_call(context) is False
-
-
-async def test_extract_all(context, manager, monkeypatch, call_logger_factory):
-    logs, func = call_logger_factory()
-
-    monkeypatch.setattr(SlotManager, "extract_all", func)
-
-    await proc.ExtractAll().wrapped_call(context)
-
-    assert logs == [{"args": (manager, context), "kwargs": {}}]
 
 
 async def test_unset_all(context, manager, monkeypatch, call_logger_factory):

@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from typing import List, Optional, Dict
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AliasChoices
 
 from chatsky.core.script_function import AnyResponse, BaseProcessing
 from chatsky.core.node_label import AbsoluteNodeLabel
@@ -21,48 +21,62 @@ from chatsky.core.transition import Transition
 logger = logging.getLogger(__name__)
 
 
-class Node(BaseModel):
+class Node(BaseModel, extra="forbid"):
     """
     Node is a basic element of the dialog graph.
 
     Usually used to represent a specific state of a conversation.
     """
 
-    transitions: List[Transition] = Field(default_factory=list)
+    transitions: List[Transition] = Field(
+        validation_alias=AliasChoices("transitions", "TRANSITIONS"), default_factory=list
+    )
     """List of transitions possible from this node."""
-    response: Optional[AnyResponse] = Field(default=None)
+    response: Optional[AnyResponse] = Field(validation_alias=AliasChoices("response", "RESPONSE"), default=None)
     """Response produced when this node is entered."""
-    pre_transition: Dict[str, BaseProcessing] = Field(default_factory=dict)
+    pre_transition: Dict[str, BaseProcessing] = Field(
+        validation_alias=AliasChoices("pre_transition", "PRE_TRANSITION"), default_factory=dict
+    )
     """
     A dictionary of :py:class:`.BaseProcessing` functions that are executed before transitions are processed.
     Keys of the dictionary act as names for the processing functions.
     """
-    pre_response: Dict[str, BaseProcessing] = Field(default_factory=dict)
+    pre_response: Dict[str, BaseProcessing] = Field(
+        validation_alias=AliasChoices("pre_response", "PRE_RESPONSE"), default_factory=dict
+    )
     """
     A dictionary of :py:class:`.BaseProcessing` functions that are executed before response is processed.
     Keys of the dictionary act as names for the processing functions.
     """
-    misc: dict = Field(default_factory=dict)
+    misc: dict = Field(validation_alias=AliasChoices("misc", "MISC"), default_factory=dict)
     """
     A dictionary that is used to store metadata about the node.
 
     Can be accessed at runtime via :py:attr:`~chatsky.core.context.Context.current_node`.
     """
 
-    def merge(self, other: Node):
+    def inherit_from_other(self, other: Node):
         """
-        Merge another node into this one:
+        Inherit properties from another node into this one:
 
-        - Prepend :py:attr:`transitions` of the other node;
-        - Replace response if ``other.response`` is not ``None``;
-        - Update :py:attr:`pre_transition`, :py:attr:`pre_response` and :py:attr:`misc` dictionaries.
+        - Extend ``self.transitions`` with :py:attr:`transitions` of the other node;
+        - Replace response with ``other.response`` if ``self.response`` is ``None``;
+        - Dictionaries (:py:attr:`pre_transition`, :py:attr:`pre_response` and :py:attr:`misc`)
+          are appended to this node's dictionaries except for the repeating keys.
+          For example, ``inherit_from_other({1: 1, 3: 3}, {1: 0, 2: 2}) == {1: 1, 3: 3, 2: 2}``.
+
+        Basically, only non-conflicting properties of ``other`` are inherited.
         """
-        self.transitions = [*other.transitions, *self.transitions]
-        if other.response is not None:
+
+        def merge_dicts(first: dict, second: dict):
+            first.update({k: v for k, v in second.items() if k not in first})
+
+        self.transitions.extend(other.transitions)
+        if self.response is None:
             self.response = other.response
-        self.pre_transition.update(**other.pre_transition)
-        self.pre_response.update(**other.pre_response)
-        self.misc.update(**other.misc)
+        merge_dicts(self.pre_transition, other.pre_transition)
+        merge_dicts(self.pre_response, other.pre_response)
+        merge_dicts(self.misc, other.misc)
         return self
 
 
@@ -72,8 +86,13 @@ class Flow(BaseModel, extra="allow"):
     This is used to group them by a specific purpose.
     """
 
-    local_node: Node = Field(alias="local", default_factory=Node)
-    """Node from which all other nodes in this Flow inherit properties according to :py:meth:`Node.merge`."""
+    local_node: Node = Field(
+        validation_alias=AliasChoices("local", "LOCAL", "local_node", "LOCAL_NODE"), default_factory=Node
+    )
+    """
+    Node from which all other nodes in this Flow inherit properties
+    according to :py:meth:`Node.inherit_from_other`.
+    """
     __pydantic_extra__: Dict[str, Node]
 
     @property
@@ -100,8 +119,13 @@ class Script(BaseModel, extra="allow"):
     It represents an entire dialog graph.
     """
 
-    global_node: Node = Field(alias="global", default_factory=Node)
-    """Node from which all other nodes in this Script inherit properties according to :py:meth:`Node.merge`."""
+    global_node: Node = Field(
+        validation_alias=AliasChoices("global", "GLOBAL", "global_node", "GLOBAL_NODE"), default_factory=Node
+    )
+    """
+    Node from which all other nodes in this Script inherit properties
+    according to :py:meth:`Node.inherit_from_other`.
+    """
     __pydantic_extra__: Dict[str, Flow]
 
     @property
@@ -134,14 +158,14 @@ class Script(BaseModel, extra="allow"):
 
     def get_inherited_node(self, label: AbsoluteNodeLabel) -> Optional[Node]:
         """
-        Return a new node that inherits (using :py:meth:`Node.merge`)
-        properties from :py:attr:`Script.global_node`, :py:attr:`Flow.local_node`
-        and :py:class`Node`.
+        Return a new node that inherits (using :py:meth:`Node.inherit_from_other`)
+        properties from :py:class:`Node`, :py:attr:`Flow.local_node`
+        and :py:attr:`Script.global_node` (in that order).
 
         Flow and node are determined by ``label``.
 
         This is essentially a copy of the node specified by ``label``,
-        that inherits properties from `global_node` and `local_node`.
+        that inherits properties from ``local_node`` and ``global_node``.
 
         :return: A new node or ``None`` if it doesn't exist.
         """
@@ -154,20 +178,24 @@ class Script(BaseModel, extra="allow"):
 
         inheritant_node = Node()
 
-        return inheritant_node.merge(self.global_node).merge(flow.local_node).merge(node)
+        return (
+            inheritant_node.inherit_from_other(node)
+            .inherit_from_other(flow.local_node)
+            .inherit_from_other(self.global_node)
+        )
 
 
-GLOBAL = "global"
+GLOBAL = "GLOBAL"
 """Key for :py:attr:`~chatsky.core.script.Script.global_node`."""
-LOCAL = "local"
+LOCAL = "LOCAL"
 """Key for :py:attr:`~chatsky.core.script.Flow.local_node`."""
-TRANSITIONS = "transitions"
+TRANSITIONS = "TRANSITIONS"
 """Key for :py:attr:`~chatsky.core.script.Node.transitions`."""
-RESPONSE = "response"
+RESPONSE = "RESPONSE"
 """Key for :py:attr:`~chatsky.core.script.Node.response`."""
-MISC = "misc"
+MISC = "MISC"
 """Key for :py:attr:`~chatsky.core.script.Node.misc`."""
-PRE_RESPONSE = "pre_response"
+PRE_RESPONSE = "PRE_RESPONSE"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_response`."""
-PRE_TRANSITION = "pre_transition"
+PRE_TRANSITION = "PRE_TRANSITION"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_transition`."""

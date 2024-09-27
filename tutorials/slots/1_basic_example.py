@@ -78,8 +78,6 @@ The slots module provides several functions for managing slots in-script:
     Condition for checking if specified slots are extracted.
 - %mddoclink(api,processing.slots,Extract):
     A processing function that extracts specified slots.
-- %mddoclink(api,processing.slots,ExtractAll):
-    A processing function that extracts all slots.
 - %mddoclink(api,processing.slots,Unset):
     A processing function that marks specified slots as not extracted,
     effectively resetting their state.

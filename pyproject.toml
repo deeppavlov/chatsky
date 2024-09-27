@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chatsky"
-version = "0.8.0"
+version = "1.0.0rc1"
 description = "Chatsky is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
 license = "Apache-2.0"
 authors = [
@@ -74,6 +74,7 @@ python-telegram-bot = { version = "~=21.3", extras = ["all"], optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
+pyyaml = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -87,6 +88,7 @@ ydb = ["ydb", "six"]
 telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
+yaml = ["pyyaml"]
 
 
 [tool.poetry.group.lint]
@@ -224,5 +226,4 @@ concurrency = [
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
-    "raise RuntimeError",
     ]

@@ -1,4 +1,4 @@
-# Chatsky
+![Chatsky](https://raw.githubusercontent.com/deeppavlov/chatsky/master/docs/source/_static/images/Chatsky-full-dark.svg)
 
 [![Documentation Status](https://github.com/deeppavlov/chatsky/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/chatsky)
 [![Codestyle](https://github.com/deeppavlov/chatsky/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/codestyle.yml)
@@ -6,7 +6,7 @@
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/chatsky/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
-[![Downloads](https://pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
+[![Downloads](https://static.pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
 
 Chatsky allows you to develop conversational services.
 Chatsky offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the Chatsky pipeline.

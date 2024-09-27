@@ -146,14 +146,34 @@ toy_script = {
 }
 
 
+# %% [markdown]
+"""
+The order of execution for processing functions is as follows:
+
+1. All node-specific functions are executed in the order of definition;
+2. All local functions are executed in the order of definition except those with
+   keys matching to previously executed functions;
+3. All global functions are executed in the order of definition
+   except those with keys matching to previously executed functions.
+
+That means that if both global and local nodes
+define a processing function with key "processing_name",
+only the one inside the local node will be executed.
+
+This demonstrated in the happy path below
+(the first prefix in the text is the last one to execute):
+"""
+
+
+# %%
 # testing
 happy_path = (
-    (Message(), "l3_local: l2_local: l1_global: first"),
+    (Message(), "l1_global: l3_local: l2_local: first"),
     (Message(), "l3_local: l2_local: l1_step_1: second"),
-    (Message(), "l3_local: l2_step_2: l1_global: third"),
-    (Message(), "l3_step_3: l2_local: l1_global: fourth"),
-    (Message(), "l4_step_4: l3_local: l2_local: l1_global: fifth"),
-    (Message(), "l3_local: l2_local: l1_global: first"),
+    (Message(), "l1_global: l3_local: l2_step_2: third"),
+    (Message(), "l1_global: l2_local: l3_step_3: fourth"),
+    (Message(), "l1_global: l3_local: l2_local: l4_step_4: fifth"),
+    (Message(), "l1_global: l3_local: l2_local: first"),
 )
 
 

@@ -6,7 +6,7 @@ This module defines classes for addressing nodes.
 
 from __future__ import annotations
 
-from typing import Optional, Union, Tuple, TYPE_CHECKING
+from typing import Optional, Union, Tuple, List, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 
 from pydantic import BaseModel, model_validator, ValidationInfo
@@ -47,7 +47,7 @@ class NodeLabel(BaseModel, frozen=True):
         Allow instantiating of this class from:
 
         - A single string (node name). Also attempt to get the current flow name from context.
-        - A tuple of two strings (flow and node name).
+        - A tuple or list of two strings (flow and node name).
         """
         if isinstance(data, str):
             flow_name = None
@@ -55,11 +55,13 @@ class NodeLabel(BaseModel, frozen=True):
             if isinstance(context, dict):
                 flow_name = _get_current_flow_name(context.get("ctx"))
             return {"flow_name": flow_name, "node_name": data}
-        elif isinstance(data, tuple):
+        elif isinstance(data, (tuple, list)):
             if len(data) == 2 and isinstance(data[0], str) and isinstance(data[1], str):
                 return {"flow_name": data[0], "node_name": data[1]}
             else:
-                raise ValueError(f"Cannot validate NodeLabel from {data!r}: tuple should contain 2 strings.")
+                raise ValueError(
+                    f"Cannot validate NodeLabel from {data!r}: {type(data).__name__} should contain 2 strings."
+                )
         return data
 
 
@@ -67,6 +69,7 @@ NodeLabelInitTypes: TypeAlias = Union[
     NodeLabel,
     Annotated[str, "node_name, flow name equal to current flow's name"],
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
+    Annotated[List[str], "list of two strings (flow_name and node_name)"],
     Annotated[dict, "dict following the NodeLabel data model"],
 ]
 """Types that :py:class:`~.NodeLabel` can be validated from."""
@@ -124,6 +127,7 @@ AbsoluteNodeLabelInitTypes: TypeAlias = Union[
     AbsoluteNodeLabel,
     NodeLabel,
     Tuple[Annotated[str, "flow_name"], Annotated[str, "node_name"]],
+    Annotated[List[str], "list of two strings (flow_name and node_name)"],
     Annotated[dict, "dict following the AbsoluteNodeLabel data model"],
 ]
 """Types that :py:class:`~.AbsoluteNodeLabel` can be validated from."""
