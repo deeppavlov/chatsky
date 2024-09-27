@@ -58,8 +58,10 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     """
     name: Optional[str] = None
     """
-    Component name (should be unique in a single :py:class:`~chatsky.core.service.group.ServiceGroup`),
-    should not be blank or contain the ``.`` character.
+    Name of the component. Defaults to :py:attr:`.computed_name` potentially modified by
+    :py:func:`~chatsky.core.utils.rename_component_incrementing`.
+
+    See :py:meth:`.validate_name` for rules.
     """
     path: Optional[str] = None
     """
@@ -68,7 +70,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
 
     @field_validator("name")
     @classmethod
-    def __pipeline_component_name_validator__(cls, name: str):
+    def validate_name(cls, name: str):
         """
         Validate this component's name:
 
@@ -90,7 +92,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         """
         Method for component runtime state setting, state is preserved in :py:attr:`.Context.framework_data`.
 
-        :param ctx: :py:class:`~.Context` to keep state in.
+        :param ctx: :py:class:`.Context` to keep state in.
         :param value: State to set.
         """
         ctx.framework_data.service_states[self.path].execution_status = value
@@ -136,6 +138,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
                 await self.before_handler(ctx, self)
 
                 self._set_state(ctx, ComponentExecutionState.RUNNING)
+                logger.debug(f"Running component {self.path!r}")
                 result = await self.run_component(ctx)
                 if isinstance(result, ComponentExecutionState):
                     self._set_state(ctx, result)

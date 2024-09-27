@@ -106,7 +106,7 @@ class ExtraHandlerRuntimeInfo(BaseModel):
 
     stage: ExtraHandlerType
     """
-    :py:data:`.ExtraHandlerType` -- either "BEFORE" or "AFTER".
+    :py:class:`.ExtraHandlerType` -- either "BEFORE" or "AFTER".
     """
     component: PipelineComponent
     """

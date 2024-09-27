@@ -28,9 +28,9 @@ class Service(PipelineComponent):
     This class represents a service.
     """
 
-    handler: Union[BaseProcessing, Callable] = None
+    handler: Union[BaseProcessing, Callable[[Context], None]] = None
     """
-    A :py:data:`~.ServiceFunction` or an instance of `BaseProcessing`.
+    Function that represents this service.
     """
     # Repeating inherited fields for better documentation.
     before_handler: BeforeHandler = Field(default_factory=BeforeHandler)
@@ -53,9 +53,8 @@ class Service(PipelineComponent):
 
     async def call(self, ctx: Context) -> None:
         """
-        A placeholder method which the user can redefine in their own derivative of `Service`.
-        This allows direct access to the `self` object, from which they could
-        extract information about this :py:class:`~chatsky.core.service.Service`.
+        A placeholder method which the user can redefine in their own derivative of :py:class:`.Service`.
+        This allows direct access to the ``self`` object and all its fields.
 
         :param ctx: Current dialog context.
         """
@@ -97,9 +96,8 @@ def to_service(
     name: Optional[str] = None,
 ):
     """
-    Function for decorating a function as a Service.
-    Returns a Service, constructed from this function (taken as a handler).
-    All arguments are passed directly to `Service` constructor.
+    Return a function decorator that returns a :py:class:`Service` with the
+    given parameters.
     """
     before_handler = BeforeHandler() if before_handler is None else before_handler
     after_handler = AfterHandler() if after_handler is None else after_handler

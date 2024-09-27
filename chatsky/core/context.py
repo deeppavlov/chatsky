@@ -56,7 +56,10 @@ class ContextError(Exception):
 
 class ServiceState(BaseModel, arbitrary_types_allowed=True):
     execution_status: ComponentExecutionState = Field(default="NOT_RUN")
-    "Execution status of this pipeline service. Cleared at the end of every turn."
+    """
+    :py:class:`.ComponentExecutionState` of this pipeline service.
+    Cleared at the end of every turn.
+    """
     finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
     """
     Asyncio `Event` which can be awaited until this service finishes.
@@ -70,7 +73,10 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
 
     service_states: Dict[str, ServiceState] = Field(default_factory=dict, exclude=True)
-    "Statuses of all the pipeline services. Cleared at the end of every turn."
+    """
+    Dictionary containing :py:class:`.ServiceState` of all the pipeline components.
+    Cleared at the end of every turn.
+    """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
     A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.

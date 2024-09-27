@@ -2,11 +2,9 @@
 Instrumentor
 -------------
 This modules contains the :py:class:`~OtelInstrumentor` class that implements
-Opentelemetry's `BaseInstrumentor` interface and allows for automated
+Opentelemetry's ``BaseInstrumentor`` interface and allows for automated
 instrumentation of Chatsky applications,
 e.g. for automated logging and log export.
-
-For detailed reference, see `~OtelInstrumentor` class.
 """
 
 import asyncio
@@ -45,21 +43,21 @@ INSTRUMENTS = ["chatsky"]
 class OtelInstrumentor(BaseInstrumentor):
     """
     Utility class for instrumenting Chatsky-related functions
-    that implements the :py:class:`~BaseInstrumentor` interface.
-    :py:meth:`~instrument` and :py:meth:`~uninstrument` methods
+    that implements the :py:class:`.BaseInstrumentor` interface.
+    :py:meth:`._instrument` and :py:meth:`._uninstrument` methods
     are available to apply and revert the instrumentation effects,
     e.g. enable and disable logging at runtime.
 
     .. code-block::
 
         chatsky_instrumentor = OtelInstrumentor()
-        chatsky_instrumentor.instrument()
-        chatsky_instrumentor.uninstrument()
+        chatsky_instrumentor._instrument()
+        chatsky_instrumentor._uninstrument()
 
     Opentelemetry provider instances can be optionally passed to the class constructor.
     Otherwise, the global logger, tracer and meter providers are leveraged.
 
-    The class implements the :py:meth:`~__call__` method, so that
+    The class implements the :py:meth:`.__call__` method, so that
     regular functions can be decorated using the class instance.
 
     .. code-block::
@@ -147,7 +145,7 @@ class OtelInstrumentor(BaseInstrumentor):
     @decorator
     async def __call__(self, wrapped, _, args, kwargs):
         """
-        Regular functions that match the :py:class:`~chatsky.pipeline.types.ExtraHandlerFunction`
+        Regular functions that match the :py:class:`~chatsky.core.service.types.ExtraHandlerFunction`
         signature can be decorated with the class instance to log the returned value.
         This method implements the logging procedure.
         The returned value is assumed to be `dict` or `NoneType`.

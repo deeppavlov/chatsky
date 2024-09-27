@@ -65,9 +65,7 @@ class ServiceGroup(PipelineComponent):
     @classmethod
     def components_validator(cls, data: Any):
         """
-        Add support for initializing from a `Callable`,
-        and :py:class:`~.PipelineComponent` (such as :py:class:`~.Service`)
-        Casts `components` to `list` if it's not already.
+        Add support for initializing from a list of :py:class:`~.PipelineComponent`.
         """
         if isinstance(data, list):
             result = {"components": data}
@@ -83,7 +81,7 @@ class ServiceGroup(PipelineComponent):
         """
         Run components of this service group.
 
-        If :py:attr:`.fully_concurrent` flag is set to True, all ``components`` will run concurrently
+        If :py:attr:`.fully_concurrent` flag is set to True, all :py:attr:`.components` will run concurrently
         (via ``asyncio.gather``).
 
         Otherwise, all non-concurrent components execute one after another
@@ -123,7 +121,10 @@ class ServiceGroup(PipelineComponent):
 
         :param extra_handler_type: Extra handler type (before or after).
         :param extra_handler: Function to add as an extra handler.
+        :type extra_handler: :py:data:`.ExtraHandlerFunction`
         :param condition: Condition function to determine if extra handler should be added to specific subcomponents.
+            Defaults to a function returning False.
+        :type condition: :py:data:`.ExtraHandlerConditionFunction`
         """
         super().add_extra_handler(extra_handler_type, extra_handler)
         for service in self.components:

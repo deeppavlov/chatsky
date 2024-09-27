@@ -8,7 +8,7 @@ of the framework and are organized into sections.
 
 The Context Storages section describes how to use context storages in Chatsky.
 
-The Messengers section covers how to use the Telegram messenger with Chatsky.
+The Messengers section covers how to use the Telegram messenger with Chatsky and how to create web interface.
 
 The Service section teaches how to use Services: objects that execute
 before or after the main part.

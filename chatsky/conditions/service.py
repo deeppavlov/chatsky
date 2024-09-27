@@ -18,7 +18,7 @@ from chatsky.core.service.types import (
 
 class ServiceFinished(BaseCondition):
     """
-    Check if a :py:class:`~.chatsky.core.service.Service` was executed successfully.
+    Check if a :py:class:`~chatsky.core.service.service.Service` was executed successfully.
     """
 
     path: str
