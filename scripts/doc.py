@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 import shutil
 from typing import Optional
@@ -56,7 +57,8 @@ def docs(docker: Optional[DockerClient]):
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         poly_path = "docs/source/poly.py"
-        poly_main([poly_path, poly_path])
+        sys.argv = [poly_path, poly_path]
+        poly_main()
         exit(0)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
