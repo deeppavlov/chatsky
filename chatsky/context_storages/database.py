@@ -79,6 +79,18 @@ class DBContextStorage(ABC):
         self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
         self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
 
+    def _get_config_for_field(self, field_name: str) -> FieldConfig:
+        if field_name == self.labels_config.name:
+            return self.labels_config
+        elif field_name == self.requests_config.name:
+            return self.requests_config
+        elif field_name == self.responses_config.name:
+            return self.responses_config
+        elif field_name == self.misc_config.name:
+            return self.misc_config
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
     @abstractmethod
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         """

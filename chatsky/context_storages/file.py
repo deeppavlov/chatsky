@@ -63,6 +63,23 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
+    async def _get_elems_for_field_name(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+        storage = await self._load()
+        if field_name == self.misc_config.name:
+            return [(k, v) for c, k, v in storage.misc if c == ctx_id]
+        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+            return [(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name ]
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
+    def _get_table_for_field_name(self, storage: SerializableStorage, field_name: str) -> List[Tuple]:
+        if field_name == self.misc_config.name:
+            return storage.misc
+        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+            return storage.turns
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         return (await self._load()).main.get(ctx_id, None)
 
@@ -74,67 +91,38 @@ class FileContextStorage(DBContextStorage, ABC):
     async def delete_main_info(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)
-        storage.turns = [t for t in storage.turns if t[0] != ctx_id]
-        storage.misc = [m for m in storage.misc if m[0] != ctx_id]
+        storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
+        storage.misc = [(c, k, v) for c, k, v in storage.misc if c != ctx_id]
         await self._save(storage)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        storage = await self._load()
-        if field_name == self.misc_config.name:
-            select = [m for m in storage.misc if m[0] == ctx_id]
-            config = self.misc_config
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
-            select = [t for t in storage.turns if t[0] == ctx_id and t[1] == field_name]
-            select = sorted(select, key=lambda x: x[2], reverse=True)
-            config = [c for c in (self.labels_config, self.requests_config, self.responses_config) if c.name == field_name][0]
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
+        config = self._get_config_for_field(field_name)
+        select = await self._get_elems_for_field_name(ctx_id, field_name)
+        if field_name != self.misc_config.name:
+            select = sorted(select, key=lambda e: e[0], reverse=True)
         if isinstance(config.subscript, int):
             select = select[:config.subscript]
         elif isinstance(config.subscript, Set):
-            select = [e for e in select if e[1] in config.subscript]
-        return [(e[-2], e[-1]) for e in select]
+            select = [(k, v) for k, v in select if k in config.subscript]
+        return select
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        storage = await self._load()
-        if field_name == self.misc_config.name:
-            return [m[1] for m in storage.misc if m[0] == ctx_id]
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
-            return [t[2] for t in storage.turns if t[0] == ctx_id and t[1] == field_name]
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
+        return [k for k, _ in await self._get_elems_for_field_name(ctx_id, field_name)]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
-        storage = await self._load()
-        if field_name == self.misc_config.name:
-            return [m[2] for m in storage.misc if m[0] == ctx_id and m[1] in keys]
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
-            return [t[3] for t in storage.turns if t[0] == ctx_id and t[1] == field_name and t[2] in keys]
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
+        return [v for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         storage = await self._load()
-        while len(items) > 0:
-            nx = items.pop(0)
-            if field_name == self.misc_config.name:
-                upd = (ctx_id, nx[0], nx[1])
-                for i in range(len(storage.misc)):
-                    if storage.misc[i][0] == ctx_id and storage.misc[i][-2] == nx[0]:
-                        storage.misc[i] = upd
-                        break
-                else:
-                    storage.misc += [upd]
-            elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
-                upd = (ctx_id, field_name, nx[0], nx[1])
-                for i in range(len(storage.turns)):
-                    if storage.turns[i][0] == ctx_id and storage.turns[i][1] == field_name and storage.turns[i][-2] == nx[0]:
-                        storage.turns[i] = upd
-                        break
-                else:
-                    storage.turns += [upd]
+        table = self._get_table_for_field_name(storage, field_name)
+        for k, v in items:
+            upd = (ctx_id, k, v) if field_name == self.misc_config.name else (ctx_id, field_name, k, v)
+            for i in range(len(table)):
+                if table[i][:-1] == upd[:-1]:
+                    table[i] = upd
+                    break
             else:
-                raise ValueError(f"Unknown field name: {field_name}!")
+                table += [upd]
         await self._save(storage)
 
     async def clear_all(self) -> None:

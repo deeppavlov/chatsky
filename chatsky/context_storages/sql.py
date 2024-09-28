@@ -28,13 +28,11 @@ try:
         MetaData,
         Column,
         LargeBinary,
-        ForeignKey,
         String,
         BigInteger,
         Integer,
         Index,
         Insert,
-        event,
         inspect,
         select,
         delete,
@@ -80,10 +78,6 @@ if not sqlalchemy_available:
 
 def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
-
-
-def _sqlite_pragma_enable_foreign_keys(dbapi_con, con_record):
-    dbapi_con.execute('pragma foreign_keys=ON')
 
 
 def _get_write_limit(dialect: str):
@@ -161,9 +155,6 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        if self.dialect == "sqlite":
-            event.listen(self.engine.sync_engine, "connect", _sqlite_pragma_enable_foreign_keys)
-
         self._metadata = MetaData()
         self._main_table = Table(
             f"{table_name_prefix}_{self._main_table_name}",
@@ -177,7 +168,7 @@ class SQLContextStorage(DBContextStorage):
         self._turns_table = Table(
             f"{table_name_prefix}_{self._turns_table_name}",
             self._metadata,
-            Column(self._id_column_name, ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._id_column_name, String(self._UUID_LENGTH), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self.labels_config.name, LargeBinary(), nullable=True),
             Column(self.requests_config.name, LargeBinary(), nullable=True),
@@ -187,7 +178,7 @@ class SQLContextStorage(DBContextStorage):
         self._misc_table = Table(
             f"{table_name_prefix}_{self.misc_config.name}",
             self._metadata,
-            Column(self._id_column_name, ForeignKey(self._main_table.c[self._id_column_name], ondelete="CASCADE", onupdate="CASCADE"), nullable=False),
+            Column(self._id_column_name, String(self._UUID_LENGTH), nullable=False),
             Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
             Column(self._VALUE_COLUMN, LargeBinary(), nullable=True),
             Index(f"{self.misc_config.name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
@@ -224,7 +215,7 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    def _get_table_field_and_config(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
+    def _get_config_for_field(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
         if field_name == self.labels_config.name:
             return self._turns_table, field_name, self.labels_config
         elif field_name == self.requests_config.name:
@@ -261,13 +252,17 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
 
+    # TODO: use foreign keys instead maybe?
     async def delete_main_info(self, ctx_id: str) -> None:
-        stmt = delete(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
-            await conn.execute(stmt)
+            await asyncio.gather(
+                conn.execute(delete(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self._turns_table).where(self._turns_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self._misc_table).where(self._misc_table.c[self._id_column_name] == ctx_id)),
+            )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, field_name, field_config = self._get_table_field_and_config(field_name)
+        field_table, field_name, field_config = self._get_config_for_field(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[field_name])
         stmt = stmt.where(field_table.c[self._id_column_name] == ctx_id)
         if field_table == self._turns_table:
@@ -280,20 +275,20 @@ class SQLContextStorage(DBContextStorage):
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, _, _ = self._get_table_field_and_config(field_name)
+        field_table, _, _ = self._get_config_for_field(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        field_table, field_name, _ = self._get_table_field_and_config(field_name)
+        field_table, field_name, _ = self._get_config_for_field(field_name)
         stmt = select(field_table.c[field_name])
         stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
         async with self.engine.begin() as conn:
             return [v[0] for v in (await conn.execute(stmt)).fetchall()]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, field_name, _ = self._get_table_field_and_config(field_name)
+        field_table, field_name, _ = self._get_config_for_field(field_name)
         if len(items) == 0:
             return
         if field_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
@@ -318,4 +313,8 @@ class SQLContextStorage(DBContextStorage):
 
     async def clear_all(self) -> None:
         async with self.engine.begin() as conn:
-            await conn.execute(delete(self._main_table))
+            await asyncio.gather(
+                conn.execute(delete(self._main_table)),
+                conn.execute(delete(self._turns_table)),
+                conn.execute(delete(self._misc_table))
+            )
