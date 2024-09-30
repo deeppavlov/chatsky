@@ -5,19 +5,13 @@ This module defines functions that allow to delete data in various types of data
 including JSON, MongoDB, Pickle, Redis, Shelve, SQL, and YDB databases.
 """
 
-import os
-
 from chatsky.context_storages import (
     JSONContextStorage,
     MongoContextStorage,
-    PickleContextStorage,
     RedisContextStorage,
-    ShelveContextStorage,
     SQLContextStorage,
     YDBContextStorage,
-    json_available,
     mongo_available,
-    pickle_available,
     redis_available,
     sqlite_available,
     postgres_available,
@@ -26,16 +20,14 @@ from chatsky.context_storages import (
 )
 
 
-async def delete_json(storage: JSONContextStorage):
+async def delete_file(storage: JSONContextStorage):
     """
     Delete all data from a JSON context storage.
 
     :param storage: A JSONContextStorage object.
     """
-    if not json_available:
-        raise Exception("Can't delete JSON database - JSON provider unavailable!")
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
+    if storage.path.exists():
+        storage.path.unlink()
 
 
 async def delete_mongo(storage: MongoContextStorage):
@@ -50,18 +42,6 @@ async def delete_mongo(storage: MongoContextStorage):
         await collection.drop()
 
 
-async def delete_pickle(storage: PickleContextStorage):
-    """
-    Delete all data from a Pickle context storage.
-
-    :param storage: A PickleContextStorage object.
-    """
-    if not pickle_available:
-        raise Exception("Can't delete pickle database - pickle provider unavailable!")
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
-
-
 async def delete_redis(storage: RedisContextStorage):
     """
     Delete all data from a Redis context storage.
@@ -71,16 +51,6 @@ async def delete_redis(storage: RedisContextStorage):
     if not redis_available:
         raise Exception("Can't delete redis database - redis provider unavailable!")
     await storage.clear_async()
-
-
-async def delete_shelve(storage: ShelveContextStorage):
-    """
-    Delete all data from a Shelve context storage.
-
-    :param storage: A ShelveContextStorage object.
-    """
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
 
 
 async def delete_sql(storage: SQLContextStorage):

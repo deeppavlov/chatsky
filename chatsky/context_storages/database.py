@@ -10,6 +10,7 @@ This class implements the basic functionality and can be extended to add additio
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from pathlib import Path
 from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, field_validator, validate_call
@@ -69,7 +70,7 @@ class DBContextStorage(ABC):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
-        self.path = file_path
+        self.path = Path(file_path)
         """`full_path` without a prefix defining db used."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""

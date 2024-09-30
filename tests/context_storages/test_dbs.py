@@ -8,8 +8,6 @@ import pytest
 from chatsky.context_storages import (
     get_protocol_install_suggestion,
     context_storage_factory,
-    json_available,
-    pickle_available,
     postgres_available,
     mysql_available,
     sqlite_available,
@@ -18,9 +16,7 @@ from chatsky.context_storages import (
     ydb_available,
 )
 from chatsky.utils.testing.cleanup_db import (
-    delete_shelve,
-    delete_json,
-    delete_pickle,
+    delete_file,
     delete_mongo,
     delete_redis,
     delete_sql,
@@ -78,13 +74,9 @@ def test_protocol_suggestion(protocol: str, expected: str) -> None:
     "db_kwargs,db_teardown",
     [
         pytest.param({"path": ""}, None, id="memory"),
-        pytest.param({"path": "shelve://{__testing_file__}"}, delete_shelve, id="shelve"),
-        pytest.param({"path": "json://{__testing_file__}"}, delete_json, id="json", marks=[
-            pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
-        ]),
-        pytest.param({"path": "pickle://{__testing_file__}"}, delete_pickle, id="pickle", marks=[
-            pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
-        ]),
+        pytest.param({"path": "shelve://{__testing_file__}"}, delete_file, id="shelve"),
+        pytest.param({"path": "json://{__testing_file__}"}, delete_file, id="json"),
+        pytest.param({"path": "pickle://{__testing_file__}"}, delete_file, id="pickle"),
         pytest.param({
             "path": "mongodb://{MONGO_INITDB_ROOT_USERNAME}:{MONGO_INITDB_ROOT_PASSWORD}@"
                     "localhost:27017/{MONGO_INITDB_ROOT_USERNAME}"
