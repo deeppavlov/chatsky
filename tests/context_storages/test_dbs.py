@@ -235,7 +235,7 @@ class TestContextStorages:
 
         # Test context main info can be deleted
         await db.update_field_items(testing_context.id, db.requests_config.name, requests_dump)
-        await db.delete_main_info(testing_context.id)
+        await db.delete_context(testing_context.id)
         nothing = await db.load_main_info(testing_context.id)
         requests = await db.load_field_latest(testing_context.id, db.requests_config.name)
         req_keys = await db.load_field_keys(testing_context.id, db.requests_config.name)
@@ -356,7 +356,7 @@ class TestContextStorages:
         # Check whole context storing, deleting and retrieveing
         await testing_context.store()
         context = await Context.connected(db, None, testing_context.id)
-        await db.delete_main_info(testing_context.id)
+        await db.delete_context(testing_context.id)
         assert testing_context == context
 
     async def test_pipeline(self, db: DBContextStorage) -> None:

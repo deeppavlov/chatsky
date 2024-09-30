@@ -157,7 +157,7 @@ class Context(BaseModel):
 
     async def delete(self) -> None:
         if self._storage is not None:
-            await self._storage.delete_main_info(self.id)
+            await self._storage.delete_context(self.id)
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 

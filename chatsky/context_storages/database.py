@@ -107,9 +107,9 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_main_info(self, ctx_id: str) -> None:
+    async def delete_context(self, ctx_id: str) -> None:
         """
-        Delete main information about the context storage.
+        Delete context from context storage.
         """
         raise NotImplementedError
 

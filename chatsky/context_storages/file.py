@@ -75,7 +75,7 @@ class FileContextStorage(DBContextStorage, ABC):
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, fw_data)
         self._save(storage)
 
-    async def delete_main_info(self, ctx_id: str) -> None:
+    async def delete_context(self, ctx_id: str) -> None:
         storage = self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
