@@ -72,9 +72,16 @@ def recursive_setattr(obj, slot_name: SlotName, value):
     parent_slot, _, slot = slot_name.rpartition(".")
 
     if parent_slot:
-        setattr(recursive_getattr(obj, parent_slot), slot, value)
+        parent_obj = recursive_getattr(obj, parent_slot)
+        if isinstance(value, ExtractedGroupSlot):
+            getattr(parent_obj, slot).update(value)
+        else:
+            setattr(parent_obj, slot, value)
     else:
-        setattr(obj, slot, value)
+        if isinstance(value, ExtractedGroupSlot):
+            getattr(obj, slot).update(value)
+        else:
+            setattr(obj, slot, value)
 
 
 class SlotNotExtracted(Exception):
@@ -261,9 +268,11 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     """
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    allow_partially_extracted: bool = False
+    """If True, allows returning a partial dictionary with only successfully extracted slots."""
 
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    def __init__(self, allow_partially_extracted=False, **kwargs):
+        super().__init__(allow_partially_extracted=allow_partially_extracted, **kwargs)
 
     @model_validator(mode="after")
     def __check_extra_field_names__(self):
@@ -279,8 +288,13 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
+        extracted_values = {}
+        for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
+            if child_value.__slot_extracted__ or not self.allow_partially_extracted:
+                extracted_values[child_name] = child_value
+        
         return ExtractedGroupSlot(
-            **{child_name: child_value for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys())}
+            **extracted_values
         )
 
     def init_value(self) -> ExtractedGroupSlot:
