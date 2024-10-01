@@ -17,9 +17,7 @@ from chatsky.slots import RegexpSlot, GroupSlot
 
 from chatsky.utils.testing import (
     check_happy_path,
-    is_interactive_mode,
 )
-import pytest
 
 SLOTS = {
     "person": GroupSlot(
