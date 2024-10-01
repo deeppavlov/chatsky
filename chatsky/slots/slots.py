@@ -292,10 +292,8 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
         for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
             if child_value.__slot_extracted__ or not self.allow_partially_extracted:
                 extracted_values[child_name] = child_value
-        
-        return ExtractedGroupSlot(
-            **extracted_values
-        )
+
+        return ExtractedGroupSlot(**extracted_values)
 
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(

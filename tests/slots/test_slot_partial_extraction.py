@@ -13,13 +13,13 @@ from chatsky import (
 )
 
 from chatsky.slots import RegexpSlot, GroupSlot
-import logging
-logging.basicConfig(level=logging.DEBUG)
+
 
 from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
 )
+import pytest
 
 SLOTS = {
     "person": GroupSlot(
@@ -30,21 +30,17 @@ SLOTS = {
         email=RegexpSlot(
             regexp=r"email is ([a-z@\.A-Z]+)",
             match_group_idx=1,
-        )
+        ),
     ),
     "friend": GroupSlot(
         first_name=RegexpSlot(regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"),
         last_name=RegexpSlot(regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"),
-        allow_partially_extracted=True
-    )
+        allow_partially_extracted=True,
+    ),
 }
 
 script = {
-    GLOBAL: {
-        TRANSITIONS: [
-            Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
-        ]
-    },
+    GLOBAL: {TRANSITIONS: [Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))]},
     "username_flow": {
         LOCAL: {
             PRE_TRANSITION: {"get_slot": proc.Extract("person.username")},
@@ -89,18 +85,14 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter"),
-                    cnd=cnd.SlotsExtracted(
-                        "friend.first_name", "friend.last_name", mode="any"
-                    ),
+                    cnd=cnd.SlotsExtracted("friend.first_name", "friend.last_name", mode="any"),
                     priority=1.2,
                 ),
                 Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
             ],
         },
         "ask": {RESPONSE: "Please, name me one of your friends: (John Doe)"},
-        "repeat_question": {
-            RESPONSE: "Please, name me one of your friends again: (John Doe)"
-        },
+        "repeat_question": {RESPONSE: "Please, name me one of your friends again: (John Doe)"},
     },
     "root": {
         "start": {
@@ -111,14 +103,11 @@ script = {
             TRANSITIONS: [Tr(dst=("username_flow", "ask"))],
         },
         "utter": {
-            RESPONSE: rsp.FilledTemplate(
-                "Your friend is {friend.first_name} {friend.last_name}"
-            ),
+            RESPONSE: rsp.FilledTemplate("Your friend is {friend.first_name} {friend.last_name}"),
             TRANSITIONS: [Tr(dst=("root", "utter_alternative"))],
         },
         "utter_alternative": {
-            RESPONSE: "Your username is {person.username}. "
-            "Your email is {person.email}.",
+            RESPONSE: "Your username is {person.username}. " "Your email is {person.email}.",
             PRE_RESPONSE: {"fill": proc.FillTemplate()},
         },
     },
@@ -134,6 +123,15 @@ HAPPY_PATH = [
     ("Bob Page", "Your friend is Bob Page"),
     ("ok", "Your username is groot. Your email is groot@gmail.com."),
     ("ok", "Finishing query"),
+    ("again", "Write your username (my username is ...):"),
+    ("my username is groot", "Write your email (my email is ...):"),
+    (
+        "my email is groot@gmail.com",
+        "Please, name me one of your friends: (John Doe)",
+    ),
+    ("Jim ", "Your friend is Jim Page"),
+    ("ok", "Your username is groot. Your email is groot@gmail.com."),
+    ("ok", "Finishing query"),
 ]
 
 # %%
@@ -144,11 +142,6 @@ pipeline = Pipeline(
     slots=SLOTS,
 )
 
-if __name__ == "__main__":
-    check_happy_path(
-        pipeline, HAPPY_PATH, printout=True
-    )  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
 
-    if is_interactive_mode():
-        pipeline.run()
+def test_happy_path():
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)  # This is a function for automatic tutorial running
