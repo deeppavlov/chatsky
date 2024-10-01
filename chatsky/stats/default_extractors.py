@@ -13,12 +13,12 @@ Detailed examples can be found in the `tutorials` section.
 
 from datetime import datetime
 
-from chatsky.core import Context, Pipeline
+from chatsky.core import Context
 from chatsky.core.service.extra import ExtraHandlerRuntimeInfo
 from .utils import get_extra_handler_name
 
 
-async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandlerRuntimeInfo):
+async def get_current_label(ctx: Context, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
     This function is required for running the dashboard with the default configuration.
@@ -36,7 +36,7 @@ async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandler
     }
 
 
-async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_timing_before(ctx: Context, info: ExtraHandlerRuntimeInfo):
     """
     Store the pipeline component's start time inside the context.
     This function is required for running the dashboard with the default configuration.
@@ -45,7 +45,7 @@ async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.framework_data.stats[get_extra_handler_name(info, "time")] = start_time
 
 
-async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
+async def get_timing_after(ctx: Context, info: ExtraHandlerRuntimeInfo):  # noqa: F811
     """
     Extract the pipeline component's execution time.
     Requires :py:func:`~.get_timing_before` to be called previously in order to calculate the time.
@@ -58,7 +58,7 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
     return data
 
 
-async def get_last_response(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_last_response(ctx: Context, info: ExtraHandlerRuntimeInfo):
     """
     Extract the text of the last response in the current context.
     This handler is best used together with the `Actor` component.
@@ -69,7 +69,7 @@ async def get_last_response(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return data
 
 
-async def get_last_request(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_last_request(ctx: Context, info: ExtraHandlerRuntimeInfo):
     """
     Extract the text of the last request in the current context.
     This handler is best used together with the `Actor` component.
