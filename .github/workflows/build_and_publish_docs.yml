@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: testing actions/checkout_v4
+        run: |
+          git branch
+          git status
+
       - name: checkout to calling branch
         env:
           BRANCH_NAME: ${{ github.head_ref }}
