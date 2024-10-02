@@ -30,6 +30,7 @@ repo = git.Repo('./')
 # because in those cases 'repo.active_branch' gives 'detached HEAD'.
 branch = os.getenv('BRANCH_NAME', default=None)
 print(branch)
+print(repo)
 if branch is None:
     branch = repo.active_branch
 
