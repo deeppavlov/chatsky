@@ -35,8 +35,8 @@ jobs:
         env:
           BRANCH_NAME: ${{ github.head_ref }}
         uses: actions/checkout@v4
-          with:
-            ref: my-branch
+        with:
+          ref: my-branch
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
