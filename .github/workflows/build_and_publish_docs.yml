@@ -51,7 +51,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          git pull origin $BRANCH_NAME:$BRANCH_NAME
+          git pull origin/$BRANCH_NAME
           git checkout $BRANCH_NAME
 
       - name: build documentation
