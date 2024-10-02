@@ -46,6 +46,14 @@ jobs:
           git status
           echo "$BRANCH_NAME"
 
+      - name: checkout to calling branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git pull origin $BRANCH_NAME
+          git checkout $BRANCH_NAME
+
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
