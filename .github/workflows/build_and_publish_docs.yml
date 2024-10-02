@@ -24,6 +24,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: checkout to calling branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git checkout $BRANCH_NAME
+          echo "$BRANCH_NAME"
+
       - name: set up python 3.9
         uses: actions/setup-python@v5
         with:

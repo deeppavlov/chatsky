@@ -114,7 +114,7 @@ html_css_files = [
 ]
 
 # Version switcher url
-switcher_url = "https://zerglev.github.io/dialog_flow_framework/switcher.json"
+switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
 # To-do: a separate switcher.json for dev and other branches
 
 # Checking for dev before passing version to switcher
@@ -128,7 +128,8 @@ else:
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
 if LOCAL_BUILD:
     switcher_url = "./_static/switcher.json"
-# Possible TO-DO: generating switcher.json for local builds separately. Then change the prior url to new switcher. This is probably overkill.
+# Possible TO-DO: generating switcher.json for local builds separately.
+# Then change the prior url to new switcher. This is probably overkill.
 
 # Theme options
 html_theme_options = {
