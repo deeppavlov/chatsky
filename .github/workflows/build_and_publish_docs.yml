@@ -24,20 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: testing actions/checkout_v4
-        run: |
-          git fetch --all
-          git branch
-          git status
-
-      - name: checkout to calling branch
-        if: ${{ github.event_name == 'pull_request' }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref }}
-        uses: actions/checkout@v4
-        with:
-          ref: my-branch
-
       - name: set up python 3.9
         uses: actions/setup-python@v5
         with:
@@ -62,6 +48,7 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           LOCAL_BUILD: "False"
+          BRANCH_NAME: ${{ github.head_ref }}
         run: |
           python -m poetry run poe docs
 

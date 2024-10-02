@@ -22,11 +22,13 @@ BRANCH_REGEX = r"((?!master).)*"
 #: Regex matching the tags to build docs for
 TAG_REGEX = r"-"
 
-repo = git.Repo('./')
-branch = repo.active_branch
-
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+
+repo = git.Repo('./')
+# This variable is needed for passing the branch name during PR workflow doc builds,
+# because in those cases 'repo.active_branch' gives 'detached HEAD'.
+branch = os.getenv('BRANCH_NAME', default=repo.active_branch)
 
 if LOCAL_BUILD == "True":
     # Local builds only build docs for the current branch and no tags.
