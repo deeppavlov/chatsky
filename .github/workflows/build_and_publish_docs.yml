@@ -39,16 +39,19 @@ jobs:
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
       - name: testing actions/checkout_v4
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           git branch
           git status
+          echo "$BRANCH_NAME"
 
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           LOCAL_BUILD: "False"
-          BRANCH_NAME: ${{ github.head_ref }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           python -m poetry run poe docs
 
