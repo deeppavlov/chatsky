@@ -39,7 +39,7 @@ class MemoryContextStorage(DBContextStorage):
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         self._main_storage[ctx_id] = (turn_id, crt_at, upd_at, fw_data)
 
-    async def delete_main_info(self, ctx_id: str) -> None:
+    async def delete_context(self, ctx_id: str) -> None:
         self._main_storage.pop(ctx_id, None)
         for storage in self._aux_storage.values():
             storage.pop(ctx_id, None)

@@ -25,7 +25,7 @@ from telegram.constants import ParseMode
 from chatsky import (
     RESPONSE,
     TRANSITIONS,
-    GLOBAL,
+    LOCAL,
     Message,
     Pipeline,
     BaseResponse,
@@ -57,14 +57,27 @@ such as:
 5. Document with a thumbnail.
 6. Attachment bytes hash.
 
-Check out
-[this](https://docs.python-telegram-bot.org/en/latest/telegram.bot.html#telegram.Bot)
-class for information about different arguments
-for sending attachments, `send_...` methods.
-
 Last option ("Raw attachments!") button might be especially interesting,
 because it shows how bot percepts different telegram attachments sent by user
 in terms and datastructures of Chatsky.
+
+<div class="alert alert-info">
+
+Tip
+
+Check out
+[this](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot)
+class for information about different arguments
+for sending attachments, `send_...` methods.
+
+For example, documentation for `Image` extra fields can be found in the
+[send_photo](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot.send_photo)
+method.
+
+The `Message` class also supports extra keywords as described in
+[send_message](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot.send_message).
+
+</div>
 """
 
 # %%
@@ -78,8 +91,6 @@ image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
 formatted_text = """
 Visit [this link](https://core.telegram.org/bots/api#formatting-options)
 for more information about formatting options in telegram\.
-
-Run /start command again to restart\.
 """  # noqa: W605
 
 location_data = {"latitude": 59.9386, "longitude": 30.3141}
@@ -97,6 +108,8 @@ image_data = {
     "has_spoiler": True,
     "filename": "deeppavlov_logo.png",
 }
+# last 3 fields are extra keywords passed directly to the
+# telegram.Bot.send_photo method
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
@@ -119,81 +132,21 @@ class DataAttachmentHash(BaseResponse):
                 ctx.pipeline.messenger_interface
             )
             attachment_hash = sha256(attachment_bytes).hexdigest()
-            resp_format = (
-                "Here's your previous request first attachment sha256 hash: "
-                "`{}`!\n"
-                "Run /start command again to restart."
+            response = (
+                "Here's your previous request first attachment sha256 hash:\n"
+                f"```\n{attachment_hash}\n```"
             )
-            return resp_format.format(
-                attachment_hash, parse_mode=ParseMode.MARKDOWN_V2
-            )
+            return Message(text=response, parse_mode=ParseMode.MARKDOWN_V2)
         else:
-            return (
-                "Last request did not contain any data attachment!\n"
-                "Run /start command again to restart."
-            )
+            return "Last request did not contain any data attachment!"
 
 
 # %%
 script = {
-    GLOBAL: {
-        TRANSITIONS: [
-            Tr(dst=("main_flow", "main_node"), cnd=cnd.ExactMatch("/start"))
-        ]
-    },
     "main_flow": {
-        "start_node": {},
-        "main_node": {
-            RESPONSE: Message(
-                attachments=[
-                    Location(
-                        latitude=58.431610,
-                        longitude=27.792887,
-                        reply_markup=InlineKeyboardMarkup(
-                            [
-                                [
-                                    InlineKeyboardButton(
-                                        "Cute formatted text!",
-                                        callback_data="formatted",
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
-                                        "Multiple attachments!",
-                                        callback_data="attachments",
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
-                                        "Secret image!", callback_data="secret"
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
-                                        "Document with thumbnail!",
-                                        callback_data="thumbnail",
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
-                                        "First attachment bytes hash!",
-                                        callback_data="hash",
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
-                                        "Restart!", callback_data="restart"
-                                    ),
-                                    InlineKeyboardButton(
-                                        "Quit!", callback_data="quit"
-                                    ),
-                                ],
-                            ],
-                        ),
-                    ),
-                ],
-            ),
+        LOCAL: {
             TRANSITIONS: [
+                Tr(dst="main_node", cnd=cnd.ExactMatch("/start")),
                 Tr(dst="formatted_node", cnd=cnd.HasCallbackQuery("formatted")),
                 Tr(
                     dst="attachments_node",
@@ -203,8 +156,49 @@ script = {
                 Tr(dst="thumbnail_node", cnd=cnd.HasCallbackQuery("thumbnail")),
                 Tr(dst="hash_init_node", cnd=cnd.HasCallbackQuery("hash")),
                 Tr(dst="main_node", cnd=cnd.HasCallbackQuery("restart")),
-                Tr(dst="fallback_node", cnd=cnd.HasCallbackQuery("quit")),
-            ],
+            ]
+        },
+        "start_node": {},
+        "main_node": {
+            RESPONSE: Message(
+                text="Welcome! Choose what you want to receive.",
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                "Cute formatted text!",
+                                callback_data="formatted",
+                            ),
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                "Multiple attachments!",
+                                callback_data="attachments",
+                            ),
+                            InlineKeyboardButton(
+                                "Secret image!", callback_data="secret"
+                            ),
+                            InlineKeyboardButton(
+                                "Document with thumbnail!",
+                                callback_data="thumbnail",
+                            ),
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                "First attachment bytes hash!",
+                                callback_data="hash",
+                            ),
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                "Restart!", callback_data="restart"
+                            ),
+                        ],
+                    ],
+                ),
+                # you can add extra fields to the message itself;
+                # they are passed to telegram.Bot.send_message
+            ),
         },
         "formatted_node": {
             RESPONSE: Message(
@@ -214,8 +208,7 @@ script = {
         "attachments_node": {
             RESPONSE: Message(
                 text="Here's your message with multiple attachments "
-                + "(a location and a sticker)!\n"
-                + "Run /start command again to restart.",
+                + "(a location and a sticker)!",
                 attachments=[
                     Location(**location_data),
                     Sticker(**sticker_data),
@@ -224,15 +217,13 @@ script = {
         },
         "secret_node": {
             RESPONSE: Message(
-                text="Here's your secret image! "
-                + "Run /start command again to restart.",
+                text="Here's your secret image!",
                 attachments=[Image(**image_data)],
             ),
         },
         "thumbnail_node": {
             RESPONSE: Message(
-                text="Here's your document with tumbnail! "
-                + "Run /start command again to restart.",
+                text="Here's your document with thumbnail!",
                 attachments=[Document(**document_data)],
             ),
         },
@@ -249,7 +240,7 @@ script = {
         "fallback_node": {
             RESPONSE: Message(
                 text="Bot has entered unrecoverable state:"
-                + "/\nRun /start command again to restart."
+                + "\nRun /start command again to restart."
             ),
         },
     },

@@ -108,9 +108,9 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_main_info(self, ctx_id: str) -> None:
+    async def delete_context(self, ctx_id: str) -> None:
         """
-        Delete main information about the context storage.
+        Delete context from context storage.
         """
         raise NotImplementedError
 
@@ -129,7 +129,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
         """
         Load field items.
         """

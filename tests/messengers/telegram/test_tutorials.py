@@ -18,7 +18,11 @@ happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
 @pytest.mark.skipif(not telegram_available, reason="Telegram dependencies missing")
 @pytest.mark.parametrize(
     "tutorial_module_name",
-    ["1_basic", "2_attachments", "3_advanced"],
+    [
+        "1_basic",
+        pytest.param("2_attachments", marks=[pytest.mark.slow]),
+        pytest.param("3_advanced", marks=[pytest.mark.slow]),
+    ],
 )
 def test_tutorials(tutorial_module_name: str, monkeypatch):
     def patched_data_attachment_eq(self: DataAttachment, other: DataAttachment):

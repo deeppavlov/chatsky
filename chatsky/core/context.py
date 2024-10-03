@@ -18,6 +18,7 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 import logging
+import asyncio
 from uuid import uuid4
 from time import time_ns
 from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
@@ -31,9 +32,9 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.utils.context_dict import ContextDict, launch_coroutines
 
 if TYPE_CHECKING:
+    from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
-    from chatsky.core.service.types import ComponentExecutionState
 
 logger = logging.getLogger(__name__)
 
@@ -50,13 +51,29 @@ class ContextError(Exception):
     """Raised when context methods are not used correctly."""
 
 
-class FrameworkData(BaseModel):
+class ServiceState(BaseModel, arbitrary_types_allowed=True):
+    execution_status: ComponentExecutionState = Field(default="NOT_RUN")
+    """
+    :py:class:`.ComponentExecutionState` of this pipeline service.
+    Cleared at the end of every turn.
+    """
+    finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
+    """
+    Asyncio `Event` which can be awaited until this service finishes.
+    Cleared at the end of every turn.
+    """
+
+
+class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     Framework uses this to store data related to any of its modules.
     """
 
-    service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
-    "Statuses of all the pipeline services. Cleared at the end of every turn."
+    service_states: Dict[str, ServiceState] = Field(default_factory=dict, exclude=True)
+    """
+    Dictionary containing :py:class:`.ServiceState` of all the pipeline components.
+    Cleared at the end of every turn.
+    """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
     A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.
@@ -157,7 +174,7 @@ class Context(BaseModel):
 
     async def delete(self) -> None:
         if self._storage is not None:
-            await self._storage.delete_main_info(self.id)
+            await self._storage.delete_context(self.id)
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 

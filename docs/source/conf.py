@@ -171,7 +171,7 @@ def setup(_):
                     ("web_api_interface", "Web API"),
                 ],
             ),
-            ("tutorials.pipeline", "Pipeline"),
+            ("tutorials.service", "Service"),
             (
                 "tutorials.script",
                 "Script",

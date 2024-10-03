@@ -262,7 +262,7 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(update_stmt)
 
     # TODO: use foreign keys instead maybe?
-    async def delete_main_info(self, ctx_id: str) -> None:
+    async def delete_context(self, ctx_id: str) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(
                 conn.execute(delete(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)),
