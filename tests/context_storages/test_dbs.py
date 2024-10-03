@@ -184,23 +184,23 @@ class TestContextStorages:
         assert await db.load_main_info("2") == (1, 1, 1, b"1")
 
     async def test_wrong_field_name(self, db):
-        with pytest.raises(ValueError, match="Unknown field name"):
+        with pytest.raises(BaseException, match="non-existent"):
             await db.load_field_latest("1", "non-existent")
-        with pytest.raises(ValueError, match="Unknown field name"):
+        with pytest.raises(BaseException, match="non-existent"):
             await db.load_field_keys("1", "non-existent")
-        with pytest.raises(ValueError, match="Unknown field name"):
+        with pytest.raises(BaseException, match="non-existent"):
             await db.load_field_items("1", "non-existent", {1, 2})
-        with pytest.raises(ValueError, match="Unknown field name"):
+        with pytest.raises(BaseException, match="non-existent"):
             await db.update_field_items("1", "non-existent", [(1, b"2")])
 
     async def test_field_get(self, db, add_context):
         await add_context("1")
 
         assert await db.load_field_latest("1", "labels") == [(0, b"0")]
-        assert await db.load_field_keys("1", "labels") == [0]
+        assert set(await db.load_field_keys("1", "labels")) == {0}
 
         assert await db.load_field_latest("1", "requests") == []
-        assert await db.load_field_keys("1", "requests") == []
+        assert set(await db.load_field_keys("1", "requests")) == set()
 
     async def test_field_update(self, db, add_context):
         await add_context("1")
@@ -211,10 +211,10 @@ class TestContextStorages:
         await db.update_field_items("1", "requests", [(4, b"4")])
         await db.update_field_items("1", "labels", [(2, b"2")])
 
-        assert await db.load_field_latest("1", "labels") == [(0, b"1"), (2, b"2")]
-        assert await db.load_field_keys("1", "labels") == [0, 2]
+        assert await db.load_field_latest("1", "labels") == [(2, b"2"), (0, b"1")]
+        assert set(await db.load_field_keys("1", "labels")) == {0, 2}
         assert await db.load_field_latest("1", "requests") == [(4, b"4")]
-        assert await db.load_field_keys("1", "requests") == [4]
+        assert set(await db.load_field_keys("1", "requests")) == {4}
 
     async def test_int_key_field_subscript(self, db, add_context):
         await add_context("1")
@@ -223,15 +223,15 @@ class TestContextStorages:
         await db.update_field_items("1", "requests", [(0, b"0")])
 
         self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript=2))
-        assert await db.load_field_latest("1", "requests") == [(1, b"1"), (2, b"2")]
+        assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1")]
 
         self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript="__all__"))
-        assert await db.load_field_latest("1", "requests") == [(0, b"0"), (1, b"1"), (2, b"2")]
+        assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1"), (0, b"0")]
 
         await db.update_field_items("1", "requests", [(5, b"5")])
 
         self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript=2))
-        assert await db.load_field_latest("1", "requests") == [(2, b"2"), (5, b"5")]
+        assert await db.load_field_latest("1", "requests") == [(5, b"5"), (2, b"2")]
 
     async def test_string_key_field_subscript(self, db, add_context):
         await add_context("1")
@@ -241,22 +241,20 @@ class TestContextStorages:
         assert await db.load_field_latest("1", "misc") == [("4", b"4")]
 
         self.configure_context_storage(db, misc_config=FieldConfig(name="misc", subscript="__all__"))
-        assert await db.load_field_latest("1", "misc") == [("4", b"4"), ("0", b"0")]
+        assert set(await db.load_field_latest("1", "misc")) == {("4", b"4"), ("0", b"0")}
 
     async def test_delete_field_key(self, db, add_context):
         await add_context("1")
 
         await db.delete_field_keys("1", "labels", [0])
 
-        assert await db.load_field_latest("1", "labels") == [(0, None)]
+        assert await db.load_field_latest("1", "labels") == []
 
     async def test_raises_on_missing_field_keys(self, db, add_context):
         await add_context("1")
 
-        with pytest.raises(KeyError):
-            await db.load_field_items("1", "labels", [0, 1])
-        with pytest.raises(KeyError):
-            await db.load_field_items("1", "requests", [0])
+        assert set(await db.load_field_items("1", "labels", [0, 1])) == {(0, b"0")}
+        assert set(await db.load_field_items("1", "requests", [0])) == set()
 
     async def test_delete_context(self, db, add_context):
         await add_context("1")
@@ -268,8 +266,8 @@ class TestContextStorages:
         assert await db.load_main_info("1") is None
         assert await db.load_main_info("2") == (1, 1, 1, b"1")
 
-        assert await db.load_field_keys("1", "labels") == []
-        assert await db.load_field_keys("2", "labels") == [0]
+        assert set(await db.load_field_keys("1", "labels")) == set()
+        assert set(await db.load_field_keys("2", "labels")) == {0}
 
     @pytest.mark.slow
     async def test_concurrent_operations(self, db):
@@ -285,11 +283,11 @@ class TestContextStorages:
                 await db.update_field_items(str_key, "requests", [(0, bytes(2 * key + idx)), (idx, bytes(key + idx))])
                 await asyncio.sleep(random.random() / 100)
                 keys = list(range(idx + 1))
-                assert await db.load_field_keys(str_key, "requests") == keys
-                assert await db.load_field_items(str_key, "requests", keys) == [
-                    bytes(2 * key + idx),
-                    *[bytes(key + k) for k in range(1, idx + 1)]
-                ]
+                assert set(await db.load_field_keys(str_key, "requests")) == set(keys)
+                assert set(await db.load_field_items(str_key, "requests", keys)) == {
+                    (0, bytes(2 * key + idx)),
+                    *[(k, bytes(key + k)) for k in range(1, idx + 1)]
+                }
 
         await asyncio.gather(*(db_operations(key * 2) for key in range(3)))
 

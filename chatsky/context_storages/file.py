@@ -98,7 +98,7 @@ class FileContextStorage(DBContextStorage, ABC):
         return [k for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if v is not None]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
-        return [v for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys]
+        return [(k, v) for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys and v is not None]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         storage = self._load()

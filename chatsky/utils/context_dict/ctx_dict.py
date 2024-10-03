@@ -56,11 +56,10 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
-        for key, item in zip(keys, items):
-            if item is not None:
-                self._items[key] = self._value_type.validate_json(item)
-                if self._storage.rewrite_existing:
-                    self._hashes[key] = get_hash(item)
+        for key, value in items.items():
+            self._items[key] = self._value_type.validate_json(value)
+            if self._storage.rewrite_existing:
+                self._hashes[key] = get_hash(value)
 
     @overload
     async def __getitem__(self, key: K) -> V: ...

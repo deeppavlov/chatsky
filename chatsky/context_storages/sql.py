@@ -273,7 +273,7 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         field_table, field_name, field_config = self._get_config_for_field(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[field_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] is not None))
+        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] != None))
         if field_table == self._turns_table:
             stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
         if isinstance(field_config.subscript, int):
@@ -284,17 +284,17 @@ class SQLContextStorage(DBContextStorage):
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, _, _ = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[self._KEY_COLUMN]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] is not None))
+        field_table, field_name, _ = self._get_config_for_field(field_name)
+        stmt = select(field_table.c[self._KEY_COLUMN]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] != None))
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
         field_table, field_name, _ = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[field_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))))
+        stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[field_name])
+        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._KEY_COLUMN].in_(tuple(keys))) & (field_table.c[field_name] != None))
         async with self.engine.begin() as conn:
-            return [v[0] for v in (await conn.execute(stmt)).fetchall()]
+            return list((await conn.execute(stmt)).fetchall())
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_table, field_name, _ = self._get_config_for_field(field_name)

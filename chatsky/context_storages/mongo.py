@@ -136,7 +136,7 @@ class MongoContextStorage(DBContextStorage):
             {self._id_column_name: ctx_id, self._KEY_COLUMN: field_name},
             {
                 "$set": {
-                    self._KEY_COLUMN, field_name,
+                    self._KEY_COLUMN: field_name,
                     self._PACKED_COLUMN: self.serializer.dumps(data),
                     ExtraFields.storage_key.value: storage_key,
                     ExtraFields.id.value: id,

@@ -59,7 +59,7 @@ class MemoryContextStorage(DBContextStorage):
         return [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        return [v for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys]
+        return [(k, v) for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys and v is not None]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         self._aux_storage[field_name].setdefault(ctx_id, dict()).update(items)

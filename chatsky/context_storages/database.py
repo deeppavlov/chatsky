@@ -129,7 +129,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
         """
         Load field items.
         """
