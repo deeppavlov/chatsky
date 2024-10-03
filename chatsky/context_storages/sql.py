@@ -30,12 +30,14 @@ try:
         LargeBinary,
         String,
         BigInteger,
+        ForeignKey,
         Integer,
         Index,
         Insert,
         inspect,
         select,
         delete,
+        event,
     )
     from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -74,6 +76,10 @@ except (ImportError, ModuleNotFoundError):
 
 if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
+
+
+def _sqlite_enable_foreign_key(dbapi_con, con_record):
+    dbapi_con.execute("pragma foreign_keys=ON")
 
 
 def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
@@ -155,6 +161,9 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
+        if self.dialect == "sqlite":
+            event.listen(self.engine.sync_engine, "connect", _sqlite_enable_foreign_key)
+
         self._metadata = MetaData()
         self._main_table = Table(
             f"{table_name_prefix}_{self._main_table_name}",
@@ -168,7 +177,7 @@ class SQLContextStorage(DBContextStorage):
         self._turns_table = Table(
             f"{table_name_prefix}_{self._turns_table_name}",
             self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), nullable=False),
+            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.name, self._id_column_name), nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self.labels_config.name, LargeBinary(), nullable=True),
             Column(self.requests_config.name, LargeBinary(), nullable=True),
@@ -176,12 +185,12 @@ class SQLContextStorage(DBContextStorage):
             Index(f"{self._turns_table_name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
         )
         self._misc_table = Table(
-            f"{table_name_prefix}_{self.misc_config.name}",
+            f"{table_name_prefix}_{self._misc_table_name}",
             self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), nullable=False),
+            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.name, self._id_column_name), nullable=False),
             Column(self._KEY_COLUMN, String(self._FIELD_LENGTH), nullable=False),
             Column(self._VALUE_COLUMN, LargeBinary(), nullable=True),
-            Index(f"{self.misc_config.name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
+            Index(f"{self._misc_table_name}_index", self._id_column_name, self._KEY_COLUMN, unique=True),
         )
 
         asyncio.run(self._create_self_tables())
@@ -264,7 +273,7 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         field_table, field_name, field_config = self._get_config_for_field(field_name)
         stmt = select(field_table.c[self._KEY_COLUMN], field_table.c[field_name])
-        stmt = stmt.where(field_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] is not None))
         if field_table == self._turns_table:
             stmt = stmt.order_by(field_table.c[self._KEY_COLUMN].desc())
         if isinstance(field_config.subscript, int):
@@ -276,7 +285,7 @@ class SQLContextStorage(DBContextStorage):
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
         field_table, _, _ = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[self._KEY_COLUMN]).where(field_table.c[self._id_column_name] == ctx_id)
+        stmt = select(field_table.c[self._KEY_COLUMN]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] is not None))
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 

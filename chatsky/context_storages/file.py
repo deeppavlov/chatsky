@@ -85,6 +85,7 @@ class FileContextStorage(DBContextStorage, ABC):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         config = self._get_config_for_field(field_name)
         select = await self._get_elems_for_field_name(ctx_id, field_name)
+        select = [(k, v) for k, v in select if v is not None]
         if field_name != self.misc_config.name:
             select = sorted(select, key=lambda e: e[0], reverse=True)
         if isinstance(config.subscript, int):
@@ -94,7 +95,7 @@ class FileContextStorage(DBContextStorage, ABC):
         return select
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        return [k for k, _ in await self._get_elems_for_field_name(ctx_id, field_name)]
+        return [k for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if v is not None]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
         return [v for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys]

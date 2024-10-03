@@ -46,7 +46,7 @@ class MemoryContextStorage(DBContextStorage):
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         subscript = self._get_config_for_field(field_name).subscript
-        select = list(self._aux_storage[field_name].get(ctx_id, dict()).keys())
+        select = [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None]
         if field_name != self.misc_config.name:
             select = sorted(select, key=lambda x: x, reverse=True)
         if isinstance(subscript, int):
@@ -56,7 +56,7 @@ class MemoryContextStorage(DBContextStorage):
         return [(k, self._aux_storage[field_name][ctx_id][k]) for k in select]
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        return list(self._aux_storage[field_name].get(ctx_id, dict()).keys())
+        return [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
         return [v for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys]

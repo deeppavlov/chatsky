@@ -13,7 +13,7 @@ and high levels of read and write traffic.
 """
 
 import asyncio
-from typing import Dict, Set, Tuple, Optional, List, Any
+from typing import Dict, Hashable, Set, Tuple, Optional, List, Any
 
 try:
     from pymongo import ASCENDING, HASHED, UpdateOne
@@ -40,12 +40,12 @@ class MongoContextStorage(DBContextStorage):
     :param collection_prefix: "namespace" prefix for the two collections created for context storing.
     """
 
-    _CONTEXTS_TABLE = "contexts"
-    _LOGS_TABLE = "logs"
+    _UNIQUE_KEYS = "unique_keys"
+
     _KEY_COLUMN = "key"
     _VALUE_COLUMN = "value"
-    _FIELD_COLUMN = "field"
-    _PACKED_COLUMN = "data"
+
+    is_asynchronous = False
 
     def __init__(
         self,
@@ -57,7 +57,6 @@ class MongoContextStorage(DBContextStorage):
         collection_prefix: str = "chatsky_collection",
     ):
         DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
-        self.context_schema.supports_async = True
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
@@ -65,27 +64,102 @@ class MongoContextStorage(DBContextStorage):
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
-        self.collections = {
-            self._CONTEXTS_TABLE: db[f"{collection_prefix}_{self._CONTEXTS_TABLE}"],
-            self._LOGS_TABLE: db[f"{collection_prefix}_{self._LOGS_TABLE}"],
-        }
+        self._main_table = db[f"{collection_prefix}_{self._main_table_name}"],
+        self._turns_table = db[f"{collection_prefix}_{self._turns_table_name}"]
+        self._misc_table = db[f"{collection_prefix}_{self._misc_table_name}"]
 
         asyncio.run(
             asyncio.gather(
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.id.value, ASCENDING)], background=True, unique=True
+                self._main_table.create_index(
+                    [(self._id_column_name, ASCENDING)], background=True, unique=True
                 ),
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.storage_key.value, HASHED)], background=True
+                self._turns_table.create_index(
+                    [(self._id_column_name, self._KEY_COLUMN, HASHED)], background=True, unique=True
                 ),
-                self.collections[self._CONTEXTS_TABLE].create_index(
-                    [(ExtraFields.active_ctx.value, HASHED)], background=True
-                ),
-                self.collections[self._LOGS_TABLE].create_index(
-                    [(ExtraFields.id.value, ASCENDING)], background=True
+                self._misc_table.create_index(
+                    [(self._id_column_name, self._KEY_COLUMN, HASHED)], background=True, unique=True
                 ),
             )
         )
+
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+        result = await self._main_table.find_one(
+            {self._id_column_name: ctx_id},
+            [self._current_turn_id_column_name, self._created_at_column_name, self._updated_at_column_name, self._framework_data_column_name]
+        )
+        return result.values() if result is not None else None
+
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        await self._main_table.update_one(
+            {self._id_column_name: ctx_id},
+            {
+                "$set": {
+                    self._id_column_name: ctx_id,
+                    self._current_turn_id_column_name: turn_id,
+                    self._created_at_column_name: crt_at,
+                    self._updated_at_column_name: upd_at,
+                    self._framework_data_column_name: fw_data,
+                }
+            },
+            upsert=True,
+        )
+
+    async def delete_main_info(self, ctx_id: str) -> None:
+        await self._main_table.delete_one({self._id_column_name: ctx_id})
+
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+        return self._turns_table.find(
+            {self._id_column_name: ctx_id},
+            [self._KEY_COLUMN, field_name],
+            sort=[(self._KEY_COLUMN, -1)],
+        ).to_list(None)
+
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+        keys = self._turns_table.aggregate(
+            [
+                {"$match": {self._id_column_name: ctx_id}},
+                {"$group": {"_id": None, self._UNIQUE_KEYS: {"$addToSet": f"${self._KEY_COLUMN}"}}},
+            ]
+        ).to_list(None)
+        return set(keys[0][self._UNIQUE_KEYS])
+
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
+        return self._turns_table.find(
+            {self._id_column_name: ctx_id},
+            [self._KEY_COLUMN, field_name],
+            sort=[(self._KEY_COLUMN, -1)],
+        ).to_list(None)
+        ## TODO:!!
+
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+        await self._turns_table.update_one(
+            {self._id_column_name: ctx_id, self._KEY_COLUMN: field_name},
+            {
+                "$set": {
+                    self._KEY_COLUMN, field_name,
+                    self._PACKED_COLUMN: self.serializer.dumps(data),
+                    ExtraFields.storage_key.value: storage_key,
+                    ExtraFields.id.value: id,
+                    ExtraFields.created_at.value: created,
+                    ExtraFields.updated_at.value: updated,
+                }
+            },
+            upsert=True,
+        )
+
+    async def clear_all(self) -> None:
+        """
+        Clear all the chatsky tables and records.
+        """
+        raise NotImplementedError
+
+
+
+
+
+
+
+
 
     async def del_item_async(self, key: str):
         await self.collections[self._CONTEXTS_TABLE].update_many(
