@@ -41,7 +41,9 @@ from chatsky.utils.testing import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from chatsky.llm import LLM_API, llm_response
+from chatsky.llm import LLM_API
+from chatsky.responses.llm import llm_response
+
 
 import os
 
