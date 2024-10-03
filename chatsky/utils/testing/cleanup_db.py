@@ -38,7 +38,7 @@ async def delete_mongo(storage: MongoContextStorage):
     """
     if not mongo_available:
         raise Exception("Can't delete mongo database - mongo provider unavailable!")
-    for collection in storage.collections.values():
+    for collection in [storage._main_table, storage._turns_table, storage._misc_table]:
         await collection.drop()
 
 

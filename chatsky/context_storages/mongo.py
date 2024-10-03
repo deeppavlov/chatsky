@@ -13,10 +13,11 @@ and high levels of read and write traffic.
 """
 
 import asyncio
-from typing import Dict, Hashable, Set, Tuple, Optional, List, Any
+from typing import Dict, Hashable, Set, Tuple, Optional, List
 
 try:
-    from pymongo import ASCENDING, HASHED, UpdateOne
+    from pymongo import UpdateOne
+    from pymongo.collection import Collection
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
@@ -41,22 +42,18 @@ class MongoContextStorage(DBContextStorage):
     """
 
     _UNIQUE_KEYS = "unique_keys"
+    _ID_FIELD = "_id"
 
-    _KEY_COLUMN = "key"
-    _VALUE_COLUMN = "value"
-
-    is_asynchronous = False
+    is_asynchronous = True
 
     def __init__(
         self,
         path: str,
-        serializer: Optional[Any] = None,
         rewrite_existing: bool = False,
-        turns_config: Optional[FieldConfig] = None,
-        misc_config: Optional[FieldConfig] = None,
+        configuration: Optional[Dict[str, FieldConfig]] = None,
         collection_prefix: str = "chatsky_collection",
     ):
-        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
+        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
@@ -64,30 +61,42 @@ class MongoContextStorage(DBContextStorage):
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
-        self._main_table = db[f"{collection_prefix}_{self._main_table_name}"],
+        self._main_table = db[f"{collection_prefix}_{self._main_table_name}"]
         self._turns_table = db[f"{collection_prefix}_{self._turns_table_name}"]
         self._misc_table = db[f"{collection_prefix}_{self._misc_table_name}"]
 
         asyncio.run(
             asyncio.gather(
                 self._main_table.create_index(
-                    [(self._id_column_name, ASCENDING)], background=True, unique=True
+                    self._id_column_name, background=True, unique=True
                 ),
                 self._turns_table.create_index(
-                    [(self._id_column_name, self._KEY_COLUMN, HASHED)], background=True, unique=True
+                    [self._id_column_name, self._key_column_name], background=True, unique=True
                 ),
                 self._misc_table.create_index(
-                    [(self._id_column_name, self._KEY_COLUMN, HASHED)], background=True, unique=True
-                ),
+                    [self._id_column_name, self._key_column_name], background=True, unique=True
+                )
             )
         )
+
+    def _get_config_for_field(self, field_name: str) -> Tuple[Collection, str, FieldConfig]:
+        if field_name == self.labels_config.name:
+            return self._turns_table, field_name, self.labels_config
+        elif field_name == self.requests_config.name:
+            return self._turns_table, field_name, self.requests_config
+        elif field_name == self.responses_config.name:
+            return self._turns_table, field_name, self.responses_config
+        elif field_name == self.misc_config.name:
+            return self._misc_table, self._value_column_name, self.misc_config
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
         result = await self._main_table.find_one(
             {self._id_column_name: ctx_id},
             [self._current_turn_id_column_name, self._created_at_column_name, self._updated_at_column_name, self._framework_data_column_name]
         )
-        return result.values() if result is not None else None
+        return (result[self._current_turn_id_column_name], result[self._created_at_column_name], result[self._updated_at_column_name], result[self._framework_data_column_name]) if result is not None else None
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         await self._main_table.update_one(
@@ -104,176 +113,64 @@ class MongoContextStorage(DBContextStorage):
             upsert=True,
         )
 
-    async def delete_main_info(self, ctx_id: str) -> None:
-        await self._main_table.delete_one({self._id_column_name: ctx_id})
+    async def delete_context(self, ctx_id: str) -> None:
+        await asyncio.gather(
+            self._main_table.delete_one({self._id_column_name: ctx_id}),
+            self._turns_table.delete_one({self._id_column_name: ctx_id}),
+            self._misc_table.delete_one({self._id_column_name: ctx_id})
+        )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        return self._turns_table.find(
-            {self._id_column_name: ctx_id},
-            [self._KEY_COLUMN, field_name],
-            sort=[(self._KEY_COLUMN, -1)],
-        ).to_list(None)
+        field_table, field_name, field_config = self._get_config_for_field(field_name)
+        sort, limit, key = None, 0, dict()
+        if field_table == self._turns_table:
+            sort = [(self._key_column_name, -1)]
+        if isinstance(field_config.subscript, int):
+            limit = field_config.subscript
+        if isinstance(field_config.subscript, Set):
+            key = {self._key_column_name: {"$in": list(field_config.subscript)}}
+        result = await field_table.find(
+            {self._id_column_name: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},
+            [self._key_column_name, field_name],
+            sort=sort
+        ).limit(limit).to_list(None)
+        return [(item[self._key_column_name], item[field_name]) for item in result]
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        keys = self._turns_table.aggregate(
+        field_table, field_name, _ = self._get_config_for_field(field_name)
+        result = await field_table.aggregate(
             [
-                {"$match": {self._id_column_name: ctx_id}},
-                {"$group": {"_id": None, self._UNIQUE_KEYS: {"$addToSet": f"${self._KEY_COLUMN}"}}},
+                {"$match": {self._id_column_name: ctx_id, field_name: {"$ne": None}}},
+                {"$group": {"_id": None, self._UNIQUE_KEYS: {"$addToSet": f"${self._key_column_name}"}}},
             ]
         ).to_list(None)
-        return set(keys[0][self._UNIQUE_KEYS])
+        return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
-        return self._turns_table.find(
-            {self._id_column_name: ctx_id},
-            [self._KEY_COLUMN, field_name],
-            sort=[(self._KEY_COLUMN, -1)],
+        field_table, field_name, _ = self._get_config_for_field(field_name)
+        result = await field_table.find(
+            {self._id_column_name: ctx_id, self._key_column_name: {"$in": list(keys)}, field_name: {"$exists": True, "$ne": None}},
+            [self._key_column_name, field_name]
         ).to_list(None)
-        ## TODO:!!
+        return [(item[self._key_column_name], item[field_name]) for item in result]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        await self._turns_table.update_one(
-            {self._id_column_name: ctx_id, self._KEY_COLUMN: field_name},
-            {
-                "$set": {
-                    self._KEY_COLUMN: field_name,
-                    self._PACKED_COLUMN: self.serializer.dumps(data),
-                    ExtraFields.storage_key.value: storage_key,
-                    ExtraFields.id.value: id,
-                    ExtraFields.created_at.value: created,
-                    ExtraFields.updated_at.value: updated,
-                }
-            },
-            upsert=True,
+        field_table, field_name, _ = self._get_config_for_field(field_name)
+        if len(items) == 0:
+            return
+        await field_table.bulk_write(
+            [
+                UpdateOne(
+                    {self._id_column_name: ctx_id, self._key_column_name: k},
+                    {"$set": {field_name: v}},
+                    upsert=True,
+                ) for k, v in items
+            ]
         )
 
     async def clear_all(self) -> None:
-        """
-        Clear all the chatsky tables and records.
-        """
-        raise NotImplementedError
-
-
-
-
-
-
-
-
-
-    async def del_item_async(self, key: str):
-        await self.collections[self._CONTEXTS_TABLE].update_many(
-            {ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}}
-        )
-
-    async def len_async(self) -> int:
-        count_key = "unique_count"
-        unique = (
-            await self.collections[self._CONTEXTS_TABLE]
-            .aggregate(
-                [
-                    {"$match": {ExtraFields.active_ctx.value: True}},
-                    {"$group": {"_id": None, "unique_keys": {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
-                    {"$project": {count_key: {"$size": "$unique_keys"}}},
-                ]
-            )
-            .to_list(1)
-        )
-        return 0 if len(unique) == 0 else unique[0][count_key]
-
-    async def clear_async(self, prune_history: bool = False):
-        if prune_history:
-            await self.collections[self._CONTEXTS_TABLE].drop()
-            await self.collections[self._LOGS_TABLE].drop()
-        else:
-            await self.collections[self._CONTEXTS_TABLE].update_many(
-                {}, {"$set": {ExtraFields.active_ctx.value: False}}
-            )
-
-    async def keys_async(self) -> Set[str]:
-        unique_key = "unique_keys"
-        unique = (
-            await self.collections[self._CONTEXTS_TABLE]
-            .aggregate(
-                [
-                    {"$match": {ExtraFields.active_ctx.value: True}},
-                    {"$group": {"_id": None, unique_key: {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
-                ]
-            )
-            .to_list(None)
-        )
-        return set(unique[0][unique_key])
-
-    async def contains_async(self, key: str) -> bool:
-        return (
-            await self.collections[self._CONTEXTS_TABLE].count_documents(
-                {"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.active_ctx.value: True}]}
-            )
-            > 0
-        )
-
-    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
-        packed = await self.collections[self._CONTEXTS_TABLE].find_one(
-            {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.active_ctx.value: True}]},
-            [self._PACKED_COLUMN, ExtraFields.id.value],
-            sort=[(ExtraFields.updated_at.value, -1)],
-        )
-        if packed is not None:
-            return self.serializer.loads(packed[self._PACKED_COLUMN]), packed[ExtraFields.id.value]
-        else:
-            return dict(), None
-
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
-        logs = (
-            await self.collections[self._LOGS_TABLE]
-            .find(
-                {"$and": [{ExtraFields.id.value: id}, {self._FIELD_COLUMN: field_name}]},
-                [self._KEY_COLUMN, self._VALUE_COLUMN],
-                sort=[(self._KEY_COLUMN, -1)],
-                limit=keys_limit if keys_limit is not None else 0,
-            )
-            .to_list(None)
-        )
-        return {log[self._KEY_COLUMN]: self.serializer.loads(log[self._VALUE_COLUMN]) for log in logs}
-
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
-        await self.collections[self._CONTEXTS_TABLE].update_one(
-            {ExtraFields.id.value: id},
-            {
-                "$set": {
-                    ExtraFields.active_ctx.value: True,
-                    self._PACKED_COLUMN: self.serializer.dumps(data),
-                    ExtraFields.storage_key.value: storage_key,
-                    ExtraFields.id.value: id,
-                    ExtraFields.created_at.value: created,
-                    ExtraFields.updated_at.value: updated,
-                }
-            },
-            upsert=True,
-        )
-
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
-        await self.collections[self._LOGS_TABLE].bulk_write(
-            [
-                UpdateOne(
-                    {
-                        "$and": [
-                            {ExtraFields.id.value: id},
-                            {self._FIELD_COLUMN: field},
-                            {self._KEY_COLUMN: key},
-                        ]
-                    },
-                    {
-                        "$set": {
-                            self._FIELD_COLUMN: field,
-                            self._KEY_COLUMN: key,
-                            self._VALUE_COLUMN: self.serializer.dumps(value),
-                            ExtraFields.id.value: id,
-                            ExtraFields.updated_at.value: updated,
-                        }
-                    },
-                    upsert=True,
-                )
-                for field, key, value in data
-            ]
+        await asyncio.gather(
+            self._main_table.delete_many({}),
+            self._turns_table.delete_many({}),
+            self._misc_table.delete_many({})
         )

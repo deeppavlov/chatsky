@@ -51,6 +51,8 @@ class DBContextStorage(ABC):
     _main_table_name: Literal["main"] = "main"
     _turns_table_name: Literal["turns"] = "turns"
     _misc_table_name: Literal["misc"] = "misc"
+    _key_column_name: Literal["key"] = "key"
+    _value_column_name: Literal["value"] = "value"
     _id_column_name: Literal["id"] = "id"
     _current_turn_id_column_name: Literal["current_turn_id"] = "current_turn_id"
     _created_at_column_name: Literal["created_at"] = "created_at"
