@@ -90,13 +90,17 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
-doc_version = os.getenv('doc_version', default="dev")
+doc_version = os.getenv('doc_version', default="master")
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = """
-{% set tutorial_name = env.docname %}
-{% set doc_version = doc_version %}
+:tutorial_name: {{ env.docname }}
+:doc_version: {{ doc_version }}
 """
+
+# nbsphinx_prolog = """
+# {% set tutorial_name = env.docname %}
+# {% set doc_version = doc_version %}
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
 
