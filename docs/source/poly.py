@@ -29,8 +29,6 @@ repo = git.Repo('./')
 # This variable is needed for passing the branch name during PR workflow doc builds,
 # because in those cases 'repo.active_branch' gives 'detached HEAD'.
 branch = os.getenv('BRANCH_NAME', default=None)
-print(branch)
-print(repo)
 if branch is None:
     branch = repo.active_branch
 
