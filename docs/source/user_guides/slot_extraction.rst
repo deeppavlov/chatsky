@@ -100,7 +100,7 @@ A dot-separated string that acts as a path from the root slot to the needed slot
 In the example above ``name_slot`` would have the name "name"
 because that is the key used to store it in the ``profile_slot``.
 
-If you have a nested structure (of ``GroupSlots``) separate the names with dots:
+Let's consider nested group slots:
 
 .. code-block:: python
 
@@ -141,7 +141,10 @@ The `conditions` submodule provides a function for checking if specific slots ha
 
 Both `processing` and `response` submodules provide functions for filling templates with
 extracted slot values.
-Choose whichever one you like, there's not much difference between them at the moment.
+
+- ``FillTemplate`` changes the response function of the current node to ``FilledTemplate`` at the ``PRE_RESPONSE`` level.
+- ``FilledTemplate`` is a response function that fills slots after producing inner response
+  (which can be ``BaseResponse``, ``Message`` or simply a string).
 
 .. code-block:: python
     
@@ -153,7 +156,7 @@ Choose whichever one you like, there's not much difference between them at the m
 
     RESPONSE: rsp.FilledTemplate("Your first name: {name}")
 
-Some real examples of scripts utilizing slot extraction can be found in the
+An example of script utilizing slot extraction can be found in the
 `tutorials section <../tutorials/tutorials.slots.1_basic_example.html>`_.
 
 Further reading
