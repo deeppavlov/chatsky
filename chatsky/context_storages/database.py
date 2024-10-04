@@ -83,6 +83,7 @@ class DBContextStorage(ABC):
         self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
         self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
 
+    # TODO: this method (and similar) repeat often. Optimize?
     def _get_config_for_field(self, field_name: str) -> FieldConfig:
         if field_name == self.labels_config.name:
             return self.labels_config

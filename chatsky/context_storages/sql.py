@@ -221,6 +221,7 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
+    # TODO: this method (and similar) repeat often. Optimize?
     def _get_config_for_field(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
         if field_name == self.labels_config.name:
             return self._turns_table, field_name, self.labels_config

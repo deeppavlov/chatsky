@@ -79,6 +79,7 @@ class MongoContextStorage(DBContextStorage):
             )
         )
 
+    # TODO: this method (and similar) repeat often. Optimize?
     def _get_config_for_field(self, field_name: str) -> Tuple[Collection, str, FieldConfig]:
         if field_name == self.labels_config.name:
             return self._turns_table, field_name, self.labels_config
@@ -127,7 +128,7 @@ class MongoContextStorage(DBContextStorage):
             sort = [(self._key_column_name, -1)]
         if isinstance(field_config.subscript, int):
             limit = field_config.subscript
-        if isinstance(field_config.subscript, Set):
+        elif isinstance(field_config.subscript, Set):
             key = {self._key_column_name: {"$in": list(field_config.subscript)}}
         result = await field_table.find(
             {self._id_column_name: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},

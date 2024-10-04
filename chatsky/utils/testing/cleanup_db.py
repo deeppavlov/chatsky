@@ -50,7 +50,8 @@ async def delete_redis(storage: RedisContextStorage):
     """
     if not redis_available:
         raise Exception("Can't delete redis database - redis provider unavailable!")
-    await storage.clear_async()
+    await storage.clear_all()
+    await storage._redis.close()
 
 
 async def delete_sql(storage: SQLContextStorage):

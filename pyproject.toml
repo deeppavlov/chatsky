@@ -215,7 +215,7 @@ asyncio_mode = "auto"
 concurrency = [
     "thread",
     "greenlet",
-    ]
+]
 
 
 [tool.coverage.report]
@@ -223,4 +223,4 @@ concurrency = [
 exclude_also = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
-    ]
+]

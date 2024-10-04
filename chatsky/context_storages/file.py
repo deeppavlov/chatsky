@@ -50,6 +50,7 @@ class FileContextStorage(DBContextStorage, ABC):
     def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
+    # TODO: this method (and similar) repeat often. Optimize?
     async def _get_elems_for_field_name(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         storage = self._load()
         if field_name == self.misc_config.name:
@@ -59,6 +60,7 @@ class FileContextStorage(DBContextStorage, ABC):
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
+    # TODO: this method (and similar) repeat often. Optimize?
     def _get_table_for_field_name(self, storage: SerializableStorage, field_name: str) -> List[Tuple]:
         if field_name == self.misc_config.name:
             return storage.misc
