@@ -145,7 +145,8 @@ class SQLContextStorage(DBContextStorage):
     _FIELD_LENGTH = 256
 
     def __init__(
-        self, path: str,
+        self,
+        path: str,
         rewrite_existing: bool = False,
         configuration: Optional[Dict[str, FieldConfig]] = None,
         table_name_prefix: str = "chatsky_table",
@@ -161,30 +162,30 @@ class SQLContextStorage(DBContextStorage):
         if self.dialect == "sqlite":
             event.listen(self.engine.sync_engine, "connect", _sqlite_enable_foreign_key)
 
-        self._metadata = MetaData()
-        self._main_table = Table(
+        metadata = MetaData()
+        self.main_table = Table(
             f"{table_name_prefix}_{self._main_table_name}",
-            self._metadata,
+            metadata,
             Column(self._id_column_name, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
             Column(self._current_turn_id_column_name, BigInteger(), nullable=False),
             Column(self._created_at_column_name, BigInteger(), nullable=False),
             Column(self._updated_at_column_name, BigInteger(), nullable=False),
             Column(self._framework_data_column_name, LargeBinary(), nullable=False),
         )
-        self._turns_table = Table(
+        self.turns_table = Table(
             f"{table_name_prefix}_{self._turns_table_name}",
-            self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.name, self._id_column_name), nullable=False),
+            metadata,
+            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self.main_table.name, self._id_column_name), nullable=False),
             Column(self._key_column_name, Integer(), nullable=False),
             Column(self.labels_config.name, LargeBinary(), nullable=True),
             Column(self.requests_config.name, LargeBinary(), nullable=True),
             Column(self.responses_config.name, LargeBinary(), nullable=True),
             Index(f"{self._turns_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
         )
-        self._misc_table = Table(
+        self.misc_table = Table(
             f"{table_name_prefix}_{self._misc_table_name}",
-            self._metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self._main_table.name, self._id_column_name), nullable=False),
+            metadata,
+            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self.main_table.name, self._id_column_name), nullable=False),
             Column(self._key_column_name, String(self._FIELD_LENGTH), nullable=False),
             Column(self._value_column_name, LargeBinary(), nullable=True),
             Index(f"{self._misc_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
@@ -201,7 +202,7 @@ class SQLContextStorage(DBContextStorage):
         Create tables required for context storing, if they do not exist yet.
         """
         async with self.engine.begin() as conn:
-            for table in [self._main_table, self._turns_table, self._misc_table]:
+            for table in [self.main_table, self.turns_table, self.misc_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
 
@@ -224,24 +225,24 @@ class SQLContextStorage(DBContextStorage):
     # TODO: this method (and similar) repeat often. Optimize?
     def _get_config_for_field(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
         if field_name == self.labels_config.name:
-            return self._turns_table, field_name, self.labels_config
+            return self.turns_table, field_name, self.labels_config
         elif field_name == self.requests_config.name:
-            return self._turns_table, field_name, self.requests_config
+            return self.turns_table, field_name, self.requests_config
         elif field_name == self.responses_config.name:
-            return self._turns_table, field_name, self.responses_config
+            return self.turns_table, field_name, self.responses_config
         elif field_name == self.misc_config.name:
-            return self._misc_table, self._value_column_name, self.misc_config
+            return self.misc_table, self._value_column_name, self.misc_config
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
-        stmt = select(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)
+        stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return None if result is None else result[1:]
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
-        insert_stmt = self._INSERT_CALLABLE(self._main_table).values(
+        insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
                 self._id_column_name: ctx_id,
                 self._current_turn_id_column_name: turn_id,
@@ -263,16 +264,16 @@ class SQLContextStorage(DBContextStorage):
     async def delete_context(self, ctx_id: str) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(
-                conn.execute(delete(self._main_table).where(self._main_table.c[self._id_column_name] == ctx_id)),
-                conn.execute(delete(self._turns_table).where(self._turns_table.c[self._id_column_name] == ctx_id)),
-                conn.execute(delete(self._misc_table).where(self._misc_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self.turns_table).where(self.turns_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self.misc_table).where(self.misc_table.c[self._id_column_name] == ctx_id)),
             )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, field_name, field_config = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name], field_table.c[field_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] != None))
-        if field_table == self._turns_table:
+        field_table, key_name, field_config = self._get_config_for_field(field_name)
+        stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
+        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
+        if field_table == self.turns_table:
             stmt = stmt.order_by(field_table.c[self._key_column_name].desc())
         if isinstance(field_config.subscript, int):
             stmt = stmt.limit(field_config.subscript)
@@ -282,37 +283,37 @@ class SQLContextStorage(DBContextStorage):
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, field_name, _ = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[field_name] != None))
+        field_table, key_name, _ = self._get_config_for_field(field_name)
+        stmt = select(field_table.c[self._key_column_name]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        field_table, field_name, _ = self._get_config_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name], field_table.c[field_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._key_column_name].in_(tuple(keys))) & (field_table.c[field_name] != None))
+        field_table, key_name, _ = self._get_config_for_field(field_name)
+        stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
+        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._key_column_name].in_(tuple(keys))) & (field_table.c[key_name] != None))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, field_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_config_for_field(field_name)
         if len(items) == 0:
             return
-        if field_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
+        if key_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
             raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
         insert_stmt = self._INSERT_CALLABLE(field_table).values(
             [
                 {
                     self._id_column_name: ctx_id,
                     self._key_column_name: k,
-                    field_name: v,
+                    key_name: v,
                 } for k, v in items
             ]
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [field_name],
+            [key_name],
             [self._id_column_name, self._key_column_name],
         )
         async with self.engine.begin() as conn:
@@ -321,7 +322,7 @@ class SQLContextStorage(DBContextStorage):
     async def clear_all(self) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(
-                conn.execute(delete(self._main_table)),
-                conn.execute(delete(self._turns_table)),
-                conn.execute(delete(self._misc_table))
+                conn.execute(delete(self.main_table)),
+                conn.execute(delete(self.turns_table)),
+                conn.execute(delete(self.misc_table))
             )
