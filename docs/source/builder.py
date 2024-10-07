@@ -98,7 +98,7 @@ class ChatskySphinxBuilder(CommandBuilder):
 
         # Running Chatsky custom funcs before doc building
         scripts.doc.pre_sphinx_build_funcs(str(root_dir))
-        setup_module.setup(str(root_dir), str(output_dir))
+        setup_module.setup(str(root_dir))
 
         # Using the newest conf.py file instead of the old one
         # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.

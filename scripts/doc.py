@@ -13,6 +13,7 @@ from python_on_whales import DockerClient
 
 from .clean import clean_docs
 from .utils import docker_client
+from chatsky.docs.source import setup
 
 from sphinx_polyversion.main import main as poly_main
 
@@ -71,6 +72,7 @@ def docs(docker: Optional[DockerClient]):
             # TODO: Add setup and the other funcs back in
             _build_drawio()
             result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
+            setup(root_dir=".")
             result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
             result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
             exit(result)

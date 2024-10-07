@@ -122,7 +122,7 @@ switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
 # To-do: a separate switcher.json for dev and other branches
 
 # Checking for dev before passing version to switcher
-if current[0] == "dev":
+if polyversion_build and current[0] == "dev":
     version_data = "dev"
     # Possible to-do: show the warning banner for latest(unstable) version.
 else:
