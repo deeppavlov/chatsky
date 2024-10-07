@@ -5,6 +5,8 @@ This module defines functions that allow to delete data in various types of data
 including JSON, MongoDB, Pickle, Redis, Shelve, SQL, and YDB databases.
 """
 
+from typing import Any
+
 from chatsky.context_storages import (
     JSONContextStorage,
     MongoContextStorage,
@@ -38,7 +40,7 @@ async def delete_mongo(storage: MongoContextStorage):
     """
     if not mongo_available:
         raise Exception("Can't delete mongo database - mongo provider unavailable!")
-    for collection in [storage._main_table, storage._turns_table, storage._misc_table]:
+    for collection in [storage.main_table, storage.turns_table, storage.misc_table]:
         await collection.drop()
 
 
@@ -51,7 +53,7 @@ async def delete_redis(storage: RedisContextStorage):
     if not redis_available:
         raise Exception("Can't delete redis database - redis provider unavailable!")
     await storage.clear_all()
-    await storage._redis.close()
+    await storage.database.aclose()
 
 
 async def delete_sql(storage: SQLContextStorage):
@@ -67,7 +69,7 @@ async def delete_sql(storage: SQLContextStorage):
     if storage.dialect == "mysql" and not mysql_available:
         raise Exception("Can't delete mysql database - mysql provider unavailable!")
     async with storage.engine.begin() as conn:
-        for table in [storage._main_table, storage._turns_table, storage._misc_table]:
+        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
             await conn.run_sync(table.drop, storage.engine)
 
 
@@ -80,8 +82,8 @@ async def delete_ydb(storage: YDBContextStorage):
     if not ydb_available:
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
-    async def callee(session):
-        for field in [storage._CONTEXTS_TABLE, storage._LOGS_TABLE]:
-            await session.drop_table("/".join([storage.database, f"{storage.table_prefix}_{field}"]))
+    async def callee(session: Any) -> None:
+        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
+            await session.drop_table("/".join([storage.database, table]))
 
     await storage.pool.retry_operation(callee)

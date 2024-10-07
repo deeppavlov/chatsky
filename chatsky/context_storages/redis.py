@@ -68,7 +68,7 @@ class RedisContextStorage(DBContextStorage):
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
         if not bool(key_prefix):
             raise ValueError("`key_prefix` parameter shouldn't be empty")
-        self._redis = Redis.from_url(self.full_path)
+        self.database = Redis.from_url(self.full_path)
 
         self._prefix = key_prefix
         self._main_key = f"{key_prefix}:{self._main_table_name}"
@@ -97,12 +97,12 @@ class RedisContextStorage(DBContextStorage):
             raise ValueError(f"Unknown field name: {field_name}!")
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
-        if await self._redis.exists(f"{self._main_key}:{ctx_id}"):
+        if await self.database.exists(f"{self._main_key}:{ctx_id}"):
             cti, ca, ua, fd = await gather(
-                self._redis.hget(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name),
-                self._redis.hget(f"{self._main_key}:{ctx_id}", self._created_at_column_name),
-                self._redis.hget(f"{self._main_key}:{ctx_id}", self._updated_at_column_name),
-                self._redis.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name)
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name),
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._created_at_column_name),
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._updated_at_column_name),
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name)
             )
             return (int(cti), int(ca), int(ua), fd)
         else:
@@ -110,50 +110,50 @@ class RedisContextStorage(DBContextStorage):
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
         await gather(
-            self._redis.hset(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name, str(turn_id)),
-            self._redis.hset(f"{self._main_key}:{ctx_id}", self._created_at_column_name, str(crt_at)),
-            self._redis.hset(f"{self._main_key}:{ctx_id}", self._updated_at_column_name, str(upd_at)),
-            self._redis.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data)
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name, str(turn_id)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._created_at_column_name, str(crt_at)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._updated_at_column_name, str(upd_at)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data)
         )
 
     async def delete_context(self, ctx_id: str) -> None:
-        keys = await self._redis.keys(f"{self._prefix}:*:{ctx_id}*")
+        keys = await self.database.keys(f"{self._prefix}:*:{ctx_id}*")
         if len(keys) > 0:
-            await self._redis.delete(*keys)
+            await self.database.delete(*keys)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         field_key, field_converter, field_config = self._get_config_for_field(field_name, ctx_id)
-        keys = await self._redis.hkeys(field_key)
+        keys = await self.database.hkeys(field_key)
         if field_key.startswith(self._turns_key):
             keys = sorted(keys, key=lambda k: int(k), reverse=True)
         if isinstance(field_config.subscript, int):
             keys = keys[:field_config.subscript]
         elif isinstance(field_config.subscript, Set):
             keys = [k for k in keys if k in self._keys_to_bytes(field_config.subscript)]
-        values = await gather(*[self._redis.hget(field_key, k) for k in keys])
+        values = await gather(*[self.database.hget(field_key, k) for k in keys])
         return [(k, v) for k, v in zip(field_converter(keys), values)]
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
         field_key, field_converter, _ = self._get_config_for_field(field_name, ctx_id)
-        return field_converter(await self._redis.hkeys(field_key))
+        return field_converter(await self.database.hkeys(field_key))
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
         field_key, field_converter, _ = self._get_config_for_field(field_name, ctx_id)
-        load = [k for k in await self._redis.hkeys(field_key) if k in self._keys_to_bytes(keys)]
-        values = await gather(*[self._redis.hget(field_key, k) for k in load])
+        load = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
+        values = await gather(*[self.database.hget(field_key, k) for k in load])
         return [(k, v) for k, v in zip(field_converter(load), values)]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
         field_key, _, _ = self._get_config_for_field(field_name, ctx_id)
-        await gather(*[self._redis.hset(field_key, str(k), v) for k, v in items])
+        await gather(*[self.database.hset(field_key, str(k), v) for k, v in items])
 
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
         field_key, _, _ = self._get_config_for_field(field_name, ctx_id)
-        match = [k for k in await self._redis.hkeys(field_key) if k in self._keys_to_bytes(keys)]
+        match = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         if len(match) > 0:
-            await self._redis.hdel(field_key, *match)
+            await self.database.hdel(field_key, *match)
 
     async def clear_all(self) -> None:
-        keys = await self._redis.keys(f"{self._prefix}:*")
+        keys = await self.database.keys(f"{self._prefix}:*")
         if len(keys) > 0:
-            await self._redis.delete(*keys)
+            await self.database.delete(*keys)

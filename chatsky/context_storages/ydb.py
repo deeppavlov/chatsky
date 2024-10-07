@@ -10,9 +10,9 @@ with Yandex Cloud services using python. This allows Chatsky to easily integrate
 take advantage of the scalability and high-availability features provided by the service.
 """
 
-import asyncio
+from asyncio import gather, run
 from os.path import join
-from typing import Any, Set, Tuple, List, Dict, Optional
+from typing import Awaitable, Callable, Hashable, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
 from .database import DBContextStorage, FieldConfig
@@ -26,9 +26,9 @@ try:
         Column,
         OptionalType,
         PrimitiveType,
-        TableIndex,
     )
     from ydb.aio import Driver, SessionPool
+    from ydb.table import Session
 
     ydb_available = True
 except ImportError:
@@ -55,345 +55,291 @@ class YDBContextStorage(DBContextStorage):
     :param table_name: The name of the table to use.
     """
 
-    _CONTEXTS_TABLE = "contexts"
-    _LOGS_TABLE = "logs"
-    _KEY_COLUMN = "key"
-    _VALUE_COLUMN = "value"
-    _FIELD_COLUMN = "field"
-    _PACKED_COLUMN = "data"
+    is_asynchronous = True
 
     def __init__(
         self,
         path: str,
-        serializer: Optional[Any] = None,
         rewrite_existing: bool = False,
-        turns_config: Optional[FieldConfig] = None,
-        misc_config: Optional[FieldConfig] = None,
+        configuration: Optional[Dict[str, FieldConfig]] = None,
         table_name_prefix: str = "chatsky_table",
-        timeout=5,
+        timeout: int = 5,
     ):
-        DBContextStorage.__init__(self, path, serializer, rewrite_existing, turns_config, misc_config)
-        self.context_schema.supports_async = True
+        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
 
         protocol, netloc, self.database, _, _ = urlsplit(path)
-        self.endpoint = "{}://{}".format(protocol, netloc)
         if not ydb_available:
             install_suggestion = get_protocol_install_suggestion("grpc")
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
         self.table_prefix = table_name_prefix
-        self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix))
+        run(self._init_drive(timeout, f"{protocol}://{netloc}"))
 
-    async def del_item_async(self, key: str):
-        async def callee(session):
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
-                """
+    async def _init_drive(self, timeout: int, endpoint: str) -> None:
+        self._driver = Driver(endpoint=endpoint, database=self.database)
+        client_settings = self._driver.table_client._table_client_settings.with_allow_truncated_result(True)
+        self._driver.table_client._table_client_settings = client_settings
+        await self._driver.wait(fail_fast=True, timeout=timeout)
 
-            await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                {f"${ExtraFields.storage_key.value}": key},
-                commit_tx=True,
+        self.pool = SessionPool(self._driver, size=10)
+
+        self.main_table = f"{self.table_prefix}_{self._main_table_name}"
+        if not await self._does_table_exist(self.main_table):
+            await self._create_main_table(self.main_table)
+
+        self.turns_table = f"{self.table_prefix}_{self._turns_table_name}"
+        if not await self._does_table_exist(self.turns_table):
+            await self._create_turns_table(self.turns_table)
+
+        self.misc_table = f"{self.table_prefix}_{self._misc_table_name}"
+        if not await self._does_table_exist(self.misc_table):
+            await self._create_misc_table(self.misc_table)
+
+    async def _does_table_exist(self, table_name: str) -> bool:
+        async def callee(session: Session) -> None:
+            await session.describe_table(join(self.database, table_name))
+
+        try:
+            await self.pool.retry_operation(callee)
+            return True
+        except SchemeError:
+            return False
+
+    async def _create_main_table(self, table_name: str) -> None:
+        async def callee(session: Session) -> None:
+            await session.create_table(
+                "/".join([self.database, table_name]),
+                TableDescription()
+                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
+                .with_column(Column(self._current_turn_id_column_name, PrimitiveType.Uint64))
+                .with_column(Column(self._created_at_column_name, PrimitiveType.Uint64))
+                .with_column(Column(self._updated_at_column_name, PrimitiveType.Uint64))
+                .with_column(Column(self._framework_data_column_name, PrimitiveType.String))
+                .with_primary_key(self._id_column_name)
             )
 
-        return await self.pool.retry_operation(callee)
+        await self.pool.retry_operation(callee)
 
-    async def contains_async(self, key: str) -> bool:
-        async def callee(session):
+    async def _create_turns_table(self, table_name: str) -> None:
+        async def callee(session: Session) -> None:
+            await session.create_table(
+                "/".join([self.database, table_name]),
+                TableDescription()
+                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
+                .with_column(Column(self._key_column_name, PrimitiveType.Uint32))
+                .with_column(Column(self.labels_config.name, OptionalType(PrimitiveType.String)))
+                .with_column(Column(self.requests_config.name, OptionalType(PrimitiveType.String)))
+                .with_column(Column(self.responses_config.name, OptionalType(PrimitiveType.String)))
+                .with_primary_keys(self._id_column_name, self._key_column_name)
+            )
+
+        await self.pool.retry_operation(callee)
+
+    async def _create_misc_table(self, table_name: str) -> None:
+        async def callee(session: Session) -> None:
+            await session.create_table(
+                "/".join([self.database, table_name]),
+                TableDescription()
+                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
+                .with_column(Column(self._key_column_name, PrimitiveType.Utf8))
+                .with_column(Column(self._value_column_name, OptionalType(PrimitiveType.String)))
+                .with_primary_keys(self._id_column_name, self._key_column_name)
+            )
+
+        await self.pool.retry_operation(callee)
+
+    # TODO: this method (and similar) repeat often. Optimize?
+    def _get_config_for_field(self, field_name: str) -> Tuple[str, str, FieldConfig]:
+        if field_name == self.labels_config.name:
+            return self.turns_table, field_name, self.labels_config
+        elif field_name == self.requests_config.name:
+            return self.turns_table, field_name, self.requests_config
+        elif field_name == self.responses_config.name:
+            return self.turns_table, field_name, self.responses_config
+        elif field_name == self.misc_config.name:
+            return self.misc_table, self._value_column_name, self.misc_config
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
+    # TODO: this method (and similar) repeat often. Optimize?
+    def _transform_keys(self, field_name: str, keys: List[Hashable]) -> List[str]:
+        if field_name == self.misc_config.name:
+            return [f"\"{e}\"" for e in keys]
+        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+            return [str(e) for e in keys]
+        else:
+            raise ValueError(f"Unknown field name: {field_name}!")
+
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+        async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes]]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
-                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
+                SELECT {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._framework_data_column_name}
+                FROM {self.main_table}
+                WHERE {self._id_column_name} = "{ctx_id}";
                 """  # noqa: E501
-
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                {f"${ExtraFields.storage_key.value}": key},
-                commit_tx=True,
+                await session.prepare(query), dict(), commit_tx=True
             )
-            return result_sets[0].rows[0].cnt != 0 if len(result_sets[0].rows) > 0 else False
+            return (
+                result_sets[0].rows[0][self._current_turn_id_column_name],
+                result_sets[0].rows[0][self._created_at_column_name],
+                result_sets[0].rows[0][self._updated_at_column_name],
+                result_sets[0].rows[0][self._framework_data_column_name],
+            ) if len(result_sets[0].rows) > 0 else None
 
         return await self.pool.retry_operation(callee)
 
-    async def len_async(self) -> int:
-        async def callee(session):
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+        async def callee(session: Session) -> None:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
-                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.active_ctx.value} == True;
-                """
-
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                commit_tx=True,
-            )
-            return result_sets[0].rows[0].cnt if len(result_sets[0].rows) > 0 else 0
-
-        return await self.pool.retry_operation(callee)
-
-    async def clear_async(self, prune_history: bool = False):
-        async def callee(session):
-            if prune_history:
-                query = f"""
-                    PRAGMA TablePathPrefix("{self.database}");
-                    DELETE FROM {self.table_prefix}_{self._CONTEXTS_TABLE};
-                    """
-            else:
-                query = f"""
-                    PRAGMA TablePathPrefix("{self.database}");
-                    UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False;
-                    """
-
-            await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                commit_tx=True,
-            )
-
-        return await self.pool.retry_operation(callee)
-
-    async def keys_async(self) -> Set[str]:
-        async def callee(session):
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                SELECT DISTINCT {ExtraFields.storage_key.value}
-                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.active_ctx.value} == True;
-                """
-
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                commit_tx=True,
-            )
-            return {row[ExtraFields.storage_key.value] for row in result_sets[0].rows}
-
-        return await self.pool.retry_operation(callee)
-
-    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
-        async def callee(session):
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT {ExtraFields.id.value}, {self._PACKED_COLUMN}, {ExtraFields.updated_at.value}
-                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
-                ORDER BY {ExtraFields.updated_at.value} DESC
-                LIMIT 1;
+                DECLARE ${self._current_turn_id_column_name} AS Uint64;
+                DECLARE ${self._created_at_column_name} AS Uint64;
+                DECLARE ${self._updated_at_column_name} AS Uint64;
+                DECLARE ${self._framework_data_column_name} AS String;
+                UPSERT INTO {self.main_table} ({self._id_column_name}, {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._framework_data_column_name})
+                VALUES ("{ctx_id}", ${self._current_turn_id_column_name}, ${self._created_at_column_name}, ${self._updated_at_column_name}, ${self._framework_data_column_name});
                 """  # noqa: E501
-
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                {f"${ExtraFields.storage_key.value}": storage_key},
-                commit_tx=True,
-            )
-
-            if len(result_sets[0].rows) > 0:
-                return (
-                    self.serializer.loads(result_sets[0].rows[0][self._PACKED_COLUMN]),
-                    result_sets[0].rows[0][ExtraFields.id.value],
-                )
-            else:
-                return dict(), None
-
-        return await self.pool.retry_operation(callee)
-
-    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, id: str) -> Dict:
-        async def callee(session):
-            limit = 1001 if keys_limit is None else keys_limit
-
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.id.value} AS Utf8;
-                DECLARE ${self._FIELD_COLUMN} AS Utf8;
-                SELECT {self._KEY_COLUMN}, {self._VALUE_COLUMN}
-                FROM {self.table_prefix}_{self._LOGS_TABLE}
-                WHERE {ExtraFields.id.value} = ${ExtraFields.id.value} AND {self._FIELD_COLUMN} = ${self._FIELD_COLUMN}
-                ORDER BY {self._KEY_COLUMN} DESC
-                LIMIT {limit}
-                """  # noqa: E501
-
-            final_offset = 0
-            result_sets = None
-
-            result_dict = dict()
-            while result_sets is None or result_sets[0].truncated:
-                final_query = f"{query} OFFSET {final_offset};"
-                result_sets = await session.transaction(SerializableReadWrite()).execute(
-                    await session.prepare(final_query),
-                    {f"${ExtraFields.id.value}": id, f"${self._FIELD_COLUMN}": field_name},
-                    commit_tx=True,
-                )
-
-                if len(result_sets[0].rows) > 0:
-                    for key, value in {
-                        row[self._KEY_COLUMN]: row[self._VALUE_COLUMN] for row in result_sets[0].rows
-                    }.items():
-                        result_dict[key] = self.serializer.loads(value)
-
-                final_offset += 1000
-
-            return result_dict
-
-        return await self.pool.retry_operation(callee)
-
-    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, id: str):
-        async def callee(session):
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._PACKED_COLUMN} AS String;
-                DECLARE ${ExtraFields.id.value} AS Utf8;
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                DECLARE ${ExtraFields.created_at.value} AS Uint64;
-                DECLARE ${ExtraFields.updated_at.value} AS Uint64;
-                UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
-                VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
-                """  # noqa: E501
-
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._PACKED_COLUMN}": self.serializer.dumps(data),
-                    f"${ExtraFields.id.value}": id,
-                    f"${ExtraFields.storage_key.value}": storage_key,
-                    f"${ExtraFields.created_at.value}": created,
-                    f"${ExtraFields.updated_at.value}": updated,
+                    f"${self._current_turn_id_column_name}": turn_id,
+                    f"${self._created_at_column_name}": crt_at,
+                    f"${self._updated_at_column_name}": upd_at,
+                    f"${self._framework_data_column_name}": fw_data,
                 },
-                commit_tx=True,
+                commit_tx=True
             )
 
-        return await self.pool.retry_operation(callee)
+        await self.pool.retry_operation(callee)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, id: str):
-        async def callee(session):
-            for field, key, value in data:
+    async def delete_context(self, ctx_id: str) -> None:
+        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
+            async def callee(session: Session) -> None:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
-                    DECLARE ${self._FIELD_COLUMN} AS Utf8;
-                    DECLARE ${self._KEY_COLUMN} AS Uint64;
-                    DECLARE ${self._VALUE_COLUMN} AS String;
-                    DECLARE ${ExtraFields.id.value} AS Utf8;
-                    DECLARE ${ExtraFields.updated_at.value} AS Uint64;
-                    UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.id.value}, {ExtraFields.updated_at.value})
-                    VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.id.value}, ${ExtraFields.updated_at.value});
+                    DELETE FROM {table_name}
+                    WHERE {self._id_column_name} = "{ctx_id}";
                     """  # noqa: E501
-
                 await session.transaction(SerializableReadWrite()).execute(
-                    await session.prepare(query),
-                    {
-                        f"${self._FIELD_COLUMN}": field,
-                        f"${self._KEY_COLUMN}": key,
-                        f"${self._VALUE_COLUMN}": self.serializer.dumps(value),
-                        f"${ExtraFields.id.value}": id,
-                        f"${ExtraFields.updated_at.value}": updated,
-                    },
-                    commit_tx=True,
+                    await session.prepare(query), dict(), commit_tx=True
                 )
+
+            return callee
+
+        await gather(
+            self.pool.retry_operation(construct_callee(self.main_table)),
+            self.pool.retry_operation(construct_callee(self.turns_table)),
+            self.pool.retry_operation(construct_callee(self.misc_table))
+        )
+
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+        field_table, key_name, field_config = self._get_config_for_field(field_name)
+
+        async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
+            sort, limit, key = "", "", ""
+            if field_table == self.turns_table:
+                sort = f"ORDER BY {self._key_column_name} DESC"
+            if isinstance(field_config.subscript, int):
+                limit = f"LIMIT {field_config.subscript}"
+            elif isinstance(field_config.subscript, Set):
+                keys = ", ".join(self._transform_keys(field_name, field_config.subscript))
+                key = f"AND {self._key_column_name} IN ({keys})"
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                SELECT {self._key_column_name}, {key_name}
+                FROM {field_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL {key}
+                {sort} {limit};
+                """  # noqa: E501
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query), dict(), commit_tx=True
+            )
+            return [
+                (e[self._key_column_name], e[key_name]) for e in result_sets[0].rows
+            ] if len(result_sets[0].rows) > 0 else list()
 
         return await self.pool.retry_operation(callee)
 
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+        field_table, key_name, _ = self._get_config_for_field(field_name)
 
-async def _init_drive(timeout: int, endpoint: str, database: str, table_name_prefix: str):
-    """
-    Initialize YDB drive if it doesn't exist and connect to it.
+        async def callee(session: Session) -> List[Hashable]:
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                SELECT {self._key_column_name}
+                FROM {field_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL;
+                """  # noqa: E501
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query), dict(), commit_tx=True
+            )
+            return [
+                e[self._key_column_name] for e in result_sets[0].rows
+            ] if len(result_sets[0].rows) > 0 else list()
 
-    :param timeout: timeout to wait for driver.
-    :param endpoint: endpoint to connect to.
-    :param database: database to connect to.
-    :param table_name_prefix: prefix for all table names.
-    """
-    driver = Driver(endpoint=endpoint, database=database)
-    client_settings = driver.table_client._table_client_settings.with_allow_truncated_result(True)
-    driver.table_client._table_client_settings = client_settings
-    await driver.wait(fail_fast=True, timeout=timeout)
+        return await self.pool.retry_operation(callee)
 
-    pool = SessionPool(driver, size=10)
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
+        field_table, key_name, _ = self._get_config_for_field(field_name)
 
-    logs_table_name = f"{table_name_prefix}_{YDBContextStorage._LOGS_TABLE}"
-    if not await _does_table_exist(pool, database, logs_table_name):
-        await _create_logs_table(pool, database, logs_table_name)
+        async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                SELECT {self._key_column_name}, {key_name}
+                FROM {field_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL
+                AND {self._key_column_name} IN ({', '.join(self._transform_keys(field_name, keys))});
+                """  # noqa: E501
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query), dict(), commit_tx=True
+            )
+            return [
+                (e[self._key_column_name], e[key_name]) for e in result_sets[0].rows
+            ] if len(result_sets[0].rows) > 0 else list()
 
-    ctx_table_name = f"{table_name_prefix}_{YDBContextStorage._CONTEXTS_TABLE}"
-    if not await _does_table_exist(pool, database, ctx_table_name):
-        await _create_contexts_table(pool, database, ctx_table_name)
+        return await self.pool.retry_operation(callee)
 
-    return driver, pool
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+        field_table, key_name, _ = self._get_config_for_field(field_name)
+        if len(items) == 0:
+            return
 
+        async def callee(session: Session) -> None:
+            keys = self._transform_keys(field_name, [k for k, _ in items])
+            placeholders = {k: f"${key_name}_{i}" for i, (k, v) in enumerate(items) if v is not None}
+            declarations = "\n".join(f"DECLARE {p} AS String;" for p in placeholders.values())
+            values = ", ".join(f"(\"{ctx_id}\", {keys[i]}, {placeholders.get(k, 'NULL')})" for i, (k, _) in enumerate(items))
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                {declarations}
+                UPSERT INTO {field_table} ({self._id_column_name}, {self._key_column_name}, {key_name})
+                VALUES {values};
+                """  # noqa: E501
+            await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query),
+                {placeholders[k]: v for k, v in items if k in placeholders.keys()},
+                commit_tx=True
+            )
 
-async def _does_table_exist(pool, path, table_name) -> bool:
-    """
-    Check if table exists.
+        await self.pool.retry_operation(callee)
 
-    :param pool: driver session pool.
-    :param path: path to table being checked.
-    :param table_name: the table name.
-    :returns: True if table exists, False otherwise.
-    """
+    async def clear_all(self) -> None:
+        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
+            async def callee(session: Session) -> None:
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DELETE FROM {table_name};
+                    """  # noqa: E501
+                await session.transaction(SerializableReadWrite()).execute(
+                    await session.prepare(query), dict(), commit_tx=True
+                )
 
-    async def callee(session):
-        await session.describe_table(join(path, table_name))
+            return callee
 
-    try:
-        await pool.retry_operation(callee)
-        return True
-    except SchemeError:
-        return False
-
-
-async def _create_contexts_table(pool, path, table_name):
-    """
-    Create CONTEXTS table.
-
-    :param pool: driver session pool.
-    :param path: path to table being checked.
-    :param table_name: the table name.
-    """
-
-    async def callee(session):
-        await session.create_table(
-            "/".join([path, table_name]),
-            TableDescription()
-            .with_column(Column(ExtraFields.id.value, PrimitiveType.Utf8))
-            .with_column(Column(ExtraFields.storage_key.value, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(ExtraFields.active_ctx.value, OptionalType(PrimitiveType.Bool)))
-            .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Uint64)))
-            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Uint64)))
-            .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
-            .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
-            .with_primary_key(ExtraFields.id.value),
+        await gather(
+            self.pool.retry_operation(construct_callee(self.main_table)),
+            self.pool.retry_operation(construct_callee(self.turns_table)),
+            self.pool.retry_operation(construct_callee(self.misc_table))
         )
-
-    return await pool.retry_operation(callee)
-
-
-async def _create_logs_table(pool, path, table_name):
-    """
-    Create CONTEXTS table.
-
-    :param pool: driver session pool.
-    :param path: path to table being checked.
-    :param table_name: the table name.
-    """
-
-    async def callee(session):
-        await session.create_table(
-            "/".join([path, table_name]),
-            TableDescription()
-            .with_column(Column(ExtraFields.id.value, PrimitiveType.Utf8))
-            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Uint64)))
-            .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
-            .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex("logs_id_index").with_index_columns(ExtraFields.id.value))
-            .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
-            .with_primary_keys(
-                ExtraFields.id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN
-            ),
-        )
-
-    return await pool.retry_operation(callee)
