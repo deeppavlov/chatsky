@@ -13,7 +13,7 @@ from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
 
-polyversion_build = os.getenv("POLYVERSION_BUILD", default=True)
+polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
 if polyversion_build:
     data = load(globals())  # adds variables `current` and `revisions`
     current: GitRef = data['current']

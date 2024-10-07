@@ -46,6 +46,11 @@ jobs:
           git status
           echo "$BRANCH_NAME"
 
+      - name: checking if it's a polyversion build
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          echo "POLYVERSION_BUILD=True" >> $GITHUB_ENV
+
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
