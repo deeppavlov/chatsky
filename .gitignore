@@ -3,6 +3,7 @@
 dist/
 venv/
 build/
+dbs/
 docs/source/apiref
 docs/source/_misc
 docs/source/release_notes.rst

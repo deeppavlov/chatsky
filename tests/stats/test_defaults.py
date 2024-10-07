@@ -12,8 +12,8 @@ except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
-async def test_get_current_label():
-    context = Context.init(("a", "b"))
+async def test_get_current_label(context_factory):
+    context = context_factory(start_label=("a", "b"))
     runtime_info = ExtraHandlerRuntimeInfo(
         stage="BEFORE",
         component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
@@ -22,7 +22,7 @@ async def test_get_current_label():
     assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
-async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_provider):
+async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_provider, context_factory):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
@@ -32,7 +32,8 @@ async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_p
         stage="BEFORE",
         component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
     )
-    _ = await default_extractors.get_current_label(Context.init(("a", "b")), runtime_info)
+    ctx = context_factory(start_label=("a", "b"))
+    _ = await default_extractors.get_current_label(ctx, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

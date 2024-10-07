@@ -68,7 +68,7 @@ class Actor(PipelineComponent):
 
         logger.debug(f"Next label: {next_label}")
 
-        ctx.add_label(next_label)
+        ctx.labels[ctx.current_turn_id] = next_label
 
         response = Message()
 
@@ -91,7 +91,7 @@ class Actor(PipelineComponent):
         except Exception as exc:
             logger.exception("Exception occurred during response processing.", exc_info=exc)
 
-        ctx.add_response(response)
+        ctx.responses[ctx.current_turn_id] = response
 
     @staticmethod
     async def _run_processing_parallel(processing: Dict[str, BaseProcessing], ctx: Context) -> None:

@@ -5,19 +5,15 @@ This module defines functions that allow to delete data in various types of data
 including JSON, MongoDB, Pickle, Redis, Shelve, SQL, and YDB databases.
 """
 
-import os
+from typing import Any
 
 from chatsky.context_storages import (
     JSONContextStorage,
     MongoContextStorage,
-    PickleContextStorage,
     RedisContextStorage,
-    ShelveContextStorage,
     SQLContextStorage,
     YDBContextStorage,
-    json_available,
     mongo_available,
-    pickle_available,
     redis_available,
     sqlite_available,
     postgres_available,
@@ -26,16 +22,14 @@ from chatsky.context_storages import (
 )
 
 
-async def delete_json(storage: JSONContextStorage):
+async def delete_file(storage: JSONContextStorage):
     """
     Delete all data from a JSON context storage.
 
     :param storage: A JSONContextStorage object.
     """
-    if not json_available:
-        raise Exception("Can't delete JSON database - JSON provider unavailable!")
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
+    if storage.path.exists():
+        storage.path.unlink()
 
 
 async def delete_mongo(storage: MongoContextStorage):
@@ -46,19 +40,8 @@ async def delete_mongo(storage: MongoContextStorage):
     """
     if not mongo_available:
         raise Exception("Can't delete mongo database - mongo provider unavailable!")
-    await storage.collection.drop()
-
-
-async def delete_pickle(storage: PickleContextStorage):
-    """
-    Delete all data from a Pickle context storage.
-
-    :param storage: A PickleContextStorage object.
-    """
-    if not pickle_available:
-        raise Exception("Can't delete pickle database - pickle provider unavailable!")
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
+    for collection in [storage.main_table, storage.turns_table, storage.misc_table]:
+        await collection.drop()
 
 
 async def delete_redis(storage: RedisContextStorage):
@@ -69,17 +52,8 @@ async def delete_redis(storage: RedisContextStorage):
     """
     if not redis_available:
         raise Exception("Can't delete redis database - redis provider unavailable!")
-    await storage.clear_async()
-
-
-async def delete_shelve(storage: ShelveContextStorage):
-    """
-    Delete all data from a Shelve context storage.
-
-    :param storage: A ShelveContextStorage object.
-    """
-    if os.path.isfile(storage.path):
-        os.remove(storage.path)
+    await storage.clear_all()
+    await storage.database.aclose()
 
 
 async def delete_sql(storage: SQLContextStorage):
@@ -94,8 +68,9 @@ async def delete_sql(storage: SQLContextStorage):
         raise Exception("Can't delete sqlite database - sqlite provider unavailable!")
     if storage.dialect == "mysql" and not mysql_available:
         raise Exception("Can't delete mysql database - mysql provider unavailable!")
-    async with storage.engine.connect() as conn:
-        await conn.run_sync(storage.table.drop, storage.engine)
+    async with storage.engine.begin() as conn:
+        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
+            await conn.run_sync(table.drop, storage.engine)
 
 
 async def delete_ydb(storage: YDBContextStorage):
@@ -107,7 +82,8 @@ async def delete_ydb(storage: YDBContextStorage):
     if not ydb_available:
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
-    async def callee(session):
-        await session.drop_table("/".join([storage.database, storage.table_name]))
+    async def callee(session: Any) -> None:
+        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
+            await session.drop_table("/".join([storage.database, table]))
 
     await storage.pool.retry_operation(callee)
