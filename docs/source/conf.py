@@ -14,6 +14,9 @@ from sphinx_polyversion.git import GitRef
 # -- Project information -----------------------------------------------------
 
 polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+if not polyversion_build:
+    # Importing setup here, because it will get called by Sphinx.
+    from .setup import setup
 if polyversion_build:
     data = load(globals())  # adds variables `current` and `revisions`
     current: GitRef = data['current']
