@@ -83,6 +83,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
+        print("This is right before changing links to being version-dependent.")
         # Making GitHub links version dependent in tutorials and API reference
         doc_version = str(output_dir).split('/')[-1]
         example_links_file = Path(source_dir) / "_templates" / "example-links.html"
