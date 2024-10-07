@@ -61,7 +61,7 @@ def docs(docker: Optional[DockerClient]):
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         # polyversion_build is False for local builds and PR builds.
         # In other words, it's only 'True' when docs are to be deployed on gh-pages
-        polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+        polyversion_build = os.getenv("POLYVERSION_BUILD", default=True)
         if polyversion_build:
             poly_path = "docs/source/poly.py"
             sys.argv = [poly_path, poly_path]
