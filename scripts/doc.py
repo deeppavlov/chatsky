@@ -68,6 +68,7 @@ def docs(docker: Optional[DockerClient]):
             poly_main()
             exit(0)
         else:
+            # TODO: Add setup and the other funcs back in
             _build_drawio()
             result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
             result += build.make_main(["-M", "clean", "docs/source", "docs/build"])

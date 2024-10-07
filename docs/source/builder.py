@@ -84,6 +84,9 @@ class ChatskySphinxBuilder(CommandBuilder):
         output_dir.mkdir(exist_ok=True, parents=True)
 
         # Importing version-dependent module setup.py
+        # TODO: import setup() from older conf.py files directly.
+        # Maybe if the import is unsuccessful import from the other location?
+        # Or just take the version into account.
         root_dir = environment.path.absolute()
         spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
         setup_module = importlib.util.module_from_spec(spec)
@@ -98,8 +101,8 @@ class ChatskySphinxBuilder(CommandBuilder):
         setup_module.setup(str(root_dir), str(output_dir))
 
         # Using the newest conf.py file instead of the old one
-        # This feature can be turned on, in case anyone needs it to build old versions with a newer design.
-        # Just don't forget to configure poly.py
+        # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.
+        # Just don't forget to configure poly.py for building the right tags
         new_sphinx_configs = False
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
@@ -107,6 +110,16 @@ class ChatskySphinxBuilder(CommandBuilder):
             shutil.copyfile(newer_conf_path, older_conf_path)
         # If you add your own conf.py path there, you could build with any conf.py,
         # meaning you could add features like the version-switcher button.
+
+        # Making GitHub links version dependent in tutorials and API reference
+        doc_version = str(output_dir).split('/')[-1]
+        example_links_file = Path(source_dir) / "_templates" / "example-links.html"
+        source_links_file = Path(source_dir) / "_templates" / "source-links.html"
+        for links_file in [example_links_file, source_links_file]:
+            with open(links_file, "r+") as file:
+                contents = file.read()
+                contents.replace("//DOC_VERSION//", doc_version)
+                file.write(contents)
 
         # pre hook
         if self.pre_cmd:
@@ -126,4 +139,3 @@ class ChatskySphinxBuilder(CommandBuilder):
             out, err, rc = await environment.run(*map(replace, self.post_cmd), env=env)
             if rc:
                 raise BuildError from CalledProcessError(rc, " ".join(cmd), out, err)
-

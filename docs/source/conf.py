@@ -13,8 +13,10 @@ from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
 
-data = load(globals())  # adds variables `current` and `revisions`
-current: GitRef = data['current']
+polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+if polyversion_build:
+    data = load(globals())  # adds variables `current` and `revisions`
+    current: GitRef = data['current']
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
@@ -95,12 +97,8 @@ doc_version = os.getenv('doc_version', default="master")
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:doc_version: {{ doc_version }}
+:doc_version: //DOC_VERSION//
 """
-
-# nbsphinx_prolog = """
-# {% set tutorial_name = env.docname %}
-# {% set doc_version = doc_version %}
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
 
