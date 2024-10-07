@@ -83,6 +83,16 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
+        # Making GitHub links version dependent in tutorials and API reference
+        doc_version = str(output_dir).split('/')[-1]
+        example_links_file = Path(source_dir) / "_templates" / "example-links.html"
+        source_links_file = Path(source_dir) / "_templates" / "source-links.html"
+        for links_file in [example_links_file, source_links_file]:
+            with open(links_file, "r+") as file:
+                contents = file.read()
+                contents.replace("//DOC_VERSION//", doc_version)
+                file.write(contents)
+
         # Importing version-dependent module setup.py
         # TODO: import setup() from older conf.py files directly.
         # Maybe if the import is unsuccessful import from the other location?
@@ -110,16 +120,6 @@ class ChatskySphinxBuilder(CommandBuilder):
             shutil.copyfile(newer_conf_path, older_conf_path)
         # If you add your own conf.py path there, you could build with any conf.py,
         # meaning you could add features like the version-switcher button.
-
-        # Making GitHub links version dependent in tutorials and API reference
-        doc_version = str(output_dir).split('/')[-1]
-        example_links_file = Path(source_dir) / "_templates" / "example-links.html"
-        source_links_file = Path(source_dir) / "_templates" / "source-links.html"
-        for links_file in [example_links_file, source_links_file]:
-            with open(links_file, "r+") as file:
-                contents = file.read()
-                contents.replace("//DOC_VERSION//", doc_version)
-                file.write(contents)
 
         # pre hook
         if self.pre_cmd:
