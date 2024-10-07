@@ -13,7 +13,7 @@ from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
 
-polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+polyversion_build = os.getenv("POLYVERSION_BUILD", default=True)
 if polyversion_build:
     data = load(globals())  # adds variables `current` and `revisions`
     current: GitRef = data['current']
@@ -182,7 +182,6 @@ autodoc_default_options = {
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
 
-print(polyversion_build)
 if not polyversion_build:
+    from docs.source.setup import setup
     # Importing setup here, because it will get called by Sphinx.
-    from .setup import setup
