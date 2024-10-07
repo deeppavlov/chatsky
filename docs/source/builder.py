@@ -92,6 +92,7 @@ class ChatskySphinxBuilder(CommandBuilder):
             with open(links_file, "r") as file:
                 contents = file.read()
                 contents = contents.replace('DOC_VERSION', doc_version)
+                # links_file.write_text(contents)
 
             with open(links_file, "w") as file:
                 file.write(contents)
