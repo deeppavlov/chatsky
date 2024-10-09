@@ -1851,8 +1851,8 @@ files = [
 [package.dependencies]
 cffi = {version = ">=1.12.2", markers = "platform_python_implementation == \"CPython\" and sys_platform == \"win32\""}
 greenlet = [
-    {version = ">=2.0.0", markers = "platform_python_implementation == \"CPython\" and python_version < \"3.11\""},
     {version = ">=3.0rc3", markers = "platform_python_implementation == \"CPython\" and python_version >= \"3.11\""},
+    {version = ">=2.0.0", markers = "platform_python_implementation == \"CPython\" and python_version < \"3.11\""},
 ]
 "zope.event" = "*"
 "zope.interface" = "*"
@@ -7043,7 +7043,10 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [extras]
+async = []
 benchmark = ["altair", "humanize", "pandas", "pympler", "tqdm"]
+dialogflow-conditions = ["requests"]
+extended-conditions = ["requests"]
 json = ["aiofiles"]
 mongodb = ["motor"]
 mysql = ["asyncmy", "cryptography", "sqlalchemy"]
