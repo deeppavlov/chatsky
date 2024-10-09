@@ -101,7 +101,7 @@ jobs:
       - name: preparing for PR deployment
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          mkdir ${{ env.OLD_VERSIONS }}
+          mkdir -p ${{ env.OLD_VERSIONS }}
           mv !(${{ env.OLD_VERSIONS }}) ${{ env.OLD_VERSIONS }}
 
       - name: deploy website
