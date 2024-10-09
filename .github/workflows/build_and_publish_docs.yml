@@ -65,9 +65,16 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: get old versions names for updating documentation
+      - name: get old tags names for updating documentation
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           echo "OLD_VERSIONS=$(python -c 'import os, json; print json.dumps(os.listdir("."))')" >> "$GITHUB_ENV"
+          echo "${{ env.OLD_VERSIONS }}"
+
+      - name: get branch name for updating documentation
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          echo "OLD_VERSIONS=${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
 
       - name: update switcher.json file
@@ -82,7 +89,6 @@ jobs:
           git checkout gh-pages
 
       - name: delete previous docs build for this branch
-        if: ${{ github.event_name != 'pull_request' }}
         uses: EndBug/add-and-commit@v9.1.4
         with:
           remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
