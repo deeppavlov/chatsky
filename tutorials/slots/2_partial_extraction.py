@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 2. Group slots usage
+# 2. Partial slot extraction
 
 This tutorial will show more advanced way of using slots by utilizing `GroupSlot` and different parameters it provides us with.
 By using Group slots you can extract multiple slots at once if they are placed in one group.
@@ -66,7 +66,7 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_user"),
-                    cnd=cnd.SlotsExtracted("person.username", "person.email", mode="any"),
+                    cnd=cnd.SlotsExtracted("person", mode="any"),
                     priority=1.2,
                 ),
                 Tr(dst=("user_flow", "repeat_question"), priority=0.8),
