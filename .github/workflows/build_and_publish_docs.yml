@@ -98,13 +98,15 @@ jobs:
           git checkout -
           git stash pop
 
-      - name: preparing for PR deployment
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          mkdir -p ${{ env.OLD_VERSIONS }}
-          mv !(${{ env.OLD_VERSIONS }}) ${{ env.OLD_VERSIONS }}
+      - name: deploy website (for PR)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/build/
+          target-folder: ${{ github.head_ref || github.ref_name }}
+          clean: False
 
-      - name: deploy website
+      - name: deploy website (default)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
