@@ -65,11 +65,12 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: get old tags names for updating documentation
+      - name: get old tag names for updating documentation and update switcher
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir("."))'))" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
+          cp docs/source/_static/switcher.json ./docs/build/switcher.json
 
       - name: get branch name for updating documentation
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -77,18 +78,13 @@ jobs:
           echo "OLD_VERSIONS=./${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
 
-      - name: update switcher.json file
-        if: ${{ github.ref == 'refs/heads/master' }}
-        run: |
-          cp docs/source/_static/switcher.json ./docs/build/switcher.json
-
       - name: save changes and checkout to gh-pages
         run: |
           git add -f .
           git stash
           git checkout gh-pages
 
-      - name: delete previous docs build for this branch
+      - name: clean outdated documentation
         uses: EndBug/add-and-commit@v9.1.4
         with:
           remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
@@ -98,7 +94,8 @@ jobs:
           git checkout -
           git stash pop
 
-      - name: deploy website (for PR)
+      - name: deploy website (for Pull Requests)
+        if: ${{ github.event_name == 'pull_request' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
@@ -107,6 +104,7 @@ jobs:
           clean: False
 
       - name: deploy website (default)
+        if: ${{ github.event_name != 'pull_request' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
@@ -114,7 +112,6 @@ jobs:
           clean: False
 
       - name: printing link to the documentation
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
-          echo "https://deeppavlov.github.io/chatsky/${{ env.BRANCH_NAME }}"
+          echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
