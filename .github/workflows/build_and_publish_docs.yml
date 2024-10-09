@@ -47,11 +47,13 @@ jobs:
           git branch
           git status
           echo "$BRANCH_NAME"
+          echo "TARGET_FOLDER='$BRANCH_NAME'" >> $GITHUB_ENV
 
       - name: checking if it's a polyversion build
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "POLYVERSION_BUILD=True" >> $GITHUB_ENV
+          echo "TARGET_FOLDER=''" >> $GITHUB_ENV
 
       - name: build documentation
         env:
@@ -95,7 +97,10 @@ jobs:
           git stash pop
 
       - name: deploy website (for Pull Requests)
-        if: ${{ github.event_name == 'pull_request' }}
+        # TODO: Make a better True-False flag for deploying for Pull Requests.
+        # Make this use GitHub Action Variables.
+        # (PR only) Changed the variable below to False if you don't want to build docs for your PR
+        if: ${{ github.event_name == 'pull_request' && True }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
@@ -109,6 +114,7 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/build/
+          target-folder: ${{env.TARGET_FOLDER}}
           clean: False
 
       - name: printing link to the documentation

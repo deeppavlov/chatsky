@@ -83,6 +83,8 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
+        # TODO: Fix links for branches that have slashes in them like "feat/sphinx_multiversion"
+        # TODO: Make all links use metadata in conf.py and like apiref metadata.
         # Making GitHub links version dependent in tutorials and API reference
         doc_version = os.getenv("VERSION", default=None)
         doc_version = str(output_dir).split('/')[-1]
@@ -117,7 +119,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         # Using the newest conf.py file instead of the old one
         # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.
         # Just don't forget to configure poly.py for building the right tags
-        new_sphinx_configs = False
+        new_sphinx_configs = True
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
             older_conf_path = str(source_dir) + "/conf.py"

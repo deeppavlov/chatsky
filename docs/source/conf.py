@@ -95,9 +95,9 @@ autosummary_generate_overwrite = False
 doc_version = os.getenv('doc_version', default="master")
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
-nbsphinx_prolog = """
-:tutorial_name: {{ env.docname }}
-:doc_version: //DOC_VERSION//
+nbsphinx_prolog = f"""
+:tutorial_name: {{{{ env.docname }}}}
+:doc_version: {doc_version}/
 """
 
 html_logo = "_static/images/Chatsky-full-dark.svg"

@@ -24,12 +24,15 @@ TAG_REGEX = r"-"
 # TODO: Make a regexp for all tags except those that include "dev, rc1 and so on"
 # r""
 # Basically, only leave those that fit v'number'.'number'.'number' and >= than v0.6.4
+# All those "rc1" and so on should be excluded.
+# It's possible to just make a really long string with the right tags.
+# (could be all tags after a certain tag in the 'repo.tags' array)
+# It's very quick to do, but a regexp sounds cooler.
 
-# This flag is for building only the last tag.
-# Ideally, this should be automatically set to 'True' if 'conf.py' hasn't changed since
-# the previous version(tag). Otherwise, all tags will be built.
-# I'm not sure how to check that quickly enough. But if I could,
-# it would save a lot of time on docs building.
+# If 'True', builds only the latest tag. Otherwise, all tags will be built.
+# TODO: (Optional, not critical) set this to 'True' if 'conf.py' hasn't changed since
+# TODO: the previous version(tag).
+# I'm not sure how to do it right now.
 build_only_latest_tag = False
 
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
@@ -44,6 +47,7 @@ if branch is None:
 
 if str(branch) == "master":
     if build_only_latest_tag:
+        # TODO: Check for release candidates. "rc1" and don't let them through.
         # Releases are handled here (pushes into master mean a release, so the latest tag is built)
         tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
         latest_tag = tags[-1]
