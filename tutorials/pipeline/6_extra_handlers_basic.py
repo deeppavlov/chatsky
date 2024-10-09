@@ -4,8 +4,8 @@
 
 The following tutorial shows extra handlers possibilities and use cases.
 
-Here, extra handlers %mddoclink(api,pipeline.service.extra,BeforeHandler)
-and %mddoclink(api,pipeline.service.extra,AfterHandler)
+Here, extra handlers %mddoclink(api,core.service.extra,BeforeHandler)
+and %mddoclink(api,core.service.extra,AfterHandler)
 are shown as additional means of data processing, attached to services.
 """
 
@@ -18,19 +18,14 @@ import logging
 import random
 from datetime import datetime
 
-from chatsky.script import Context
-
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     ServiceGroup,
     ExtraHandlerRuntimeInfo,
-    ACTOR,
 )
-
+from chatsky import Context, Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -82,47 +77,44 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        ServiceGroup(
-            before_handler=[collect_timestamp_before],
-            after_handler=[collect_timestamp_after],
-            components=[
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-                {
-                    "handler": heavy_service,
-                    "before_handler": [collect_timestamp_before],
-                    "after_handler": [collect_timestamp_after],
-                },
-            ],
-        ),
-        ACTOR,
-        logging_service,
-    ],
+    "pre_services": ServiceGroup(
+        before_handler=[collect_timestamp_before],
+        after_handler=[collect_timestamp_after],
+        components=[
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+            {
+                "handler": heavy_service,
+                "before_handler": [collect_timestamp_before],
+                "after_handler": [collect_timestamp_after],
+            },
+        ],
+    ),
+    "post_services": logging_service,
 }
 
 # %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

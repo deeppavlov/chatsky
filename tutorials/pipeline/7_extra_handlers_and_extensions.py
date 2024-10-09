@@ -5,7 +5,7 @@
 The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
 
-Here, %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.add_global_handler)
+Here, %mddoclink(api,core.pipeline,Pipeline.add_global_handler)
 function is shown, that can be used to add extra handlers before
 and/or after all pipeline services.
 """
@@ -19,19 +19,16 @@ import logging
 import random
 from datetime import datetime
 
-from chatsky.pipeline import (
-    Pipeline,
+from chatsky.core.service import (
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
-    ACTOR,
 )
-
+from chatsky import Pipeline
 from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
@@ -61,7 +58,7 @@ Pipeline `add_global_extra_handler` function is used to register
 
 * `global_extra_handler_type` (required) - A `GlobalExtraHandlerType` instance,
     indicates extra handler type to add.
-* `extra_handler` (required) - The extra handler function itself.
+* `extra_handler` (required) - The `ExtraHandlerFunction` itself.
 * `whitelist` - An optional list of paths, if it's not `None`
                 the extra handlers will be applied to
                 specified pipeline components only.
@@ -124,10 +121,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "components": [
-        [long_service for _ in range(0, 25)],
-        ACTOR,
-    ],
+    "pre_services": [long_service for _ in range(0, 25)],
 }
 
 # %%
@@ -139,6 +133,6 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER, after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, after_all)
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()

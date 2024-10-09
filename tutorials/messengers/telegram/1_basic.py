@@ -17,11 +17,15 @@ Telegram API token is required to access telegram API.
 # %%
 import os
 
-from chatsky.script import conditions as cnd
-from chatsky.script import labels as lbl
-from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky import (
+    RESPONSE,
+    TRANSITIONS,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    destinations as dst,
+)
 from chatsky.messengers.telegram import LongpollingInterface
-from chatsky.pipeline import Pipeline
 from chatsky.utils.testing.common import is_interactive_mode
 
 
@@ -44,6 +48,20 @@ argument for a bot to run is a token. Some other parameters
 
 Either of the two interfaces connect the bot to Telegram.
 They can be passed directly to a Chatsky `Pipeline` instance.
+
+
+<div class="alert alert-info">
+
+Note
+
+You can also import `LongpollingInterface`
+under the alias of `TelegramInterface` from `chatsky.messengers`:
+
+```python
+from chatsky.messengers import TelegramInterface
+```
+
+</div>
 """
 
 
@@ -51,15 +69,19 @@ They can be passed directly to a Chatsky `Pipeline` instance.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
         },
         "greeting_node": {
-            RESPONSE: Message("Hi"),
-            TRANSITIONS: {lbl.repeat(): cnd.true()},
+            RESPONSE: "Hi",
+            TRANSITIONS: [Tr(dst=dst.Current())],
         },
         "fallback_node": {
-            RESPONSE: Message("Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+            RESPONSE: "Please, repeat the request",
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
         },
     }
 }
@@ -70,7 +92,7 @@ interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
-pipeline = Pipeline.from_script(
+pipeline = Pipeline(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
