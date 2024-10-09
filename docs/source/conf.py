@@ -182,6 +182,8 @@ autodoc_default_options = {
     "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
 
-if not polyversion_build:
-    from docs.source.setup import setup
-    # Importing setup here, because it will get called by Sphinx.
+
+def setup():
+    # TODO: Import for old versions differently
+    from setup import setup
+    setup()

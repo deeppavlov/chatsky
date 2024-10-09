@@ -38,7 +38,7 @@ jobs:
           python -m pip install --upgrade pip poetry
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
-      - name: testing actions/checkout_v4
+      - name: testing actions/checkout_v4 (remove this before merging PR)
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -63,9 +63,10 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: get built version name
+      - name: get old versions names for updating documentation
         run: |
-          echo "VERSION=$(ls -1 docs/build | head -n 1)" >> "$GITHUB_ENV"
+          echo "OLD_VERSIONS=$(python -c 'import os, json; print json.dumps(os.listdir("."))')" >> "$GITHUB_ENV"
+          echo ${{ env.OLD_VERSIONS }}
 
       - name: update switcher.json file
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -80,28 +81,15 @@ jobs:
 
       - name: delete previous docs build for this branch
         uses: EndBug/add-and-commit@v9.1.4
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         with:
-          remove: '-r --ignore-unmatch ./${{ env.VERSION }}'
+          remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
 
       - name: checkout to original branch and reapply changes
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           git checkout -
           git stash pop
 
-      - name: save artifact
-        if: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/dev' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
-          path: docs/build/
-          retention-days: 3
-
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
