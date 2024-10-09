@@ -22,6 +22,7 @@ BRANCH_REGEX = r"((?!master).)*"
 #: Regex matching the tags to build docs for
 TAG_REGEX = r"-"
 # TODO: Make a regexp for all tags except those that include "dev, rc1 and so on"
+# r""
 # Basically, only leave those that fit v'number'.'number'.'number' and >= than v0.6.4
 
 # This variable is set to `False` during workflow build. It is 'True' during local builds.

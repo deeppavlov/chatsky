@@ -183,7 +183,7 @@ autodoc_default_options = {
 }
 
 
-def setup():
+def setup(_):
     # TODO: Import for old versions differently
-    from setup import inner_setup
-    inner_setup()
+    from setup import setup
+    setup()

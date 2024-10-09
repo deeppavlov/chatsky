@@ -4,7 +4,7 @@ from docs.source.utils.regenerate_apiref import regenerate_apiref
 from pathlib import Path
 
 
-def inner_setup(root_dir: str = "."):
+def setup(root_dir: str = "."):
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",

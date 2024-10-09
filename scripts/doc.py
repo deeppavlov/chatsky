@@ -71,8 +71,6 @@ def docs(docker: Optional[DockerClient]):
             # TODO: Add setup and the other funcs back in
             _build_drawio()
             result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
-            # rootdir/docs/source/setup()
-            # Maybe import just like builder does it?
             result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
             result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
             exit(result)
