@@ -68,7 +68,7 @@ jobs:
       - name: get old tags names for updating documentation
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          echo "OLD_VERSIONS=$(python -c 'import os, json; print json.dumps(os.listdir("."))')" >> "$GITHUB_ENV"
+          echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir("."))'))" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
 
       - name: get branch name for updating documentation
