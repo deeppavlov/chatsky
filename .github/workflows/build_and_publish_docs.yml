@@ -68,7 +68,7 @@ jobs:
       - name: get old tag names for updating documentation and update switcher
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir("."))'))" >> "$GITHUB_ENV"
+          echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir(".")))')" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
           cp docs/source/_static/switcher.json ./docs/build/switcher.json
 
