@@ -82,6 +82,7 @@ jobs:
           git checkout gh-pages
 
       - name: delete previous docs build for this branch
+        if: ${{ github.event_name != 'pull_request' }}
         uses: EndBug/add-and-commit@v9.1.4
         with:
           remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
