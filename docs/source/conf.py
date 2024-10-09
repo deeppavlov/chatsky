@@ -2,16 +2,21 @@ import os
 import sys
 import re
 import importlib.metadata
+import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from sphinx_polyversion import load
+from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
+
+polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+if polyversion_build:
+    data = load(globals())  # adds variables `current` and `revisions`
+    current: GitRef = data['current']
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
@@ -57,7 +62,6 @@ pygments_style = "default"
 
 add_module_names = False
 
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -88,10 +92,12 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
+doc_version = os.getenv('doc_version', default="master")
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
-nbsphinx_prolog = """
-:tutorial_name: {{ env.docname }}
+nbsphinx_prolog = f"""
+:tutorial_name: {{{{ env.docname }}}}
+:doc_version: {doc_version}/
 """
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
@@ -110,6 +116,24 @@ html_context = {
 html_css_files = [
     "css/custom.css",
 ]
+
+# Version switcher url
+switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
+# To-do: a separate switcher.json for dev and other branches
+
+# Checking for dev before passing version to switcher
+if polyversion_build and current[0] == "dev":
+    version_data = "dev"
+    # Possible to-do: show the warning banner for latest(unstable) version.
+else:
+    version_data = version
+
+# Removing version switcher from local doc builds. (Or it would point to our Github Pages)
+LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+if LOCAL_BUILD:
+    switcher_url = "./_static/switcher.json"
+# Possible TO-DO: generating switcher.json for local builds separately.
+# Then change the prior url to new switcher. This is probably overkill.
 
 # Theme options
 html_theme_options = {
@@ -135,8 +159,14 @@ html_theme_options = {
         },
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
+    "switcher": {
+        "json_url": switcher_url,
+        "version_match" : version_data,
+    },
+    "navbar_persistent": ["search-button.html", "theme-switcher.html"],
+    "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
+    "show_version_warning_banner": True,
 }
-
 
 favicons = [
     {"href": "images/Chatsky-min-light.svg"},
@@ -154,50 +184,6 @@ autodoc_default_options = {
 
 
 def setup(_):
-    link_misc_files(
-        [
-            "utils/db_benchmark/benchmark_schema.json",
-            "utils/db_benchmark/benchmark_streamlit.py",
-        ]
-    )
-    generate_tutorial_links_for_notebook_creation(
-        [
-            ("tutorials.context_storages", "Context Storages"),
-            (
-                "tutorials.messengers",
-                "Interfaces",
-                [
-                    ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API"),
-                ],
-            ),
-            ("tutorials.service", "Service"),
-            (
-                "tutorials.script",
-                "Script",
-                [
-                    ("core", "Core"),
-                    ("responses", "Responses"),
-                ],
-            ),
-            ("tutorials.slots", "Slots"),
-            ("tutorials.stats", "Stats"),
-        ]
-    )
-    regenerate_apiref(
-        [
-            ("chatsky.core.service", "Core.Service"),
-            ("chatsky.core", "Core"),
-            ("chatsky.conditions", "Conditions"),
-            ("chatsky.destinations", "Destinations"),
-            ("chatsky.responses", "Responses"),
-            ("chatsky.processing", "Processing"),
-            ("chatsky.context_storages", "Context Storages"),
-            ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.slots", "Slots"),
-            ("chatsky.stats", "Stats"),
-            ("chatsky.utils.testing", "Testing Utils"),
-            ("chatsky.utils.db_benchmark", "DB Benchmark"),
-            ("chatsky.utils.devel", "Development Utils"),
-        ]
-    )
+    # TODO: Import for old versions differently
+    from setup import setup
+    setup()
