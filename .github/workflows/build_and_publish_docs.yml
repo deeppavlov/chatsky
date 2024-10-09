@@ -66,7 +66,7 @@ jobs:
       - name: get old versions names for updating documentation
         run: |
           echo "OLD_VERSIONS=$(python -c 'import os, json; print json.dumps(os.listdir("."))')" >> "$GITHUB_ENV"
-          echo ${{ env.OLD_VERSIONS }}
+          echo "${{ env.OLD_VERSIONS }}"
 
       - name: update switcher.json file
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -95,3 +95,9 @@ jobs:
           branch: gh-pages
           folder: docs/build/
           clean: False
+
+      - name: printing link to the documentation
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          echo "https://deeppavlov.github.io/chatsky/${{ env.BRANCH_NAME }}"
