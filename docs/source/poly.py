@@ -25,6 +25,13 @@ TAG_REGEX = r"-"
 # r""
 # Basically, only leave those that fit v'number'.'number'.'number' and >= than v0.6.4
 
+# This flag is for building only the last tag.
+# Ideally, this should be automatically set to 'True' if 'conf.py' hasn't changed since
+# the previous version(tag). Otherwise, all tags will be built.
+# I'm not sure how to check that quickly enough. But if I could,
+# it would save a lot of time on docs building.
+build_only_latest_tag = False
+
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
 
@@ -35,15 +42,17 @@ branch = os.getenv('BRANCH_NAME', default=None)
 if branch is None:
     branch = repo.active_branch
 
-if LOCAL_BUILD == "True":
-    # Local builds only build docs for the current branch and no tags.
+if str(branch) == "master":
+    if build_only_latest_tag:
+        # Releases are handled here (pushes into master mean a release, so the latest tag is built)
+        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+        latest_tag = tags[-1]
+        TAG_REGEX = str(latest_tag)
+    # else the default option happens - building all tags from v1.0 and beyond, I think.
+    # Or whatever the user has set to the tags section.
+else:
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
-elif str(branch) == "master":
-    # Releases are handled here (pushes into master mean a release, so the latest tag is built)
-    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    latest_tag = tags[-1]
-    TAG_REGEX = str(latest_tag)
 
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
