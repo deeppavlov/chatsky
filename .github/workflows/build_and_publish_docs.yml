@@ -74,7 +74,7 @@ jobs:
       - name: get branch name for updating documentation
         if: ${{ github.ref != 'refs/heads/master' }}
         run: |
-          echo "OLD_VERSIONS=${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
+          echo "OLD_VERSIONS=./${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
 
       - name: update switcher.json file
@@ -97,6 +97,12 @@ jobs:
         run: |
           git checkout -
           git stash pop
+
+      - name: preparing for PR deployment
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          mkdir ${{ env.OLD_VERSIONS }}
+          mv !(${{ env.OLD_VERSIONS }}) ${{ env.OLD_VERSIONS }}
 
       - name: deploy website
         uses: JamesIves/github-pages-deploy-action@v4
