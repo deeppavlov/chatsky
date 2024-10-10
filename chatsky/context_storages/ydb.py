@@ -15,7 +15,7 @@ from os.path import join
 from typing import Awaitable, Callable, Hashable, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, FieldConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -61,7 +61,7 @@ class YDBContextStorage(DBContextStorage):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
         table_name_prefix: str = "chatsky_table",
         timeout: int = 5,
     ):
@@ -127,9 +127,9 @@ class YDBContextStorage(DBContextStorage):
                 TableDescription()
                 .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
                 .with_column(Column(self._key_column_name, PrimitiveType.Uint32))
-                .with_column(Column(self.labels_config.name, OptionalType(PrimitiveType.String)))
-                .with_column(Column(self.requests_config.name, OptionalType(PrimitiveType.String)))
-                .with_column(Column(self.responses_config.name, OptionalType(PrimitiveType.String)))
+                .with_column(Column(self._labels_field_name, OptionalType(PrimitiveType.String)))
+                .with_column(Column(self._requests_field_name, OptionalType(PrimitiveType.String)))
+                .with_column(Column(self._responses_field_name, OptionalType(PrimitiveType.String)))
                 .with_primary_keys(self._id_column_name, self._key_column_name)
             )
 
@@ -149,23 +149,23 @@ class YDBContextStorage(DBContextStorage):
         await self.pool.retry_operation(callee)
 
     # TODO: this method (and similar) repeat often. Optimize?
-    def _get_config_for_field(self, field_name: str) -> Tuple[str, str, FieldConfig]:
-        if field_name == self.labels_config.name:
-            return self.turns_table, field_name, self.labels_config
-        elif field_name == self.requests_config.name:
-            return self.turns_table, field_name, self.requests_config
-        elif field_name == self.responses_config.name:
-            return self.turns_table, field_name, self.responses_config
-        elif field_name == self.misc_config.name:
-            return self.misc_table, self._value_column_name, self.misc_config
+    def _get_subscript_for_field(self, field_name: str) -> Tuple[str, str, _SUBSCRIPT_TYPE]:
+        if field_name == self._labels_field_name:
+            return self.turns_table, field_name, self.labels_subscript
+        elif field_name == self._requests_field_name:
+            return self.turns_table, field_name, self.requests_subscript
+        elif field_name == self._responses_field_name:
+            return self.turns_table, field_name, self.responses_subscript
+        elif field_name == self._misc_field_name:
+            return self.misc_table, self._value_column_name, self.misc_subscript
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
     # TODO: this method (and similar) repeat often. Optimize?
     def _transform_keys(self, field_name: str, keys: List[Hashable]) -> List[str]:
-        if field_name == self.misc_config.name:
+        if field_name == self._misc_field_name:
             return [f"\"{e}\"" for e in keys]
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+        elif field_name in (self.labels_field_name, self.requests_field_name, self.responses_field_name):
             return [str(e) for e in keys]
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
@@ -235,16 +235,16 @@ class YDBContextStorage(DBContextStorage):
         )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, field_config = self._get_config_for_field(field_name)
+        field_table, key_name, field_subscript = self._get_subscript_for_field(field_name)
 
         async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
             sort, limit, key = "", "", ""
             if field_table == self.turns_table:
                 sort = f"ORDER BY {self._key_column_name} DESC"
-            if isinstance(field_config.subscript, int):
-                limit = f"LIMIT {field_config.subscript}"
-            elif isinstance(field_config.subscript, Set):
-                keys = ", ".join(self._transform_keys(field_name, field_config.subscript))
+            if isinstance(field_subscript, int):
+                limit = f"LIMIT {field_subscript}"
+            elif isinstance(field_subscript, Set):
+                keys = ", ".join(self._transform_keys(field_name, field_subscript))
                 key = f"AND {self._key_column_name} IN ({keys})"
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -263,7 +263,7 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
 
         async def callee(session: Session) -> List[Hashable]:
             query = f"""
@@ -282,7 +282,7 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
 
         async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
             query = f"""
@@ -302,7 +302,7 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         if len(items) == 0:
             return
 

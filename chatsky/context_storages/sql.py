@@ -19,7 +19,7 @@ from importlib import import_module
 from os import getenv
 from typing import Hashable, Callable, Collection, Dict, List, Optional, Set, Tuple
 
-from .database import DBContextStorage, FieldConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -148,7 +148,7 @@ class SQLContextStorage(DBContextStorage):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
         table_name_prefix: str = "chatsky_table",
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
@@ -177,9 +177,9 @@ class SQLContextStorage(DBContextStorage):
             metadata,
             Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self.main_table.name, self._id_column_name), nullable=False),
             Column(self._key_column_name, Integer(), nullable=False),
-            Column(self.labels_config.name, LargeBinary(), nullable=True),
-            Column(self.requests_config.name, LargeBinary(), nullable=True),
-            Column(self.responses_config.name, LargeBinary(), nullable=True),
+            Column(self._labels_field_name, LargeBinary(), nullable=True),
+            Column(self._requests_field_name, LargeBinary(), nullable=True),
+            Column(self._responses_field_name, LargeBinary(), nullable=True),
             Index(f"{self._turns_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
         )
         self.misc_table = Table(
@@ -223,15 +223,15 @@ class SQLContextStorage(DBContextStorage):
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     # TODO: this method (and similar) repeat often. Optimize?
-    def _get_config_for_field(self, field_name: str) -> Tuple[Table, str, FieldConfig]:
-        if field_name == self.labels_config.name:
-            return self.turns_table, field_name, self.labels_config
-        elif field_name == self.requests_config.name:
-            return self.turns_table, field_name, self.requests_config
-        elif field_name == self.responses_config.name:
-            return self.turns_table, field_name, self.responses_config
-        elif field_name == self.misc_config.name:
-            return self.misc_table, self._value_column_name, self.misc_config
+    def _get_subscript_for_field(self, field_name: str) -> Tuple[Table, str, _SUBSCRIPT_TYPE]:
+        if field_name == self._labels_field_name:
+            return self.turns_table, field_name, self.labels_subscript
+        elif field_name == self._requests_field_name:
+            return self.turns_table, field_name, self.requests_subscript
+        elif field_name == self._responses_field_name:
+            return self.turns_table, field_name, self.responses_subscript
+        elif field_name == self._misc_field_name:
+            return self.misc_table, self._value_column_name, self.misc_subscript
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
@@ -270,36 +270,36 @@ class SQLContextStorage(DBContextStorage):
             )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, field_config = self._get_config_for_field(field_name)
+        field_table, key_name, field_subscript = self._get_subscript_for_field(field_name)
         stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
         stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
         if field_table == self.turns_table:
             stmt = stmt.order_by(field_table.c[self._key_column_name].desc())
-        if isinstance(field_config.subscript, int):
-            stmt = stmt.limit(field_config.subscript)
-        elif isinstance(field_config.subscript, Set):
-            stmt = stmt.where(field_table.c[self._key_column_name].in_(field_config.subscript))
+        if isinstance(field_subscript, int):
+            stmt = stmt.limit(field_subscript)
+        elif isinstance(field_subscript, Set):
+            stmt = stmt.where(field_table.c[self._key_column_name].in_(field_subscript))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         stmt = select(field_table.c[self._key_column_name]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
         stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._key_column_name].in_(tuple(keys))) & (field_table.c[key_name] != None))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         if len(items) == 0:
             return
-        if key_name == self.misc_config.name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
+        if key_name == self._misc_field_name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
             raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
         insert_stmt = self._INSERT_CALLABLE(field_table).values(
             [

@@ -17,34 +17,8 @@ from pydantic import BaseModel, Field, field_validator, validate_call
 
 from .protocol import PROTOCOLS
 
-
-class FieldConfig(BaseModel, validate_assignment=True):
-    """
-    Schema for :py:class:`~.Context` fields that are dictionaries with numeric keys fields.
-    Used for controlling read and write policy of the particular field.
-    """
-
-    name: str = Field(default_factory=str, frozen=True)
-    """
-    `name` is the name of backing :py:class:`~.Context` field.
-    It can not (and should not) be changed in runtime.
-    """
-
-    subscript: Union[Literal["__all__"], int, Set[str]] = 3
-    """
-    `subscript` is used for limiting keys for reading and writing.
-    It can be a string `__all__` meaning all existing keys or number,
-    string `__none__` meaning none of the existing keys (actually alias for 0),
-    negative for first **N** keys and positive for last **N** keys.
-    Keys should be sorted as numbers.
-    Default: 3.
-    """
-
-    @field_validator("subscript", mode="before")
-    @classmethod
-    @validate_call
-    def _validate_subscript(cls, subscript: Union[Literal["__all__"], Literal["__none__"], int, Set[str]]) -> Union[Literal["__all__"], int, Set[str]]:
-        return 0 if subscript == "__none__" else subscript
+_SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[str]]
+_SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE, Literal["__none__"]]]
 
 
 class DBContextStorage(ABC):
@@ -58,6 +32,11 @@ class DBContextStorage(ABC):
     _created_at_column_name: Literal["created_at"] = "created_at"
     _updated_at_column_name: Literal["updated_at"] = "updated_at"
     _framework_data_column_name: Literal["framework_data"] = "framework_data"
+    _labels_field_name: Literal["labels"] = "labels"
+    _requests_field_name: Literal["requests"] = "requests"
+    _responses_field_name: Literal["responses"] = "responses"
+    _misc_field_name: Literal["misc"] = "misc"
+    _default_subscript_value: int = 3
 
     @property
     @abstractmethod
@@ -68,7 +47,7 @@ class DBContextStorage(ABC):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         _, _, file_path = path.partition("://")
         self.full_path = path
@@ -77,22 +56,29 @@ class DBContextStorage(ABC):
         """`full_path` without a prefix defining db used."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
-        configuration = configuration if configuration is not None else dict()
-        self.labels_config = configuration.get("labels", FieldConfig(name="labels"))
-        self.requests_config = configuration.get("requests", FieldConfig(name="requests"))
-        self.responses_config = configuration.get("responses", FieldConfig(name="responses"))
-        self.misc_config = configuration.get("misc", FieldConfig(name="misc"))
+        self._validate_subscripts(configuration if configuration is not None else dict())
+
+    def _validate_subscripts(self, subscripts: _SUBSCRIPT_DICT) -> None:
+        def get_subscript(name: str) -> _SUBSCRIPT_TYPE:
+            value = subscripts.get(name, self._default_subscript_value)
+            return 0 if value == "__none__" else value
+
+        self.labels_subscript = get_subscript(self._labels_field_name)
+        self.requests_subscript = get_subscript(self._requests_field_name)
+        self.responses_subscript = get_subscript(self._responses_field_name)
+        self.misc_subscript = get_subscript(self._misc_field_name)
+
 
     # TODO: this method (and similar) repeat often. Optimize?
-    def _get_config_for_field(self, field_name: str) -> FieldConfig:
-        if field_name == self.labels_config.name:
-            return self.labels_config
-        elif field_name == self.requests_config.name:
-            return self.requests_config
-        elif field_name == self.responses_config.name:
-            return self.responses_config
-        elif field_name == self.misc_config.name:
-            return self.misc_config
+    def _get_subscript_for_field(self, field_name: str) -> _SUBSCRIPT_TYPE:
+        if field_name == self._labels_field_name:
+            return self.labels_subscript
+        elif field_name == self._requests_field_name:
+            return self.requests_subscript
+        elif field_name == self._responses_field_name:
+            return self.responses_subscript
+        elif field_name == self._misc_field_name:
+            return self.misc_subscript
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 

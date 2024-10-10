@@ -13,7 +13,7 @@ from typing import List, Set, Tuple, Dict, Optional, Hashable
 
 from pydantic import BaseModel, Field
 
-from .database import DBContextStorage, FieldConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 
 
 class SerializableStorage(BaseModel):
@@ -37,7 +37,7 @@ class FileContextStorage(DBContextStorage, ABC):
         self, 
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
         self._load()
@@ -53,18 +53,18 @@ class FileContextStorage(DBContextStorage, ABC):
     # TODO: this method (and similar) repeat often. Optimize?
     async def _get_elems_for_field_name(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         storage = self._load()
-        if field_name == self.misc_config.name:
+        if field_name == self._misc_field_name:
             return [(k, v) for c, k, v in storage.misc if c == ctx_id]
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+        elif field_name in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
             return [(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name ]
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
     # TODO: this method (and similar) repeat often. Optimize?
     def _get_table_for_field_name(self, storage: SerializableStorage, field_name: str) -> List[Tuple]:
-        if field_name == self.misc_config.name:
+        if field_name == self._misc_field_name:
             return storage.misc
-        elif field_name in (self.labels_config.name, self.requests_config.name, self.responses_config.name):
+        elif field_name in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
             return storage.turns
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
@@ -85,15 +85,15 @@ class FileContextStorage(DBContextStorage, ABC):
         self._save(storage)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        config = self._get_config_for_field(field_name)
+        subscript = self._get_subscript_for_field(field_name)
         select = await self._get_elems_for_field_name(ctx_id, field_name)
         select = [(k, v) for k, v in select if v is not None]
-        if field_name != self.misc_config.name:
+        if field_name != self._misc_field_name:
             select = sorted(select, key=lambda e: e[0], reverse=True)
-        if isinstance(config.subscript, int):
-            select = select[:config.subscript]
-        elif isinstance(config.subscript, Set):
-            select = [(k, v) for k, v in select if k in config.subscript]
+        if isinstance(subscript, int):
+            select = select[:subscript]
+        elif isinstance(subscript, Set):
+            select = [(k, v) for k, v in select if k in subscript]
         return select
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
@@ -106,7 +106,7 @@ class FileContextStorage(DBContextStorage, ABC):
         storage = self._load()
         table = self._get_table_for_field_name(storage, field_name)
         for k, v in items:
-            upd = (ctx_id, k, v) if field_name == self.misc_config.name else (ctx_id, field_name, k, v)
+            upd = (ctx_id, k, v) if field_name == self._misc_field_name else (ctx_id, field_name, k, v)
             for i in range(len(table)):
                 if table[i][:-1] == upd[:-1]:
                     table[i] = upd
@@ -156,7 +156,7 @@ class ShelveContextStorage(FileContextStorage):
         self, 
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         self._storage = None
         FileContextStorage.__init__(self, path, rewrite_existing, configuration)

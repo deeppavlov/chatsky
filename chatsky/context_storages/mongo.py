@@ -24,7 +24,7 @@ try:
 except ImportError:
     mongo_available = False
 
-from .database import DBContextStorage, FieldConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
 
 
@@ -50,7 +50,7 @@ class MongoContextStorage(DBContextStorage):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
         collection_prefix: str = "chatsky_collection",
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
@@ -80,15 +80,15 @@ class MongoContextStorage(DBContextStorage):
         )
 
     # TODO: this method (and similar) repeat often. Optimize?
-    def _get_config_for_field(self, field_name: str) -> Tuple[Collection, str, FieldConfig]:
-        if field_name == self.labels_config.name:
-            return self.turns_table, field_name, self.labels_config
-        elif field_name == self.requests_config.name:
-            return self.turns_table, field_name, self.requests_config
-        elif field_name == self.responses_config.name:
-            return self.turns_table, field_name, self.responses_config
-        elif field_name == self.misc_config.name:
-            return self.misc_table, self._value_column_name, self.misc_config
+    def _get_subscript_for_field(self, field_name: str) -> Tuple[Collection, str, _SUBSCRIPT_TYPE]:
+        if field_name == self._labels_field_name:
+            return self.turns_table, field_name, self.labels_subscript
+        elif field_name == self._requests_field_name:
+            return self.turns_table, field_name, self.requests_subscript
+        elif field_name == self._responses_field_name:
+            return self.turns_table, field_name, self.responses_subscript
+        elif field_name == self._misc_field_name:
+            return self.misc_table, self._value_column_name, self.misc_subscript
         else:
             raise ValueError(f"Unknown field name: {field_name}!")
 
@@ -122,14 +122,14 @@ class MongoContextStorage(DBContextStorage):
         )
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, field_config = self._get_config_for_field(field_name)
+        field_table, key_name, field_subscript = self._get_subscript_for_field(field_name)
         sort, limit, key = None, 0, dict()
         if field_table == self.turns_table:
             sort = [(self._key_column_name, -1)]
-        if isinstance(field_config.subscript, int):
-            limit = field_config.subscript
-        elif isinstance(field_config.subscript, Set):
-            key = {self._key_column_name: {"$in": list(field_config.subscript)}}
+        if isinstance(field_subscript, int):
+            limit = field_subscript
+        elif isinstance(field_subscript, Set):
+            key = {self._key_column_name: {"$in": list(field_subscript)}}
         result = await field_table.find(
             {self._id_column_name: ctx_id, key_name: {"$exists": True, "$ne": None}, **key},
             [self._key_column_name, key_name],
@@ -138,7 +138,7 @@ class MongoContextStorage(DBContextStorage):
         return [(item[self._key_column_name], item[key_name]) for item in result]
 
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         result = await field_table.aggregate(
             [
                 {"$match": {self._id_column_name: ctx_id, key_name: {"$ne": None}}},
@@ -148,7 +148,7 @@ class MongoContextStorage(DBContextStorage):
         return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
 
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         result = await field_table.find(
             {self._id_column_name: ctx_id, self._key_column_name: {"$in": list(keys)}, key_name: {"$exists": True, "$ne": None}},
             [self._key_column_name, key_name]
@@ -156,7 +156,7 @@ class MongoContextStorage(DBContextStorage):
         return [(item[self._key_column_name], item[key_name]) for item in result]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, key_name, _ = self._get_config_for_field(field_name)
+        field_table, key_name, _ = self._get_subscript_for_field(field_name)
         if len(items) == 0:
             return
         await field_table.bulk_write(

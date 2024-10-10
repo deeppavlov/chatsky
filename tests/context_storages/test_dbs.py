@@ -25,7 +25,7 @@ from chatsky.utils.testing.cleanup_db import (
     delete_ydb,
 )
 from chatsky.context_storages import DBContextStorage
-from chatsky.context_storages.database import FieldConfig
+from chatsky.context_storages.database import _SUBSCRIPT_TYPE
 from chatsky import Pipeline, Context, Message
 from chatsky.core.context import FrameworkData
 from chatsky.utils.context_dict.ctx_dict import ContextDict
@@ -145,24 +145,24 @@ class TestContextStorages:
     def configure_context_storage(
         context_storage: DBContextStorage,
         rewrite_existing: Optional[bool] = None,
-        labels_config: Optional[FieldConfig] = None,
-        requests_config: Optional[FieldConfig] = None,
-        responses_config: Optional[FieldConfig] = None,
-        misc_config: Optional[FieldConfig] = None,
-        all_config: Optional[FieldConfig] = None,
+        labels_subscript: Optional[_SUBSCRIPT_TYPE] = None,
+        requests_subscript: Optional[_SUBSCRIPT_TYPE] = None,
+        responses_subscript: Optional[_SUBSCRIPT_TYPE] = None,
+        misc_subscript: Optional[_SUBSCRIPT_TYPE] = None,
+        all_subscript: Optional[_SUBSCRIPT_TYPE] = None,
     ) -> None:
         if rewrite_existing is not None:
             context_storage.rewrite_existing = rewrite_existing
-        if all_config is not None:
-            labels_config = requests_config = responses_config = misc_config = all_config
-        if labels_config is not None:
-            context_storage.labels_config = labels_config
-        if requests_config is not None:
-            context_storage.requests_config = requests_config
-        if responses_config is not None:
-            context_storage.responses_config = responses_config
-        if misc_config is not None:
-            context_storage.misc_config = misc_config
+        if all_subscript is not None:
+            labels_subscript = requests_subscript = responses_subscript = misc_subscript = all_subscript
+        if labels_subscript is not None:
+            context_storage.labels_subscript = labels_subscript
+        if requests_subscript is not None:
+            context_storage.requests_subscript = requests_subscript
+        if responses_subscript is not None:
+            context_storage.responses_subscript = responses_subscript
+        if misc_subscript is not None:
+            context_storage.misc_subscript = misc_subscript
 
     async def test_add_context(self, db, add_context):
         # test the fixture
@@ -222,25 +222,25 @@ class TestContextStorages:
         await db.update_field_items("1", "requests", [(1, b"1")])
         await db.update_field_items("1", "requests", [(0, b"0")])
 
-        self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript=2))
+        self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1")]
 
-        self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript="__all__"))
+        self.configure_context_storage(db, requests_subscript="__all__")
         assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1"), (0, b"0")]
 
         await db.update_field_items("1", "requests", [(5, b"5")])
 
-        self.configure_context_storage(db, requests_config=FieldConfig(name="requests", subscript=2))
+        self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(5, b"5"), (2, b"2")]
 
     async def test_string_key_field_subscript(self, db, add_context):
         await add_context("1")
         await db.update_field_items("1", "misc", [("4", b"4"), ("0", b"0")])
 
-        self.configure_context_storage(db, misc_config=FieldConfig(name="misc", subscript={"4"}))
+        self.configure_context_storage(db, misc_subscript={"4"})
         assert await db.load_field_latest("1", "misc") == [("4", b"4")]
 
-        self.configure_context_storage(db, misc_config=FieldConfig(name="misc", subscript="__all__"))
+        self.configure_context_storage(db, misc_subscript="__all__")
         assert set(await db.load_field_latest("1", "misc")) == {("4", b"4"), ("0", b"0")}
 
     async def test_delete_field_key(self, db, add_context):

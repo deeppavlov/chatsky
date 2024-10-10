@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
-from .database import DBContextStorage, FieldConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -22,15 +22,15 @@ class MemoryContextStorage(DBContextStorage):
         self, 
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[Dict[str, FieldConfig]] = None,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
         self._main_storage = dict()
         self._aux_storage = {
-            self.labels_config.name: dict(),
-            self.requests_config.name: dict(),
-            self.responses_config.name: dict(),
-            self.misc_config.name: dict(),
+            self._labels_field_name: dict(),
+            self._requests_field_name: dict(),
+            self._responses_field_name: dict(),
+            self._misc_field_name: dict(),
         }
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
@@ -45,9 +45,9 @@ class MemoryContextStorage(DBContextStorage):
             storage.pop(ctx_id, None)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        subscript = self._get_config_for_field(field_name).subscript
+        subscript = self._get_subscript_for_field(field_name)
         select = [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None]
-        if field_name != self.misc_config.name:
+        if field_name != self._misc_field_name:
             select = sorted(select, key=lambda x: x, reverse=True)
         if isinstance(subscript, int):
             select = select[:subscript]
