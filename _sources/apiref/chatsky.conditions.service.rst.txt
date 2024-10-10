@@ -1,0 +1,6 @@
+:source_name: chatsky/conditions/service
+
+.. automodule:: chatsky.conditions.service
+   :members:
+   :undoc-members:
+   :show-inheritance:

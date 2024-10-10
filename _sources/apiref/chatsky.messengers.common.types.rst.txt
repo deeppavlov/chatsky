@@ -1,0 +1,6 @@
+:source_name: chatsky/messengers/common/types
+
+.. automodule:: chatsky.messengers.common.types
+   :members:
+   :undoc-members:
+   :show-inheritance:

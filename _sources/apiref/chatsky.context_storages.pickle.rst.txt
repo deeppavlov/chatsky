@@ -1,0 +1,6 @@
+:source_name: chatsky/context_storages/pickle
+
+.. automodule:: chatsky.context_storages.pickle
+   :members:
+   :undoc-members:
+   :show-inheritance:

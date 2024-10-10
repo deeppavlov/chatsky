@@ -1,0 +1,15 @@
+:orphan:
+
+.. This is an auto-generated RST file representing documentation source directory structure
+
+Messenger Interfaces
+====================
+
+.. autosummary::
+   :toctree:
+
+   chatsky.messengers.console
+   chatsky.messengers.common.interface
+   chatsky.messengers.telegram.abstract
+   chatsky.messengers.telegram.interface
+   chatsky.messengers.common.types

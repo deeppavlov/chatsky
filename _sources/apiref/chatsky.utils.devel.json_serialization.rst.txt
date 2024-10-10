@@ -1,0 +1,6 @@
+:source_name: chatsky/utils/devel/json_serialization
+
+.. automodule:: chatsky.utils.devel.json_serialization
+   :members:
+   :undoc-members:
+   :show-inheritance:

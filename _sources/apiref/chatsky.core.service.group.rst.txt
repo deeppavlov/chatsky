@@ -1,0 +1,6 @@
+:source_name: chatsky/core/service/group
+
+.. automodule:: chatsky.core.service.group
+   :members:
+   :undoc-members:
+   :show-inheritance:

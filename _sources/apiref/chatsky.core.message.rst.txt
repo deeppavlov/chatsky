@@ -1,0 +1,6 @@
+:source_name: chatsky/core/message
+
+.. automodule:: chatsky.core.message
+   :members:
+   :undoc-members:
+   :show-inheritance:

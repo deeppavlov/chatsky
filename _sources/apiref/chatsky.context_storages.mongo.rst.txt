@@ -1,0 +1,6 @@
+:source_name: chatsky/context_storages/mongo
+
+.. automodule:: chatsky.context_storages.mongo
+   :members:
+   :undoc-members:
+   :show-inheritance:

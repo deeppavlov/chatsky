@@ -1,0 +1,6 @@
+:source_name: chatsky/context_storages/ydb
+
+.. automodule:: chatsky.context_storages.ydb
+   :members:
+   :undoc-members:
+   :show-inheritance:

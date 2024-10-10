@@ -1,0 +1,829 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>chatsky.context_storages.ydb &#8212; chatsky 0.9.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/katex-math.css?v=91adb8b6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=b77b6cac" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=1bc1ca25"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/katex.min.js?v=be8ff15f"></script>
+    <script src="../../../_static/auto-render.min.js?v=ad136472"></script>
+    <script src="../../../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/chatsky/context_storages/ydb';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/Chatsky-full-dark.svg" class="logo__image only-light" alt="chatsky 0.9.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/Chatsky-full-dark.svg" class="logo__image only-dark" alt="chatsky 0.9.0 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../get_started.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guides.html">
+                        User guides
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tutorials.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../reference.html">
+                        API reference
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../development.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../about_us.html">
+                        About us
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://forum.deeppavlov.ai" title="DeepPavlov Forum" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/images/logo-deeppavlov.svg" class="icon-link-image" alt="DeepPavlov Forum"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://t.me/DeepPavlovDreamDiscussions" title="Telegram" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-telegram fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Telegram</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/deeppavlov/chatsky" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../get_started.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../user_guides.html">
+                        User guides
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../tutorials.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../examples.html">
+                        Examples
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../reference.html">
+                        API reference
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../development.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../community.html">
+                        Community
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../../../about_us.html">
+                        About us
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://forum.deeppavlov.ai" title="DeepPavlov Forum" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../../_static/images/logo-deeppavlov.svg" class="icon-link-image" alt="DeepPavlov Forum"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://t.me/DeepPavlovDreamDiscussions" title="Telegram" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-telegram fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Telegram</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/deeppavlov/chatsky" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">chatsky.cont...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <h1>Source code for chatsky.context_storages.ydb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Yandex DB</span>
+<span class="sd">---------</span>
+<span class="sd">The Yandex DB module provides a version of the :py:class:`.DBContextStorage` class that designed to work with</span>
+<span class="sd">Yandex and other databases. Yandex DataBase is a fully-managed cloud-native SQL service that makes it easy to set up,</span>
+<span class="sd">operate, and scale high-performance and high-availability databases for your applications.</span>
+
+<span class="sd">The Yandex DB module uses the Yandex Cloud SDK, which is a python library that allows you to work</span>
+<span class="sd">with Yandex Cloud services using python. This allows Chatsky to easily integrate with the Yandex DataBase and</span>
+<span class="sd">take advantage of the scalability and high-availability features provided by the service.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Hashable</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlsplit</span>
+
+
+<span class="kn">from</span> <span class="nn">chatsky.core</span> <span class="kn">import</span> <span class="n">Context</span>
+
+<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DBContextStorage</span>
+<span class="kn">from</span> <span class="nn">.protocol</span> <span class="kn">import</span> <span class="n">get_protocol_install_suggestion</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ydb</span>
+    <span class="kn">import</span> <span class="nn">ydb.aio</span>
+
+    <span class="n">ydb_available</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">ydb_available</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="YDBContextStorage"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage">[docs]</a><span class="k">class</span> <span class="nc">YDBContextStorage</span><span class="p">(</span><span class="n">DBContextStorage</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Version of the :py:class:`.DBContextStorage` for YDB.</span>
+
+<span class="sd">    :param path: Standard sqlalchemy URI string.</span>
+<span class="sd">        When using sqlite backend in Windows, keep in mind that you have to use double backslashes &#39;\\&#39;</span>
+<span class="sd">        instead of forward slashes &#39;/&#39; in the file path.</span>
+<span class="sd">    :param table_name: The name of the table to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;contexts&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">DBContextStorage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">protocol</span><span class="p">,</span> <span class="n">netloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">://</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">netloc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ydb_available</span><span class="p">:</span>
+            <span class="n">install_suggestion</span> <span class="o">=</span> <span class="n">get_protocol_install_suggestion</span><span class="p">(</span><span class="s2">&quot;grpc&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;`ydb` package is missing.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">install_suggestion</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">_init_drive</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">))</span>
+
+<div class="viewcode-block" id="YDBContextStorage.set_item_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.set_item_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">set_item_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Context</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                DECLARE $queryId AS Utf8;</span>
+<span class="s2">                DECLARE $queryContext AS Json;</span>
+<span class="s2">                UPSERT INTO </span><span class="si">{}</span>
+<span class="s2">                (</span>
+<span class="s2">                    id,</span>
+<span class="s2">                    context</span>
+<span class="s2">                )</span>
+<span class="s2">                VALUES</span>
+<span class="s2">                (</span>
+<span class="s2">                    $queryId,</span>
+<span class="s2">                    $queryContext</span>
+<span class="s2">                );</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;$queryId&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="s2">&quot;$queryContext&quot;</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">()},</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="YDBContextStorage.get_item_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.get_item_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">get_item_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Context</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                DECLARE $queryId AS Utf8;</span>
+<span class="s2">                SELECT</span>
+<span class="s2">                    id,</span>
+<span class="s2">                    context</span>
+<span class="s2">                FROM </span><span class="si">{}</span>
+<span class="s2">                WHERE id = $queryId;</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="n">result_sets</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;$queryId&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">result_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rows</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Context</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">result_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="YDBContextStorage.del_item_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.del_item_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">del_item_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                DECLARE $queryId AS Utf8;</span>
+<span class="s2">                DELETE</span>
+<span class="s2">                FROM </span><span class="si">{}</span>
+<span class="s2">                WHERE</span>
+<span class="s2">                    id = $queryId</span>
+<span class="s2">                ;</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;$queryId&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)},</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="YDBContextStorage.contains_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.contains_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">contains_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="c1"># new transaction in serializable read write mode</span>
+            <span class="c1"># if query successfully completed you will get result sets.</span>
+            <span class="c1"># otherwise exception will be raised</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                DECLARE $queryId AS Utf8;</span>
+<span class="s2">                SELECT</span>
+<span class="s2">                    id,</span>
+<span class="s2">                    context</span>
+<span class="s2">                FROM </span><span class="si">{}</span>
+<span class="s2">                WHERE id = $queryId;</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="n">result_sets</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;$queryId&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span>
+                <span class="p">},</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="YDBContextStorage.len_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.len_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">len_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                SELECT</span>
+<span class="s2">                    COUNT(*) as cnt</span>
+<span class="s2">                FROM </span><span class="si">{}</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="n">result_sets</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">result_sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cnt</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="YDBContextStorage.clear_async"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb.YDBContextStorage.clear_async">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">clear_async</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                PRAGMA TablePathPrefix(&quot;</span><span class="si">{}</span><span class="s2">&quot;);</span>
+<span class="s2">                DECLARE $queryId AS Utf8;</span>
+<span class="s2">                DELETE</span>
+<span class="s2">                FROM </span><span class="si">{}</span>
+<span class="s2">                ;</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span>
+            <span class="p">)</span>
+            <span class="n">prepared_query</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+            <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">SerializableReadWrite</span><span class="p">())</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">prepared_query</span><span class="p">,</span>
+                <span class="p">{},</span>
+                <span class="n">commit_tx</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="_init_drive"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb._init_drive">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">_init_drive</span><span class="p">(</span><span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">ydb</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">Driver</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">driver</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">fail_fast</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">ydb</span><span class="o">.</span><span class="n">aio</span><span class="o">.</span><span class="n">SessionPool</span><span class="p">(</span><span class="n">driver</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">_is_table_exists</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>  <span class="c1"># create table if it does not exist</span>
+        <span class="k">await</span> <span class="n">_create_table</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">driver</span><span class="p">,</span> <span class="n">pool</span></div>
+
+
+<div class="viewcode-block" id="_is_table_exists"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb._is_table_exists">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">_is_table_exists</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">describe_table</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">table_name</span><span class="p">))</span>
+
+        <span class="k">await</span> <span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="n">ydb</span><span class="o">.</span><span class="n">SchemeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="_create_table"><a class="viewcode-back" href="../../../apiref/chatsky.context_storages.ydb.html#chatsky.context_storages.ydb._create_table">[docs]</a><span class="k">async</span> <span class="k">def</span> <span class="nf">_create_table</span><span class="p">(</span><span class="n">pool</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">callee</span><span class="p">(</span><span class="n">session</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span>
+            <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">path</span><span class="p">,</span> <span class="n">table_name</span><span class="p">]),</span>
+            <span class="n">ydb</span><span class="o">.</span><span class="n">TableDescription</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">with_column</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">ydb</span><span class="o">.</span><span class="n">OptionalType</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">PrimitiveType</span><span class="o">.</span><span class="n">Utf8</span><span class="p">)))</span>
+            <span class="o">.</span><span class="n">with_column</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s2">&quot;context&quot;</span><span class="p">,</span> <span class="n">ydb</span><span class="o">.</span><span class="n">OptionalType</span><span class="p">(</span><span class="n">ydb</span><span class="o">.</span><span class="n">PrimitiveType</span><span class="o">.</span><span class="n">Json</span><span class="p">)))</span>
+            <span class="o">.</span><span class="n">with_primary_key</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="k">await</span> <span class="n">pool</span><span class="o">.</span><span class="n">retry_operation</span><span class="p">(</span><span class="n">callee</span><span class="p">)</span></div>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022 - 2024, DeepPavlov.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

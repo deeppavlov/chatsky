@@ -1,0 +1,6 @@
+:source_name: chatsky/stats/instrumentor
+
+.. automodule:: chatsky.stats.instrumentor
+   :members:
+   :undoc-members:
+   :show-inheritance:

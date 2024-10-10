@@ -1,0 +1,6 @@
+:source_name: chatsky/utils/db_benchmark/benchmark
+
+.. automodule:: chatsky.utils.db_benchmark.benchmark
+   :members:
+   :undoc-members:
+   :show-inheritance:

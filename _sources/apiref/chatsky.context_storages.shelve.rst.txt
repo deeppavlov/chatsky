@@ -1,0 +1,6 @@
+:source_name: chatsky/context_storages/shelve
+
+.. automodule:: chatsky.context_storages.shelve
+   :members:
+   :undoc-members:
+   :show-inheritance:
