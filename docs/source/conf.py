@@ -117,10 +117,6 @@ html_css_files = [
     "css/custom.css",
 ]
 
-# Version switcher url
-switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
-# To-do: a separate switcher.json for dev and other branches
-
 # Checking for dev before passing version to switcher
 if polyversion_build and current[0] == "dev":
     version_data = "dev"
@@ -128,12 +124,14 @@ if polyversion_build and current[0] == "dev":
 else:
     version_data = version
 
-# Removing version switcher from local doc builds. (Or it would point to our Github Pages)
+# Version switcher url
+switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
+
+# Removing version switcher from local doc builds. There is no local multi-versioning.
+# Instead, this allows the person to use their own switcher if they need it for some reason.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
 if LOCAL_BUILD:
     switcher_url = "./_static/switcher.json"
-# Possible TO-DO: generating switcher.json for local builds separately.
-# Then change the prior url to new switcher. This is probably overkill.
 
 # Theme options
 html_theme_options = {
@@ -161,7 +159,7 @@ html_theme_options = {
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
     "switcher": {
         "json_url": switcher_url,
-        "version_match" : version_data,
+        "version_match": version_data,
     },
     "navbar_persistent": ["search-button.html", "theme-switcher.html"],
     "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],

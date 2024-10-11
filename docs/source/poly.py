@@ -19,20 +19,14 @@ generate_switcher()
 BRANCH_REGEX = r"((?!master).)*"
 # BRANCH_REGEX = r".*"
 
-#: Regex matching the tags to build docs for
+#: Regex matching the tags to build docs for (will get overwritten without the option below)
 TAG_REGEX = r"-"
-# TODO: Make a regexp for all tags except those that include "dev, rc1 and so on"
-# r""
-# Basically, only leave those that fit v'number'.'number'.'number' and >= than v0.6.4
-# All those "rc1" and so on should be excluded.
-# It's possible to just make a really long string with the right tags.
-# (could be all tags after a certain tag in the 'repo.tags' array)
-# It's very quick to do, but a regexp sounds cooler.
+# You can set this to 'True' to run default sphinx-polyversion with few changes of our own.
+custom_tag_regex = False
 
 # If 'True', builds only the latest tag. Otherwise, all tags will be built.
 # TODO: (Optional, not critical) set this to 'True' if 'conf.py' hasn't changed since
-# TODO: the previous version(tag).
-# I'm not sure how to do it right now.
+# the previous version(tag). I'm not sure how to do it right now.
 build_only_latest_tag = False
 
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
@@ -45,15 +39,43 @@ branch = os.getenv('BRANCH_NAME', default=None)
 if branch is None:
     branch = repo.active_branch
 
+
+# This makes sure that tags which include 'rc' and 'dev' strings aren't built for the latest tag option.
+# Is this a good thing, actually?
+# TODO: discuss this.
+def find_latest_tag(tag_list: list):
+    latest_tag = tag_list[-1]
+    shift = 0
+    while "rc" in latest_tag or "dev" in latest_tag:
+        shift += 1
+        latest_tag = tag_list[-shift]
+    return latest_tag
+
+
+def create_tag_regex(tag_list: list):
+    tag_regex = r"("
+    # Maybe could add a 'start_version' for building
+    start_index = tag_list.index("v0.9.0")
+    tag_list = tag_list[start_index:]
+    # Sorts through tags for 'rc' and 'dev' strings
+    tag_list = [elem for elem in tag_list if (("rc" not in str(elem)) and ("dev" not in str(elem)))]
+    # Creates the regex
+    for tag in tag_list:
+        tag_regex += str(tag) + "|"
+    tag_regex = tag_regex[:-1] + ")"
+    return tag_regex
+
+
 if str(branch) == "master":
+    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
     if build_only_latest_tag:
-        # TODO: Check for release candidates. "rc1" and don't let them through.
         # Releases are handled here (pushes into master mean a release, so the latest tag is built)
-        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-        latest_tag = tags[-1]
-        TAG_REGEX = str(latest_tag)
-    # else the default option happens - building all tags from v1.0 and beyond, I think.
-    # Or whatever the user has set to the tags section.
+        TAG_REGEX = str(find_latest_tag(tags))
+    # If v0.9.0 is not in tags there's something wrong, this line is quite wrong,
+    # but for now it makes sure docs don't crash in case someone fetches only a part of tags
+    elif "v0.9.0" in tags and not custom_tag_regex:
+        TAG_REGEX = create_tag_regex(tags)
+        print("TAG_REGEX = ", TAG_REGEX)
 else:
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
