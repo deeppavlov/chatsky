@@ -119,6 +119,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         clean_docs(str(output_dir))
 
         # Running Chatsky custom funcs before doc building
+        root_dir = environment.path.absolute()
         scripts.doc.pre_sphinx_build_funcs(str(root_dir))
         # setup_module.setup(str(root_dir))
 
