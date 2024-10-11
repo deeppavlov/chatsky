@@ -28,7 +28,7 @@ def generate_switcher():
         if tag == tags[0]:
             tag_data["preferred"] = "true"
         # Only building for tags from v0.7.0
-        if str(tag) > "v0.7.0":
+        if str(tag) > "v0.6.0":
             switcher_json += [tag_data]
 
     switcher_json_obj = json.dumps(switcher_json, indent=4)
