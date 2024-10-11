@@ -194,6 +194,9 @@ def setup(_):
         sys.modules["setup"] = setup_module
         spec.loader.exec_module(setup_module)
         setup_module.setup(str(root_dir))
+        # Or this could just be
+        # from old_conf import setup
+        # setup()
     else:
         from setup import setup
         setup()

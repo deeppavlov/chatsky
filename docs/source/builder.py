@@ -104,7 +104,7 @@ class ChatskySphinxBuilder(CommandBuilder):
 
             with open(links_file, "w") as file:
                 file.write(contents)
-
+"""
         # Importing version-dependent module setup.py
         # TODO: import setup() from older conf.py files directly.
         # Maybe if the import is unsuccessful import from the other location?
@@ -114,13 +114,13 @@ class ChatskySphinxBuilder(CommandBuilder):
         setup_module = importlib.util.module_from_spec(spec)
         sys.modules["setup"] = setup_module
         spec.loader.exec_module(setup_module)
-
+"""
         # Cleaning outdated documentation build
         clean_docs(str(output_dir))
 
         # Running Chatsky custom funcs before doc building
         scripts.doc.pre_sphinx_build_funcs(str(root_dir))
-        setup_module.setup(str(root_dir))
+        # setup_module.setup(str(root_dir))
 
         # Using the newest conf.py file instead of the old one
         # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.
