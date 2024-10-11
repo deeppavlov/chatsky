@@ -119,7 +119,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         # Using the newest conf.py file instead of the old one
         # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.
         # Just don't forget to configure poly.py for building the right tags
-        new_sphinx_configs = True
+        new_sphinx_configs = False
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
             older_conf_path = str(source_dir) + "/conf.py"
