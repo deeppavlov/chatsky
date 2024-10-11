@@ -69,6 +69,7 @@ def create_tag_regex(tag_list: list):
 print(branch)
 if str(branch) == "master":
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+    tags.reverse()
     tags = [str(x) for x in tags]
     print(tags)
     if build_only_latest_tag:
