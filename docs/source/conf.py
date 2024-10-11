@@ -118,6 +118,8 @@ html_css_files = [
     "css/custom.css",
 ]
 
+print(current[0])
+print(current)
 # Checking for dev before passing version to switcher
 if polyversion_build and current[0] == "dev":
     version_data = "dev"
