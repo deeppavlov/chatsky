@@ -68,6 +68,7 @@ def create_tag_regex(tag_list: list):
 
 if str(branch) == "master":
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+    tags = [str(x) for x in tags]
     if build_only_latest_tag:
         # Releases are handled here (pushes into master mean a release, so the latest tag is built)
         TAG_REGEX = str(find_latest_tag(tags))

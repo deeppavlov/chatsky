@@ -87,7 +87,13 @@ class ChatskySphinxBuilder(CommandBuilder):
         # TODO: Make all links use metadata in conf.py and like apiref metadata.
         # Making GitHub links version dependent in tutorials and API reference
         doc_version = os.getenv("VERSION", default=None)
-        doc_version = str(output_dir).split('/')[-1]
+        accepted_branch_prefixes = ["feat", "fix", "test", "docs", "style", "refactor", "chore"]
+        output_dir_list = str(output_dir).split('/')
+        if output_dir_list[-2] in accepted_branch_prefixes:
+            doc_version = output_dir_list[-2] + "/" + output_dir_list[-1]
+        else:
+            doc_version = output_dir_list[-1]
+
         example_links_file = Path(source_dir) / "_templates" / "example-links.html"
         source_links_file = Path(source_dir) / "_templates" / "source-links.html"
         for links_file in [example_links_file, source_links_file]:
