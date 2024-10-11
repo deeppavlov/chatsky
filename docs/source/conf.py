@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import importlib.metadata
+import importlib.util
 import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
@@ -183,5 +184,13 @@ autodoc_default_options = {
 
 def setup(_):
     # TODO: Import for old versions differently
-    from setup import setup
-    setup()
+    if polyversion_build and str(version) < "v0.10.0":
+        root_dir = os.getcwd()
+        spec = importlib.util.spec_from_file_location("setup", "./old_conf.py")
+        setup_module = importlib.util.module_from_spec(spec)
+        sys.modules["setup"] = setup_module
+        spec.loader.exec_module(setup_module)
+        setup_module.setup(str(root_dir))
+    else:
+        from setup import setup
+        setup()

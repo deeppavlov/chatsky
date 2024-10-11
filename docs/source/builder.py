@@ -129,6 +129,8 @@ class ChatskySphinxBuilder(CommandBuilder):
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
             older_conf_path = str(source_dir) + "/conf.py"
+            # Saving the old conf.py file for future use.
+            shutil.copyfile(older_conf_path, str(source_dir) + "/old_conf.py")
             shutil.copyfile(newer_conf_path, older_conf_path)
         # If you add your own conf.py path there, you could build with any conf.py,
         # meaning you could add features like the version-switcher button.
