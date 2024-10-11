@@ -66,9 +66,11 @@ def create_tag_regex(tag_list: list):
     return tag_regex
 
 
+print(branch)
 if str(branch) == "master":
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
     tags = [str(x) for x in tags]
+    print(tags)
     if build_only_latest_tag:
         # Releases are handled here (pushes into master mean a release, so the latest tag is built)
         TAG_REGEX = str(find_latest_tag(tags))
@@ -76,10 +78,10 @@ if str(branch) == "master":
     # but for now it makes sure docs don't crash in case someone fetches only a part of tags
     elif "v0.8.0" in tags and not custom_tag_regex:
         TAG_REGEX = create_tag_regex(tags)
-        print("TAG_REGEX = ", TAG_REGEX)
 else:
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
+print("TAG_REGEX = ", TAG_REGEX)
 
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
