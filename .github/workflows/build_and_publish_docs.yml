@@ -100,7 +100,7 @@ jobs:
         # TODO: Make a better True-False flag for deploying for Pull Requests.
         # Make this use GitHub Action Variables.
         # (PR only) Changed the variable below to False if you don't want to build docs for your PR
-        if: ${{ github.event_name == 'pull_request' && True }}
+        if: ${{ github.event_name == 'pull_request' && true }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
