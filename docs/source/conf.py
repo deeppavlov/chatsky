@@ -184,7 +184,7 @@ autodoc_default_options = {
 
 def setup(_):
     # TODO: Import for old versions differently
-    if polyversion_build and str(version) < "v0.10.0":
+    if polyversion_build and current[0] != "dev" and str(version) < "v0.9.0":
         root_dir = os.getcwd()
         spec = importlib.util.spec_from_file_location("setup", "./old_conf.py")
         setup_module = importlib.util.module_from_spec(spec)
