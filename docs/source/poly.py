@@ -63,13 +63,13 @@ def create_tag_regex(tag_list: list):
     for tag in tag_list:
         tag_regex += str(tag) + "|"
     tag_regex = tag_regex[:-1] + ")"
+    print("created tag regex")
     return tag_regex
 
 
 print(branch)
 if str(branch) == "master":
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    tags.reverse()
     tags = [str(x) for x in tags]
     print(tags)
     if build_only_latest_tag:
