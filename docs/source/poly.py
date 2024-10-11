@@ -24,6 +24,9 @@ TAG_REGEX = r"-"
 # You can set this to 'True' to run default sphinx-polyversion with few changes of our own.
 custom_tag_regex = False
 
+# Add an env variable from GitHub Actions, maybe.
+first_built_version = "v0.8.0"
+
 # If 'True', builds only the latest tag. Otherwise, all tags will be built.
 # TODO: (Optional, not critical) set this to 'True' if 'conf.py' hasn't changed since
 # the previous version(tag). I'm not sure how to do it right now.
@@ -55,7 +58,7 @@ def find_latest_tag(tag_list: list):
 def create_tag_regex(tag_list: list):
     tag_regex = r"("
     # Maybe could add a 'start_version' for building
-    start_index = tag_list.index("v0.6.4")
+    start_index = tag_list.index(first_built_version)
     tag_list = tag_list[start_index:]
     # Sorts through tags for 'rc' and 'dev' strings
     tag_list = [elem for elem in tag_list if (("rc" not in str(elem)) and ("dev" not in str(elem)))]
@@ -77,7 +80,7 @@ if str(branch) == "master":
         TAG_REGEX = str(find_latest_tag(tags))
     # If v0.8.0 is not in tags there's something wrong, this line is quite wrong,
     # but for now it makes sure docs don't crash in case someone fetches only a part of tags
-    elif "v0.6.4" in tags and not custom_tag_regex:
+    elif first_built_version in tags and not custom_tag_regex:
         TAG_REGEX = create_tag_regex(tags)
 else:
     BRANCH_REGEX = str(branch)
