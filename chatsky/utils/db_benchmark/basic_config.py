@@ -16,6 +16,7 @@ from humanize import naturalsize
 from pympler import asizeof
 
 from chatsky.core import Message, Context, AbsoluteNodeLabel
+from chatsky.context_storages import MemoryContextStorage
 from chatsky.utils.db_benchmark.benchmark import BenchmarkConfig
 
 
@@ -59,7 +60,8 @@ def get_message(message_dimensions: Tuple[int, ...]):
     return Message(misc=get_dict(message_dimensions))
 
 
-def get_context(
+async def get_context(
+    db,
     dialog_len: int,
     message_dimensions: Tuple[int, ...],
     misc_dimensions: Tuple[int, ...],
@@ -73,12 +75,16 @@ def get_context(
     :param misc_dimensions:
         A parameter used to generate misc field. See :py:func:`~.get_dict`.
     """
-    return Context(
-        labels={i: (f"flow_{i}", f"node_{i}") for i in range(dialog_len)},
-        requests={i: get_message(message_dimensions) for i in range(dialog_len)},
-        responses={i: get_message(message_dimensions) for i in range(dialog_len)},
-        misc=get_dict(misc_dimensions),
-    )
+    ctx = await Context.connected(db, start_label=("flow", "node"))
+    ctx.current_turn_id = -1
+    for i in range(dialog_len):
+        ctx.current_turn_id += 1
+        ctx.labels[ctx.current_turn_id] = AbsoluteNodeLabel(flow_name=f"flow_{i}", node_name=f"node_{i}")
+        ctx.requests[ctx.current_turn_id] = get_message(message_dimensions)
+        ctx.responses[ctx.current_turn_id] = get_message(message_dimensions)
+    await ctx.misc.update(get_dict(misc_dimensions))
+
+    return ctx
 
 
 class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
@@ -121,15 +127,15 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
     See :py:func:`~.get_dict`.
     """
 
-    def get_context(self) -> Context:
+    async def get_context(self, db) -> Context:
         """
         Return context with `from_dialog_len`, `message_dimensions`, `misc_dimensions`.
 
         Wraps :py:func:`~.get_context`.
         """
-        return get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
+        return await get_context(db, self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
 
-    def info(self):
+    async def info(self):
         """
         Return fields of this instance and sizes of objects defined by this config.
 
@@ -147,9 +153,9 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
         return {
             "params": self.model_dump(),
             "sizes": {
-                "starting_context_size": naturalsize(asizeof.asizeof(self.get_context()), gnu=True),
+                "starting_context_size": naturalsize(asizeof.asizeof(await self.get_context(MemoryContextStorage())), gnu=True),
                 "final_context_size": naturalsize(
-                    asizeof.asizeof(get_context(self.to_dialog_len, self.message_dimensions, self.misc_dimensions)),
+                    asizeof.asizeof(await get_context(MemoryContextStorage(), self.to_dialog_len, self.message_dimensions, self.misc_dimensions)),
                     gnu=True,
                 ),
                 "misc_size": naturalsize(asizeof.asizeof(get_dict(self.misc_dimensions)), gnu=True),
@@ -157,7 +163,7 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
             },
         }
 
-    def context_updater(self, context: Context) -> Optional[Context]:
+    async def context_updater(self, context: Context) -> Optional[Context]:
         """
         Update context to have `step_dialog_len` more labels, requests and responses,
         unless such dialog len would be equal to `to_dialog_len` or exceed than it,
@@ -166,10 +172,10 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
         start_len = len(context.labels)
         if start_len + self.step_dialog_len < self.to_dialog_len:
             for i in range(start_len, start_len + self.step_dialog_len):
-                context.current_turn_id = context.current_turn_id + 1
+                context.current_turn_id += 1
                 context.labels[context.current_turn_id] = AbsoluteNodeLabel(flow_name="flow_{i}", node_name="node_{i}")
                 context.requests[context.current_turn_id] = get_message(self.message_dimensions)
-                context.responses[context.current_turn_id] =get_message(self.message_dimensions)
+                context.responses[context.current_turn_id] = get_message(self.message_dimensions)
             return context
         else:
             return None

@@ -40,7 +40,7 @@ class DBContextStorage(ABC):
     @property
     @abstractmethod
     def is_asynchronous(self) -> bool:
-        return NotImplementedError
+        raise NotImplementedError()
 
     def __init__(
         self,
