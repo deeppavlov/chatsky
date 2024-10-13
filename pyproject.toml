@@ -64,6 +64,7 @@ altair = { version = "*", optional = true }
 asyncmy = { version = "*", optional = true }
 asyncpg = { version = "*", optional = true }
 pympler = { version = "*", optional = true }
+aiofiles = { version = "*", optional = true }
 humanize = { version = "*", optional = true }
 aiosqlite = { version = "*", optional = true }
 omegaconf = { version = "*", optional = true }
@@ -76,6 +77,8 @@ opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log b
 pyyaml = { version = "*", optional = true }
 
 [tool.poetry.extras]
+json = ["aiofiles"]
+pickle = ["aiofiles"]
 sqlite = ["sqlalchemy", "aiosqlite"]
 redis = ["redis"]
 mongodb = ["motor"]

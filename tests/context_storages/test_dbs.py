@@ -10,6 +10,8 @@ import pytest
 from chatsky.context_storages import (
     get_protocol_install_suggestion,
     context_storage_factory,
+    json_available,
+    pickle_available,
     postgres_available,
     mysql_available,
     sqlite_available,
@@ -77,8 +79,12 @@ def test_protocol_suggestion(protocol: str, expected: str) -> None:
     [
         pytest.param({"path": ""}, None, id="memory"),
         pytest.param({"path": "shelve://{__testing_file__}"}, delete_file, id="shelve"),
-        pytest.param({"path": "json://{__testing_file__}"}, delete_file, id="json"),
-        pytest.param({"path": "pickle://{__testing_file__}"}, delete_file, id="pickle"),
+        pytest.param({"path": "json://{__testing_file__}"}, delete_file, id="json", marks=[
+            pytest.mark.skipif(not json_available, reason="Asynchronous file (JSON) dependencies missing")
+        ]),
+        pytest.param({"path": "pickle://{__testing_file__}"}, delete_file, id="pickle", marks=[
+            pytest.mark.skipif(not pickle_available, reason="Asynchronous file (pickle) dependencies missing")
+        ]),
         pytest.param({
             "path": "mongodb://{MONGO_INITDB_ROOT_USERNAME}:{MONGO_INITDB_ROOT_PASSWORD}@"
                     "localhost:27017/{MONGO_INITDB_ROOT_USERNAME}"
@@ -289,7 +295,12 @@ class TestContextStorages:
                     *[(k, bytes(key + k)) for k in range(1, idx + 1)]
                 }
 
-        await asyncio.gather(*(db_operations(key * 2) for key in range(3)))
+        operations = [db_operations(key * 2) for key in range(3)]
+        if db.is_asynchronous:
+            await asyncio.gather(*operations)
+        else:
+            for coro in operations:
+                await coro
 
     async def test_pipeline(self, db) -> None:
         # Test Pipeline workload on DB

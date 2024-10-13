@@ -7,6 +7,7 @@ store and retrieve context data.
 """
 
 from abc import ABC, abstractmethod
+import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
 from typing import List, Set, Tuple, Dict, Optional, Hashable
@@ -14,6 +15,17 @@ from typing import List, Set, Tuple, Dict, Optional, Hashable
 from pydantic import BaseModel, Field
 
 from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+
+try:
+    from aiofiles import open
+    from aiofiles.os import stat, makedirs
+    from aiofiles.ospath import isfile
+
+    json_available = True
+    pickle_available = True
+except ImportError:
+    json_available = False
+    pickle_available = False
 
 
 class SerializableStorage(BaseModel):
@@ -40,19 +52,19 @@ class FileContextStorage(DBContextStorage, ABC):
         configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
-        self._load()
+        asyncio.run(self._load())
 
     @abstractmethod
-    def _save(self, data: SerializableStorage) -> None:
+    async def _save(self, data: SerializableStorage) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def _load(self) -> SerializableStorage:
+    async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
     # TODO: this method (and similar) repeat often. Optimize?
     async def _get_elems_for_field_name(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        storage = self._load()
+        storage = await self._load()
         if field_name == self._misc_field_name:
             return [(k, v) for c, k, v in storage.misc if c == ctx_id]
         elif field_name in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
@@ -70,19 +82,19 @@ class FileContextStorage(DBContextStorage, ABC):
             raise ValueError(f"Unknown field name: {field_name}!")
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
-        return self._load().main.get(ctx_id, None)
+        return (await self._load()).main.get(ctx_id, None)
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
-        storage = self._load()
+        storage = await self._load()
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, fw_data)
-        self._save(storage)
+        await self._save(storage)
 
     async def delete_context(self, ctx_id: str) -> None:
-        storage = self._load()
+        storage = await self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
         storage.misc = [(c, k, v) for c, k, v in storage.misc if c != ctx_id]
-        self._save(storage)
+        await self._save(storage)
 
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
         subscript = self._get_subscript_for_field(field_name)
@@ -103,7 +115,7 @@ class FileContextStorage(DBContextStorage, ABC):
         return [(k, v) for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys and v is not None]
 
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        storage = self._load()
+        storage = await self._load()
         table = self._get_table_for_field_name(storage, field_name)
         for k, v in items:
             upd = (ctx_id, k, v) if field_name == self._misc_field_name else (ctx_id, field_name, k, v)
@@ -113,39 +125,43 @@ class FileContextStorage(DBContextStorage, ABC):
                     break
             else:
                 table += [upd]
-        self._save(storage)
+        await self._save(storage)
 
     async def clear_all(self) -> None:
-        self._save(SerializableStorage())
+        await self._save(SerializableStorage())
 
 
 class JSONContextStorage(FileContextStorage):
-    def _save(self, data: SerializableStorage) -> None:
-        if not self.path.exists() or self.path.stat().st_size == 0:
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(data.model_dump_json(), encoding="utf-8")
+    async def _save(self, data: SerializableStorage) -> None:
+        if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
+            await makedirs(self.path.parent, exist_ok=True)
+        async with open(self.path, "w", encoding="utf-8") as file_stream:
+            await file_stream.write(data.model_dump_json())
 
-    def _load(self) -> SerializableStorage:
-        if not self.path.exists() or self.path.stat().st_size == 0:
+    async def _load(self) -> SerializableStorage:
+        if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
-            self._save(storage)
+            await self._save(storage)
         else:
-            storage = SerializableStorage.model_validate_json(self.path.read_text(encoding="utf-8"))
+            async with open(self.path, "r", encoding="utf-8") as file_stream:
+                storage = SerializableStorage.model_validate_json(await file_stream.read())
         return storage
 
 
 class PickleContextStorage(FileContextStorage):
-    def _save(self, data: SerializableStorage) -> None:
-        if not self.path.exists() or self.path.stat().st_size == 0:
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_bytes(dumps(data.model_dump()))
+    async def _save(self, data: SerializableStorage) -> None:
+        if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
+            await makedirs(self.path.parent, exist_ok=True)
+        async with open(self.path, "wb") as file_stream:
+            await file_stream.write(dumps(data.model_dump()))
 
-    def _load(self) -> SerializableStorage:
-        if not self.path.exists() or self.path.stat().st_size == 0:
+    async def _load(self) -> SerializableStorage:
+        if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
-            self._save(storage)
+            await self._save(storage)
         else:
-            storage = SerializableStorage.model_validate(loads(self.path.read_bytes()))
+            async with open(self.path, "rb") as file_stream:
+                storage = SerializableStorage.model_validate(loads(await file_stream.read()))
         return storage
 
 
@@ -161,14 +177,14 @@ class ShelveContextStorage(FileContextStorage):
         self._storage = None
         FileContextStorage.__init__(self, path, rewrite_existing, configuration)
 
-    def _save(self, data: SerializableStorage) -> None:
+    async def _save(self, data: SerializableStorage) -> None:
         self._storage[self._SHELVE_ROOT] = data.model_dump()
 
-    def _load(self) -> SerializableStorage:
+    async def _load(self) -> SerializableStorage:
         if self._storage is None:
             content = SerializableStorage()
             self._storage = DbfilenameShelf(str(self.path.absolute()), writeback=True)
-            self._save(content)
+            await self._save(content)
         else:
             content = SerializableStorage.model_validate(self._storage[self._SHELVE_ROOT])
         return content

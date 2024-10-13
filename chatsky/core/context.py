@@ -139,10 +139,10 @@ class Context(BaseModel):
         if id is None:
             uid = str(uuid4())
             instance = cls(id=uid)
-            instance.requests = await ContextDict.new(storage, uid, storage.requests_config.name, Message)
-            instance.responses = await ContextDict.new(storage, uid, storage.responses_config.name, Message)
-            instance.misc = await ContextDict.new(storage, uid, storage.misc_config.name, Any)
-            instance.labels = await ContextDict.new(storage, uid, storage.labels_config.name, AbsoluteNodeLabel)
+            instance.requests = await ContextDict.new(storage, uid, storage._requests_field_name, Message)
+            instance.responses = await ContextDict.new(storage, uid, storage._responses_field_name, Message)
+            instance.misc = await ContextDict.new(storage, uid, storage._misc_field_name, Any)
+            instance.labels = await ContextDict.new(storage, uid, storage._labels_field_name, AbsoluteNodeLabel)
             instance.labels[0] = start_label
             instance._storage = storage
             return instance
@@ -153,10 +153,10 @@ class Context(BaseModel):
             main, labels, requests, responses, misc = await launch_coroutines(
                 [
                     storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage.labels_config.name, AbsoluteNodeLabel),
-                    ContextDict.connected(storage, id, storage.requests_config.name, Message),
-                    ContextDict.connected(storage, id, storage.responses_config.name, Message),
-                    ContextDict.connected(storage, id, storage.misc_config.name, Any)
+                    ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
+                    ContextDict.connected(storage, id, storage._requests_field_name, Message),
+                    ContextDict.connected(storage, id, storage._responses_field_name, Message),
+                    ContextDict.connected(storage, id, storage._misc_field_name, Any)
                 ],
                 storage.is_asynchronous,
             )
