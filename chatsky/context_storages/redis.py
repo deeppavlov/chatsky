@@ -14,7 +14,7 @@ and powerful choice for data storage and management.
 """
 
 from asyncio import gather
-from typing import Callable, Hashable, List, Dict, Set, Tuple, Optional
+from typing import Callable, List, Dict, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -67,46 +67,34 @@ class RedisContextStorage(DBContextStorage):
         self._prefix = key_prefix
         self._main_key = f"{key_prefix}:{self._main_table_name}"
         self._turns_key = f"{key_prefix}:{self._turns_table_name}"
-        self._misc_key = f"{key_prefix}:{self._misc_table_name}"
 
     @staticmethod
-    def _keys_to_bytes(keys: List[Hashable]) -> List[bytes]:
+    def _keys_to_bytes(keys: List[int]) -> List[bytes]:
         return [str(f).encode("utf-8") for f in keys]
 
     @staticmethod
-    def _bytes_to_keys_converter(constructor: Callable[[str], Hashable] = str) -> Callable[[List[bytes]], List[Hashable]]:
-        return lambda k: [constructor(f.decode("utf-8")) for f in k]
+    def _bytes_to_keys(keys: List[bytes]) -> List[int]:
+        return [int(f.decode("utf-8")) for f in keys]
 
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _get_subscript_for_field(self, field_name: str, ctx_id: str) -> Tuple[str, Callable[[List[bytes]], List[Hashable]], _SUBSCRIPT_TYPE]:
-        if field_name == self._labels_field_name:
-            return f"{self._turns_key}:{ctx_id}:{field_name}", self._bytes_to_keys_converter(int), self.labels_subscript
-        elif field_name == self._requests_field_name:
-            return f"{self._turns_key}:{ctx_id}:{field_name}", self._bytes_to_keys_converter(int), self.requests_subscript
-        elif field_name == self._responses_field_name:
-            return f"{self._turns_key}:{ctx_id}:{field_name}", self._bytes_to_keys_converter(int), self.responses_subscript
-        elif field_name == self._misc_field_name:
-            return f"{self._misc_key}:{ctx_id}", self._bytes_to_keys_converter(), self.misc_subscript
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
-            cti, ca, ua, fd = await gather(
+            cti, ca, ua, msc, fd = await gather(
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name),
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._created_at_column_name),
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._updated_at_column_name),
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._misc_column_name),
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name)
             )
-            return (int(cti), int(ca), int(ua), fd)
+            return (int(cti), int(ca), int(ua), msc, fd)
         else:
             return None
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         await gather(
             self.database.hset(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name, str(turn_id)),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._created_at_column_name, str(crt_at)),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._updated_at_column_name, str(upd_at)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._misc_column_name, misc),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data)
         )
 
@@ -115,34 +103,35 @@ class RedisContextStorage(DBContextStorage):
         if len(keys) > 0:
             await self.database.delete(*keys)
 
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_key, field_converter, field_subscript = self._get_subscript_for_field(field_name, ctx_id)
-        keys = await self.database.hkeys(field_key)
-        if field_key.startswith(self._turns_key):
-            keys = sorted(keys, key=lambda k: int(k), reverse=True)
-        if isinstance(field_subscript, int):
-            keys = keys[:field_subscript]
-        elif isinstance(field_subscript, Set):
-            keys = [k for k in keys if k in self._keys_to_bytes(field_subscript)]
+    @DBContextStorage._verify_field_name
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
+        keys = sorted(await self.database.hkeys(field_key), key=lambda k: int(k), reverse=True)
+        if isinstance(self._subscripts[field_name], int):
+            keys = keys[:self._subscripts[field_name]]
+        elif isinstance(self._subscripts[field_name], Set):
+            keys = [k for k in keys if k in self._keys_to_bytes(self._subscripts[field_name])]
         values = await gather(*[self.database.hget(field_key, k) for k in keys])
-        return [(k, v) for k, v in zip(field_converter(keys), values)]
+        return [(k, v) for k, v in zip(self._bytes_to_keys(keys), values)]
 
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_key, field_converter, _ = self._get_subscript_for_field(field_name, ctx_id)
-        return field_converter(await self.database.hkeys(field_key))
+    @DBContextStorage._verify_field_name
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        return self._bytes_to_keys(await self.database.hkeys(f"{self._turns_key}:{ctx_id}:{field_name}"))
 
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
-        field_key, field_converter, _ = self._get_subscript_for_field(field_name, ctx_id)
+    @DBContextStorage._verify_field_name
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+        field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         load = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         values = await gather(*[self.database.hget(field_key, k) for k in load])
-        return [(k, v) for k, v in zip(field_converter(load), values)]
+        return [(k, v) for k, v in zip(self._bytes_to_keys(load), values)]
 
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_key, _, _ = self._get_subscript_for_field(field_name, ctx_id)
-        await gather(*[self.database.hset(field_key, str(k), v) for k, v in items])
+    @DBContextStorage._verify_field_name
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+        await gather(*[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in items])
 
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
-        field_key, _, _ = self._get_subscript_for_field(field_name, ctx_id)
+    @DBContextStorage._verify_field_name
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
+        field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         match = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         if len(match) > 0:
             await self.database.hdel(field_key, *match)

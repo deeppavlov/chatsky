@@ -17,7 +17,7 @@ from __future__ import annotations
 import asyncio
 from importlib import import_module
 from os import getenv
-from typing import Hashable, Callable, Collection, Dict, List, Optional, Set, Tuple
+from typing import Callable, Collection, Dict, List, Optional, Set, Tuple
 
 from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
@@ -142,7 +142,6 @@ class SQLContextStorage(DBContextStorage):
     """
 
     _UUID_LENGTH = 64
-    _FIELD_LENGTH = 256
 
     def __init__(
         self,
@@ -170,6 +169,7 @@ class SQLContextStorage(DBContextStorage):
             Column(self._current_turn_id_column_name, BigInteger(), nullable=False),
             Column(self._created_at_column_name, BigInteger(), nullable=False),
             Column(self._updated_at_column_name, BigInteger(), nullable=False),
+            Column(self._misc_column_name, LargeBinary(), nullable=False),
             Column(self._framework_data_column_name, LargeBinary(), nullable=False),
         )
         self.turns_table = Table(
@@ -181,14 +181,6 @@ class SQLContextStorage(DBContextStorage):
             Column(self._requests_field_name, LargeBinary(), nullable=True),
             Column(self._responses_field_name, LargeBinary(), nullable=True),
             Index(f"{self._turns_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
-        )
-        self.misc_table = Table(
-            f"{table_name_prefix}_{self._misc_table_name}",
-            metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self.main_table.name, self._id_column_name), nullable=False),
-            Column(self._key_column_name, String(self._FIELD_LENGTH), nullable=False),
-            Column(self._value_column_name, LargeBinary(), nullable=True),
-            Index(f"{self._misc_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
         )
 
         asyncio.run(self._create_self_tables())
@@ -202,7 +194,7 @@ class SQLContextStorage(DBContextStorage):
         Create tables required for context storing, if they do not exist yet.
         """
         async with self.engine.begin() as conn:
-            for table in [self.main_table, self.turns_table, self.misc_table]:
+            for table in [self.main_table, self.turns_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
 
@@ -222,39 +214,27 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _get_subscript_for_field(self, field_name: str) -> Tuple[Table, str, _SUBSCRIPT_TYPE]:
-        if field_name == self._labels_field_name:
-            return self.turns_table, field_name, self.labels_subscript
-        elif field_name == self._requests_field_name:
-            return self.turns_table, field_name, self.requests_subscript
-        elif field_name == self._responses_field_name:
-            return self.turns_table, field_name, self.responses_subscript
-        elif field_name == self._misc_field_name:
-            return self.misc_table, self._value_column_name, self.misc_subscript
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return None if result is None else result[1:]
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
                 self._id_column_name: ctx_id,
                 self._current_turn_id_column_name: turn_id,
                 self._created_at_column_name: crt_at,
                 self._updated_at_column_name: upd_at,
+                self._misc_column_name: misc,
                 self._framework_data_column_name: fw_data,
             }
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [self._updated_at_column_name, self._framework_data_column_name, self._current_turn_id_column_name],
+            [self._updated_at_column_name, self._current_turn_id_column_name, self._misc_column_name, self._framework_data_column_name],
             [self._id_column_name],
         )
         async with self.engine.begin() as conn:
@@ -266,54 +246,50 @@ class SQLContextStorage(DBContextStorage):
             await asyncio.gather(
                 conn.execute(delete(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)),
                 conn.execute(delete(self.turns_table).where(self.turns_table.c[self._id_column_name] == ctx_id)),
-                conn.execute(delete(self.misc_table).where(self.misc_table.c[self._id_column_name] == ctx_id)),
             )
 
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, field_subscript = self._get_subscript_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
-        if field_table == self.turns_table:
-            stmt = stmt.order_by(field_table.c[self._key_column_name].desc())
-        if isinstance(field_subscript, int):
-            stmt = stmt.limit(field_subscript)
-        elif isinstance(field_subscript, Set):
-            stmt = stmt.where(field_table.c[self._key_column_name].in_(field_subscript))
+    @DBContextStorage._verify_field_name
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
+        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
+        stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
+        if isinstance(self._subscripts[field_name], int):
+            stmt = stmt.limit(self._subscripts[field_name])
+        elif isinstance(self._subscripts[field_name], Set):
+            stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(self._subscripts[field_name]))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name]).where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[key_name] != None))
+    @DBContextStorage._verify_field_name
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        stmt = select(self.turns_table.c[self._key_column_name]).where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[bytes]:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
-        stmt = select(field_table.c[self._key_column_name], field_table.c[key_name])
-        stmt = stmt.where((field_table.c[self._id_column_name] == ctx_id) & (field_table.c[self._key_column_name].in_(tuple(keys))) & (field_table.c[key_name] != None))
+    @DBContextStorage._verify_field_name
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
+        stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
+        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[self._key_column_name].in_(tuple(keys))) & (self.turns_table.c[field_name] != None))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
+    @DBContextStorage._verify_field_name
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
         if len(items) == 0:
             return
-        if key_name == self._misc_field_name and any(len(k) > self._FIELD_LENGTH for k, _ in items):
-            raise ValueError(f"Field key length exceeds the limit of {self._FIELD_LENGTH} characters!")
-        insert_stmt = self._INSERT_CALLABLE(field_table).values(
+        insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
             [
                 {
                     self._id_column_name: ctx_id,
                     self._key_column_name: k,
-                    key_name: v,
+                    field_name: v,
                 } for k, v in items
             ]
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [key_name],
+            [field_name],
             [self._id_column_name, self._key_column_name],
         )
         async with self.engine.begin() as conn:
@@ -323,6 +299,5 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             await asyncio.gather(
                 conn.execute(delete(self.main_table)),
-                conn.execute(delete(self.turns_table)),
-                conn.execute(delete(self.misc_table))
+                conn.execute(delete(self.turns_table))
             )

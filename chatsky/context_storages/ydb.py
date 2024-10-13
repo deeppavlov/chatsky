@@ -12,7 +12,7 @@ take advantage of the scalability and high-availability features provided by the
 
 from asyncio import gather, run
 from os.path import join
-from typing import Awaitable, Callable, Hashable, Set, Tuple, List, Dict, Optional
+from typing import Awaitable, Callable, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
 from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
@@ -91,10 +91,6 @@ class YDBContextStorage(DBContextStorage):
         if not await self._does_table_exist(self.turns_table):
             await self._create_turns_table(self.turns_table)
 
-        self.misc_table = f"{self.table_prefix}_{self._misc_table_name}"
-        if not await self._does_table_exist(self.misc_table):
-            await self._create_misc_table(self.misc_table)
-
     async def _does_table_exist(self, table_name: str) -> bool:
         async def callee(session: Session) -> None:
             await session.describe_table(join(self.database, table_name))
@@ -114,6 +110,7 @@ class YDBContextStorage(DBContextStorage):
                 .with_column(Column(self._current_turn_id_column_name, PrimitiveType.Uint64))
                 .with_column(Column(self._created_at_column_name, PrimitiveType.Uint64))
                 .with_column(Column(self._updated_at_column_name, PrimitiveType.Uint64))
+                .with_column(Column(self._misc_column_name, PrimitiveType.String))
                 .with_column(Column(self._framework_data_column_name, PrimitiveType.String))
                 .with_primary_key(self._id_column_name)
             )
@@ -135,46 +132,11 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def _create_misc_table(self, table_name: str) -> None:
-        async def callee(session: Session) -> None:
-            await session.create_table(
-                "/".join([self.database, table_name]),
-                TableDescription()
-                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
-                .with_column(Column(self._key_column_name, PrimitiveType.Utf8))
-                .with_column(Column(self._value_column_name, OptionalType(PrimitiveType.String)))
-                .with_primary_keys(self._id_column_name, self._key_column_name)
-            )
-
-        await self.pool.retry_operation(callee)
-
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _get_subscript_for_field(self, field_name: str) -> Tuple[str, str, _SUBSCRIPT_TYPE]:
-        if field_name == self._labels_field_name:
-            return self.turns_table, field_name, self.labels_subscript
-        elif field_name == self._requests_field_name:
-            return self.turns_table, field_name, self.requests_subscript
-        elif field_name == self._responses_field_name:
-            return self.turns_table, field_name, self.responses_subscript
-        elif field_name == self._misc_field_name:
-            return self.misc_table, self._value_column_name, self.misc_subscript
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _transform_keys(self, field_name: str, keys: List[Hashable]) -> List[str]:
-        if field_name == self._misc_field_name:
-            return [f"\"{e}\"" for e in keys]
-        elif field_name in (self.labels_field_name, self.requests_field_name, self.responses_field_name):
-            return [str(e) for e in keys]
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
-        async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+        async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes, bytes]]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._framework_data_column_name}
+                SELECT {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._misc_column_name}, {self._framework_data_column_name}
                 FROM {self.main_table}
                 WHERE {self._id_column_name} = "{ctx_id}";
                 """  # noqa: E501
@@ -185,21 +147,23 @@ class YDBContextStorage(DBContextStorage):
                 result_sets[0].rows[0][self._current_turn_id_column_name],
                 result_sets[0].rows[0][self._created_at_column_name],
                 result_sets[0].rows[0][self._updated_at_column_name],
+                result_sets[0].rows[0][self._misc_column_name],
                 result_sets[0].rows[0][self._framework_data_column_name],
             ) if len(result_sets[0].rows) > 0 else None
 
         return await self.pool.retry_operation(callee)
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         async def callee(session: Session) -> None:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${self._current_turn_id_column_name} AS Uint64;
                 DECLARE ${self._created_at_column_name} AS Uint64;
                 DECLARE ${self._updated_at_column_name} AS Uint64;
+                DECLARE ${self._misc_column_name} AS String;
                 DECLARE ${self._framework_data_column_name} AS String;
-                UPSERT INTO {self.main_table} ({self._id_column_name}, {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._framework_data_column_name})
-                VALUES ("{ctx_id}", ${self._current_turn_id_column_name}, ${self._created_at_column_name}, ${self._updated_at_column_name}, ${self._framework_data_column_name});
+                UPSERT INTO {self.main_table} ({self._id_column_name}, {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._misc_column_name}, {self._framework_data_column_name})
+                VALUES ("{ctx_id}", ${self._current_turn_id_column_name}, ${self._created_at_column_name}, ${self._updated_at_column_name}, ${self._misc_column_name}, ${self._framework_data_column_name});
                 """  # noqa: E501
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
@@ -207,6 +171,7 @@ class YDBContextStorage(DBContextStorage):
                     f"${self._current_turn_id_column_name}": turn_id,
                     f"${self._created_at_column_name}": crt_at,
                     f"${self._updated_at_column_name}": upd_at,
+                    f"${self._misc_column_name}": misc,
                     f"${self._framework_data_column_name}": fw_data,
                 },
                 commit_tx=True
@@ -230,47 +195,42 @@ class YDBContextStorage(DBContextStorage):
 
         await gather(
             self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table)),
-            self.pool.retry_operation(construct_callee(self.misc_table))
+            self.pool.retry_operation(construct_callee(self.turns_table))
         )
 
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, field_subscript = self._get_subscript_for_field(field_name)
-
-        async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
-            sort, limit, key = "", "", ""
-            if field_table == self.turns_table:
-                sort = f"ORDER BY {self._key_column_name} DESC"
-            if isinstance(field_subscript, int):
-                limit = f"LIMIT {field_subscript}"
-            elif isinstance(field_subscript, Set):
-                keys = ", ".join(self._transform_keys(field_name, field_subscript))
+    @DBContextStorage._verify_field_name
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        async def callee(session: Session) -> List[Tuple[int, bytes]]:
+            limit, key = "", ""
+            if isinstance(self._subscripts[field_name], int):
+                limit = f"LIMIT {self._subscripts[field_name]}"
+            elif isinstance(self._subscripts[field_name], Set):
+                keys = ", ".join([str(e) for e in self._subscripts[field_name]])
                 key = f"AND {self._key_column_name} IN ({keys})"
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT {self._key_column_name}, {key_name}
-                FROM {field_table}
-                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL {key}
-                {sort} {limit};
+                SELECT {self._key_column_name}, {field_name}
+                FROM {self.turns_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {field_name} IS NOT NULL {key}
+                ORDER BY {self._key_column_name} DESC {limit};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query), dict(), commit_tx=True
             )
             return [
-                (e[self._key_column_name], e[key_name]) for e in result_sets[0].rows
+                (e[self._key_column_name], e[field_name]) for e in result_sets[0].rows
             ] if len(result_sets[0].rows) > 0 else list()
 
         return await self.pool.retry_operation(callee)
 
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
-
-        async def callee(session: Session) -> List[Hashable]:
+    @DBContextStorage._verify_field_name
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        async def callee(session: Session) -> List[int]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 SELECT {self._key_column_name}
-                FROM {field_table}
-                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL;
+                FROM {self.turns_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {field_name} IS NOT NULL;
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query), dict(), commit_tx=True
@@ -281,40 +241,39 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
-
-        async def callee(session: Session) -> List[Tuple[Hashable, bytes]]:
+    @DBContextStorage._verify_field_name
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+        async def callee(session: Session) -> List[Tuple[int, bytes]]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT {self._key_column_name}, {key_name}
-                FROM {field_table}
-                WHERE {self._id_column_name} = "{ctx_id}" AND {key_name} IS NOT NULL
-                AND {self._key_column_name} IN ({', '.join(self._transform_keys(field_name, keys))});
+                SELECT {self._key_column_name}, {field_name}
+                FROM {self.turns_table}
+                WHERE {self._id_column_name} = "{ctx_id}" AND {field_name} IS NOT NULL
+                AND {self._key_column_name} IN ({', '.join([str(e) for e in keys])});
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query), dict(), commit_tx=True
             )
             return [
-                (e[self._key_column_name], e[key_name]) for e in result_sets[0].rows
+                (e[self._key_column_name], e[field_name]) for e in result_sets[0].rows
             ] if len(result_sets[0].rows) > 0 else list()
 
         return await self.pool.retry_operation(callee)
 
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
-        field_table, key_name, _ = self._get_subscript_for_field(field_name)
+    @DBContextStorage._verify_field_name
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
         if len(items) == 0:
             return
 
         async def callee(session: Session) -> None:
-            keys = self._transform_keys(field_name, [k for k, _ in items])
-            placeholders = {k: f"${key_name}_{i}" for i, (k, v) in enumerate(items) if v is not None}
+            keys = [str(k) for k, _ in items]
+            placeholders = {k: f"${field_name}_{i}" for i, (k, v) in enumerate(items) if v is not None}
             declarations = "\n".join(f"DECLARE {p} AS String;" for p in placeholders.values())
             values = ", ".join(f"(\"{ctx_id}\", {keys[i]}, {placeholders.get(k, 'NULL')})" for i, (k, _) in enumerate(items))
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 {declarations}
-                UPSERT INTO {field_table} ({self._id_column_name}, {self._key_column_name}, {key_name})
+                UPSERT INTO {self.turns_table} ({self._id_column_name}, {self._key_column_name}, {field_name})
                 VALUES {values};
                 """  # noqa: E501
             await session.transaction(SerializableReadWrite()).execute(
@@ -340,6 +299,5 @@ class YDBContextStorage(DBContextStorage):
 
         await gather(
             self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table)),
-            self.pool.retry_operation(construct_callee(self.misc_table))
+            self.pool.retry_operation(construct_callee(self.turns_table))
         )

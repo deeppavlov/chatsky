@@ -119,7 +119,7 @@ class Context(BaseModel):
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    misc: ContextDict[str, Any] = Field(default_factory=ContextDict)
+    misc: Dict[str, Any] = Field(default_factory=dict)
     """
     ``misc`` stores any custom data. The framework doesn't use this dictionary,
     so storage of any data won't reflect on the work of the internal Chatsky functions.
@@ -141,7 +141,6 @@ class Context(BaseModel):
             instance = cls(id=uid)
             instance.requests = await ContextDict.new(storage, uid, storage._requests_field_name, Message)
             instance.responses = await ContextDict.new(storage, uid, storage._responses_field_name, Message)
-            instance.misc = await ContextDict.new(storage, uid, storage._misc_field_name, Any)
             instance.labels = await ContextDict.new(storage, uid, storage._labels_field_name, AbsoluteNodeLabel)
             instance.labels[0] = start_label
             instance._storage = storage
@@ -150,23 +149,24 @@ class Context(BaseModel):
             if not isinstance(id, str):
                 logger.warning(f"Id is not a string: {id}. Converting to string.")
                 id = str(id)
-            main, labels, requests, responses, misc = await launch_coroutines(
+            main, labels, requests, responses = await launch_coroutines(
                 [
                     storage.load_main_info(id),
                     ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
                     ContextDict.connected(storage, id, storage._requests_field_name, Message),
                     ContextDict.connected(storage, id, storage._responses_field_name, Message),
-                    ContextDict.connected(storage, id, storage._misc_field_name, Any)
                 ],
                 storage.is_asynchronous,
             )
             if main is None:
                 crt_at = upd_at = time_ns()
                 turn_id = 0
+                misc = dict()
                 fw_data = FrameworkData()
                 labels[0] = start_label
             else:
-                turn_id, crt_at, upd_at, fw_data = main
+                turn_id, crt_at, upd_at, misc, fw_data = main
+                misc = TypeAdapter(Dict[str, Any]).validate_json(misc)
                 fw_data = FrameworkData.model_validate_json(fw_data)
             instance = cls(id=id, current_turn_id=turn_id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
@@ -248,11 +248,6 @@ class Context(BaseModel):
                 responses_obj = TypeAdapter(Dict[int, Message]).validate_python(responses_obj)
             instance.responses = ContextDict.model_validate(responses_obj)
             instance.responses._ctx_id = instance.id
-            misc_obj = value.get("misc", dict())
-            if isinstance(misc_obj, Dict):
-                misc_obj = TypeAdapter(Dict[str, Any]).validate_python(misc_obj)
-            instance.misc = ContextDict.model_validate(misc_obj)
-            instance.misc._ctx_id = instance.id
             return instance
         else:
             raise ValueError(f"Unknown type of Context value: {type(value).__name__}!")
@@ -260,14 +255,14 @@ class Context(BaseModel):
     async def store(self) -> None:
         if self._storage is not None:
             self._updated_at = time_ns()
-            byted = self.framework_data.model_dump_json().encode()
+            misc_byted = self.framework_data.model_dump_json().encode()
+            fw_data_byted = self.framework_data.model_dump_json().encode()
             await launch_coroutines(
                 [
-                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, byted),
+                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted),
                     self.labels.store(),
                     self.requests.store(),
                     self.responses.store(),
-                    self.misc.store(),
                 ],
                 self._storage.is_asynchronous,
             )

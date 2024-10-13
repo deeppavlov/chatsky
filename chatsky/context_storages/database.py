@@ -10,8 +10,9 @@ This class implements the basic functionality and can be extended to add additio
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from inspect import signature
 from pathlib import Path
-from typing import Any, Dict, Hashable, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, field_validator, validate_call
 
@@ -24,18 +25,16 @@ _SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE, Literal["__none__"]]]
 class DBContextStorage(ABC):
     _main_table_name: Literal["main"] = "main"
     _turns_table_name: Literal["turns"] = "turns"
-    _misc_table_name: Literal["misc"] = "misc"
     _key_column_name: Literal["key"] = "key"
-    _value_column_name: Literal["value"] = "value"
     _id_column_name: Literal["id"] = "id"
     _current_turn_id_column_name: Literal["current_turn_id"] = "current_turn_id"
     _created_at_column_name: Literal["created_at"] = "created_at"
     _updated_at_column_name: Literal["updated_at"] = "updated_at"
+    _misc_column_name: Literal["misc"] = "misc"
     _framework_data_column_name: Literal["framework_data"] = "framework_data"
     _labels_field_name: Literal["labels"] = "labels"
     _requests_field_name: Literal["requests"] = "requests"
     _responses_field_name: Literal["responses"] = "responses"
-    _misc_field_name: Literal["misc"] = "misc"
     _default_subscript_value: int = 3
 
     @property
@@ -50,47 +49,39 @@ class DBContextStorage(ABC):
         configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
         _, _, file_path = path.partition("://")
+        configuration = configuration if configuration is not None else dict()
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
         self.path = Path(file_path)
         """`full_path` without a prefix defining db used."""
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
-        self._validate_subscripts(configuration if configuration is not None else dict())
+        self._subscripts = dict()
+        for field in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
+            value = configuration.get(field, self._default_subscript_value)
+            self._subscripts[field] = 0 if value == "__none__" else value
 
-    def _validate_subscripts(self, subscripts: _SUBSCRIPT_DICT) -> None:
-        def get_subscript(name: str) -> _SUBSCRIPT_TYPE:
-            value = subscripts.get(name, self._default_subscript_value)
-            return 0 if value == "__none__" else value
-
-        self.labels_subscript = get_subscript(self._labels_field_name)
-        self.requests_subscript = get_subscript(self._requests_field_name)
-        self.responses_subscript = get_subscript(self._responses_field_name)
-        self.misc_subscript = get_subscript(self._misc_field_name)
-
-
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _get_subscript_for_field(self, field_name: str) -> _SUBSCRIPT_TYPE:
-        if field_name == self._labels_field_name:
-            return self.labels_subscript
-        elif field_name == self._requests_field_name:
-            return self.requests_subscript
-        elif field_name == self._responses_field_name:
-            return self.responses_subscript
-        elif field_name == self._misc_field_name:
-            return self.misc_subscript
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
+    @staticmethod
+    def _verify_field_name(method: Callable):
+        def verifier(self, *args, **kwargs):
+            field_name = args[1] if len(args) >= 1 else kwargs.get("field_name", None)
+            if field_name is None:
+                raise ValueError(f"For method {method.__name__} argument 'field_name' is not found!")
+            elif field_name not in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
+                raise ValueError(f"Invalid value '{field_name}' for method '{method.__name__}' argument 'field_name'!")
+            else:
+                return method(self, *args, **kwargs)
+        return verifier
 
     @abstractmethod
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         """
         Load main information about the context storage.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         """
         Update main information about the context storage.
         """
@@ -104,34 +95,35 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         """
         Load the latest field data.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         """
         Load all field keys.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> List[Tuple[Hashable, bytes]]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         """
         Load field items.
         """
         raise NotImplementedError
 
     @abstractmethod
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
         """
         Update field items.
         """
         raise NotImplementedError
 
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[Hashable]) -> None:
+    @_verify_field_name
+    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         """
         Delete field keys.
         """

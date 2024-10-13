@@ -40,7 +40,7 @@ async def delete_mongo(storage: MongoContextStorage):
     """
     if not mongo_available:
         raise Exception("Can't delete mongo database - mongo provider unavailable!")
-    for collection in [storage.main_table, storage.turns_table, storage.misc_table]:
+    for collection in [storage.main_table, storage.turns_table]:
         await collection.drop()
 
 
@@ -69,7 +69,7 @@ async def delete_sql(storage: SQLContextStorage):
     if storage.dialect == "mysql" and not mysql_available:
         raise Exception("Can't delete mysql database - mysql provider unavailable!")
     async with storage.engine.begin() as conn:
-        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
+        for table in [storage.main_table, storage.turns_table]:
             await conn.run_sync(table.drop, storage.engine)
 
 
@@ -83,7 +83,7 @@ async def delete_ydb(storage: YDBContextStorage):
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
     async def callee(session: Any) -> None:
-        for table in [storage.main_table, storage.turns_table, storage.misc_table]:
+        for table in [storage.main_table, storage.turns_table]:
             await session.drop_table("/".join([storage.database, table]))
 
     await storage.pool.retry_operation(callee)

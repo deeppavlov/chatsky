@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import List, Set, Tuple, Dict, Optional, Hashable
+from typing import List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
@@ -29,9 +29,8 @@ except ImportError:
 
 
 class SerializableStorage(BaseModel):
-    main: Dict[str, Tuple[int, int, int, bytes]] = Field(default_factory=dict)
+    main: Dict[str, Tuple[int, int, int, bytes, bytes]] = Field(default_factory=dict)
     turns: List[Tuple[str, str, int, Optional[bytes]]] = Field(default_factory=list)
-    misc: List[Tuple[str, str, Optional[bytes]]] = Field(default_factory=list)
 
 
 class FileContextStorage(DBContextStorage, ABC):
@@ -62,69 +61,49 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
-    # TODO: this method (and similar) repeat often. Optimize?
-    async def _get_elems_for_field_name(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        storage = await self._load()
-        if field_name == self._misc_field_name:
-            return [(k, v) for c, k, v in storage.misc if c == ctx_id]
-        elif field_name in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
-            return [(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name ]
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    # TODO: this method (and similar) repeat often. Optimize?
-    def _get_table_for_field_name(self, storage: SerializableStorage, field_name: str) -> List[Tuple]:
-        if field_name == self._misc_field_name:
-            return storage.misc
-        elif field_name in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
-            return storage.turns
-        else:
-            raise ValueError(f"Unknown field name: {field_name}!")
-
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return (await self._load()).main.get(ctx_id, None)
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         storage = await self._load()
-        storage.main[ctx_id] = (turn_id, crt_at, upd_at, fw_data)
+        storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
         await self._save(storage)
 
     async def delete_context(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
-        storage.misc = [(c, k, v) for c, k, v in storage.misc if c != ctx_id]
         await self._save(storage)
 
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[Hashable, bytes]]:
-        subscript = self._get_subscript_for_field(field_name)
-        select = await self._get_elems_for_field_name(ctx_id, field_name)
-        select = [(k, v) for k, v in select if v is not None]
-        if field_name != self._misc_field_name:
-            select = sorted(select, key=lambda e: e[0], reverse=True)
-        if isinstance(subscript, int):
-            select = select[:subscript]
-        elif isinstance(subscript, Set):
-            select = [(k, v) for k, v in select if k in subscript]
+    @DBContextStorage._verify_field_name
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        storage = await self._load()
+        select = sorted([(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None], key=lambda e: e[0], reverse=True)
+        if isinstance(self._subscripts[field_name], int):
+            select = select[:self._subscripts[field_name]]
+        elif isinstance(self._subscripts[field_name], Set):
+            select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
         return select
 
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[Hashable]:
-        return [k for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if v is not None]
+    @DBContextStorage._verify_field_name
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        return [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
 
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[Hashable]) -> List[bytes]:
-        return [(k, v) for k, v in await self._get_elems_for_field_name(ctx_id, field_name) if k in keys and v is not None]
+    @DBContextStorage._verify_field_name
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
+        return [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
 
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[Hashable, bytes]]) -> None:
+    @DBContextStorage._verify_field_name
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
         storage = await self._load()
-        table = self._get_table_for_field_name(storage, field_name)
         for k, v in items:
-            upd = (ctx_id, k, v) if field_name == self._misc_field_name else (ctx_id, field_name, k, v)
-            for i in range(len(table)):
-                if table[i][:-1] == upd[:-1]:
-                    table[i] = upd
+            upd = (ctx_id, field_name, k, v)
+            for i in range(len(storage.turns)):
+                if storage.turns[i][:-1] == upd[:-1]:
+                    storage.turns[i] = upd
                     break
             else:
-                table += [upd]
+                storage.turns += [upd]
         await self._save(storage)
 
     async def clear_all(self) -> None:
