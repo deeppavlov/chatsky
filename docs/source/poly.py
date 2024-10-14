@@ -113,6 +113,8 @@ OUTPUT_DIR = "docs/build"
 #: Source directory
 SOURCE_DIR = "docs/source"
 
+# Could attempt adding "--sync", but seems like an awful solution, even if it works
+# Really should to add the latest version of sphinx-polyversion programmatically.
 #: Arguments to pass to `poetry install`
 POETRY_ARGS = "--with tutorials,docs --all-extras --no-ansi --no-interaction".split()
 

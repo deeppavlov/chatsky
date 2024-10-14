@@ -1,6 +1,7 @@
 from __future__ import annotations
 import enum
 import os
+import subprocess
 import sys
 import shutil
 import importlib.util
@@ -135,6 +136,9 @@ class ChatskySphinxBuilder(CommandBuilder):
             shutil.copyfile(newer_conf_path, older_conf_path)
         # If you add your own conf.py path there, you could build with any conf.py,
         # meaning you could add features like the version-switcher button.
+
+        # Adding sphinx-polyversion to local dependencies
+        subprocess.Popen(["poetry", "add", "sphinx-polyversion", "--group", "docs"], cwd=str(source_dir))
 
         # pre hook
         if self.pre_cmd:
