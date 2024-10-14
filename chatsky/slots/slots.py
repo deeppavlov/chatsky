@@ -267,7 +267,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
     allow_partially_extracted: bool = False
-    """If True, allows returning a partial dictionary with only successfully extracted slots."""
+    """If True, extraction returns only successfully extracted child slots."""
 
     def __init__(self, allow_partially_extracted=False, **kwargs):
         super().__init__(allow_partially_extracted=allow_partially_extracted, **kwargs)
@@ -377,6 +377,8 @@ class SlotManager(BaseModel):
     async def extract_slot(self, slot_name: SlotName, ctx: Context, success_only: bool) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
+
+        Extracted group slots update slot storage instead of overwriting it.
 
         :raises KeyError: If the slot with the specified name does not exist.
 
