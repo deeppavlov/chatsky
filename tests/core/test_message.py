@@ -100,7 +100,7 @@ class TestMessage:
         validated = Message.model_validate_json(serialized)
         assert message == validated
 
-    @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_getting_attachment_bytes(self, tmp_path):
         local_path = self.clear_and_create_dir(tmp_path / "local")
 

@@ -39,8 +39,7 @@ Additionally, you also have the option to download the source code directly from
    git clone https://github.com/deeppavlov/chatsky.git
    cd chatsky
 
-Once you are in the directory, you can run the command ``make venv`` to set up all the necessary requirements for the library.
-If you need to update the requirements, use the command ``make clean`` to remove `venv` first.
+Once you are in the directory, you can run the command ``poetry install --all-extras`` to set up all the requirements for the library.
 
 Key concepts
 ~~~~~~~~~~~~

@@ -70,6 +70,7 @@ async def test_tutorials_ch(tutorial_module_name: str, expected_logs, otlp_log_e
         ("2_pipeline_integration", 35),
     ],
 )
+@pytest.mark.slow
 async def test_tutorials_memory(
     tutorial_module_name: str, expected_logs, tracer_exporter_and_provider, log_exporter_and_provider
 ):
