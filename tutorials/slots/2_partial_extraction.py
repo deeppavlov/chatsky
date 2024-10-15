@@ -127,6 +127,7 @@ HAPPY_PATH = [
     ("Jim ", "Your friend is Jim Page")
 ]
 
+
 # %%
 pipeline = Pipeline(
     script=script,
@@ -134,3 +135,11 @@ pipeline = Pipeline(
     fallback_label=("root", "fallback"),
     slots=SLOTS,
 )
+
+
+# %%
+if __name__ == "__main__":
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
+
+    if is_interactive_mode():
+        pipeline.run()
