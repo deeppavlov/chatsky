@@ -52,17 +52,27 @@ SLOTS = {
         ),
     ),
     "friend": GroupSlot(
-        first_name=RegexpSlot(regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"),
-        last_name=RegexpSlot(regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"),
+        first_name=RegexpSlot(
+            regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"
+        ),
+        last_name=RegexpSlot(
+            regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"
+        ),
         allow_partial_extraction=True,
-    )
+    ),
 }
 
 script = {
-    GLOBAL: {TRANSITIONS: [Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))]},
+    GLOBAL: {
+        TRANSITIONS: [
+            Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+        ]
+    },
     "user_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("person", success_only=True)},
+            PRE_TRANSITION: {
+                "get_slots": proc.Extract("person", success_only=True)
+            },
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_user"),
@@ -72,16 +82,24 @@ script = {
                 Tr(dst=("user_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "ask": {RESPONSE: "Please, send your username and email in one message."},
-        "repeat_question": {RESPONSE: "Please, send your username and email again."},
+        "ask": {
+            RESPONSE: "Please, send your username and email in one message."
+        },
+        "repeat_question": {
+            RESPONSE: "Please, send your username and email again."
+        },
     },
     "friend_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("friend", success_only=False)},
+            PRE_TRANSITION: {
+                "get_slots": proc.Extract("friend", success_only=False)
+            },
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_friends"),
-                    cnd=cnd.SlotsExtracted("friend.first_name", "friend.last_name", mode="any"),
+                    cnd=cnd.SlotsExtracted(
+                        "friend.first_name", "friend.last_name", mode="any"
+                    ),
                     priority=1.2,
                 ),
                 Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
@@ -99,13 +117,16 @@ script = {
             TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
         },
         "utter_friend": {
-            RESPONSE: rsp.FilledTemplate("Your friend is {friend.first_name} {friend.last_name}"),
+            RESPONSE: rsp.FilledTemplate(
+                "Your friend is {friend.first_name} {friend.last_name}"
+            ),
             TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
         },
         "utter_user": {
-            RESPONSE: "Your username is {person.username}. " "Your email is {person.email}.",
+            RESPONSE: "Your username is {person.username}. "
+            "Your email is {person.email}.",
             PRE_RESPONSE: {"fill": proc.FillTemplate()},
-            TRANSITIONS: [Tr(dst=("root", "utter_friend"))]
+            TRANSITIONS: [Tr(dst=("root", "utter_friend"))],
         },
     },
 }
@@ -124,7 +145,7 @@ HAPPY_PATH = [
         "again",
         "Please, name me one of your friends: (John Doe)",
     ),
-    ("Jim ", "Your friend is Jim Page")
+    ("Jim ", "Your friend is Jim Page"),
 ]
 
 
