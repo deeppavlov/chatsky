@@ -266,11 +266,11 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     """
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
-    allow_partially_extracted: bool = False
+    allow_partial_extraction: bool = False
     """If True, extraction returns only successfully extracted child slots."""
 
-    def __init__(self, allow_partially_extracted=False, **kwargs):
-        super().__init__(allow_partially_extracted=allow_partially_extracted, **kwargs)
+    def __init__(self, allow_partial_extraction=False, **kwargs):
+        super().__init__(allow_partial_extraction=allow_partial_extraction, **kwargs)
 
     @model_validator(mode="after")
     def __check_extra_field_names__(self):
@@ -288,7 +288,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
         child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
         extracted_values = {}
         for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
-            if child_value.__slot_extracted__ or not self.allow_partially_extracted:
+            if child_value.__slot_extracted__ or not self.allow_partial_extraction:
                 extracted_values[child_name] = child_value
 
         return ExtractedGroupSlot(**extracted_values)

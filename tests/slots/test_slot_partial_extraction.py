@@ -11,14 +11,14 @@ test_slot = GroupSlot(
         nested_group=GroupSlot(
             three=RegexpSlot(regexp=r"3"),
             four=RegexpSlot(regexp=r"4"),
-            allow_partially_extracted=False,
+            allow_partial_extraction=False,
         ),
         nested_partial_group=GroupSlot(
             five=RegexpSlot(regexp=r"5"),
             six=RegexpSlot(regexp=r"6"),
-            allow_partially_extracted=True,
+            allow_partial_extraction=True,
         ),
-        allow_partially_extracted=True,
+        allow_partial_extraction=True,
     )
 )
 

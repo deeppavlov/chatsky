@@ -32,7 +32,7 @@ from chatsky.utils.testing import (
 
 # %% [markdown]
 """
-In this example we define two group slots for `person` and for a `friend`. Note, that in `friend` slot we set a flag `allow_partially_extracted` to `True` that allows us to _update_ slot values and not totally rewrite them in case we did not get full information first time.
+In this example we define two group slots for `person` and for a `friend`. Note, that in `friend` slot we set a flag `allow_partial_extraction` to `True` that allows us to _update_ slot values and not totally rewrite them in case we did not get full information first time.
 
 So in this example if we send "John Doe" as a friends name and after that send only name e.g. "Mike" the last extracted friends name would be "Mike Doe" and not "Mike default_surname".
 
@@ -54,7 +54,7 @@ SLOTS = {
     "friend": GroupSlot(
         first_name=RegexpSlot(regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"),
         last_name=RegexpSlot(regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"),
-        allow_partially_extracted=True,
+        allow_partial_extraction=True,
     )
 }
 
