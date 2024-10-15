@@ -2,8 +2,8 @@
 """
 # 2. Partial slot extraction
 
-This tutorial will show more advanced way of using slots by utilizing `GroupSlot` and different parameters it provides us with.
-By using Group slots you can extract multiple slots at once if they are placed in one group.
+This tutorial shows advanced options for slot extraction allowing
+to extract only some of the slots.
 """
 
 # %pip install chatsky
@@ -32,11 +32,47 @@ from chatsky.utils.testing import (
 
 # %% [markdown]
 """
-In this example we define two group slots for `person` and for a `friend`. Note, that in `friend` slot we set a flag `allow_partial_extraction` to `True` that allows us to _update_ slot values and not totally rewrite them in case we did not get full information first time.
+## Default behavior
 
-So in this example if we send "John Doe" as a friends name and after that send only name e.g. "Mike" the last extracted friends name would be "Mike Doe" and not "Mike default_surname".
+By default, slot extraction will write a value into slot storage regardless
+of whether the extraction was success.
+If extraction fails, the slot will be marked as not-extracted
+and its value will be the `default_value` (`None` by default).
 
-Another feature is `success_only` flag in `Extract` function that ensures that group slot will be extracted if ALL of the slots in it were extracted successfully.
+If group slot is being extracted, the extraction is considered successful
+only if all child slots are successfully extracted.
+
+## Success only extraction
+
+The `Extract` function accepts `success_only` flag which makes it so
+that extracted value is not saved unless extraction is successful.
+
+This means that unsuccessfully trying to extract a slot after
+it has already been extracted will not overwrite the previously extracted
+value.
+
+Note that `success_only` is `True` by default.
+
+## Partial group slot extraction
+
+A group slot marked with `allow_partial_extraction` only saves values
+of successfully extracted child slots.
+Extracting such group slot is equivalent to extracting every child slot
+with the `success_only` flag.
+
+Partially extracted group slot is always considered successfully extracted
+for the purposes of `success_only` flag.
+
+## Code explanation
+
+In this example we define two group slots: `person` and `friend`.
+Note that in the `friend` slot we set `allow_partial_extraction` to `True`
+which allows us to _update_ slot values and not
+rewrite them in case we don't get full information at once.
+
+So if we send "John Doe" as a full name and after that send only first name
+(e.g. "Mike") the extracted friends name would be "Mike Doe"
+and not "Mike default_surname".
 """
 
 # %%
