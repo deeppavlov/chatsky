@@ -5,8 +5,8 @@ from functools import partial
 from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.git import closest_tag
-from sphinx_polyversion.pyvenv import Poetry
 from docs.source.builder import ChatskySphinxBuilder
+from docs.source.poetry_multiversioning import ChatskyPoetry
 from docs.source.switcher_gen import generate_switcher
 import git
 import os
@@ -151,7 +151,7 @@ DefaultDriver(
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
     builder=ChatskySphinxBuilder(src, args=SPHINX_ARGS),
-    env=Poetry.factory(args=POETRY_ARGS),
+    env=ChatskyPoetry.factory(args=POETRY_ARGS),
     selector=partial(closest_tag, root),
     template_dir=root / src / "templates",
     static_dir=root / src / "static",
