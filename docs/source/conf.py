@@ -117,13 +117,12 @@ html_css_files = [
     "css/custom.css",
 ]
 
+version_data = version
 # Checking for dev before passing version to switcher
 if polyversion_build == "True":
     if current[0] == "dev":
         version_data = "dev"
         # Possible to-do: show the warning banner for latest(unstable) version.
-else:
-    version_data = version
 
 # Version switcher url
 switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
