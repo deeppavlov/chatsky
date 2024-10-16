@@ -24,6 +24,8 @@ class ChatskyPoetry(Poetry):
 
         """
         # Adding sphinx-polyversion to local dependencies
+        print(os.getcwd())
+        print(self.path)
         poetry_args = ["poetry", "add", "sphinx-polyversion", "--group", "docs"]
         poetry_subprocess = subprocess.Popen(poetry_args, cwd=self.path)
         poetry_subprocess.wait()
