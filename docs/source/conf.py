@@ -94,13 +94,10 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
-doc_version = os.getenv('doc_version', default=str(version))
 # Finding tutorials directories
-nbsphinx_execute = "never"
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
-nbsphinx_prolog = f"""
-:tutorial_name: {{{{ env.docname }}}}
-:doc_version: {doc_version}/
+nbsphinx_prolog = """
+:tutorial_name: {{ env.docname }}
 """
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
@@ -187,6 +184,7 @@ autodoc_default_options = {
 
 def setup(_):
     # TODO: Import for old versions differently
+    #  Check for the versions via poly.py functions.
     print(version)
     print(str(version))
     if polyversion_build == "True":

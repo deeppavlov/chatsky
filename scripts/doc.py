@@ -12,7 +12,7 @@ from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .clean import clean_docs
-from .utils import docker_client
+from .utils import docker_client, set_up_example_and_source_links
 
 from sphinx_polyversion.main import main as poly_main
 
@@ -52,24 +52,35 @@ def _build_drawio(root_dir: str = "."):
         print(f"Drawio images built from {path.parent} to {target}")
 
 
-def docs():
+# TODO: What did we agree on about exit status for polyversion build?
+#  Should it be equal to poly_main() or was it something else?
+@docker_client
+def docs(docker: Optional[DockerClient]):
     init()
-    clean_docs()
-    dotenv.load_dotenv(".env_file")
-    os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-    # polyversion_build is False for local builds and PR builds.
-    # In other words, it's only 'True' when docs are to be deployed on gh-pages
-    polyversion_build = os.getenv("POLYVERSION_BUILD", default="False")
-    if polyversion_build == "True":
-        poly_path = "docs/source/poly.py"
-        sys.argv = [poly_path, poly_path]
-        poly_main()
-        exit(0)
+    if docker is not None:
+        clean_docs()
+        dotenv.load_dotenv(".env_file")
+        os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
+        # polyversion_build is False for local builds and PR builds.
+        # In other words, it's only 'True' when docs are to be deployed on gh-pages
+        polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
+        if polyversion_build:
+            poly_path = "docs/source/poly.py"
+            sys.argv = [poly_path, poly_path]
+            poly_main()
+            exit(0)
+        else:
+            # This func is made for Pull Request docs building (linking examples and GitHub sources)
+            set_up_example_and_source_links("./docs/source/")
+            _build_drawio()
+            result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
+            result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
+            result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
+            exit(result)
+
     else:
-        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
-        result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
-        result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
-        exit(result)
+        print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
+        exit(1)
 
 
 # Functions to be called from ChatskySphinxBuilder before build

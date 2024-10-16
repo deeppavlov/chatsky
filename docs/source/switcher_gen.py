@@ -2,6 +2,9 @@ import git
 import json
 
 
+# TODO: Redo this entire thing - sort through tags to find the ones which are going to be built
+#  or get the funcs from poly.py do it. Also find the biggest tag of them all.
+#  On top of it, the latest tag must be renamed to "latest(v0.9.0)" or something like that.
 def generate_switcher():
     repo = git.Repo('./')
     # branch = repo.active_branch

@@ -84,10 +84,11 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
-        # TODO: Fix links for branches that have slashes in them like "feat/sphinx_multiversion"
-        # TODO: Make all links use metadata in conf.py and like apiref metadata.
+        # TODO: Need to sort tags, to add the right link for the "latest" tag
+        #  (Let output_dir == "v0.9.0", but github-actions-deploy dir == "latest", unless it isn't, of course,
+        #  depends on what we decide).
+        #  Then the links will be all wrong if they're not changed here.
         # Making GitHub links version dependent in tutorials and API reference
-        doc_version = os.getenv("VERSION", default=None)
         accepted_branch_prefixes = ["feat", "fix", "test", "docs", "style", "refactor", "chore"]
         output_dir_list = str(output_dir).split('/')
         if output_dir_list[-2] in accepted_branch_prefixes:
@@ -105,17 +106,7 @@ class ChatskySphinxBuilder(CommandBuilder):
 
             with open(links_file, "w") as file:
                 file.write(contents)
-        """
-        # Importing version-dependent module setup.py
-        # TODO: import setup() from older conf.py files directly.
-        # Maybe if the import is unsuccessful import from the other location?
-        # Or just take the version into account.
-        root_dir = environment.path.absolute()
-        spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
-        setup_module = importlib.util.module_from_spec(spec)
-        sys.modules["setup"] = setup_module
-        spec.loader.exec_module(setup_module)
-        """
+
         # Cleaning outdated documentation build
         clean_docs(str(output_dir))
 
