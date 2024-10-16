@@ -33,7 +33,7 @@ def docker_client(wrapped: Callable[[Optional[DockerClient]], int], _, __, ___) 
 # Local builds will have the right links, but there's no multi-versioning for them
 def set_up_example_and_source_links(source_dir: str):
     branch_name = os.getenv("BRANCH_NAME", default="")
-    if branch_name is not "":
+    if branch_name != "":
         branch_name = branch_name + "/"
 
     example_links_file = source_dir + "_templates/example-links.html"
@@ -41,7 +41,7 @@ def set_up_example_and_source_links(source_dir: str):
     for links_file in [example_links_file, source_links_file]:
         with open(links_file, "r") as file:
             contents = file.read()
-            contents = contents.replace('DOC_VERSION', branch_name)
+            contents = contents.replace("DOC_VERSION", branch_name)
 
         with open(links_file, "w") as file:
             file.write(contents)

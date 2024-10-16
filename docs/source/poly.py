@@ -6,7 +6,7 @@ from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.git import closest_tag
 from docs.source.builder import ChatskySphinxBuilder
-from docs.source.poetry_multiversioning import ChatskyPoetry
+from docs.source.poetry_multiversion import ChatskyPoetry
 from docs.source.switcher_gen import generate_switcher
 import git
 import os
