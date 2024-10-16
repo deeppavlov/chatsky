@@ -1,5 +1,15 @@
+import asyncio
+import os
 import subprocess
+from pathlib import Path
+from typing import TYPE_CHECKING, cast
+from asyncio.subprocess import PIPE
+from subprocess import CalledProcessError
 from sphinx_polyversion.pyvenv import Poetry
+from sphinx_polyversion.builder import BuildError
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 # TODO: Ask if this part is syntactically correct
