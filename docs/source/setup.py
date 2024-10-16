@@ -10,7 +10,7 @@ def setup(root_dir: str = "."):
             "utils/db_benchmark/benchmark_schema.json",
             "utils/db_benchmark/benchmark_streamlit.py",
         ],
-        root_dir=Path(root_dir),
+        root_dir=Path(root_dir).absolute(),
     )
     generate_tutorial_links_for_notebook_creation(
         [

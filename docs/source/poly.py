@@ -35,7 +35,7 @@ build_only_latest_tag = False
 
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
-
+print("before repo")
 repo = git.Repo('./')
 # This variable is needed for passing the branch name during PR workflow doc builds,
 # because in those cases 'repo.active_branch' gives 'detached HEAD'.
@@ -44,6 +44,7 @@ if branch is None:
     branch = repo.active_branch
 
 
+print("after repo, before cycle")
 # This makes sure that tags which include 'rc' and 'dev' strings aren't built for the latest tag option.
 # Is this a good thing, actually?
 # TODO: discuss this.
@@ -53,13 +54,14 @@ def find_latest_tag(tag_list: list):
     while "rc" in latest_tag or "dev" in latest_tag:
         shift += 1
         latest_tag = tag_list[-shift]
+    print("after cycle")
     return latest_tag
 
 
 # Filter func for building latest versions of each major tag.
 # Returns a dictionary of major tag groups as keys and latest tag's number as values
 # e.g. {(0, 6): 7, (1, 2): 3} standing for v0.6.7 and v1.2.3.
-def latest_tags_filter(tag_list: list):
+def latest_tags_filter(tag_list: list) -> list:
     regex = re.compile(r"^v\d*\.\d*\.\d*$")
     tag_list = list(filter(regex.match, tag_list))
     latest_tags = {}

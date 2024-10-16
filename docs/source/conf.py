@@ -14,8 +14,9 @@ from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
 
-polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
-if polyversion_build:
+current = [None]
+polyversion_build = os.getenv("POLYVERSION_BUILD", default="False")
+if polyversion_build == "True":
     data = load(globals())  # adds variables `current` and `revisions`
     current: GitRef = data['current']
 
@@ -95,6 +96,7 @@ autosummary_generate_overwrite = False
 
 doc_version = os.getenv('doc_version', default=str(version))
 # Finding tutorials directories
+nbsphinx_execute = "never"
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = f"""
 :tutorial_name: {{{{ env.docname }}}}
@@ -118,12 +120,11 @@ html_css_files = [
     "css/custom.css",
 ]
 
-print(current[0])
-print(current)
 # Checking for dev before passing version to switcher
-if polyversion_build and current[0] == "dev":
-    version_data = "dev"
-    # Possible to-do: show the warning banner for latest(unstable) version.
+if polyversion_build == "True":
+    if current[0] == "dev":
+        version_data = "dev"
+        # Possible to-do: show the warning banner for latest(unstable) version.
 else:
     version_data = version
 
@@ -188,17 +189,18 @@ def setup(_):
     # TODO: Import for old versions differently
     print(version)
     print(str(version))
-    if polyversion_build and current[0] != "dev" and str(version) < "v0.9.0":
-        print("building old version")
-        root_dir = os.getcwd()
-        spec = importlib.util.spec_from_file_location("setup", "./old_conf.py")
-        setup_module = importlib.util.module_from_spec(spec)
-        sys.modules["setup"] = setup_module
-        spec.loader.exec_module(setup_module)
-        setup_module.setup(str(root_dir))
-        # Or this could just be
-        # from old_conf import setup
-        # setup()
+    if polyversion_build == "True":
+        if current[0] != "dev" and str(version) < "v0.9.0":
+            print("building old version")
+            root_dir = os.getcwd()
+            spec = importlib.util.spec_from_file_location("setup", "./old_conf.py")
+            setup_module = importlib.util.module_from_spec(spec)
+            sys.modules["setup"] = setup_module
+            spec.loader.exec_module(setup_module)
+            setup_module.setup(str(root_dir))
+            # Or this could just be
+            # from old_conf import setup
+            # setup()
     else:
         from setup import setup
         setup()
