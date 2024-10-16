@@ -190,7 +190,7 @@ def setup(_):
         if current[0] != "dev" and str(version) < "v0.9.0":
             print("building old version")
             root_dir = os.getcwd()
-            spec = importlib.util.spec_from_file_location("setup", "./old_conf.py")
+            spec = importlib.util.spec_from_file_location("setup", root_dir + "/old_conf.py")
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
             spec.loader.exec_module(setup_module)
