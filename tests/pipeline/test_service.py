@@ -14,16 +14,10 @@ from chatsky.core.service import (
 )
 from chatsky.core.service.extra import BeforeHandler
 from chatsky.core.utils import initialize_service_states, finalize_service_group
-from chatsky.utils.testing import TOY_SCRIPT
-from .utils import run_test_group, make_test_service_group, run_extra_handler
+from .conftest import run_test_group, make_test_service_group, run_extra_handler
 
 
-@pytest.fixture
-def empty_context():
-    return Context.init(("", ""))
-
-
-async def test_pipeline_component_order(empty_context):
+async def test_pipeline_component_order():
     logs = []
 
     class MyProcessing(BaseProcessing):
@@ -41,12 +35,11 @@ async def test_pipeline_component_order(empty_context):
         pre_services=[MyProcessing(wait=0.02, text="A")],
         post_services=[MyProcessing(wait=0, text="C")],
     )
-    initialize_service_states(empty_context, pipeline.services_pipeline)
-    await pipeline._run_pipeline(Message(""), empty_context.id)
+    await pipeline._run_pipeline(Message(""))
     assert logs == ["A", "B", "C"]
 
 
-async def test_async_services():
+async def test_async_services(make_test_service_group, run_test_group):
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.components[0].concurrent = True
@@ -56,7 +49,7 @@ async def test_async_services():
     assert running_order == ["A1", "B1", "A2", "B2", "A3", "B3", "C1", "C2", "C3"]
 
 
-async def test_all_async_flag():
+async def test_all_async_flag(make_test_service_group, run_test_group):
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.fully_concurrent = True
@@ -65,7 +58,7 @@ async def test_all_async_flag():
     assert running_order == ["A1", "B1", "C1", "A2", "B2", "C2", "A3", "B3", "C3"]
 
 
-async def test_extra_handler_timeouts():
+async def test_extra_handler_timeouts(run_extra_handler):
     def bad_function(timeout: float, bad_func_completed: list):
         def inner(_: Context, __: ExtraHandlerRuntimeInfo) -> None:
             asyncio.run(asyncio.sleep(timeout))
@@ -85,7 +78,7 @@ async def test_extra_handler_timeouts():
     assert test_list == [True]
 
 
-async def test_extra_handler_function_signatures():
+async def test_extra_handler_function_signatures(run_extra_handler):
     def one_parameter_func(_: Context) -> None:
         pass
 
@@ -106,7 +99,7 @@ async def test_extra_handler_function_signatures():
 
 
 # Checking that async functions can be run as extra_handlers.
-async def test_async_extra_handler_func():
+async def test_async_extra_handler_func(run_extra_handler):
     def append_list(record: list):
         async def async_func(_: Context, __: ExtraHandlerRuntimeInfo):
             record.append("Value")
@@ -187,7 +180,7 @@ def test_raise_on_name_collision():
 
 # 'fully_concurrent' flag will try to run all services simultaneously, but the 'wait' option
 # makes it so that A waits for B, which waits for C. So "C" is first, "A" is last.
-async def test_waiting_for_service_to_finish_condition():
+async def test_waiting_for_service_to_finish_condition(make_test_service_group, run_test_group):
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.fully_concurrent = True
@@ -198,7 +191,7 @@ async def test_waiting_for_service_to_finish_condition():
     assert running_order == ["C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
 
 
-async def test_bad_service():
+async def test_bad_service(run_test_group):
     def bad_service_func(_: Context) -> None:
         raise Exception("Custom exception")
 
@@ -206,14 +199,15 @@ async def test_bad_service():
     assert await run_test_group(test_group) == ComponentExecutionState.FAILED
 
 
-async def test_service_not_run(empty_context):
+async def test_service_not_run(context_factory):
     service = Service(handler=lambda ctx: None, start_condition=False)
+    empty_context = context_factory()
     initialize_service_states(empty_context, service)
     await service(empty_context)
     assert service.get_state(empty_context) == ComponentExecutionState.NOT_RUN
 
 
-async def test_inherited_extra_handlers_for_service_groups_with_conditions():
+async def test_inherited_extra_handlers_for_service_groups_with_conditions(make_test_service_group, run_test_group):
     def extra_handler_func(counter: list):
         def inner(_: Context) -> None:
             counter.append("Value")
@@ -231,12 +225,10 @@ async def test_inherited_extra_handlers_for_service_groups_with_conditions():
     service = Service(handler=lambda _: None, name="service")
     test_group.components.append(service)
 
-    ctx = Context.init(("greeting_flow", "start_node"))
-    pipeline = Pipeline(pre_services=test_group, script=TOY_SCRIPT, start_label=("greeting_flow", "start_node"))
+    finalize_service_group(test_group, ".pre")
 
     test_group.add_extra_handler(ExtraHandlerType.BEFORE, extra_handler_func(counter_list), condition_func)
-    initialize_service_states(ctx, test_group)
 
-    await pipeline.pre_services(ctx)
+    await run_test_group(test_group)
     # One for original ServiceGroup, one for each of the defined paths in the condition function.
     assert counter_list == ["Value"] * 3
