@@ -82,7 +82,7 @@ async def get_context(
         ctx.labels[ctx.current_turn_id] = AbsoluteNodeLabel(flow_name=f"flow_{i}", node_name=f"node_{i}")
         ctx.requests[ctx.current_turn_id] = get_message(message_dimensions)
         ctx.responses[ctx.current_turn_id] = get_message(message_dimensions)
-    await ctx.misc.update(get_dict(misc_dimensions))
+    ctx.misc.update(get_dict(misc_dimensions))
 
     return ctx
 
