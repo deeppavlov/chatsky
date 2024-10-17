@@ -6,7 +6,7 @@ from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.git import closest_tag
 from docs.source.builder import ChatskySphinxBuilder
-from docs.source.poetry_multiversion import ChatskyPoetry
+from sphinx_polyversion.pyvenv import Poetry
 from docs.source.switcher_gen import generate_switcher
 import git
 import os
@@ -30,7 +30,7 @@ first_built_version = "v0.8.0"
 
 # If 'True', builds only the latest tag. Otherwise, all tags will be built.
 # TODO: (Optional, not critical) set this to 'True' if 'conf.py' hasn't changed since
-# the previous version(tag). I'm not sure how to do it right now.
+#  the previous version(tag). I'm not sure how to do it right now.
 build_only_latest_tag = False
 
 # This variable is set to `False` during workflow build. It is 'True' during local builds.
@@ -44,7 +44,7 @@ if branch is None:
     branch = repo.active_branch
 
 
-print("after repo, before cycle")
+"""
 # This makes sure that tags which include 'rc' and 'dev' strings aren't built for the latest tag option.
 # Is this a good thing, actually?
 # TODO: discuss this.
@@ -56,6 +56,7 @@ def find_latest_tag(tag_list: list):
         latest_tag = tag_list[-shift]
     print("after cycle")
     return latest_tag
+"""
 
 
 # Filter func for building latest versions of each major tag.
@@ -140,10 +141,6 @@ apply_overrides(globals())
 root = Git.root(Path(__file__).parent)
 src = Path(SOURCE_DIR)
 
-# TODO: sphinx-multiversion should just be incorporated into pyproject.toml files for each required tag
-#  instead of being added programmatically, there is no reason to do such a large workaround
-#  for a problem that has an easy and direct solution.
-
 # TODO: Make a custom 'Driver' that has build_failed() method defined. (right now it catches all exceptions
 #  and does nothing with them)
 
@@ -158,7 +155,7 @@ DefaultDriver(
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
     builder=ChatskySphinxBuilder(src, args=SPHINX_ARGS),
-    env=ChatskyPoetry.factory(args=POETRY_ARGS),
+    env=Poetry.factory(args=POETRY_ARGS),
     selector=partial(closest_tag, root),
     template_dir=root / src / "templates",
     static_dir=root / src / "static",
