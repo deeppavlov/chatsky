@@ -70,6 +70,8 @@ def docs(docker: Optional[DockerClient]):
             poly_main()
             exit(0)
         else:
+            # TODO: redo this into what we talked about -> changing /docs/source/ directory is
+            #  a bad practice. Same goes for Polyversion build.
             # This func is made for Pull Request docs building (linking examples and GitHub sources)
             set_up_example_and_source_links("./docs/source/")
             _build_drawio()

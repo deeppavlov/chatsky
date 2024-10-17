@@ -140,6 +140,13 @@ apply_overrides(globals())
 root = Git.root(Path(__file__).parent)
 src = Path(SOURCE_DIR)
 
+# TODO: sphinx-multiversion should just be incorporated into pyproject.toml files for each required tag
+#  instead of being added programmatically, there is no reason to do such a large workaround
+#  for a problem that has an easy and direct solution.
+
+# TODO: Make a custom 'Driver' that has build_failed() method defined. (right now it catches all exceptions
+#  and does nothing with them)
+
 # Setup driver and run it
 DefaultDriver(
     root,

@@ -3,6 +3,8 @@ import sys
 import re
 import importlib.metadata
 import importlib.util
+from pathlib import Path
+
 import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
@@ -182,15 +184,15 @@ autodoc_default_options = {
 
 
 def setup(_):
-    # TODO: Import for old versions differently
-    #  Check for the versions via poly.py functions.
+    # TODO: Import for old versions differently (it's unfinished now)
+    #  Check if a given version is less than v0.9.0 via poly.py functions and/or new filters.
     print(version)
     print(str(version))
     if polyversion_build == "True":
         if current[0] != "dev" and str(version) < "v0.9.0":
             print("building old version")
-            root_dir = os.getcwd()
-            spec = importlib.util.spec_from_file_location("setup", root_dir + "/old_conf.py")
+            root_dir = Path(__file__)
+            spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
             spec.loader.exec_module(setup_module)
