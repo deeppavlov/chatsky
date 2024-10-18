@@ -114,7 +114,6 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/build/
-          target-folder: ${{env.TARGET_FOLDER}}
           clean: False
 
       - name: printing link to the documentation

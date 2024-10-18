@@ -186,17 +186,21 @@ autodoc_default_options = {
 def setup(_):
     # TODO: Import for old versions differently (it's unfinished now)
     #  Check if a given version is less than v0.9.0 via poly.py functions and/or new filters.
+    #  Version v0.10.0 would show as less than v0.9.0, a mistake.
+    #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
+    #  Of course, it could be added, but that seems a bit invasive.
     print(version)
     print(str(version))
     if polyversion_build == "True":
         if current[0] != "dev" and str(version) < "v0.9.0":
             print("building old version")
             root_dir = Path(__file__).parent
+            print(root_dir / "old_conf.py")
             spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
             spec.loader.exec_module(setup_module)
-            setup_module.setup(str(root_dir))
+            setup_module.setup(_)
             # Or this could just be
             # from old_conf import setup
             # setup()
