@@ -86,7 +86,7 @@ def docs(docker: Optional[DockerClient]):
 
 
 # Functions to be called from ChatskySphinxBuilder before build
-def pre_sphinx_build_funcs(source_dir: str):
+def pre_sphinx_build_funcs(source_dir: str, module_dir: str):
     _build_drawio(source_dir)
     apiref_dir = source_dir + "/apiref"
-    apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "chatsky"])
+    apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, module_dir])

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+from os.path import join
 import shutil
 from pathlib import Path, PurePath
 from subprocess import CalledProcessError
@@ -79,34 +80,26 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
+        # Cleaning outdated documentation build
+        clean_docs(str(output_dir))
+
+        # Running Chatsky custom funcs before doc building
+        module_dir = environment.path.absolute() / "chatsky"
+        print("source_dir:", source_dir)
+        print("module_dir:", module_dir)
+        scripts.doc.pre_sphinx_build_funcs(str(source_dir), str(module_dir))
+
         # TODO: Need to sort tags, to add the right link for the "latest" tag
         #  (Let output_dir == "v0.9.0", but github-actions-deploy dir == "latest", unless it isn't, of course,
         #  depends on what we decide).
         #  Then the links will be all wrong if they're not changed here.
         # Making GitHub links version dependent in tutorials and API reference
-        accepted_branch_prefixes = ["feat", "fix", "test", "docs", "style", "refactor", "chore"]
-        output_dir_list = str(output_dir).split('/')
-        if output_dir_list[-2] in accepted_branch_prefixes:
-            doc_version = output_dir_list[-2] + "/" + output_dir_list[-1]
-        else:
-            doc_version = output_dir_list[-1]
-
-        example_links_file = Path(source_dir) / "_templates" / "example-links.html"
-        source_links_file = Path(source_dir) / "_templates" / "source-links.html"
-        for links_file in [example_links_file, source_links_file]:
-            with open(links_file, "r") as file:
+        doc_version = str(output_dir).split('/')[-1]
+        apiref_source = Path(source_dir) / "/apiref"
+        for doc_file in iter(apiref_source.glob("./*.rst")):
+            with open(doc_file, "r+") as file:
                 contents = file.read()
-                contents = contents.replace('DOC_VERSION', doc_version)
-                # links_file.write_text(contents)
-
-            with open(links_file, "w") as file:
-                file.write(contents)
-
-        # Cleaning outdated documentation build
-        clean_docs(str(output_dir))
-
-        # Running Chatsky custom funcs before doc building
-        scripts.doc.pre_sphinx_build_funcs(str(source_dir))
+                doc_file.write_text(f":doc_version: {doc_version}\n{contents}")
 
         # Using the newest conf.py file instead of the old one
         new_sphinx_configs = True
