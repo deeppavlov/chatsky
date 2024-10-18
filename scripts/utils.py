@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 from typing import Callable, Optional
 
 from python_on_whales import DockerClient
@@ -31,17 +32,13 @@ def docker_client(wrapped: Callable[[Optional[DockerClient]], int], _, __, ___) 
 
 # Making GitHub links version dependent in tutorials and API reference (Pull Requests and local builds)
 # Local builds will have the right links, but there's no multi-versioning for them
-def set_up_example_and_source_links(source_dir: str):
+def set_up_source_links(source_dir: str):
     branch_name = os.getenv("BRANCH_NAME", default="")
     if branch_name != "":
         branch_name = branch_name + "/"
 
-    example_links_file = source_dir + "_templates/example-links.html"
-    source_links_file = source_dir + "_templates/source-links.html"
-    for links_file in [example_links_file, source_links_file]:
-        with open(links_file, "r") as file:
+    apiref_source = Path(source_dir) / "/apiref"
+    for doc_file in iter(apiref_source.glob("./*.rst")):
+        with open(doc_file, "r+") as file:
             contents = file.read()
-            contents = contents.replace("DOC_VERSION", branch_name)
-
-        with open(links_file, "w") as file:
-            file.write(contents)
+            doc_file.write_text(f":doc_version: {branch_name}\n{contents}")
