@@ -163,8 +163,8 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
         return {
             "params": self.model_dump(),
             "sizes": {
-                "starting_context_size": naturalsize(asizeof.asizeof(starting_context.model_dump(mode="json")), gnu=True),
-                "final_context_size": naturalsize(asizeof.asizeof(final_contex.model_dump(mode="json")), gnu=True),
+                "starting_context_size": naturalsize(asizeof.asizeof(starting_context.model_dump(mode="python")), gnu=True),
+                "final_context_size": naturalsize(asizeof.asizeof(final_contex.model_dump(mode="python")), gnu=True),
                 "misc_size": naturalsize(asizeof.asizeof(get_dict(self.misc_dimensions)), gnu=True),
                 "message_size": naturalsize(asizeof.asizeof(get_message(self.message_dimensions)), gnu=True),
             },
