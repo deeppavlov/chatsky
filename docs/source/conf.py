@@ -2,16 +2,25 @@ import os
 import sys
 import re
 import importlib.metadata
+import importlib.util
+from pathlib import Path
+
+import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from sphinx_polyversion.api import load
+from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
+
+current = [None]
+polyversion_build = os.getenv("POLYVERSION_BUILD", default="False")
+if polyversion_build == "True":
+    data = load(globals())  # adds variables `current` and `revisions`
+    current: GitRef = data['current']
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
@@ -57,7 +66,6 @@ pygments_style = "default"
 
 add_module_names = False
 
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -88,10 +96,17 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
+if polyversion_build == "True":
+    doc_version = str(current[0]) + '/'
+else:
+    doc_version = os.getenv("BRANCH_NAME", default="")
+    if doc_version != "":
+        doc_version = doc_version + '/'
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
-nbsphinx_prolog = """
-:tutorial_name: {{ env.docname }}
+nbsphinx_prolog = f"""
+:tutorial_name: {{{{ env.docname }}}}
+:doc_version: {doc_version}
 """
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
@@ -110,6 +125,22 @@ html_context = {
 html_css_files = [
     "css/custom.css",
 ]
+
+version_data = version
+# Checking for dev before passing version to switcher
+if polyversion_build == "True":
+    if current[0] == "dev":
+        version_data = "dev"
+        # Possible to-do: show the warning banner for latest(unstable) version.
+
+# Version switcher url
+switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
+
+# Removing version switcher from local doc builds. There is no local multi-versioning.
+# Instead, this allows the person to use their own switcher if they need it for some reason.
+LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+if LOCAL_BUILD:
+    switcher_url = "./_static/switcher.json"
 
 # Theme options
 html_theme_options = {
@@ -135,8 +166,14 @@ html_theme_options = {
         },
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
+    "switcher": {
+        "json_url": switcher_url,
+        "version_match": version_data,
+    },
+    "navbar_persistent": ["search-button.html", "theme-switcher.html"],
+    "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
+    "show_version_warning_banner": True,
 }
-
 
 favicons = [
     {"href": "images/Chatsky-min-light.svg"},
@@ -154,50 +191,29 @@ autodoc_default_options = {
 
 
 def setup(_):
-    link_misc_files(
-        [
-            "utils/db_benchmark/benchmark_schema.json",
-            "utils/db_benchmark/benchmark_streamlit.py",
-        ]
-    )
-    generate_tutorial_links_for_notebook_creation(
-        [
-            ("tutorials.context_storages", "Context Storages"),
-            (
-                "tutorials.messengers",
-                "Interfaces",
-                [
-                    ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API"),
-                ],
-            ),
-            ("tutorials.service", "Service"),
-            (
-                "tutorials.script",
-                "Script",
-                [
-                    ("core", "Core"),
-                    ("responses", "Responses"),
-                ],
-            ),
-            ("tutorials.slots", "Slots"),
-            ("tutorials.stats", "Stats"),
-        ]
-    )
-    regenerate_apiref(
-        [
-            ("chatsky.core.service", "Core.Service"),
-            ("chatsky.core", "Core"),
-            ("chatsky.conditions", "Conditions"),
-            ("chatsky.destinations", "Destinations"),
-            ("chatsky.responses", "Responses"),
-            ("chatsky.processing", "Processing"),
-            ("chatsky.context_storages", "Context Storages"),
-            ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.slots", "Slots"),
-            ("chatsky.stats", "Stats"),
-            ("chatsky.utils.testing", "Testing Utils"),
-            ("chatsky.utils.db_benchmark", "DB Benchmark"),
-            ("chatsky.utils.devel", "Development Utils"),
-        ]
-    )
+    # TODO: Import for old versions differently (it's unfinished now)
+    #  Check if a given version is less than v0.9.0 via poly.py functions and/or new filters.
+    #  Version v0.10.0 would show as less than v0.9.0, a mistake.
+    #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
+    #  Of course, it could be added, but that seems a bit invasive.
+    # TODO: I think setup() doesn't launch, even though the old_conf.py file is there.
+    print(version)
+    print(str(version))
+    if polyversion_build == "True":
+        if current[0] != "dev" and str(version) < "v0.9.0":
+            print("current[0] is", current[0])
+            print("building old version")
+            root_dir = Path(__file__).parent
+            print(root_dir / "old_conf.py")
+            print("old_conf.py path is copied correctly:", os.path.isfile(root_dir / "old_conf.py"))
+            spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
+            setup_module = importlib.util.module_from_spec(spec)
+            sys.modules["setup"] = setup_module
+            spec.loader.exec_module(setup_module)
+            setup_module.setup(_)
+            # Or this could just be
+            # from .old_conf import setup
+            # setup(_)
+    else:
+        from setup import setup
+        setup()

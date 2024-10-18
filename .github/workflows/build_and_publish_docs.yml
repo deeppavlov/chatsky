@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
     - dev
+    # TODO: Need to remove the branch below, it's just for testing.
+    - feat/sphinx_multiversion
   workflow_dispatch:
 
 concurrency:
@@ -21,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -36,37 +40,83 @@ jobs:
           python -m pip install --upgrade pip poetry
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
+      - name: testing actions/checkout_v4 (remove this before merging PR)
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          git branch
+          git status
+          echo "$BRANCH_NAME"
+          echo "TARGET_FOLDER='$BRANCH_NAME'" >> $GITHUB_ENV
+
+      - name: checking if it's a polyversion build
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          echo "POLYVERSION_BUILD=True" >> $GITHUB_ENV
+          echo "TARGET_FOLDER=''" >> $GITHUB_ENV
+
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          LOCAL_BUILD: "False"
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: save branch name without slashes
-        if: ${{ github.ref != 'refs/heads/master' }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: |
-          BRANCH_NAME=${{ env.BRANCH_NAME }}
-          BRANCH_NAME=${BRANCH_NAME////_}
-          echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
-
-      - name: save artifact
-        if: ${{ github.ref != 'refs/heads/master' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
-          path: docs/build/
-          retention-days: 3
-
-      - name: deploy website
+      - name: get old tag names for updating documentation and update switcher
         if: ${{ github.ref == 'refs/heads/master' }}
-        uses: JamesIves/github-pages-deploy-action@v4.6.4
+        run: |
+          echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir(".")))')" >> "$GITHUB_ENV"
+          echo "${{ env.OLD_VERSIONS }}"
+          cp docs/source/_static/switcher.json ./docs/build/switcher.json
+
+      - name: get branch name for updating documentation
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          echo "OLD_VERSIONS=./${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
+          echo "${{ env.OLD_VERSIONS }}"
+
+      - name: save changes and checkout to gh-pages
+        run: |
+          git add -f .
+          git stash
+          git checkout gh-pages
+
+      - name: clean outdated documentation
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
+
+      - name: checkout to original branch and reapply changes
+        run: |
+          git checkout -
+          git stash pop
+
+      - name: deploy website (for Pull Requests)
+        # TODO: Make a better True-False flag for deploying for Pull Requests.
+        # Make this use GitHub Action Variables.
+        # (PR only) Changed the variable below to False if you don't want to build docs for your PR
+        if: ${{ github.event_name == 'pull_request' && true }}
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
-          single-commit: True
+          target-folder: ${{ github.head_ref || github.ref_name }}
+          clean: False
+
+      - name: deploy website (default)
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/build/
+          clean: False
+
+      - name: printing link to the documentation
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
