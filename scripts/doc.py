@@ -18,8 +18,8 @@ from sphinx_polyversion.main import main as poly_main
 
 
 def _build_drawio(root_dir: str = "."):
-    drawio_root = root_dir + "/docs/source/drawio_src"
-    destination = root_dir + "/docs/source/_static/drawio"
+    drawio_root = root_dir + "/drawio_src"
+    destination = root_dir + "/_static/drawio"
     docker = DockerClient(
         compose_files=[f"{root_dir}/compose.yml"],
         compose_profiles=["context_storage", "stats"],
@@ -88,5 +88,5 @@ def docs(docker: Optional[DockerClient]):
 # Functions to be called from ChatskySphinxBuilder before build
 def pre_sphinx_build_funcs(source_dir: str):
     _build_drawio(source_dir)
-    apiref_dir = source_dir + "/docs/source/apiref"
+    apiref_dir = source_dir + "/apiref"
     apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "chatsky"])
