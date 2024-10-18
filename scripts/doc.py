@@ -12,12 +12,12 @@ from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .clean import clean_docs
-from .utils import docker_client, set_up_example_and_source_links
+from .utils import docker_client, set_up_source_links
 
 from sphinx_polyversion.main import main as poly_main
 
 
-def _build_drawio(root_dir: str = "."):
+def _build_drawio(root_dir: str = "./docs/source"):
     drawio_root = root_dir + "/drawio_src"
     destination = root_dir + "/_static/drawio"
     docker = DockerClient(
@@ -52,8 +52,6 @@ def _build_drawio(root_dir: str = "."):
         print(f"Drawio images built from {path.parent} to {target}")
 
 
-# TODO: What did we agree on about exit status for polyversion build?
-#  Should it be equal to poly_main() or was it something else?
 @docker_client
 def docs(docker: Optional[DockerClient]):
     init()
@@ -70,12 +68,10 @@ def docs(docker: Optional[DockerClient]):
             poly_main()
             exit(0)
         else:
-            # TODO: redo this into what we talked about -> changing /docs/source/ directory is
-            #  a bad practice. Same goes for Polyversion build.
-            # This func is made for Pull Request docs building (linking examples and GitHub sources)
-            set_up_example_and_source_links("./docs/source/")
             _build_drawio()
             result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
+            # This func is made for Pull Request docs building (linking examples and GitHub sources)
+            set_up_source_links("./docs/source/")
             result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
             result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
             exit(result)
