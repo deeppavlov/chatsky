@@ -200,20 +200,19 @@ def setup(_):
     print(str(version))
     if polyversion_build == "True":
         if current[0] != "dev" and str(version) < "v0.9.0":
+            print("current[0] is", current[0])
             print("building old version")
             root_dir = Path(__file__).parent
             print(root_dir / "old_conf.py")
             print("old_conf.py path is copied correctly:", os.path.isfile(root_dir / "old_conf.py"))
-            """
             spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
             spec.loader.exec_module(setup_module)
             setup_module.setup(_)
-            """
             # Or this could just be
-            from .old_conf import setup
-            setup(_)
+            # from .old_conf import setup
+            # setup(_)
     else:
         from setup import setup
         setup()
