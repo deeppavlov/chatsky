@@ -106,9 +106,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         clean_docs(str(output_dir))
 
         # Running Chatsky custom funcs before doc building
-        root_dir = environment.path.absolute()
-        scripts.doc.pre_sphinx_build_funcs(str(root_dir))
-        # setup_module.setup(str(root_dir))
+        scripts.doc.pre_sphinx_build_funcs(str(source_dir))
 
         # Using the newest conf.py file instead of the old one
         new_sphinx_configs = True
