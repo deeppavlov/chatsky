@@ -187,7 +187,7 @@ basic_configurations = {
     ),
     "default": BasicBenchmarkConfig(),
     "large-misc-long-dialog": BasicBenchmarkConfig(
-        from_dialog_len=50, 
+        from_dialog_len=50,
         to_dialog_len=75,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
