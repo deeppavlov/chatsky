@@ -36,11 +36,12 @@ dbs = {
 }
 
 
-for db_name, db_uri in dbs.items():
-    benchmark_all(
-        benchmark_dir / f"{db_name}.json",
-        db_name,
-        description="Basic configs",
-        db_uri=db_uri,
-        benchmark_configs=basic_configurations,
-    )
+if __name__ == "__main__":
+    for db_name, db_uri in dbs.items():
+        benchmark_all(
+            benchmark_dir / f"{db_name}.json",
+            db_name,
+            description="Basic configs",
+            db_uri=db_uri,
+            benchmark_configs=basic_configurations,
+        )
