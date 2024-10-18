@@ -150,14 +150,21 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
                 - "misc_size" -- size of a misc field of a context.
                 - "message_size" -- size of a misc field of a message.
         """
+        def remove_db_from_context(ctx: Context):
+            ctx._storage = None
+            ctx.requests._storage = None
+            ctx.responses._storage = None
+            ctx.labels._storage = None
+
+        starting_context = await get_context(MemoryContextStorage(), self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
+        final_contex = await get_context(MemoryContextStorage(), self.to_dialog_len, self.message_dimensions, self.misc_dimensions)
+        remove_db_from_context(starting_context)
+        remove_db_from_context(final_contex)
         return {
             "params": self.model_dump(),
             "sizes": {
-                "starting_context_size": naturalsize(asizeof.asizeof(await self.get_context(MemoryContextStorage())), gnu=True),
-                "final_context_size": naturalsize(
-                    asizeof.asizeof(await get_context(MemoryContextStorage(), self.to_dialog_len, self.message_dimensions, self.misc_dimensions)),
-                    gnu=True,
-                ),
+                "starting_context_size": naturalsize(asizeof.asizeof(starting_context.model_dump(mode="json")), gnu=True),
+                "final_context_size": naturalsize(asizeof.asizeof(final_contex.model_dump(mode="json")), gnu=True),
                 "misc_size": naturalsize(asizeof.asizeof(get_dict(self.misc_dimensions)), gnu=True),
                 "message_size": naturalsize(asizeof.asizeof(get_message(self.message_dimensions)), gnu=True),
             },
