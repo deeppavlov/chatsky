@@ -210,7 +210,7 @@ def setup(_):
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
             spec.loader.exec_module(setup_module)
-            setup_module.setup(_)
+            setup_module.setup()
             # Or this could just be
             # from .old_conf import setup
             # setup(_)
