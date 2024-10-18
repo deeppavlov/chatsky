@@ -196,6 +196,7 @@ def setup(_):
     #  Version v0.10.0 would show as less than v0.9.0, a mistake.
     #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
     #  Of course, it could be added, but that seems a bit invasive.
+    # TODO: I think setup() doesn't launch, even though the old_conf.py file is there.
     print(version)
     print(str(version))
     if polyversion_build == "True":
