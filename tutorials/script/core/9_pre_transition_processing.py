@@ -63,7 +63,7 @@ class PrependPreviousNodeResponse(proc.ModifyResponse):
     ) -> MessageInitTypes:
         result = await original_response(ctx)
 
-        previous_node_response = ctx.misc.get("previous_node_response")
+        previous_node_response = await ctx.misc.get("previous_node_response")
         if previous_node_response is None:
             return result
         else:

@@ -12,23 +12,19 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 
-from typing import Hashable, Dict, Any
+import asyncio
+from typing import Dict, Set, Tuple, Optional, List
 
 try:
+    from pymongo import UpdateOne
+    from pymongo.collection import Collection
     from motor.motor_asyncio import AsyncIOMotorClient
-    from bson.objectid import ObjectId
 
     mongo_available = True
 except ImportError:
     mongo_available = False
-    AsyncIOMotorClient = None
-    ObjectId = Any
 
-import json
-
-from chatsky.core import Context
-
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
 
 
@@ -36,60 +32,126 @@ class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
+    CONTEXTS table is stored as `COLLECTION_PREFIX_contexts` collection.
+    LOGS table is stored as `COLLECTION_PREFIX_logs` collection.
+
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :param collection: Name of the collection to store the data in.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
+    :param collection_prefix: "namespace" prefix for the two collections created for context storing.
     """
 
-    def __init__(self, path: str, collection: str = "context_collection"):
-        DBContextStorage.__init__(self, path)
+    _UNIQUE_KEYS = "unique_keys"
+    _ID_FIELD = "_id"
+
+    is_asynchronous = True
+
+    def __init__(
+        self,
+        path: str,
+        rewrite_existing: bool = False,
+        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        collection_prefix: str = "chatsky_collection",
+    ):
+        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
+
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
-        self._mongo = AsyncIOMotorClient(self.full_path)
+        self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
-        self.collection = db[collection]
 
-    @staticmethod
-    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
-        """Convert a n-digit context id to a 24-digit mongo id"""
-        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
-        new_key = (new_key * (24 // len(new_key) + 1))[:24]
-        assert len(new_key) == 24
-        return {"_id": ObjectId(new_key)}
+        self.main_table = db[f"{collection_prefix}_{self._main_table_name}"]
+        self.turns_table = db[f"{collection_prefix}_{self._turns_table_name}"]
 
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        new_key = self._adjust_key(key)
-        value = Context.model_validate(value)
-        document = json.loads(value.model_dump_json())
+        asyncio.run(
+            asyncio.gather(
+                self.main_table.create_index(
+                    self._id_column_name, background=True, unique=True
+                ),
+                self.turns_table.create_index(
+                    [self._id_column_name, self._key_column_name], background=True, unique=True
+                )
+            )
+        )
 
-        document.update(new_key)
-        await self.collection.replace_one(new_key, document, upsert=True)
+    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+        result = await self.main_table.find_one(
+            {self._id_column_name: ctx_id},
+            [self._current_turn_id_column_name, self._created_at_column_name, self._updated_at_column_name, self._misc_column_name, self._framework_data_column_name]
+        )
+        return (result[self._current_turn_id_column_name], result[self._created_at_column_name], result[self._updated_at_column_name], result[self._misc_column_name], result[self._framework_data_column_name]) if result is not None else None
 
-    @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        adjust_key = self._adjust_key(key)
-        document = await self.collection.find_one(adjust_key)
-        if document:
-            document.pop("_id")
-            ctx = Context.model_validate(document)
-            return ctx
-        raise KeyError
+    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+        await self.main_table.update_one(
+            {self._id_column_name: ctx_id},
+            {
+                "$set": {
+                    self._id_column_name: ctx_id,
+                    self._current_turn_id_column_name: turn_id,
+                    self._created_at_column_name: crt_at,
+                    self._updated_at_column_name: upd_at,
+                    self._misc_column_name: misc,
+                    self._framework_data_column_name: fw_data,
+                }
+            },
+            upsert=True,
+        )
 
-    @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        adjust_key = self._adjust_key(key)
-        await self.collection.delete_one(adjust_key)
+    async def delete_context(self, ctx_id: str) -> None:
+        await asyncio.gather(
+            self.main_table.delete_one({self._id_column_name: ctx_id}),
+            self.turns_table.delete_one({self._id_column_name: ctx_id})
+        )
 
-    @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        adjust_key = self._adjust_key(key)
-        return bool(await self.collection.find_one(adjust_key))
+    @DBContextStorage._verify_field_name
+    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        limit, key = 0, dict()
+        if isinstance(self._subscripts[field_name], int):
+            limit = self._subscripts[field_name]
+        elif isinstance(self._subscripts[field_name], Set):
+            key = {self._key_column_name: {"$in": list(self._subscripts[field_name])}}
+        result = await self.turns_table.find(
+            {self._id_column_name: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},
+            [self._key_column_name, field_name],
+            sort=[(self._key_column_name, -1)]
+        ).limit(limit).to_list(None)
+        return [(item[self._key_column_name], item[field_name]) for item in result]
 
-    @threadsafe_method
-    async def len_async(self) -> int:
-        return await self.collection.estimated_document_count()
+    @DBContextStorage._verify_field_name
+    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        result = await self.turns_table.aggregate(
+            [
+                {"$match": {self._id_column_name: ctx_id, field_name: {"$ne": None}}},
+                {"$group": {"_id": None, self._UNIQUE_KEYS: {"$addToSet": f"${self._key_column_name}"}}},
+            ]
+        ).to_list(None)
+        return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
 
-    @threadsafe_method
-    async def clear_async(self):
-        await self.collection.delete_many(dict())
+    @DBContextStorage._verify_field_name
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
+        result = await self.turns_table.find(
+            {self._id_column_name: ctx_id, self._key_column_name: {"$in": list(keys)}, field_name: {"$exists": True, "$ne": None}},
+            [self._key_column_name, field_name]
+        ).to_list(None)
+        return [(item[self._key_column_name], item[field_name]) for item in result]
+
+    @DBContextStorage._verify_field_name
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+        if len(items) == 0:
+            return
+        await self.turns_table.bulk_write(
+            [
+                UpdateOne(
+                    {self._id_column_name: ctx_id, self._key_column_name: k},
+                    {"$set": {field_name: v}},
+                    upsert=True,
+                ) for k, v in items
+            ]
+        )
+
+    async def clear_all(self) -> None:
+        await asyncio.gather(
+            self.main_table.delete_many({}),
+            self.turns_table.delete_many({})
+        )
