@@ -191,7 +191,7 @@ def setup(_):
     if polyversion_build == "True":
         if current[0] != "dev" and str(version) < "v0.9.0":
             print("building old version")
-            root_dir = Path(__file__)
+            root_dir = Path(__file__).parent
             spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
             setup_module = importlib.util.module_from_spec(spec)
             sys.modules["setup"] = setup_module
