@@ -142,9 +142,7 @@ root = Git.root(Path(__file__).parent)
 src = Path(SOURCE_DIR)
 
 
-# TODO: Make a custom 'Driver' that has build_failed() method defined. (right now it catches all exceptions
-#  and does nothing with them)
-# Should there be something more to this?
+# Should there be something more to this? It looks very simple.
 class ChatskyPolyversionDriver(DefaultDriver):
     def build_failed(self, rev, exc_info) -> None:
         raise Exception(f"Building documentation for revision {rev} failed!"
