@@ -96,9 +96,9 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
     """
-    from_dialog_len: int = 300
+    from_dialog_len: int = 50
     """Starting dialog len of a context."""
-    to_dialog_len: int = 311
+    to_dialog_len: int = 75
     """
     Final dialog len of a context.
     :py:meth:`~.BasicBenchmarkConfig.context_updater` will return contexts
@@ -182,8 +182,6 @@ basic_configurations = {
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "short-messages": BasicBenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
         message_dimensions=(2, 30),
         misc_dimensions=(0, 0),
     ),
