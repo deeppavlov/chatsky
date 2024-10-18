@@ -111,8 +111,6 @@ class ChatskySphinxBuilder(CommandBuilder):
         # setup_module.setup(str(root_dir))
 
         # Using the newest conf.py file instead of the old one
-        # This feature can be turned on, in case anyone needs it to build old versions with newer links / design.
-        # Just don't forget to configure poly.py for building the right tags
         new_sphinx_configs = True
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
@@ -120,8 +118,6 @@ class ChatskySphinxBuilder(CommandBuilder):
             # Saving the old conf.py file for future use.
             shutil.copyfile(older_conf_path, str(source_dir) + "/old_conf.py")
             shutil.copyfile(newer_conf_path, older_conf_path)
-        # If you add your own conf.py path there, you could build with any conf.py,
-        # meaning you could add features like the version-switcher button.
 
         # pre hook
         if self.pre_cmd:
