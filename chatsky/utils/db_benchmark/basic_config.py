@@ -186,9 +186,6 @@ basic_configurations = {
         misc_dimensions=(0, 0),
     ),
     "default": BasicBenchmarkConfig(),
-    "many-contexts": BasicBenchmarkConfig(
-        context_num=50,
-    ),
     "large-misc-long-dialog": BasicBenchmarkConfig(
         from_dialog_len=500,
         to_dialog_len=550,
