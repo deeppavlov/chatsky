@@ -102,9 +102,9 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
     """
-    from_dialog_len: int = 300
+    from_dialog_len: int = 25
     """Starting dialog len of a context."""
-    to_dialog_len: int = 311
+    to_dialog_len: int = 50
     """
     Final dialog len of a context.
     :py:meth:`~.BasicBenchmarkConfig.context_updater` will return contexts
@@ -150,14 +150,21 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
                 - "misc_size" -- size of a misc field of a context.
                 - "message_size" -- size of a misc field of a message.
         """
+        def remove_db_from_context(ctx: Context):
+            ctx._storage = None
+            ctx.requests._storage = None
+            ctx.responses._storage = None
+            ctx.labels._storage = None
+
+        starting_context = await get_context(MemoryContextStorage(), self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
+        final_contex = await get_context(MemoryContextStorage(), self.to_dialog_len, self.message_dimensions, self.misc_dimensions)
+        remove_db_from_context(starting_context)
+        remove_db_from_context(final_contex)
         return {
             "params": self.model_dump(),
             "sizes": {
-                "starting_context_size": naturalsize(asizeof.asizeof(await self.get_context(MemoryContextStorage())), gnu=True),
-                "final_context_size": naturalsize(
-                    asizeof.asizeof(await get_context(MemoryContextStorage(), self.to_dialog_len, self.message_dimensions, self.misc_dimensions)),
-                    gnu=True,
-                ),
+                "starting_context_size": naturalsize(asizeof.asizeof(starting_context.model_dump(mode="python")), gnu=True),
+                "final_context_size": naturalsize(asizeof.asizeof(final_contex.model_dump(mode="python")), gnu=True),
                 "misc_size": naturalsize(asizeof.asizeof(get_dict(self.misc_dimensions)), gnu=True),
                 "message_size": naturalsize(asizeof.asizeof(get_message(self.message_dimensions)), gnu=True),
             },
@@ -184,27 +191,25 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
 basic_configurations = {
     "large-misc": BasicBenchmarkConfig(
         from_dialog_len=1,
-        to_dialog_len=50,
+        to_dialog_len=26,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "short-messages": BasicBenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
         message_dimensions=(2, 30),
         misc_dimensions=(0, 0),
     ),
     "default": BasicBenchmarkConfig(),
-    "large-misc--long-dialog": BasicBenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
+    "large-misc-long-dialog": BasicBenchmarkConfig(
+        from_dialog_len=50,
+        to_dialog_len=75,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "very-long-dialog-len": BasicBenchmarkConfig(
         context_num=10,
-        from_dialog_len=10000,
-        to_dialog_len=10050,
+        from_dialog_len=1000,
+        to_dialog_len=1050,
     ),
     "very-long-message-len": BasicBenchmarkConfig(
         context_num=10,
