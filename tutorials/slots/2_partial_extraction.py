@@ -83,7 +83,7 @@ SLOTS = {
             match_group_idx=1,
         ),
         email=RegexpSlot(
-            regexp=r"([a-z@\.A-Z]+)",
+            regexp=r"([a-z]+@[a-zA-Z]+\.[a-z]+)",
             match_group_idx=1,
         ),
     ),
@@ -132,7 +132,7 @@ script = {
             },
             TRANSITIONS: [
                 Tr(
-                    dst=("root", "utter_friends"),
+                    dst=("root", "utter_friend"),
                     cnd=cnd.SlotsExtracted(
                         "friend.first_name", "friend.last_name", mode="any"
                     ),
@@ -162,26 +162,18 @@ script = {
             RESPONSE: "Your username is {person.username}. "
             "Your email is {person.email}.",
             PRE_RESPONSE: {"fill": proc.FillTemplate()},
-            TRANSITIONS: [Tr(dst=("root", "utter_friend"))],
+            TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
         },
     },
 }
 
 HAPPY_PATH = [
-    ("hi", "Write your username (my username is ...):"),
-    ("my username is groot", "Write your email (my email is ...):"),
-    (
-        "my email is groot@gmail.com",
-        "Please, name me one of your friends: (John Doe)",
-    ),
-    ("Bob Page", "Your friend is Bob Page"),
-    ("ok", "Your username is groot. Your email is groot@gmail.com."),
-    ("ok", "Finishing query"),
-    (
-        "again",
-        "Please, name me one of your friends: (John Doe)",
-    ),
-    ("Jim ", "Your friend is Jim Page"),
+    ("Start", "Please, send your username and email in one message."),
+    ("groot, groot@gmail.com", "Your username is groot. Your email is groot@gmail.com."),
+    ("ok", "Please, send your friends name"),
+    ("Jonh Doe", "Your friend is Jonh Doe"),
+    ("ok", "Please, send your friends name"),
+    ("Mike ", "Your friend is Mike Doe")
 ]
 
 
