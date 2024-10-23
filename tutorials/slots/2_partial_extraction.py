@@ -35,8 +35,8 @@ from chatsky.utils.testing import (
 ## Default behavior
 
 By default, slot extraction will write a value into slot storage regardless
-of whether the extraction was success.
-If extraction fails, the slot will be marked as not-extracted
+of whether the extraction was successful.
+If extraction fails, the slot will be marked as "not extracted"
 and its value will be the `default_value` (`None` by default).
 
 If group slot is being extracted, the extraction is considered successful
