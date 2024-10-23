@@ -12,7 +12,6 @@ import logging
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
-from uuid import uuid4
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -30,7 +29,7 @@ class MessengerInterface(abc.ABC):
     """
 
     def __init__(self, id: Optional[str] = None) -> None:
-        id = id if id is not None else f"{type(self).__name__}_{uuid4()}"
+        id = id if id is not None else type(self).__name__
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
