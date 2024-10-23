@@ -149,8 +149,8 @@ class Context(BaseModel):
 
     @property
     def origin_interface(self) -> Optional[str]:
-        if 0 in self.requests.keys():
-            return self.requests[0].origin_interface
+        if 1 in self.requests.keys():
+            return self.requests[1].origin_interface
         else:
             return None
 
