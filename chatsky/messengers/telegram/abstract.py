@@ -628,7 +628,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
             message = create_message(update)
-            message.origin = Origin(original_message=update, origin_interface=self.id)
+            message.origin = Origin.model_construct(original_message=update, origin_interface=self.id)
             resp = await self._pipeline_runner(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(

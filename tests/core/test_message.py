@@ -94,7 +94,7 @@ class TestMessage:
     def test_field_serializable(self, random_original_message: UnserializableObject):
         message = Message(text="sample message")
         message.misc = {"answer": 42, "unserializable": random_original_message}
-        message.origin = Origin(original_message=random_original_message)
+        message.origin = Origin.model_construct(original_message=random_original_message)
         message.some_extra_field = random_original_message
         message.other_extra_field = {"unserializable": random_original_message}
         serialized = message.model_dump_json()
