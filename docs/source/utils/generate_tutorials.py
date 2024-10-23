@@ -123,7 +123,7 @@ def generate_tutorial_links_for_notebook_creation(
     """
     include = [("tutorials", "Tutorials")] if include is None else include
     exclude = list() if exclude is None else exclude
-    dest = Path(configs["destination"])
+    dest = Path(configs["tutorials_destination"])
 
     flattened = list()
     for package in include:
@@ -132,7 +132,9 @@ def generate_tutorial_links_for_notebook_creation(
         else:
             flattened += [f"{package[0]}.{subpackage[0]}" for subpackage in package[2]]
 
-    links = iterate_tutorials_dir_generating_links(Path(configs["source"]), dest, f"{configs['destination']}/tutorials")
+    links = iterate_tutorials_dir_generating_links(
+        Path(configs["tutorials_source"]), dest, f"{configs['tutorials_destination']}/tutorials"
+    )
     filtered_links = list()
     for link in links:
         link_included = len(list(flat for flat in flattened if link.name.startswith(flat))) > 0

@@ -1,6 +1,4 @@
-import os
 import sys
-from pathlib import Path
 from typing import Callable, Optional
 
 from python_on_whales import DockerClient
