@@ -89,20 +89,8 @@ class ChatskySphinxBuilder(CommandBuilder):
         print("module_dir:", module_dir)
         scripts.doc.pre_sphinx_build_funcs(str(source_dir), str(module_dir))
 
-        # TODO: Need to sort tags, to add the right link for the "latest" tag
-        #  (Let output_dir == "v0.9.0", but github-actions-deploy dir == "latest", unless it isn't, of course,
-        #  depends on what we decide).
-        #  Then the links will be all wrong if they're not changed here.
-        # Making GitHub links version dependent in tutorials and API reference
-        doc_version = str(output_dir).split('/')[-1]
-        apiref_source = Path(source_dir) / "apiref"
-        for doc_file in iter(apiref_source.glob("./*.rst")):
-            with open(doc_file, "r+") as file:
-                contents = file.read()
-                doc_file.write_text(f":doc_version: {doc_version}\n{contents}")
-
         # Using the newest conf.py file instead of the old one
-        # This still can't be removed, it a key feature of the Pull Request.
+        # This still can't be removed, it's a key feature of the Pull Request.
         new_sphinx_configs = True
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
