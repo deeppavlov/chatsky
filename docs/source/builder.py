@@ -102,6 +102,7 @@ class ChatskySphinxBuilder(CommandBuilder):
                 doc_file.write_text(f":doc_version: {doc_version}\n{contents}")
 
         # Using the newest conf.py file instead of the old one
+        # This still can't be removed, it a key feature of the Pull Request.
         new_sphinx_configs = True
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")

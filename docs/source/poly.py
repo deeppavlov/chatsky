@@ -14,11 +14,25 @@ import os
 # Generate switcher.json file
 generate_switcher()
 
+# TODO: Need to build the 'latest' version, that being the latest commit in master.
+#  It doesn't have to be a release, actually. There's one problem, though.
+#  Will master also be built during releases? That's excessive and could be somehow handled.
+# If there is a tag pushed into master (there isn't a new commit) then 'latest' shouldn't change at all,
+# because there are actually no changes from it. And instead, it's currently built.
+# The obvious path to solve this is to use workflow trigger info. Was it a push in tag?
+# Not building master then. Was it not? Master O'clock it is, except if it's a PR or a dev build.
+# So, if the pushing branch is 'master' and trigger event isn't a tag push - LATEST_BUILD == 'True'.
+# Then BRANCH_REGEX should switch straight to r"master".
+
 # Regex matching the branches to build docs for
 # This regex stands for all branches except master, so docs can be built for any branch on demand.
 # (if the workflow is launched from it)
 BRANCH_REGEX = r"((?!master).)*"
 # BRANCH_REGEX = r".*"
+LATEST_BUILD = os.getenv('LATEST_BUILD', default="False")
+if LATEST_BUILD == "True":
+    BRANCH_REGEX = r"master"
+# TODO: I need to add 'latest' to 'master' redirecting (in 404.html file) in case people get it wrong.
 
 #: Regex matching the tags to build docs for (will get overwritten without the option below)
 TAG_REGEX = r"-"

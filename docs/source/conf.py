@@ -198,12 +198,14 @@ autodoc_default_options = {
 # TODO: merge Sphinx Multiversion PR into local tags (v0.8.0 and v0.9.0)
 
 def setup(_):
-    # TODO: Import for old versions differently (it's unfinished now)
-    #  Check if a given version is less than v0.9.0 via poly.py functions and/or new filters.
-    #  Version v0.10.0 would show as less than v0.9.0, a mistake.
-    #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
-    #  Of course, it could be added, but that seems a bit invasive.
-    # TODO: I think setup() doesn't launch, even though the old_conf.py file is there.
-    configs = {"doc_version": doc_version, "root_dir": root_dir, }
+    setup_configs = {
+        # doc_version_path is determined by polyversion's 'current' metadata variable.
+        # Are 'Paths' here okay? Should I tone it down?
+        "doc_version": doc_version_path,
+        "root_dir": Path(".").absolute(),
+        "apiref_destination": "apiref",
+        "tutorials_source": Path("./tutorials").absolute(),
+        "tutorials_destination": Path("./docs/source/tutorials").absolute(),
+    }
     from setup import setup
-    setup(configs=configs)
+    setup(configs=setup_configs)

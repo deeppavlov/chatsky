@@ -1,20 +1,18 @@
 from docs.source.utils.generate_tutorials import generate_tutorial_links_for_notebook_creation
 from docs.source.utils.link_misc_files import link_misc_files
 from docs.source.utils.regenerate_apiref import regenerate_apiref
-from pathlib import Path
 
 
 # TODO: add config dictionary which holds all parameters in a convenient form.
 #  setup() could just pass the doc_version to regenerate_apiref for it to add that to html metadata
 #  for correct links.
+# It's done, but needs review soon-ish.
 def setup(configs: dict):
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",
             "utils/db_benchmark/benchmark_streamlit.py",
         ],
-
-        root_dir=Path(root_dir).absolute(),
         configs=configs,
     )
     generate_tutorial_links_for_notebook_creation(
@@ -41,8 +39,6 @@ def setup(configs: dict):
             ("tutorials.stats", "Stats"),
         ],
         configs=configs,
-        source=(root_dir + "/tutorials"),
-        destination=(root_dir + "/docs/source/tutorials"),
     )
     regenerate_apiref(
         [
@@ -61,5 +57,4 @@ def setup(configs: dict):
             ("chatsky.utils.devel", "Development Utils"),
         ],
         configs=configs,
-        root_dir=root_dir,
     )

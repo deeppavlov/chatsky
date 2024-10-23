@@ -104,12 +104,10 @@ def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) 
     return links
 
 
-#   source: str = "tutorials",
-#   destination: str = "docs/source/tutorials",
 def generate_tutorial_links_for_notebook_creation(
     include: Optional[List[Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]]]] = None,
     exclude: Optional[List[str]] = None,
-    configs: dict = {},
+    configs: dict = None,
 ):
     """
     Generate symbolic links to tutorials files (tutorials/) in docs directory (docs/source/tutorials/).
@@ -119,13 +117,13 @@ def generate_tutorial_links_for_notebook_creation(
 
     :param include: Files to copy (supports file templates, like *).
     :param exclude: Files to skip (supports file templates, like *).
-    :param configs:
-    :param source: Tutorials root, default: 'tutorials/'.
-    :param destination: Destination root, default: 'docs/source/tutorials/'.
+    :param configs: Dictionary with tutorials' source and destination roots,
+    defaults: 'tutorials/' and 'docs/source/tutorials/' respectively.
+    (and other setup() configs)
     """
     include = [("tutorials", "Tutorials")] if include is None else include
     exclude = list() if exclude is None else exclude
-    dest = Path(destination)
+    dest = Path(configs["destination"])
 
     flattened = list()
     for package in include:
@@ -134,7 +132,7 @@ def generate_tutorial_links_for_notebook_creation(
         else:
             flattened += [f"{package[0]}.{subpackage[0]}" for subpackage in package[2]]
 
-    links = iterate_tutorials_dir_generating_links(Path(source), dest, f"{destination}/tutorials")
+    links = iterate_tutorials_dir_generating_links(Path(configs["source"]), dest, f"{configs['destination']}/tutorials")
     filtered_links = list()
     for link in links:
         link_included = len(list(flat for flat in flattened if link.name.startswith(flat))) > 0
