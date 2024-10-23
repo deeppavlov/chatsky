@@ -169,11 +169,14 @@ script = {
 
 HAPPY_PATH = [
     ("Start", "Please, send your username and email in one message."),
-    ("groot, groot@gmail.com", "Your username is groot. Your email is groot@gmail.com."),
+    (
+        "groot, groot@gmail.com",
+        "Your username is groot. Your email is groot@gmail.com.",
+    ),
     ("ok", "Please, send your friends name"),
     ("Jonh Doe", "Your friend is Jonh Doe"),
     ("ok", "Please, send your friends name"),
-    ("Mike ", "Your friend is Mike Doe")
+    ("Mike ", "Your friend is Mike Doe"),
 ]
 
 
