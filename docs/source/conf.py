@@ -204,26 +204,6 @@ def setup(_):
     #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
     #  Of course, it could be added, but that seems a bit invasive.
     # TODO: I think setup() doesn't launch, even though the old_conf.py file is there.
-    # Also, str(version) doesn't have a 'v' letter at the start.
-    print(version)
-    print(str(version))
-    if polyversion_build == "True":
-        if current[0] != "dev" and str(version) < "v0.9.0":
-            start_dir = os.getcwd()
-            # change_dir
-            print("current[0] is", current[0])
-            print("building old version")
-            root_dir = Path(__file__).parent
-            print(root_dir / "old_conf.py")
-            print("old_conf.py path is copied correctly:", os.path.isfile(root_dir / "old_conf.py"))
-            spec = importlib.util.spec_from_file_location("setup", root_dir / "old_conf.py")
-            setup_module = importlib.util.module_from_spec(spec)
-            sys.modules["setup"] = setup_module
-            spec.loader.exec_module(setup_module)
-            setup_module.setup(_)
-            # Or this could just be
-            # from .old_conf import setup
-            # setup(_)
-    else:
-        from setup import setup
-        setup()
+    configs = {"doc_version": doc_version, "root_dir": root_dir, }
+    from setup import setup
+    setup(configs=configs)

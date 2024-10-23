@@ -104,11 +104,12 @@ def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) 
     return links
 
 
+#   source: str = "tutorials",
+#   destination: str = "docs/source/tutorials",
 def generate_tutorial_links_for_notebook_creation(
     include: Optional[List[Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]]]] = None,
     exclude: Optional[List[str]] = None,
-    source: str = "tutorials",
-    destination: str = "docs/source/tutorials",
+    configs: dict = {},
 ):
     """
     Generate symbolic links to tutorials files (tutorials/) in docs directory (docs/source/tutorials/).
@@ -118,6 +119,7 @@ def generate_tutorial_links_for_notebook_creation(
 
     :param include: Files to copy (supports file templates, like *).
     :param exclude: Files to skip (supports file templates, like *).
+    :param configs:
     :param source: Tutorials root, default: 'tutorials/'.
     :param destination: Destination root, default: 'docs/source/tutorials/'.
     """
