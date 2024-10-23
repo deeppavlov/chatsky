@@ -147,6 +147,14 @@ class Context(BaseModel):
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
+    @property
+    def origin_interface(self) -> Optional[str]:
+        if 1 in self.requests.keys():
+            origin = self.requests[1].origin
+            if origin is not None:
+                return origin.origin_interface
+        return None
+
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
         """Initialize new context from ``start_label`` and, optionally, context ``id``."""

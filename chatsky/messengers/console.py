@@ -17,12 +17,13 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
     def __init__(
         self,
+        id: Optional[str] = None,
         intro: Optional[str] = None,
         prompt_request: str = "request: ",
         prompt_response: str = "response: ",
         out_descriptor: Optional[TextIO] = None,
     ):
-        super().__init__()
+        super().__init__(id)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request
