@@ -82,6 +82,7 @@ class LLMResponse(BaseResponse):
 
         return wrapped
 
+
 async def __prompt_to_message(prompt, ctx):
     if isinstance(prompt, str):
         return Message(prompt)
