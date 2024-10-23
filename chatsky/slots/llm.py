@@ -19,6 +19,7 @@ class LLMSlot(ValueSlot, frozen=True):
     LLMSlot is a slot type that extract information described in `caption` parameter using LLM.
     """
     caption: str
+    return_type: Any = str
     model: Optional[Any] = None
 
     def __init__(self, caption, model=None):
@@ -33,7 +34,7 @@ class LLMSlot(ValueSlot, frozen=True):
             return SlotNotExtracted
         # Dynamically create a Pydantic model based on the caption
         class DynamicModel(BaseModel):
-            value: str = Field(description=self.caption)
+            value: self.return_type = Field(description=self.caption)
         
         # model = create_model("DynamicModel",)
 
@@ -48,20 +49,11 @@ class LLMGroupSlot(GroupSlot):
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
     model: Any
 
-    @property
-    def caption(self):
-        cap = {}
-        for child_name, child in self.__pydantic_extra__.items():
-            logger.debug(f"Child.caption is {child.caption}, and it is {type(child.caption)}")
-            cap[child_name] = (type(child.caption), Field(description=child.caption, default=None))
-        
-        return cap
-
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         flat_items = self.__flatten_llm_group_slot(self)
         captions = {}
-        for child_name, caption in flat_items.items():
-            captions[child_name] = (type(caption), Field(description=caption, default=None))
+        for child_name, slot_item in flat_items.items():
+            captions[child_name] = (slot_item.return_type, Field(description=slot_item.caption, default=None))
         
         logger.debug(f"Flattened group slot: {flat_items}")
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
@@ -86,5 +78,5 @@ class LLMGroupSlot(GroupSlot):
             if isinstance(value, LLMGroupSlot):
                 items.update(self.__flatten_llm_group_slot(value, new_key))
             else:
-                items[new_key] = value.caption
+                items[new_key] = value
         return items
