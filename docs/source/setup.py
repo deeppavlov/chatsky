@@ -4,13 +4,15 @@ from docs.source.utils.regenerate_apiref import regenerate_apiref
 from pathlib import Path
 
 
-def setup(root_dir: str = "."):
+def setup(configs: dict):
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",
             "utils/db_benchmark/benchmark_streamlit.py",
         ],
+
         root_dir=Path(root_dir).absolute(),
+        configs=configs,
     )
     generate_tutorial_links_for_notebook_creation(
         [
@@ -35,6 +37,7 @@ def setup(root_dir: str = "."):
             ("tutorials.slots", "Slots"),
             ("tutorials.stats", "Stats"),
         ],
+        configs=configs,
         source=(root_dir + "/tutorials"),
         destination=(root_dir + "/docs/source/tutorials"),
     )
@@ -54,5 +57,6 @@ def setup(root_dir: str = "."):
             ("chatsky.utils.db_benchmark", "DB Benchmark"),
             ("chatsky.utils.devel", "Development Utils"),
         ],
+        configs=configs,
         root_dir=root_dir,
     )

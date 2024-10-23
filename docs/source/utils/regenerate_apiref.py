@@ -2,6 +2,8 @@ from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
+from docs.source.conf import doc_version
+
 
 def generate_doc_container(file: Path, alias: str, includes: List[Path]):
     """
@@ -29,8 +31,9 @@ def generate_doc_container(file: Path, alias: str, includes: List[Path]):
 """
     file.with_name(f"index_{file.name}").write_text(contents)
 
-
-def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, root_dir: str = ".", destination: str = "apiref"):
+# TODO: add a configs dictionary with all parameters inside it for ease of use.
+# def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, root_dir: str = ".", apiref_destination: str = "apiref"):
+def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, configs: dict = {}):
     """
     Regenerate files in apiref root.
     Not all the files there are generally useful: mostly the folder consists of module toctrees that look ugly.
@@ -41,10 +44,11 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, root_dir: s
 
     :param paths: Paths to the modules that should be merged together, separated by '.'.
     Should be prefixes of files in apiref root.
-    :param destination: Apiref root path, default: apiref.
+    :param configs: A dictionary that contains apiref root path (default: apiref),
+    doc_version and the root directory of the project.
     """
     paths = list() if paths is None else paths
-    source = Path(root_dir) / "docs" / "source" / destination
+    source = Path(configs.root_dir) / "docs" / "source" / configs.apiref_destination
     doc_containers: Dict[str, Tuple[str, List[Path]]] = dict()
 
     for doc_file in iter(source.glob("./*.rst")):
@@ -63,7 +67,8 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, root_dir: s
 
         with open(doc_file, "r+") as file:
             contents = file.read()
-            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n\n{contents}")
+            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n"
+                                f":doc_version: {configs.doc_version}\n\n{contents}")
 
     for name, (alias, files) in doc_containers.items():
         generate_doc_container(source / Path(f"{name}.rst"), alias, files)

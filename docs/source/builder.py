@@ -106,11 +106,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         if new_sphinx_configs:
             newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
             older_conf_path = str(source_dir) + "/conf.py"
-            # Saving the old conf.py file for future use.
-            shutil.copyfile(older_conf_path, str(source_dir) + "/old_conf.py")
-            print(older_conf_path, "was copied into", str(source_dir) + "/old_conf.py")
             shutil.copyfile(newer_conf_path, older_conf_path)
-            print(newer_conf_path, "was copied into", older_conf_path)
 
         # pre hook
         if self.pre_cmd:
