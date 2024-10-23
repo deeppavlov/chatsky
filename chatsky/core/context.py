@@ -150,9 +150,10 @@ class Context(BaseModel):
     @property
     def origin_interface(self) -> Optional[str]:
         if 1 in self.requests.keys():
-            return self.requests[1].origin_interface
-        else:
-            return None
+            origin = self.requests[1].origin
+            if origin is not None:
+                return origin.origin_interface
+        return None
 
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
