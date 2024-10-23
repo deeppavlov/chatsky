@@ -12,6 +12,7 @@ import logging
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
+from uuid import uuid4
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -27,6 +28,9 @@ class MessengerInterface(abc.ABC):
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
+
+    def __init__(self, id: Optional[str] = None) -> None:
+        id = id if id is not None else f"{type(self).__name__}_{uuid4()}"
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -60,7 +64,8 @@ class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
     Attachments not in this list will be neglected.
     """
 
-    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+    def __init__(self, id: Optional[str] = None, attachments_directory: Optional[Path] = None) -> None:
+        MessengerInterface.__init__(self, id)
         tempdir = gettempdir()
         if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
             self.attachments_directory = attachments_directory
@@ -169,7 +174,8 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, id: Optional[str] = None) -> None:
+        MessengerInterface.__init__(self, id)
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):

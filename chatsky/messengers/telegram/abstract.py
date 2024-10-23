@@ -22,6 +22,7 @@ from chatsky.core.message import (
     Invoice,
     Location,
     Message,
+    Origin,
     Poll,
     PollOption,
     Sticker,
@@ -87,8 +88,8 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         MediaGroup,
     }
 
-    def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
-        super().__init__(attachments_directory)
+    def __init__(self, token: str, id: Optional[str] = None, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(id, attachments_directory)
         if not telegram_available:
             raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install chatsky[telegram]`.")
 
@@ -627,7 +628,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
             message = create_message(update)
-            message.original_message = update
+            message.origin = Origin(original_message=update, origin_interface=self.id)
             resp = await self._pipeline_runner(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
