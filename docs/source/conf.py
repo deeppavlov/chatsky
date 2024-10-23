@@ -29,6 +29,7 @@ copyright = "2022 - 2024, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
+# TODO: Add 'today' variable with the commit date of this tag.
 
 # -- General configuration ---------------------------------------------------
 
@@ -97,16 +98,16 @@ html_show_sourcelink = False
 autosummary_generate_overwrite = False
 
 if polyversion_build == "True":
-    doc_version = str(current[0]) + '/'
+    doc_version_path = str(current[0]) + '/'
 else:
-    doc_version = os.getenv("BRANCH_NAME", default="")
-    if doc_version != "":
-        doc_version = doc_version + '/'
+    doc_version_path = os.getenv("BRANCH_NAME", default="")
+    if doc_version_path != "":
+        doc_version_path = doc_version_path + '/'
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = f"""
 :tutorial_name: {{{{ env.docname }}}}
-:doc_version: {doc_version}
+:doc_version_path: {doc_version_path}
 """
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
@@ -190,6 +191,12 @@ autodoc_default_options = {
 }
 
 
+# TODO: Make a universal setup(), assuming there will be a setup.py for every version.
+#  No workarounds for old versions needed.
+#  (The Sphinx Multiversion PR will be merged into v0.8.0 and v0.9.0 and so forth)
+
+# TODO: merge Sphinx Multiversion PR into local tags (v0.8.0 and v0.9.0)
+
 def setup(_):
     # TODO: Import for old versions differently (it's unfinished now)
     #  Check if a given version is less than v0.9.0 via poly.py functions and/or new filters.
@@ -197,10 +204,13 @@ def setup(_):
     #  Would be nice if there was a good way to check this, cause poly.py won't be in the old files, I think.
     #  Of course, it could be added, but that seems a bit invasive.
     # TODO: I think setup() doesn't launch, even though the old_conf.py file is there.
+    # Also, str(version) doesn't have a 'v' letter at the start.
     print(version)
     print(str(version))
     if polyversion_build == "True":
         if current[0] != "dev" and str(version) < "v0.9.0":
+            start_dir = os.getcwd()
+            # change_dir
             print("current[0] is", current[0])
             print("building old version")
             root_dir = Path(__file__).parent

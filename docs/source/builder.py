@@ -95,7 +95,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         #  Then the links will be all wrong if they're not changed here.
         # Making GitHub links version dependent in tutorials and API reference
         doc_version = str(output_dir).split('/')[-1]
-        apiref_source = Path(source_dir) / "/apiref"
+        apiref_source = Path(source_dir) / "apiref"
         for doc_file in iter(apiref_source.glob("./*.rst")):
             with open(doc_file, "r+") as file:
                 contents = file.read()

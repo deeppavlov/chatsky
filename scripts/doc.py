@@ -70,8 +70,6 @@ def docs(docker: Optional[DockerClient]):
         else:
             _build_drawio()
             result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
-            # This func is made for Pull Request docs building (linking examples and GitHub sources)
-            set_up_source_links("./docs/source/")
             result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
             result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
             exit(result)

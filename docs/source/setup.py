@@ -4,6 +4,9 @@ from docs.source.utils.regenerate_apiref import regenerate_apiref
 from pathlib import Path
 
 
+# TODO: add config dictionary which holds all parameters in a convenient form.
+#  setup() could just pass the doc_version to regenerate_apiref for it to add that to html metadata
+#  for correct links.
 def setup(root_dir: str = "."):
     link_misc_files(
         [

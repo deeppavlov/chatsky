@@ -30,6 +30,7 @@ def generate_doc_container(file: Path, alias: str, includes: List[Path]):
     file.with_name(f"index_{file.name}").write_text(contents)
 
 
+# TODO: Add that dictionary from setup() here, then recursively add 'doc_version' into html metadata.
 def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, root_dir: str = ".", destination: str = "apiref"):
     """
     Regenerate files in apiref root.
