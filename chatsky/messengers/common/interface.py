@@ -29,7 +29,7 @@ class MessengerInterface(abc.ABC):
     """
 
     def __init__(self, id: Optional[str] = None) -> None:
-        id = id if id is not None else type(self).__name__
+        self.id = id if id is not None else type(self).__name__
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
