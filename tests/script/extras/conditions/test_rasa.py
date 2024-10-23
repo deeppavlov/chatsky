@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from chatsky.script.conditions.llm_conditions.models.remote_api.rasa_model import RasaModel, AsyncRasaModel, rasa_available
+from chatsky.ml.models.remote_api.rasa_model import RasaModel, AsyncRasaModel, rasa_available
 from tests.context_storages.test_dbs import ping_localhost
 
 RASA_ACTIVE = ping_localhost(5005)

@@ -21,9 +21,9 @@ except ImportError:
     rasa_available = False
 
 from http import HTTPStatus
-from chatsky.script.conditions.llm_conditions.utils import RasaResponse
-from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
-from chatsky.script.conditions.llm_conditions.models.remote_api.async_mixin import AsyncMixin
+from chatsky.ml.utils import RasaResponse
+from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 
 class AbstractRasaModel(ExtrasBaseModel):

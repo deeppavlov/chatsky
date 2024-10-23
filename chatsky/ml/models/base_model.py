@@ -7,9 +7,9 @@ When defining custom label-scoring models, always inherit from this class.
 from copy import copy
 from abc import ABC, abstractmethod
 
-from chatsky.script import Context
+from chatsky import Context
 
-from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky.ml.dataset import Dataset
 
 import asyncio
 from async_lru import alru_cache

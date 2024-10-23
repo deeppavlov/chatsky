@@ -1,9 +1,9 @@
 import pytest
 
-from chatsky.script import Context, Message
-from chatsky.script.conditions.llm_conditions.dataset import Dataset, pyyaml_available
-from chatsky.script.conditions.llm_conditions.utils import LABEL_KEY
-from chatsky.script.conditions.llm_conditions.models.remote_api.async_mixin import AsyncMixin
+from chatsky import Context, Message
+from chatsky.ml.dataset import Dataset, pyyaml_available
+from chatsky.ml.utils import LABEL_KEY
+from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 from tests.test_utils import get_path_from_tests_to_current_dir
 
 path = get_path_from_tests_to_current_dir(__file__)

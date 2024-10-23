@@ -11,8 +11,8 @@ import json
 from pathlib import Path
 from async_lru import alru_cache
 
-from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
-from chatsky.script.conditions.llm_conditions.models.remote_api.async_mixin import AsyncMixin
+from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 try:
     from google.cloud import dialogflow_v2

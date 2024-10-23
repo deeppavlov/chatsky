@@ -1,10 +1,9 @@
 import pytest
-from chatsky.script import Context, Message
-from chatsky.script.conditions.llm_conditions.utils import LABEL_KEY
-from chatsky.script.conditions.llm_conditions.dataset import DatasetItem, Dataset
-from chatsky.script.conditions.llm_conditions.conditions import has_cls_label, has_match
-from chatsky.script.conditions.llm_conditions.models.local.cosine_matchers.sklearn import SklearnMatcher, sklearn_available
-from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+from chatsky import Context, Message
+from chatsky.ml.utils import LABEL_KEY
+from chatsky.ml.dataset import DatasetItem, Dataset
+from chatsky.conditions.ml import has_cls_label, has_match
+from chatsky.ml.models.base_model import ExtrasBaseModel
 
 
 class DummyModel(ExtrasBaseModel):
@@ -16,13 +15,6 @@ class DummyModel(ExtrasBaseModel):
 
     def __call__(self, text):
         pass
-
-
-@pytest.fixture(scope="session")
-def standard_model(testing_dataset):
-    from sklearn.feature_extraction.text import TfidfVectorizer
-
-    yield SklearnMatcher(tokenizer=TfidfVectorizer(stop_words=None), dataset=testing_dataset)
 
 
 @pytest.mark.parametrize(
@@ -51,7 +43,6 @@ def test_conds_invalid(input, testing_pipeline):
         _ = has_cls_label(model, input)(Context(), testing_pipeline)
 
 
-@pytest.mark.skipif(not sklearn_available, reason="Sklearn package missing.")
 @pytest.mark.parametrize(
     ["_input", "last_request", "thresh"],
     [

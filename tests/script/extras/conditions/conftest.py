@@ -1,7 +1,7 @@
 import pytest
 
-from chatsky.pipeline import Pipeline
-from chatsky.script.conditions.llm_conditions.dataset import Dataset
+from chatsky import Pipeline
+from chatsky.ml.dataset import Dataset
 from chatsky.utils.testing.toy_script import TOY_SCRIPT
 
 from tests.test_utils import get_path_from_tests_to_current_dir

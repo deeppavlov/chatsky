@@ -8,15 +8,15 @@ from typing import Callable, Optional, List
 from functools import singledispatch
 
 try:
+    #!!! remove sklearn, use something else instead
     from sklearn.metrics.pairwise import cosine_similarity
 
     sklearn_available = True
 except ImportError:
     sklearn_available = False
-from chatsky.script import Context
-from chatsky.pipeline import Pipeline
-from chatsky.script.conditions.llm_conditions.dataset import DatasetItem
-from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+from chatsky import Context, Pipeline
+from chatsky.ml.dataset import DatasetItem
+from chatsky.ml.models.base_model import ExtrasBaseModel
 
 
 @singledispatch
@@ -92,7 +92,7 @@ def has_match(
     any of the pre-defined intent utterances.
     The model passed to this function should be in the fit state.
 
-    :param model: Any model from the :py:mod:`~chatsky.script.conditions.llm_conditions.models.local.cosine_matchers` module.
+    :param model: Any model from the :py:mod:`~chatsky.ml.models.local.cosine_matchers` module.
     :param positive_examples: Utterances that the request should match.
     :param negative_examples: Utterances that the request should not match.
     :param threshold: Similarity threshold that triggers a positive response from the function.

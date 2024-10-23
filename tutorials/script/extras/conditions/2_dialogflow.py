@@ -12,20 +12,20 @@ Tutorials for other models can be found in the same section.
 # %%
 import os
 
-from chatsky.script import (
+from chatsky import (
     Message,
     RESPONSE,
     GLOBAL,
     TRANSITIONS,
     LOCAL,
 )
-from chatsky.script import conditions as cnd
+from chatsky import conditions as cnd
 
-from chatsky.script.conditions.llm_conditions.models.remote_api.google_dialogflow_model import (
+from chatsky.ml.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
 )
-from chatsky.script.conditions.llm_conditions import conditions as i_cnd
-from chatsky.pipeline import Pipeline
+from chatsky.ml import conditions as i_cnd
+from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.utils.testing.common import (
     is_interactive_mode,
