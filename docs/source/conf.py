@@ -191,12 +191,6 @@ autodoc_default_options = {
 }
 
 
-# TODO: Make a universal setup(), assuming there will be a setup.py for every version.
-#  No workarounds for old versions needed.
-#  (The Sphinx Multiversion PR will be merged into v0.8.0 and v0.9.0 and so forth)
-
-# TODO: merge Sphinx Multiversion PR into local tags (v0.8.0 and v0.9.0)
-
 def setup(_):
     setup_configs = {
         # doc_version_path is determined by polyversion's 'current' metadata variable.
