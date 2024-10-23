@@ -5,6 +5,9 @@ import json
 # TODO: Redo this entire thing - sort through tags to find the ones which are going to be built
 #  or get the funcs from poly.py do it. Also find the latest tag,
 #  it must be renamed to "latest(v0.9.0)" or something like that.
+# Yeah, I should be just renaming 'master' to 'latest'.
+# Although, specifying the version would be nice. Actually, its a good question, I can't just write 'latest'
+# Without any version after it, right?
 def generate_switcher():
     repo = git.Repo('./')
     # branch = repo.active_branch

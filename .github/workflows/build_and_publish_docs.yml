@@ -47,13 +47,16 @@ jobs:
           git branch
           git status
           echo "$BRANCH_NAME"
-          echo "TARGET_FOLDER='$BRANCH_NAME'" >> $GITHUB_ENV
 
       - name: checking if it's a polyversion build
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           echo "POLYVERSION_BUILD=True" >> $GITHUB_ENV
-          echo "TARGET_FOLDER=''" >> $GITHUB_ENV
+
+      - name: checking if it's a release build
+        if: ${{ github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/v') == false }}
+        run: |
+          echo "LATEST_BUILD=True" >> $GITHUB_ENV
 
       - name: build documentation
         env:
@@ -68,7 +71,7 @@ jobs:
         run: touch docs/build/.nojekyll
 
       - name: get old tag names for updating documentation and update switcher
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
         run: |
           echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir(".")))')" >> "$GITHUB_ENV"
           echo "${{ env.OLD_VERSIONS }}"
