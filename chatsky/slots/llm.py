@@ -19,7 +19,7 @@ class LLMSlot(ValueSlot, frozen=True):
     LLMSlot is a slot type that extract information described in `caption` parameter using LLM.
     """
     caption: str
-    return_type: Any = str
+    return_type: type = str
     model: Optional[Any] = None
 
     def __init__(self, caption, model=None):
