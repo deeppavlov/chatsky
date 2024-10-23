@@ -29,9 +29,11 @@ generate_switcher()
 # (if the workflow is launched from it)
 BRANCH_REGEX = r"((?!master).)*"
 # BRANCH_REGEX = r".*"
+"""
 LATEST_BUILD = os.getenv('LATEST_BUILD', default="False")
 if LATEST_BUILD == "True":
     BRANCH_REGEX = r"master"
+"""
 # TODO: I need to add 'latest' to 'master' redirecting (in 404.html file) in case people get it wrong.
 
 #: Regex matching the tags to build docs for (will get overwritten without the option below)
