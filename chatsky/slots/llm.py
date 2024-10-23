@@ -47,26 +47,26 @@ class LLMGroupSlot(GroupSlot):
     
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
     model: Any
-    # add partial extraction support
 
     @property
-    def caption(self, flat_items):
+    def caption(self):
         cap = {}
-        if flat_items != {}:
-            for child_name, caption in flat_items:
-                cap[child_name] = (type(caption), Field(description=caption, default=None))
-        else:
-            for child_name, child in self.__pydantic_extra__.items():
-                logger.debug(f"Child.caption is {child.caption}, and it is {type(child.caption)}")
-                cap[child_name] = (type(child.caption), Field(description=child.caption, default=None))
+        for child_name, child in self.__pydantic_extra__.items():
+            logger.debug(f"Child.caption is {child.caption}, and it is {type(child.caption)}")
+            cap[child_name] = (type(child.caption), Field(description=child.caption, default=None))
         
         return cap
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         flat_items = self.__flatten_llm_group_slot(self)
+        captions = {}
+        for child_name, caption in flat_items.items():
+            captions[child_name] = (type(caption), Field(description=caption, default=None))
+        
         logger.debug(f"Flattened group slot: {flat_items}")
-        DynamicGroupModel = create_model("DynamicGroupModel", **self.caption(flat_items))
+        DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
+        
         structured_model = self.model.with_structured_output(DynamicGroupModel)
         result = await structured_model.ainvoke(ctx.last_request.text)
         result_json = result.model_dump()
