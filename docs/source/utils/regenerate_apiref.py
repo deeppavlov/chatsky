@@ -2,8 +2,6 @@ from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
-from docs.source.conf import doc_version
-
 
 def generate_doc_container(file: Path, alias: str, includes: List[Path]):
     """
@@ -66,8 +64,10 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, configs: di
 
         with open(doc_file, "r+") as file:
             contents = file.read()
-            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n"
-                                f":doc_version: {configs['doc_version']}\n\n{contents}")
+            doc_file.write_text(
+                f":source_name: {join(*doc_file.stem.split('.'))}\n"
+                f":doc_version: {configs['doc_version']}\n\n{contents}"
+            )
 
     for name, (alias, files) in doc_containers.items():
         generate_doc_container(source / Path(f"{name}.rst"), alias, files)
