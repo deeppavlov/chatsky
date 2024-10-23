@@ -12,7 +12,7 @@ from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .clean import clean_docs
-from .utils import docker_client, set_up_source_links
+from .utils import docker_client
 
 from sphinx_polyversion.main import main as poly_main
 
