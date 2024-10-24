@@ -1,7 +1,9 @@
 from __future__ import annotations
 import os
 from os.path import join
+import sys
 import shutil
+import importlib.util
 from pathlib import Path, PurePath
 from subprocess import CalledProcessError
 from typing import TYPE_CHECKING, Any, Iterable
@@ -9,6 +11,8 @@ from typing import TYPE_CHECKING, Any, Iterable
 from sphinx_polyversion.builder import Builder, BuildError
 from sphinx_polyversion.environment import Environment
 from sphinx_polyversion.json import GLOBAL_ENCODER, JSONable
+from sphinx_polyversion.api import load
+from sphinx_polyversion.git import GitRef
 
 if TYPE_CHECKING:
     import json
@@ -80,14 +84,43 @@ class ChatskySphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
-        # Cleaning outdated documentation build
-        clean_docs(str(output_dir))
+        # Importing version-dependent module setup.py
+        # TODO: import setup() from older conf.py files directly.
+        # Maybe if the import is unsuccessful import from the other location?
+        # Or just take the version into account.
+        root_dir = environment.path.absolute()
+        spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
+        setup_module = importlib.util.module_from_spec(spec)
+        sys.modules["setup"] = setup_module
+        spec.loader.exec_module(setup_module)
+
+        """
+        # Adding these variables just like in conf.py, because it should work here too
+        data = load(globals())  # adds variables `current` and `revisions`
+        current: GitRef = data['current']
+        doc_version_path = str(current[0]) + '/'
+        print(current[0])
+        print(doc_version_path)
+        """
+
+        doc_version_path = str(output_dir).split('/')[-1] + '/'
+
+        setup_configs = {
+            # doc_version_path is determined by polyversion's 'current' metadata variable.
+            "doc_version": doc_version_path,
+            "root_dir": str(root_dir),
+            "apiref_destination": Path("apiref"),
+            "tutorials_source": str(root_dir) + "/tutorials",
+            "tutorials_destination": str(root_dir) + "/docs/source/tutorials",
+        }
+        print(setup_configs)
 
         # Running Chatsky custom funcs before doc building
         module_dir = environment.path.absolute() / "chatsky"
         print("source_dir:", source_dir)
         print("module_dir:", module_dir)
         scripts.doc.pre_sphinx_build_funcs(str(source_dir), str(module_dir))
+        setup_module.setup(setup_configs)
 
         # Using the newest conf.py file instead of the old one
         # This still can't be removed, it's a key feature of the Pull Request.

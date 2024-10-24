@@ -126,6 +126,13 @@ else:
     TAG_REGEX = r"-"
 print("TAG_REGEX = ", TAG_REGEX)
 
+"""
+# TODO: Checking custom build (Remove before PR merge!)
+# Just testing how this will build.
+TAG_REGEX = r"-"
+BRANCH_REGEX = r"master"
+"""
+
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
 

@@ -201,5 +201,7 @@ def setup(_):
         "tutorials_source": Path("./tutorials"),
         "tutorials_destination": "./docs/source/tutorials",
     }
-    from setup import setup
-    setup(configs=setup_configs)
+    print(setup_configs, "\n version is", current[0])
+    if polyversion_build == "False":
+        from setup import setup
+        setup(configs=setup_configs)

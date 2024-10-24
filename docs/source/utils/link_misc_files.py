@@ -24,4 +24,4 @@ def link_misc_files(files: Iterable[str], configs: dict = None):
     """
     for file_name in files:
         file = Path(file_name)
-        create_file_link(configs["root_dir"] / file, configs["root_dir"] / "docs" / "source" / "_misc" / file.name)
+        create_file_link(Path(configs["root_dir"]) / file, Path(configs["root_dir"]) / "docs" / "source" / "_misc" / file.name)
