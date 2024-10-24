@@ -180,7 +180,7 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
         if start_len + self.step_dialog_len < self.to_dialog_len:
             for i in range(start_len, start_len + self.step_dialog_len):
                 context.current_turn_id += 1
-                context.labels[context.current_turn_id] = AbsoluteNodeLabel(flow_name="flow_{i}", node_name="node_{i}")
+                context.labels[context.current_turn_id] = AbsoluteNodeLabel(flow_name=f"flow_{i}", node_name=f"node_{i}")
                 context.requests[context.current_turn_id] = get_message(self.message_dimensions)
                 context.responses[context.current_turn_id] = get_message(self.message_dimensions)
             return context

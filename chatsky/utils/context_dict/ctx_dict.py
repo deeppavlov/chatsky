@@ -58,7 +58,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
         for key, value in items.items():
             self._items[key] = self._value_type.validate_json(value)
-            if self._storage.rewrite_existing:
+            if not self._storage.rewrite_existing:
                 self._hashes[key] = get_hash(value)
 
     @overload
@@ -204,12 +204,12 @@ class ContextDict(BaseModel, Generic[K, V]):
     def _serialize_model(self) -> Dict[K, V]:
         if self._storage is None:
             return self._items
-        elif self._storage.rewrite_existing:
+        elif not self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
                 value = self._value_type.dump_json(v)
                 if get_hash(value) != self._hashes.get(k, None):
-                    result.update({k: value.decode()})
+                    result[k] = value.decode()
             return result
         else:
             return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
@@ -223,5 +223,10 @@ class ContextDict(BaseModel, Generic[K, V]):
                 ],
                 self._storage.is_asynchronous,
             )
+            if not self._storage.rewrite_existing:
+                for k, v in self._items.items():
+                    value_hash = get_hash(self._value_type.dump_json(v))
+                    if value_hash != self._hashes.get(k, None):
+                        self._hashes[k] = value_hash
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
