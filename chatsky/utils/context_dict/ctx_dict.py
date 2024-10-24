@@ -223,10 +223,9 @@ class ContextDict(BaseModel, Generic[K, V]):
                 ],
                 self._storage.is_asynchronous,
             )
+            self._added, self._removed = set(), set()
             if not self._storage.rewrite_existing:
                 for k, v in self._items.items():
-                    value_hash = get_hash(self._value_type.dump_json(v))
-                    if value_hash != self._hashes.get(k, None):
-                        self._hashes[k] = value_hash
+                    self._hashes[k] = get_hash(self._value_type.dump_json(v))
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
