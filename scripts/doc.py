@@ -62,7 +62,7 @@ def docs(docker: Optional[DockerClient]):
         # polyversion_build is False for local builds and PR builds.
         # In other words, it's only 'True' when docs are to be deployed on gh-pages
         polyversion_build = os.getenv("POLYVERSION_BUILD", default=False)
-        if polyversion_build:
+        if polyversion_build == "True":
             poly_path = "docs/source/poly.py"
             sys.argv = [poly_path, poly_path]
             poly_main()

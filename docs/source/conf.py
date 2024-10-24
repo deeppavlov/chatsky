@@ -196,9 +196,9 @@ def setup(_):
         # doc_version_path is determined by polyversion's 'current' metadata variable.
         # Are 'Paths' here okay? Should I tone it down?
         "doc_version": doc_version_path,
-        "root_dir": ".",
-        "apiref_destination": "apiref",
-        "tutorials_source": "./tutorials",
+        "root_dir": Path(".").absolute(),
+        "apiref_destination": Path("apiref"),
+        "tutorials_source": Path("./tutorials"),
         "tutorials_destination": "./docs/source/tutorials",
     }
     from setup import setup
