@@ -35,7 +35,7 @@ def has_cls_label(model: ExtrasBaseModel, label, threshold: float = 0.9):
 
 
 @has_cls_label.register(str)
-def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
+def _(label, model: ExtrasBaseModel, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, _) -> bool:
         # Predict labels for the last request
         # and store them in framework_data with uuid of the model as a key
@@ -52,7 +52,7 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
 
 
 @has_cls_label.register(DatasetItem)
-def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
+def _(label, model: ExtrasBaseModel, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
     def has_cls_label_innner(ctx: Context, _) -> bool:
         model(ctx.last_request.text)
         if model.model_id not in ctx.framework_data.llm_labels:
@@ -67,7 +67,7 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Contex
 
 
 @has_cls_label.register(list)
-def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
+def _(label, model: ExtrasBaseModel, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, pipeline: Pipeline) -> bool:
         model(ctx.last_request.text)
         if model.model_id not in ctx.framework_data.llm_labels:

@@ -227,3 +227,7 @@ class Context(BaseModel):
         if node is None:
             raise ContextError("Current node is not set.")
         return node
+
+    @property
+    def llm_labels(self) -> dict:
+        pass

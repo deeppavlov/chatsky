@@ -9,7 +9,7 @@ from tests.test_utils import get_path_from_tests_to_current_dir
 
 @pytest.fixture(scope="session")
 def testing_pipeline():
-    pipeline = Pipeline.from_script(
+    pipeline = Pipeline(
         TOY_SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
     )
     yield pipeline
