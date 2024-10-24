@@ -14,7 +14,7 @@ and powerful choice for data storage and management.
 """
 
 from asyncio import gather
-from typing import Any, List, Dict, Set, Tuple, Optional, Union
+from typing import Callable, List, Dict, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -23,7 +23,7 @@ try:
 except ImportError:
     redis_available = False
 
-from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 from .protocol import get_protocol_install_suggestion
 
 
@@ -75,11 +75,6 @@ class RedisContextStorage(DBContextStorage):
     @staticmethod
     def _bytes_to_keys(keys: List[bytes]) -> List[int]:
         return [int(f.decode("utf-8")) for f in keys]
-
-    @DBContextStorage._verify_field_name
-    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
-        context_ids = {k.decode("utf-8") for k in await self.database.keys(f"{self._main_key}:*")}
-        return filter.filter_keys(context_ids)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):

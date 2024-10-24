@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple
 
-from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -31,10 +31,6 @@ class MemoryContextStorage(DBContextStorage):
             self._requests_field_name: dict(),
             self._responses_field_name: dict(),
         }
-
-    @DBContextStorage._verify_field_name
-    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
-        return filter.filter_keys(set(self._main_storage.keys()))
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return self._main_storage.get(ctx_id, None)

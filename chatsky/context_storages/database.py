@@ -10,30 +10,16 @@ This class implements the basic functionality and can be extended to add additio
 
 from abc import ABC, abstractmethod
 from importlib import import_module
+from inspect import signature
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, validate_call
 
 from .protocol import PROTOCOLS
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[str]]
 _SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE, Literal["__none__"]]]
-
-
-class ContextIdFilter(BaseModel):
-    update_time_greater: Optional[int] = Field(default=None)
-    update_time_less: Optional[int] = Field(default=None)
-    origin_interface_whitelist: Set[str] = Field(default_factory=set)
-
-    def filter_keys(self, keys: Set[str]) -> Set[str]:
-        if self.update_time_greater is not None:
-            keys = {k for k in keys if k > self.update_time_greater}
-        if self.update_time_less is not None:
-            keys = {k for k in keys if k < self.update_time_greater}
-        if len(self.origin_interface_whitelist) > 0:
-            keys = {k for k in keys if k in self.origin_interface_whitelist}
-        return keys
 
 
 class DBContextStorage(ABC):
@@ -86,29 +72,6 @@ class DBContextStorage(ABC):
             else:
                 return method(self, *args, **kwargs)
         return verifier
-    
-    @staticmethod
-    def _convert_id_filter(method: Callable):
-        def verifier(self, *args, **kwargs):
-            if len(args) >= 1:
-                args, filter_obj = [args[0]] + args[1:], args[1]
-            else:
-                filter_obj = kwargs.pop("filter", None)
-            if filter_obj is None:
-                raise ValueError(f"For method {method.__name__} argument 'filter' is not found!")
-            elif isinstance(filter_obj, Dict):
-                filter_obj = ContextIdFilter.validate_model(filter_obj)
-            elif not isinstance(filter_obj, ContextIdFilter):
-                raise ValueError(f"Invalid type '{type(filter_obj).__name__}' for method '{method.__name__}' argument 'filter'!")
-            return method(self, *args, filter=filter_obj, **kwargs)
-        return verifier
-
-    @abstractmethod
-    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> List[str]:
-        """
-        :param filter:
-        """
-        raise NotImplementedError
 
     @abstractmethod
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
