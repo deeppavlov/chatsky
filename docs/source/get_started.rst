@@ -41,6 +41,12 @@ Additionally, you also have the option to download the source code directly from
 
 Once you are in the directory, you can run the command ``poetry install --all-extras`` to set up all the requirements for the library.
 
+Quick start with a project template
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you don't want to bother with setting up project files, you can use the `Chatsky Project Template <https://github.com/deeppavlov/chatsky-template>`_
+repository, which offers a ready-to-use simple bot that can be modified to your needs.
+
 Key concepts
 ~~~~~~~~~~~~
 
