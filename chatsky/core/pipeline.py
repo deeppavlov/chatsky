@@ -14,11 +14,11 @@ from functools import cached_property
 from typing import Union, List, Dict, Optional, Hashable
 from pydantic import BaseModel, Field, model_validator, computed_field
 
-from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
 from chatsky.core.context import Context
 from chatsky.core.message import Message
 
+from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
@@ -84,7 +84,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     It handles connections to interfaces that provide user requests and accept bot responses.
     """
-    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    context_storage: DBContextStorage = Field(default_factory=MemoryContextStorage)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
@@ -117,7 +117,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         default_priority: float = None,
         slots: GroupSlot = None,
         messenger_interface: MessengerInterface = None,
-        context_storage: Union[DBContextStorage, dict] = None,
+        context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
         post_services: ServiceGroupInitTypes = None,
         before_handler: ComponentExtraHandlerInitTypes = None,
@@ -223,7 +223,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -243,15 +243,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
         logger.debug(f"Received request: {request}.")
-        if ctx_id is None:
-            ctx = Context.init(self.start_label)
-        elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context.init(self.start_label, id=ctx_id))
-        else:
-            ctx = self.context_storage.get(ctx_id, Context.init(self.start_label, id=ctx_id))
+        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
         if update_ctx_misc is not None:
-            ctx.misc.update(update_ctx_misc)
+            await ctx.misc.update(update_ctx_misc)
 
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
@@ -259,16 +254,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.framework_data.pipeline = self
         initialize_service_states(ctx, self.services_pipeline)
 
-        ctx.add_request(request)
+        ctx.current_turn_id = ctx.current_turn_id + 1
+
+        ctx.requests[ctx.current_turn_id] = request
         await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 
-        if isinstance(self.context_storage, DBContextStorage):
-            await self.context_storage.set_item_async(ctx_id, ctx)
-        else:
-            self.context_storage[ctx_id] = ctx
+        await ctx.store()
 
         return ctx
 
@@ -286,7 +280,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that executes pipeline once.
