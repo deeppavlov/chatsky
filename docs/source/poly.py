@@ -166,8 +166,11 @@ src = Path(SOURCE_DIR)
 # Should there be something more to this? It looks very simple.
 class ChatskyPolyversionDriver(DefaultDriver):
     def build_failed(self, rev, exc_info) -> None:
+        pass
+        """
         raise Exception(f"Building documentation for revision {rev} failed!"
                         f"Exception info: {exc_info}")
+        """
 
 
 # TODO: Need to add pre_cmd here with maybe a file with commands, instead of a custom builder.
