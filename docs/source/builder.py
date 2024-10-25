@@ -32,9 +32,8 @@ class ChatskySphinxBuilder(CommandBuilder):
         post_cmd: Iterable[str | Placeholder] | None = None,
     ) -> None:
         cmd: Iterable[str | Placeholder] = [
-            "sphinx-build",
-            "--color",
-            *args,
+            "poe",
+            "tmp_docs",
             Placeholder.SOURCE_DIR,
             Placeholder.OUTPUT_DIR,
         ]

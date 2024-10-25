@@ -142,9 +142,6 @@ SOURCE_DIR = "docs/source"
 #: Arguments to pass to `poetry install`
 POETRY_ARGS = "--with tutorials,docs --all-extras --no-ansi --no-interaction".split()
 
-#: Arguments to pass to `sphinx-build`
-SPHINX_ARGS = "-b html -W --keep-going -v".split()
-
 #: Mock data used for building local version
 MOCK_DATA = {
     "revisions": [
@@ -190,7 +187,7 @@ ChatskyPolyversionDriver(
         buffer_size=1 * 10**9,  # 1 GB
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
-    builder=ChatskySphinxBuilder(src, args=SPHINX_ARGS),
+    builder=ChatskySphinxBuilder(src),
     env=Poetry.factory(args=POETRY_ARGS),
     selector=partial(closest_tag, root),
     template_dir=root / src / "templates",
