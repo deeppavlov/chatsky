@@ -4,7 +4,7 @@
 [![Codestyle](https://github.com/deeppavlov/chatsky/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/codestyle.yml)
 [![Tests](https://github.com/deeppavlov/chatsky/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/chatsky/blob/master/LICENSE)
-![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
+![Python 3.9, 3.10, 3.11, 3.12, 3.13](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
 [![Downloads](https://static.pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
 
@@ -37,7 +37,7 @@ in the evolving landscape of Python applications and IoT connectivity.
 ## System Requirements
 
 - Supported operating systems include Ubuntu 18.04+, Windows 10+ (partial support), and MacOS Big Sur (partial support);
-- Python version 3.8 or higher is necessary for proper functionality;
+- Python version 3.9 or higher is necessary for proper functionality;
 - A minimum of 1 GB of RAM is required for optimal performance;
 - If analytics collection or database integration is intended, Docker version 20 or higher may be necessary.
 

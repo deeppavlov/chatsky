@@ -11,7 +11,7 @@ Chatsky
    :alt: Number of downloads
    :target: https://pypi.org/project/chatsky/
 
-.. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg
+.. image:: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-green.svg
    :alt: Supported python versions
 
 Chatsky is an open-source, `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
