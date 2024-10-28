@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import git
 import importlib.metadata
 import importlib.util
 from pathlib import Path
@@ -16,11 +17,20 @@ from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
 
+
+# TODO: Add 'today' variable with the commit date of this tag.
+repo = git.Repo('./')
+
 current = [None]
 polyversion_build = os.getenv("POLYVERSION_BUILD", default="False")
 if polyversion_build == "True":
     data = load(globals())  # adds variables `current` and `revisions`
     current: GitRef = data['current']
+    if current[0] != "dev":
+        repo = git.Repo('./')
+        tag = current[0]
+        today = str(tag.commit.committed_datetime)
+        print(today)
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
@@ -28,8 +38,6 @@ project = _distribution_metadata["Name"]
 copyright = "2022 - 2024, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
-
-# TODO: Add 'today' variable with the commit date of this tag.
 
 # -- General configuration ---------------------------------------------------
 
