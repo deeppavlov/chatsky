@@ -12,6 +12,8 @@ import git
 import os
 
 # Generate switcher.json file
+from docs.source.utils.tags_filter import create_tag_regex
+
 generate_switcher()
 
 # TODO: Need to build the 'latest' version, that being the latest commit in master.
@@ -60,7 +62,6 @@ if branch is None:
     branch = repo.active_branch
 
 
-"""
 # This makes sure that tags which include 'rc' and 'dev' strings aren't built for the latest tag option.
 # Is this a good thing, actually?
 # TODO: discuss this.
@@ -72,41 +73,6 @@ def find_latest_tag(tag_list: list):
         latest_tag = tag_list[-shift]
     print("after cycle")
     return latest_tag
-"""
-
-
-# Filter func for building latest versions of each major tag.
-# Returns a dictionary of major tag groups as keys and latest tag's number as values
-# e.g. {(0, 6): 7, (1, 2): 3} standing for v0.6.7 and v1.2.3.
-def latest_tags_filter(tag_list: list) -> list:
-    regex = re.compile(r"^v\d*\.\d*\.\d*$")
-    tag_list = list(filter(regex.match, tag_list))
-    latest_tags = {}
-    for tag in tag_list:
-        tag = str(tag).replace('v', '').split(".")
-        tag_group = (tag[0], tag[1])
-        # Not building versions lower than v0.8.0
-        if not (int(tag[0]) == 0 and int(tag[1]) < 8):
-            # If there is a greater tag in this group, it will have priority over others
-            if int(tag[2]) > int(latest_tags.get(tag_group, -1)):
-                latest_tags[tag_group] = tag[2]
-    # Could return a dictionary, but it looks unclear.
-    tag_list = ['v' + x[0] + '.' + x[1] + '.' + latest_tags[x] for x in latest_tags.keys()]
-    return tag_list
-
-
-def create_tag_regex(tag_list: list):
-    # Maybe could add a 'start_version' for building
-    start_index = tag_list.index(first_built_version)
-    tag_list = tag_list[start_index:]
-    # Filter for latest tags in their respective groups
-    tag_list = latest_tags_filter(tag_list)
-    # Creates the regex
-    tag_regex = r"("
-    for tag in tag_list:
-        tag_regex += str(tag) + "|"
-    tag_regex = tag_regex[:-1] + ")"
-    return tag_regex
 
 
 print(branch)
@@ -120,7 +86,7 @@ if str(branch) == "master":
     # If v0.8.0 is not in tags there's something wrong, this line is quite wrong,
     # but for now it makes sure docs don't crash in case someone fetches only a part of tags
     elif first_built_version in tags and not custom_tag_regex:
-        TAG_REGEX = create_tag_regex(tags)
+        TAG_REGEX = create_tag_regex(tags, first_built_version)
 else:
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"

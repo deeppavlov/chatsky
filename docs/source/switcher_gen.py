@@ -1,6 +1,6 @@
 import git
 import json
-from docs.source.poly import latest_tags_filter
+from docs.source.utils.tags_filter import latest_tags_filter
 
 
 # TODO: Redo this entire thing - sort through tags to find the ones which are going to be built
