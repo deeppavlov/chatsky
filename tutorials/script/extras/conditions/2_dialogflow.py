@@ -55,9 +55,7 @@ script = {
     GLOBAL: {
         # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: {
-            ("root", "finish", 1.2): i_cnd.has_cls_label(
-                gdf_model, "goodbye"
-            )
+            ("root", "finish", 1.2): i_cnd.has_cls_label(gdf_model, "goodbye")
         },
     },
     "root": {
@@ -74,7 +72,10 @@ script = {
             TRANSITIONS: {
                 # Here, we use intents to decide which branch of dialog should be picked
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    gdf_model, "mood_great", threshold=0.95, namespace="dialogflow"
+                    gdf_model,
+                    "mood_great",
+                    threshold=0.95,
+                    namespace="dialogflow",
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label(
                     gdf_model, "mood_unhappy", namespace="dialogflow"

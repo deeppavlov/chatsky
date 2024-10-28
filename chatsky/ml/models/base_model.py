@@ -4,6 +4,7 @@ Base Model
 This module defines an abstract interface for label-scoring models, :py:class:`~ExtrasBaseModel`.
 When defining custom label-scoring models, always inherit from this class.
 """
+
 from copy import copy
 from abc import ABC, abstractmethod
 

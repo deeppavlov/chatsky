@@ -5,6 +5,7 @@ Rasa Model
 This module provides an annotator model
 that queries an external RASA NLU Server for utterance classification.
 """
+
 import asyncio
 from async_lru import alru_cache
 import json

@@ -25,7 +25,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
             not (os.getenv("GDF_ACCOUNT_JSON") and os.path.exists(os.getenv("GDF_ACCOUNT_JSON")))
             or not dialogflow_available,
         ),
-        ("6_hf_api", os.getenv("HF_API_KEY") is None or not hf_api_available)
+        ("6_hf_api", os.getenv("HF_API_KEY") is None or not hf_api_available),
     ],
 )
 @pytest.mark.rasa

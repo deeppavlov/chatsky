@@ -11,7 +11,7 @@ class DummyModel(ExtrasBaseModel):
         self.model_id = model_id
 
     def predict(self, text):
-        return {'label_a': 0.1, 'label_b': 0.9}
+        return {"label_a": 0.1, "label_b": 0.9}
 
     def __call__(self, text):
         pass

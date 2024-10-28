@@ -5,6 +5,7 @@ Asynchronous Mixin
 This module provides the mixin that overrides the :py:meth:`__call__` method
 in all the descendants making them asynchronous.
 """
+
 from chatsky import Context
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 

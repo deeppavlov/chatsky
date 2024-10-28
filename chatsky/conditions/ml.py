@@ -4,6 +4,7 @@ Conditions
 
 This module provides condition functions for annotation processing.
 """
+
 from typing import Callable, Optional, List
 from functools import singledispatch
 
@@ -18,6 +19,7 @@ from chatsky import Context, Pipeline
 from chatsky.conditions.standard import BaseCondition
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
+
 class HasLabel(BaseCondition):
     """
     Use this condition, when you need to check, whether the probability
@@ -29,6 +31,7 @@ class HasLabel(BaseCondition):
     :param threshold: The minimal label probability that triggers a positive response
         from the function.
     """
+
     label: str
     model: ExtrasBaseAPIModel
     threshold: float = 0.9
@@ -44,7 +47,9 @@ class HasLabel(BaseCondition):
             if self.model.model_id not in ctx.framework_data.models_labels:
                 return False
             if self.model.model_id is not None:
-                return ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
+                return (
+                    ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
+                )
             scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
             comparison_array = [item >= self.threshold for item in scores]
             return any(comparison_array)
@@ -54,15 +59,16 @@ class HasLabel(BaseCondition):
 
 class HasMatch(BaseCondition):
     """
-        Use this condition, if you need to check whether the last request matches
-        any of the pre-defined intent utterances.
-        The model passed to this function should be in the fit state.
+    Use this condition, if you need to check whether the last request matches
+    any of the pre-defined intent utterances.
+    The model passed to this function should be in the fit state.
 
-        :param model: Any model from the :py:mod:`~chatsky.ml.models.local.cosine_matchers` module.
-        :param positive_examples: Utterances that the request should match.
-        :param negative_examples: Utterances that the request should not match.
-        :param threshold: Similarity threshold that triggers a positive response from the function.
+    :param model: Any model from the :py:mod:`~chatsky.ml.models.local.cosine_matchers` module.
+    :param positive_examples: Utterances that the request should match.
+    :param negative_examples: Utterances that the request should not match.
+    :param threshold: Similarity threshold that triggers a positive response from the function.
     """
+
     model: ExtrasBaseAPIModel
     positive_examples: Optional[List[str]]
     negative_examples: Optional[List[str]] = None

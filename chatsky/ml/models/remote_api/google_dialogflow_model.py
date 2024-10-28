@@ -5,6 +5,7 @@ Google Dialogflow Model
 The module allows you to use Google Dialogflow as a service
 to gain insights about user intents.
 """
+
 from typing import Optional
 import uuid
 import json
@@ -106,6 +107,7 @@ class AsyncGoogleDialogFlowModel(AsyncMixin, AbstractGDFModel):
     :param namespace_key: Name of the namespace in framework states that the model will be using.
     :param language: Language parameter is passed to the Dialogflow wrapper.
     """
+
     @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
         session_id = uuid.uuid4()
