@@ -1,6 +1,5 @@
 from __future__ import annotations
 import os
-from os.path import join
 import shutil
 from pathlib import Path, PurePath
 from subprocess import CalledProcessError
@@ -97,6 +96,8 @@ class ChatskySphinxBuilder(CommandBuilder):
             older_conf_path = str(source_dir) + "/conf.py"
             shutil.copyfile(newer_conf_path, older_conf_path)
 
+        # TODO: Move the code before to a .py file and throw it's execution into pre_cmd right here.
+        # TODO: Try printing out the env to see what env variables are there.
         # pre hook
         if self.pre_cmd:
             out, err, rc = await environment.run(*map(replace, self.pre_cmd), env=env)
