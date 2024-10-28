@@ -36,6 +36,9 @@ LATEST_BUILD = os.getenv('LATEST_BUILD', default="False")
 if LATEST_BUILD == "True":
     BRANCH_REGEX = r"master"
 """
+# N.B. If you have a bunch of branches fetched, and you launch polyversion it will start building docs
+# for all of those branches, and will probably crash on older versions.
+# Polyversion_build is only supposed to be used on Github Actions.
 # TODO: I need to add 'latest' to 'master' redirecting (in 404.html file) in case people get it wrong.
 
 #: Regex matching the tags to build docs for (will get overwritten without the option below)

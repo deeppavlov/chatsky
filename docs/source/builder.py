@@ -119,7 +119,7 @@ class ChatskySphinxBuilder(CommandBuilder):
             if rc:
                 raise BuildError from CalledProcessError(rc, " ".join(cmd), out, err)
         """
-        return super().build(
+        return await super().build(
             environment,
             output_dir,
             data
