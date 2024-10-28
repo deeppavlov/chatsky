@@ -10,11 +10,11 @@ from abc import ABC, abstractmethod
 import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import Any, List, Set, Tuple, Dict, Optional, Union
+from typing import List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
 
 try:
     from aiofiles import open
@@ -60,10 +60,6 @@ class FileContextStorage(DBContextStorage, ABC):
     @abstractmethod
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
-
-    @DBContextStorage._verify_field_name
-    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
-        return filter.filter_keys(set((await self._load()).main.keys()))
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         self._logger.debug(f"Loading main info for {ctx_id}...")
