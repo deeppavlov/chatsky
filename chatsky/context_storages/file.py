@@ -66,39 +66,53 @@ class FileContextStorage(DBContextStorage, ABC):
         return filter.filter_keys(set((await self._load()).main.keys()))
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
-        return (await self._load()).main.get(ctx_id, None)
+        self._logger.debug(f"Loading main info for {ctx_id}...")
+        result = (await self._load()).main.get(ctx_id, None)
+        self._logger.debug(f"Main info loaded for {ctx_id}: {result}")
+        return result
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         storage = await self._load()
+        self._logger.debug(f"Updating main info for {ctx_id}: {(turn_id, crt_at, upd_at, misc, fw_data)}")
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
         await self._save(storage)
 
     async def delete_context(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)
+        self._logger.debug(f"Deleting main info for {ctx_id}")
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
         await self._save(storage)
 
     @DBContextStorage._verify_field_name
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         storage = await self._load()
+        self._logger.debug(f"Loading latest field for {ctx_id}, {field_name}...")
         select = sorted([(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None], key=lambda e: e[0], reverse=True)
         if isinstance(self._subscripts[field_name], int):
             select = select[:self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
+        self._logger.debug(f"Loading latest field for {ctx_id}, {field_name}: {list(k for k, _ in select)}")
         return select
 
     @DBContextStorage._verify_field_name
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
-        return [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
+        self._logger.debug(f"Loading field keys {ctx_id}, {field_name}...")
+        result = [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
+        self._logger.debug(f"Field keys loaded {ctx_id}, {field_name}: {result}")
+        return result
 
     @DBContextStorage._verify_field_name
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
-        return [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
+        self._logger.debug(f"Loading field items {ctx_id}, {field_name} ({keys})...")
+        result = [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
+        self._logger.debug(f"Field items loaded {ctx_id}, {field_name}: {[k for k, _ in result]}")
+        return result
 
     @DBContextStorage._verify_field_name
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+        self._logger.debug(f"Updating fields {ctx_id}, {field_name}: {list(k for k, _ in items)}")
         storage = await self._load()
         for k, v in items:
             upd = (ctx_id, field_name, k, v)
@@ -111,6 +125,7 @@ class FileContextStorage(DBContextStorage, ABC):
         await self._save(storage)
 
     async def clear_all(self) -> None:
+        self._logger.debug("Clearing all")
         await self._save(SerializableStorage())
 
 

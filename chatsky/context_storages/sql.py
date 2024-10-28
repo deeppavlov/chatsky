@@ -17,9 +17,9 @@ from __future__ import annotations
 import asyncio
 from importlib import import_module
 from os import getenv
-from typing import Callable, Collection, Dict, List, Optional, Set, Tuple
+from typing import Callable, Collection, List, Optional, Set, Tuple
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -196,7 +196,10 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             for table in [self.main_table, self.turns_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
+                    self._logger.debug(f"SQL table created: {table.name}")
                     await conn.run_sync(table.create, self.engine)
+                else:
+                    self._logger.debug(f"SQL table already exists: {table.name}")
 
     def _check_availability(self):
         """
@@ -215,12 +218,15 @@ class SQLContextStorage(DBContextStorage):
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+        self._logger.debug(f"Loading main info for {ctx_id}...")
         stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
+            self._logger.debug(f"Main info loaded for {ctx_id}: {result}")
             return None if result is None else result[1:]
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+        self._logger.debug(f"Updating main info for {ctx_id}: {(turn_id, crt_at, upd_at, misc, fw_data)}")
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
                 self._id_column_name: ctx_id,
@@ -242,6 +248,7 @@ class SQLContextStorage(DBContextStorage):
 
     # TODO: use foreign keys instead maybe?
     async def delete_context(self, ctx_id: str) -> None:
+        self._logger.debug(f"Deleting main info for {ctx_id}")
         async with self.engine.begin() as conn:
             await asyncio.gather(
                 conn.execute(delete(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)),
@@ -250,6 +257,7 @@ class SQLContextStorage(DBContextStorage):
 
     @DBContextStorage._verify_field_name
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        self._logger.debug(f"Loading latest field for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
         stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
         stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
@@ -258,23 +266,32 @@ class SQLContextStorage(DBContextStorage):
         elif isinstance(self._subscripts[field_name], Set):
             stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(self._subscripts[field_name]))
         async with self.engine.begin() as conn:
-            return list((await conn.execute(stmt)).fetchall())
+            result = list((await conn.execute(stmt)).fetchall())
+            self._logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {list(k for k, _ in select)}")
+            return result
 
     @DBContextStorage._verify_field_name
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        self._logger.debug(f"Loading field keys {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name]).where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
         async with self.engine.begin() as conn:
-            return [k[0] for k in (await conn.execute(stmt)).fetchall()]
+            result = [k[0] for k in (await conn.execute(stmt)).fetchall()]
+            self._logger.debug(f"Field keys loaded {ctx_id}, {field_name}: {result}")
+            return result
 
     @DBContextStorage._verify_field_name
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
+        self._logger.debug(f"Loading field items {ctx_id}, {field_name} ({keys})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
         stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[self._key_column_name].in_(tuple(keys))) & (self.turns_table.c[field_name] != None))
         async with self.engine.begin() as conn:
-            return list((await conn.execute(stmt)).fetchall())
+            result = list((await conn.execute(stmt)).fetchall())
+            self._logger.debug(f"Field items loaded {ctx_id}, {field_name}: {[k for k, _ in result]}")
+            return result
 
     @DBContextStorage._verify_field_name
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+        self._logger.debug(f"Updating fields {ctx_id}, {field_name}: {list(k for k, _ in items)}")
         if len(items) == 0:
             return
         insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
@@ -296,6 +313,7 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(update_stmt)
 
     async def clear_all(self) -> None:
+        self._logger.debug("Clearing all")
         async with self.engine.begin() as conn:
             await asyncio.gather(
                 conn.execute(delete(self.main_table)),
