@@ -13,7 +13,6 @@ from pathlib import Path
 from async_lru import alru_cache
 
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
-from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 try:
     from google.cloud import dialogflow_v2
@@ -61,37 +60,7 @@ class AbstractGDFModel(ExtrasBaseAPIModel):
         return cls(model=info, language=language)
 
 
-class GoogleDialogFlowModel(AbstractGDFModel):
-    """
-    This class implements a synchronous connection to Google Dialogflow for dialog annotation.
-    Note, that before you use this class, you need to set up a Dialogflow project,
-    create intents, and train a language model, which can be easily done
-    using the Dialogflow web interface (see the official
-    `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
-    After this is done, you should obtain a service account JSON file from Google
-    and pass it to this class, using :py:meth:`~from_file` method.
-
-    :param model: A parsed service account json for your Dialogflow project.
-        Calling json.load() on the file obtained from Google is sufficient to get the
-        credentials object. Alternatively, use :py:meth:`~from_file` method.
-    :param namespace_key: Name of the namespace in that the model will be using.
-    :param language: Language parameter is passed to the Dialogflow wrapper.
-    """
-
-    def predict(self, request: str) -> dict:
-        session_id = uuid.uuid4()
-        session_client = dialogflow_v2.SessionsClient(credentials=self._credentials)
-        session_path = session_client.session_path(self._credentials.project_id, session_id)
-        query_input = dialogflow_v2.QueryInput(text=dialogflow_v2.TextInput(text=request, language_code=self._language))
-        request = dialogflow_v2.DetectIntentRequest(session=session_path, query_input=query_input)
-        response = session_client.detect_intent(request=request)
-        result: dialogflow_v2.QueryResult = response.query_result
-        if result.intent is not None:
-            return {result.intent.display_name: result.intent_detection_confidence}
-        return {}
-
-
-class AsyncGoogleDialogFlowModel(AsyncMixin, AbstractGDFModel):
+class AsyncGoogleDialogFlowModel(AbstractGDFModel):
     """
     This class implements an asynchronous connection to Google Dialogflow for dialog annotation.
     Note, that before you use the class, you need to set up a Dialogflow project,

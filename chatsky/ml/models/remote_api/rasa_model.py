@@ -24,7 +24,6 @@ except ImportError:
 from http import HTTPStatus
 from chatsky.ml.utils import RasaResponse
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
-from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 
 class AbstractRasaModel(ExtrasBaseAPIModel):
@@ -52,7 +51,7 @@ class AbstractRasaModel(ExtrasBaseAPIModel):
         self.retries = retries
 
 
-class RasaModel(AsyncMixin, AbstractRasaModel):
+class RasaModel(AbstractRasaModel):
     """
     This class implements an asynchronous connection to RASA NLU server for dialog annotation.
     In order to work with this class, you need to have a running instance of Rasa NLU Server

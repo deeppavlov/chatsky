@@ -23,7 +23,6 @@ except ImportError:
     hf_api_available = False
 
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
-from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 
 class AbstractHFAPIModel(ExtrasBaseAPIModel):
@@ -53,7 +52,7 @@ class AbstractHFAPIModel(ExtrasBaseAPIModel):
             raise requests.HTTPError(test_response.text)
 
 
-class HFAPIModel(AsyncMixin, AbstractHFAPIModel):
+class HFAPIModel(AbstractHFAPIModel):
     """
     This class implements an asynchronous connection to the Hugging Face API for dialog annotation.
     Obtain an API token from Hugging Face to gain full access to hosted models.

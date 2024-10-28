@@ -74,8 +74,8 @@ class HasMatch(BaseCondition):
     negative_examples: Optional[List[str]] = None
     threshold: float = 0.9
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     async def call(self):
         if negative_examples is None:

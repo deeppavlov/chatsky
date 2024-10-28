@@ -229,7 +229,3 @@ class Context(BaseModel):
         if node is None:
             raise ContextError("Current node is not set.")
         return node
-
-    @property
-    def models_labels(self) -> dict:
-        return self.framework_data.models_labels
