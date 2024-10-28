@@ -1,6 +1,5 @@
 from __future__ import annotations
 import os
-from os.path import join
 import sys
 import shutil
 import importlib.util
@@ -11,14 +10,11 @@ from typing import TYPE_CHECKING, Any, Iterable
 from sphinx_polyversion.builder import Builder, BuildError
 from sphinx_polyversion.environment import Environment
 from sphinx_polyversion.json import GLOBAL_ENCODER, JSONable
-from sphinx_polyversion.api import load
-from sphinx_polyversion.git import GitRef
 
 if TYPE_CHECKING:
     import json
 
 import scripts.doc
-from scripts.clean import clean_docs
 from sphinx_polyversion.sphinx import CommandBuilder, Placeholder
 
 
@@ -93,17 +89,7 @@ class ChatskySphinxBuilder(CommandBuilder):
         sys.modules["setup"] = setup_module
         spec.loader.exec_module(setup_module)
 
-        """
-        # Adding these variables just like in conf.py, because it should work here too
-        data = load(globals())  # adds variables `current` and `revisions`
-        current: GitRef = data['current']
-        doc_version_path = str(current[0]) + '/'
-        print(current[0])
-        print(doc_version_path)
-        """
-
         doc_version_path = str(output_dir).split('/')[-1] + '/'
-
         setup_configs = {
             # doc_version_path is determined by polyversion's 'current' metadata variable.
             "doc_version": doc_version_path,
