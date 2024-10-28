@@ -1,5 +1,6 @@
 import git
 import json
+from docs.source.poly import latest_tags_filter
 
 
 # TODO: Redo this entire thing - sort through tags to find the ones which are going to be built
@@ -9,14 +10,22 @@ import json
 # Although, specifying the version would be nice. Actually, its a good question, I can't just write 'latest'
 # Without any version after it, right?
 def generate_switcher():
+    # retrieving and sorting git tags
     repo = git.Repo('./')
-    # branch = repo.active_branch
 
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    tags.reverse()
-    latest_tag = tags[-1]
+    tags = [str(x) for x in tags]
+    tags = latest_tags_filter(tags)
 
     switcher_json = []
+
+    latest_data = {
+        "name": "latest",
+        "version": "master",
+        "url": "https://deeppavlov.github.io/chatsky/master/index.html",
+        "preferred": "true"
+    }
+    switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
@@ -31,11 +40,7 @@ def generate_switcher():
             "version": str(tag),
             "url": url,
         }
-        if tag == tags[0]:
-            tag_data["preferred"] = "true"
-        # Only building for tags from v0.7.0
-        if str(tag) > "v0.6.0":
-            switcher_json += [tag_data]
+        switcher_json += [tag_data]
 
     switcher_json_obj = json.dumps(switcher_json, indent=4)
 
