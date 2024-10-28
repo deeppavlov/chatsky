@@ -126,19 +126,21 @@ else:
     TAG_REGEX = r"-"
 print("TAG_REGEX = ", TAG_REGEX)
 
+"""
+# TODO: Checking custom build (Remove before PR merge!)
+# Just testing how this will build.
+TAG_REGEX = r"-"
+BRANCH_REGEX = r"master"
+"""
+
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
 
 #: Source directory
 SOURCE_DIR = "docs/source"
 
-# Could attempt adding "--sync", but seems like an awful solution, even if it works
-# Really should to add the latest version of sphinx-polyversion programmatically.
 #: Arguments to pass to `poetry install`
 POETRY_ARGS = "--with tutorials,docs --all-extras --no-ansi --no-interaction".split()
-
-#: Arguments to pass to `sphinx-build`
-SPHINX_ARGS = "-b html -W --keep-going -v".split()
 
 #: Mock data used for building local version
 MOCK_DATA = {
@@ -161,9 +163,19 @@ src = Path(SOURCE_DIR)
 # Should there be something more to this? It looks very simple.
 class ChatskyPolyversionDriver(DefaultDriver):
     def build_failed(self, rev, exc_info) -> None:
+        pass
+        """
         raise Exception(f"Building documentation for revision {rev} failed!"
                         f"Exception info: {exc_info}")
+        """
 
+
+# TODO: Need to add pre_cmd here with maybe a file with commands, instead of a custom builder.
+#  An alternative comes to mind, though - why not just call the parent's method after own funcs?
+#  As in, "super().build(*args)".
+#  Sure, the class name could change or something, but using pre_cmd could also change, it's just
+#  how life works. I think it would actually be good to lock a specific version of polyversion with pyproject.toml.
+#  So that there aren't any problems like that.
 
 # Setup driver and run it
 ChatskyPolyversionDriver(
@@ -175,7 +187,7 @@ ChatskyPolyversionDriver(
         buffer_size=1 * 10**9,  # 1 GB
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
-    builder=ChatskySphinxBuilder(src, args=SPHINX_ARGS),
+    builder=ChatskySphinxBuilder(src),
     env=Poetry.factory(args=POETRY_ARGS),
     selector=partial(closest_tag, root),
     template_dir=root / src / "templates",
