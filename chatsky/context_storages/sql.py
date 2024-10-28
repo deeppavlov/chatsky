@@ -267,7 +267,7 @@ class SQLContextStorage(DBContextStorage):
             stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(self._subscripts[field_name]))
         async with self.engine.begin() as conn:
             result = list((await conn.execute(stmt)).fetchall())
-            self._logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {list(k for k, _ in select)}")
+            self._logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {list(k for k, _ in result)}")
             return result
 
     @DBContextStorage._verify_field_name

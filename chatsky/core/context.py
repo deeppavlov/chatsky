@@ -17,7 +17,6 @@ This allows developers to save the context data and resume the conversation late
 """
 
 from __future__ import annotations
-import logging
 import asyncio
 from uuid import uuid4
 from time import time_ns
@@ -30,13 +29,14 @@ from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.utils.context_dict import ContextDict, launch_coroutines
+from chatsky.utils.logging.logger import create_logger
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 """
@@ -138,6 +138,7 @@ class Context(BaseModel):
     async def connected(cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None) -> Context:
         if id is None:
             uid = str(uuid4())
+            logger.debug(f"Disconnected context created with uid: {uid}")
             instance = cls(id=uid)
             instance.requests = await ContextDict.new(storage, uid, storage._requests_field_name, Message)
             instance.responses = await ContextDict.new(storage, uid, storage._responses_field_name, Message)
@@ -149,6 +150,7 @@ class Context(BaseModel):
             if not isinstance(id, str):
                 logger.warning(f"Id is not a string: {id}. Converting to string.")
                 id = str(id)
+            logger.debug(f"Connected context created with uid: {id}")
             main, labels, requests, responses = await launch_coroutines(
                 [
                     storage.load_main_info(id),
@@ -168,6 +170,7 @@ class Context(BaseModel):
                 turn_id, crt_at, upd_at, misc, fw_data = main
                 misc = TypeAdapter(Dict[str, Any]).validate_json(misc)
                 fw_data = FrameworkData.model_validate_json(fw_data)
+            logger.debug(f"Context loaded with turns number: {len(labels)}")
             instance = cls(id=id, current_turn_id=turn_id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
@@ -254,6 +257,7 @@ class Context(BaseModel):
 
     async def store(self) -> None:
         if self._storage is not None:
+            logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
             misc_byted = self.framework_data.model_dump_json().encode()
             fw_data_byted = self.framework_data.model_dump_json().encode()
@@ -266,5 +270,6 @@ class Context(BaseModel):
                 ],
                 self._storage.is_asynchronous,
             )
+            logger.debug(f"Context stored: {self.id}")
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")

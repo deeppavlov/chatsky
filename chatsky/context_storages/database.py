@@ -10,12 +10,12 @@ This class implements the basic functionality and can be extended to add additio
 
 from abc import ABC, abstractmethod
 from importlib import import_module
-from logging import getLogger
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field, field_validator, validate_call
 
+from ..utils.logging.logger import create_logger
 from .protocol import PROTOCOLS
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[str]]
@@ -57,7 +57,7 @@ class DBContextStorage(ABC):
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
         self._subscripts = dict()
-        self._logger = getLogger(type(self).__name__)
+        self._logger = create_logger(type(self).__name__)
         for field in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
             value = configuration.get(field, self._default_subscript_value)
             self._subscripts[field] = 0 if value == "__none__" else value
