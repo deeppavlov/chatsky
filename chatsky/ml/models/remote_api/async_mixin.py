@@ -6,10 +6,10 @@ This module provides the mixin that overrides the :py:meth:`__call__` method
 in all the descendants making them asynchronous.
 """
 from chatsky import Context
-from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
 
-class AsyncMixin(ExtrasBaseModel):
+class AsyncMixin(ExtrasBaseAPIModel):
     """
     This class overrides the :py:meth:`~__call__` method
     allowing for asynchronous calls to annotator models.
@@ -22,5 +22,5 @@ class AsyncMixin(ExtrasBaseModel):
         if ctx.last_request and ctx.last_request.text:
             labels = await self.predict(ctx.last_request.text)
 
-        ctx.framework_data.llm_labels[self.model_id] = labels
+        ctx.framework_data.models_labels[self.model_id] = labels
         return ctx

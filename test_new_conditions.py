@@ -21,10 +21,10 @@ from chatsky.script import (
 )
 from chatsky.script import conditions as cnd
 
-from chatsky.script.conditions.llm_conditions.models import HFClassifier
-from chatsky.script.conditions.llm_conditions.models import HFMatcher
-from chatsky.script.conditions.llm_conditions.dataset import Dataset
-from chatsky.script.conditions.llm_conditions import conditions as i_cnd
+from chatsky.ml.models import HFClassifier
+from chatsky.ml.models import HFMatcher
+from chatsky.ml.dataset import Dataset
+from chatsky.ml import conditions as i_cnd
 from chatsky.pipeline import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.utils.testing.common import (
@@ -42,7 +42,7 @@ will handle downloading and deploying the model for you. You need to instantiant
 these classes separately and then pass them to the `Classifier` / `Matcher` instance.
 
 We are using an open source model by Obsei-AI
-to demonstrate, how custom classifiers can be easily adapted for use in chatsky.script.conditions.llm_conditions
+to demonstrate, how custom classifiers can be easily adapted for use in chatsky.ml
 However, you can use any classification model that is accessible via the Hugging Face hub
 Below, we list some of the most popular open-source models that can power your conversational logic
 

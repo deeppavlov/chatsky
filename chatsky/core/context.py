@@ -74,6 +74,8 @@ class FrameworkData(BaseModel):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+    models_labels: Dict[str, Any] = Field(default_factory=dict)
+    "Stores predicted labels for the models."
 
 
 class Context(BaseModel):
@@ -229,5 +231,5 @@ class Context(BaseModel):
         return node
 
     @property
-    def llm_labels(self) -> dict:
-        pass
+    def models_labels(self) -> dict:
+        return self.framework_data.models_labels

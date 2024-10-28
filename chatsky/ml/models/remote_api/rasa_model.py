@@ -22,11 +22,11 @@ except ImportError:
 
 from http import HTTPStatus
 from chatsky.ml.utils import RasaResponse
-from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 
-class AbstractRasaModel(ExtrasBaseModel):
+class AbstractRasaModel(ExtrasBaseAPIModel):
     """
     Abstract class for a RASA annotator.
     """

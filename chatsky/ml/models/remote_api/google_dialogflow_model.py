@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from async_lru import alru_cache
 
-from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 try:
@@ -25,7 +25,7 @@ except ImportError:
     dialogflow_available = False
 
 
-class AbstractGDFModel(ExtrasBaseModel):
+class AbstractGDFModel(ExtrasBaseAPIModel):
     """
     Abstract class for a Google Dialogflow model.
     """

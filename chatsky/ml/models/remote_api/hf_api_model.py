@@ -21,11 +21,11 @@ try:
 except ImportError:
     hf_api_available = False
 
-from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.ml.models.remote_api.async_mixin import AsyncMixin
 
 
-class AbstractHFAPIModel(ExtrasBaseModel):
+class AbstractHFAPIModel(ExtrasBaseAPIModel):
     """
     Abstract class for an HF API annotator.
     """
