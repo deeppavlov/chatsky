@@ -3,7 +3,7 @@ import pytest
 
 from chatsky.ml.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
-    AsyncGoogleDialogFlowModel,
+    GoogleDialogFlowModel,
     dialogflow_available,
 )
 
@@ -21,7 +21,7 @@ def testing_model():
 def testing_async_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
     if gdf_json:
-        yield AsyncGoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="gdf_async")
+        yield GoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="gdf_async")
     else:
         yield None
 
@@ -50,7 +50,7 @@ def test_predict(testing_model: GoogleDialogFlowModel):
 )
 @pytest.mark.dialogflow
 @pytest.mark.asyncio
-async def test_async_predict(testing_async_model: AsyncGoogleDialogFlowModel):
+async def test_async_predict(testing_async_model: GoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project
     result = await testing_async_model.predict(test_phrase)
     assert isinstance(result, dict)

@@ -13,20 +13,6 @@ from pydantic import BaseModel
 LABEL_KEY = "labels"
 
 
-class DefaultTokenizer:
-    """
-    This class is used as a default tokenizer for integration with
-    models that do not provide their own tokenizer. It uses a compiled
-    regular expression that matches words and punctuation marks.
-    """
-
-    def __init__(self):
-        self.expression = re.compile(r"[\w']+|[^\w ]")
-
-    def __call__(self, string: str):
-        return re.findall(self.expression, string=string)
-
-
 class RasaIntent(BaseModel):
     """Class for integration with Rasa NLU server HTTP API."""
 

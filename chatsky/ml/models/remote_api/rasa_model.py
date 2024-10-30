@@ -26,32 +26,7 @@ from chatsky.ml.utils import RasaResponse
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
 
-class AbstractRasaModel(ExtrasBaseAPIModel):
-    """
-    Abstract class for a RASA annotator.
-    """
-
-    def __init__(
-        self,
-        model: str,
-        api_key: Optional[str] = None,
-        jwt_token: Optional[str] = None,
-        *,
-        retries: int = 10,
-        headers: Optional[dict] = None,
-    ):
-        super().__init__()
-        self.headers = headers or {"Content-Type": "application/json"}
-        health_check = requests.get(model)
-        health_check.raise_for_status()
-        self.parse_url = urljoin(model, ("model/parse" + (f"?token={api_key}" if api_key else "")))
-        self.train_url = urljoin(model, ("model/train" + (f"?token={api_key}" if api_key else "")))
-        if jwt_token is not None:
-            self.headers["Authorization"] = "Bearer " + jwt_token
-        self.retries = retries
-
-
-class RasaModel(AbstractRasaModel):
+class RasaModel(ExtrasBaseAPIModel):
     """
     This class implements an asynchronous connection to RASA NLU server for dialog annotation.
     In order to work with this class, you need to have a running instance of Rasa NLU Server
@@ -82,7 +57,15 @@ class RasaModel(AbstractRasaModel):
     ):
         if not rasa_available:
             raise ImportError("`httpx` package missing. Try `pip install chatsky[httpx]`")
-        super().__init__(model, api_key, jwt_token, namespace_key, retries=retries, headers=headers)
+        super().__init__()
+        self.headers = headers or {"Content-Type": "application/json"}
+        health_check = requests.get(model)
+        health_check.raise_for_status()
+        self.parse_url = urljoin(model, ("model/parse" + (f"?token={api_key}" if api_key else "")))
+        self.train_url = urljoin(model, ("model/train" + (f"?token={api_key}" if api_key else "")))
+        if jwt_token is not None:
+            self.headers["Authorization"] = "Bearer " + jwt_token
+        self.retries = retries
 
     @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:

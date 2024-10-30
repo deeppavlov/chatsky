@@ -25,34 +25,7 @@ except ImportError:
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
 
-class AbstractHFAPIModel(ExtrasBaseAPIModel):
-    """
-    Abstract class for an HF API annotator.
-    """
-
-    def __init__(
-        self,
-        model: str,
-        api_key: str,
-        *,
-        retries: int = 60,
-        base_url: str = "https://api-inference.huggingface.co/models/",
-        headers: Optional[dict] = None,
-    ) -> None:
-        super().__init__()
-        self.api_key = api_key
-        self.model = model
-        self.headers = (
-            headers if headers else {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
-        )
-        self.retries = retries
-        self.url = urljoin(base_url, model)
-        test_response = requests.get(self.url, headers=self.headers)  # assert that the model exists
-        if not test_response.status_code == HTTPStatus.OK:
-            raise requests.HTTPError(test_response.text)
-
-
-class HFAPIModel(AbstractHFAPIModel):
+class HFAPIModel(ExtrasBaseAPIModel):
     """
     This class implements an asynchronous connection to the Hugging Face API for dialog annotation.
     Obtain an API token from Hugging Face to gain full access to hosted models.
@@ -74,11 +47,22 @@ class HFAPIModel(AbstractHFAPIModel):
         api_key: str,
         *,
         retries: int = 60,
+        base_url: str = "https://api-inference.huggingface.co/models/",
         headers: Optional[dict] = None,
     ) -> None:
         if not hf_api_available:
             raise ImportError("`httpx` package missing. Try `pip install chatsky[httpx]`")
-        super().__init__(model, api_key, retries=retries, headers=headers)
+        super().__init__()
+        self.api_key = api_key
+        self.model = model
+        self.headers = (
+            headers if headers else {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+        )
+        self.retries = retries
+        self.url = urljoin(base_url, model)
+        test_response = requests.get(self.url, headers=self.headers)  # assert that the model exists
+        if not test_response.status_code == HTTPStatus.OK:
+            raise requests.HTTPError(test_response.text)
 
     @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
