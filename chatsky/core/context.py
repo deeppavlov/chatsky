@@ -21,6 +21,7 @@ import asyncio
 from uuid import uuid4
 from time import time_ns
 from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
+import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator, model_serializer
 
@@ -29,14 +30,13 @@ from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.utils.context_dict import ContextDict, launch_coroutines
-from chatsky.utils.logging.logger import create_logger
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
 
-logger = create_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 """

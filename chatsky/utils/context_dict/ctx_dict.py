@@ -1,12 +1,11 @@
 from __future__ import annotations
 from hashlib import sha256
-from logging import Logger
+import logging
 from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
 from .asyncronous import launch_coroutines
-from ..logging.logger import create_logger
 
 if TYPE_CHECKING:
     from chatsky.context_storages.database import DBContextStorage
@@ -14,7 +13,7 @@ if TYPE_CHECKING:
 K = TypeVar("K", bound=int)
 V = TypeVar("V")
 
-logger = create_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_hash(string: bytes) -> bytes:
