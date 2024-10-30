@@ -29,6 +29,9 @@ from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
 )
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 
 # %% [markdown]
 """
@@ -78,21 +81,24 @@ and not "Mike default_surname".
 # %%
 SLOTS = {
     "person": GroupSlot(
-        username=RegexpSlot(
-            regexp=r"([a-zA-Z]+)",
+        coin_address=RegexpSlot(
+            regexp=r"(\b[a-zA-Z0-9]{34}\b)",
+            default_value="default_address",
             match_group_idx=1,
         ),
         email=RegexpSlot(
-            regexp=r"([a-z]+@[a-zA-Z]+\.[a-z]+)",
+            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
+            default_value="default_email",
             match_group_idx=1,
         ),
+        allow_partial_extraction=True
     ),
     "friend": GroupSlot(
-        first_name=RegexpSlot(
-            regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"
+        coin_address=RegexpSlot(
+            regexp=r"(\b[a-zA-Z0-9]{34}\b)", default_value="default_address"
         ),
-        last_name=RegexpSlot(
-            regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"
+        email=RegexpSlot(
+            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})", default_value="default_email"
         ),
         allow_partial_extraction=True,
     ),
@@ -107,7 +113,7 @@ script = {
     "user_flow": {
         LOCAL: {
             PRE_TRANSITION: {
-                "get_slots": proc.Extract("person", success_only=True)
+                "get_slots": proc.Extract("person", success_only=False)
             },
             TRANSITIONS: [
                 Tr(
@@ -119,10 +125,10 @@ script = {
             ],
         },
         "ask": {
-            RESPONSE: "Please, send your username and email in one message."
+            RESPONSE: "Please, send your email and bitcoin address in one message."
         },
         "repeat_question": {
-            RESPONSE: "Please, send your username and email again."
+            RESPONSE: "Please, send your bitcoin address and email again."
         },
     },
     "friend_flow": {
@@ -134,15 +140,15 @@ script = {
                 Tr(
                     dst=("root", "utter_friend"),
                     cnd=cnd.SlotsExtracted(
-                        "friend.first_name", "friend.last_name", mode="any"
+                        "friend.coin_address", "friend.email", mode="any"
                     ),
                     priority=1.2,
                 ),
                 Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "ask": {RESPONSE: "Please, send your friends name"},
-        "repeat_question": {RESPONSE: "Please, send your friends name again."},
+        "ask": {RESPONSE: "Please, send your friends bitcoin address and email"},
+        "repeat_question": {RESPONSE: "Please, send your friends bitcoin address and email again."},
     },
     "root": {
         "start": {
@@ -154,13 +160,12 @@ script = {
         },
         "utter_friend": {
             RESPONSE: rsp.FilledTemplate(
-                "Your friend is {friend.first_name} {friend.last_name}"
+                "Your friends address is {friend.coin_address} and email is {friend.email}"
             ),
             TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
         },
         "utter_user": {
-            RESPONSE: "Your username is {person.username}. "
-            "Your email is {person.email}.",
+            RESPONSE: "Your bitcoin address is {person.coin_address}. Your email is {person.email}.",
             PRE_RESPONSE: {"fill": proc.FillTemplate()},
             TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
         },
@@ -168,10 +173,10 @@ script = {
 }
 
 HAPPY_PATH = [
-    ("Start", "Please, send your username and email in one message."),
+    ("Start", "Please, send your email and bitcoin address in one message."),
     (
         "groot, groot@gmail.com",
-        "Your username is groot. Your email is groot@gmail.com.",
+        "Your bitcoin address is default_address. Your email is groot@gmail.com.",
     ),
     ("ok", "Please, send your friends name"),
     ("Jonh Doe", "Your friend is Jonh Doe"),
