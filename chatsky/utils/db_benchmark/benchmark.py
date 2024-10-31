@@ -84,7 +84,7 @@ def time_context_read_write(
     read_times: List[Dict[int, float]] = []
     update_times: List[Dict[int, float]] = []
 
-    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}", leave=False):
+    for _ in tqdm(range(context_num), desc="Iteration", leave=False):
         context = context_factory()
 
         ctx_id = uuid4()
