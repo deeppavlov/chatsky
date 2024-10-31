@@ -30,7 +30,7 @@ from chatsky.utils.testing import (
     is_interactive_mode,
 )
 import logging
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 # %% [markdown]
@@ -85,13 +85,13 @@ SLOTS = {
             regexp=r"(\b[a-zA-Z0-9]{34}\b)",
             default_value="default_address",
             match_group_idx=1,
+            required=True
         ),
         email=RegexpSlot(
             regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
             default_value="default_email",
             match_group_idx=1,
-        ),
-        allow_partial_extraction=True
+        )
     ),
     "friend": GroupSlot(
         coin_address=RegexpSlot(
@@ -118,10 +118,10 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_user"),
-                    cnd=cnd.SlotsExtracted("person", mode="any"),
+                    cnd=cnd.GroupSlotsExtracted("person", required=["person.coin_address"]),
                     priority=1.2,
                 ),
-                Tr(dst=("user_flow", "repeat_question"), priority=0.8),
+                # Tr(dst=("user_flow", "repeat_question"), priority=0.8),
             ],
         },
         "ask": {
