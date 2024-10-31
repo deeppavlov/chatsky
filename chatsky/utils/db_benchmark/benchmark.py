@@ -61,9 +61,6 @@ def time_context_read_write(
         The function should return `None` to stop updating contexts.
         For an example of such function, see implementation of
         :py:meth:`chatsky.utils.db_benchmark.basic_config.BasicBenchmarkConfig.context_updater`.
-
-        To avoid keeping many contexts in memory,
-        this function will be called repeatedly at least `context_num` times.
     :return:
         A tuple of 3 elements.
 
