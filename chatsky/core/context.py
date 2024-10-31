@@ -152,7 +152,7 @@ class Context(BaseModel):
         if 1 in self.requests.keys():
             origin = self.requests[1].origin
             if origin is not None:
-                return origin.origin_interface
+                return origin.interface
         return None
 
     @classmethod

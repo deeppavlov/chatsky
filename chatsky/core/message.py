@@ -258,25 +258,25 @@ class MediaGroup(Attachment):
 
 
 class Origin(BaseModel):
-    original_message: Optional[Any] = None
-    origin_interface: Optional[str] = None
+    message: Optional[Any] = None
+    interface: Optional[str] = None
 
-    @field_serializer("original_message", when_used="json")
-    def pickle_serialize_original_message(self, value):
+    @field_serializer("message", when_used="json")
+    def pickle_serialize_message(self, value):
         """
-        Cast :py:attr:`original_message` to string via pickle.
+        Cast :py:attr:`message` to string via pickle.
         Allows storing arbitrary data in this field when using context storages.
         """
         if value is not None:
             return pickle_serializer(value)
         return value
 
-    @field_validator("original_message", mode="before")
+    @field_validator("message", mode="before")
     @classmethod
-    def pickle_validate_original_message(cls, value):
+    def pickle_validate_message(cls, value):
         """
-        Restore :py:attr:`original_message` after being processed with
-        :py:meth:`pickle_serialize_original_message`.
+        Restore :py:attr:`message` after being processed with
+        :py:meth:`pickle_serialize_message`.
         """
         if value is not None:
             return pickle_validator(value)
