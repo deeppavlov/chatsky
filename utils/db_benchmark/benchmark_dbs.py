@@ -9,6 +9,8 @@ from platform import system
 
 from chatsky.utils.db_benchmark import benchmark_all, basic_configurations
 
+from tqdm.auto import tqdm
+
 
 # benchmarks will be saved to this directory
 benchmark_dir = Path("benchmarks")
@@ -36,11 +38,14 @@ dbs = {
 }
 
 
-for db_name, db_uri in dbs.items():
-    benchmark_all(
-        benchmark_dir / f"{db_name}.json",
-        db_name,
-        description="Basic configs",
-        db_uri=db_uri,
-        benchmark_configs=basic_configurations,
-    )
+if __name__ == "__main__":
+    cases = tqdm(dbs.items(), leave=False)
+    for db_name, db_uri in cases:
+        cases.set_description(f"Benchmarking: {db_name}")
+        benchmark_all(
+            benchmark_dir / f"{db_name}.json",
+            db_name,
+            description="Basic configs",
+            db_uri=db_uri,
+            benchmark_configs=basic_configurations,
+        )

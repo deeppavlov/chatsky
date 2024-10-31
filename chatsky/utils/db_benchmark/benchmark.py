@@ -62,9 +62,6 @@ async def time_context_read_write(
         The function should return `None` to stop updating contexts.
         For an example of such function, see implementation of
         :py:meth:`chatsky.utils.db_benchmark.basic_config.BasicBenchmarkConfig.context_updater`.
-
-        To avoid keeping many contexts in memory,
-        this function will be called repeatedly at least `context_num` times.
     :return:
         A tuple of 3 elements.
 
@@ -88,7 +85,7 @@ async def time_context_read_write(
     read_times: List[Dict[int, float]] = []
     update_times: List[Dict[int, float]] = []
 
-    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}", leave=False):
+    for _ in tqdm(range(context_num), desc="Iteration", leave=False):
         context = await context_factory(context_storage)
 
         # write operation benchmark
@@ -101,25 +98,25 @@ async def time_context_read_write(
 
         # read operation benchmark
         read_start = perf_counter()
-        _ = await Context.connected(context_storage, start_label=("flow", "node"), id=context.id)
+        context = await Context.connected(context_storage, start_label=("flow", "node"), id=context.id)
         read_time = perf_counter() - read_start
         read_times[-1][len(context.labels)] = read_time
 
         if context_updater is not None:
-            updated_context = await context_updater(context)
+            context = await context_updater(context)
 
-            while updated_context is not None:
+            while context is not None:
                 update_start = perf_counter()
-                await updated_context.store()
+                await context.store()
                 update_time = perf_counter() - update_start
-                update_times[-1][len(updated_context.labels)] = update_time
+                update_times[-1][len(context.labels)] = update_time
 
                 read_start = perf_counter()
-                _ = await Context.connected(context_storage, start_label=("flow", "node"), id=updated_context.id)
+                context = await Context.connected(context_storage, start_label=("flow", "node"), id=context.id)
                 read_time = perf_counter() - read_start
-                read_times[-1][len(updated_context.labels)] = read_time
+                read_times[-1][len(context.labels)] = read_time
 
-                updated_context = await context_updater(updated_context)
+                context = await context_updater(context)
 
         await context_storage.clear_all()
     return write_times, read_times, update_times
@@ -159,7 +156,7 @@ class BenchmarkConfig(BaseModel, abc.ABC, frozen=True):
     Inherit from this class only if `BasicBenchmarkConfig` is not enough for your benchmarking needs.
     """
 
-    context_num: int = 30
+    context_num: int = 1
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
