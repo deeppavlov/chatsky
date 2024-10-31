@@ -91,7 +91,7 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
     Dialog length is configured using `from_dialog_len`, `to_dialog_len`, `step_dialog_len`.
     """
 
-    context_num: int = 3
+    context_num: int = 1
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
