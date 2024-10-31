@@ -15,6 +15,9 @@ def generate_switcher():
     # TODO: add a parameter with github actions (env)
     # Parameters that say start_version and a black_list_regex, also a whitelist in case latest_tag
     # is actually relevant and should also be built.
+
+    # The parameter exists now, but it's done as an env sort of variable.
+    # How should it be used?
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
     # retrieving and filtering git tags
@@ -32,10 +35,11 @@ def generate_switcher():
     tags = [str(tag).replace('v', '').split(".") for tag in tags]
     # I assume there are no version numbers higher than 100, then it's all correct.
     # I just thought this is an interesting solution. But yeah, this just seems illegal.
+    # TODO: use a conventional solution for this, maybe there is something built-in?
     tags = sorted(tags, key=lambda t: 1000000 * t[0] + 1000 * t[1] + t[2])
     tags = ['v' + x[0] + '.' + x[1] + '.' + x[2] for x in tags]
 
-    # Maybe remove 'preferred' completely?
+    # TODO: Maybe remove 'preferred' completely?
     # Otherwise, it will say that 'dev' is bad / outdated, I'm not sure.
     switcher_json = []
 

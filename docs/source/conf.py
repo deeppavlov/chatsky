@@ -4,33 +4,16 @@ import re
 import git
 import importlib.metadata
 import importlib.util
-from pathlib import Path
-
-import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from sphinx_polyversion.api import load
-from sphinx_polyversion.git import GitRef
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.link_misc_files import link_misc_files  # noqa: E402
+from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
-
-
-# TODO: Add 'today' variable with the commit date of this tag.
-repo = git.Repo('./')
-
-current = [None]
-polyversion_build = os.getenv("POLYVERSION_BUILD", default="False")
-if polyversion_build == "True":
-    data = load(globals())  # adds variables `current` and `revisions`
-    current: GitRef = data['current']
-    if current[0] != "dev":
-        repo = git.Repo('./')
-        tag = current[0]
-        today = str(tag.commit.committed_datetime)
-        print(today)
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
@@ -38,6 +21,12 @@ project = _distribution_metadata["Name"]
 copyright = "2022 - 2024, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
+
+# TODO: Add 'today' variable with the commit date of this tag.
+current_commit = git.Repo('./').head.commit
+today = current_commit.committed_datetime
+print("today is:", today)
+print("str(today) is:", str(today))
 
 # -- General configuration ---------------------------------------------------
 
@@ -105,12 +94,9 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
-if polyversion_build == "True":
-    doc_version_path = str(current[0]) + '/'
-else:
-    doc_version_path = os.getenv("BRANCH_NAME", default="")
-    if doc_version_path != "":
-        doc_version_path = doc_version_path + '/'
+doc_version_path = os.getenv("DOC_VERSION", default="")
+if doc_version_path != "":
+    doc_version_path = doc_version_path + '/'
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = f"""
@@ -135,21 +121,10 @@ html_css_files = [
     "css/custom.css",
 ]
 
-version_data = version
-# Checking for dev before passing version to switcher
-if polyversion_build == "True":
-    if current[0] == "dev":
-        version_data = "dev"
-        # Possible to-do: show the warning banner for latest(unstable) version.
-
-# Version switcher url
+# Possible to-do: show the warning banner for latest(unstable) version.
+# Version switcher data (change zerglev into deeppavlov)
+version_data = os.getenv("DOC_VERSION", default="latest")
 switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
-
-# Removing version switcher from local doc builds. There is no local multi-versioning.
-# Instead, this allows the person to use their own switcher if they need it for some reason.
-LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
-if LOCAL_BUILD:
-    switcher_url = "./_static/switcher.json"
 
 # Theme options
 html_theme_options = {
@@ -200,16 +175,50 @@ autodoc_default_options = {
 
 
 def setup(_):
-    setup_configs = {
-        # doc_version_path is determined by polyversion's 'current' metadata variable.
-        # Are 'Paths' here okay? Should I tone it down?
-        "doc_version": doc_version_path,
-        "root_dir": Path(".").absolute(),
-        "apiref_destination": Path("apiref"),
-        "tutorials_source": Path("./tutorials"),
-        "tutorials_destination": "./docs/source/tutorials",
-    }
-    if polyversion_build == "False":
-        print(setup_configs, "\n version is", current[0])
-        from setup import setup
-        setup(configs=setup_configs)
+    link_misc_files(
+        [
+            "utils/db_benchmark/benchmark_schema.json",
+            "utils/db_benchmark/benchmark_streamlit.py",
+        ]
+    )
+    generate_tutorial_links_for_notebook_creation(
+        [
+            ("tutorials.context_storages", "Context Storages"),
+            (
+                "tutorials.messengers",
+                "Interfaces",
+                [
+                    ("telegram", "Telegram"),
+                    ("web_api_interface", "Web API"),
+                ],
+            ),
+            ("tutorials.service", "Service"),
+            (
+                "tutorials.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("tutorials.slots", "Slots"),
+            ("tutorials.stats", "Stats"),
+        ]
+    )
+    regenerate_apiref(
+        [
+            ("chatsky.core.service", "Core.Service"),
+            ("chatsky.core", "Core"),
+            ("chatsky.conditions", "Conditions"),
+            ("chatsky.destinations", "Destinations"),
+            ("chatsky.responses", "Responses"),
+            ("chatsky.processing", "Processing"),
+            ("chatsky.context_storages", "Context Storages"),
+            ("chatsky.messengers", "Messenger Interfaces"),
+            ("chatsky.slots", "Slots"),
+            ("chatsky.stats", "Stats"),
+            ("chatsky.utils.testing", "Testing Utils"),
+            ("chatsky.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.utils.devel", "Development Utils"),
+        ]
+    )

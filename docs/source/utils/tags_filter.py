@@ -19,17 +19,3 @@ def latest_tags_filter(tag_list: list) -> list:
     # Could return a dictionary, but it looks unclear.
     tag_list = ['v' + x[0] + '.' + x[1] + '.' + latest_tags[x] for x in latest_tags.keys()]
     return tag_list
-
-
-def create_tag_regex(tag_list: list, first_built_version="v0.8.0"):
-    # Maybe could add a 'start_version' for building
-    start_index = tag_list.index(first_built_version)
-    tag_list = tag_list[start_index:]
-    # Filter for latest tags in their respective groups
-    tag_list = latest_tags_filter(tag_list)
-    # Creates the regex
-    tag_regex = r"("
-    for tag in tag_list:
-        tag_regex += str(tag) + "|"
-    tag_regex = tag_regex[:-1] + ")"
-    return tag_regex
