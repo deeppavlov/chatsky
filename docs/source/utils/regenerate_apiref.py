@@ -66,10 +66,9 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
             contents = file.read()
             doc_version = os.getenv("DOC_VERSION", default="")
             if doc_version != "":
-                doc_version = doc_version + '/'
+                doc_version = doc_version + "/"
             doc_file.write_text(
-                f":source_name: {join(*doc_file.stem.split('.'))}\n"
-                f":doc_version: {doc_version}\n\n{contents}"
+                f":source_name: {join(*doc_file.stem.split('.'))}\n" f":doc_version: {doc_version}\n\n{contents}"
             )
 
     for name, (alias, files) in doc_containers.items():
