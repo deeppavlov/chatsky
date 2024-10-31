@@ -1,3 +1,5 @@
+import os
+
 import git
 import json
 from docs.source.utils.tags_filter import latest_tags_filter
@@ -10,13 +12,31 @@ from docs.source.utils.tags_filter import latest_tags_filter
 # Although, specifying the version would be nice. Actually, its a good question, I can't just write 'latest'
 # Without any version after it, right?
 def generate_switcher():
-    # retrieving and sorting git tags
+    # TODO: add a parameter with github actions (env)
+    # Parameters that say start_version and a black_list_regex, also a whitelist in case latest_tag
+    # is actually relevant and should also be built.
+    blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
+    whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
+    # retrieving and filtering git tags
     repo = git.Repo('./')
 
-    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    tags = [str(x) for x in tags]
+    tags = [str(x) for x in repo.tags]
     tags = latest_tags_filter(tags)
+    for tag in tags:
+        if tag in blacklisted_tags:
+            tags.remove(tag)
+    for tag in whitelisted_tags:
+        if tag not in tags:
+            tags.append(tag)
 
+    tags = [str(tag).replace('v', '').split(".") for tag in tags]
+    # I assume there are no version numbers higher than 100, then it's all correct.
+    # I just thought this is an interesting solution. But yeah, this just seems illegal.
+    tags = sorted(tags, key=lambda t: 1000000 * t[0] + 1000 * t[1] + t[2])
+    tags = ['v' + x[0] + '.' + x[1] + '.' + x[2] for x in tags]
+
+    # Maybe remove 'preferred' completely?
+    # Otherwise, it will say that 'dev' is bad / outdated, I'm not sure.
     switcher_json = []
 
     latest_data = {

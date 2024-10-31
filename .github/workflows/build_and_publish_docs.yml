@@ -40,48 +40,38 @@ jobs:
           python -m pip install --upgrade pip poetry
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
-      - name: testing actions/checkout_v4 (remove this before merging PR)
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      - name: test actions/checkout_v4 (remove this before merging PR)
         run: |
           git branch
           git status
-          echo "$BRANCH_NAME"
+          echo "${{ github.head_ref || github.ref_name }}"
 
-      - name: checking if it's a polyversion build
-        if: ${{ github.event_name != 'pull_request' }}
+      - name: save docs version into a variable
         run: |
-          echo "POLYVERSION_BUILD=True" >> $GITHUB_ENV
-
-      - name: checking if it's a release build
-        if: ${{ github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/v') == false }}
-        run: |
-          echo "LATEST_BUILD=True" >> $GITHUB_ENV
+          echo "DOC_VERSION=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
 
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
-          LOCAL_BUILD: "False"
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+          DOC_VERSION: ${{ env.DOC_VERSION }}
+          VERSION_SWITCHER_TAG_BLACKLIST: []
+          VERSION_SWITCHER_TAG_WHITELIST: []
         run: |
           python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: get old tag names for updating documentation and update switcher
-        if: ${{ github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') }}
+      - name: move built files to a versioned deploy directory
         run: |
-          echo "OLD_VERSIONS=$(python -c 'import os, json; print(json.dumps(os.listdir(".")))')" >> "$GITHUB_ENV"
-          echo "${{ env.OLD_VERSIONS }}"
-          cp docs/source/_static/switcher.json ./docs/build/switcher.json
+          mkdir -p docs/build/${{ env.DOC_VERSION }}
+          git mv -k docs/build/* docs/build/${{ env.DOC_VERSION }}
 
-      - name: get branch name for updating documentation
-        if: ${{ github.ref != 'refs/heads/master' }}
+      - name: save version switcher for updating it during deployment (tags only)
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         run: |
-          echo "OLD_VERSIONS=./${{ github.head_ref || github.ref_name }}" >> "$GITHUB_ENV"
-          echo "${{ env.OLD_VERSIONS }}"
+          cp docs/source/_static/switcher.json docs/build/switcher.json
 
       - name: save changes and checkout to gh-pages
         run: |
@@ -92,34 +82,23 @@ jobs:
       - name: clean outdated documentation
         uses: EndBug/add-and-commit@v9.1.4
         with:
-          remove: '-r --ignore-unmatch ${{ env.OLD_VERSIONS }}'
+          remove: '-r --ignore-unmatch ${{ env.DOC_VERSION }}'
 
       - name: checkout to original branch and reapply changes
         run: |
           git checkout -
           git stash pop
 
-      - name: deploy website (for Pull Requests)
+      - name: deploy website (for branches / Pull Requests)
         # TODO: Make a better True-False flag for deploying for Pull Requests.
         # Make this use GitHub Action Variables.
         # (PR only) Changed the variable below to False if you don't want to build docs for your PR
-        if: ${{ github.event_name == 'pull_request' && true }}
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: docs/build/
-          target-folder: ${{ github.head_ref || github.ref_name }}
-          clean: False
-
-      - name: deploy website (default)
-        if: ${{ github.event_name != 'pull_request' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
           clean: False
 
-      - name: printing link to the documentation
-        if: ${{ github.ref != 'refs/heads/master' }}
+      - name: print link to the documentation
         run: |
           echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
