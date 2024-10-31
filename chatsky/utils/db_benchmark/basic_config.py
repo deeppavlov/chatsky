@@ -188,13 +188,13 @@ basic_configurations = {
     "default": BasicBenchmarkConfig(),
     "large-misc-long-dialog": BasicBenchmarkConfig(
         from_dialog_len=500,
-        to_dialog_len=550,
+        to_dialog_len=510,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "very-long-dialog-len": BasicBenchmarkConfig(
         from_dialog_len=10000,
-        to_dialog_len=10050,
+        to_dialog_len=10010,
     ),
     "very-long-message-len": BasicBenchmarkConfig(
         from_dialog_len=1,
