@@ -147,13 +147,7 @@ class Context(BaseModel):
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
-    @property
-    def origin_interface(self) -> Optional[str]:
-        if 1 in self.requests.keys():
-            origin = self.requests[1].origin
-            if origin is not None:
-                return origin.interface
-        return None
+    origin_interface: Optional[str] = Field(default=None)
 
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
@@ -173,6 +167,8 @@ class Context(BaseModel):
         request_message = Message.model_validate(request)
         if len(self.requests) == 0:
             self.requests[1] = request_message
+            if request_message.origin is not None:
+                self.origin_interface = request_message.origin.interface
         else:
             last_index = get_last_index(self.requests)
             self.requests[last_index + 1] = request_message
