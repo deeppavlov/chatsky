@@ -30,9 +30,7 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 
 
 def create_index_file(
-    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
-    files: List[Path],
-    destination: Path,
+    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]], files: List[Path], destination: Path
 ):
     """
     Create a package index file.
@@ -82,13 +80,12 @@ def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
 
 def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) -> List[Path]:
     """
-    Recursively travel through tutorials directory, creating copies
-    for all files under /tmp_dir/docs/source/tutorials/ root.
-    Created copied files have absolute path name matching source file tree structure.
+    Recursively travel through tutorials directory, creating links for all files under docs/source/tutorials/ root.
+    Created link files have dot-path name matching source file tree structure.
 
     :param source: Tutorials root (usually tutorials/).
     :param dest: Tutorials destination (usually docs/source/tutorials/).
-    :param base: Absolute path to current dir (will be used for link file naming).
+    :param base: Dot path to current dir (will be used for link file naming).
     """
     if not source.is_dir():
         raise Exception(f"Entity {source} appeared to be a file during processing!")
@@ -97,7 +94,7 @@ def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) 
         base_name = f"{base}.{entity.name}"
         if entity.is_file() and entity.suffix in (".py", ".ipynb"):
             base_path = Path(base_name)
-            create_notebook_link(entity, Path(base_name))
+            create_notebook_link(entity, dest / base_path)
             links += [base_path]
         elif entity.is_dir() and not entity.name.startswith("_"):
             links += iterate_tutorials_dir_generating_links(entity, dest, base_name)
@@ -107,7 +104,8 @@ def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) 
 def generate_tutorial_links_for_notebook_creation(
     include: Optional[List[Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]]]] = None,
     exclude: Optional[List[str]] = None,
-    configs: dict = None,
+    source: str = "tutorials",
+    destination: str = "docs/source/tutorials",
 ):
     """
     Generate symbolic links to tutorials files (tutorials/) in docs directory (docs/source/tutorials/).
@@ -117,13 +115,12 @@ def generate_tutorial_links_for_notebook_creation(
 
     :param include: Files to copy (supports file templates, like *).
     :param exclude: Files to skip (supports file templates, like *).
-    :param configs: Dictionary with tutorials' source and destination roots,
-    defaults: 'tutorials/' and 'docs/source/tutorials/' respectively.
-    (and other setup() configs)
+    :param source: Tutorials root, default: 'tutorials/'.
+    :param destination: Destination root, default: 'docs/source/tutorials/'.
     """
     include = [("tutorials", "Tutorials")] if include is None else include
     exclude = list() if exclude is None else exclude
-    dest = Path(configs["tutorials_destination"])
+    dest = Path(destination)
 
     flattened = list()
     for package in include:
@@ -132,9 +129,7 @@ def generate_tutorial_links_for_notebook_creation(
         else:
             flattened += [f"{package[0]}.{subpackage[0]}" for subpackage in package[2]]
 
-    links = iterate_tutorials_dir_generating_links(
-        Path(configs["tutorials_source"]), dest, f"{configs['tutorials_destination']}/tutorials"
-    )
+    links = iterate_tutorials_dir_generating_links(Path(source), dest, source)
     filtered_links = list()
     for link in links:
         link_included = len(list(flat for flat in flattened if link.name.startswith(flat))) > 0
