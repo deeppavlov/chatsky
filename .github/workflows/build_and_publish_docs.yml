@@ -55,8 +55,8 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           DOC_VERSION: ${{ env.DOC_VERSION }}
-          VERSION_SWITCHER_TAG_BLACKLIST: []
-          VERSION_SWITCHER_TAG_WHITELIST: []
+          # VERSION_SWITCHER_TAG_BLACKLIST: []
+          # VERSION_SWITCHER_TAG_WHITELIST: []
         run: |
           python -m poetry run poe docs
 
