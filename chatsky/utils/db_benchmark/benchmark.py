@@ -102,25 +102,25 @@ def time_context_read_write(
 
         # read operation benchmark
         read_start = perf_counter()
-        _ = context_storage[ctx_id]
+        context = context_storage[ctx_id]
         read_time = perf_counter() - read_start
         read_times[-1][len(context.labels)] = read_time
 
         if context_updater is not None:
-            updated_context = context_updater(context)
+            context = context_updater(context)
 
-            while updated_context is not None:
+            while context is not None:
                 update_start = perf_counter()
-                context_storage[ctx_id] = updated_context
+                context_storage[ctx_id] = context
                 update_time = perf_counter() - update_start
-                update_times[-1][len(updated_context.labels)] = update_time
+                update_times[-1][len(context.labels)] = update_time
 
                 read_start = perf_counter()
-                _ = context_storage[ctx_id]
+                context = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
-                read_times[-1][len(updated_context.labels)] = read_time
+                read_times[-1][len(context.labels)] = read_time
 
-                updated_context = context_updater(updated_context)
+                context = context_updater(context)
 
         context_storage.clear()
     return write_times, read_times, update_times
