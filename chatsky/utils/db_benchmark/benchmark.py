@@ -157,7 +157,7 @@ class BenchmarkConfig(BaseModel, abc.ABC, frozen=True):
     Inherit from this class only if `BasicBenchmarkConfig` is not enough for your benchmarking needs.
     """
 
-    context_num: int = 30
+    context_num: int = 3
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
