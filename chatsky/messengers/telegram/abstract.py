@@ -88,8 +88,8 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         MediaGroup,
     }
 
-    def __init__(self, token: str, id: Optional[str] = None, attachments_directory: Optional[Path] = None) -> None:
-        super().__init__(id, attachments_directory)
+    def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(attachments_directory)
         if not telegram_available:
             raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install chatsky[telegram]`.")
 
