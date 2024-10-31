@@ -23,7 +23,7 @@ author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
 # TODO: Add 'today' variable with the commit date of this tag.
-current_commit = git.Repo('../../../').head.commit
+current_commit = git.Repo('../../').head.commit
 today = current_commit.committed_datetime
 print("today is:", today)
 print("str(today) is:", str(today))
