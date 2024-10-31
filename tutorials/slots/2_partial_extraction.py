@@ -29,9 +29,6 @@ from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
 )
-import logging
-# logging.basicConfig(level=logging.DEBUG)
-
 
 # %% [markdown]
 """
@@ -85,20 +82,21 @@ SLOTS = {
             regexp=r"(\b[a-zA-Z0-9]{34}\b)",
             default_value="default_address",
             match_group_idx=1,
-            required=True
+            required=True,
         ),
         email=RegexpSlot(
             regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
             default_value="default_email",
             match_group_idx=1,
-        )
+        ),
     ),
     "friend": GroupSlot(
         coin_address=RegexpSlot(
             regexp=r"(\b[a-zA-Z0-9]{34}\b)", default_value="default_address"
         ),
         email=RegexpSlot(
-            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})", default_value="default_email"
+            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
+            default_value="default_email",
         ),
         allow_partial_extraction=True,
     ),
@@ -118,7 +116,9 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_user"),
-                    cnd=cnd.GroupSlotsExtracted("person", required=["person.coin_address"]),
+                    cnd=cnd.GroupSlotsExtracted(
+                        "person", required=["person.coin_address"]
+                    ),
                     priority=1.2,
                 ),
                 # Tr(dst=("user_flow", "repeat_question"), priority=0.8),
@@ -147,8 +147,12 @@ script = {
                 Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "ask": {RESPONSE: "Please, send your friends bitcoin address and email"},
-        "repeat_question": {RESPONSE: "Please, send your friends bitcoin address and email again."},
+        "ask": {
+            RESPONSE: "Please, send your friends bitcoin address and email"
+        },
+        "repeat_question": {
+            RESPONSE: "Please, send your friends bitcoin address and email again."
+        },
     },
     "root": {
         "start": {
