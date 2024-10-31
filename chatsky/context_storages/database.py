@@ -180,7 +180,7 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
         _class = "MemoryContextStorage"
     else:
         prefix, _, _ = path.partition("://")
-        if "sql" in prefix:
+        if any(prefix.startswith(sql_prefix) for sql_prefix in ("sqlite", "mysql", "postgresql")):
             prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
         if prefix not in PROTOCOLS:
             raise ValueError(f"""
