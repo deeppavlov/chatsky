@@ -29,6 +29,7 @@ def generate_switcher():
 
     # Sort the tags for the version switcher button.
     tags.sort(key=lambda x: x.replace('v', '').split("."))
+    tags.reverse()
 
     # TODO: Could add 'preferred' back in / remove it, but there are issues to be solved in that case.
     # Like, it will say that 'dev' is bad / outdated, because it's not the 'preferred' version.
