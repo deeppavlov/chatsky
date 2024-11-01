@@ -128,10 +128,11 @@ class TestContextStorages:
     @pytest.fixture
     async def db(self, db_kwargs, db_teardown, tmpdir_factory):
         kwargs = {
-            "__testing_file__": str(tmpdir_factory.mktemp("data").join("file.db")),
             "__separator__": "///" if system() == "Windows" else "////",
             **os.environ
         }
+        if "{__testing_file__}" in db_kwargs["path"]:
+            kwargs["__testing_file__"] = str(tmpdir_factory.mktemp("data").join("file.db"))
         db_kwargs["path"] = db_kwargs["path"].format(**kwargs)
         context_storage = context_storage_factory(**db_kwargs)
 
