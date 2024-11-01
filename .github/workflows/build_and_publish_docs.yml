@@ -63,18 +63,14 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: move built files to a versioned deploy directory
-        run: |
-          mkdir -p docs/build/${{ env.DOC_VERSION }}
-          git mv -k docs/build/* docs/build/${{ env.DOC_VERSION }}
-
-      - name: save version switcher for updating it during deployment (tags only)
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      - name: generate version switcher file (tags only) (remove master when merging PR)
+        if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
         run: |
           python3 docs/source/switcher_gen.py
-          cp docs/source/_static/switcher.json docs/build/switcher.json
 
       - name: save changes and checkout to gh-pages
+        # Maybe these three steps could be merged into one?
+        # It would look a bit boilerplate, but maybe it'll be easier to understand the logic.
         run: |
           git add -f .
           git stash
@@ -90,16 +86,25 @@ jobs:
           git checkout -
           git stash pop
 
-      - name: deploy website (for branches / Pull Requests)
-        # TODO: Make a better True-False flag for deploying for Pull Requests.
+      - name: deploy website
+        # TODO: Make a better True-False flag for deploying for Pull Requests. If at all?
         # Make this use GitHub Action Variables.
         # (PR only) Changed the variable below to False if you don't want to build docs for your PR
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
+          target-folder: ${{ env.DOC_VERSION }}
           clean: False
 
       - name: print link to the documentation
         run: |
           echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
+
+      - name: update version switcher file (tags only) (remove master before merging PR)
+        run: |
+          git checkout gh-pages
+          cp ${{ env.DOC_VERSION }}/docs/source/_static/switcher.json ./switcher.json
+          git add .
+          git commit -m "updated version switcher file"
+          git checkout -
