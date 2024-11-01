@@ -5,22 +5,17 @@ import json
 from docs.source.utils.tags_filter import latest_tags_filter
 
 
-# TODO: Redo this entire thing - sort through tags to find the ones which are going to be built
-#  or get the funcs from poly.py do it. Also find the latest tag,
-#  it must be renamed to "latest(v0.9.0)" or something like that.
-# Yeah, I should be just renaming 'master' to 'latest'.
-# Although, specifying the version would be nice. Actually, its a good question, I can't just write 'latest'
-# Without any version after it, right?
 def generate_switcher():
     # TODO: add a parameter with github actions (env)
     # Parameters that say start_version and a black_list_regex, also a whitelist in case latest_tag
     # is actually relevant and should also be built.
 
-    # The parameter exists now, but it's done as an env sort of variable.
-    # How should it be used?
+    # TODO: Discuss the following:
+    # The parameters exist now, but they're done as an env sort of variables.
+    # How should they be used?
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
-    # retrieving and filtering git tags
+    # Retrieve and filter git tags
     repo = git.Repo('./')
 
     tags = [str(x) for x in repo.tags]
@@ -32,17 +27,16 @@ def generate_switcher():
         if tag not in tags:
             tags.append(tag)
 
-    tags = [str(tag).replace('v', '').split(".") for tag in tags]
-    # I assume there are no version numbers higher than 100, then it's all correct.
-    # I just thought this is an interesting solution. But yeah, this just seems illegal.
-    # TODO: use a conventional solution for this, maybe there is something built-in?
-    tags = sorted(tags, key=lambda t: 1000000 * t[0] + 1000 * t[1] + t[2])
-    tags = ['v' + x[0] + '.' + x[1] + '.' + x[2] for x in tags]
+    # Sort the tags for the version switcher button.
+    tags.sort(key=lambda x: x.replace('v', '').split("."))
 
-    # TODO: Maybe remove 'preferred' completely?
-    # Otherwise, it will say that 'dev' is bad / outdated, I'm not sure.
+    # TODO: Could add 'preferred' back in / remove it, but there are issues to be solved in that case.
+    # Like, it will say that 'dev' is bad / outdated, because it's not the 'preferred' version.
+    # Well, it could be useful for new users, seeing a bright red banner if they're using 'dev'
+    # when they didn't really need it.
     switcher_json = []
 
+    # TODO: Ensure that 'master' is renamed to 'latest' in the docs.
     latest_data = {
         "name": "latest",
         "version": "master",
