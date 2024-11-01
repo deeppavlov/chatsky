@@ -162,7 +162,6 @@ sphinxcontrib-httpdomain = "*"
 sphinx-autodoc-typehints = "*"
 jupytext = "*"
 jupyter = "*"
-gitpython = "*"
 
 
 

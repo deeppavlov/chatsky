@@ -63,11 +63,6 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: generate version switcher file (tags only) (remove master when merging PR)
-        if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
-        run: |
-          python3 docs/source/switcher_gen.py
-
       - name: save changes and checkout to gh-pages
         # Maybe these three steps could be merged into one?
         # It would look a bit boilerplate, but maybe it'll be easier to understand the logic.
@@ -102,6 +97,7 @@ jobs:
           echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
 
       - name: update version switcher file (tags only) (remove master before merging PR)
+        if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
         run: |
           git checkout gh-pages
           cp ${{ env.DOC_VERSION }}/docs/source/_static/switcher.json ./switcher.json
