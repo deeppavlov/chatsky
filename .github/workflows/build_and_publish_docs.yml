@@ -101,6 +101,7 @@ jobs:
         run: |
           git stash
           git checkout gh-pages
+          git pull origin gh-pages
           ls
           pwd
           cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
