@@ -99,7 +99,6 @@ jobs:
       - name: update version switcher file (tags only) (remove master before merging PR)
         if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
         run: |
-          git stash
           git checkout gh-pages
           git pull origin gh-pages
           ls
@@ -107,4 +106,5 @@ jobs:
           cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
           git add ./switcher.json
           git commit -m "updated version switcher file"
+          git push origin gh-pages
           git checkout -
