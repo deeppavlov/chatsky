@@ -7213,4 +7213,4 @@ ydb = ["six", "ydb"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1,!=3.9.7"
-content-hash = "140761bcb2f0a9c99e510554b3547c084e724e5ab071ff60af55ea5caecb1907"
+content-hash = "511348f67731d8a26e0a269d3f8f032368a85289cdd4772df378335c57812201"
