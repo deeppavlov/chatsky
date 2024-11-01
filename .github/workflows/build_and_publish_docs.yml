@@ -101,6 +101,8 @@ jobs:
         run: |
           git stash
           git checkout gh-pages
+          ls
+          pwd
           cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
           git add ./switcher.json
           git commit -m "updated version switcher file"
