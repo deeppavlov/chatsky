@@ -11,6 +11,7 @@ from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .utils import docker_client
+from .switcher_gen import generate_version_switcher
 from .clean import clean_docs
 
 
@@ -50,6 +51,7 @@ def docs(docker: Optional[DockerClient]):
         clean_docs()
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
+        generate_version_switcher()
         _build_drawio(docker)
         result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])

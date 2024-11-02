@@ -13,8 +13,6 @@ from utils.generate_tutorials import generate_tutorial_links_for_notebook_creati
 from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
-from docs.source.switcher_gen import generate_switcher
-
 # -- Project information -----------------------------------------------------
 
 _distribution_metadata = importlib.metadata.metadata('chatsky')
@@ -178,10 +176,6 @@ autodoc_default_options = {
 
 
 def setup(_):
-    # Generate version switcher file (switcher.json)
-    generate_switcher()
-    print("os.getcwd() ==", os.getcwd())
-
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",
