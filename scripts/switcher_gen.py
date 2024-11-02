@@ -56,19 +56,19 @@ def generate_version_switcher():
     latest_data = {
         "name": "latest",
         "version": "master",
-        "url": "https://zerglev.github.io/chatsky/master/index.html",
+        "url": "https://zerglev.github.io/chatsky/master/",
         "preferred": "true"
     }
     switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
-        "url": "https://zerglev.github.io/chatsky/dev/index.html",
+        "url": "https://zerglev.github.io/chatsky/dev/",
     }
     switcher_json += [dev_data]
 
     for tag in tags:
-        url = "https://zerglev.github.io/chatsky/" + str(tag) + "/index.html"
+        url = "https://zerglev.github.io/chatsky/" + str(tag) + "/"
         tag_data = {
             "name": str(tag),
             "version": str(tag),
