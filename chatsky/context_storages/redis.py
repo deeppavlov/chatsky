@@ -76,10 +76,11 @@ class RedisContextStorage(DBContextStorage):
     def _bytes_to_keys(keys: List[bytes]) -> List[int]:
         return [int(f.decode("utf-8")) for f in keys]
 
-    @DBContextStorage._verify_field_name
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
-        context_ids = {k.decode("utf-8") for k in await self.database.keys(f"{self._main_key}:*")}
-        return filter.filter_keys(context_ids)
+        context_ids = [k.decode("utf-8") for k in await self.database.keys(f"{self._main_key}:*")]
+        context_upd = [int(await self.database.hget(f"{self._main_key}:{k}", self._updated_at_column_name)) for k in context_ids]
+        partial_contexts = {k: (None, None, ua, None, None) for k, ua in zip(context_ids, context_upd)}
+        return filter.filter_keys(partial_contexts)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):

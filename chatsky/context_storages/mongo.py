@@ -13,18 +13,17 @@ and high levels of read and write traffic.
 """
 
 import asyncio
-from typing import Dict, Set, Tuple, Optional, List
+from typing import Any, Dict, Set, Tuple, Optional, List, Union
 
 try:
     from pymongo import UpdateOne
-    from pymongo.collection import Collection
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
 except ImportError:
     mongo_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 
@@ -74,6 +73,18 @@ class MongoContextStorage(DBContextStorage):
                 )
             )
         )
+
+    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
+        ftr_dct = dict()
+        if filter.update_time_greater is not None:
+            ftr_dct.setdefault(self._updated_at_column_name, dict()).update({"$gt": filter.update_time_greater})
+        if filter.update_time_less is not None:
+            ftr_dct.setdefault(self._updated_at_column_name, dict()).update({"$lt": filter.update_time_less})
+        if len(filter.origin_interface_whitelist) > 0:
+            # TODO: implement whitelist once context ID is 
+            pass
+        result = await self.main_table.find(ftr_dct, [self._id_column_name]).to_list(None)
+        return {item[self._key_column_name] for item in result}
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         result = await self.main_table.find_one(

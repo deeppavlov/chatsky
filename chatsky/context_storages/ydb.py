@@ -12,10 +12,10 @@ take advantage of the scalability and high-availability features provided by the
 
 from asyncio import gather, run
 from os.path import join
-from typing import Awaitable, Callable, Set, Tuple, List, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict, Set, Tuple, List, Optional, Union
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -131,6 +131,32 @@ class YDBContextStorage(DBContextStorage):
             )
 
         await self.pool.retry_operation(callee)
+
+    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
+        async def callee(session: Session) -> Set[str]:
+            where_stmt = ""
+            conditions = list()
+            if filter.update_time_greater is not None:
+                conditions += [f"{self._updated_at_column_name} > {filter.update_time_greater}"]
+            if filter.update_time_less is not None:
+                conditions += [f"{self._updated_at_column_name} < {filter.update_time_less}"]
+            if len(filter.origin_interface_whitelist) > 0:
+                # TODO: implement whitelist once context ID is 
+                pass
+            if len(conditions) > 0:
+                where_stmt = f"WHERE {' AND '.join(conditions)}"
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                SELECT {self._id_column_name}
+                FROM {self.main_table}
+                {where_stmt};
+                """  # noqa: E501
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query), dict(), commit_tx=True
+            )
+            return {e[self._id_column_name] for e in result_sets[0].rows} if len(result_sets[0].rows) > 0 else set()
+
+        return await self.pool.retry_operation(callee)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes, bytes]]:

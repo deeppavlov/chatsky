@@ -61,9 +61,8 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
-    @DBContextStorage._verify_field_name
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
-        return filter.filter_keys(set((await self._load()).main.keys()))
+        return filter.filter_keys((await self._load()).main)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return (await self._load()).main.get(ctx_id, None)

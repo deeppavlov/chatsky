@@ -26,14 +26,15 @@ class ContextIdFilter(BaseModel):
     update_time_less: Optional[int] = Field(default=None)
     origin_interface_whitelist: Set[str] = Field(default_factory=set)
 
-    def filter_keys(self, keys: Set[str]) -> Set[str]:
+    def filter_keys(self, contexts: Dict[str, Tuple[int, int, int, bytes, bytes]]) -> Set[str]:
         if self.update_time_greater is not None:
-            keys = {k for k in keys if k > self.update_time_greater}
+            contexts = {k: (ti, ca, ua, m, fd) for k, (ti, ca, ua, m, fd) in contexts.items() if ua > self.update_time_greater}
         if self.update_time_less is not None:
-            keys = {k for k in keys if k < self.update_time_greater}
+            contexts = {k: (ti, ca, ua, m, fd) for k, (ti, ca, ua, m, fd) in contexts.items() if ua < self.update_time_less}
         if len(self.origin_interface_whitelist) > 0:
-            keys = {k for k in keys if k in self.origin_interface_whitelist}
-        return keys
+            # TODO: implement whitelist once context ID is 
+            pass
+        return contexts.keys()
 
 
 class DBContextStorage(ABC):
