@@ -30,7 +30,7 @@ def generate_version_switcher():
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
     # Retrieve and filter git tags
-    repo = git.Repo('./')
+    repo = git.Repo("./")
 
     # Could maybe place the latest_tags_filter() in this file, it's only used here.
     tags = [str(x) for x in repo.tags]
@@ -42,7 +42,7 @@ def generate_version_switcher():
     tags = tags + [x for x in whitelisted_tags if x not in tags]
 
     # Sort the tags for the version switcher button.
-    tags.sort(key=lambda x: x.replace('v', '').split("."))
+    tags.sort(key=lambda x: x.replace("v", "").split("."))
     tags.reverse()
 
     # TODO: Could add 'preferred' back in / remove it, but there are issues to be solved in that case.
@@ -57,7 +57,7 @@ def generate_version_switcher():
         "name": "latest",
         "version": "master",
         "url": "https://zerglev.github.io/chatsky/master/",
-        "preferred": "true"
+        "preferred": "true",
     }
     switcher_json += [latest_data]
 
@@ -79,5 +79,5 @@ def generate_version_switcher():
     switcher_json_obj = json.dumps(switcher_json, indent=4)
 
     # Write nested JSON data to the switcher.json file
-    with open('./docs/source/_static/switcher.json', 'w') as f:
+    with open("./docs/source/_static/switcher.json", "w") as f:
         f.write(switcher_json_obj)

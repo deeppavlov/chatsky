@@ -103,11 +103,12 @@ nbsphinx_prolog = f"""
 :doc_version_path: {doc_version_path}
 """
 
-rst_prolog = f"""
-.. |doc_version| replace:: {doc_version}
-"""
 print("doc_version_path ==", doc_version_path)
 print("doc_version ==", doc_version)
+
+extlinks = {
+    'github_versioned_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}/%s", None),
+}
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
 

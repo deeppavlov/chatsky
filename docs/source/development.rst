@@ -4,7 +4,7 @@ Development
 Contribution
 ~~~~~~~~~~~~~~~
 
-`Contribution rules <https://github.com/deeppavlov/chatsky/blob/|doc_version|/CONTRIBUTING.md>`_  provide
+:github_versioned_link:`Contribution rules <CONTRIBUTING.md>` provide
 guidelines and rules for contributing to the Chatsky project. It includes information on
 how to contribute code to the project, manage your workflow, use tests, and so on.
 
