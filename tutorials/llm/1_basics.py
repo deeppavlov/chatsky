@@ -123,7 +123,7 @@ toy_script = {
 }
 
 # %%
-pipeline = Pipeline.from_script(
+pipeline = Pipeline(
     toy_script,
     start_label=("main_flow", "start_node"),
     fallback_label=("main_flow", "fallback_node"),
