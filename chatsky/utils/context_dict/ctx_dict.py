@@ -65,7 +65,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} loading extra items: {collapse_num_list(keys)}...")
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
         logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} extra items loaded: {collapse_num_list(keys)}")
-        for key, value in items.items():
+        for key, value in items:
             self._items[key] = self._value_type.validate_json(value)
             if not self._storage.rewrite_existing:
                 self._hashes[key] = get_hash(value)
