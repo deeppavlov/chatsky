@@ -1,31 +1,24 @@
 import os
-
 import git
 import json
 from docs.source.utils.tags_filter import latest_tags_filter
 
 
 def generate_switcher():
-    # TODO: add a parameter with github actions (env)
-    # Parameters that say start_version and a black_list_regex, also a whitelist in case latest_tag
-    # is actually relevant and should also be built.
-
-    # TODO: Discuss the following:
-    # The parameters exist now, but they're done as an env sort of variables.
-    # How should they be used?
+    # TODO: add a start_version parameter with github actions (env)
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
     # Retrieve and filter git tags
     repo = git.Repo('./')
 
+    # Could maybe place the latest_tags_filter() in this file, it's only used here.
     tags = [str(x) for x in repo.tags]
     tags = latest_tags_filter(tags)
-    for tag in tags:
-        if tag in blacklisted_tags:
-            tags.remove(tag)
-    for tag in whitelisted_tags:
-        if tag not in tags:
-            tags.append(tag)
+
+    # TODO: Consider making this look better, it's a bit hard to read.
+    # Removing blacklisted tags and adding whitelisted tags.
+    tags = [x for x in tags if x not in blacklisted_tags]
+    tags = tags + [x for x in whitelisted_tags if x not in tags]
 
     # Sort the tags for the version switcher button.
     tags.sort(key=lambda x: x.replace('v', '').split("."))
@@ -38,22 +31,23 @@ def generate_switcher():
     switcher_json = []
 
     # TODO: Ensure that 'master' is renamed to 'latest' in the docs.
+    # TODO: (before merge) Replace all occurrences of 'zerglev' with deeppavlov! Use Ctrl+Shift+F.
     latest_data = {
         "name": "latest",
         "version": "master",
-        "url": "https://deeppavlov.github.io/chatsky/master/index.html",
+        "url": "https://zerglev.github.io/chatsky/master/index.html",
         "preferred": "true"
     }
     switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
-        "url": "https://deeppavlov.github.io/chatsky/dev/index.html",
+        "url": "https://zerglev.github.io/chatsky/dev/index.html",
     }
     switcher_json += [dev_data]
 
     for tag in tags:
-        url = "https://deepavlov.github.io/chatsky/" + str(tag) + "/index.html"
+        url = "https://zerglev.github.io/chatsky/" + str(tag) + "/index.html"
         tag_data = {
             "name": str(tag),
             "version": str(tag),

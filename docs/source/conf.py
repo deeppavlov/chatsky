@@ -60,7 +60,7 @@ suppress_warnings = ["image.nonlocal_uri"]
 source_suffix = ".rst"
 master_doc = "index"
 
-version = re.match(r"^\d\.\d.\d", release).group()
+version = re.match(r"^\d\.\d", release).group()
 language = "en"
 
 pygments_style = "default"

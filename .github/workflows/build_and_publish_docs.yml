@@ -94,20 +94,18 @@ jobs:
           target-folder: ${{ env.DOC_VERSION }}
           clean: False
 
-      - name: print link to the documentation
-        run: |
-          echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
-
       - name: update version switcher file (tags only) (remove master before merging PR)
         if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
+        # TODO: wrap this in two steps (one with github actions)
         run: |
           git stash
           git checkout gh-pages
           git pull origin gh-pages
-          ls
-          pwd
           cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
           git add ./switcher.json
           git commit -m "updated version switcher file"
           git push origin gh-pages
-          git checkout -
+
+      - name: print link to the documentation
+        run: |
+          echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"
