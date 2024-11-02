@@ -134,7 +134,6 @@ class TestContextDict:
                 ctx_dict._storage.rewrite_existing = False
             # Adding an item
             ctx_dict[0] = Message("message")
-            print("ALULA:", ctx_dict.__repr__())
             # Loading all pre-filled items
             await ctx_dict.values()
             # Changing one more item (might be pre-filled)
