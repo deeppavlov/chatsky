@@ -93,21 +93,17 @@ html_show_sourcelink = False
 autosummary_generate_overwrite = False
 
 doc_version = os.getenv("DOC_VERSION", default="")
-doc_version_path = doc_version
-if doc_version_path != "":
-    doc_version_path = doc_version_path + '/'
+if doc_version != "":
+    doc_version = doc_version + '/'
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = f"""
 :tutorial_name: {{{{ env.docname }}}}
-:doc_version_path: {doc_version_path}
+:doc_version_path: {doc_version}
 """
 
-print("doc_version_path ==", doc_version_path)
-print("doc_version ==", doc_version)
-
 extlinks = {
-    'github_versioned_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}/%s", None),
+    'github_versioned_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}%s", None),
 }
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
