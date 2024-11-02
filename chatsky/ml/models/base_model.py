@@ -42,7 +42,7 @@ class ExtrasBaseAPIModel(ABC):
         """
         raise NotImplementedError
 
-    async def __call__(self, ctx: Context, _):
+    async def __call__(self, ctx: Context):
         """
         Saves the retrieved labels to a subspace inside the `framework_states` field of the context.
         Creates the missing namespaces, if necessary.

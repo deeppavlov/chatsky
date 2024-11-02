@@ -39,22 +39,19 @@ class HasLabel(BaseCondition):
     def __init__(self, *args):
         super().__init__(*args)
 
-    async def call(self):
-        async def has_cls_label_innner(ctx: Context, _) -> bool:
-            # Predict labels for the last request
-            # and store them in framework_data with uuid of the model as a key
-            await self.model(ctx, _)
-            if self.model.model_id not in ctx.framework_data.models_labels:
-                return False
-            if self.model.model_id is not None:
-                return (
-                    ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
-                )
-            scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
-            comparison_array = [item >= self.threshold for item in scores]
-            return any(comparison_array)
-
-        return await has_cls_label_innner
+    async def call(self, ctx: Context) -> bool:
+        # Predict labels for the last request
+        # and store them in framework_data with uuid of the model as a key
+        await self.model(ctx)
+        if self.model.model_id not in ctx.framework_data.models_labels:
+            return False
+        if self.model.model_id is not None:
+            return (
+                ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
+            )
+        scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
+        comparison_array = [item >= self.threshold for item in scores]
+        return any(comparison_array)
 
 
 class HasMatch(BaseCondition):
@@ -71,26 +68,21 @@ class HasMatch(BaseCondition):
 
     model: ExtrasBaseAPIModel
     positive_examples: Optional[List[str]]
-    negative_examples: Optional[List[str]] = None
+    negative_examples: Optional[List[str]] = []
     threshold: float = 0.9
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def call(self):
-        if negative_examples is None:
-            negative_examples = []
+    async def call(self, ctx: Context) -> bool:
+        if not (ctx.last_request and ctx.last_request.text):
+            return False
+        input_vector = self.model.transform(ctx.last_request.text)
+        positive_vectors = [self.model.transform(item) for item in self.positive_examples]
+        negative_vectors = [self.model.transform(item) for item in self.negative_examples]
+        positive_sims = [cosine_similarity(input_vector, item)[0][0] for item in positive_vectors]
+        negative_sims = [cosine_similarity(input_vector, item)[0][0] for item in negative_vectors]
+        max_pos_sim = max(positive_sims)
+        max_neg_sim = 0 if len(negative_sims) == 0 else max(negative_sims)
+        return bool(max_pos_sim > self.threshold > max_neg_sim)
 
-        def has_match_inner(ctx: Context, _) -> bool:
-            if not (ctx.last_request and ctx.last_request.text):
-                return False
-            input_vector = self.model.transform(ctx.last_request.text)
-            positive_vectors = [self.model.transform(item) for item in self.positive_examples]
-            negative_vectors = [self.model.transform(item) for item in self.negative_examples]
-            positive_sims = [cosine_similarity(input_vector, item)[0][0] for item in positive_vectors]
-            negative_sims = [cosine_similarity(input_vector, item)[0][0] for item in negative_vectors]
-            max_pos_sim = max(positive_sims)
-            max_neg_sim = 0 if len(negative_sims) == 0 else max(negative_sims)
-            return bool(max_pos_sim > self.threshold > max_neg_sim)
-
-        return has_match_inner
