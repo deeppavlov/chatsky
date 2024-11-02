@@ -66,13 +66,15 @@ for the purposes of `success_only` flag.
 ## Code explanation
 
 In this example we define two group slots: `person` and `friend`.
-Note that in the `friend` slot we set `allow_partial_extraction` to `True`
+Note that in the `person` slot we set `allow_partial_extraction` to `True`
 which allows us to _update_ slot values and not
 rewrite them in case we don't get full information at once.
 
-So if we send "John Doe" as a full name and after that send only first name
-(e.g. "Mike") the extracted friends name would be "Mike Doe"
-and not "Mike default_surname".
+So if we send "groot@gmail.com" as user email and after that send only Bitcoin address
+the extracted user data would be "<bitcoin_address> groot@gmail.com"
+and not "<bitcoin_address> default_email".
+We can compare that behaviour with `fried` slot extraction where we have set `success_only=False`
+that enables us to send unly partial info that can be overwritten with default values.
 """
 
 # %%
@@ -89,6 +91,7 @@ SLOTS = {
             default_value="default_email",
             match_group_idx=1,
         ),
+        allow_partial_extraction=True,
     ),
     "friend": GroupSlot(
         coin_address=RegexpSlot(
@@ -98,7 +101,6 @@ SLOTS = {
             regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
             default_value="default_email",
         ),
-        allow_partial_extraction=True,
     ),
 }
 
@@ -110,23 +112,17 @@ script = {
     },
     "user_flow": {
         LOCAL: {
-            PRE_TRANSITION: {
-                "get_slots": proc.Extract("person", success_only=False)
-            },
+            PRE_TRANSITION: {"get_slots": proc.Extract("person")},
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter_user"),
-                    cnd=cnd.GroupSlotsExtracted(
-                        "person", required=["person.coin_address"]
-                    ),
+                    cnd=cnd.SlotsExtracted("person.email"),
                     priority=1.2,
                 ),
                 # Tr(dst=("user_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "ask": {
-            RESPONSE: "Please, send your email and bitcoin address in one message."
-        },
+        "ask": {RESPONSE: "Please, send your email and bitcoin address."},
         "repeat_question": {
             RESPONSE: "Please, send your bitcoin address and email again."
         },
@@ -144,11 +140,16 @@ script = {
                     ),
                     priority=1.2,
                 ),
+                Tr(
+                    dst=("friend_flow", "ask"),
+                    cnd=cnd.ExactMatch("update"),
+                    priority=0.8,
+                ),
                 Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
             ],
         },
         "ask": {
-            RESPONSE: "Please, send your friends bitcoin address and email"
+            RESPONSE: "Please, send your friends bitcoin address and email."
         },
         "repeat_question": {
             RESPONSE: "Please, send your friends bitcoin address and email again."
@@ -169,23 +170,37 @@ script = {
             TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
         },
         "utter_user": {
-            RESPONSE: "Your bitcoin address is {person.coin_address}. Your email is {person.email}.",
+            RESPONSE: "Your bitcoin address is {person.coin_address}. Your email is {person.email}. You can update your data or type /send to proceed.",
             PRE_RESPONSE: {"fill": proc.FillTemplate()},
-            TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
+            TRANSITIONS: [
+                Tr(dst=("friend_flow", "ask"), cnd=cnd.ExactMatch("/send")),
+                Tr(dst=("user_flow", "ask")),
+            ],
         },
     },
 }
 
 HAPPY_PATH = [
-    ("Start", "Please, send your email and bitcoin address in one message."),
+    ("Start", "Please, send your email and bitcoin address."),
     (
-        "groot, groot@gmail.com",
-        "Your bitcoin address is default_address. Your email is groot@gmail.com.",
+        "groot@gmail.com",
+        "Your bitcoin address is default_address. Your email is groot@gmail.com. You can update your data or type /send to proceed.",
     ),
-    ("ok", "Please, send your friends name"),
-    ("Jonh Doe", "Your friend is Jonh Doe"),
-    ("ok", "Please, send your friends name"),
-    ("Mike ", "Your friend is Mike Doe"),
+    ("update", "Please, send your email and bitcoin address."),
+    (
+        "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF",
+        "Your bitcoin address is 1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF. Your email is groot@gmail.com. You can update your data or type /send to proceed.",
+    ),
+    ("/send", "Please, send your friends bitcoin address and email."),
+    (
+        "john_doe@gmail.com",
+        "Your friends address is default_address and email is john_doe@gmail.com",
+    ),
+    ("update", "Please, send your friends bitcoin address and email."),
+    (
+        "3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v",
+        "Your friends address is 3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v and email is default_email",
+    ),
 ]
 
 
