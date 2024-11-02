@@ -1,10 +1,14 @@
 from chatsky.llm.methods import BaseMethod
-from chatsky.core.script_function import BaseCondition
+from chatsky.core import BaseCondition, Context, Pipeline
 
 
 class LLMCondition(BaseCondition):
-
-    def __call__(model_name: str, prompt: str, method: BaseMethod):
+    model_name: str
+    prompt: str
+    method: BaseMethod
+    pipeline: Pipeline
+    
+    async def call(self, ctx: Context) -> bool:
         """
         Basic function for using LLM in condition cases.
 
@@ -12,9 +16,5 @@ class LLMCondition(BaseCondition):
         :param prompt: Prompt for the model to use on users input.
         :param method: Method that takes models output and returns boolean.
         """
-
-        async def wrapped(ctx, pipeline):
-            model = pipeline.models[model_name]
-            return await model.condition(prompt, method)
-
-        return wrapped
+        model = self.pipeline.models[self.model_name]
+        return await model.condition(self.prompt, self.method)
