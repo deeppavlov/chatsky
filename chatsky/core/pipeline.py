@@ -246,7 +246,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
         if update_ctx_misc is not None:
-            await ctx.misc.update(update_ctx_misc)
+            ctx.misc.update(update_ctx_misc)
 
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
