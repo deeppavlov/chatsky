@@ -99,7 +99,7 @@ if doc_version != "":
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = f"""
 :tutorial_name: {{{{ env.docname }}}}
-:doc_version_path: {doc_version}
+:doc_version: {doc_version}
 """
 
 extlinks = {

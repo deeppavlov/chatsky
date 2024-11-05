@@ -51,8 +51,7 @@ def generate_version_switcher():
     # when they didn't really need it.
     switcher_json = []
 
-    # TODO: Ensure that 'master' is renamed to 'latest' in the docs.
-    # TODO: (before merge) Replace all occurrences of 'zerglev' with deeppavlov! Use Ctrl+Shift+F.
+    # TODO: (before merge) Replace all occurrences of 'zerglev' with 'deeppavlov'! Use Ctrl+Shift+F.
     latest_data = {
         "name": "latest",
         "version": "master",
