@@ -32,24 +32,22 @@ from chatsky.utils.testing import (
 
 # %% [markdown]
 """
-## Default behavior
+## Extracted values
 
-By default, slot extraction will write a value into slot storage regardless
-of whether the extraction was successful.
-If extraction fails, the slot will be marked as "not extracted"
-and its value will be the `default_value` (`None` by default).
+Result of successful slot extraction is the extracted value, *but*
+if the extraction fails, the slot will be marked as "not extracted"
+and its value will be set to the slot's `default_value` (`None` by default).
 
 If group slot is being extracted, the extraction is considered successful
-only if all child slots are successfully extracted.
+if and only if all child slots are successfully extracted.
 
 ## Success only extraction
 
 The `Extract` function accepts `success_only` flag which makes it so
 that extracted value is not saved unless extraction is successful.
 
-This means that unsuccessfully trying to extract a slot after
-it has already been extracted will not overwrite the previously extracted
-value.
+This means that unsuccessfully trying to extract a slot will not overwrite
+its previously extracted value.
 
 Note that `success_only` is `True` by default.
 
@@ -61,7 +59,7 @@ Extracting such group slot is equivalent to extracting every child slot
 with the `success_only` flag.
 
 Partially extracted group slot is always considered successfully extracted
-for the purposes of `success_only` flag.
+for the purposes of the `success_only` flag.
 
 ## Code explanation
 
