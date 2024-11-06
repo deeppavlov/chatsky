@@ -48,7 +48,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
 ]
 
-suppress_warnings = ["image.nonlocal_uri"]
+suppress_warnings = ["image.nonlocal_uri", "config.cache"]
 source_suffix = ".rst"
 master_doc = "index"
 
