@@ -24,11 +24,11 @@ from chatsky import (
 
 from chatsky.utils.testing import (
     is_interactive_mode,
-    run_interactive_mode,
 )
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 
 import os
+
 os.environ["OPENAI_API_KEY"] = "<OPENAI_TOKEN>"
 
 from langchain_openai import ChatOpenAI
@@ -42,14 +42,14 @@ In the `LLMSlot.caption` parameter you should put description of a data piece yo
 Note that we are using `langchain_community.chat_models.openai.ChatOpenAI` and not `chatsky.llm.LLM_API` here.
 """
 
-#%%
+# %%
 model = ChatOpenAI(model="gpt-4o-mini")
 
 SLOTS = {
     "person": LLMGroupSlot(
         username=LLMSlot(caption="User's username in uppercase"),
         job=LLMSlot(caption="User's occupation, job, profession"),
-        model=model
+        model=model,
     )
 }
 
@@ -71,21 +71,20 @@ script = {
                 Tr(dst=("user_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "start": {
-            RESPONSE: "",
-            TRANSITIONS: [Tr(dst=("user_flow", "ask"))]
-        },
+        "start": {RESPONSE: "", TRANSITIONS: [Tr(dst=("user_flow", "ask"))]},
         "ask": {
             RESPONSE: "Hello! Tell me about yourself, what are you doing for living, your hobbies. And don't forget to introduce yourself!",
         },
         "tell": {
-            RESPONSE: rsp.FilledTemplate("So you are {person.username} and your occupation is {person.job}, right?"),
-            TRANSITIONS: [Tr(dst=("user_flow", "ask"))]
+            RESPONSE: rsp.FilledTemplate(
+                "So you are {person.username} and your occupation is {person.job}, right?"
+            ),
+            TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
         },
         "repeat_question": {
             RESPONSE: "I didn't quite understand you...",
         },
-    }
+    },
 }
 
 pipeline = Pipeline(

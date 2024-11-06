@@ -23,9 +23,10 @@ from chatsky import (
 )
 from chatsky.utils.testing import (
     is_interactive_mode,
-    run_interactive_mode,
 )
-from chatsky.llm import LLM_API, llm_response, llm_condition
+from chatsky.llm import LLM_API
+from chatsky.responses.llm import LLMResponse
+from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
 
 import os
@@ -49,7 +50,7 @@ model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
     system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.",
 )
-
+llm_response = LLMResponse()
 # %% [markdown]
 """
 Also you can pass images to the LLM, just pass them as attachments to your message.
@@ -82,7 +83,7 @@ toy_script = {
                 ),
                 Tr(
                     dst="boss_node",
-                    cnd=llm_condition(
+                    cnd=LLMCondition(
                         model_name="barista_model",
                         prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
                         method=Contains(pattern="TRUE"),
@@ -134,4 +135,4 @@ if __name__ == "__main__":
     # This runs tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        run_interactive_mode(pipeline)  # This runs tutorial in interactive mode
+        pipeline.run()  # This runs tutorial in interactive mode

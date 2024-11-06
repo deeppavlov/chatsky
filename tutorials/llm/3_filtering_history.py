@@ -19,12 +19,9 @@ from chatsky import (
     destinations as dst,
     labels as lbl,
 )
-from chatsky.utils.testing import (
-    is_interactive_mode,
-    run_interactive_mode,
-)
+from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
-from chatsky.responses.llm import llm_response
+from chatsky.responses.llm import LLMResponse
 from chatsky.llm.filters import BaseFilter
 from chatsky.core.context import Context
 
@@ -39,6 +36,7 @@ model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
     system_prompt="You are a database assistant and must help your user to recover the demanded data from your memory.",
 )
+llm_response = LLMResponse()
 
 # %% [markdown]
 """
@@ -113,4 +111,4 @@ if __name__ == "__main__":
     # This runs tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        run_interactive_mode(pipeline)  # This runs tutorial in interactive mode
+        pipeline.run()  # This runs tutorial in interactive mode

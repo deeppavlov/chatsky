@@ -7,7 +7,7 @@ class LLMCondition(BaseCondition):
     prompt: str
     method: BaseMethod
     pipeline: Pipeline
-    
+
     async def call(self, ctx: Context) -> bool:
         """
         Basic function for using LLM in condition cases.
