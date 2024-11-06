@@ -12,10 +12,8 @@ to extract only some of the slots.
 from chatsky import (
     RESPONSE,
     TRANSITIONS,
-    PRE_TRANSITION,
     PRE_RESPONSE,
     GLOBAL,
-    LOCAL,
     Pipeline,
     Transition as Tr,
     conditions as cnd,
@@ -63,141 +61,161 @@ for the purposes of the `success_only` flag.
 
 ## Code explanation
 
-In this example we define two group slots: `person` and `friend`.
-Note that in the `person` slot we set `allow_partial_extraction` to `True`
-which allows us to _update_ slot values and not
-rewrite them in case we don't get full information at once.
+In this example we showcase the behavior of
+different group slot extraction settings:
 
-So if we send "groot@gmail.com" as user email and after that send only Bitcoin address
-the extracted user data would be "<bitcoin_address> groot@gmail.com"
-and not "<bitcoin_address> default_email".
-We can compare that behaviour with `fried` slot extraction where we have set `success_only=False`
-that enables us to send unly partial info that can be overwritten with default values.
+Group `partial_extraction` is marked with `allow_partial_extraction`.
+Any slot in this group is saved if and only if that slot is successfully
+extracted.
+
+Group `success_only_extraction` is extracted with the `success_only`
+flag set to True.
+Any slot in this group is saved if and only if all of the slots in the group
+are successfully extracted within a single `Extract` call.
+
+Group `success_only_false` is extracted with the `success_only` set to False.
+Any slot in this group is saved (even if extraction was not successful).
+
+Group `sub_slot_success_only_extraction` is extracted by passing all of its
+child slots to the `Extract` method with the `success_only` flag set to True.
+The behavior is equivalent to that of `partial_extraction`.
 """
 
 # %%
+sub_slots = {
+    "date": RegexpSlot(
+        regexp=r"(0?[1-9]|(?:1|2)[0-9]|3[0-1])[\.\/]"
+        r"(0?[1-9]|1[0-2])[\.\/](\d{4}|\d{2})",
+    ),
+    "email": RegexpSlot(
+        regexp=r"[\w\.-]+@[\w\.-]+\.\w{2,4}",
+    ),
+}
+
 SLOTS = {
-    "person": GroupSlot(
-        coin_address=RegexpSlot(
-            regexp=r"(\b[a-zA-Z0-9]{34}\b)",
-            default_value="default_address",
-            match_group_idx=1,
-            required=True,
-        ),
-        email=RegexpSlot(
-            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
-            default_value="default_email",
-            match_group_idx=1,
-        ),
+    "partial_extraction": GroupSlot(
+        **sub_slots,
         allow_partial_extraction=True,
     ),
-    "friend": GroupSlot(
-        coin_address=RegexpSlot(
-            regexp=r"(\b[a-zA-Z0-9]{34}\b)", default_value="default_address"
-        ),
-        email=RegexpSlot(
-            regexp=r"([\w\.-]+@[\w\.-]+\.\w{2,4})",
-            default_value="default_email",
-        ),
+    "success_only_extraction": GroupSlot(
+        **sub_slots,
+    ),
+    "success_only_false": GroupSlot(
+        **sub_slots,
+    ),
+    "sub_slot_success_only_extraction": GroupSlot(
+        **sub_slots,
     ),
 }
 
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+            Tr(dst=("main", "start"), cnd=cnd.ExactMatch("/start")),
+            Tr(dst=("main", "reset"), cnd=cnd.ExactMatch("/reset")),
+            Tr(dst=("main", "print"), priority=0.5),
         ]
     },
-    "user_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("person")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("root", "utter_user"),
-                    cnd=cnd.SlotsExtracted("person.email"),
-                    priority=1.2,
+    "main": {
+        "start": {RESPONSE: "Hi! Send me email and date."},
+        "reset": {
+            PRE_RESPONSE: {"reset_slots": proc.UnsetAll()},
+            RESPONSE: "All slots have been reset.",
+        },
+        "print": {
+            PRE_RESPONSE: {
+                "partial_extraction": proc.Extract("partial_extraction"),
+                # partial extraction is always successful;
+                # success_only doesn't matter
+                "success_only_extraction": proc.Extract(
+                    "success_only_extraction", success_only=True
                 ),
-                # Tr(dst=("user_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {RESPONSE: "Please, send your email and bitcoin address."},
-        "repeat_question": {
-            RESPONSE: "Please, send your bitcoin address and email again."
-        },
-    },
-    "friend_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {
-                "get_slots": proc.Extract("friend", success_only=False)
+                # success_only is True by default
+                "success_only_false": proc.Extract(
+                    "success_only_false", success_only=False
+                ),
+                "sub_slot_success_only_extraction": proc.Extract(
+                    "sub_slot_success_only_extraction.email",
+                    "sub_slot_success_only_extraction.date",
+                    success_only=True,
+                ),
             },
-            TRANSITIONS: [
-                Tr(
-                    dst=("root", "utter_friend"),
-                    cnd=cnd.SlotsExtracted(
-                        "friend.coin_address", "friend.email", mode="any"
-                    ),
-                    priority=1.2,
-                ),
-                Tr(
-                    dst=("friend_flow", "ask"),
-                    cnd=cnd.ExactMatch("update"),
-                    priority=0.8,
-                ),
-                Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {
-            RESPONSE: "Please, send your friends bitcoin address and email."
-        },
-        "repeat_question": {
-            RESPONSE: "Please, send your friends bitcoin address and email again."
-        },
-    },
-    "root": {
-        "start": {
-            TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
-        },
-        "fallback": {
-            RESPONSE: "Finishing query",
-            TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
-        },
-        "utter_friend": {
             RESPONSE: rsp.FilledTemplate(
-                "Your friends address is {friend.coin_address} and email is {friend.email}"
+                "Extracted slots:\n"
+                "  Group with partial extraction:\n"
+                "    {partial_extraction}\n"
+                "  Group with success_only:\n"
+                "    {success_only_extraction}\n"
+                "  Group without success_only:\n"
+                "    {success_only_false}\n"
+                "  Extracting sub-slots with success_only:\n"
+                "    {sub_slot_success_only_extraction}"
             ),
-            TRANSITIONS: [Tr(dst=("friend_flow", "ask"))],
-        },
-        "utter_user": {
-            RESPONSE: "Your bitcoin address is {person.coin_address}. Your email is {person.email}. You can update your data or type /send to proceed.",
-            PRE_RESPONSE: {"fill": proc.FillTemplate()},
-            TRANSITIONS: [
-                Tr(dst=("friend_flow", "ask"), cnd=cnd.ExactMatch("/send")),
-                Tr(dst=("user_flow", "ask")),
-            ],
         },
     },
 }
 
 HAPPY_PATH = [
-    ("Start", "Please, send your email and bitcoin address."),
+    ("/start", "Hi! Send me email and date."),
     (
-        "groot@gmail.com",
-        "Your bitcoin address is default_address. Your email is groot@gmail.com. You can update your data or type /send to proceed.",
+        "Only email: email@email.com",
+        "Extracted slots:\n"
+        "  Group with partial extraction:\n"
+        "    {'date': 'None', 'email': 'email@email.com'}\n"
+        "  Group with success_only:\n"
+        "    {'date': 'None', 'email': 'None'}\n"
+        "  Group without success_only:\n"
+        "    {'date': 'None', 'email': 'email@email.com'}\n"
+        "  Extracting sub-slots with success_only:\n"
+        "    {'date': 'None', 'email': 'email@email.com'}",
     ),
-    ("update", "Please, send your email and bitcoin address."),
     (
-        "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF",
-        "Your bitcoin address is 1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF. Your email is groot@gmail.com. You can update your data or type /send to proceed.",
+        "Only date: 01.01.2024",
+        "Extracted slots:\n"
+        "  Group with partial extraction:\n"
+        "    {'date': '01.01.2024', 'email': 'email@email.com'}\n"
+        "  Group with success_only:\n"
+        "    {'date': 'None', 'email': 'None'}\n"
+        "  Group without success_only:\n"
+        "    {'date': '01.01.2024', 'email': 'None'}\n"
+        "  Extracting sub-slots with success_only:\n"
+        "    {'date': '01.01.2024', 'email': 'email@email.com'}",
     ),
-    ("/send", "Please, send your friends bitcoin address and email."),
     (
-        "john_doe@gmail.com",
-        "Your friends address is default_address and email is john_doe@gmail.com",
+        "Both email and date: another_email@email.com; 02.01.2024",
+        "Extracted slots:\n"
+        "  Group with partial extraction:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group with success_only:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group without success_only:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Extracting sub-slots with success_only:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}",
     ),
-    ("update", "Please, send your friends bitcoin address and email."),
     (
-        "3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v",
-        "Your friends address is 3Nxwenay9Z8Lc9JBiywExpnEFiLp6Afp8v and email is default_email",
+        "Partial update (date only): 03.01.2024",
+        "Extracted slots:\n"
+        "  Group with partial extraction:\n"
+        "    {'date': '03.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group with success_only:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group without success_only:\n"
+        "    {'date': '03.01.2024', 'email': 'None'}\n"
+        "  Extracting sub-slots with success_only:\n"
+        "    {'date': '03.01.2024', 'email': 'another_email@email.com'}",
+    ),
+    (
+        "No slots here but `Extract` will still be called.",
+        "Extracted slots:\n"
+        "  Group with partial extraction:\n"
+        "    {'date': '03.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group with success_only:\n"
+        "    {'date': '02.01.2024', 'email': 'another_email@email.com'}\n"
+        "  Group without success_only:\n"
+        "    {'date': 'None', 'email': 'None'}\n"
+        "  Extracting sub-slots with success_only:\n"
+        "    {'date': '03.01.2024', 'email': 'another_email@email.com'}",
     ),
 ]
 
@@ -205,8 +223,7 @@ HAPPY_PATH = [
 # %%
 pipeline = Pipeline(
     script=script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("main", "start"),
     slots=SLOTS,
 )
 
