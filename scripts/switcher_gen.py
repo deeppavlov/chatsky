@@ -4,19 +4,20 @@ import json
 import re
 
 
-# TODO: add a first_version parameter
 # Filter func for building latest versions of each major tag.
-# Returns a dictionary of major tag groups as keys and latest tag's number as values
+# Creates a dictionary of major tag groups as keys and latest tag's number as values
 # e.g. {(0, 6): 7, (1, 2): 3} standing for v0.6.7 and v1.2.3.
-def latest_tags_filter(tag_list: list) -> list:
+# Returns a list of tags right now, as it's more useful outside of this function.
+def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     regex = re.compile(r"^v\d+\.\d+\.\d+$")
     tag_list = list(filter(regex.match, tag_list))
     latest_tags = {}
+    start_version = str(start_version).replace("v", "").split(".")
     for tag in tag_list:
         tag = str(tag).replace("v", "").split(".")
         tag_group = (tag[0], tag[1])
-        # Not building versions lower than v0.8.0
-        if not (int(tag[0]) == 0 and int(tag[1]) < 8):
+        # Not building versions lower than v0.8.0 (or other)
+        if not (int(tag[0]) == int(start_version[0]) and int(tag[1]) < int(start_version[1])):
             # If there is a greater tag in this group, it will have priority over others
             if int(tag[2]) > int(latest_tags.get(tag_group, -1)):
                 latest_tags[tag_group] = tag[2]
@@ -26,7 +27,7 @@ def latest_tags_filter(tag_list: list) -> list:
 
 
 def generate_version_switcher():
-    # TODO: add a start_version parameter with github actions (env)
+    start_version = os.getenv("VERSION_SWITCHER_STARTING_TAG", default="v0.8.0")
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
     # Retrieve and filter git tags
@@ -34,9 +35,8 @@ def generate_version_switcher():
 
     # Could maybe place the latest_tags_filter() in this file, it's only used here.
     tags = [str(x) for x in repo.tags]
-    tags = latest_tags_filter(tags)
+    tags = latest_tags_filter(tags, start_version)
 
-    # TODO: Consider making this look better, it's a bit hard to read.
     # Removing blacklisted tags and adding whitelisted tags.
     tags = [x for x in tags if x not in blacklisted_tags]
     tags = tags + [x for x in whitelisted_tags if x not in tags]
@@ -45,10 +45,6 @@ def generate_version_switcher():
     tags.sort(key=lambda x: x.replace("v", "").split("."))
     tags.reverse()
 
-    # TODO: Could add 'preferred' back in / remove it, but there are issues to be solved in that case.
-    # Like, it will say that 'dev' is bad / outdated, because it's not the 'preferred' version.
-    # Well, it could be useful for new users, seeing a bright red banner if they're using 'dev'
-    # when they didn't really need it.
     switcher_json = []
 
     # TODO: (before merge) Replace all occurrences of 'zerglev' with 'deeppavlov'! Use Ctrl+Shift+F.

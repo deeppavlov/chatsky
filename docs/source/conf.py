@@ -9,9 +9,6 @@ import importlib.util
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -123,8 +120,7 @@ html_css_files = [
     "css/custom.css",
 ]
 
-# Possible to-do: show the warning banner for latest(unstable) version.
-# Version switcher data (change zerglev into deeppavlov)
+# Version switcher data (change zerglev into deeppavlov before merge!)
 version_data = os.getenv("DOC_VERSION", default="latest")
 switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
 
@@ -182,50 +178,5 @@ autodoc_default_options = {
 
 
 def setup(_):
-    link_misc_files(
-        [
-            "utils/db_benchmark/benchmark_schema.json",
-            "utils/db_benchmark/benchmark_streamlit.py",
-        ]
-    )
-    generate_tutorial_links_for_notebook_creation(
-        [
-            ("tutorials.context_storages", "Context Storages"),
-            (
-                "tutorials.messengers",
-                "Interfaces",
-                [
-                    ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API"),
-                ],
-            ),
-            ("tutorials.service", "Service"),
-            (
-                "tutorials.script",
-                "Script",
-                [
-                    ("core", "Core"),
-                    ("responses", "Responses"),
-                ],
-            ),
-            ("tutorials.slots", "Slots"),
-            ("tutorials.stats", "Stats"),
-        ]
-    )
-    regenerate_apiref(
-        [
-            ("chatsky.core.service", "Core.Service"),
-            ("chatsky.core", "Core"),
-            ("chatsky.conditions", "Conditions"),
-            ("chatsky.destinations", "Destinations"),
-            ("chatsky.responses", "Responses"),
-            ("chatsky.processing", "Processing"),
-            ("chatsky.context_storages", "Context Storages"),
-            ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.slots", "Slots"),
-            ("chatsky.stats", "Stats"),
-            ("chatsky.utils.testing", "Testing Utils"),
-            ("chatsky.utils.db_benchmark", "DB Benchmark"),
-            ("chatsky.utils.devel", "Development Utils"),
-        ]
-    )
+    from setup import setup
+    setup(_)

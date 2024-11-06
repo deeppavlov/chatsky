@@ -57,6 +57,7 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           DOC_VERSION: ${{ env.DOC_VERSION }}
+          VERSION_SWITCHER_STARTING_TAG: v0.8.0
           # VERSION_SWITCHER_TAG_BLACKLIST: []
           # VERSION_SWITCHER_TAG_WHITELIST: []
         run: |
@@ -66,12 +67,11 @@ jobs:
         run: touch docs/build/.nojekyll
 
       - name: save changes and checkout to gh-pages
-        # Maybe these three steps could be merged into one?
-        # It would look a bit boilerplate, but maybe it'll be easier to understand the logic.
         run: |
           git add -f .
           git stash
           git checkout gh-pages
+          git pull origin gh-pages
 
       - name: clean outdated documentation
         uses: EndBug/add-and-commit@v9.1.4
@@ -103,7 +103,6 @@ jobs:
           cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
 
       - name: update version switcher file (tags only) (remove master before merging PR)
-        # git push origin gh-pages -f
         if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
         uses: EndBug/add-and-commit@v9.1.4
         with:
