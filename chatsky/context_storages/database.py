@@ -61,7 +61,7 @@ class DBContextStorage(ABC):
 
     @staticmethod
     def _verify_field_name(method: Callable):
-        def verifier(self, *args, **kwargs):
+        def verifier(self: "DBContextStorage", *args, **kwargs):
             field_name = args[1] if len(args) >= 1 else kwargs.get("field_name", None)
             if field_name is None:
                 raise ValueError(f"For method {method.__name__} argument 'field_name' is not found!")
