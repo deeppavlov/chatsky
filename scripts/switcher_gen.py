@@ -9,7 +9,7 @@ import re
 # Returns a dictionary of major tag groups as keys and latest tag's number as values
 # e.g. {(0, 6): 7, (1, 2): 3} standing for v0.6.7 and v1.2.3.
 def latest_tags_filter(tag_list: list) -> list:
-    regex = re.compile(r"^v\d*\.\d*\.\d*$")
+    regex = re.compile(r"^v\d+\.\d+\.\d+$")
     tag_list = list(filter(regex.match, tag_list))
     latest_tags = {}
     for tag in tag_list:
@@ -56,7 +56,6 @@ def generate_version_switcher():
         "name": "latest",
         "version": "master",
         "url": "https://zerglev.github.io/chatsky/master/",
-        "preferred": "true",
     }
     switcher_json += [latest_data]
 
@@ -73,6 +72,8 @@ def generate_version_switcher():
             "version": str(tag),
             "url": url,
         }
+        if tag == tags[0]:
+            tag_data["preferred"] = "true"
         switcher_json += [tag_data]
 
     switcher_json_obj = json.dumps(switcher_json, indent=4)
