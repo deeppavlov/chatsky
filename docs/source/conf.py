@@ -120,9 +120,9 @@ html_css_files = [
     "css/custom.css",
 ]
 
-# Version switcher data (change zerglev into deeppavlov before merge!)
+# Version switcher data
 version_data = os.getenv("DOC_VERSION", default="latest")
-switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
+switcher_url = "https://deeppavlov.github.io/chatsky/switcher.json"
 
 # Shows version warning banner for tags and 'dev', not 'latest' or PRs
 show_version_warning_banner = False

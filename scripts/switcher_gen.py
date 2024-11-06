@@ -47,22 +47,21 @@ def generate_version_switcher():
 
     switcher_json = []
 
-    # TODO: (before merge) Replace all occurrences of 'zerglev' with 'deeppavlov'! Use Ctrl+Shift+F.
     latest_data = {
         "name": "latest",
         "version": "master",
-        "url": "https://zerglev.github.io/chatsky/master/",
+        "url": "https://deeppavlov.github.io/chatsky/master/",
     }
     switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
-        "url": "https://zerglev.github.io/chatsky/dev/",
+        "url": "https://deeppavlov.github.io/chatsky/dev/",
     }
     switcher_json += [dev_data]
 
     for tag in tags:
-        url = "https://zerglev.github.io/chatsky/" + str(tag) + "/"
+        url = "https://deeppavlov.github.io/chatsky/" + str(tag) + "/"
         tag_data = {
             "name": str(tag),
             "version": str(tag),
