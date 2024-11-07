@@ -69,12 +69,17 @@ def recursive_getattr(obj, slot_name: SlotName):
 
 
 def recursive_setattr(obj, slot_name: SlotName, value):
-    parent_slot, _, slot = slot_name.rpartition(".")
+    parent_slot, sep, slot = slot_name.rpartition(".")
 
-    if parent_slot:
-        setattr(recursive_getattr(obj, parent_slot), slot, value)
+    if sep == ".":
+        parent_obj = recursive_getattr(obj, parent_slot)
     else:
-        setattr(obj, slot, value)
+        parent_obj = obj
+
+    if isinstance(value, ExtractedGroupSlot):
+        getattr(parent_obj, slot).update(value)
+    else:
+        setattr(parent_obj, slot, value)
 
 
 class SlotNotExtracted(Exception):
@@ -261,9 +266,11 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     """
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    allow_partial_extraction: bool = False
+    """If True, extraction returns only successfully extracted child slots."""
 
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    def __init__(self, allow_partial_extraction=False, **kwargs):
+        super().__init__(allow_partial_extraction=allow_partial_extraction, **kwargs)
 
     @model_validator(mode="after")
     def __check_extra_field_names__(self):
@@ -279,9 +286,12 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
-        return ExtractedGroupSlot(
-            **{child_name: child_value for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys())}
-        )
+        extracted_values = {}
+        for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
+            if child_value.__slot_extracted__ or not self.allow_partial_extraction:
+                extracted_values[child_name] = child_value
+
+        return ExtractedGroupSlot(**extracted_values)
 
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(
@@ -367,6 +377,8 @@ class SlotManager(BaseModel):
     async def extract_slot(self, slot_name: SlotName, ctx: Context, success_only: bool) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
+
+        Extracted group slots update slot storage instead of overwriting it.
 
         :raises KeyError: If the slot with the specified name does not exist.
 
