@@ -1,145 +1,84 @@
-from chatsky import (
-    RESPONSE,
-    TRANSITIONS,
-    PRE_TRANSITION,
-    PRE_RESPONSE,
-    GLOBAL,
-    LOCAL,
-    Pipeline,
-    Transition as Tr,
-    conditions as cnd,
-    processing as proc,
-    responses as rsp,
-)
-
 from chatsky.slots import RegexpSlot, GroupSlot
+from chatsky.slots.slots import SlotManager
+from chatsky.core import Message
 
+import pytest
 
-from chatsky.utils.testing import (
-    check_happy_path,
+test_slot = GroupSlot(
+    root_slot=GroupSlot(
+        one=RegexpSlot(regexp=r"1"),
+        two=RegexpSlot(regexp=r"2"),
+        nested_group=GroupSlot(
+            three=RegexpSlot(regexp=r"3"),
+            four=RegexpSlot(regexp=r"4"),
+            allow_partial_extraction=False,
+        ),
+        nested_partial_group=GroupSlot(
+            five=RegexpSlot(regexp=r"5"),
+            six=RegexpSlot(regexp=r"6"),
+            allow_partial_extraction=True,
+        ),
+        allow_partial_extraction=True,
+    )
 )
 
-SLOTS = {
-    "person": GroupSlot(
-        username=RegexpSlot(
-            regexp=r"username is ([a-zA-Z]+)",
-            match_group_idx=1,
-        ),
-        email=RegexpSlot(
-            regexp=r"email is ([a-z@\.A-Z]+)",
-            match_group_idx=1,
-        ),
-    ),
-    "friend": GroupSlot(
-        first_name=RegexpSlot(regexp=r"^[A-Z][a-z]+?(?= )", default_value="default_name"),
-        last_name=RegexpSlot(regexp=r"(?<= )[A-Z][a-z]+", default_value="default_surname"),
-        allow_partially_extracted=True,
-    ),
+extracted_slots = {
+    "root_slot.one": "1",
+    "root_slot.two": "2",
+    "root_slot.nested_group.three": "3",
+    "root_slot.nested_group.four": "4",
+    "root_slot.nested_partial_group.five": "5",
+    "root_slot.nested_partial_group.six": "6",
 }
 
-script = {
-    GLOBAL: {TRANSITIONS: [Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))]},
-    "username_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.username")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("email_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username"),
-                    priority=1.2,
-                ),
-                Tr(dst=("username_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {
-            RESPONSE: "Write your username (my username is ...):",
-        },
-        "repeat_question": {
-            RESPONSE: "Please, type your username again (my username is ...):",
-        },
-    },
-    "email_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.email")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("friend_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username", "person.email"),
-                    priority=1.2,
-                ),
-                Tr(dst=("email_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {
-            RESPONSE: "Write your email (my email is ...):",
-        },
-        "repeat_question": {
-            RESPONSE: "Please, write your email again (my email is ...):",
-        },
-    },
-    "friend_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("friend", success_only=False)},
-            TRANSITIONS: [
-                Tr(
-                    dst=("root", "utter"),
-                    cnd=cnd.SlotsExtracted("friend.first_name", "friend.last_name", mode="any"),
-                    priority=1.2,
-                ),
-                Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {RESPONSE: "Please, name me one of your friends: (John Doe)"},
-        "repeat_question": {RESPONSE: "Please, name me one of your friends again: (John Doe)"},
-    },
-    "root": {
-        "start": {
-            TRANSITIONS: [Tr(dst=("username_flow", "ask"))],
-        },
-        "fallback": {
-            RESPONSE: "Finishing query",
-            TRANSITIONS: [Tr(dst=("username_flow", "ask"))],
-        },
-        "utter": {
-            RESPONSE: rsp.FilledTemplate("Your friend is {friend.first_name} {friend.last_name}"),
-            TRANSITIONS: [Tr(dst=("root", "utter_alternative"))],
-        },
-        "utter_alternative": {
-            RESPONSE: "Your username is {person.username}. " "Your email is {person.email}.",
-            PRE_RESPONSE: {"fill": proc.FillTemplate()},
-        },
-    },
-}
 
-HAPPY_PATH = [
-    ("hi", "Write your username (my username is ...):"),
-    ("my username is groot", "Write your email (my email is ...):"),
-    (
-        "my email is groot@gmail.com",
-        "Please, name me one of your friends: (John Doe)",
-    ),
-    ("Bob Page", "Your friend is Bob Page"),
-    ("ok", "Your username is groot. Your email is groot@gmail.com."),
-    ("ok", "Finishing query"),
-    ("again", "Write your username (my username is ...):"),
-    ("my username is groot", "Write your email (my email is ...):"),
-    (
-        "my email is groot@gmail.com",
-        "Please, name me one of your friends: (John Doe)",
-    ),
-    ("Jim ", "Your friend is Jim Page"),
-    ("ok", "Your username is groot. Your email is groot@gmail.com."),
-    ("ok", "Finishing query"),
-]
+@pytest.fixture(scope="function")
+def context_with_request(context):
+    def inner(request):
+        context.add_request(Message(request))
+        return context
 
-# %%
-pipeline = Pipeline(
-    script=script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
-    slots=SLOTS,
+    return inner
+
+
+@pytest.fixture(scope="function")
+def empty_slot_manager():
+    manager = SlotManager()
+    manager.set_root_slot(test_slot)
+    return manager
+
+
+def get_extracted_slots(manager: SlotManager):
+    values = []
+    for slot, value in extracted_slots.items():
+        extracted_value = manager.get_extracted_slot(slot)
+        if extracted_value.__slot_extracted__:
+            if extracted_value.value == value:
+                values.append(value)
+            else:
+                raise RuntimeError(f"Extracted value {extracted_value} does not match expected {value}.")
+    return values
+
+
+@pytest.mark.parametrize(
+    "message,extracted",
+    [("1 2 3", ["1", "2"]), ("1 3 5", ["1", "5"]), ("3 4 5 6", ["3", "4", "5", "6"])],
 )
+async def test_partial_extraction(message, extracted, context_with_request, empty_slot_manager):
+    await empty_slot_manager.extract_slot("root_slot", context_with_request(message), success_only=False)
+
+    assert extracted == get_extracted_slots(empty_slot_manager)
 
 
-def test_happy_path():
-    check_happy_path(pipeline, HAPPY_PATH, printout=True)  # This is a function for automatic tutorial running
+async def test_slot_storage_update(context_with_request, empty_slot_manager):
+    await empty_slot_manager.extract_slot("root_slot", context_with_request("1 3 5"), success_only=False)
+
+    assert get_extracted_slots(empty_slot_manager) == ["1", "5"]
+
+    await empty_slot_manager.extract_slot("root_slot", context_with_request("2 4 6"), success_only=False)
+
+    assert get_extracted_slots(empty_slot_manager) == ["1", "2", "5", "6"]
+
+    await empty_slot_manager.extract_slot("root_slot.nested_group", context_with_request("3 4"), success_only=False)
+
+    assert get_extracted_slots(empty_slot_manager) == ["1", "2", "3", "4", "5", "6"]

@@ -24,12 +24,8 @@ from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
-from chatsky.core.service.types import (
-    GlobalExtraHandlerType,
-    ExtraHandlerFunction,
-)
 from .service import Service
-from .utils import finalize_service_group
+from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
@@ -109,15 +105,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Timeout to add to pipeline root service group.
     """
-    optimization_warnings: bool = False
-    """
-    Asynchronous pipeline optimization check request flag;
-    warnings will be sent to logs. Additionally, it has some calculated fields:
-
-    - `services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-    - `actor` is a pipeline actor, found among services.
-
-    """
     parallelize_processing: bool = False
     """
     This flag determines whether or not the functions
@@ -141,7 +128,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         before_handler: ComponentExtraHandlerInitTypes = None,
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
-        optimization_warnings: bool = None,
         parallelize_processing: bool = None,
     ):
         if fallback_label is None:
@@ -160,7 +146,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "before_handler": before_handler,
             "after_handler": after_handler,
             "timeout": timeout,
-            "optimization_warnings": optimization_warnings,
             "parallelize_processing": parallelize_processing,
         }
         empty_fields = set()
@@ -222,13 +207,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             after_handler=self.after_handler,
             timeout=self.timeout,
         )
-        services_pipeline.name = "pipeline"
-        services_pipeline.path = ".pipeline"
+        services_pipeline.name = ""
+        services_pipeline.path = ""
 
         finalize_service_group(services_pipeline, path=services_pipeline.path)
-
-        if self.optimization_warnings:
-            services_pipeline.log_optimization_warnings()
 
         return services_pipeline
 
@@ -245,60 +227,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
-
-    def add_global_handler(
-        self,
-        global_handler_type: GlobalExtraHandlerType,
-        extra_handler: ExtraHandlerFunction,
-        whitelist: Optional[List[str]] = None,
-        blacklist: Optional[List[str]] = None,
-    ):
-        """
-        Method for adding global wrappers to pipeline.
-        Different types of global wrappers are called before/after pipeline execution
-        or before/after each pipeline component.
-        They can be used for pipeline statistics collection or other functionality extensions.
-        NB! Global wrappers are still wrappers,
-        they shouldn't be used for much time-consuming tasks (see :py:mod:`chatsky.core.service.extra`).
-
-        :param global_handler_type: (required) indication where the wrapper
-            function should be executed.
-        :param extra_handler: (required) wrapper function itself.
-        :type extra_handler: ExtraHandlerFunction
-        :param whitelist: a list of services to only add this wrapper to.
-        :param blacklist: a list of services to not add this wrapper to.
-        :return: `None`
-        """
-
-        def condition(name: str) -> bool:
-            return (whitelist is None or name in whitelist) and (blacklist is None or name not in blacklist)
-
-        if (
-            global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-            or global_handler_type is GlobalExtraHandlerType.AFTER_ALL
-        ):
-            whitelist = ["pipeline"]
-            global_handler_type = (
-                GlobalExtraHandlerType.BEFORE
-                if global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-                else GlobalExtraHandlerType.AFTER
-            )
-
-        self.services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
-
-    @property
-    def info_dict(self) -> dict:
-        """
-        Property for retrieving info dictionary about this pipeline.
-        Returns info dict, containing most important component public fields as well as its type.
-        All complex or unserializable fields here are replaced with 'Instance of [type]'.
-        """
-        return {
-            "type": type(self).__name__,
-            "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
-            "context_storage": f"Instance of {type(self.context_storage).__name__}",
-            "services": [self.services_pipeline.info_dict],
-        }
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
@@ -335,12 +263,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
         ctx.framework_data.pipeline = self
+        initialize_service_states(ctx, self.services_pipeline)
 
         ctx.add_request(request)
-        result = await self.services_pipeline(ctx, self)
-
-        if asyncio.iscoroutine(result):
-            await result
+        await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
