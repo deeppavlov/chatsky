@@ -3,7 +3,7 @@
 # LLM: 1. Basics
 
 Using Chatsky you can easily add LLM invocations to your script.
-In this tutorial we will see how to use LLM for responses and conditions.
+In this tutorial we will see how to use LLMs for responses and conditions.
 Chatsky uses langchain under the hood to connect to the remote models.
 """
 
@@ -37,7 +37,7 @@ from langchain_openai import ChatOpenAI
 
 # %% [markdown]
 """
-Now we need to create a model object.
+First we need to create a model object.
 Keep in mind, that if you instantiate model object outside of the script,
 it will be reused across all the nodes and therefore it will store all dialogue history.
 This is not advised if you are short on tokens or if you do not need to store all dialogue history.
@@ -48,12 +48,14 @@ Via `history` parameter you can set number of dialogue _turns_ that the model wi
 # %%
 model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
-    system_prompt="You are an experienced barista in a local coffeshop. Answer your customers questions about coffee and barista work.",
+    system_prompt="You are an experienced barista in a local coffeshop. Answer your customer's questions about coffee and barista work.",
 )
 llm_response = LLMResponse()
 # %% [markdown]
 """
-Also you can pass images to the LLM, just pass them as attachments to your message.
+Also you can pass images to the LLM: any chatsky Images in message attachments
+will be processed and sent to the LLM in an appropriate format.
+
 As you can see in this script, you can pass an additional prompt to the LLM. We will cover that thoroughly in the Prompt usage tutorial.
 """
 
@@ -85,7 +87,7 @@ toy_script = {
                     dst="boss_node",
                     cnd=LLMCondition(
                         model_name="barista_model",
-                        prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
+                        prompt="Return TRUE if the customer says they are your boss, and FALSE otherwise. Only ONE word must be in the output.",
                         method=Contains(pattern="TRUE"),
                     ),
                 ),
@@ -93,7 +95,7 @@ toy_script = {
             ],
         },
         "boss_node": {
-            RESPONSE: Message("Input your ID number."),
+            RESPONSE: Message("You are my boss."),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.true()),
             ],

@@ -63,7 +63,7 @@ class Movie(BaseModel):
 class ImportantMessage(Message):
     text: str = Field(description="Text of the note")
     misc: dict = Field(
-        description="A dictonary with 'important' key and true/false value in it"
+        description="A dictionary with 'important' key and true/false value in it"
     )
 
 

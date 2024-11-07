@@ -2,7 +2,7 @@
 """
 # LLM: 5. LLM Slots
 
-If we want to retrieve some information from user input like names, address or email we can simply use Chatsky's Slot system and user regexes or other formally specified data retrieval techniques. But if the data is more finicky to get or not explicitly presented in utterance we encourage you to utilize Chatsky LLM Slots.
+If we want to retrieve some information from user input like name, address or email we can simply use Chatsky's Slot system and user regexes or other formally specified data retrieval techniques. But if the data is more finicky to get or not explicitly presented in utterance we encourage you to utilize Chatsky LLM Slots.
 In this tutorial we will see how we can set up Slots that uses LLM's under the hood to extract more obscure information from users input.
 """
 # %pip install chatsky[llm]
@@ -73,7 +73,7 @@ script = {
         },
         "start": {RESPONSE: "", TRANSITIONS: [Tr(dst=("user_flow", "ask"))]},
         "ask": {
-            RESPONSE: "Hello! Tell me about yourself, what are you doing for living, your hobbies. And don't forget to introduce yourself!",
+            RESPONSE: "Hello! Tell me about yourself: what are you doing for the living or your hobbies. And don't forget to introduce yourself!",
         },
         "tell": {
             RESPONSE: rsp.FilledTemplate(
