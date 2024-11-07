@@ -74,7 +74,7 @@ Any slot in this group is saved if and only if all of the slots in the group
 are successfully extracted within a single `Extract` call.
 
 Group `success_only_false` is extracted with the `success_only` set to False.
-Any slot in this group is saved (even if extraction was not successful).
+Every slot in this group is saved (even if extraction was not successful).
 
 Group `sub_slot_success_only_extraction` is extracted by passing all of its
 child slots to the `Extract` method with the `success_only` flag set to True.
