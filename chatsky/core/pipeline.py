@@ -133,7 +133,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         *,
         default_priority: float = None,
         slots: GroupSlot = None,
-        models: dict = None, 
+        models: dict = None,
         messenger_interface: MessengerInterface = None,
         context_storage: Union[DBContextStorage, dict] = None,
         pre_services: ServiceGroupInitTypes = None,

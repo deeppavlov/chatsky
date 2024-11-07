@@ -63,21 +63,26 @@ class LLMResponse(BaseResponse):
                     [ctx.requests[x] for x in range(1, len(ctx.requests) + 1)],
                     [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
                 )
-                # print(f"Pairs: {[p for p in pairs]}")
                 if history != -1:
                     for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-history:]):
-                        history_messages.append(await message_to_langchain(req, pipeline=pipeline))
-                        history_messages.append(await message_to_langchain(resp, pipeline=pipeline, source="ai"))
+                        history_messages.append(await message_to_langchain(req, pipeline=pipeline, max_size=max_size))
+                        history_messages.append(
+                            await message_to_langchain(resp, pipeline=pipeline, source="ai", max_size=max_size)
+                        )
                 else:
                     # TODO: Fix redundant code
                     for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
-                        history_messages.append(await message_to_langchain(req, pipeline=pipeline))
-                        history_messages.append(await message_to_langchain(resp, pipeline=pipeline, source="ai"))
+                        history_messages.append(await message_to_langchain(req, pipeline=pipeline, max_size=max_size))
+                        history_messages.append(
+                            await message_to_langchain(resp, pipeline=pipeline, source="ai", max_size=max_size)
+                        )
 
             if prompt:
                 msg = await __prompt_to_message(prompt, ctx)
                 history_messages.append(await message_to_langchain(msg, pipeline=pipeline, source="system"))
-            history_messages.append(await message_to_langchain(ctx.last_request, pipeline=pipeline, source="human"))
+            history_messages.append(
+                await message_to_langchain(ctx.last_request, pipeline=pipeline, source="human", max_size=max_size)
+            )
             return await model.respond(history_messages, message_schema=message_schema)
 
         return wrapped

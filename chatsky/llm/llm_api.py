@@ -23,7 +23,7 @@ from chatsky.core.context import Context
 from chatsky.core.pipeline import Pipeline
 from chatsky.llm.methods import BaseMethod
 
-from typing import Union, Callable, Type, Optional
+from typing import Union, Type, Optional
 from pydantic import BaseModel
 
 from chatsky.llm.utils import message_to_langchain
@@ -54,21 +54,27 @@ class LLM_API:
         if not langchain_available:
             raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
 
+    async def __get_llm_response(self, history: list = [""], message_schema: BaseModel = None):
+        if message_schema is None:
+            result = await self.parser.ainvoke(await self.model.ainvoke(history))
+        else:
+            structured_model = self.model.with_structured_output(message_schema)
+            result = Message.model_validate(await structured_model.ainvoke(history))
+        return result
+
     async def respond(
         self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     ) -> Message:
-        if message_schema is None:
-            result = await self.parser.ainvoke(await self.model.ainvoke(history))
-            result = Message(text=result)
 
+        result = await self.__get_llm_response(history, message_schema)
+
+        if message_schema is None:
+            result = Message(text=result)
         elif issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
-            structured_model = self.model.with_structured_output(message_schema)
-            result = Message.model_validate(await structured_model.ainvoke(history))
+            result = Message.model_validate(result)
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
-            structured_model = self.model.with_structured_output(message_schema)
-            result = await structured_model.ainvoke(history)
             result = Message(text=str(result))
 
         if result.annotations:

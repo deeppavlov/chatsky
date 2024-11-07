@@ -13,8 +13,7 @@ from chatsky import (
     TRANSITIONS,
     RESPONSE,
     Pipeline,
-    Transition as Tr,
-    conditions as cnd,
+    Transition as Tr
     # all the aliases used in tutorials are available for direct import
     # e.g. you can do `from chatsky import Tr` instead
 )
