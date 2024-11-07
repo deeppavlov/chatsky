@@ -195,8 +195,6 @@ def setup(_):
             ("chatsky.processing", "Processing"),
             ("chatsky.context_storages", "Context Storages"),
             ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.pipeline", "Pipeline"),
-            ("chatsky.script", "Script"),
             ("chatsky.llm", "LLM Integration"),
             ("chatsky.slots", "Slots"),
             ("chatsky.stats", "Stats"),
