@@ -188,7 +188,6 @@ test_no_cov = "scripts.test:test_no_cov"
 test_no_deps = "scripts.test:test_no_deps"
 test_all = "scripts.test:test_all"
 docs = "scripts.doc:docs"
-tmp_docs = "scripts.doc:tmp_docs"
 
 
 

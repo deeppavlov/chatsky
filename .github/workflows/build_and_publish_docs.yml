@@ -11,8 +11,6 @@ on:
   pull_request:
     branches:
     - dev
-    # TODO: Need to remove the branch below, it's just for testing.
-    - feat/sphinx_multiversion
   workflow_dispatch:
 
 concurrency:

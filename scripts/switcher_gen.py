@@ -4,10 +4,9 @@ import json
 import re
 
 
-# Filter func for building latest versions of each major tag.
-# Creates a dictionary of major tag groups as keys and latest tag's number as values
-# e.g. {(0, 6): 7, (1, 2): 3} standing for v0.6.7 and v1.2.3.
-# Returns a list of tags right now, as it's more useful outside of this function.
+# Filter function for building latest versions of each major tag.
+# For example, out of ["v0.8.0", "v0.8.1", "v0.9.2", "v0.9.3"]
+# those would be ["v0.8.1", "v0.9.3"]
 def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     regex = re.compile(r"^v\d+\.\d+\.\d+$")
     tag_list = list(filter(regex.match, tag_list))
@@ -16,12 +15,12 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     for tag in tag_list:
         tag = str(tag).replace("v", "").split(".")
         tag_group = (tag[0], tag[1])
-        # Not building versions lower than v0.8.0 (or other)
+        # Not building versions lower than the start version (initially, "v0.8.0")
         if not (int(tag[0]) == int(start_version[0]) and int(tag[1]) < int(start_version[1])):
             # If there is a greater tag in this group, it will have priority over others
             if int(tag[2]) > int(latest_tags.get(tag_group, -1)):
                 latest_tags[tag_group] = tag[2]
-    # Could return a dictionary, but it looks unclear.
+    # Could return that dictionary, but it looks unclear.
     tag_list = ["v" + x[0] + "." + x[1] + "." + latest_tags[x] for x in latest_tags.keys()]
     return tag_list
 
@@ -41,7 +40,7 @@ def generate_version_switcher():
     tags = [str(x) for x in repo.tags]
     tags = latest_tags_filter(tags, start_version)
 
-    # Removing blacklisted tags and adding whitelisted tags.
+    # Remove blacklisted tags and add whitelisted tags.
     tags = [x for x in tags if x not in blacklisted_tags]
     tags = tags + [x for x in whitelisted_tags if x not in tags]
 
