@@ -124,11 +124,6 @@ html_css_files = [
 version_data = os.getenv("DOC_VERSION", default="latest")
 switcher_url = "https://deeppavlov.github.io/chatsky/switcher.json"
 
-# Shows version warning banner for tags and 'dev', not 'latest' or PRs
-show_version_warning_banner = False
-if version_data == "dev" or re.match(r"^v\d+\.\d+\.\d+$", version_data):
-    show_version_warning_banner = True
-
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
@@ -159,7 +154,6 @@ html_theme_options = {
     },
     "navbar_persistent": ["search-button.html", "theme-switcher.html"],
     "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
-    "show_version_warning_banner": show_version_warning_banner,
 }
 
 favicons = [
