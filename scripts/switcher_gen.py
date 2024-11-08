@@ -30,12 +30,12 @@ def generate_version_switcher():
     start_version = os.getenv("VERSION_SWITCHER_STARTING_TAG", default="v0.8.0")
 
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default="")
-    if blacklisted_tags = "":
+    if blacklisted_tags == "":
         blacklisted_tags = []
     blacklisted_tags = blacklisted_tags.split(",")
 
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default="")
-    if whitelisted_tags = "":
+    if whitelisted_tags == "":
         whitelisted_tags = []
     whitelisted_tags = whitelisted_tags.split(",")
 
