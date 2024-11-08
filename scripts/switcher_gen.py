@@ -27,13 +27,17 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
 
 
 def generate_version_switcher():
+    # Retrieve GitHub Actions variables and parse them
     start_version = os.getenv("VERSION_SWITCHER_STARTING_TAG", default="v0.8.0")
+
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
+    blacklisted_tags = blacklisted_tags.split(",")
+
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
+    whitelisted_tags = whitelisted_tags.split(",")
+
     # Retrieve and filter git tags
     repo = git.Repo("./")
-
-    # Could maybe place the latest_tags_filter() in this file, it's only used here.
     tags = [str(x) for x in repo.tags]
     tags = latest_tags_filter(tags, start_version)
 
@@ -45,6 +49,7 @@ def generate_version_switcher():
     tags.sort(key=lambda x: x.replace("v", "").split("."))
     tags.reverse()
 
+    # Create the version switcher
     switcher_json = []
 
     latest_data = {
@@ -67,8 +72,6 @@ def generate_version_switcher():
             "version": str(tag),
             "url": url,
         }
-        if tag == tags[0]:
-            tag_data["preferred"] = "true"
         switcher_json += [tag_data]
 
     switcher_json_obj = json.dumps(switcher_json, indent=4)
