@@ -46,8 +46,6 @@ class RedisContextStorage(DBContextStorage):
     :param key_prefix: "namespace" prefix for all keys, should be set for efficient clearing of all data.
     """
 
-    is_asynchronous = True
-
     def __init__(
         self,
         path: str,

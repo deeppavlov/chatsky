@@ -193,7 +193,7 @@ class SQLContextStorage(DBContextStorage):
     @property
     def is_asynchronous(self) -> bool:
         return self.dialect != "sqlite"
-    
+
     async def _create_self_tables(self):
         """
         Create tables required for context storing, if they do not exist yet.
@@ -222,6 +222,7 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         logger.debug(f"Loading main info for {ctx_id}...")
         stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
@@ -230,6 +231,7 @@ class SQLContextStorage(DBContextStorage):
             logger.debug(f"Main info loaded for {ctx_id}")
             return None if result is None else result[1:]
 
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         logger.debug(f"Updating main info for {ctx_id}...")
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
@@ -253,6 +255,7 @@ class SQLContextStorage(DBContextStorage):
         logger.debug(f"Main info updated for {ctx_id}")
 
     # TODO: use foreign keys instead maybe?
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def delete_context(self, ctx_id: str) -> None:
         logger.debug(f"Deleting context {ctx_id}...")
         async with self.engine.begin() as conn:
@@ -263,6 +266,7 @@ class SQLContextStorage(DBContextStorage):
         logger.debug(f"Context {ctx_id} deleted")
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
@@ -278,6 +282,7 @@ class SQLContextStorage(DBContextStorage):
             return result
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name]).where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
@@ -287,6 +292,7 @@ class SQLContextStorage(DBContextStorage):
             return result
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
@@ -297,6 +303,7 @@ class SQLContextStorage(DBContextStorage):
             return result
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         if len(items) == 0:
@@ -320,6 +327,7 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(update_stmt)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
+    @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def clear_all(self) -> None:
         logger.debug("Clearing all")
         async with self.engine.begin() as conn:

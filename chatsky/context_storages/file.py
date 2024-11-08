@@ -47,8 +47,6 @@ class FileContextStorage(DBContextStorage, ABC):
     :param serializer: Serializer that will be used for serializing contexts.
     """
 
-    is_asynchronous = False
-
     def __init__(
         self, 
         path: str = "",
@@ -134,12 +132,14 @@ class FileContextStorage(DBContextStorage, ABC):
 
 
 class JSONContextStorage(FileContextStorage):
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "w", encoding="utf-8") as file_stream:
             await file_stream.write(data.model_dump_json())
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -151,12 +151,14 @@ class JSONContextStorage(FileContextStorage):
 
 
 class PickleContextStorage(FileContextStorage):
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "wb") as file_stream:
             await file_stream.write(dumps(data.model_dump()))
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -179,9 +181,11 @@ class ShelveContextStorage(FileContextStorage):
         self._storage = None
         FileContextStorage.__init__(self, path, rewrite_existing, configuration)
 
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         self._storage[self._SHELVE_ROOT] = data.model_dump()
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if self._storage is None:
             content = SerializableStorage()

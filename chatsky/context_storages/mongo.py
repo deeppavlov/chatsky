@@ -44,8 +44,6 @@ class MongoContextStorage(DBContextStorage):
     _UNIQUE_KEYS = "unique_keys"
     _ID_FIELD = "_id"
 
-    is_asynchronous = True
-
     def __init__(
         self,
         path: str,

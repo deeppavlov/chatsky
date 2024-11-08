@@ -58,8 +58,6 @@ class YDBContextStorage(DBContextStorage):
     _LIMIT_VAR = "limit"
     _KEY_VAR = "key"
 
-    is_asynchronous = True
-
     def __init__(
         self,
         path: str,
