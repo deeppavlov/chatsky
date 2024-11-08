@@ -57,14 +57,17 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           DOC_VERSION: ${{ env.DOC_VERSION }}
-          VERSION_SWITCHER_STARTING_TAG: v0.8.0
-          # VERSION_SWITCHER_TAG_BLACKLIST: []
-          # VERSION_SWITCHER_TAG_WHITELIST: []
+          VERSION_SWITCHER_STARTING_TAG: ${{ env.VERSION_SWITCHER_STARTING_TAG }}
+          VERSION_SWITCHER_TAG_BLACKLIST: ${{ env.VERSION_SWITCHER_TAG_BLACKLIST }}
+          VERSION_SWITCHER_TAG_WHITELIST: ${{ env.VERSION_SWITCHER_TAG_WHITELIST }}
         run: |
           python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
+
+      - name: set up mutex
+        uses: ben-z/gh-action-mutex@v1.0.0-alpha.9
 
       - name: deploy website
         uses: JamesIves/github-pages-deploy-action@v4
