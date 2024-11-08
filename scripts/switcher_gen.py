@@ -32,12 +32,14 @@ def generate_version_switcher():
     blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default="")
     if blacklisted_tags == "":
         blacklisted_tags = []
-    blacklisted_tags = blacklisted_tags.split(",")
+    else:
+        blacklisted_tags = blacklisted_tags.split(",")
 
     whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default="")
     if whitelisted_tags == "":
         whitelisted_tags = []
-    whitelisted_tags = whitelisted_tags.split(",")
+    else:
+        whitelisted_tags = whitelisted_tags.split(",")
 
     # Retrieve and filter git tags
     repo = git.Repo("./")
