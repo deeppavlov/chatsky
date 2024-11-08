@@ -66,47 +66,25 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: save changes and checkout to gh-pages
-        run: |
-          git add -f .
-          git stash
-          git checkout gh-pages
-          git pull origin gh-pages
-
-      - name: clean outdated documentation
-        uses: EndBug/add-and-commit@v9.1.4
-        with:
-          remove: '-r --ignore-unmatch ${{ env.DOC_VERSION }}'
-
-      - name: checkout to original branch and reapply changes
-        run: |
-          git checkout -
-          git stash pop
-
       - name: deploy website
-        # TODO: Make a better True-False flag for deploying for Pull Requests. If at all?
-        # Make this use GitHub Action Variables.
-        # (PR only) Changed the variable below to False if you don't want to build docs for your PR
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
           target-folder: ${{ env.DOC_VERSION }}
-          clean: False
+          clean: True
 
-      - name: checkout to gh-pages (tags only) (remove master before merging PR)
+      - name: copy version switcher for updating it
         if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
-        run: |
-          git stash
-          git checkout gh-pages
-          git pull origin gh-pages
-          cp ${{ env.DOC_VERSION }}/_static/switcher.json ./switcher.json
+        run: cp docs/build/_static/switcher.json docs/build/switcher/switcher.json
 
-      - name: update version switcher file (tags only) (remove master before merging PR)
+      - name: update version switcher
         if: ${{ startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master' }}
-        uses: EndBug/add-and-commit@v9.1.4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          add: './switcher.json --force'
+          branch: gh-pages
+          folder: docs/build/switcher/
+          clean: False
 
       - name: print link to the documentation
         run: |
