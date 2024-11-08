@@ -29,10 +29,14 @@ def generate_version_switcher():
     # Retrieve GitHub Actions variables and parse them
     start_version = os.getenv("VERSION_SWITCHER_STARTING_TAG", default="v0.8.0")
 
-    blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default=[])
+    blacklisted_tags = os.getenv("VERSION_SWITCHER_TAG_BLACKLIST", default="")
+    if blacklisted_tags = "":
+        blacklisted_tags = []
     blacklisted_tags = blacklisted_tags.split(",")
 
-    whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default=[])
+    whitelisted_tags = os.getenv("VERSION_SWITCHER_TAG_WHITELIST", default="")
+    if whitelisted_tags = "":
+        whitelisted_tags = []
     whitelisted_tags = whitelisted_tags.split(",")
 
     # Retrieve and filter git tags
