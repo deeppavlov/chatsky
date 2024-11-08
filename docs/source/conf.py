@@ -122,7 +122,7 @@ html_css_files = [
 
 # Version switcher data
 version_data = os.getenv("DOC_VERSION", default="latest")
-switcher_url = "https://deeppavlov.github.io/chatsky/switcher.json"
+switcher_url = "https://zerglev.github.io/chatsky/switcher.json"
 
 # Theme options
 html_theme_options = {
