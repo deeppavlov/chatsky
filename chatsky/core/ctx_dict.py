@@ -1,11 +1,11 @@
 from __future__ import annotations
+from asyncio import gather
 from hashlib import sha256
 import logging
 from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
-from .asyncronous import launch_coroutines
 from chatsky.utils.logging import collapse_num_list
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def connected(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
         val_adapter = TypeAdapter(value_type)
         logger.debug(f"Connected context dict created for {id}, {field}")
-        keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
+        keys, items = await gather(storage.load_field_keys(id, field), storage.load_field_latest(id, field))
         val_key_items = [(k, v) for k, v in items if v is not None]
         hashes = {k: get_hash(v) for k, v in val_key_items}
         objected = {k: val_adapter.validate_json(v) for k, v in val_key_items}
@@ -227,12 +227,9 @@ class ContextDict(BaseModel, Generic[K, V]):
         if self._storage is not None:
             logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
             stored = [(k, e.encode()) for k, e in self.model_dump().items()]
-            await launch_coroutines(
-                [
-                    self._storage.update_field_items(self._ctx_id, self._field_name, stored),
-                    self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
-                ],
-                self._storage.is_asynchronous,
+            await gather(
+                self._storage.update_field_items(self._ctx_id, self._field_name, stored),
+                self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added))
             )
             logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} stored: {collapse_num_list([k for k, _ in stored])}")
             self._added, self._removed = set(), set()

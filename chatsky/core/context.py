@@ -17,7 +17,7 @@ This allows developers to save the context data and resume the conversation late
 """
 
 from __future__ import annotations
-import asyncio
+from asyncio import Event, gather
 from uuid import uuid4
 from time import time_ns
 from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
@@ -29,7 +29,7 @@ from chatsky.context_storages.database import DBContextStorage
 from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.utils.context_dict import ContextDict, launch_coroutines
+from chatsky.core.ctx_dict import ContextDict
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
@@ -57,7 +57,7 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     :py:class:`.ComponentExecutionState` of this pipeline service.
     Cleared at the end of every turn.
     """
-    finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
+    finished_event: Event = Field(default_factory=Event)
     """
     Asyncio `Event` which can be awaited until this service finishes.
     Cleared at the end of every turn.
@@ -151,14 +151,11 @@ class Context(BaseModel):
                 logger.warning(f"Id is not a string: {id}. Converting to string.")
                 id = str(id)
             logger.debug(f"Connected context created with uid: {id}")
-            main, labels, requests, responses = await launch_coroutines(
-                [
-                    storage.load_main_info(id),
-                    ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
-                    ContextDict.connected(storage, id, storage._requests_field_name, Message),
-                    ContextDict.connected(storage, id, storage._responses_field_name, Message),
-                ],
-                storage.is_asynchronous,
+            main, labels, requests, responses = await gather(
+                storage.load_main_info(id),
+                ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
+                ContextDict.connected(storage, id, storage._requests_field_name, Message),
+                ContextDict.connected(storage, id, storage._responses_field_name, Message)
             )
             if main is None:
                 crt_at = upd_at = time_ns()
@@ -261,14 +258,11 @@ class Context(BaseModel):
             self._updated_at = time_ns()
             misc_byted = self.framework_data.model_dump_json().encode()
             fw_data_byted = self.framework_data.model_dump_json().encode()
-            await launch_coroutines(
-                [
-                    self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted),
-                    self.labels.store(),
-                    self.requests.store(),
-                    self.responses.store(),
-                ],
-                self._storage.is_asynchronous,
+            await gather(
+                self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted),
+                self.labels.store(),
+                self.requests.store(),
+                self.responses.store()
             )
             logger.debug(f"Context stored: {self.id}")
         else:

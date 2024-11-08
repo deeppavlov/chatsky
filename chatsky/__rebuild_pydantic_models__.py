@@ -6,7 +6,7 @@ from chatsky.core.script import Node
 from chatsky.core.pipeline import Pipeline
 from chatsky.slots.slots import SlotManager
 from chatsky.context_storages import DBContextStorage, MemoryContextStorage
-from chatsky.utils.context_dict import ContextDict
+from chatsky.core.ctx_dict import ContextDict
 from chatsky.context_storages.file import SerializableStorage
 from chatsky.core.context import FrameworkData, ServiceState
 from chatsky.core.service import PipelineComponent

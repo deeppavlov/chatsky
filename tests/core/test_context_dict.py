@@ -3,9 +3,8 @@ import pytest
 from pydantic import TypeAdapter
 
 from chatsky.context_storages import MemoryContextStorage
-from chatsky.core.context import FrameworkData
 from chatsky.core.message import Message
-from chatsky.utils.context_dict import ContextDict
+from chatsky.core.ctx_dict import ContextDict
 
 
 class TestContextDict:
@@ -26,9 +25,9 @@ class TestContextDict:
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
-        storage = MemoryContextStorage(rewrite_existing=True, configuration={"requests": "__none__"})
+        storage = MemoryContextStorage(rewrite_existing=False, configuration={"requests": "__none__"})
         await storage.update_main_info(ctx_id, 0, 0, 0, b"", b"")
-        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json())]
+        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode())]
         await storage.update_field_items(ctx_id, storage._requests_field_name, requests)
         return await ContextDict.connected(storage, ctx_id, storage._requests_field_name, Message)
 
