@@ -1,0 +1,33 @@
+name: generate_version_switcher
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: generate and update version switcher's json file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: generate version switcher
+        run: |
+          python ./scripts/switcher_gen.py
+
+      - name: copy version switcher for updating it
+        run: |
+          mkdir docs/source/switcher/
+          cp ./switcher.json docs/source/switcher/switcher.json
+
+      - name: update version switcher
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/source/switcher/
+          clean: False
