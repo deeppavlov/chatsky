@@ -20,11 +20,16 @@ jobs:
         run: python -m pip install GitPython
 
       - name: generate version switcher
-        run: python ./scripts/switcher_gen.py
+        run: |
+          python ./scripts/switcher_gen.py
+          ls scripts/
+          pwd
 
       - name: copy version switcher for updating it
         run: |
           mkdir docs/source/switcher/
+          ls docs/source/switcher/
+          ls docs/source/_static/
           cp docs/source/_static/switcher.json docs/source/switcher/switcher.json
 
       - name: update version switcher
