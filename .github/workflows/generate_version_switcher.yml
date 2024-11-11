@@ -23,12 +23,13 @@ jobs:
         run: |
           ls
           python ./scripts/switcher_gen.py
-          ls ./scripts/
+          ls docs/source/switcher/
+          ls docs/source/_static/
 
       - name: copy version switcher for updating it
         run: |
           mkdir docs/source/switcher/
-          cp scripts/switcher.json docs/source/switcher/switcher.json
+          cp docs/source/_static/switcher.json docs/source/switcher/switcher.json
 
       - name: update version switcher
         uses: JamesIves/github-pages-deploy-action@v4
