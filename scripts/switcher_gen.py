@@ -84,3 +84,6 @@ def generate_version_switcher():
     # Write nested JSON data to the switcher.json file
     with open("./docs/source/_static/switcher.json", "w") as f:
         f.write(switcher_json_obj)
+
+
+generate_version_switcher()
