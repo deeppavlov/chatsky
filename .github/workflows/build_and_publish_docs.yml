@@ -75,7 +75,7 @@ jobs:
       - name: update version switcher (triggering the workflow)
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh workflow list
           gh workflow run generate_version_switcher --ref ${{ env.DOC_VERSION }}
