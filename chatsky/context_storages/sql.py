@@ -222,6 +222,19 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
+    @DBContextStorage._convert_id_filter
+    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
+        stmt = select(self.main_table.c[self._id_column_name])
+        if filter.update_time_greater is not None:
+            stmt.where(self.main_table.c[self._updated_at_column_name] > filter.update_time_greater)
+        if filter.update_time_less is not None:
+            stmt.where(self.main_table.c[self._updated_at_column_name] < filter.update_time_less)
+        if len(filter.origin_interface_whitelist) > 0:
+            # TODO: implement whitelist once context ID is ready
+            pass
+        async with self.engine.begin() as conn:
+            return set((await conn.execute(stmt)).fetchone())
+
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         logger.debug(f"Loading main info for {ctx_id}...")
@@ -270,7 +283,8 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
         if isinstance(self._subscripts[field_name], int):
             stmt = stmt.limit(self._subscripts[field_name])
@@ -284,8 +298,10 @@ class SQLContextStorage(DBContextStorage):
     @DBContextStorage._verify_field_name
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        stmt = select(self.turns_table.c[self._key_column_name])
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
-        stmt = select(self.turns_table.c[self._key_column_name]).where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
         async with self.engine.begin() as conn:
             result = [k[0] for k in (await conn.execute(stmt)).fetchall()]
             logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
@@ -296,7 +312,9 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[self._key_column_name].in_(tuple(keys))) & (self.turns_table.c[field_name] != None))
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(tuple(keys)))
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         async with self.engine.begin() as conn:
             result = list((await conn.execute(stmt)).fetchall())
             logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")

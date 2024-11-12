@@ -168,6 +168,17 @@ class TestContextStorages:
         if responses_subscript is not None:
             context_storage._subscripts["responses"] = responses_subscript
 
+    async def test_get_context_ids(self, db, add_context):
+        await add_context("1")
+
+        assert await db.get_context_ids({"update_time_greater": 0}) == {"1"}
+        assert await db.get_context_ids({"update_time_greater": 2}) == set()
+
+        assert await db.get_context_ids({"update_time_less": 0}) == set()
+        assert await db.get_context_ids({"update_time_less": 2}) == {"1"}
+
+        # TODO: implement whitelist once context ID is ready
+
     async def test_add_context(self, db, add_context):
         # test the fixture
         await add_context("1")
