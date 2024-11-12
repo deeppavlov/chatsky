@@ -128,10 +128,11 @@ class TestContextStorages:
     @pytest.fixture
     async def db(self, db_kwargs, db_teardown, tmpdir_factory):
         kwargs = {
-            "__testing_file__": str(tmpdir_factory.mktemp("data").join("file.db")),
             "__separator__": "///" if system() == "Windows" else "////",
             **os.environ
         }
+        if "{__testing_file__}" in db_kwargs["path"]:
+            kwargs["__testing_file__"] = str(tmpdir_factory.mktemp("data").join("file.db"))
         db_kwargs["path"] = db_kwargs["path"].format(**kwargs)
         context_storage = context_storage_factory(**db_kwargs)
 
@@ -215,6 +216,14 @@ class TestContextStorages:
 
         assert await db.load_field_latest("1", "requests") == []
         assert set(await db.load_field_keys("1", "requests")) == set()
+
+    async def test_field_load(self, db, add_context):
+        await add_context("1")
+
+        await db.update_field_items("1", "requests", [(1, b"1"), (3, b"3"), (2, b"2"), (4, b"4")])
+
+        assert await db.load_field_items("1", "requests", [1, 2]) == [(1, b"1"), (2, b"2")]
+        assert await db.load_field_items("1", "requests", [4, 3]) == [(3, b"3"), (4, b"4")]
 
     async def test_field_update(self, db, add_context):
         await add_context("1")

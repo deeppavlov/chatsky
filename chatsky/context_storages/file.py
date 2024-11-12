@@ -10,11 +10,13 @@ from abc import ABC, abstractmethod
 import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import Any, List, Set, Tuple, Dict, Optional, Union
+from typing import List, Set, Tuple, Dict, Optional
+import logging
 
 from pydantic import BaseModel, Field
 
-from .database import ContextIdFilter, DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from chatsky.utils.logging import collapse_num_list
 
 try:
     from aiofiles import open
@@ -26,6 +28,9 @@ try:
 except ImportError:
     json_available = False
     pickle_available = False
+
+
+logger = logging.getLogger(__name__)
 
 
 class SerializableStorage(BaseModel):
@@ -41,8 +46,6 @@ class FileContextStorage(DBContextStorage, ABC):
     :param context_schema: Context schema for this storage.
     :param serializer: Serializer that will be used for serializing contexts.
     """
-
-    is_asynchronous = False
 
     def __init__(
         self, 
@@ -66,39 +69,55 @@ class FileContextStorage(DBContextStorage, ABC):
         return filter.filter_keys((await self._load()).main)
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
-        return (await self._load()).main.get(ctx_id, None)
+        logger.debug(f"Loading main info for {ctx_id}...")
+        result = (await self._load()).main.get(ctx_id, None)
+        logger.debug(f"Main info loaded for {ctx_id}")
+        return result
 
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+        logger.debug(f"Updating main info for {ctx_id}...")
         storage = await self._load()
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
         await self._save(storage)
+        logger.debug(f"Main info updated for {ctx_id}")
 
     async def delete_context(self, ctx_id: str) -> None:
+        logger.debug(f"Deleting context {ctx_id}...")
         storage = await self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
         await self._save(storage)
+        logger.debug(f"Context {ctx_id} deleted")
 
     @DBContextStorage._verify_field_name
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         storage = await self._load()
         select = sorted([(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None], key=lambda e: e[0], reverse=True)
         if isinstance(self._subscripts[field_name], int):
             select = select[:self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
+        logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in select))}")
         return select
 
     @DBContextStorage._verify_field_name
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
-        return [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
+        logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
+        result = [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
+        logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
+        return result
 
     @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
-        return [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
+        logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
+        result = [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
+        logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
+        return result
 
     @DBContextStorage._verify_field_name
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+        logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         storage = await self._load()
         for k, v in items:
             upd = (ctx_id, field_name, k, v)
@@ -109,18 +128,22 @@ class FileContextStorage(DBContextStorage, ABC):
             else:
                 storage.turns += [upd]
         await self._save(storage)
+        logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
     async def clear_all(self) -> None:
+        logger.debug("Clearing all")
         await self._save(SerializableStorage())
 
 
 class JSONContextStorage(FileContextStorage):
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "w", encoding="utf-8") as file_stream:
             await file_stream.write(data.model_dump_json())
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -132,12 +155,14 @@ class JSONContextStorage(FileContextStorage):
 
 
 class PickleContextStorage(FileContextStorage):
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "wb") as file_stream:
             await file_stream.write(dumps(data.model_dump()))
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -160,9 +185,11 @@ class ShelveContextStorage(FileContextStorage):
         self._storage = None
         FileContextStorage.__init__(self, path, rewrite_existing, configuration)
 
+    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         self._storage[self._SHELVE_ROOT] = data.model_dump()
 
+    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if self._storage is None:
             content = SerializableStorage()

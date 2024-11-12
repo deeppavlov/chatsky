@@ -9,9 +9,10 @@ This class implements the basic functionality and can be extended to add additio
 """
 
 from abc import ABC, abstractmethod
+from asyncio import Lock
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -52,11 +53,6 @@ class DBContextStorage(ABC):
     _responses_field_name: Literal["responses"] = "responses"
     _default_subscript_value: int = 3
 
-    @property
-    @abstractmethod
-    def is_asynchronous(self) -> bool:
-        raise NotImplementedError()
-
     def __init__(
         self,
         path: str,
@@ -72,14 +68,27 @@ class DBContextStorage(ABC):
         self.rewrite_existing = rewrite_existing
         """Whether to rewrite existing data in the storage."""
         self._subscripts = dict()
+        self._sync_lock = Lock()
         for field in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
             value = configuration.get(field, self._default_subscript_value)
             self._subscripts[field] = 0 if value == "__none__" else value
 
     @staticmethod
+    def _synchronously_lock(method: Coroutine):
+        def setup_lock(condition: Callable[["DBContextStorage"], bool] = lambda _: True):
+            async def lock(self: "DBContextStorage", *args, **kwargs):
+                if condition(self):
+                    async with self._sync_lock:
+                        return await method(self, *args, **kwargs)
+                else:
+                    return await method(self, *args, **kwargs)
+            return lock
+        return setup_lock
+
+    @staticmethod
     def _verify_field_name(method: Callable):
-        def verifier(self, *args, **kwargs):
-            field_name = args[1] if len(args) >= 2 else kwargs.get("field_name", None)
+        def verifier(self: "DBContextStorage", *args, **kwargs):
+            field_name = args[1] if len(args) >= 1 else kwargs.get("field_name", None)
             if field_name is None:
                 raise ValueError(f"For method {method.__name__} argument 'field_name' is not found!")
             elif field_name not in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
@@ -220,7 +229,7 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
         _class = "MemoryContextStorage"
     else:
         prefix, _, _ = path.partition("://")
-        if "sql" in prefix:
+        if any(prefix.startswith(sql_prefix) for sql_prefix in ("sqlite", "mysql", "postgresql")):
             prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
         if prefix not in PROTOCOLS:
             raise ValueError(f"""

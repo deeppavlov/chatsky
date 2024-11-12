@@ -16,8 +16,6 @@ class MemoryContextStorage(DBContextStorage):
     - `misc`: [context_id, turn_number, misc]
     """
 
-    is_asynchronous = True
-
     def __init__(
         self, 
         path: str = "",
@@ -50,7 +48,6 @@ class MemoryContextStorage(DBContextStorage):
     @DBContextStorage._verify_field_name
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         select = sorted([k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None], reverse=True)
-        print("SUBS:", self._subscripts[field_name])
         if isinstance(self._subscripts[field_name], int):
             select = select[:self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):

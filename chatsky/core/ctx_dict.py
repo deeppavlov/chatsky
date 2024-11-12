@@ -1,16 +1,20 @@
 from __future__ import annotations
+from asyncio import gather
 from hashlib import sha256
+import logging
 from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
-from .asyncronous import launch_coroutines
+from chatsky.utils.logging import collapse_num_list
 
 if TYPE_CHECKING:
     from chatsky.context_storages.database import DBContextStorage
 
 K = TypeVar("K", bound=int)
 V = TypeVar("V")
+
+logger = logging.getLogger(__name__)
 
 
 def get_hash(string: bytes) -> bytes:
@@ -32,6 +36,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     @classmethod
     async def new(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
         instance = cls()
+        logger.debug(f"Disconnected context dict created for id {id} and field name: {field}")
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
@@ -41,11 +46,13 @@ class ContextDict(BaseModel, Generic[K, V]):
     @classmethod
     async def connected(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
         val_adapter = TypeAdapter(value_type)
-        keys, items = await launch_coroutines([storage.load_field_keys(id, field), storage.load_field_latest(id, field)], storage.is_asynchronous)
+        logger.debug(f"Connected context dict created for {id}, {field}")
+        keys, items = await gather(storage.load_field_keys(id, field), storage.load_field_latest(id, field))
         val_key_items = [(k, v) for k, v in items if v is not None]
         hashes = {k: get_hash(v) for k, v in val_key_items}
         objected = {k: val_adapter.validate_json(v) for k, v in val_key_items}
         instance = cls.model_validate(objected)
+        logger.debug(f"Context dict for {id}, {field} loaded: {collapse_num_list(keys)}")
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
@@ -55,8 +62,10 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
+        logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} loading extra items: {collapse_num_list(keys)}...")
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
-        for key, value in items.items():
+        logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} extra items loaded: {collapse_num_list(keys)}")
+        for key, value in items:
             self._items[key] = self._value_type.validate_json(value)
             if not self._storage.rewrite_existing:
                 self._hashes[key] = get_hash(value)
@@ -216,13 +225,13 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     async def store(self) -> None:
         if self._storage is not None:
-            await launch_coroutines(
-                [
-                    self._storage.update_field_items(self._ctx_id, self._field_name, [(k, e.encode()) for k, e in self.model_dump().items()]),
-                    self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
-                ],
-                self._storage.is_asynchronous,
+            logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
+            stored = [(k, e.encode()) for k, e in self.model_dump().items()]
+            await gather(
+                self._storage.update_field_items(self._ctx_id, self._field_name, stored),
+                self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added))
             )
+            logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} stored: {collapse_num_list([k for k, _ in stored])}")
             self._added, self._removed = set(), set()
             if not self._storage.rewrite_existing:
                 for k, v in self._items.items():
