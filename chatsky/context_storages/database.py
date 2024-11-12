@@ -32,7 +32,7 @@ class ContextIdFilter(BaseModel):
         if self.update_time_less is not None:
             contexts = {k: (ti, ca, ua, m, fd) for k, (ti, ca, ua, m, fd) in contexts.items() if ua < self.update_time_less}
         if len(self.origin_interface_whitelist) > 0:
-            # TODO: implement whitelist once context ID is 
+            # TODO: implement whitelist once context ID is ready
             pass
         return contexts.keys()
 
@@ -79,7 +79,7 @@ class DBContextStorage(ABC):
     @staticmethod
     def _verify_field_name(method: Callable):
         def verifier(self, *args, **kwargs):
-            field_name = args[1] if len(args) >= 1 else kwargs.get("field_name", None)
+            field_name = args[1] if len(args) >= 2 else kwargs.get("field_name", None)
             if field_name is None:
                 raise ValueError(f"For method {method.__name__} argument 'field_name' is not found!")
             elif field_name not in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
@@ -92,20 +92,20 @@ class DBContextStorage(ABC):
     def _convert_id_filter(method: Callable):
         def verifier(self, *args, **kwargs):
             if len(args) >= 1:
-                args, filter_obj = [args[0]] + args[1:], args[1]
+                args, filter_obj = list(args[1:]), args[0]
             else:
                 filter_obj = kwargs.pop("filter", None)
             if filter_obj is None:
                 raise ValueError(f"For method {method.__name__} argument 'filter' is not found!")
             elif isinstance(filter_obj, Dict):
-                filter_obj = ContextIdFilter.validate_model(filter_obj)
+                filter_obj = ContextIdFilter.model_validate(filter_obj)
             elif not isinstance(filter_obj, ContextIdFilter):
                 raise ValueError(f"Invalid type '{type(filter_obj).__name__}' for method '{method.__name__}' argument 'filter'!")
             return method(self, *args, filter=filter_obj, **kwargs)
         return verifier
 
     @abstractmethod
-    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> List[str]:
+    async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
         """
         :param filter:
         """

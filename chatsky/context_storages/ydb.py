@@ -55,6 +55,9 @@ class YDBContextStorage(DBContextStorage):
     :param table_name: The name of the table to use.
     """
 
+    _UPDATE_TIME_GREATER_VAR = "update_time_greater"
+    _UPDATE_TIME_LESS_VAR = "update_time_less"
+
     is_asynchronous = True
 
     def __init__(
@@ -132,27 +135,31 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
+    @DBContextStorage._convert_id_filter
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
         async def callee(session: Session) -> Set[str]:
-            where_stmt = ""
-            conditions = list()
+            declare, prepare, conditions = list(), dict(), list()
             if filter.update_time_greater is not None:
-                conditions += [f"{self._updated_at_column_name} > {filter.update_time_greater}"]
+                declare += [f"DECLARE ${self._UPDATE_TIME_GREATER_VAR} AS Uint64;"]
+                prepare.update({f"${self._UPDATE_TIME_GREATER_VAR}": filter.update_time_greater})
+                conditions += [f"{self._updated_at_column_name} > ${self._UPDATE_TIME_GREATER_VAR}"]
             if filter.update_time_less is not None:
-                conditions += [f"{self._updated_at_column_name} < {filter.update_time_less}"]
+                declare += [f"DECLARE ${self._UPDATE_TIME_LESS_VAR} AS Uint64;"]
+                prepare.update({f"${self._UPDATE_TIME_LESS_VAR}": filter.update_time_less})
+                conditions += [f"{self._updated_at_column_name} < ${self._UPDATE_TIME_LESS_VAR}"]
             if len(filter.origin_interface_whitelist) > 0:
-                # TODO: implement whitelist once context ID is 
+                # TODO: implement whitelist once context ID is ready
                 pass
-            if len(conditions) > 0:
-                where_stmt = f"WHERE {' AND '.join(conditions)}"
+            where =  f"WHERE {' AND '.join(conditions)}" if len(conditions) > 0 else ""
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
+                {" ".join(declare)}
                 SELECT {self._id_column_name}
                 FROM {self.main_table}
-                {where_stmt};
+                {where};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), dict(), commit_tx=True
+                await session.prepare(query), prepare, commit_tx=True
             )
             return {e[self._id_column_name] for e in result_sets[0].rows} if len(result_sets[0].rows) > 0 else set()
 

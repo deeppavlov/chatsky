@@ -214,6 +214,7 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
+    @DBContextStorage._convert_id_filter
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
         stmt = select(self.main_table.c[self._id_column_name])
         if filter.update_time_greater is not None:
@@ -221,7 +222,7 @@ class SQLContextStorage(DBContextStorage):
         if filter.update_time_less is not None:
             stmt.where(self.main_table.c[self._updated_at_column_name] < filter.update_time_less)
         if len(filter.origin_interface_whitelist) > 0:
-            # TODO: implement whitelist once context ID is 
+            # TODO: implement whitelist once context ID is ready
             pass
         async with self.engine.begin() as conn:
             return set((await conn.execute(stmt)).fetchone())

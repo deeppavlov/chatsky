@@ -74,6 +74,7 @@ class MongoContextStorage(DBContextStorage):
             )
         )
 
+    @DBContextStorage._convert_id_filter
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
         ftr_dct = dict()
         if filter.update_time_greater is not None:
@@ -81,7 +82,7 @@ class MongoContextStorage(DBContextStorage):
         if filter.update_time_less is not None:
             ftr_dct.setdefault(self._updated_at_column_name, dict()).update({"$lt": filter.update_time_less})
         if len(filter.origin_interface_whitelist) > 0:
-            # TODO: implement whitelist once context ID is 
+            # TODO: implement whitelist once context ID is ready
             pass
         result = await self.main_table.find(ftr_dct, [self._id_column_name]).to_list(None)
         return {item[self._key_column_name] for item in result}

@@ -32,6 +32,7 @@ class MemoryContextStorage(DBContextStorage):
             self._responses_field_name: dict(),
         }
 
+    @DBContextStorage._convert_id_filter
     async def get_context_ids(self, filter: Union[ContextIdFilter, Dict[str, Any]]) -> Set[str]:
         return filter.filter_keys(self._main_storage)
 
