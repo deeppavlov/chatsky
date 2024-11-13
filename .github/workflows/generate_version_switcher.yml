@@ -1,6 +1,12 @@
 name: generate_version_switcher
 
 on:
+  workflow_run:
+    workflows: ["build_and_publish_docs"]
+    types:
+      - completed
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
 concurrency:

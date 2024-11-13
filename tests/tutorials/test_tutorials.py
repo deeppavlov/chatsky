@@ -31,8 +31,13 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     with open(tutorial_path, "w") as fd:
         fd.write(tutorial_source_code)
 
+    # In case it doesn't work, add "=={chatsky}" at the end of replace('chatsky***')
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        venv.run(f"python -m pip install {deps}".replace("chatsky", "."), check_rc=True, cd=os.getcwd())
+        venv.run(
+            f"python -m pip install {deps}".replace("chatsky=={chatsky}", ".").format(InstallationCell.versions),
+            check_rc=True,
+            cd=os.getcwd(),
+        )
 
     venv.run(f"python {tutorial_path}", check_rc=True)
 
