@@ -20,7 +20,6 @@ except ImportError:
 
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from chatsky.core.pipeline import Pipeline
 from chatsky.llm.methods import BaseMethod
 
 from typing import Union, Type, Optional
@@ -84,10 +83,10 @@ class LLM_API:
         return result
 
     async def condition(self, prompt: str, method: BaseMethod, return_schema=None):
-        async def process_input(ctx: Context, _: Pipeline) -> bool:
+        async def process_input(ctx: Context, _) -> bool:
             condition_history = [
-                await message_to_langchain(Message(prompt), pipeline=_, source="system"),
-                await message_to_langchain(ctx.last_request, pipeline=_, source="human"),
+                await message_to_langchain(Message(prompt), ctx=ctx, source="system"),
+                await message_to_langchain(ctx.last_request, ctx=ctx, source="human"),
             ]
             result = method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
             return result

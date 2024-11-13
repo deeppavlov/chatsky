@@ -1,10 +1,10 @@
 import base64
+from chatsky.core.context import Context
 from chatsky.core.message import Image, Message
-from chatsky.core.pipeline import Pipeline
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 
-async def message_to_langchain(message: Message, pipeline: Pipeline, source: str = "human", max_size: int = 1000):
+async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
@@ -30,7 +30,7 @@ async def message_to_langchain(message: Message, pipeline: Pipeline, source: str
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {"url": await __attachment_to_content(image, pipeline.messenger_interface)},
+                        "image_url": {"url": await __attachment_to_content(image, ctx.pipeline.messenger_interface)},
                     }
                 )
 
