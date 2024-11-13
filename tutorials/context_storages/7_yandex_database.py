@@ -11,7 +11,7 @@ Chatsky uses [ydb.aio](https://ydb.tech/en/docs/)
 library for asynchronous access to Yandex DB.
 """
 
-# %pip install chatsky[ydb]
+# %pip install chatsky[ydb]=={chatsky}
 
 # %%
 import os

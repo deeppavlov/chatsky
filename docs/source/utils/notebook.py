@@ -1,8 +1,10 @@
 import re
 import abc
+from functools import cache
 from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
+from importlib import metadata
 
 try:
     from jupytext import jupytext
@@ -55,12 +57,22 @@ class InstallationCell(ReplacePattern):
     pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
 
     @staticmethod
+    @cache
+    def versions() -> dict:
+        versions = {}
+        for dist in metadata.distributions():
+            versions[dist.name] = dist.version
+        return versions
+
+    @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
         return f"""
 # %%
 # installing dependencies
 %pip install -q {matchobj.group(1)}
-"""
+""".format(
+            **InstallationCell.versions()
+        )
 
 
 class DocumentationLink(ReplacePattern):

@@ -8,7 +8,7 @@ Here, %mddoclink(api,core.context,Context.misc)
 dictionary of context is used for storing additional data.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging

@@ -7,7 +7,7 @@ This tutorial shows how to benchmark context storages.
 For more info see [API reference](%doclink(api,utils.db_benchmark.benchmark)).
 """
 
-# %pip install chatsky[benchmark,postgresql,mongodb,redis,mysql,sqlite,ydb]
+# %pip install chatsky[benchmark,postgresql,mongodb,redis,mysql,sqlite,ydb]=={chatsky}
 
 # %%
 from pathlib import Path
