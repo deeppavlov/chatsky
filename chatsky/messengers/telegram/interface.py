@@ -29,7 +29,11 @@ class LongpollingInterface(_AbstractTelegramInterface):
     """
 
     def __init__(
-        self, token: str, attachments_directory: Optional[Path] = None, interval: int = 2, timeout: int = 20
+        self,
+        token: str,
+        attachments_directory: Optional[Path] = None,
+        interval: int = 2,
+        timeout: int = 20,
     ) -> None:
         super().__init__(token, attachments_directory)
         self.interval = interval
@@ -54,7 +58,11 @@ class WebhookInterface(_AbstractTelegramInterface):
     """
 
     def __init__(
-        self, token: str, attachments_directory: Optional[Path] = None, host: str = "localhost", port: int = 844
+        self,
+        token: str,
+        attachments_directory: Optional[Path] = None,
+        host: str = "localhost",
+        port: int = 844,
     ):
         super().__init__(token, attachments_directory)
         self.listen = host

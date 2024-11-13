@@ -147,6 +147,11 @@ class Context(BaseModel):
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
+    origin_interface: Optional[str] = Field(default=None)
+    """
+    Name of the interface that produced the first request in this context.
+    """
+
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
         """Initialize new context from ``start_label`` and, optionally, context ``id``."""
@@ -165,6 +170,8 @@ class Context(BaseModel):
         request_message = Message.model_validate(request)
         if len(self.requests) == 0:
             self.requests[1] = request_message
+            if request_message.origin is not None:
+                self.origin_interface = request_message.origin.interface
         else:
             last_index = get_last_index(self.requests)
             self.requests[last_index + 1] = request_message
