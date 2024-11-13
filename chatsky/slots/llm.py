@@ -61,17 +61,11 @@ class LLMGroupSlot(GroupSlot):
         result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")
 
-        if self.allow_partially_extracted:
-            res = {
-                name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
-                for name in result_json
-                if result_json[name] is not None
-            }
-        else:
-            res = {
-                name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
-                for name in result_json
-            }
+        res = {
+            name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
+            for name in result_json
+            if result_json[name] is not None or not self.allow_partial_extraction
+        }
         return ExtractedGroupSlot(**res)
 
     def __flatten_llm_group_slot(self, slot, parent_key=""):
