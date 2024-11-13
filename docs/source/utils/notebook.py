@@ -56,8 +56,8 @@ class InstallationCell(ReplacePattern):
 
     pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
 
-    @cache
     @staticmethod
+    @cache
     def versions() -> dict:
         versions = {}
         for dist in metadata.distributions():
