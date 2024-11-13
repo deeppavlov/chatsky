@@ -11,7 +11,7 @@ Chatsky uses [motor](https://motor.readthedocs.io/en/stable/)
 library for asynchronous access to MongoDB.
 """
 
-# %pip install chatsky[mongodb]
+# %pip install chatsky[mongodb]=={chatsky}
 
 # %%
 import os

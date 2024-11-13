@@ -12,7 +12,7 @@ and [asyncpg](https://magicstack.github.io/asyncpg/current/)
 libraries for asynchronous access to PostgreSQL DB.
 """
 
-# %pip install chatsky[postgresql]
+# %pip install chatsky[postgresql]=={chatsky}
 
 # %%
 import os

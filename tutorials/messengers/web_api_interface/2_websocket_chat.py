@@ -21,7 +21,7 @@ is used to process requests.
 %mddoclink(api,core.message,Message) is used to represent text messages.
 """
 
-# %pip install chatsky uvicorn fastapi
+# %pip install chatsky=={chatsky} uvicorn=={uvicorn} fastapi=={fastapi}
 
 # %%
 from chatsky.messengers.common.interface import CallbackMessengerInterface

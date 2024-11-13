@@ -11,7 +11,7 @@ Chatsky uses [redis.asyncio](https://redis.readthedocs.io/en/latest/)
 library for asynchronous access to Redis DB.
 """
 
-# %pip install chatsky[redis]
+# %pip install chatsky[redis]=={chatsky}
 
 # %%
 import os
