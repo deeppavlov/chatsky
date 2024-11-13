@@ -29,6 +29,7 @@ from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
+from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    models: Dict = Field(default_factory=dict)
+    models: Dict[str, LLM_API] = Field(default_factory=dict)
     """
     LLM models.
     """
