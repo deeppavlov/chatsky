@@ -148,6 +148,9 @@ class Context(BaseModel):
     """
 
     origin_interface: Optional[str] = Field(default=None)
+    """
+    Name of the interface that produced the first request in this context.
+    """
 
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):

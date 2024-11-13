@@ -258,8 +258,19 @@ class MediaGroup(Attachment):
 
 
 class Origin(BaseModel):
+    """
+    Denotes the origin of the message.
+    """
+
     message: Optional[Any] = None
+    """
+    Original data that the message is created from.
+    E.g. telegram update.
+    """
     interface: Optional[str] = None
+    """
+    Name of the interface that produced the message.
+    """
 
     @field_serializer("message", when_used="json")
     def pickle_serialize_message(self, value):
