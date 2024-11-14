@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from chatsky.messengers.common import MessengerInterface
-from chatsky.script import Message
+from chatsky.core import Message
 
 
 class HTTPMessengerInterface(MessengerInterface):
