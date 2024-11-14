@@ -47,27 +47,28 @@ class LLM_API:
         if not langchain_available:
             raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
 
-    async def __get_llm_response(self, history: list = [""], message_schema: BaseModel = None):
-        if message_schema is None:
-            result = await self.parser.ainvoke(await self.model.ainvoke(history))
-            result = Message(text=result)
-        else:
-            structured_model = self.model.with_structured_output(message_schema)
-            result = Message.model_validate(await structured_model.ainvoke(history))
-        return result
-
     async def respond(
-        self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None
+        self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None, model_name: str = ""
     ) -> Message:
 
         result = await self.__get_llm_response(history, message_schema)
 
-        if message_schema is issubclass(message_schema, Message):
+        if message_schema is None:
+            result = await self.parser.ainvoke(await self.model.ainvoke(history))
+            result = Message(text=result)
+        elif issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
-            result = Message.model_validate(result)
+            structured_model = self.model.with_structured_output(message_schema)
+            result = Message.model_validate(await structured_model.ainvoke(history))
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
-            result = Message(text=str(result))
+            structured_model = self.model.with_structured_output(message_schema)
+            result = Message(text=str(await structured_model.ainvoke(history)))
+
+        if result.annotations:
+            result.annotations["__generated_by_model__"] = model_name
+        else:
+            result.annotations = {"__generated_by_model__": model_name}
 
         return result
 

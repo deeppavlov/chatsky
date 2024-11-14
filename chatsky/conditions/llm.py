@@ -10,6 +10,7 @@ class LLMCondition(BaseCondition):
     :param prompt: Prompt for the model to use on users input.
     :param method: Method that takes models output and returns boolean.
     """
+
     model_name: str
     prompt: str
     method: BaseMethod

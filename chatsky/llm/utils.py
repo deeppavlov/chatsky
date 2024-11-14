@@ -11,7 +11,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     :param Message message: ~chatsky.script.core.message.Message object.
     :param Pipeline pipeline: ~chatsky.pipeline.Pipeline object.
     :param str source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
-    :param int max_size: Maximum size of the message in symbols. 
+    :param int max_size: Maximum size of the message in symbols.
     If exceed the limit will raise ValueError. Is not affected by system prompt size.
 
     :return: Langchain message object.

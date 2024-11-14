@@ -83,14 +83,9 @@ class LLMResponse(BaseResponse):
             history_messages.append(
                 await message_to_langchain(ctx.last_request, pipeline=pipeline, source="human", max_size=max_size)
             )
-            result = await model.__get_llm_response(history_messages, message_schema=message_schema)
-            if result.annotations:
-                result.annotations["__generated_by_model__"] = self.name
-            else:
-                result.annotations = {"__generated_by_model__": self.name}
+            result = await model.respond(history_messages, message_schema=message_schema, model_name=model_name)
 
             return result
-
 
         return wrapped
 
