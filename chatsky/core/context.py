@@ -134,6 +134,11 @@ class Context(BaseModel):
     """
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
+    origin_interface: Optional[str] = Field(default=None)
+    """
+    Name of the interface that produced the first request in this context.
+    """
+
     @classmethod
     async def connected(
         cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None
