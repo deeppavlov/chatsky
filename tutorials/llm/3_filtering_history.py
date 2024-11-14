@@ -36,7 +36,6 @@ model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
     system_prompt="You are a database assistant and must help your user to recover the demanded data from your memory.",
 )
-llm_response = LLMResponse()
 
 # %% [markdown]
 """

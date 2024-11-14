@@ -50,7 +50,6 @@ model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
     system_prompt="You are an experienced barista in a local coffeshop. Answer your customer's questions about coffee and barista work.",
 )
-llm_response = LLMResponse()
 # %% [markdown]
 """
 Also you can pass images to the LLM: any chatsky Images in message attachments

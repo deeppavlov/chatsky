@@ -60,7 +60,6 @@ model = LLM_API(
     ChatOpenAI(model="gpt-3.5-turbo"),
     system_prompt="You will represent different bank workers. Answer users' questions according to your role.",
 )
-llm_response = LLMResponse()
 
 toy_script = {
     GLOBAL: {
