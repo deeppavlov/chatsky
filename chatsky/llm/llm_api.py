@@ -1,15 +1,10 @@
 """
 LLM responses.
----------
+--------------
 Wrapper around langchain.
 """
 
 try:
-    from langchain_openai import ChatOpenAI
-    from langchain_anthropic import ChatAnthropic
-    from langchain_google_vertexai import ChatVertexAI
-    from langchain_cohere import ChatCohere
-    from langchain_mistralai import ChatMistralAI
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.language_models.chat_models import BaseChatModel
 
@@ -45,7 +40,6 @@ class LLM_API:
         """
         self.__check_imports()
         self.model: BaseChatModel = model
-        self.name = ""
         self.parser = StrOutputParser()
         self.system_prompt = system_prompt
 
@@ -56,6 +50,7 @@ class LLM_API:
     async def __get_llm_response(self, history: list = [""], message_schema: BaseModel = None):
         if message_schema is None:
             result = await self.parser.ainvoke(await self.model.ainvoke(history))
+            result = Message(text=result)
         else:
             structured_model = self.model.with_structured_output(message_schema)
             result = Message.model_validate(await structured_model.ainvoke(history))
@@ -67,19 +62,13 @@ class LLM_API:
 
         result = await self.__get_llm_response(history, message_schema)
 
-        if message_schema is None:
-            result = Message(text=result)
-        elif issubclass(message_schema, Message):
+        if message_schema is issubclass(message_schema, Message):
             # Case if the message_schema desribes Message structure
             result = Message.model_validate(result)
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
             result = Message(text=str(result))
 
-        if result.annotations:
-            result.annotations["__generated_by_model__"] = self.name
-        else:
-            result.annotations = {"__generated_by_model__": self.name}
         return result
 
     async def condition(self, prompt: str, method: BaseMethod, return_schema=None):
