@@ -7,6 +7,7 @@ Wrapper around langchain.
 try:
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.language_models.chat_models import BaseChatModel
+    from langchain_core.messages.base import BaseMessage
 
     langchain_available = True
 except ImportError:
@@ -48,10 +49,11 @@ class LLM_API:
             raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
 
     async def respond(
-        self, history: list = [""], message_schema: Union[None, Type[Message], Type[BaseModel]] = None, model_name: str = ""
+        self,
+        history: list[BaseMessage],
+        message_schema: Union[None, Type[Message], Type[BaseModel]] = None,
+        model_name: str = "",
     ) -> Message:
-
-        result = await self.__get_llm_response(history, message_schema)
 
         if message_schema is None:
             result = await self.parser.ainvoke(await self.model.ainvoke(history))
@@ -63,22 +65,19 @@ class LLM_API:
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema desribes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)
-            result = Message(text=str(await structured_model.ainvoke(history)))
-
-        if result.annotations:
-            result.annotations["__generated_by_model__"] = model_name
+            model_result = await structured_model.ainvoke(history)
+            result = Message(text=model_result.model_dump_json())
         else:
-            result.annotations = {"__generated_by_model__": model_name}
+            raise ValueError
 
         return result
 
-    async def condition(self, prompt: str, method: BaseMethod, return_schema=None):
-        async def process_input(ctx: Context, _) -> bool:
-            condition_history = [
-                await message_to_langchain(Message(prompt), ctx=ctx, source="system"),
-                await message_to_langchain(ctx.last_request, ctx=ctx, source="human"),
-            ]
-            result = method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
-            return result
-
-        return process_input
+    async def condition(
+        self, history: list[BaseMessage], prompt: str, method: BaseMethod, return_schema: Optional[BaseModel] = None
+    ) -> bool:
+        condition_history = [
+            await message_to_langchain(Message(prompt), ctx=ctx, source="system"),
+            await message_to_langchain(ctx.last_request, ctx=ctx, source="human"),
+        ]
+        result = await method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
+        return result

@@ -8,10 +8,10 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
-    :param Message message: ~chatsky.script.core.message.Message object.
-    :param Pipeline pipeline: ~chatsky.pipeline.Pipeline object.
-    :param str source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
-    :param int max_size: Maximum size of the message in symbols.
+    :param message: ~chatsky.script.core.message.Message object.
+    :param pipeline: ~chatsky.pipeline.Pipeline object.
+    :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
+    :param max_size: Maximum size of the message in symbols.
     If exceed the limit will raise ValueError. Is not affected by system prompt size.
 
     :return: Langchain message object.
@@ -30,7 +30,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {"url": await __attachment_to_content(image, ctx.pipeline.messenger_interface)},
+                        "image_url": {"url": await attachment_to_content(image, ctx.pipeline.messenger_interface)},
                     }
                 )
 
@@ -44,7 +44,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
         raise ValueError("Invalid source name. Only `human`, `ai` and `system` are supported.")
 
 
-async def __attachment_to_content(attachment: Image, iface) -> str:
+async def attachment_to_content(attachment: Image, iface) -> str:
     """
     Helper function to convert image to base64 string.
     """
@@ -55,3 +55,23 @@ async def __attachment_to_content(attachment: Image, iface) -> str:
         raise ValueError("Data image is not accessible.")
     image_b64 = f"data:image/{extension};base64,{image_b64}"
     return image_b64
+
+
+async def context_to_history(ctx: Context, length: int, filter_func, model_name: str, max_size: int):
+
+    history = []
+
+    pairs = zip(
+        [ctx.requests[x] for x in range(1, len(ctx.requests) + 1)],
+        [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
+    )
+    if length != -1:
+        for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-length:]):
+            history.append(await message_to_langchain(req, pipeline=ctx.pipeline, max_size=max_size))
+            history.append(await message_to_langchain(resp, pipeline=ctx.pipeline, source="ai", max_size=ctx.max_size))
+    else:
+        # TODO: Fix redundant code
+        for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
+            history.append(await message_to_langchain(req, pipeline=ctx.pipeline, max_size=max_size))
+            history.append(await message_to_langchain(resp, pipeline=ctx.pipeline, source="ai", max_size=max_size))
+    return history

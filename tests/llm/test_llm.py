@@ -1,7 +1,7 @@
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import llm_response
 from chatsky.conditions.llm import llm_condition
-from chatsky.llm.utils import message_to_langchain, __attachment_to_content
+from chatsky.llm.utils import message_to_langchain, attachment_to_content
 from chatsky.llm.filters import IsImportant, FromTheModel
 from langchain_core.messages import HumanMessage, AIMessage
 from pydantic import BaseModel
@@ -158,7 +158,7 @@ class MockMessengerInterface(MessengerInterfaceWithAttachments):
 async def test_attachments(img, expected):
     script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: [Tr(dst="node", cnd=True)]}}}
     pipe = Pipeline(script=script, start_label=("flow", "node"), messenger_interface=MockMessengerInterface())
-    res = await __attachment_to_content(img, pipe.messenger_interface)
+    res = await attachment_to_content(img, pipe.messenger_interface)
     assert res == expected
 
 
