@@ -1,4 +1,3 @@
 from chatsky.llm.filters import BaseFilter, FromTheModel, IsImportant
-from chatsky.llm.methods import BaseMethod, LogProb, LLMResult
+from chatsky.llm.methods import BaseMethod, LogProb, Contains
 from chatsky.llm.llm_api import LLM_API
-from chatsky.llm.utils import message_to_langchain, attachment_to_content, context_to_history
