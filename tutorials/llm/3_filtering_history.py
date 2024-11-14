@@ -2,7 +2,7 @@
 """
 # LLM: 3. Filtering History
 
-If you want to take the messages that meet your particular criteria and pass them to the LLMs context you can use the `llm_response`s `filter_func` parameter.
+If you want to take the messages that meet your particular criteria and pass them to the LLMs context you can use the `LLMResponse`s `filter_func` parameter.
 It must be a function that takes a single `Message` object and returns a boolean.
 """
 
@@ -70,20 +70,20 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: llm_response(model_name="assistant_model", history=0),
+            RESPONSE: LLMResponse(model_name="assistant_model", history=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
         },
         "main_node": {
-            RESPONSE: llm_response(model_name="assistant_model", history=3),
+            RESPONSE: LLMResponse(model_name="assistant_model", history=3),
             TRANSITIONS: [
                 Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
                 Tr(dst=dst.Current(), cnd=cnd.true()),
             ],
         },
         "remind_node": {
-            RESPONSE: llm_response(
+            RESPONSE: LLMResponse(
                 model_name="assistant_model",
                 history=15,
                 filter_func=FilterImportant(),

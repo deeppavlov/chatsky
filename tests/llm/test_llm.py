@@ -1,6 +1,6 @@
 from chatsky.llm.llm_api import LLM_API
-from chatsky.responses.llm import llm_response
-from chatsky.conditions.llm import llm_condition
+from chatsky.responses.llm import LLMResponse
+from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.utils import message_to_langchain, attachment_to_content
 from chatsky.llm.filters import IsImportant, FromTheModel
 from langchain_core.messages import HumanMessage, AIMessage
@@ -180,7 +180,7 @@ async def test_attachments(img, expected):
     ],
 )
 async def test_history(context, pipeline, hist, expected):
-    res = await llm_response("test_model", history=hist)(context, pipeline)
+    res = await LLMResponse("test_model", history=hist)(context, pipeline)
     assert res.text == expected
 
 

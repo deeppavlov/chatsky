@@ -66,13 +66,13 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: llm_response(model_name="barista_model", history=0),
+            RESPONSE: LLMResponse(model_name="barista_model", history=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
         },
         "main_node": {
-            RESPONSE: llm_response(model_name="barista_model"),
+            RESPONSE: LLMResponse(model_name="barista_model"),
             TRANSITIONS: [
                 Tr(
                     dst="latte_art_node",
@@ -101,7 +101,7 @@ toy_script = {
         },
         "latte_art_node": {
             # we can pass a node-specific prompt to a LLM.
-            RESPONSE: llm_response(
+            RESPONSE: LLMResponse(
                 model_name="barista_model",
                 prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it.",
             ),
@@ -111,7 +111,7 @@ toy_script = {
         },
         "image_desc_node": {
             # we expect user to send some images of coffee.
-            RESPONSE: llm_response(
+            RESPONSE: LLMResponse(
                 model_name="barista_model",
                 prompt="PROMPT: user will give you some images of coffee. Describe them.",
             ),

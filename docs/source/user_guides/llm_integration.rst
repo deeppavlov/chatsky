@@ -50,10 +50,10 @@ Once model is defined, generating a response from an LLM is very simple:
 
 .. code-block:: python
 
-    from chatsky.llm.wrapper import LLM_API, llm_response
+    from chatsky.llm.wrapper import LLM_API, LLMResponse
     ...
-    RESPONSE: llm_response(model_name="model_name_1")
-    RESPONSE: llm_response(model_name="model_name_2", prompt="some prompt")
+    RESPONSE: LLMResponse(model_name="model_name_1")
+    RESPONSE: LLMResponse(model_name="model_name_2", prompt="some prompt")
 
 Although you can overwrite this function for more fine-grained usage.
 
@@ -64,11 +64,11 @@ LLM-based conditions can also be used in the script.
 
 .. code-block:: python
 
-    from chatsky.llm.wrapper import LLM_API, llm_condition
+    from chatsky.llm.wrapper import LLM_API, LLMCondition
     from chatsky.llm.methods import Contains
     ...
     TRANSITIONS: {
-        "boss_node": llm_condition(model_name="model_name_1",
+        "boss_node": LLMCondition(model_name="model_name_1",
                         prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
                         method=Contains(pattern="TRUE")),
         }
@@ -96,7 +96,7 @@ There is a certain order of the prompts inside of the "history" list that goes i
     SYSTEM: RESPONSE_PROMPT
     HUMAN: CURRENT_REQUEST
 
-Also, there are several ways to pass a prompt into a model. First is to directly pass it as an argument inside of the ``llm_response`` call.
+Also, there are several ways to pass a prompt into a model. First is to directly pass it as an argument inside of the ``LLMResponse`` call.
 Another one is to define it in the "MISC" dictionary inside of the node.
 
 .. code-block:: python
@@ -126,21 +126,21 @@ The simplest of all is setting amount of dialogue turns (request+response) that 
 .. code-block:: python
 
     # if history length set to ``0`` the model will not recall any previous messages except prompts
-    RESPONSE: llm_response(model_name="model_name_1", history=0)
+    RESPONSE: LLMResponse(model_name="model_name_1", history=0)
 
-    RESPONSE: llm_response(model_name="model_name_1", history=10)
+    RESPONSE: LLMResponse(model_name="model_name_1", history=10)
 
     # if history length set to ``-1`` ALL the users messages will be passed as history.
     # use this value cautiously because it can easily exceed models context window
     # and "push" the meaningful prompts out of it
-    RESPONSE: llm_response(model_name="model_name_1", history=-1)
+    RESPONSE: LLMResponse(model_name="model_name_1", history=-1)
 
 Another way of dealing with unwanted messages is by using filtering functions.
 
 .. code-block:: python
 
     from chatsky.llm.filters import IsImportant
-    RESPONSE: llm_response(model_name="model_name_1", history=15, filter_func=IsImportant)
+    RESPONSE: LLMResponse(model_name="model_name_1", history=15, filter_func=IsImportant)
 
 These functions should be classes inheriting from ``BaseFilter``, having a ``__call__`` function with the following signature:
 ``def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool``

@@ -90,7 +90,7 @@ script = {
     },
     "movie_flow": {
         "main_node": {
-            RESPONSE: llm_response(
+            RESPONSE: LLMResponse(
                 "movie_model",
                 prompt="Ask user to request you for movie ideas.",
                 message_schema=Movie,
@@ -100,7 +100,7 @@ script = {
     },
     "note_flow": {
         "main_node": {
-            RESPONSE: llm_response(
+            RESPONSE: LLMResponse(
                 "note_model",
                 prompt="Help user take notes and mark the important ones.",
                 message_schema=ImportantMessage,
