@@ -5,4 +5,4 @@ COPY entrypoint_stats.sh /app/docker/
 COPY --chown=superset superset_config_docker.py /app/pythonpath/
 ENV SUPERSET_CONFIG_PATH /app/pythonpath/superset_config_docker.py
 USER superset
-ENTRYPOINT ["/bin/bash","/app/docker/entrypoint_stats.sh"]
+ENTRYPOINT ["/bin/bash","/app/docker/superset_chatsky_dashboard/entrypoint_stats.sh"]

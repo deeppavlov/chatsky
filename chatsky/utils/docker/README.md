@@ -7,5 +7,7 @@ of various Chatsky utilities.
 
 ## Contents
 
-* dockerfile_stats - Dockerfile for Chatsky statistics dashboard.
-* entrypoint_stats.sh - Entrypoint script for Chatsky statistics dashboard.
+* chatsky - Directory containing docker files for Chatsky image
+* superset_chatsky_dashboard - Directory containing docker files for Chatsky statistics dashboard
+    * dockerfile_stats - Dockerfile for Chatsky statistics dashboard.
+    * entrypoint_stats.sh - Entrypoint script for Chatsky statistics dashboard.

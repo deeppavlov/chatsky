@@ -75,6 +75,8 @@ opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
 pyyaml = { version = "*", optional = true }
+fastapi = { version = "*", optional = true }
+uvicorn = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -89,6 +91,7 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 yaml = ["pyyaml"]
+web-api = ["fastapi", "uvicorn"]
 
 
 [tool.poetry.group.lint]
