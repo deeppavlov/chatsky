@@ -27,11 +27,16 @@ class TestContextDict:
         ctx_id = "ctx1"
         storage = MemoryContextStorage(rewrite_existing=False, configuration={"requests": "__none__"})
         await storage.update_main_info(ctx_id, 0, 0, 0, b"", b"")
-        requests = [(1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()), (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode())]
+        requests = [
+            (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
+            (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),
+        ]
         await storage.update_field_items(ctx_id, storage._requests_field_name, requests)
         return await ContextDict.connected(storage, ctx_id, storage._requests_field_name, Message)
 
-    async def test_creation(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
+    async def test_creation(
+        self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+    ) -> None:
         # Checking creation correctness
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             assert ctx_dict._storage is not None or ctx_dict == empty_dict
@@ -39,7 +44,9 @@ class TestContextDict:
             assert ctx_dict._added == ctx_dict._removed == set()
             assert ctx_dict._keys == set() if ctx_dict != prefilled_dict else {1, 2}
 
-    async def test_get_set_del(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
+    async def test_get_set_del(
+        self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+    ) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Setting 1 item
             message = Message("message")
@@ -102,7 +109,7 @@ class TestContextDict:
         assert prefilled_dict._removed == {1}
         assert len(prefilled_dict) == 1
         # Popping nonexistent item
-        assert await prefilled_dict.pop(100, None) == None
+        assert await prefilled_dict.pop(100, None) is None
         # Poppint last item
         assert (await prefilled_dict.popitem())[0] == 2
         assert prefilled_dict._removed == {1, 2}
@@ -125,7 +132,9 @@ class TestContextDict:
         empty_dict._added = set()
         assert empty_dict == ContextDict.model_validate({0: Message("msg")})
 
-    async def test_serialize_store(self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict) -> None:
+    async def test_serialize_store(
+        self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+    ) -> None:
         # Check all the dict types
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Set overwriting existing keys to false

@@ -14,7 +14,7 @@ and powerful choice for data storage and management.
 """
 
 from asyncio import gather
-from typing import Callable, List, Dict, Set, Tuple, Optional
+from typing import List, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -23,7 +23,7 @@ try:
 except ImportError:
     redis_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 
@@ -81,19 +81,21 @@ class RedisContextStorage(DBContextStorage):
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._created_at_column_name),
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._updated_at_column_name),
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._misc_column_name),
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name)
+                self.database.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name),
             )
             return (int(cti), int(ca), int(ua), msc, fd)
         else:
             return None
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         await gather(
             self.database.hset(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name, str(turn_id)),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._created_at_column_name, str(crt_at)),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._updated_at_column_name, str(upd_at)),
             self.database.hset(f"{self._main_key}:{ctx_id}", self._misc_column_name, misc),
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data)
+            self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data),
         )
 
     async def delete_context(self, ctx_id: str) -> None:
@@ -106,7 +108,7 @@ class RedisContextStorage(DBContextStorage):
         field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         keys = sorted(await self.database.hkeys(field_key), key=lambda k: int(k), reverse=True)
         if isinstance(self._subscripts[field_name], int):
-            keys = keys[:self._subscripts[field_name]]
+            keys = keys[: self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             keys = [k for k in keys if k in self._keys_to_bytes(self._subscripts[field_name])]
         values = await gather(*[self.database.hget(field_key, k) for k in keys])

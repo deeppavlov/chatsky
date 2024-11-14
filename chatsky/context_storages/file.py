@@ -15,7 +15,7 @@ import logging
 
 from pydantic import BaseModel, Field
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 from chatsky.utils.logging import collapse_num_list
 
 try:
@@ -48,7 +48,7 @@ class FileContextStorage(DBContextStorage, ABC):
     """
 
     def __init__(
-        self, 
+        self,
         path: str = "",
         rewrite_existing: bool = False,
         configuration: Optional[_SUBSCRIPT_DICT] = None,
@@ -70,7 +70,9 @@ class FileContextStorage(DBContextStorage, ABC):
         logger.debug(f"Main info loaded for {ctx_id}")
         return result
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         logger.debug(f"Updating main info for {ctx_id}...")
         storage = await self._load()
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
@@ -89,9 +91,13 @@ class FileContextStorage(DBContextStorage, ABC):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         storage = await self._load()
-        select = sorted([(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None], key=lambda e: e[0], reverse=True)
+        select = sorted(
+            [(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None],
+            key=lambda e: e[0],
+            reverse=True,
+        )
         if isinstance(self._subscripts[field_name], int):
-            select = select[:self._subscripts[field_name]]
+            select = select[: self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
         logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in select))}")
@@ -107,7 +113,11 @@ class FileContextStorage(DBContextStorage, ABC):
     @DBContextStorage._verify_field_name
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
-        result = [(k, v) for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and k in keys and v is not None]
+        result = [
+            (k, v)
+            for c, f, k, v in (await self._load()).turns
+            if c == ctx_id and f == field_name and k in keys and v is not None
+        ]
         logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
         return result
 
@@ -173,7 +183,7 @@ class ShelveContextStorage(FileContextStorage):
     _SHELVE_ROOT = "root"
 
     def __init__(
-        self, 
+        self,
         path: str = "",
         rewrite_existing: bool = False,
         configuration: Optional[_SUBSCRIPT_DICT] = None,

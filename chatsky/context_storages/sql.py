@@ -180,7 +180,12 @@ class SQLContextStorage(DBContextStorage):
         self.turns_table = Table(
             f"{table_name_prefix}_{self._turns_table_name}",
             metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), ForeignKey(self.main_table.name, self._id_column_name), nullable=False),
+            Column(
+                self._id_column_name,
+                String(self._UUID_LENGTH),
+                ForeignKey(self.main_table.name, self._id_column_name),
+                nullable=False,
+            ),
             Column(self._key_column_name, Integer(), nullable=False),
             Column(self._labels_field_name, LargeBinary(), nullable=True),
             Column(self._requests_field_name, LargeBinary(), nullable=True),
@@ -232,7 +237,9 @@ class SQLContextStorage(DBContextStorage):
             return None if result is None else result[1:]
 
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         logger.debug(f"Updating main info for {ctx_id}...")
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
@@ -247,7 +254,12 @@ class SQLContextStorage(DBContextStorage):
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
-            [self._updated_at_column_name, self._current_turn_id_column_name, self._misc_column_name, self._framework_data_column_name],
+            [
+                self._updated_at_column_name,
+                self._current_turn_id_column_name,
+                self._misc_column_name,
+                self._framework_data_column_name,
+            ],
             [self._id_column_name],
         )
         async with self.engine.begin() as conn:
@@ -270,7 +282,8 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] is not None)
         stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
         if isinstance(self._subscripts[field_name], int):
             stmt = stmt.limit(self._subscripts[field_name])
@@ -278,14 +291,18 @@ class SQLContextStorage(DBContextStorage):
             stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(self._subscripts[field_name]))
         async with self.engine.begin() as conn:
             result = list((await conn.execute(stmt)).fetchall())
-            logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in result))}")
+            logger.debug(
+                f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in result))}"
+            )
             return result
 
     @DBContextStorage._verify_field_name
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
-        stmt = select(self.turns_table.c[self._key_column_name]).where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[field_name] != None))
+        stmt = select(self.turns_table.c[self._key_column_name])
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] is not None)
         async with self.engine.begin() as conn:
             result = [k[0] for k in (await conn.execute(stmt)).fetchall()]
             logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
@@ -296,7 +313,9 @@ class SQLContextStorage(DBContextStorage):
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where((self.turns_table.c[self._id_column_name] == ctx_id) & (self.turns_table.c[self._key_column_name].in_(tuple(keys))) & (self.turns_table.c[field_name] != None))
+        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(tuple(keys)))
+        stmt = stmt.where(self.turns_table.c[field_name] is not None)
         async with self.engine.begin() as conn:
             result = list((await conn.execute(stmt)).fetchall())
             logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
@@ -314,7 +333,8 @@ class SQLContextStorage(DBContextStorage):
                     self._id_column_name: ctx_id,
                     self._key_column_name: k,
                     field_name: v,
-                } for k, v in items
+                }
+                for k, v in items
             ]
         )
         update_stmt = _get_upsert_stmt(
@@ -331,7 +351,4 @@ class SQLContextStorage(DBContextStorage):
     async def clear_all(self) -> None:
         logger.debug("Clearing all")
         async with self.engine.begin() as conn:
-            await asyncio.gather(
-                conn.execute(delete(self.main_table)),
-                conn.execute(delete(self.turns_table))
-            )
+            await asyncio.gather(conn.execute(delete(self.main_table)), conn.execute(delete(self.turns_table)))

@@ -1,7 +1,7 @@
 import os
 from platform import system
 from socket import AF_INET, SOCK_STREAM, socket
-from typing import Any, Optional
+from typing import Optional
 import asyncio
 import random
 
@@ -26,11 +26,9 @@ from chatsky.utils.testing.cleanup_db import (
     delete_sql,
     delete_ydb,
 )
+from chatsky import Pipeline
 from chatsky.context_storages import DBContextStorage
 from chatsky.context_storages.database import _SUBSCRIPT_TYPE
-from chatsky import Pipeline, Context, Message
-from chatsky.core.context import FrameworkData
-from chatsky.utils.context_dict.ctx_dict import ContextDict
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_path
 
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -79,58 +77,83 @@ def test_protocol_suggestion(protocol: str, expected: str) -> None:
     [
         pytest.param({"path": ""}, None, id="memory"),
         pytest.param({"path": "shelve://{__testing_file__}"}, delete_file, id="shelve"),
-        pytest.param({"path": "json://{__testing_file__}"}, delete_file, id="json", marks=[
-            pytest.mark.skipif(not json_available, reason="Asynchronous file (JSON) dependencies missing")
-        ]),
-        pytest.param({"path": "pickle://{__testing_file__}"}, delete_file, id="pickle", marks=[
-            pytest.mark.skipif(not pickle_available, reason="Asynchronous file (pickle) dependencies missing")
-        ]),
-        pytest.param({
-            "path": "mongodb://{MONGO_INITDB_ROOT_USERNAME}:{MONGO_INITDB_ROOT_PASSWORD}@"
-                    "localhost:27017/{MONGO_INITDB_ROOT_USERNAME}"
-        }, delete_mongo, id="mongo", marks=[
-            pytest.mark.docker,
-            pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running"),
-            pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
-        ]),
-        pytest.param({"path": "redis://:{REDIS_PASSWORD}@localhost:6379/0"}, delete_redis, id="redis", marks=[
-            pytest.mark.docker,
-            pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running"),
-            pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
-        ]),
-        pytest.param({
-            "path": "postgresql+asyncpg://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"
-        }, delete_sql, id="postgres", marks=[
-            pytest.mark.docker,
-            pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running"),
-            pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
-        ]),
-        pytest.param({
-            "path": "sqlite+aiosqlite:{__separator__}{__testing_file__}"
-        }, delete_sql, id="sqlite", marks=[
-            pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
-        ]),
-        pytest.param({
-            "path": "mysql+asyncmy://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@localhost:3307/{MYSQL_DATABASE}"
-        }, delete_sql, id="mysql", marks=[
-            pytest.mark.docker,
-            pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running"),
-            pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
-        ]),
-        pytest.param({"path": "{YDB_ENDPOINT}{YDB_DATABASE}"}, delete_ydb, id="ydb", marks=[
-            pytest.mark.docker,
-            pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running"),
-            pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
-        ]),
-    ]
+        pytest.param(
+            {"path": "json://{__testing_file__}"},
+            delete_file,
+            id="json",
+            marks=[pytest.mark.skipif(not json_available, reason="Asynchronous file (JSON) dependencies missing")],
+        ),
+        pytest.param(
+            {"path": "pickle://{__testing_file__}"},
+            delete_file,
+            id="pickle",
+            marks=[pytest.mark.skipif(not pickle_available, reason="Asynchronous file (pickle) dependencies missing")],
+        ),
+        pytest.param(
+            {
+                "path": "mongodb://{MONGO_INITDB_ROOT_USERNAME}:{MONGO_INITDB_ROOT_PASSWORD}@"
+                "localhost:27017/{MONGO_INITDB_ROOT_USERNAME}"
+            },
+            delete_mongo,
+            id="mongo",
+            marks=[
+                pytest.mark.docker,
+                pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running"),
+                pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing"),
+            ],
+        ),
+        pytest.param(
+            {"path": "redis://:{REDIS_PASSWORD}@localhost:6379/0"},
+            delete_redis,
+            id="redis",
+            marks=[
+                pytest.mark.docker,
+                pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running"),
+                pytest.mark.skipif(not redis_available, reason="Redis dependencies missing"),
+            ],
+        ),
+        pytest.param(
+            {"path": "postgresql+asyncpg://{POSTGRES_USERNAME}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"},
+            delete_sql,
+            id="postgres",
+            marks=[
+                pytest.mark.docker,
+                pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running"),
+                pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing"),
+            ],
+        ),
+        pytest.param(
+            {"path": "sqlite+aiosqlite:{__separator__}{__testing_file__}"},
+            delete_sql,
+            id="sqlite",
+            marks=[pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")],
+        ),
+        pytest.param(
+            {"path": "mysql+asyncmy://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@localhost:3307/{MYSQL_DATABASE}"},
+            delete_sql,
+            id="mysql",
+            marks=[
+                pytest.mark.docker,
+                pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running"),
+                pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing"),
+            ],
+        ),
+        pytest.param(
+            {"path": "{YDB_ENDPOINT}{YDB_DATABASE}"},
+            delete_ydb,
+            id="ydb",
+            marks=[
+                pytest.mark.docker,
+                pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running"),
+                pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing"),
+            ],
+        ),
+    ],
 )
 class TestContextStorages:
     @pytest.fixture
     async def db(self, db_kwargs, db_teardown, tmpdir_factory):
-        kwargs = {
-            "__separator__": "///" if system() == "Windows" else "////",
-            **os.environ
-        }
+        kwargs = {"__separator__": "///" if system() == "Windows" else "////", **os.environ}
         if "{__testing_file__}" in db_kwargs["path"]:
             kwargs["__testing_file__"] = str(tmpdir_factory.mktemp("data").join("file.db"))
         db_kwargs["path"] = db_kwargs["path"].format(**kwargs)
@@ -146,6 +169,7 @@ class TestContextStorages:
         async def add_context(ctx_id: str):
             await db.update_main_info(ctx_id, 1, 1, 1, b"1", b"1")
             await db.update_field_items(ctx_id, "labels", [(0, b"0")])
+
         yield add_context
 
     @staticmethod
@@ -188,13 +212,21 @@ class TestContextStorages:
         assert await db.load_main_info("2") == (1, 1, 1, b"1", b"1")
 
     async def test_wrong_field_name(self, db):
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for method 'load_field_latest' argument 'field_name'!"):
+        with pytest.raises(
+            ValueError, match="Invalid value 'non-existent' for method 'load_field_latest' argument 'field_name'!"
+        ):
             await db.load_field_latest("1", "non-existent")
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for method 'load_field_keys' argument 'field_name'!"):
+        with pytest.raises(
+            ValueError, match="Invalid value 'non-existent' for method 'load_field_keys' argument 'field_name'!"
+        ):
             await db.load_field_keys("1", "non-existent")
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for method 'load_field_items' argument 'field_name'!"):
+        with pytest.raises(
+            ValueError, match="Invalid value 'non-existent' for method 'load_field_items' argument 'field_name'!"
+        ):
             await db.load_field_items("1", "non-existent", {1, 2})
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for method 'update_field_items' argument 'field_name'!"):
+        with pytest.raises(
+            ValueError, match="Invalid value 'non-existent' for method 'update_field_items' argument 'field_name'!"
+        ):
             await db.update_field_items("1", "non-existent", [(1, b"2")])
 
     async def test_field_get(self, db, add_context):
@@ -288,7 +320,7 @@ class TestContextStorages:
                 assert set(await db.load_field_keys(str_key, "requests")) == set(keys)
                 assert set(await db.load_field_items(str_key, "requests", keys)) == {
                     (0, bytes(2 * key + idx)),
-                    *[(k, bytes(key + k)) for k in range(1, idx + 1)]
+                    *[(k, bytes(key + k)) for k in range(1, idx + 1)],
                 }
 
         operations = [db_operations(key * 2) for key in range(3)]

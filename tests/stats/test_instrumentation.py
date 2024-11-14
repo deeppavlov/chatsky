@@ -2,7 +2,7 @@ import pytest
 
 from chatsky import Context
 from chatsky.core.service import Service, ExtraHandlerRuntimeInfo
-from chatsky.core.utils import initialize_service_states, finalize_service_group
+from chatsky.core.utils import initialize_service_states
 
 try:
     from chatsky.stats import default_extractors

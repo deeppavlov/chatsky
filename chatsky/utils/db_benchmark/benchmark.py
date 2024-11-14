@@ -283,12 +283,14 @@ class BenchmarkCase(BaseModel):
 
     def _run(self):
         try:
-            write_times, read_times, update_times = asyncio.run(time_context_read_write(
-                self.db_factory.db(),
-                self.benchmark_config.get_context,
-                self.benchmark_config.context_num,
-                self.benchmark_config.context_updater,
-            ))
+            write_times, read_times, update_times = asyncio.run(
+                time_context_read_write(
+                    self.db_factory.db(),
+                    self.benchmark_config.get_context,
+                    self.benchmark_config.context_num,
+                    self.benchmark_config.context_updater,
+                )
+            )
             return {
                 "success": True,
                 "result": {

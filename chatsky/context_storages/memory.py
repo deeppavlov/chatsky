@@ -1,6 +1,6 @@
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -10,14 +10,14 @@ class MemoryContextStorage(DBContextStorage):
     By default it sets path to an empty string.
 
     Keeps data in a dictionary and two lists:
-    
+
     - `main`: {context_id: [created_at, turn_id, updated_at, framework_data]}
     - `turns`: [context_id, turn_number, label, request, response]
     - `misc`: [context_id, turn_number, misc]
     """
 
     def __init__(
-        self, 
+        self,
         path: str = "",
         rewrite_existing: bool = False,
         configuration: Optional[_SUBSCRIPT_DICT] = None,
@@ -33,7 +33,9 @@ class MemoryContextStorage(DBContextStorage):
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return self._main_storage.get(ctx_id, None)
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         self._main_storage[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
 
     async def delete_context(self, ctx_id: str) -> None:
@@ -43,9 +45,11 @@ class MemoryContextStorage(DBContextStorage):
 
     @DBContextStorage._verify_field_name
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
-        select = sorted([k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None], reverse=True)
+        select = sorted(
+            [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None], reverse=True
+        )
         if isinstance(self._subscripts[field_name], int):
-            select = select[:self._subscripts[field_name]]
+            select = select[: self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             select = [k for k in select if k in self._subscripts[field_name]]
         return [(k, self._aux_storage[field_name][ctx_id][k]) for k in select]
@@ -56,7 +60,9 @@ class MemoryContextStorage(DBContextStorage):
 
     @DBContextStorage._verify_field_name
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
-        return [(k, v) for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys and v is not None]
+        return [
+            (k, v) for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys and v is not None
+        ]
 
     @DBContextStorage._verify_field_name
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:

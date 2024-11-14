@@ -2,7 +2,23 @@ from __future__ import annotations
 from asyncio import gather
 from hashlib import sha256
 import logging
-from typing import Any, Callable, Dict, Generic, List, Mapping, Optional, Sequence, Set, Tuple, Type, TypeVar, Union, overload, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+    TYPE_CHECKING,
+)
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
@@ -62,26 +78,32 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
-        logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} loading extra items: {collapse_num_list(keys)}...")
+        logger.debug(
+            f"Context dict for {self._ctx_id}, {self._field_name} loading extra items: {collapse_num_list(keys)}..."
+        )
         items = await self._storage.load_field_items(self._ctx_id, self._field_name, keys)
-        logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} extra items loaded: {collapse_num_list(keys)}")
+        logger.debug(
+            f"Context dict for {self._ctx_id}, {self._field_name} extra items loaded: {collapse_num_list(keys)}"
+        )
         for key, value in items:
             self._items[key] = self._value_type.validate_json(value)
             if not self._storage.rewrite_existing:
                 self._hashes[key] = get_hash(value)
 
     @overload
-    async def __getitem__(self, key: K) -> V: ...
+    async def __getitem__(self, key: K) -> V: ...  # noqa: E704
 
     @overload
-    async def __getitem__(self, key: slice) -> List[V]: ...
+    async def __getitem__(self, key: slice) -> List[V]: ...  # noqa: E704
 
     async def __getitem__(self, key):
         if isinstance(key, int) and key < 0:
             key = self.keys()[key]
         if self._storage is not None:
             if isinstance(key, slice):
-                await self._load_items([self.keys()[k] for k in range(len(self.keys()))[key] if k not in self._items.keys()])
+                await self._load_items(
+                    [self.keys()[k] for k in range(len(self.keys()))[key] if k not in self._items.keys()]
+                )
             elif key not in self._items.keys():
                 await self._load_items([key])
         if isinstance(key, slice):
@@ -121,11 +143,11 @@ class ContextDict(BaseModel, Generic[K, V]):
 
     def __iter__(self) -> Sequence[K]:
         return iter(self.keys() if self._storage is not None else self._items.keys())
-    
+
     def __len__(self) -> int:
         return len(self.keys() if self._storage is not None else self._items.keys())
 
-    async def get(self, key: K, default = None) -> V:
+    async def get(self, key: K, default=None) -> V:
         try:
             return await self[key]
         except KeyError:
@@ -143,7 +165,7 @@ class ContextDict(BaseModel, Generic[K, V]):
     async def items(self) -> List[Tuple[K, V]]:
         return [(k, v) for k, v in zip(self.keys(), await self.values())]
 
-    async def pop(self, key: K, default = None) -> V:
+    async def pop(self, key: K, default=None) -> V:
         try:
             value = await self[key]
         except KeyError:
@@ -179,7 +201,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         for key, value in kwds.items():
             self[key] = value
 
-    async def setdefault(self, key: K, default = None) -> V:
+    async def setdefault(self, key: K, default=None) -> V:
         try:
             return await self[key]
         except KeyError:
@@ -195,7 +217,16 @@ class ContextDict(BaseModel, Generic[K, V]):
             return False
 
     def __repr__(self) -> str:
-        return f"ContextDict(items={self._items}, keys={list(self.keys())}, hashes={self._hashes}, added={self._added}, removed={self._removed}, storage={self._storage}, ctx_id={self._ctx_id}, field_name={self._field_name})"
+        return (
+            f"ContextDict(items={self._items}, "
+            f"keys={list(self.keys())}, "
+            f"hashes={self._hashes}, "
+            f"added={self._added}, "
+            f"removed={self._removed}, "
+            f"storage={self._storage}, "
+            f"ctx_id={self._ctx_id}, "
+            f"field_name={self._field_name})"
+        )
 
     @model_validator(mode="wrap")
     def _validate_model(value: Any, handler: Callable[[Any], "ContextDict"], _) -> "ContextDict":
@@ -229,9 +260,12 @@ class ContextDict(BaseModel, Generic[K, V]):
             stored = [(k, e.encode()) for k, e in self.model_dump().items()]
             await gather(
                 self._storage.update_field_items(self._ctx_id, self._field_name, stored),
-                self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added))
+                self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
             )
-            logger.debug(f"Context dict for {self._ctx_id}, {self._field_name} stored: {collapse_num_list([k for k, _ in stored])}")
+            logger.debug(
+                f"Context dict for {self._ctx_id}, {self._field_name} stored: "
+                f"{collapse_num_list([k for k, _ in stored])}"
+            )
             self._added, self._removed = set(), set()
             if not self._storage.rewrite_existing:
                 for k, v in self._items.items():

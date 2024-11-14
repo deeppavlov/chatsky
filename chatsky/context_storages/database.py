@@ -14,7 +14,6 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Set, Tuple, Union
 
-from pydantic import BaseModel, Field, field_validator, validate_call
 from .protocol import PROTOCOLS
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[str]]
@@ -65,7 +64,9 @@ class DBContextStorage(ABC):
                         return await method(self, *args, **kwargs)
                 else:
                     return await method(self, *args, **kwargs)
+
             return lock
+
         return setup_lock
 
     @staticmethod
@@ -78,6 +79,7 @@ class DBContextStorage(ABC):
                 raise ValueError(f"Invalid value '{field_name}' for method '{method.__name__}' argument 'field_name'!")
             else:
                 return method(self, *args, **kwargs)
+
         return verifier
 
     @abstractmethod
@@ -88,7 +90,9 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         """
         Update main information about the context storage.
         """
@@ -147,7 +151,7 @@ class DBContextStorage(ABC):
         if not isinstance(other, DBContextStorage):
             return False
         return (
-            self.full_path == other.full_path 
+            self.full_path == other.full_path
             and self.path == other.path
             and self.rewrite_existing == other.rewrite_existing
         )
@@ -192,11 +196,13 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
         if any(prefix.startswith(sql_prefix) for sql_prefix in ("sqlite", "mysql", "postgresql")):
             prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
         if prefix not in PROTOCOLS:
-            raise ValueError(f"""
+            raise ValueError(
+                f"""
         URI path should be prefixed with one of the following:\n
         {", ".join(PROTOCOLS.keys())}.\n
         For more information, see the function doc:\n{context_storage_factory.__doc__}
-        """)
+        """
+            )
         _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
     target_class = getattr(import_module(f".{module}", package="chatsky.context_storages"), _class)
     return target_class(path, **kwargs)

@@ -12,10 +12,10 @@ take advantage of the scalability and high-availability features provided by the
 
 from asyncio import gather, run
 from os.path import join
-from typing import Awaitable, Callable, Set, Tuple, List, Dict, Optional
+from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -113,7 +113,7 @@ class YDBContextStorage(DBContextStorage):
                 .with_column(Column(self._updated_at_column_name, PrimitiveType.Uint64))
                 .with_column(Column(self._misc_column_name, PrimitiveType.String))
                 .with_column(Column(self._framework_data_column_name, PrimitiveType.String))
-                .with_primary_key(self._id_column_name)
+                .with_primary_key(self._id_column_name),
             )
 
         await self.pool.retry_operation(callee)
@@ -128,7 +128,7 @@ class YDBContextStorage(DBContextStorage):
                 .with_column(Column(self._labels_field_name, OptionalType(PrimitiveType.String)))
                 .with_column(Column(self._requests_field_name, OptionalType(PrimitiveType.String)))
                 .with_column(Column(self._responses_field_name, OptionalType(PrimitiveType.String)))
-                .with_primary_keys(self._id_column_name, self._key_column_name)
+                .with_primary_keys(self._id_column_name, self._key_column_name),
             )
 
         await self.pool.retry_operation(callee)
@@ -143,21 +143,29 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {self._id_column_name} = ${self._id_column_name};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), {
+                await session.prepare(query),
+                {
                     f"${self._id_column_name}": ctx_id,
-                }, commit_tx=True
+                },
+                commit_tx=True,
             )
             return (
-                result_sets[0].rows[0][self._current_turn_id_column_name],
-                result_sets[0].rows[0][self._created_at_column_name],
-                result_sets[0].rows[0][self._updated_at_column_name],
-                result_sets[0].rows[0][self._misc_column_name],
-                result_sets[0].rows[0][self._framework_data_column_name],
-            ) if len(result_sets[0].rows) > 0 else None
+                (
+                    result_sets[0].rows[0][self._current_turn_id_column_name],
+                    result_sets[0].rows[0][self._created_at_column_name],
+                    result_sets[0].rows[0][self._updated_at_column_name],
+                    result_sets[0].rows[0][self._misc_column_name],
+                    result_sets[0].rows[0][self._framework_data_column_name],
+                )
+                if len(result_sets[0].rows) > 0
+                else None
+            )
 
         return await self.pool.retry_operation(callee)
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         async def callee(session: Session) -> None:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -180,7 +188,7 @@ class YDBContextStorage(DBContextStorage):
                     f"${self._misc_column_name}": misc,
                     f"${self._framework_data_column_name}": fw_data,
                 },
-                commit_tx=True
+                commit_tx=True,
             )
 
         await self.pool.retry_operation(callee)
@@ -195,16 +203,18 @@ class YDBContextStorage(DBContextStorage):
                     WHERE {self._id_column_name} = ${self._id_column_name};
                     """  # noqa: E501
                 await session.transaction(SerializableReadWrite()).execute(
-                    await session.prepare(query), {
+                    await session.prepare(query),
+                    {
                         f"${self._id_column_name}": ctx_id,
-                    }, commit_tx=True
+                    },
+                    commit_tx=True,
                 )
 
             return callee
 
         await gather(
             self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table))
+            self.pool.retry_operation(construct_callee(self.turns_table)),
         )
 
     @DBContextStorage._verify_field_name
@@ -232,14 +242,18 @@ class YDBContextStorage(DBContextStorage):
                 ORDER BY {self._key_column_name} DESC {limit};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), {
+                await session.prepare(query),
+                {
                     f"${self._id_column_name}": ctx_id,
                     **prepare,
-                }, commit_tx=True
+                },
+                commit_tx=True,
             )
-            return [
-                (e[self._key_column_name], e[field_name]) for e in result_sets[0].rows
-            ] if len(result_sets[0].rows) > 0 else list()
+            return (
+                [(e[self._key_column_name], e[field_name]) for e in result_sets[0].rows]
+                if len(result_sets[0].rows) > 0
+                else list()
+            )
 
         return await self.pool.retry_operation(callee)
 
@@ -254,13 +268,13 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {self._id_column_name} = ${self._id_column_name} AND {field_name} IS NOT NULL;
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), {
+                await session.prepare(query),
+                {
                     f"${self._id_column_name}": ctx_id,
-                }, commit_tx=True
+                },
+                commit_tx=True,
             )
-            return [
-                e[self._key_column_name] for e in result_sets[0].rows
-            ] if len(result_sets[0].rows) > 0 else list()
+            return [e[self._key_column_name] for e in result_sets[0].rows] if len(result_sets[0].rows) > 0 else list()
 
         return await self.pool.retry_operation(callee)
 
@@ -281,14 +295,18 @@ class YDBContextStorage(DBContextStorage):
                 AND {self._key_column_name} IN ({", ".join(prepare.keys())});
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), {
+                await session.prepare(query),
+                {
                     f"${self._id_column_name}": ctx_id,
                     **prepare,
-                }, commit_tx=True
+                },
+                commit_tx=True,
             )
-            return [
-                (e[self._key_column_name], e[field_name]) for e in result_sets[0].rows
-            ] if len(result_sets[0].rows) > 0 else list()
+            return (
+                [(e[self._key_column_name], e[field_name]) for e in result_sets[0].rows]
+                if len(result_sets[0].rows) > 0
+                else list()
+            )
 
         return await self.pool.retry_operation(callee)
 
@@ -318,10 +336,12 @@ class YDBContextStorage(DBContextStorage):
                 """  # noqa: E501
 
             await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query), {
+                await session.prepare(query),
+                {
                     f"${self._id_column_name}": ctx_id,
                     **prepare,
-                }, commit_tx=True
+                },
+                commit_tx=True,
             )
 
         await self.pool.retry_operation(callee)
@@ -341,5 +361,5 @@ class YDBContextStorage(DBContextStorage):
 
         await gather(
             self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table))
+            self.pool.retry_operation(construct_callee(self.turns_table)),
         )

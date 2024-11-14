@@ -13,18 +13,17 @@ and high levels of read and write traffic.
 """
 
 import asyncio
-from typing import Dict, Set, Tuple, Optional, List
+from typing import Set, Tuple, Optional, List
 
 try:
     from pymongo import UpdateOne
-    from pymongo.collection import Collection
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
 except ImportError:
     mongo_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, _SUBSCRIPT_TYPE
+from .database import DBContextStorage, _SUBSCRIPT_DICT
 from .protocol import get_protocol_install_suggestion
 
 
@@ -64,23 +63,39 @@ class MongoContextStorage(DBContextStorage):
 
         asyncio.run(
             asyncio.gather(
-                self.main_table.create_index(
-                    self._id_column_name, background=True, unique=True
-                ),
+                self.main_table.create_index(self._id_column_name, background=True, unique=True),
                 self.turns_table.create_index(
                     [self._id_column_name, self._key_column_name], background=True, unique=True
-                )
+                ),
             )
         )
 
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         result = await self.main_table.find_one(
             {self._id_column_name: ctx_id},
-            [self._current_turn_id_column_name, self._created_at_column_name, self._updated_at_column_name, self._misc_column_name, self._framework_data_column_name]
+            [
+                self._current_turn_id_column_name,
+                self._created_at_column_name,
+                self._updated_at_column_name,
+                self._misc_column_name,
+                self._framework_data_column_name,
+            ],
         )
-        return (result[self._current_turn_id_column_name], result[self._created_at_column_name], result[self._updated_at_column_name], result[self._misc_column_name], result[self._framework_data_column_name]) if result is not None else None
+        return (
+            (
+                result[self._current_turn_id_column_name],
+                result[self._created_at_column_name],
+                result[self._updated_at_column_name],
+                result[self._misc_column_name],
+                result[self._framework_data_column_name],
+            )
+            if result is not None
+            else None
+        )
 
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(
+        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
+    ) -> None:
         await self.main_table.update_one(
             {self._id_column_name: ctx_id},
             {
@@ -99,7 +114,7 @@ class MongoContextStorage(DBContextStorage):
     async def delete_context(self, ctx_id: str) -> None:
         await asyncio.gather(
             self.main_table.delete_one({self._id_column_name: ctx_id}),
-            self.turns_table.delete_one({self._id_column_name: ctx_id})
+            self.turns_table.delete_one({self._id_column_name: ctx_id}),
         )
 
     @DBContextStorage._verify_field_name
@@ -109,11 +124,15 @@ class MongoContextStorage(DBContextStorage):
             limit = self._subscripts[field_name]
         elif isinstance(self._subscripts[field_name], Set):
             key = {self._key_column_name: {"$in": list(self._subscripts[field_name])}}
-        result = await self.turns_table.find(
-            {self._id_column_name: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},
-            [self._key_column_name, field_name],
-            sort=[(self._key_column_name, -1)]
-        ).limit(limit).to_list(None)
+        result = (
+            await self.turns_table.find(
+                {self._id_column_name: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},
+                [self._key_column_name, field_name],
+                sort=[(self._key_column_name, -1)],
+            )
+            .limit(limit)
+            .to_list(None)
+        )
         return [(item[self._key_column_name], item[field_name]) for item in result]
 
     @DBContextStorage._verify_field_name
@@ -129,8 +148,12 @@ class MongoContextStorage(DBContextStorage):
     @DBContextStorage._verify_field_name
     async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
         result = await self.turns_table.find(
-            {self._id_column_name: ctx_id, self._key_column_name: {"$in": list(keys)}, field_name: {"$exists": True, "$ne": None}},
-            [self._key_column_name, field_name]
+            {
+                self._id_column_name: ctx_id,
+                self._key_column_name: {"$in": list(keys)},
+                field_name: {"$exists": True, "$ne": None},
+            },
+            [self._key_column_name, field_name],
         ).to_list(None)
         return [(item[self._key_column_name], item[field_name]) for item in result]
 
@@ -144,12 +167,10 @@ class MongoContextStorage(DBContextStorage):
                     {self._id_column_name: ctx_id, self._key_column_name: k},
                     {"$set": {field_name: v}},
                     upsert=True,
-                ) for k, v in items
+                )
+                for k, v in items
             ]
         )
 
     async def clear_all(self) -> None:
-        await asyncio.gather(
-            self.main_table.delete_many({}),
-            self.turns_table.delete_many({})
-        )
+        await asyncio.gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

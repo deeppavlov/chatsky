@@ -14,7 +14,6 @@ from chatsky.core.service import (
 )
 from chatsky.core.service.extra import BeforeHandler
 from chatsky.core.utils import initialize_service_states, finalize_service_group
-from .conftest import run_test_group, make_test_service_group, run_extra_handler
 
 
 async def test_pipeline_component_order():

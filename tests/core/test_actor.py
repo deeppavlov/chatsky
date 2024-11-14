@@ -82,7 +82,7 @@ class TestRequestProcessing:
             start_label=("flow", "node1"),
             fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             parallelize_processing=True,
-            default_priority=default_priority
+            default_priority=default_priority,
         )
 
         ctx = await pipeline._run_pipeline(Message())

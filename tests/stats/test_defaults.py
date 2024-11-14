@@ -2,7 +2,6 @@ import importlib
 
 import pytest
 
-from chatsky.core import Context
 from chatsky.core.service import Service
 from chatsky.core.service.types import ExtraHandlerRuntimeInfo
 

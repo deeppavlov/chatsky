@@ -23,7 +23,7 @@ from time import time_ns
 from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
 import logging
 
-from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator, model_serializer
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
 
 from chatsky.context_storages.database import DBContextStorage
 from chatsky.core.message import Message
@@ -135,7 +135,9 @@ class Context(BaseModel):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None) -> Context:
+    async def connected(
+        cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None
+    ) -> Context:
         if id is None:
             uid = str(uuid4())
             logger.debug(f"Disconnected context created with uid: {uid}")
@@ -155,7 +157,7 @@ class Context(BaseModel):
                 storage.load_main_info(id),
                 ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
                 ContextDict.connected(storage, id, storage._requests_field_name, Message),
-                ContextDict.connected(storage, id, storage._responses_field_name, Message)
+                ContextDict.connected(storage, id, storage._responses_field_name, Message),
             )
             if main is None:
                 crt_at = upd_at = time_ns()
@@ -168,7 +170,15 @@ class Context(BaseModel):
                 misc = TypeAdapter(Dict[str, Any]).validate_json(misc)
                 fw_data = FrameworkData.model_validate_json(fw_data)
             logger.debug(f"Context loaded with turns number: {len(labels)}")
-            instance = cls(id=id, current_turn_id=turn_id, labels=labels, requests=requests, responses=responses, misc=misc, framework_data=fw_data)
+            instance = cls(
+                id=id,
+                current_turn_id=turn_id,
+                labels=labels,
+                requests=requests,
+                responses=responses,
+                misc=misc,
+                framework_data=fw_data,
+            )
             instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
             return instance
 
@@ -259,10 +269,12 @@ class Context(BaseModel):
             misc_byted = self.framework_data.model_dump_json().encode()
             fw_data_byted = self.framework_data.model_dump_json().encode()
             await gather(
-                self._storage.update_main_info(self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted),
+                self._storage.update_main_info(
+                    self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted
+                ),
                 self.labels.store(),
                 self.requests.store(),
-                self.responses.store()
+                self.responses.store(),
             )
             logger.debug(f"Context stored: {self.id}")
         else:

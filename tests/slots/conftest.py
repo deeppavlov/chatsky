@@ -1,6 +1,6 @@
 import pytest
 
-from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr, AbsoluteNodeLabel
+from chatsky.core import Message, TRANSITIONS, RESPONSE, Pipeline, Transition
 from chatsky.slots.slots import SlotNotExtracted
 
 
@@ -14,7 +14,7 @@ def patch_exception_equality(monkeypatch):
 
 @pytest.fixture(scope="function")
 def pipeline():
-    script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: [Tr(dst="node")]}}}
+    script = {"flow": {"node": {RESPONSE: Message(), TRANSITIONS: [Transition(dst="node")]}}}
     pipeline = Pipeline(script=script, start_label=("flow", "node"))
     return pipeline
 

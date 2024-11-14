@@ -49,6 +49,7 @@ def make_test_service_group():
             ],
         )
         return test_group
+
     return inner
 
 
@@ -60,7 +61,9 @@ def run_test_group(context_factory):
         initialize_service_states(ctx, pipeline.pre_services)
         await pipeline.pre_services(ctx)
         return test_group.get_state(ctx)
+
     return inner
+
 
 @pytest.fixture()
 def run_extra_handler(context_factory):
@@ -70,4 +73,5 @@ def run_extra_handler(context_factory):
         initialize_service_states(ctx, service)
         await service(ctx)
         return service.get_state(ctx)
+
     return inner

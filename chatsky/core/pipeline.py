@@ -11,7 +11,7 @@ including :py:class:`.Actor`.
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable
+from typing import Union, List, Optional
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.core.script import Script
