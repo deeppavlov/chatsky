@@ -1,3 +1,4 @@
+import asyncio
 from typing import Callable
 
 from pydantic import ValidationError
@@ -6,7 +7,6 @@ import pytest
 from chatsky.core.service import (
     Service,
     ServiceGroup,
-    ServiceRuntimeInfo,
     BeforeHandler,
     PipelineComponent,
 )
@@ -24,35 +24,23 @@ class UserFunctionSamples:
     def correct_service_function_1(_: Context):
         pass
 
-    @staticmethod
-    def correct_service_function_2(_: Context, __: Pipeline):
-        pass
-
-    @staticmethod
-    def correct_service_function_3(_: Context, __: Pipeline, ___: ServiceRuntimeInfo):
-        pass
-
 
 # Could make a test for returning an awaitable from a ServiceFunction, ExtraHandlerFunction
 class TestServiceValidation:
     def test_model_validator(self):
         with pytest.raises(ValidationError):
             # Can't pass a list to handler, it has to be a single function
-            Service(handler=[UserFunctionSamples.correct_service_function_2])
-        with pytest.raises(ValidationError):
+            Service(handler=[UserFunctionSamples.correct_service_function_1])
+        with pytest.raises(NotImplementedError):
             # Can't pass 'None' to handler, it has to be a callable function
             # Though I wonder if empty Services should be allowed.
             # I see no reason to allow it.
-            Service()
+            service = Service()
+            asyncio.run(service.call(Context()))
         with pytest.raises(TypeError):
             # Python says that two positional arguments were given when only one was expected.
             # This happens before Pydantic's validation, so I think there's nothing we can do.
             Service(UserFunctionSamples.correct_service_function_1)
-        with pytest.raises(ValidationError):
-            # Can't pass 'None' to handler, it has to be a callable function
-            # Though I wonder if empty Services should be allowed.
-            # I see no reason to allow it.
-            Service(handler=Service())
         # But it can work like this.
         # A single function gets cast to the right dictionary here.
         Service.model_validate(UserFunctionSamples.correct_service_function_1)
@@ -60,7 +48,7 @@ class TestServiceValidation:
 
 class TestExtraHandlerValidation:
     def test_correct_functions(self):
-        funcs = [UserFunctionSamples.correct_service_function_1, UserFunctionSamples.correct_service_function_2]
+        funcs = [UserFunctionSamples.correct_service_function_1, UserFunctionSamples.correct_service_function_1]
         handler = BeforeHandler(functions=funcs)
         assert handler.functions == funcs
 
@@ -85,22 +73,22 @@ class TestExtraHandlerValidation:
             BeforeHandler.model_validate([1, 2, 3])
 
 
-# Note: I haven't tested components being asynchronous in any way,
+# Note: I haven't tested components being concurrent in any way,
 # other than in the async pipeline components tutorial.
 # It's not a test though.
 class TestServiceGroupValidation:
     def test_single_service(self):
-        func = UserFunctionSamples.correct_service_function_2
-        group = ServiceGroup(components=Service(handler=func, after_handler=func))
+        func = UserFunctionSamples.correct_service_function_1
+        group = ServiceGroup(components=[Service(handler=func, after_handler=func)])
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
         # Same, but with model_validate
-        group = ServiceGroup.model_validate(Service(handler=func, after_handler=func))
+        group = ServiceGroup.model_validate([Service(handler=func, after_handler=func)])
         assert group.components[0].handler == func
         assert group.components[0].after_handler.functions[0] == func
 
     def test_several_correct_services(self):
-        func = UserFunctionSamples.correct_service_function_2
+        func = UserFunctionSamples.correct_service_function_1
         services = [Service.model_validate(func), Service(handler=func, timeout=10)]
         group = ServiceGroup(components=services, timeout=15)
         assert group.components == services
@@ -113,10 +101,6 @@ class TestServiceGroupValidation:
             # 'components' must be a list of PipelineComponents, wrong type
             # Though 123 will be cast to a list
             ServiceGroup(components=123)
-        with pytest.raises(ValidationError):
-            # The dictionary inside 'components' will check if Service or ServiceGroup fit the signature,
-            # but it doesn't fit any of them (required fields are not defined), so it's just a normal dictionary.
-            ServiceGroup(components={"before_handler": []})
         with pytest.raises(ValidationError):
             # The dictionary inside 'components' will try to get cast to Service and will fail.
             # 'components' must be a list of PipelineComponents, but it's just a normal dictionary (not a Service).

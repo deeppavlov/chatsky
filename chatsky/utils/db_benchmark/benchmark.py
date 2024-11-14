@@ -61,9 +61,6 @@ def time_context_read_write(
         The function should return `None` to stop updating contexts.
         For an example of such function, see implementation of
         :py:meth:`chatsky.utils.db_benchmark.basic_config.BasicBenchmarkConfig.context_updater`.
-
-        To avoid keeping many contexts in memory,
-        this function will be called repeatedly at least `context_num` times.
     :return:
         A tuple of 3 elements.
 
@@ -87,7 +84,7 @@ def time_context_read_write(
     read_times: List[Dict[int, float]] = []
     update_times: List[Dict[int, float]] = []
 
-    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}", leave=False):
+    for _ in tqdm(range(context_num), desc="Iteration", leave=False):
         context = context_factory()
 
         ctx_id = uuid4()
@@ -102,25 +99,25 @@ def time_context_read_write(
 
         # read operation benchmark
         read_start = perf_counter()
-        _ = context_storage[ctx_id]
+        context = context_storage[ctx_id]
         read_time = perf_counter() - read_start
         read_times[-1][len(context.labels)] = read_time
 
         if context_updater is not None:
-            updated_context = context_updater(context)
+            context = context_updater(context)
 
-            while updated_context is not None:
+            while context is not None:
                 update_start = perf_counter()
-                context_storage[ctx_id] = updated_context
+                context_storage[ctx_id] = context
                 update_time = perf_counter() - update_start
-                update_times[-1][len(updated_context.labels)] = update_time
+                update_times[-1][len(context.labels)] = update_time
 
                 read_start = perf_counter()
-                _ = context_storage[ctx_id]
+                context = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
-                read_times[-1][len(updated_context.labels)] = read_time
+                read_times[-1][len(context.labels)] = read_time
 
-                updated_context = context_updater(updated_context)
+                context = context_updater(context)
 
         context_storage.clear()
     return write_times, read_times, update_times
@@ -160,7 +157,7 @@ class BenchmarkConfig(BaseModel, abc.ABC, frozen=True):
     Inherit from this class only if `BasicBenchmarkConfig` is not enough for your benchmarking needs.
     """
 
-    context_num: int = 30
+    context_num: int = 1
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.

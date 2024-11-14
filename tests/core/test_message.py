@@ -21,6 +21,7 @@ from chatsky.core.message import (
     Location,
     DataAttachment,
     Message,
+    Origin,
     Poll,
     PollOption,
     Sticker,
@@ -93,14 +94,14 @@ class TestMessage:
     def test_field_serializable(self, random_original_message: UnserializableObject):
         message = Message(text="sample message")
         message.misc = {"answer": 42, "unserializable": random_original_message}
-        message.original_message = random_original_message
+        message.origin = Origin.model_construct(message=random_original_message)
         message.some_extra_field = random_original_message
         message.other_extra_field = {"unserializable": random_original_message}
         serialized = message.model_dump_json()
         validated = Message.model_validate_json(serialized)
         assert message == validated
 
-    @pytest.mark.asyncio
+    @pytest.mark.slow
     async def test_getting_attachment_bytes(self, tmp_path):
         local_path = self.clear_and_create_dir(tmp_path / "local")
 

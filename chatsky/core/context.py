@@ -18,6 +18,7 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 import logging
+import asyncio
 from uuid import UUID, uuid4
 from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 
@@ -28,9 +29,9 @@ from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:
+    from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
-    from chatsky.core.service.types import ComponentExecutionState
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +54,29 @@ class ContextError(Exception):
     """Raised when context methods are not used correctly."""
 
 
-class FrameworkData(BaseModel):
+class ServiceState(BaseModel, arbitrary_types_allowed=True):
+    execution_status: ComponentExecutionState = Field(default="NOT_RUN")
+    """
+    :py:class:`.ComponentExecutionState` of this pipeline service.
+    Cleared at the end of every turn.
+    """
+    finished_event: asyncio.Event = Field(default_factory=asyncio.Event)
+    """
+    Asyncio `Event` which can be awaited until this service finishes.
+    Cleared at the end of every turn.
+    """
+
+
+class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     Framework uses this to store data related to any of its modules.
     """
 
-    service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
-    "Statuses of all the pipeline services. Cleared at the end of every turn."
+    service_states: Dict[str, ServiceState] = Field(default_factory=dict, exclude=True)
+    """
+    Dictionary containing :py:class:`.ServiceState` of all the pipeline components.
+    Cleared at the end of every turn.
+    """
     current_node: Optional[Node] = Field(default=None, exclude=True)
     """
     A copy of the current node provided by :py:meth:`~chatsky.core.script.Script.get_inherited_node`.
@@ -130,6 +147,11 @@ class Context(BaseModel):
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
+    origin_interface: Optional[str] = Field(default=None)
+    """
+    Name of the interface that produced the first request in this context.
+    """
+
     @classmethod
     def init(cls, start_label: AbsoluteNodeLabelInitTypes, id: Optional[Union[UUID, int, str]] = None):
         """Initialize new context from ``start_label`` and, optionally, context ``id``."""
@@ -148,6 +170,8 @@ class Context(BaseModel):
         request_message = Message.model_validate(request)
         if len(self.requests) == 0:
             self.requests[1] = request_message
+            if request_message.origin is not None:
+                self.origin_interface = request_message.origin.interface
         else:
             last_index = get_last_index(self.requests)
             self.requests[last_index + 1] = request_message

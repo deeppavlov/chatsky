@@ -29,6 +29,9 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
+    def __init__(self) -> None:
+        self.id = type(self).__name__
+
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         """
@@ -62,6 +65,7 @@ class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
     """
 
     def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__()
         tempdir = gettempdir()
         if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
             self.attachments_directory = attachments_directory
@@ -171,6 +175,7 @@ class CallbackMessengerInterface(MessengerInterface):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):

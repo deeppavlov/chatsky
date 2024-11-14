@@ -46,7 +46,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
 ]
 
-suppress_warnings = ["image.nonlocal_uri"]
+suppress_warnings = ["image.nonlocal_uri", "config.cache"]
 source_suffix = ".rst"
 master_doc = "index"
 
@@ -171,7 +171,7 @@ def setup(_):
                     ("web_api_interface", "Web API"),
                 ],
             ),
-            ("tutorials.pipeline", "Pipeline"),
+            ("tutorials.service", "Service"),
             (
                 "tutorials.script",
                 "Script",
