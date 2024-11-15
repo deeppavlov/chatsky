@@ -117,8 +117,9 @@ requests = "*"
 idna = "*"
 pytest = "*"
 pytest-cov = "*"
-coverage = { version = "!=7.3.3", extras = ["toml"] }
+coverage = { version = "!=7.3.3,!=7.6.6", extras = ["toml"] }
 # Coverage 7.3.3 breaks pragma: no cover -- https://github.com/nedbat/coveragepy/issues/1713
+# Unable to find coverage 7.6.6 on python 3.9
 pytest-asyncio = "*"
 pytest-virtualenv = "*"
 sniffio = "*"
