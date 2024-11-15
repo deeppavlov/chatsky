@@ -68,7 +68,7 @@ async def test_structured_output(monkeypatch, mock_structured_model):
     result = await llm_api.respond(message_schema=MessageSchema, history=history)
 
     # Assert the result
-    expected_result = Message(text=str({"history": history}), annotations={"__generated_by_model__": ""})
+    expected_result = Message(text='{"history":["message1","message2"]}')
     assert result == expected_result
 
 
@@ -93,22 +93,22 @@ def filter_context():
     ctx = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
     ctx.framework_data.current_node = Node(misc={"prompt": "1"})
     ctx.add_request(
-        Message(text="Request 1", misc={"important": True}, annotation={"__generated_by_model__": "test_model"})
+        Message(text="Request 1", misc={"important": True}, annotations={"__generated_by_model__": "test_model"})
     )
     ctx.add_request(
-        Message(text="Request 2", misc={"important": False}, annotation={"__generated_by_model__": "other_model"})
+        Message(text="Request 2", misc={"important": False}, annotations={"__generated_by_model__": "other_model"})
     )
     ctx.add_request(
-        Message(text="Request 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+        Message(text="Request 3", misc={"important": False}, annotations={"__generated_by_model__": "test_model"})
     )
     ctx.add_response(
-        Message(text="Response 1", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+        Message(text="Response 1", misc={"important": False}, annotations={"__generated_by_model__": "test_model"})
     )
     ctx.add_response(
-        Message(text="Response 2", misc={"important": True}, annotation={"__generated_by_model__": "other_model"})
+        Message(text="Response 2", misc={"important": True}, annotations={"__generated_by_model__": "other_model"})
     )
     ctx.add_response(
-        Message(text="Response 3", misc={"important": False}, annotation={"__generated_by_model__": "test_model"})
+        Message(text="Response 3", misc={"important": False}, annotations={"__generated_by_model__": "test_model"})
     )
     return ctx
 
@@ -178,7 +178,7 @@ async def test_attachments(img, expected):
     ],
 )
 async def test_history(context, pipeline, hist, expected):
-    res = await LLMResponse("test_model", history=hist)(context, pipeline)
+    res = await LLMResponse(model_name="test_model", history=hist)(context)
     assert res.text == expected
 
 
