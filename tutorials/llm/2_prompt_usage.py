@@ -24,7 +24,7 @@ This way you can specify a certain prompt for each flow or node to alter the
 model's behavior.
 """
 
-# %pip install chatsky[llm]
+# %pip install chatsky[llm] langchain-openai
 
 # %%
 

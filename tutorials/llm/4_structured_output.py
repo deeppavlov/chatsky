@@ -7,7 +7,7 @@ want to automatically fill particular fields in the output Message.
 In Chatsky we can do that using Structured Output.
 """
 
-# %pip install chatsky[llm]
+# %pip install chatsky[llm] langchain-openai langchain-anthropic
 # %%
 import os
 from chatsky import (

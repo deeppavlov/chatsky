@@ -10,7 +10,7 @@ encourage you to utilize Chatsky LLM Slots.
 In this tutorial we will see how we can set up Slots that uses LLM's under
 the hood to extract more obscure information from users input.
 """
-# %pip install chatsky[llm]
+# %pip install chatsky[llm] langchain-openai
 # %%
 import os
 from chatsky import (

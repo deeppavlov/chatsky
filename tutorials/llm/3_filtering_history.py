@@ -8,7 +8,7 @@ It must be a function that takes a single `Message`
 object and returns a boolean.
 """
 
-# %pip install chatsky[llm]
+# %pip install chatsky[llm] langchain-openai
 
 # %%
 import os
