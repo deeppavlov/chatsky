@@ -45,7 +45,7 @@ Via `history` parameter you can set number of dialogue _turns_ that the model wi
 
 # %%
 model = LLM_API(
-    ChatOpenAI(model="gpt-3.5-turbo"),
+    ChatOpenAI(model="gpt-4o-mini"),
     system_prompt="You are an experienced barista in a local coffeshop. Answer your customer's questions about coffee and barista work.",
 )
 # %% [markdown]
