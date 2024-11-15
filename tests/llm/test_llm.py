@@ -165,15 +165,28 @@ async def test_attachments(img, expected):
     [
         (
             2,
-            r"""Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
+            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), "
+            r"AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), "
+            r"AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
         ),
         (
             0,
-            r"""Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
+            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
         ),
         (
             4,
-            r"""Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]""",
+            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), "
+            r"AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), "
+            r"AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), "
+            r"AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), "
+            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
         ),
     ],
 )

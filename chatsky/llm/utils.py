@@ -3,7 +3,7 @@ import logging
 from chatsky.core.context import Context
 from chatsky.core.message import Image, Message
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-# logging.basicConfig(level=logging.DEBUG)
+
 
 async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
     """

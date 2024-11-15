@@ -2,17 +2,21 @@
 """
 # LLM: 5. LLM Slots
 
-If we want to retrieve some information from user input like name, address or email we can simply use Chatsky's Slot system and user regexes or other formally specified data retrieval techniques. But if the data is more finicky to get or not explicitly presented in utterance we encourage you to utilize Chatsky LLM Slots.
-In this tutorial we will see how we can set up Slots that uses LLM's under the hood to extract more obscure information from users input.
+If we want to retrieve some information from user input like name, address or
+email we can simply use Chatsky's Slot system and user regexes or other formally
+specified data retrieval techniques. But if the data is more finicky to get or
+not explicitly presented in utterance we
+encourage you to utilize Chatsky LLM Slots.
+In this tutorial we will see how we can set up Slots that uses LLM's under
+the hood to extract more obscure information from users input.
 """
 # %pip install chatsky[llm]
 # %%
-from chatsky.core.message import Message
+import os
 from chatsky import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITION,
-    PRE_RESPONSE,
     GLOBAL,
     LOCAL,
     Pipeline,
@@ -21,25 +25,30 @@ from chatsky import (
     processing as proc,
     responses as rsp,
 )
+from langchain_openai import ChatOpenAI
 
 from chatsky.utils.testing import (
     is_interactive_mode,
 )
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 
-import os
 
 os.environ["OPENAI_API_KEY"] = "<OPENAI_TOKEN>"
 
-from langchain_openai import ChatOpenAI
 
 # %% [markdown]
 """
-In this example we define LLM Group Slot with two LLM Slots in it. Both of them can be used separately just as regular slots, but if you are going to extract several LLM Slots simultaneously we encourage you to put them in LLM Group Slot for optimization and convenience.
+In this example we define LLM Group Slot with two LLM Slots in it.
+Both of them can be used separately just as regular slots,
+but if you are going to extract several LLM Slots simultaneously
+we encourage you to put them in LLM Group Slot for optimization and convenience.
 
-In the `LLMSlot.caption` parameter you should put description of a data piece you want to retrieve. More specific descriptions will yield better results, especially when using smaller models.
+In the `LLMSlot.caption` parameter you should put description of a data piece
+you want to retrieve. More specific descriptions will yield better results,
+especially when using smaller models.
 
-Note that we are using `langchain_community.chat_models.openai.ChatOpenAI` and not `chatsky.llm.LLM_API` here.
+Note that we are using `langchain_community.chat_models.openai.ChatOpenAI` and
+not `chatsky.llm.LLM_API` here.
 """
 
 # %%
@@ -73,11 +82,14 @@ script = {
         },
         "start": {RESPONSE: "", TRANSITIONS: [Tr(dst=("user_flow", "ask"))]},
         "ask": {
-            RESPONSE: "Hello! Tell me about yourself: what are you doing for the living or your hobbies. And don't forget to introduce yourself!",
+            RESPONSE: "Hello! Tell me about yourself: what are you doing for "
+            "the living or your hobbies. "
+            "And don't forget to introduce yourself!",
         },
         "tell": {
             RESPONSE: rsp.FilledTemplate(
-                "So you are {person.username} and your occupation is {person.job}, right?"
+                "So you are {person.username} and your "
+                "occupation is {person.job}, right?"
             ),
             TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
         },

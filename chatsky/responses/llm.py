@@ -8,6 +8,7 @@ from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import BaseFilter
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
+
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.

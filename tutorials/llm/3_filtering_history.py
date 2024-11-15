@@ -2,14 +2,16 @@
 """
 # LLM: 3. Filtering History
 
-If you want to take the messages that meet your particular criteria and pass them to the LLMs context you can use the `LLMResponse`s `filter_func` parameter.
-It must be a function that takes a single `Message` object and returns a boolean.
+If you want to take the messages that meet your particular criteria and pass
+them to the LLMs context you can use the `LLMResponse`s `filter_func` parameter.
+It must be a function that takes a single `Message`
+object and returns a boolean.
 """
 
 # %pip install chatsky[llm]
 
 # %%
-from chatsky.core.message import Message
+import os
 from chatsky import (
     TRANSITIONS,
     RESPONSE,
@@ -18,27 +20,29 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
+from langchain_openai import ChatOpenAI
+from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.llm.filters import BaseFilter
 from chatsky.core.context import Context
 
-import os
 
 os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
-from langchain_openai import ChatOpenAI
 
 # %%
 model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini"),
-    system_prompt="You are a database assistant and must help your user to recover the demanded data from your memory.",
+    system_prompt="You are a database assistant and must help your user to "
+    "recover the demanded data from your memory.",
 )
 
 # %% [markdown]
 """
-In this example we will use very simple filtering function to retrieve only the important messages.
+In this example we will use very simple filtering function to
+retrieve only the important messages.
 """
 
 
@@ -58,8 +62,12 @@ class FilterImportant(BaseFilter):
 
 # %% [markdown]
 """
-Alternatively, if you use several models in one script (e.g. one for chatting, one for text summarization), you may want to separate the models memory using the same `filter_func` parameter.
-There is a function `FromTheModel` that can be used to separate the models memory.
+Alternatively, if you use several models in one script
+(e.g. one for chatting, one for text summarization),
+you may want to separate the models memory
+using the same `filter_func` parameter.
+There is a function `FromTheModel` that
+can be used to separate the models memory.
 """
 # %%
 toy_script = {
@@ -84,7 +92,8 @@ toy_script = {
         "remind_node": {
             RESPONSE: LLMResponse(
                 model_name="assistant_model",
-                prompt="Create a bullet list from all the previous messages tagged with #important.",
+                prompt="Create a bullet list from all the previous "
+                "messages tagged with #important.",
                 history=15,
                 filter_func=FilterImportant(),
             ),

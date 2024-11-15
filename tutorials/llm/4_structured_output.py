@@ -2,13 +2,14 @@
 """
 # LLM: 4. Structured Output
 
-Sometimes, we want to output structured data, such as a valid JSON object or want to automatically fill particular fields in the output Message.
+Sometimes, we want to output structured data, such as a valid JSON object or
+want to automatically fill particular fields in the output Message.
 In Chatsky we can do that using Structured Output.
 """
 
 # %pip install chatsky[llm]
 # %%
-from chatsky.core.message import Message
+import os
 from chatsky import (
     TRANSITIONS,
     RESPONSE,
@@ -17,8 +18,10 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    labels as lbl,
 )
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
@@ -26,13 +29,9 @@ from chatsky.responses.llm import LLMResponse
 
 from langchain_core.pydantic_v1 import BaseModel, Field
 
-import os
 
 os.environ["OPENAI_API_KEY"] = "<OPENAI_TOKEN>"
 os.environ["ANTHROPIC_API_KEY"] = "<ANTHROPIC_TOKEN>"
-
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 
 
 # %% [markdown]
@@ -45,9 +44,13 @@ movie_model = LLM_API(ChatAnthropic(model="claude-3-opus-20240229"))
 
 # %% [markdown]
 """
-For the structured output we will use two classes to show two possible ways of using `message_schema` in responses.
-The `Movie`, inherited from the `BaseModel` will act as a schema for the response _text_, that will contain valid JSON containing desribed information.
-The `ImportantMessage`, inherited from the `Message` class, will otherwise define the fields of the output `Message`. In this example we will use this to mark the message as important.
+For the structured output we will use two classes to show two possible ways of
+using `message_schema` in responses.
+The `Movie`, inherited from the `BaseModel` will act as a schema for the
+response _text_, that will contain valid JSON containing desribed information.
+The `ImportantMessage`, inherited from the `Message` class, will otherwise
+define the fields of the output `Message`. In this example we will use this
+to mark the message as important.
 """
 
 
@@ -62,7 +65,8 @@ class Movie(BaseModel):
 class ImportantMessage(Message):
     text: str = Field(description="Text of the note")
     misc: dict = Field(
-        description="A dictionary with 'important' key and true/false value in it"
+        description="A dictionary with 'important' "
+        "key and true/false value in it"
     )
 
 

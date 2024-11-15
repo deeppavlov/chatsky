@@ -10,6 +10,8 @@ Chatsky uses langchain under the hood to connect to the remote models.
 # %pip install chatsky[llm]
 
 # %%
+import os
+from langchain_openai import ChatOpenAI
 from chatsky.core.message import Message
 from chatsky import (
     TRANSITIONS,
@@ -27,33 +29,36 @@ from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
 
-import os
-
 os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
-from langchain_openai import ChatOpenAI
 
 # %% [markdown]
 """
 First we need to create a model object.
 Keep in mind, that if you instantiate model object outside of the script,
-it will be reused across all the nodes and therefore it will store all dialogue history.
-This is not advised if you are short on tokens or if you do not need to store all dialogue history.
-Alternatively you can instantiate model object inside of RESPONSE field in the nodes you need.
-Via `history` parameter you can set number of dialogue _turns_ that the model will use as the history. Default value is `5`.
+it will be reused across all the nodes and
+therefore it will store all dialogue history.
+This is not advised if you are short on tokens or
+if you do not need to store all dialogue history.
+Alternatively you can instantiate model object inside
+of RESPONSE field in the nodes you need.
+Via `history` parameter you can set number of dialogue _turns_
+that the model will use as the history. Default value is `5`.
 """
 
 # %%
 model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini"),
-    system_prompt="You are an experienced barista in a local coffeshop. Answer your customer's questions about coffee and barista work.",
+    system_prompt="You are an experienced barista in a local coffeshop. "
+    "Answer your customer's questions about coffee and barista work.",
 )
 # %% [markdown]
 """
 Also you can pass images to the LLM: any chatsky Images in message attachments
 will be processed and sent to the LLM in an appropriate format.
 
-As you can see in this script, you can pass an additional prompt to the LLM. We will cover that thoroughly in the Prompt usage tutorial.
+As you can see in this script, you can pass an additional prompt to the LLM.
+We will cover that thoroughly in the Prompt usage tutorial.
 """
 
 # %%
@@ -84,7 +89,9 @@ toy_script = {
                     dst="boss_node",
                     cnd=LLMCondition(
                         model_name="barista_model",
-                        prompt="Return TRUE if the customer says they are your boss, and FALSE otherwise. Only ONE word must be in the output.",
+                        prompt="Return TRUE if the customer says they are your "
+                        "boss, and FALSE otherwise. Only ONE word must be "
+                        "in the output.",
                         method=Contains(pattern="TRUE"),
                     ),
                 ),
@@ -101,7 +108,9 @@ toy_script = {
             # we can pass a node-specific prompt to a LLM.
             RESPONSE: LLMResponse(
                 model_name="barista_model",
-                prompt="PROMPT: pretend that you have never heard about latte art before and DO NOT answer the following questions. Instead ask a person about it.",
+                prompt="PROMPT: pretend that you have never heard about latte "
+                "art before and DO NOT answer the following questions. "
+                "Instead ask a person about it.",
             ),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))
@@ -111,7 +120,8 @@ toy_script = {
             # we expect user to send some images of coffee.
             RESPONSE: LLMResponse(
                 model_name="barista_model",
-                prompt="PROMPT: user will give you some images of coffee. Describe them.",
+                prompt="PROMPT: user will give you some images of coffee. "
+                "Describe them.",
             ),
             TRANSITIONS: [Tr(dst="main_node")],
         },
