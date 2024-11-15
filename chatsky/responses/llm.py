@@ -12,8 +12,6 @@ from chatsky.core.script_function import BaseResponse, AnyResponse
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.
-    :param ctx: Context object. (Assigned automatically)
-    :param pipeline: Pipeline object. (Assigned automatically)
     :param model_name: Name of the model from the `Pipeline.models` dictionary.
     :param prompt: Prompt for the model.
     :param history: Number of messages to keep in history. `-1` for full history.

@@ -14,8 +14,6 @@ from chatsky import (
     RESPONSE,
     Pipeline,
     Transition as Tr,
-    # all the aliases used in tutorials are available for direct import
-    # e.g. you can do `from chatsky import Tr` instead
 )
 
 from chatsky.messengers.common import MessengerInterfaceWithAttachments

@@ -18,8 +18,6 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    # all the aliases used in tutorials are available for direct import
-    # e.g. you can do `from chatsky import Tr` instead
 )
 from chatsky.utils.testing import (
     is_interactive_mode,

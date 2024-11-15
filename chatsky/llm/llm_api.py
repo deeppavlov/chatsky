@@ -58,11 +58,11 @@ class LLM_API:
             result = await self.parser.ainvoke(await self.model.ainvoke(history))
             return Message(text=result)
         elif issubclass(message_schema, Message):
-            # Case if the message_schema desribes Message structure
+            # Case if the message_schema describes Message structure
             structured_model = self.model.with_structured_output(message_schema)
             return Message.model_validate(await structured_model.ainvoke(history))
         elif issubclass(message_schema, BaseModel):
-            # Case if the message_schema desribes Message.text structure
+            # Case if the message_schema describes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)
             model_result = await structured_model.ainvoke(history)
             return Message(text=model_result.model_dump_json())

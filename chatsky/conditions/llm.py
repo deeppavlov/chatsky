@@ -1,19 +1,30 @@
+"""
+LLM Conditions
+--------------
+This module provides LLM-based conditions.
+"""
 from chatsky.llm.methods import BaseMethod
 from chatsky.core import BaseCondition, Context, Pipeline
 
 
 class LLMCondition(BaseCondition):
     """
-    Basic function for using LLM in condition cases.
-
-    :param model_name: Key of the model from the `Pipeline.models` dictionary.
-    :param prompt: Prompt for the model to use on users input.
-    :param method: Method that takes models output and returns boolean.
+    LLM-based condition.
+    Uses prompt to produce result from model and evaluates the result using given method.
     """
 
     model_name: str
+    """
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    """
     prompt: str
+    """
+    Condition prompt.
+    """
     method: BaseMethod
+    """
+    Method that takes model's output and returns boolean.
+    """
 
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.model_name]
