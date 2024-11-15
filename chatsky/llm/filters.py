@@ -34,7 +34,7 @@ class IsImportant(BaseFilter):
     """
 
     def __call__(
-        self, ctx: Context, request: Message = Message(), response: Message = Message(), model_name: str = ""
+        self, ctx: Context, request: Message, response: Message, model_name: str
     ) -> bool:
         if request and request.misc.get("important", None):
             return True
@@ -49,7 +49,7 @@ class FromTheModel(BaseFilter):
     """
 
     def __call__(
-        self, ctx: Context, request: Message = Message(), response: Message = Message(), model_name: str = ""
+        self, ctx: Context, request: Message, response: Message, model_name: str
     ) -> bool:
         if request is not None and request.annotation.get("__generated_by_model__", None) == model_name:
             return True
