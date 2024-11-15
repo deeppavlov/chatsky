@@ -26,7 +26,7 @@ class MockChatOpenAI:
         self.model = self
 
     async def ainvoke(self, history: list = [""]):
-        response = AIMessage(content=f"Mock response with history: {history}")
+        response = AIMessage(content=f"Mock response with history: {[message.content[0]['text'] for message in history]}")
         return response
 
     def with_structured_output(self, message_schema):
@@ -165,28 +165,17 @@ async def test_attachments(img, expected):
     [
         (
             2,
-            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), "
-            r"AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), "
-            r"AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
+            "Mock response with history: ['prompt', 'Request 1', 'Response 1', "
+            "'Request 2', 'Response 2', 'Last request']",
         ),
         (
             0,
-            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
+            "Mock response with history: ['prompt', 'Last request']",
         ),
         (
             4,
-            r"Mock response with history: [SystemMessage(content=[{'type': 'text', 'text': 'prompt'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 0'}]), "
-            r"AIMessage(content=[{'type': 'text', 'text': 'Response 0'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 1'}]), "
-            r"AIMessage(content=[{'type': 'text', 'text': 'Response 1'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Request 2'}]), "
-            r"AIMessage(content=[{'type': 'text', 'text': 'Response 2'}]), "
-            r"HumanMessage(content=[{'type': 'text', 'text': 'Last request'}])]",
+            "Mock response with history: ['prompt', 'Request 0', 'Response 0', "
+            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'Last request']",
         ),
     ],
 )
