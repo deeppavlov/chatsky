@@ -1,8 +1,9 @@
 import base64
+import logging
 from chatsky.core.context import Context
 from chatsky.core.message import Image, Message
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-
+# logging.basicConfig(level=logging.DEBUG)
 
 async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
     """
@@ -65,13 +66,16 @@ async def context_to_history(ctx: Context, length: int, filter_func, model_name:
         [ctx.requests[x] for x in range(1, len(ctx.requests) + 1)],
         [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
     )
+    logging.debug(f"Dialogue turns: {pairs}")
     if length != -1:
         for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-length:]):
+            logging.debug(f"This pair is valid: {req, resp}")
             history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
             history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     else:
         # TODO: Fix redundant code
         for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
+            logging.debug(f"This pair is valid: {req, resp}")
             history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
             history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     return history

@@ -17,7 +17,6 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
-    labels as lbl,
 )
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
@@ -85,6 +84,7 @@ toy_script = {
         "remind_node": {
             RESPONSE: LLMResponse(
                 model_name="assistant_model",
+                prompt="Create a bullet list from all the previous messages tagged with #important.",
                 history=15,
                 filter_func=FilterImportant(),
             ),

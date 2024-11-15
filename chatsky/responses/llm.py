@@ -1,12 +1,12 @@
 from typing import Union, Type
+import logging
+from pydantic import BaseModel, Field
 from chatsky.core.message import Message
 from chatsky.core.context import Context
 from langchain_core.messages import SystemMessage
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import BaseFilter
-from pydantic import BaseModel, Field
 from chatsky.core.script_function import BaseResponse, AnyResponse
-
 
 class LLMResponse(BaseResponse):
     """
@@ -60,13 +60,14 @@ class LLMResponse(BaseResponse):
                 )
             )
 
-        if await self.prompt(ctx) != Message(text=""):
-            msg = await self.prompt(ctx)
+        msg = await self.prompt(ctx)
+        if msg.text:
             history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
 
         history_messages.append(
             await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
+        logging.debug(f"History: {history_messages}")
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
         if result.annotations:
