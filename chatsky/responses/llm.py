@@ -7,7 +7,6 @@ from chatsky.llm.filters import BaseFilter
 from pydantic import BaseModel, Field
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
-
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.
@@ -66,9 +65,10 @@ class LLMResponse(BaseResponse):
                 )
             )
 
-        if self.prompt:
+        if await self.prompt(ctx) != Message(text=""):
             msg = await self.prompt(ctx)
             history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
+        
         history_messages.append(
             await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
