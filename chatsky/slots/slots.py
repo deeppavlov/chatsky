@@ -9,16 +9,15 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Optional, Dict
+from typing import Callable, Awaitable, TYPE_CHECKING, Union, Optional, Dict
 from typing_extensions import TypeAlias, Annotated
 import logging
 from functools import reduce
 from string import Formatter
 
-from pydantic import BaseModel, model_validator, Field, field_serializer, field_validator
+from pydantic import BaseModel, JsonValue, model_validator, Field
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
-from chatsky.utils.devel.json_serialization import pickle_serializer, pickle_validator
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
@@ -117,29 +116,8 @@ class ExtractedValueSlot(ExtractedSlot):
     """Value extracted from :py:class:`~.ValueSlot`."""
 
     is_slot_extracted: bool
-    extracted_value: Any
-    default_value: Any = None
-
-    @field_serializer("extracted_value", "default_value", when_used="json")
-    def pickle_serialize_values(self, value):
-        """
-        Cast values to string via pickle.
-        Allows storing arbitrary data in these fields when using context storages.
-        """
-        if value is not None:
-            return pickle_serializer(value)
-        return value
-
-    @field_validator("extracted_value", "default_value", mode="before")
-    @classmethod
-    def pickle_validate_values(cls, value):
-        """
-        Restore values after being processed with
-        :py:meth:`pickle_serialize_values`.
-        """
-        if value is not None:
-            return pickle_validator(value)
-        return value
+    extracted_value: Union[BaseModel, JsonValue]
+    default_value: Optional[Union[BaseModel, JsonValue]] = None
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -219,10 +197,10 @@ class ValueSlot(BaseSlot, frozen=True):
     Subclass it, if you want to declare your own slot type.
     """
 
-    default_value: Any = None
+    default_value: Union[BaseModel, JsonValue] = None
 
     @abstractmethod
-    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
         """
         Return value extracted from context.
 
@@ -328,9 +306,9 @@ class FunctionSlot(ValueSlot, frozen=True):
     Uses a user-defined `func` to extract slot value from the :py:attr:`~.Context.last_request` Message.
     """
 
-    func: Callable[[Message], Union[Awaitable[Union[Any, SlotNotExtracted]], Any, SlotNotExtracted]]
+    func: Callable[[Message], Union[Awaitable[Union[Union[BaseModel, JsonValue], SlotNotExtracted]], Union[BaseModel, JsonValue], SlotNotExtracted]]
 
-    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
         return await wrap_sync_function_in_async(self.func, ctx.last_request)
 
 
