@@ -26,7 +26,9 @@ class MockChatOpenAI:
         self.model = self
 
     async def ainvoke(self, history: list = [""]):
-        response = AIMessage(content=f"Mock response with history: {[message.content[0]['text'] for message in history]}")
+        response = AIMessage(
+            content=f"Mock response with history: {[message.content[0]['text'] for message in history]}"
+        )
         return response
 
     def with_structured_output(self, message_schema):
