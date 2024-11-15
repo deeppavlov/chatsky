@@ -79,7 +79,7 @@ toy_script = {
             RESPONSE: LLMResponse(model_name="assistant_model", history=3),
             TRANSITIONS: [
                 Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
         },
         "remind_node": {
@@ -88,11 +88,11 @@ toy_script = {
                 history=15,
                 filter_func=FilterImportant(),
             ),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="main_node")],
         },
         "fallback_node": {
             RESPONSE: Message("I did not quite understand you..."),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="main_node")],
         },
     }
 }

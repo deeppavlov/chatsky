@@ -85,7 +85,7 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message("I did not quite understand you..."),
-            TRANSITIONS: [Tr(dst="start_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="start_node")],
         },
     },
     "movie_flow": {
@@ -95,7 +95,7 @@ script = {
                 prompt="Ask user to request you for movie ideas.",
                 message_schema=Movie,
             ),
-            TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst=dst.Current())],
         }
     },
     "note_flow": {
@@ -105,7 +105,7 @@ script = {
                 prompt="Help user take notes and mark the important ones.",
                 message_schema=ImportantMessage,
             ),
-            TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst=dst.Current())],
         }
     },
 }

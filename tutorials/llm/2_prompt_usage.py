@@ -84,12 +84,12 @@ toy_script = {
                     dst=("hr_flow", "start_node"),
                     cnd=cnd.ExactMatch("/vacancies"),
                 ),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
         },
         "fallback_node": {
             RESPONSE: Message("Something went wrong"),
-            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="greeting_node")],
         },
     },
     "loan_flow": {
@@ -107,7 +107,7 @@ toy_script = {
                     dst=("greeting_flow", "greeting_node"),
                     cnd=cnd.ExactMatch("/end"),
                 ),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
         },
     },
@@ -126,14 +126,14 @@ toy_script = {
                     cnd=cnd.ExactMatch("/end"),
                 ),
                 Tr(dst="cook_node", cnd=cnd.Regexp(r"\bcook\b", flags=re.I)),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
         },
         "cook_node": {
             RESPONSE: LLMResponse(model_name="bank_model"),
             TRANSITIONS: [
                 Tr(dst="start_node", cnd=cnd.ExactMatch("/end")),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
             MISC: {
                 "prompt": "Your user is the new cook employee from last week. Greet your user and tell them about the working conditions."

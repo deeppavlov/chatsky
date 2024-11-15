@@ -88,13 +88,13 @@ toy_script = {
                         method=Contains(pattern="TRUE"),
                     ),
                 ),
-                Tr(dst=dst.Current(), cnd=cnd.true()),
+                Tr(dst=dst.Current()),
             ],
         },
         "boss_node": {
             RESPONSE: Message("You are my boss."),
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.true()),
+                Tr(dst="main_node"),
             ],
         },
         "latte_art_node": {
@@ -113,11 +113,11 @@ toy_script = {
                 model_name="barista_model",
                 prompt="PROMPT: user will give you some images of coffee. Describe them.",
             ),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="main_node")],
         },
         "fallback_node": {
             RESPONSE: Message("I didn't quite understand you..."),
-            TRANSITIONS: [Tr(dst="main_node", cnd=cnd.true())],
+            TRANSITIONS: [Tr(dst="main_node")],
         },
     }
 }
