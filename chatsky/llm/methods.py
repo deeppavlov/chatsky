@@ -1,6 +1,6 @@
 """
-LLM methods.
----------
+LLM methods
+-----------
 In this file stored unified functions for some basic condition cases
 including regex search, semantic distance (cosine) etc.
 """

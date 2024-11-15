@@ -12,7 +12,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     :param ctx: Context the message belongs to.
     :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
     :param max_size: Maximum size of the message in symbols.
-    If exceed the limit will raise ValueError. Is not affected by system prompt size.
+        If exceed the limit will raise ValueError. Is not affected by system prompt size.
 
     :return: Langchain message object.
     :rtype: HumanMessage|AIMessage|SystemMessage

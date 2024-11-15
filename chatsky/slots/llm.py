@@ -1,5 +1,5 @@
 """
-LLM Slots.
+LLM Slots
 ---------
 This module contains Slots based on LLMs structured outputs,
 that can easily infer requested information from an unstructured user's request.
