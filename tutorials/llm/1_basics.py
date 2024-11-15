@@ -7,7 +7,7 @@ In this tutorial we will see how to use LLMs for responses and conditions.
 Chatsky uses langchain under the hood to connect to the remote models.
 """
 
-# %pip install chatsky[llm]
+# %pip install chatsky[llm] langchain-openai
 
 # %%
 import os

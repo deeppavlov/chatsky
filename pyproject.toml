@@ -75,14 +75,7 @@ opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
 pyyaml = { version = "*", optional = true }
-langchain-openai = { version = "*", optional = true }
 langchain = { version = "*", optional = true }
-langchain-anthropic = { version = "*", optional = true }
-langchain-google-vertexai = { version = "*", optional = true }
-langchain-cohere = { version = "*", optional = true }
-langchain-groq = { version = "*", optional = true }
-langchain-mistralai = { version = "*", optional = true }
-langchain-fireworks = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -97,7 +90,7 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 yaml = ["pyyaml"]
-llm = ["langchain", "langchain-openai", "langchain-anthropic", "langchain-google-vertexai", "langchain-cohere", "langchain-groq", "langchain-mistralai", "langchain-fireworks"]
+llm = ["langchain"]
 
 [tool.poetry.group.lint]
 optional = true
@@ -153,6 +146,8 @@ websockets = "*"
 locust = "*"
 streamlit = "*"
 streamlit-chat = "*"
+langchain-openai = "*"
+langchain-anthropic = "*"
 
 
 [tool.poetry.group.docs]
