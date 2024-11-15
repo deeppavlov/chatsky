@@ -5,8 +5,8 @@ from chatsky.core.pipeline import Pipeline
 from langchain_core.messages import SystemMessage
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import BaseFilter
-from pydantic import BaseModel
-from chatsky.core.script_function import BaseResponse
+from pydantic import BaseModel, Field
+from chatsky.core.script_function import BaseResponse, AnyResponse
 
 
 class LLMResponse(BaseResponse):
@@ -24,7 +24,7 @@ class LLMResponse(BaseResponse):
     """
 
     model_name: str
-    prompt: str = ""
+    prompt: AnyResponse = Field(default="", validate_default=True)
     history: int = 5
     filter_func: BaseFilter = lambda *args: True
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
@@ -70,7 +70,7 @@ class LLMResponse(BaseResponse):
             )
 
         if self.prompt:
-            msg = await __prompt_to_message(self.prompt, ctx)
+            msg = await self.prompt(ctx)
             history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
         history_messages.append(
             await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
@@ -83,10 +83,3 @@ class LLMResponse(BaseResponse):
             result.annotations = {"__generated_by_model__": self.model_name}
 
         return result
-
-
-async def __prompt_to_message(prompt, ctx):
-    if isinstance(prompt, str):
-        return Message(prompt)
-    elif isinstance(prompt, BaseResponse):
-        return await prompt(ctx)
