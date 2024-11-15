@@ -54,9 +54,6 @@ model = LLM_API(
 )
 # %% [markdown]
 """
-Also you can pass images to the LLM: any chatsky Images in message attachments
-will be processed and sent to the LLM in an appropriate format.
-
 As you can see in this script, you can pass an additional prompt to the LLM.
 We will cover that thoroughly in the Prompt usage tutorial.
 """
@@ -80,10 +77,6 @@ toy_script = {
                 Tr(
                     dst="latte_art_node",
                     cnd=cnd.ExactMatch("Tell me about latte art."),
-                ),
-                Tr(
-                    dst="image_desc_node",
-                    cnd=cnd.ExactMatch("Tell me what coffee is it?"),
                 ),
                 Tr(
                     dst="boss_node",
@@ -115,15 +108,6 @@ toy_script = {
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))
             ],
-        },
-        "image_desc_node": {
-            # we expect user to send some images of coffee.
-            RESPONSE: LLMResponse(
-                model_name="barista_model",
-                prompt="PROMPT: user will give you some images of coffee. "
-                "Describe them.",
-            ),
-            TRANSITIONS: [Tr(dst="main_node")],
         },
         "fallback_node": {
             RESPONSE: Message("I didn't quite understand you..."),

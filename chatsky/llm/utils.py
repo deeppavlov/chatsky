@@ -1,7 +1,6 @@
-import base64
 import logging
 from chatsky.core.context import Context
-from chatsky.core.message import Image, Message
+from chatsky.core.message import Message
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 
@@ -25,16 +24,6 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
         message.text = ""
     content = [{"type": "text", "text": message.text}]
 
-    if message.attachments:
-        for image in message.attachments:
-            if isinstance(image, Image):
-                content.append(
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": await attachment_to_content(image, ctx.pipeline.messenger_interface)},
-                    }
-                )
-
     if source == "human":
         return HumanMessage(content=content)
     elif source == "ai":
@@ -43,19 +32,6 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
         return SystemMessage(content=content)
     else:
         raise ValueError("Invalid source name. Only `human`, `ai` and `system` are supported.")
-
-
-async def attachment_to_content(attachment: Image, iface) -> str:
-    """
-    Helper function to convert image to base64 string.
-    """
-    image_bytes = await attachment.get_bytes(iface)
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-    extension = str(attachment.source).split(".")[-1]
-    if image_b64 == "" or extension is None:
-        raise ValueError("Data image is not accessible.")
-    image_b64 = f"data:image/{extension};base64,{image_b64}"
-    return image_b64
 
 
 async def context_to_history(ctx: Context, length: int, filter_func, model_name: str, max_size: int):
