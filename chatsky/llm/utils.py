@@ -8,8 +8,8 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     """
     Creates a langchain message from a ~chatsky.script.core.message.Message object.
 
-    :param message: ~chatsky.script.core.message.Message object.
-    :param pipeline: ~chatsky.pipeline.Pipeline object.
+    :param message: Chatsky Message to convert to Langchain Message.
+    :param ctx: Context the message belongs to.
     :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
     :param max_size: Maximum size of the message in symbols.
     If exceed the limit will raise ValueError. Is not affected by system prompt size.
@@ -67,11 +67,11 @@ async def context_to_history(ctx: Context, length: int, filter_func, model_name:
     )
     if length != -1:
         for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-length:]):
-            history.append(await message_to_langchain(req, pipeline=ctx.pipeline, max_size=max_size))
-            history.append(await message_to_langchain(resp, pipeline=ctx.pipeline, source="ai", max_size=ctx.max_size))
+            history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
+            history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     else:
         # TODO: Fix redundant code
         for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
-            history.append(await message_to_langchain(req, pipeline=ctx.pipeline, max_size=max_size))
-            history.append(await message_to_langchain(resp, pipeline=ctx.pipeline, source="ai", max_size=max_size))
+            history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
+            history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     return history

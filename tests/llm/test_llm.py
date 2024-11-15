@@ -117,8 +117,9 @@ def filter_context():
 
 
 @pytest.fixture
-def context():
+def context(pipeline):
     ctx = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
+    ctx.framework_data.pipeline = pipeline
     ctx.framework_data.current_node = Node(misc={"prompt": "prompt"})
     for i in range(3):
         ctx.add_request(f"Request {i}")
@@ -127,11 +128,11 @@ def context():
     return ctx
 
 
-async def test_message_to_langchain(pipeline):
-    assert await message_to_langchain(Message(text="hello"), pipeline, source="human") == HumanMessage(
+async def test_message_to_langchain(context):
+    assert await message_to_langchain(Message(text="hello"), context, source="human") == HumanMessage(
         content=[{"type": "text", "text": "hello"}]
     )
-    assert await message_to_langchain(Message(text="hello"), pipeline, source="ai") == AIMessage(
+    assert await message_to_langchain(Message(text="hello"), context, source="ai") == AIMessage(
         content=[{"type": "text", "text": "hello"}]
     )
 

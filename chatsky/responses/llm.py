@@ -44,17 +44,17 @@ class LLMResponse(BaseResponse):
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
                 history_messages.append(
-                    await message_to_langchain(Message(global_prompt), pipeline=ctx.pipeline, source="system")
+                    await message_to_langchain(Message(global_prompt), ctx=ctx, source="system")
                 )
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
                 history_messages.append(
-                    await message_to_langchain(Message(local_prompt), pipeline=ctx.pipeline, source="system")
+                    await message_to_langchain(Message(local_prompt), ctx=ctx, source="system")
                 )
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
                 history_messages.append(
-                    await message_to_langchain(Message(node_prompt), pipeline=ctx.pipeline, source="system")
+                    await message_to_langchain(Message(node_prompt), ctx=ctx, source="system")
                 )
 
         # iterate over context to retrieve history messages
@@ -71,9 +71,9 @@ class LLMResponse(BaseResponse):
 
         if self.prompt:
             msg = await __prompt_to_message(self.prompt, ctx)
-            history_messages.append(await message_to_langchain(msg, pipeline=ctx.pipeline, source="system"))
+            history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
         history_messages.append(
-            await message_to_langchain(ctx.last_request, pipeline=ctx.pipeline, source="human", max_size=self.max_size)
+            await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
         result = await model.respond(history_messages, message_schema=self.message_schema, model_name=self.model_name)
 
