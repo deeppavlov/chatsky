@@ -1,6 +1,5 @@
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
-from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.utils import message_to_langchain, attachment_to_content
 from chatsky.llm.filters import IsImportant, FromTheModel
 from langchain_core.messages import HumanMessage, AIMessage

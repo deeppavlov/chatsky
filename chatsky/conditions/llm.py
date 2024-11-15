@@ -4,7 +4,7 @@ LLM Conditions
 This module provides LLM-based conditions.
 """
 from chatsky.llm.methods import BaseMethod
-from chatsky.core import BaseCondition, Context, Pipeline
+from chatsky.core import BaseCondition, Context
 
 
 class LLMCondition(BaseCondition):

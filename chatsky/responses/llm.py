@@ -1,7 +1,6 @@
-from typing import Union, Callable, Type
+from typing import Union, Type
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from chatsky.core.pipeline import Pipeline
 from langchain_core.messages import SystemMessage
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import BaseFilter
