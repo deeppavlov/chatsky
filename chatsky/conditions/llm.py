@@ -17,4 +17,4 @@ class LLMCondition(BaseCondition):
 
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.model_name]
-        return await model.condition(self.prompt, self.method)
+        return await model.condition(ctx, self.prompt, self.method)

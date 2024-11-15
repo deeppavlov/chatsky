@@ -70,7 +70,7 @@ class LLM_API:
             raise ValueError
 
     async def condition(
-        self, history: list[BaseMessage], prompt: str, method: BaseMethod, return_schema: Optional[BaseModel] = None
+        self, ctx: Context, prompt: str, method: BaseMethod, return_schema: Optional[BaseModel] = None
     ) -> bool:
         condition_history = [
             await message_to_langchain(Message(prompt), ctx=ctx, source="system"),
