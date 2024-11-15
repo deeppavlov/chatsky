@@ -1,7 +1,8 @@
 import logging
+
 from chatsky.core.context import Context
 from chatsky.core.message import Message
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 
 
 async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
@@ -17,6 +18,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     :return: Langchain message object.
     :rtype: HumanMessage|AIMessage|SystemMessage
     """
+    check_langchain_available()
     if len(message.text) > max_size:
         raise ValueError("Message is too long.")
 

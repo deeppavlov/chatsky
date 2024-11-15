@@ -4,24 +4,14 @@ LLM responses.
 Wrapper around langchain.
 """
 
-try:
-    from langchain_core.output_parsers import StrOutputParser
-    from langchain_core.language_models.chat_models import BaseChatModel
-    from langchain_core.messages.base import BaseMessage
-
-    langchain_available = True
-except ImportError:
-    langchain_available = False
-
+from typing import Union, Type, Optional
+from pydantic import BaseModel
 
 from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.methods import BaseMethod
-
-from typing import Union, Type, Optional
-from pydantic import BaseModel
-
 from chatsky.llm.utils import message_to_langchain
+from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
 class LLM_API:
@@ -39,14 +29,10 @@ class LLM_API:
         :param model: Model object.
         :param system_prompt: System prompt for the model.
         """
-        self.__check_imports()
+        check_langchain_available()
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
         self.system_prompt = system_prompt
-
-    def __check_imports(self):
-        if not langchain_available:
-            raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
 
     async def respond(
         self,

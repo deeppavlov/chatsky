@@ -7,10 +7,12 @@ that can easily infer requested information from an unstructured user's request.
 
 from __future__ import annotations
 
-from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
-from pydantic import BaseModel, Field, create_model
 from typing import Union, Optional, Dict, Any, TYPE_CHECKING
 import logging
+
+from pydantic import BaseModel, Field, create_model
+
+from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
 
 if TYPE_CHECKING:
     from chatsky.core import Context

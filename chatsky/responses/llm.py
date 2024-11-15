@@ -1,10 +1,12 @@
 from typing import Union, Type
 import logging
+
 from pydantic import BaseModel, Field
+
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from langchain_core.messages import SystemMessage
 from chatsky.llm.utils import message_to_langchain, context_to_history
+from chatsky.llm._langchain_imports import SystemMessage, check_langchain_available
 from chatsky.llm.filters import BaseFilter
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
@@ -29,7 +31,7 @@ class LLMResponse(BaseResponse):
     max_size: int = 1000
 
     async def call(self, ctx: Context) -> Message:
-
+        check_langchain_available()
         model = ctx.pipeline.models[self.model_name]
         if model.system_prompt == "":
             history_messages = []
