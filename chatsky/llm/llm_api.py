@@ -52,7 +52,6 @@ class LLM_API:
         self,
         history: list[BaseMessage],
         message_schema: Union[None, Type[Message], Type[BaseModel]] = None,
-        model_name: str = "",
     ) -> Message:
 
         if message_schema is None:
