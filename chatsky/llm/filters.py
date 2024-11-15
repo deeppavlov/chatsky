@@ -33,9 +33,7 @@ class IsImportant(BaseFilter):
     Filter that checks if the "important" field in a Message.misc is True.
     """
 
-    def __call__(
-        self, ctx: Context, request: Message, response: Message, model_name: str
-    ) -> bool:
+    def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool:
         if request is not None and request.misc is not None and request.misc.get("important", None):
             return True
         if response is not None and response.misc is not None and response.misc.get("important", None):
@@ -48,13 +46,17 @@ class FromTheModel(BaseFilter):
     Filter that checks if the message was sent by the model.
     """
 
-    def __call__(
-        self, ctx: Context, request: Message, response: Message, model_name: str
-    ) -> bool:
-        if (request is not None and request.annotations is not None and
-                request.annotations.get("__generated_by_model__") == model_name):
+    def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool:
+        if (
+            request is not None
+            and request.annotations is not None
+            and request.annotations.get("__generated_by_model__") == model_name
+        ):
             return True
-        elif (response is not None and response.annotations is not None and
-              response.annotations.get("__generated_by_model__") == model_name):
+        elif (
+            response is not None
+            and response.annotations is not None
+            and response.annotations.get("__generated_by_model__") == model_name
+        ):
             return True
         return False

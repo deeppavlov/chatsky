@@ -7,6 +7,7 @@ from chatsky.llm.filters import BaseFilter
 from pydantic import BaseModel, Field
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
+
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.
@@ -39,19 +40,13 @@ class LLMResponse(BaseResponse):
             # populate history with global and local prompts
             if "global_prompt" in current_misc:
                 global_prompt = current_misc["global_prompt"]
-                history_messages.append(
-                    await message_to_langchain(Message(global_prompt), ctx=ctx, source="system")
-                )
+                history_messages.append(await message_to_langchain(Message(global_prompt), ctx=ctx, source="system"))
             if "local_prompt" in current_misc:
                 local_prompt = current_misc["local_prompt"]
-                history_messages.append(
-                    await message_to_langchain(Message(local_prompt), ctx=ctx, source="system")
-                )
+                history_messages.append(await message_to_langchain(Message(local_prompt), ctx=ctx, source="system"))
             if "prompt" in current_misc:
                 node_prompt = current_misc["prompt"]
-                history_messages.append(
-                    await message_to_langchain(Message(node_prompt), ctx=ctx, source="system")
-                )
+                history_messages.append(await message_to_langchain(Message(node_prompt), ctx=ctx, source="system"))
 
         # iterate over context to retrieve history messages
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
@@ -68,7 +63,7 @@ class LLMResponse(BaseResponse):
         if await self.prompt(ctx) != Message(text=""):
             msg = await self.prompt(ctx)
             history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
-        
+
         history_messages.append(
             await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
