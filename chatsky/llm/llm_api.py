@@ -65,7 +65,7 @@ class LLM_API:
             # Case if the message_schema describes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)
             model_result = await structured_model.ainvoke(history)
-            return Message(text=model_result.model_dump_json())
+            return Message(text=message_schema.model_validate(model_result).model_dump_json())
         else:
             raise ValueError
 
