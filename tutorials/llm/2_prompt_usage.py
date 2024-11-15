@@ -57,7 +57,7 @@ Please note, that `MISC` is just a dictionary and its fields can be overwritten 
 # %%
 # this `system_prompt` will be always on the top of the history during models response
 model = LLM_API(
-    ChatOpenAI(model="gpt-3.5-turbo"),
+    ChatOpenAI(model="gpt-4o-mini"),
     system_prompt="You will represent different bank workers. Answer users' questions according to your role.",
 )
 

@@ -40,7 +40,7 @@ from langchain_anthropic import ChatAnthropic
 In this tutorial we will define two models.
 """
 # %%
-assistant_model = LLM_API(ChatOpenAI(model="gpt-3.5-turbo"))
+assistant_model = LLM_API(ChatOpenAI(model="gpt-4o-mini"))
 movie_model = LLM_API(ChatAnthropic(model="claude-3-opus-20240229"))
 
 # %% [markdown]

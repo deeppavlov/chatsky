@@ -33,7 +33,7 @@ from langchain_openai import ChatOpenAI
 
 # %%
 model = LLM_API(
-    ChatOpenAI(model="gpt-3.5-turbo"),
+    ChatOpenAI(model="gpt-4o-mini"),
     system_prompt="You are a database assistant and must help your user to recover the demanded data from your memory.",
 )
 
