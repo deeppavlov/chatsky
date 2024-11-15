@@ -5,11 +5,16 @@ This module contains Slots based on LLMs structured outputs,
 that can easily infer requested information from an unstructured user's request.
 """
 
+from __future__ import annotations
+
 from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
 from pydantic import BaseModel, Field, create_model
-from typing import Union, Optional, Dict, Any
-from chatsky.core import Context
+from typing import Union, Optional, Dict, Any, TYPE_CHECKING
 import logging
+
+if TYPE_CHECKING:
+    from chatsky.core import Context
+
 
 logger = logging.getLogger(__name__)
 
