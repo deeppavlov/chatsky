@@ -9,16 +9,15 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Optional, Dict
+from typing import Callable, Awaitable, TYPE_CHECKING, Union, Optional, Dict
 from typing_extensions import TypeAlias, Annotated
 import logging
 from functools import reduce
 from string import Formatter
 
-from pydantic import BaseModel, model_validator, Field, field_serializer, field_validator
+from pydantic import BaseModel, JsonValue, model_validator, Field
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
-from chatsky.utils.devel.json_serialization import pickle_serializer, pickle_validator
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
@@ -69,12 +68,17 @@ def recursive_getattr(obj, slot_name: SlotName):
 
 
 def recursive_setattr(obj, slot_name: SlotName, value):
-    parent_slot, _, slot = slot_name.rpartition(".")
+    parent_slot, sep, slot = slot_name.rpartition(".")
 
-    if parent_slot:
-        setattr(recursive_getattr(obj, parent_slot), slot, value)
+    if sep == ".":
+        parent_obj = recursive_getattr(obj, parent_slot)
     else:
-        setattr(obj, slot, value)
+        parent_obj = obj
+
+    if isinstance(value, ExtractedGroupSlot):
+        getattr(parent_obj, slot).update(value)
+    else:
+        setattr(parent_obj, slot, value)
 
 
 class SlotNotExtracted(Exception):
@@ -112,29 +116,8 @@ class ExtractedValueSlot(ExtractedSlot):
     """Value extracted from :py:class:`~.ValueSlot`."""
 
     is_slot_extracted: bool
-    extracted_value: Any
-    default_value: Any = None
-
-    @field_serializer("extracted_value", "default_value", when_used="json")
-    def pickle_serialize_values(self, value):
-        """
-        Cast values to string via pickle.
-        Allows storing arbitrary data in these fields when using context storages.
-        """
-        if value is not None:
-            return pickle_serializer(value)
-        return value
-
-    @field_validator("extracted_value", "default_value", mode="before")
-    @classmethod
-    def pickle_validate_values(cls, value):
-        """
-        Restore values after being processed with
-        :py:meth:`pickle_serialize_values`.
-        """
-        if value is not None:
-            return pickle_validator(value)
-        return value
+    extracted_value: Union[BaseModel, JsonValue]
+    default_value: Optional[Union[BaseModel, JsonValue]] = None
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -214,10 +197,10 @@ class ValueSlot(BaseSlot, frozen=True):
     Subclass it, if you want to declare your own slot type.
     """
 
-    default_value: Any = None
+    default_value: Union[BaseModel, JsonValue] = None
 
     @abstractmethod
-    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
         """
         Return value extracted from context.
 
@@ -261,9 +244,11 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     """
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    allow_partial_extraction: bool = False
+    """If True, extraction returns only successfully extracted child slots."""
 
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    def __init__(self, allow_partial_extraction=False, **kwargs):
+        super().__init__(allow_partial_extraction=allow_partial_extraction, **kwargs)
 
     @model_validator(mode="after")
     def __check_extra_field_names__(self):
@@ -279,9 +264,12 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
-        return ExtractedGroupSlot(
-            **{child_name: child_value for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys())}
-        )
+        extracted_values = {}
+        for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
+            if child_value.__slot_extracted__ or not self.allow_partial_extraction:
+                extracted_values[child_name] = child_value
+
+        return ExtractedGroupSlot(**extracted_values)
 
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(
@@ -318,9 +306,9 @@ class FunctionSlot(ValueSlot, frozen=True):
     Uses a user-defined `func` to extract slot value from the :py:attr:`~.Context.last_request` Message.
     """
 
-    func: Callable[[Message], Union[Awaitable[Union[Any, SlotNotExtracted]], Any, SlotNotExtracted]]
+    func: Callable[[Message], Union[Awaitable[Union[Union[BaseModel, JsonValue], SlotNotExtracted]], Union[BaseModel, JsonValue], SlotNotExtracted]]
 
-    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
         return await wrap_sync_function_in_async(self.func, ctx.last_request)
 
 
@@ -367,6 +355,8 @@ class SlotManager(BaseModel):
     async def extract_slot(self, slot_name: SlotName, ctx: Context, success_only: bool) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
+
+        Extracted group slots update slot storage instead of overwriting it.
 
         :raises KeyError: If the slot with the specified name does not exist.
 

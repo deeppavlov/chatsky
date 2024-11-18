@@ -6,7 +6,7 @@ from typing import Hashable, Optional, TextIO
 from urllib.request import urlopen
 
 import pytest
-from pydantic import ValidationError, HttpUrl, FilePath
+from pydantic import BaseModel, ValidationError, HttpUrl, FilePath
 
 from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 from chatsky.messengers.console import CLIMessengerInterface
@@ -30,16 +30,9 @@ from chatsky.core.message import (
 EXAMPLE_SOURCE = "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 
 
-class UnserializableObject:
-    def __init__(self, number: int, string: bytes) -> None:
-        self.number = number
-        self.bytes = string
-
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, UnserializableObject):
-            return self.number == value.number and self.bytes == value.bytes
-        else:
-            return False
+class SampleOriginalMessage(BaseModel):
+    num: int
+    bts: bytes
 
 
 class ChatskyCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
@@ -60,8 +53,8 @@ class ChatskyCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWith
 
 class TestMessage:
     @pytest.fixture
-    def random_original_message(self) -> UnserializableObject:
-        return UnserializableObject(randint(0, 256), urandom(32))
+    def random_original_message(self) -> SampleOriginalMessage:
+        return SampleOriginalMessage(num=randint(0, 256), bts=urandom(32))
 
     def clear_and_create_dir(self, dir: Path) -> Path:
         rmtree(dir, ignore_errors=True)
@@ -90,12 +83,12 @@ class TestMessage:
         validated = Message.model_validate_json(serialized)
         assert message == validated
 
-    def test_field_serializable(self, random_original_message: UnserializableObject):
+    def test_field_serializable(self, random_original_message: SampleOriginalMessage):
         message = Message(text="sample message")
-        message.misc = {"answer": 42, "unserializable": random_original_message}
+        message.misc = {"answer": 42, "original": random_original_message}
         message.original_message = random_original_message
         message.some_extra_field = random_original_message
-        message.other_extra_field = {"unserializable": random_original_message}
+        message.other_extra_field = {"original": random_original_message}
         serialized = message.model_dump_json()
         validated = Message.model_validate_json(serialized)
         assert message == validated

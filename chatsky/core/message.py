@@ -7,29 +7,21 @@ It only contains types and properties that are compatible with most messaging se
 """
 
 from __future__ import annotations
-from typing import Literal, Optional, List, Union, Dict, Any, TYPE_CHECKING
+from typing import Literal, Optional, List, Union, Dict, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
 from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
+from pydantic import BaseModel, Field, FilePath, HttpUrl, JsonValue, model_validator
 from pydantic_core import Url
-
-from chatsky.utils.devel import (
-    json_pickle_validator,
-    json_pickle_serializer,
-    pickle_serializer,
-    pickle_validator,
-    JSONSerializableExtras,
-)
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 
 
-class DataModel(JSONSerializableExtras):
+class DataModel(BaseModel, extra="allow"):
     """
     This class is a Pydantic BaseModel that can have any type and number of extras.
     """
@@ -290,9 +282,9 @@ class Message(DataModel):
             ]
         ]
     ] = None
-    annotations: Optional[Dict[str, Any]] = None
-    misc: Optional[Dict[str, Any]] = None
-    original_message: Optional[Any] = None
+    annotations: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None
+    misc: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None
+    original_message: Optional[Union[BaseModel, JsonValue]] = None
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,
@@ -318,9 +310,9 @@ class Message(DataModel):
                 ]
             ]
         ] = None,
-        annotations: Optional[Dict[str, Any]] = None,
-        misc: Optional[Dict[str, Any]] = None,
-        original_message: Optional[Any] = None,
+        annotations: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None,
+        misc: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None,
+        original_message: Optional[Union[BaseModel, JsonValue]] = None,
         **kwargs,
     ):
         super().__init__(
@@ -331,48 +323,6 @@ class Message(DataModel):
             original_message=original_message,
             **kwargs,
         )
-
-    @field_serializer("annotations", "misc", when_used="json")
-    def pickle_serialize_dicts(self, value):
-        """
-        Serialize values that are not json-serializable via pickle.
-        Allows storing arbitrary data in misc/annotations when using context storages.
-        """
-        if isinstance(value, dict):
-            return json_pickle_serializer(value)
-        return value
-
-    @field_validator("annotations", "misc", mode="before")
-    @classmethod
-    def pickle_validate_dicts(cls, value):
-        """Restore values serialized with :py:meth:`pickle_serialize_dicts`."""
-        if isinstance(value, dict):
-            return json_pickle_validator(value)
-        return value
-
-    @field_serializer("original_message", when_used="json")
-    def pickle_serialize_original_message(self, value):
-        """
-        Cast :py:attr:`original_message` to string via pickle.
-        Allows storing arbitrary data in this field when using context storages.
-        """
-        if value is not None:
-            return pickle_serializer(value)
-        return value
-
-    @field_validator("original_message", mode="before")
-    @classmethod
-    def pickle_validate_original_message(cls, value):
-        """
-        Restore :py:attr:`original_message` after being processed with
-        :py:meth:`pickle_serialize_original_message`.
-        """
-        if value is not None:
-            return pickle_validator(value)
-        return value
-
-    def __str__(self) -> str:
-        return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
 
     @model_validator(mode="before")
     @classmethod
