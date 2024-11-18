@@ -40,12 +40,6 @@ jobs:
           python -m pip install --upgrade pip poetry
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
-      - name: test actions/checkout_v4 (remove this before merging PR)
-        run: |
-          git branch
-          git status
-          echo "${{ github.head_ref || github.ref_name }}"
-
       - name: save docs version into a variable
         run: |
           echo "DOC_VERSION=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV

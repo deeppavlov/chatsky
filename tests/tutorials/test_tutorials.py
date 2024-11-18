@@ -15,7 +15,6 @@ PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
-@pytest.mark.needs_dependencies
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     """
     Install dependencies required by a tutorial in `venv` and run the tutorial.
@@ -37,7 +36,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     versions_dict = InstallationCell.versions()
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
         venv.run(
-            re.sub(r"chatsky\[(.*)\]==\{chatsky\}", r"\.\[\1\]", f"python -m pip install {deps}").format(
+            re.sub(r"chatsky\[(.*)\]==\{chatsky\}", r".[\1]", f"python -m pip install {deps}").format(
                 **versions_dict
             ),
             check_rc=True,
@@ -51,6 +50,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 @pytest.mark.slow
 @pytest.mark.docker
 @pytest.mark.no_coverage
+@pytest.mark.needs_dependencies
 def test_tutorials(chatsky_tutorial_py_file, virtualenv):
     with open(chatsky_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()
