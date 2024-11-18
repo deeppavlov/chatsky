@@ -1,9 +1,14 @@
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-
+import dotenv
 from chatsky.messengers.common import MessengerInterface
 from chatsky.core import Message
+import os
+
+dotenv.load_dotenv()
+
+HTTP_INTERFACE_PORT = int(os.getenv("PORT", 8020))
 
 
 class HTTPMessengerInterface(MessengerInterface):
@@ -26,5 +31,5 @@ class HTTPMessengerInterface(MessengerInterface):
         uvicorn.run(
             app,
             host="0.0.0.0",
-            port=8020,
+            port=HTTP_INTERFACE_PORT,
         )
