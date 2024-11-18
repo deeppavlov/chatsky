@@ -47,6 +47,8 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
         ]
     else:
         args = [
+            "-m",
+            "not needs_dependencies",
             "--allow-skip=all",
             *args,
         ]
