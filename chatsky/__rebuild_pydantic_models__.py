@@ -7,6 +7,7 @@ from chatsky.core.pipeline import Pipeline
 from chatsky.slots.slots import SlotManager
 from chatsky.core.context import FrameworkData, ServiceState
 from chatsky.core.service import PipelineComponent
+from chatsky.utils.devel import PydanticValue
 
 PipelineComponent.model_rebuild()
 Pipeline.model_rebuild()
@@ -15,3 +16,4 @@ Context.model_rebuild()
 ExtraHandlerRuntimeInfo.model_rebuild()
 FrameworkData.model_rebuild()
 ServiceState.model_rebuild()
+PydanticValue.update_forward_refs()

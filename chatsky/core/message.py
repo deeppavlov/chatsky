@@ -14,8 +14,10 @@ from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import BaseModel, Field, FilePath, HttpUrl, JsonValue, model_validator
+from pydantic import BaseModel, Field, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
+
+from chatsky.utils.devel import PydanticValue
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
@@ -282,9 +284,9 @@ class Message(DataModel):
             ]
         ]
     ] = None
-    annotations: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None
-    misc: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None
-    original_message: Optional[Union[BaseModel, JsonValue]] = None
+    annotations: Optional[Dict[str, PydanticValue]] = None
+    misc: Optional[Dict[str, PydanticValue]] = None
+    original_message: Optional[PydanticValue] = None
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,
@@ -310,9 +312,9 @@ class Message(DataModel):
                 ]
             ]
         ] = None,
-        annotations: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None,
-        misc: Optional[Dict[str, Union[BaseModel, JsonValue]]] = None,
-        original_message: Optional[Union[BaseModel, JsonValue]] = None,
+        annotations: Optional[Dict[str, PydanticValue]] = None,
+        misc: Optional[Dict[str, PydanticValue]] = None,
+        original_message: Optional[PydanticValue] = None,
         **kwargs,
     ):
         super().__init__(

@@ -22,8 +22,9 @@ import asyncio
 from uuid import UUID, uuid4
 from typing import Optional, Union, Dict, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, JsonValue
+from pydantic import BaseModel, Field
 
+from chatsky.utils.devel import PydanticValue
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
@@ -87,7 +88,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     Instance of the pipeline that manages this context.
     Can be used to obtain run configuration such as script or fallback label.
     """
-    stats: Dict[str, Union[BaseModel, JsonValue]] = Field(default_factory=dict)
+    stats: Dict[str, PydanticValue] = Field(default_factory=dict)
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
@@ -133,7 +134,7 @@ class Context(BaseModel):
     First response is stored at key ``1``.
     IDs go up by ``1`` after that.
     """
-    misc: Dict[str, Union[BaseModel, JsonValue]] = Field(default_factory=dict)
+    misc: Dict[str, PydanticValue] = Field(default_factory=dict)
     """
     ``misc`` stores any custom data. The framework doesn't use this dictionary,
     so storage of any data won't reflect on the work of the internal Chatsky functions.

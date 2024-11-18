@@ -15,9 +15,11 @@ import logging
 from functools import reduce
 from string import Formatter
 
-from pydantic import BaseModel, JsonValue, model_validator, Field
+from pydantic import BaseModel, model_validator, Field
+from pydantic.dataclasses import dataclass
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
+from chatsky.utils.devel import PydanticValue
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
@@ -81,6 +83,7 @@ def recursive_setattr(obj, slot_name: SlotName, value):
         setattr(parent_obj, slot, value)
 
 
+@dataclass
 class SlotNotExtracted(Exception):
     """This exception can be returned or raised by slot extractor if slot extraction is unsuccessful."""
 
@@ -116,8 +119,8 @@ class ExtractedValueSlot(ExtractedSlot):
     """Value extracted from :py:class:`~.ValueSlot`."""
 
     is_slot_extracted: bool
-    extracted_value: Union[BaseModel, JsonValue]
-    default_value: Optional[Union[BaseModel, JsonValue]] = None
+    extracted_value: PydanticValue
+    default_value: Optional[PydanticValue] = None
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -197,10 +200,10 @@ class ValueSlot(BaseSlot, frozen=True):
     Subclass it, if you want to declare your own slot type.
     """
 
-    default_value: Union[BaseModel, JsonValue] = None
+    default_value: PydanticValue = None
 
     @abstractmethod
-    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[PydanticValue, SlotNotExtracted]:
         """
         Return value extracted from context.
 
@@ -306,9 +309,9 @@ class FunctionSlot(ValueSlot, frozen=True):
     Uses a user-defined `func` to extract slot value from the :py:attr:`~.Context.last_request` Message.
     """
 
-    func: Callable[[Message], Union[Awaitable[Union[Union[BaseModel, JsonValue], SlotNotExtracted]], Union[BaseModel, JsonValue], SlotNotExtracted]]
+    func: Callable[[Message], Union[Awaitable[Union[PydanticValue, SlotNotExtracted]], PydanticValue, SlotNotExtracted]]
 
-    async def extract_value(self, ctx: Context) -> Union[Union[BaseModel, JsonValue], SlotNotExtracted]:
+    async def extract_value(self, ctx: Context) -> Union[PydanticValue, SlotNotExtracted]:
         return await wrap_sync_function_in_async(self.func, ctx.last_request)
 
 
