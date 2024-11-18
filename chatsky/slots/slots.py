@@ -224,14 +224,14 @@ class ValueSlot(BaseSlot, frozen=True):
         finally:
             if not is_slot_extracted:
                 logger.debug(f"Slot {self.__class__.__name__!r} was not extracted: {extracted_value}")
-            return ExtractedValueSlot.model_construct(
+            return ExtractedValueSlot(
                 is_slot_extracted=is_slot_extracted,
                 extracted_value=extracted_value,
                 default_value=self.default_value,
             )
 
     def init_value(self) -> ExtractedValueSlot:
-        return ExtractedValueSlot.model_construct(
+        return ExtractedValueSlot(
             is_slot_extracted=False,
             extracted_value=SlotNotExtracted("Initial slot extraction."),
             default_value=self.default_value,

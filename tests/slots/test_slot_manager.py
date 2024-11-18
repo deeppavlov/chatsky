@@ -16,7 +16,7 @@ def faulty_func(_):
     raise SlotNotExtracted("Error.")
 
 
-init_value_slot = ExtractedValueSlot.model_construct(
+init_value_slot = ExtractedValueSlot(
     is_slot_extracted=False,
     extracted_value=SlotNotExtracted("Initial slot extraction."),
     default_value=None,
@@ -34,16 +34,12 @@ root_slot = GroupSlot(
 
 
 extracted_slot_values = {
-    "person.name": ExtractedValueSlot.model_construct(
-        is_slot_extracted=True, extracted_value="Bot", default_value=None
-    ),
-    "person.surname": ExtractedValueSlot.model_construct(
+    "person.name": ExtractedValueSlot(is_slot_extracted=True, extracted_value="Bot", default_value=None),
+    "person.surname": ExtractedValueSlot(
         is_slot_extracted=False, extracted_value=SlotNotExtracted("Error."), default_value=None
     ),
-    "person.email": ExtractedValueSlot.model_construct(
-        is_slot_extracted=True, extracted_value="bot@bot", default_value=None
-    ),
-    "msg_len": ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=29, default_value=None),
+    "person.email": ExtractedValueSlot(is_slot_extracted=True, extracted_value="bot@bot", default_value=None),
+    "msg_len": ExtractedValueSlot(is_slot_extracted=True, extracted_value=29, default_value=None),
 }
 
 
@@ -54,7 +50,7 @@ extracted_slot_values["person"] = ExtractedGroupSlot(
 )
 
 
-unset_slot = ExtractedValueSlot.model_construct(
+unset_slot = ExtractedValueSlot(
     is_slot_extracted=False, extracted_value=SlotNotExtracted("Slot manually unset."), default_value=None
 )
 
@@ -116,9 +112,7 @@ def extracted_slot_manager():
 @pytest.fixture(scope="function")
 def fully_extracted_slot_manager():
     slot_storage = full_slot_storage.model_copy(deep=True)
-    slot_storage.person.surname = ExtractedValueSlot.model_construct(
-        extracted_value="Bot", is_slot_extracted=True, default_value=None
-    )
+    slot_storage.person.surname = ExtractedValueSlot(extracted_value="Bot", is_slot_extracted=True, default_value=None)
     return SlotManager(root_slot=root_slot, slot_storage=slot_storage)
 
 

@@ -18,12 +18,12 @@ from chatsky.slots.slots import (
         (
             Message(text="My name is Bot"),
             "(?<=name is ).+",
-            ExtractedValueSlot.model_construct(extracted_value="Bot", is_slot_extracted=True, default_value=None),
+            ExtractedValueSlot(extracted_value="Bot", is_slot_extracted=True, default_value=None),
         ),
         (
             Message(text="I won't tell you my name"),
             "(?<=name is ).+$",
-            ExtractedValueSlot.model_construct(
+            ExtractedValueSlot(
                 extracted_value=SlotNotExtracted(
                     "Failed to match pattern {regexp!r} in {request_text!r}.".format(
                         regexp="(?<=name is ).+$", request_text="I won't tell you my name"
@@ -48,12 +48,12 @@ async def test_regexp(user_request, regexp, expected, context):
         (
             Message(text="I am bot"),
             lambda msg: msg.text.split(" ")[2],
-            ExtractedValueSlot.model_construct(extracted_value="bot", is_slot_extracted=True, default_value=None),
+            ExtractedValueSlot(extracted_value="bot", is_slot_extracted=True, default_value=None),
         ),
         (
             Message(text="My email is bot@bot"),
             lambda msg: [i for i in msg.text.split(" ") if "@" in i][0],
-            ExtractedValueSlot.model_construct(extracted_value="bot@bot", is_slot_extracted=True, default_value=None),
+            ExtractedValueSlot(extracted_value="bot@bot", is_slot_extracted=True, default_value=None),
         ),
     ],
 )
@@ -91,10 +91,10 @@ async def test_function_exception(context):
                 email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ),
             ExtractedGroupSlot(
-                name=ExtractedValueSlot.model_construct(
+                name=ExtractedValueSlot(
                     is_slot_extracted=True, extracted_value="Bot", default_value=None
                 ),
-                email=ExtractedValueSlot.model_construct(
+                email=ExtractedValueSlot(
                     is_slot_extracted=True, extracted_value="bot@bot", default_value=None
                 ),
             ),
@@ -107,10 +107,10 @@ async def test_function_exception(context):
                 email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ),
             ExtractedGroupSlot(
-                name=ExtractedValueSlot.model_construct(
+                name=ExtractedValueSlot(
                     is_slot_extracted=True, extracted_value="Bot", default_value=None
                 ),
-                email=ExtractedValueSlot.model_construct(
+                email=ExtractedValueSlot(
                     is_slot_extracted=False,
                     extracted_value=SlotNotExtracted(
                         "Failed to match pattern {regexp!r} in {request_text!r}.".format(
@@ -139,20 +139,18 @@ def test_group_subslot_name_validation(forbidden_name):
 
 async def test_str_representation():
     assert (
-        str(ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value="hello", default_value=None))
-        == "hello"
+        str(ExtractedValueSlot(is_slot_extracted=True, extracted_value="hello", default_value=None)) == "hello"
     )
     assert (
-        str(ExtractedValueSlot.model_construct(is_slot_extracted=False, extracted_value=None, default_value="hello"))
-        == "hello"
+        str(ExtractedValueSlot(is_slot_extracted=False, extracted_value=None, default_value="hello")) == "hello"
     )
     assert (
         str(
             ExtractedGroupSlot(
-                first_name=ExtractedValueSlot.model_construct(
+                first_name=ExtractedValueSlot(
                     is_slot_extracted=True, extracted_value="Tom", default_value="John"
                 ),
-                last_name=ExtractedValueSlot.model_construct(
+                last_name=ExtractedValueSlot(
                     is_slot_extracted=False, extracted_value=None, default_value="Smith"
                 ),
             )
@@ -172,7 +170,7 @@ class UnserializableClass:
 
 
 async def test_serialization():
-    extracted_slot = ExtractedValueSlot.model_construct(
+    extracted_slot = ExtractedValueSlot(
         is_slot_extracted=True, extracted_value=UnserializableClass(), default_value=UnserializableClass()
     )
     serialized = extracted_slot.model_dump_json()
