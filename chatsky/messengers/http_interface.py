@@ -8,7 +8,7 @@ import os
 
 dotenv.load_dotenv()
 
-HTTP_INTERFACE_PORT = int(os.getenv("PORT", 8020))
+HTTP_INTERFACE_PORT = int(os.getenv("HTTP_INTERFACE_PORT", 8020))
 
 
 class HTTPMessengerInterface(MessengerInterface):
