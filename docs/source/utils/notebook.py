@@ -54,7 +54,7 @@ class InstallationCell(ReplacePattern):
     Uncomment `# %pip install {}`, add a "quiet" flag, add a comment explaining the cell.
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
+    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)( # noqa: E501)?\n")
 
     @staticmethod
     @cache
