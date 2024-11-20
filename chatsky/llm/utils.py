@@ -51,7 +51,9 @@ async def attachment_to_content(attachment: Image, iface) -> str:
     return image_b64
 
 
-async def context_to_history(ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int) -> list:
+async def context_to_history(
+    ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int
+) -> list:
     """
     Convert context to list of langchain messages.
 
