@@ -23,8 +23,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     check_langchain_available()
     if message.text is None:
         content = []
-
-    if len(message.text) > max_size:
+    elif len(message.text) > max_size:
         logging.warning("Message is too long.")
         content = []
     else:
@@ -36,6 +35,8 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
         return AIMessage(content=content)
     elif source == "system":
         return SystemMessage(content=content)
+    else:
+        return HumanMessage(content=content)
 
 
 async def attachment_to_content(attachment: Image, iface) -> str:
