@@ -21,22 +21,14 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     :rtype: HumanMessage|AIMessage|SystemMessage
     """
     check_langchain_available()
-    if len(message.text) > max_size:
-        raise ValueError("Message is too long.")
-
     if message.text is None:
-        message.text = ""
-    content = [{"type": "text", "text": message.text}]
+        content = []
 
-    if message.attachments:
-        for image in message.attachments:
-            if isinstance(image, Image):
-                content.append(
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": await attachment_to_content(image, ctx.pipeline.messenger_interface)},
-                    }
-                )
+    if len(message.text) > max_size:
+        logging.warning("Message is too long.")
+        content = []
+    else:
+        content = [{"type": "text", "text": message.text}]
 
     if source == "human":
         return HumanMessage(content=content)
@@ -44,8 +36,6 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
         return AIMessage(content=content)
     elif source == "system":
         return SystemMessage(content=content)
-    else:
-        raise ValueError("Invalid source name. Only `human`, `ai` and `system` are supported.")
 
 
 async def attachment_to_content(attachment: Image, iface) -> str:
