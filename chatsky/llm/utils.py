@@ -4,14 +4,15 @@ import logging
 from chatsky.core.context import Context
 from chatsky.core.message import Image, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
+from chatsky.llm.filters import BaseFilter
 
 
 async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
     """
-    Creates a langchain message from a ~chatsky.script.core.message.Message object.
+    Create a langchain message from a ~chatsky.script.core.message.Message object.
 
     :param message: Chatsky Message to convert to Langchain Message.
-    :param ctx: Context the message belongs to.
+    :param ctx: Current dialog context.
     :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
     :param max_size: Maximum size of the message in symbols.
         If exceed the limit will raise ValueError. Is not affected by system prompt size.
@@ -49,7 +50,7 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
 
 async def attachment_to_content(attachment: Image, iface) -> str:
     """
-    Helper function to convert image to base64 string.
+    Convert chatsky.Image to base64 string.
     """
     image_bytes = await attachment.get_bytes(iface)
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -60,8 +61,19 @@ async def attachment_to_content(attachment: Image, iface) -> str:
     return image_b64
 
 
-async def context_to_history(ctx: Context, length: int, filter_func, model_name: str, max_size: int):
+async def context_to_history(ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int) -> list:
+    """
+    Convert context to list of langchain messages.
 
+    :param ctx: Current dialog context.
+    :param length: Amount of turns to include in history. Set to `-1` to include all context.
+    :param filter_func: Function to filter the context.
+    :param model_name: name of the model from the pipeline.
+    :param max_size: Maximum size of the message in symbols.
+
+    :return: List of Langchain message objects.
+    :rtype: list[HumanMessage|AIMessage|SystemMessage]
+    """
     history = []
 
     pairs = zip(
