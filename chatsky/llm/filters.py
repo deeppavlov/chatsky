@@ -16,8 +16,6 @@ class BaseFilter(BaseModel, abc.ABC):
     """
     Base class for all message history filters.
     """
-
-    @abc.abstractmethod
     def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool:
         """
         :param ctx: Context object.
