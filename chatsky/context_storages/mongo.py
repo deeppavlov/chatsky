@@ -146,7 +146,7 @@ class MongoContextStorage(DBContextStorage):
         return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
 
     @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[Tuple[int, bytes]]:
         result = await self.turns_table.find(
             {
                 self._id_column_name: ctx_id,
@@ -158,7 +158,7 @@ class MongoContextStorage(DBContextStorage):
         return [(item[self._key_column_name], item[field_name]) for item in result]
 
     @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         if len(items) == 0:
             return
         await self.turns_table.bulk_write(

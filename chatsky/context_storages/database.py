@@ -10,9 +10,10 @@ This class implements the basic functionality and can be extended to add additio
 
 from abc import ABC, abstractmethod
 from asyncio import Lock
+from functools import wraps
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
 
 from .protocol import PROTOCOLS
 
@@ -56,8 +57,9 @@ class DBContextStorage(ABC):
             self._subscripts[field] = 0 if value == "__none__" else value
 
     @staticmethod
-    def _synchronously_lock(method: Coroutine):
-        def setup_lock(condition: Callable[["DBContextStorage"], bool] = lambda _: True):
+    def _synchronously_lock(condition: Callable[["DBContextStorage"], bool] = lambda _: True):
+        def setup_lock(method: Callable[..., Awaitable[Any]]):
+            @wraps(method)
             async def lock(self: "DBContextStorage", *args, **kwargs):
                 if condition(self):
                     async with self._sync_lock:
@@ -70,7 +72,8 @@ class DBContextStorage(ABC):
         return setup_lock
 
     @staticmethod
-    def _verify_field_name(method: Callable):
+    def _verify_field_name(method: Callable[..., Awaitable[Any]]):
+        @wraps(method)
         def verifier(self: "DBContextStorage", *args, **kwargs):
             field_name = args[1] if len(args) >= 1 else kwargs.get("field_name", None)
             if field_name is None:
@@ -127,7 +130,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         """
         Update field items.
         """

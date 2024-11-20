@@ -1,3 +1,4 @@
+from chatsky.core.context import Context
 from chatsky.slots import RegexpSlot, GroupSlot
 from chatsky.slots.slots import SlotManager
 from chatsky.core import Message
@@ -33,9 +34,10 @@ extracted_slots = {
 
 
 @pytest.fixture(scope="function")
-def context_with_request(context):
+def context_with_request(context: Context):
     def inner(request):
-        context.add_request(Message(request))
+        context.requests[context.current_turn_id] = Message(request)
+        context.current_turn_id += 1
         return context
 
     return inner

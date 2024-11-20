@@ -150,7 +150,7 @@ class Context(BaseModel):
             instance.requests = await ContextDict.new(storage, uid, storage._requests_field_name, Message)
             instance.responses = await ContextDict.new(storage, uid, storage._responses_field_name, Message)
             instance.labels = await ContextDict.new(storage, uid, storage._labels_field_name, AbsoluteNodeLabel)
-            instance.labels[0] = start_label
+            await instance.labels.update({0: start_label})
             instance._storage = storage
             return instance
         else:
@@ -271,7 +271,7 @@ class Context(BaseModel):
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
-            misc_byted = self.framework_data.model_dump_json().encode()
+            misc_byted = TypeAdapter(Dict[str, Any]).dump_json(self.misc)
             fw_data_byted = self.framework_data.model_dump_json().encode()
             await gather(
                 self._storage.update_main_info(

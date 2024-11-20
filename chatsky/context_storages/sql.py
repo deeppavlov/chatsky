@@ -283,7 +283,7 @@ class SQLContextStorage(DBContextStorage):
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
-        stmt = stmt.where(self.turns_table.c[field_name] is not None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
         if isinstance(self._subscripts[field_name], int):
             stmt = stmt.limit(self._subscripts[field_name])
@@ -302,7 +302,7 @@ class SQLContextStorage(DBContextStorage):
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name])
         stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
-        stmt = stmt.where(self.turns_table.c[field_name] is not None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         async with self.engine.begin() as conn:
             result = [k[0] for k in (await conn.execute(stmt)).fetchall()]
             logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
@@ -310,12 +310,12 @@ class SQLContextStorage(DBContextStorage):
 
     @DBContextStorage._verify_field_name
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
         stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(tuple(keys)))
-        stmt = stmt.where(self.turns_table.c[field_name] is not None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)
         async with self.engine.begin() as conn:
             result = list((await conn.execute(stmt)).fetchall())
             logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
@@ -323,7 +323,7 @@ class SQLContextStorage(DBContextStorage):
 
     @DBContextStorage._verify_field_name
     @DBContextStorage._synchronously_lock(lambda s: s.is_asynchronous)
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         if len(items) == 0:
             return

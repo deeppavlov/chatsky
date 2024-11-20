@@ -7,8 +7,8 @@ from chatsky.core import Message, RESPONSE, TRANSITIONS, Pipeline, Transition as
 @pytest.mark.asyncio
 async def test_update_ctx_misc():
     class MyCondition(BaseCondition):
-        async def call(self, ctx: Context) -> bool:
-            return await ctx.misc["condition"]
+        def call(self, ctx: Context) -> bool:
+            return ctx.misc["condition"]
 
     toy_script = {
         "root": {

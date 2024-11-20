@@ -126,7 +126,7 @@ class RedisContextStorage(DBContextStorage):
         return [(k, v) for k, v in zip(self._bytes_to_keys(load), values)]
 
     @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         await gather(*[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in items])
 
     @DBContextStorage._verify_field_name

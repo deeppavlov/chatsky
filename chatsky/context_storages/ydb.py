@@ -311,7 +311,7 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         if len(items) == 0:
             return
 

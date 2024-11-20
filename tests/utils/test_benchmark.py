@@ -30,77 +30,6 @@ def test_get_dict():
     }
 
 
-def test_get_context():
-    random.seed(42)
-    context = get_context(2, (1, 2), (2, 3))
-    copy_ctx = Context(
-        labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
-        requests={0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})},
-        responses={0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})},
-        misc={"0": " d]", "1": " (b"},
-    )
-    copy_ctx.id = context.id
-    assert context == copy_ctx
-
-
-def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(random, "choice", lambda x: ".")
-
-    config = bm.BasicBenchmarkConfig(
-        from_dialog_len=1, to_dialog_len=5, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
-    )
-    context = config.get_context()
-    actual_context = get_context(1, (2, 2), (3, 3, 3))
-    actual_context.id = context.id
-    assert context == actual_context
-
-    info = config.info()
-    for size in ("starting_context_size", "final_context_size", "misc_size", "message_size"):
-        assert isinstance(info["sizes"][size], str)
-
-    context_updater = config.context_updater
-
-    contexts = [context]
-
-    while contexts[-1] is not None:
-        contexts.append(context_updater(deepcopy(contexts[-1])))
-
-    assert len(contexts) == 5
-
-    for index, context in enumerate(contexts):
-        if context is not None:
-            assert len(context.labels) == len(context.requests) == len(context.responses) == index + 1
-
-            actual_context = get_context(index + 1, (2, 2), (3, 3, 3))
-            actual_context.id = context.id
-            assert context == actual_context
-
-
-def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(random, "choice", lambda x: ".")
-
-    config = bm.BasicBenchmarkConfig(
-        from_dialog_len=1, to_dialog_len=11, step_dialog_len=3, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
-    )
-
-    context_updater = config.context_updater
-
-    contexts = [config.get_context()]
-
-    while contexts[-1] is not None:
-        contexts.append(context_updater(deepcopy(contexts[-1])))
-
-    assert len(contexts) == 5
-
-    for index, context in zip(range(1, 11, 3), contexts):
-        if context is not None:
-            assert len(context.labels) == len(context.requests) == len(context.responses) == index
-
-            actual_context = get_context(index, (2, 2), (3, 3, 3))
-            actual_context.id = context.id
-            assert context == actual_context
-
-
 def test_db_factory(tmp_path: Path):
     factory = bm.DBFactory(uri=f"json://{tmp_path}/json.json")
 
@@ -116,7 +45,73 @@ def context_storage(tmp_path: Path) -> JSONContextStorage:
     return factory.db()
 
 
-def test_time_context_read_write(context_storage: JSONContextStorage):
+async def test_get_context(context_storage: JSONContextStorage):
+    random.seed(42)
+    context = await get_context(context_storage, 2, (1, 2), (2, 3))
+    copy_ctx = await Context.connected(context_storage, ("flow", "node"))
+    await copy_ctx.labels.update({0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")})
+    await copy_ctx.requests.update({0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})})
+    await copy_ctx.responses.update({0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})})
+    copy_ctx.misc.update({"0": " d]", "1": " (b"})
+    assert context.model_dump(exclude={"id", "current_turn_id"}) == copy_ctx.model_dump(exclude={"id", "current_turn_id"})
+
+
+async def test_benchmark_config(context_storage: JSONContextStorage, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(random, "choice", lambda x: ".")
+
+    config = bm.BasicBenchmarkConfig(
+        from_dialog_len=1, to_dialog_len=5, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
+    )
+    context = await config.get_context(context_storage)
+    actual_context = await get_context(context_storage, 1, (2, 2), (3, 3, 3))
+    assert context.model_dump(exclude={"id"}) == actual_context.model_dump(exclude={"id"})
+
+    info = await config.info()
+    for size in ("starting_context_size", "final_context_size", "misc_size", "message_size"):
+        assert isinstance(info["sizes"][size], str)
+
+    context_updater = config.context_updater
+
+    contexts = [context]
+
+    while contexts[-1] is not None:
+        contexts.append(await context_updater(deepcopy(contexts[-1])))
+
+    assert len(contexts) == 5
+
+    for index, context in enumerate(contexts):
+        if context is not None:
+            assert len(context.labels) == len(context.requests) == len(context.responses) == index + 1
+
+            actual_context = await get_context(context_storage, index + 1, (2, 2), (3, 3, 3))
+            assert context.model_dump(exclude={"id"}) == actual_context.model_dump(exclude={"id"})
+
+
+async def test_context_updater_with_steps(context_storage: JSONContextStorage, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(random, "choice", lambda x: ".")
+
+    config = bm.BasicBenchmarkConfig(
+        from_dialog_len=1, to_dialog_len=11, step_dialog_len=3, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
+    )
+
+    context_updater = config.context_updater
+
+    contexts = [await config.get_context(context_storage)]
+
+    while contexts[-1] is not None:
+        contexts.append(await context_updater(deepcopy(contexts[-1])))
+
+    assert len(contexts) == 5
+
+    for index, context in zip(range(1, 11, 3), contexts):
+        if context is not None:
+            assert len(context.labels) == len(context.requests) == len(context.responses) == index
+
+            actual_context = await get_context(context_storage, index, (2, 2), (3, 3, 3))
+            assert context.model_dump(exclude={"id"}) == actual_context.model_dump(exclude={"id"})
+
+
+async def test_time_context_read_write(context_storage: JSONContextStorage):
     config = bm.BasicBenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
@@ -126,11 +121,9 @@ def test_time_context_read_write(context_storage: JSONContextStorage):
         misc_dimensions=(3, 3, 3),
     )
 
-    results = bm.time_context_read_write(
+    results = await bm.time_context_read_write(
         context_storage, config.get_context, config.context_num, config.context_updater
     )
-
-    assert len(context_storage) == 0
 
     assert len(results) == 3
 
@@ -149,7 +142,7 @@ def test_time_context_read_write(context_storage: JSONContextStorage):
         assert all([isinstance(update_time, float) and update_time > 0 for update_time in update_item.values()])
 
 
-def test_time_context_read_write_without_updates(context_storage: JSONContextStorage):
+async def test_time_context_read_write_without_updates(context_storage: JSONContextStorage):
     config = bm.BasicBenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
@@ -159,7 +152,7 @@ def test_time_context_read_write_without_updates(context_storage: JSONContextSto
         misc_dimensions=(3, 3, 3),
     )
 
-    results = bm.time_context_read_write(
+    results = await bm.time_context_read_write(
         context_storage,
         config.get_context,
         config.context_num,
@@ -170,7 +163,7 @@ def test_time_context_read_write_without_updates(context_storage: JSONContextSto
     assert list(read[0].keys()) == [1]
     assert list(update[0].keys()) == []
 
-    results = bm.time_context_read_write(
+    results = await bm.time_context_read_write(
         context_storage,
         config.get_context,
         config.context_num,

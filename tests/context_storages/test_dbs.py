@@ -192,16 +192,16 @@ class TestContextStorages:
         if responses_subscript is not None:
             context_storage._subscripts["responses"] = responses_subscript
 
-    async def test_add_context(self, db, add_context):
+    async def test_add_context(self, db: DBContextStorage, add_context):
         # test the fixture
         await add_context("1")
 
-    async def test_get_main_info(self, db, add_context):
+    async def test_get_main_info(self, db: DBContextStorage, add_context):
         await add_context("1")
         assert await db.load_main_info("1") == (1, 1, 1, b"1", b"1")
         assert await db.load_main_info("2") is None
 
-    async def test_update_main_info(self, db, add_context):
+    async def test_update_main_info(self, db: DBContextStorage, add_context):
         await add_context("1")
         await add_context("2")
         assert await db.load_main_info("1") == (1, 1, 1, b"1", b"1")
@@ -211,7 +211,7 @@ class TestContextStorages:
         assert await db.load_main_info("1") == (2, 1, 3, b"4", b"5")
         assert await db.load_main_info("2") == (1, 1, 1, b"1", b"1")
 
-    async def test_wrong_field_name(self, db):
+    async def test_wrong_field_name(self, db: DBContextStorage):
         with pytest.raises(
             ValueError, match="Invalid value 'non-existent' for method 'load_field_latest' argument 'field_name'!"
         ):
@@ -223,13 +223,13 @@ class TestContextStorages:
         with pytest.raises(
             ValueError, match="Invalid value 'non-existent' for method 'load_field_items' argument 'field_name'!"
         ):
-            await db.load_field_items("1", "non-existent", {1, 2})
+            await db.load_field_items("1", "non-existent", [1, 2])
         with pytest.raises(
             ValueError, match="Invalid value 'non-existent' for method 'update_field_items' argument 'field_name'!"
         ):
             await db.update_field_items("1", "non-existent", [(1, b"2")])
 
-    async def test_field_get(self, db, add_context):
+    async def test_field_get(self, db: DBContextStorage, add_context):
         await add_context("1")
 
         assert await db.load_field_latest("1", "labels") == [(0, b"0")]
@@ -238,7 +238,7 @@ class TestContextStorages:
         assert await db.load_field_latest("1", "requests") == []
         assert set(await db.load_field_keys("1", "requests")) == set()
 
-    async def test_field_load(self, db, add_context):
+    async def test_field_load(self, db: DBContextStorage, add_context):
         await add_context("1")
 
         await db.update_field_items("1", "requests", [(1, b"1"), (3, b"3"), (2, b"2"), (4, b"4")])
@@ -246,7 +246,7 @@ class TestContextStorages:
         assert await db.load_field_items("1", "requests", [1, 2]) == [(1, b"1"), (2, b"2")]
         assert await db.load_field_items("1", "requests", [4, 3]) == [(3, b"3"), (4, b"4")]
 
-    async def test_field_update(self, db, add_context):
+    async def test_field_update(self, db: DBContextStorage, add_context):
         await add_context("1")
         assert await db.load_field_latest("1", "labels") == [(0, b"0")]
         assert await db.load_field_latest("1", "requests") == []
@@ -260,7 +260,7 @@ class TestContextStorages:
         assert await db.load_field_latest("1", "requests") == [(4, b"4")]
         assert set(await db.load_field_keys("1", "requests")) == {4}
 
-    async def test_int_key_field_subscript(self, db, add_context):
+    async def test_int_key_field_subscript(self, db: DBContextStorage, add_context):
         await add_context("1")
         await db.update_field_items("1", "requests", [(2, b"2")])
         await db.update_field_items("1", "requests", [(1, b"1")])
@@ -277,20 +277,20 @@ class TestContextStorages:
         self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(5, b"5"), (2, b"2")]
 
-    async def test_delete_field_key(self, db, add_context):
+    async def test_delete_field_key(self, db: DBContextStorage, add_context):
         await add_context("1")
 
         await db.delete_field_keys("1", "labels", [0])
 
         assert await db.load_field_latest("1", "labels") == []
 
-    async def test_raises_on_missing_field_keys(self, db, add_context):
+    async def test_raises_on_missing_field_keys(self, db: DBContextStorage, add_context):
         await add_context("1")
 
         assert set(await db.load_field_items("1", "labels", [0, 1])) == {(0, b"0")}
         assert set(await db.load_field_items("1", "requests", [0])) == set()
 
-    async def test_delete_context(self, db, add_context):
+    async def test_delete_context(self, db: DBContextStorage, add_context):
         await add_context("1")
         await add_context("2")
 
@@ -304,7 +304,7 @@ class TestContextStorages:
         assert set(await db.load_field_keys("2", "labels")) == {0}
 
     @pytest.mark.slow
-    async def test_concurrent_operations(self, db):
+    async def test_concurrent_operations(self, db: DBContextStorage):
         async def db_operations(key: int):
             str_key = str(key)
             byte_key = bytes(key)
@@ -324,13 +324,9 @@ class TestContextStorages:
                 }
 
         operations = [db_operations(key * 2) for key in range(3)]
-        if db.is_asynchronous:
-            await asyncio.gather(*operations)
-        else:
-            for coro in operations:
-                await coro
+        await asyncio.gather(*operations)
 
-    async def test_pipeline(self, db) -> None:
+    async def test_pipeline(self, db: DBContextStorage) -> None:
         # Test Pipeline workload on DB
         pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
         check_happy_path(pipeline, happy_path=HAPPY_PATH)

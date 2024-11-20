@@ -53,8 +53,10 @@ class FileContextStorage(DBContextStorage, ABC):
         rewrite_existing: bool = False,
         configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
+        self._first_time_saved = False
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
         asyncio.run(self._load())
+        self._first_time_saved = True
 
     @abstractmethod
     async def _save(self, data: SerializableStorage) -> None:
@@ -64,12 +66,14 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         logger.debug(f"Loading main info for {ctx_id}...")
         result = (await self._load()).main.get(ctx_id, None)
         logger.debug(f"Main info loaded for {ctx_id}")
         return result
 
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
@@ -79,6 +83,7 @@ class FileContextStorage(DBContextStorage, ABC):
         await self._save(storage)
         logger.debug(f"Main info updated for {ctx_id}")
 
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def delete_context(self, ctx_id: str) -> None:
         logger.debug(f"Deleting context {ctx_id}...")
         storage = await self._load()
@@ -88,6 +93,7 @@ class FileContextStorage(DBContextStorage, ABC):
         logger.debug(f"Context {ctx_id} deleted")
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         storage = await self._load()
@@ -104,6 +110,7 @@ class FileContextStorage(DBContextStorage, ABC):
         return select
 
     @DBContextStorage._verify_field_name
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         result = [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
@@ -111,7 +118,8 @@ class FileContextStorage(DBContextStorage, ABC):
         return result
 
     @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[bytes]:
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
+    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         result = [
             (k, v)
@@ -122,7 +130,8 @@ class FileContextStorage(DBContextStorage, ABC):
         return result
 
     @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, bytes]]) -> None:
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
+    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         storage = await self._load()
         for k, v in items:
@@ -136,20 +145,19 @@ class FileContextStorage(DBContextStorage, ABC):
         await self._save(storage)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
+    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
     async def clear_all(self) -> None:
         logger.debug("Clearing all")
         await self._save(SerializableStorage())
 
 
 class JSONContextStorage(FileContextStorage):
-    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "w", encoding="utf-8") as file_stream:
             await file_stream.write(data.model_dump_json())
 
-    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -161,14 +169,12 @@ class JSONContextStorage(FileContextStorage):
 
 
 class PickleContextStorage(FileContextStorage):
-    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
         async with open(self.path, "wb") as file_stream:
             await file_stream.write(dumps(data.model_dump()))
 
-    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             storage = SerializableStorage()
@@ -191,11 +197,9 @@ class ShelveContextStorage(FileContextStorage):
         self._storage = None
         FileContextStorage.__init__(self, path, rewrite_existing, configuration)
 
-    @DBContextStorage._synchronously_lock
     async def _save(self, data: SerializableStorage) -> None:
         self._storage[self._SHELVE_ROOT] = data.model_dump()
 
-    @DBContextStorage._synchronously_lock
     async def _load(self) -> SerializableStorage:
         if self._storage is None:
             content = SerializableStorage()
