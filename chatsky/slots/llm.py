@@ -36,7 +36,7 @@ class LLMSlot(ValueSlot, frozen=True):
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         if request_text == "":
-            return SlotNotExtracted
+            return SlotNotExtracted()
 
         # Dynamically create a Pydantic model based on the caption
         class DynamicModel(BaseModel):
@@ -49,6 +49,9 @@ class LLMSlot(ValueSlot, frozen=True):
 
 
 class LLMGroupSlot(GroupSlot):
+    """
+    LLMSlots based :py:class:`~.GroupSlot` implementation.
+    """
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
     model: Any
@@ -75,7 +78,7 @@ class LLMGroupSlot(GroupSlot):
         }
         return ExtractedGroupSlot(**res)
 
-    def __flatten_llm_group_slot(self, slot, parent_key=""):
+    def _flatten_llm_group_slot(self, slot, parent_key=""):
         items = {}
         for key, value in slot.__pydantic_extra__.items():
             new_key = f"{parent_key}.{key}" if parent_key else key

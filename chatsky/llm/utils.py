@@ -7,7 +7,9 @@ from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessag
 from chatsky.llm.filters import BaseFilter
 
 
-async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000) -> HumanMessage|AIMessage|SystemMessage:
+async def message_to_langchain(
+    message: Message, ctx: Context, source: str = "human", max_size: int = 1000
+) -> HumanMessage | AIMessage | SystemMessage:
     """
     Create a langchain message from a ~chatsky.script.core.message.Message object.
 
@@ -51,7 +53,7 @@ async def attachment_to_content(attachment: Image, iface) -> str:
 
 async def context_to_history(
     ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int
-) -> list[HumanMessage|AIMessage|SystemMessage]:
+) -> list[HumanMessage | AIMessage | SystemMessage]:
     """
     Convert context to list of langchain messages.
 
