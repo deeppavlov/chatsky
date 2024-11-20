@@ -7,7 +7,7 @@ from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessag
 from chatsky.llm.filters import BaseFilter
 
 
-async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000):
+async def message_to_langchain(message: Message, ctx: Context, source: str = "human", max_size: int = 1000) -> HumanMessage|AIMessage|SystemMessage:
     """
     Create a langchain message from a ~chatsky.script.core.message.Message object.
 
@@ -16,9 +16,6 @@ async def message_to_langchain(message: Message, ctx: Context, source: str = "hu
     :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
     :param max_size: Maximum size of the message in symbols.
         If exceed the limit will raise ValueError. Is not affected by system prompt size.
-
-    :return: Langchain message object.
-    :rtype: HumanMessage|AIMessage|SystemMessage
     """
     check_langchain_available()
     if message.text is None:
@@ -54,7 +51,7 @@ async def attachment_to_content(attachment: Image, iface) -> str:
 
 async def context_to_history(
     ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int
-) -> list:
+) -> list[HumanMessage|AIMessage|SystemMessage]:
     """
     Convert context to list of langchain messages.
 
