@@ -1,3 +1,9 @@
+"""
+LLM responses.
+--------------
+Responses based on LLM_API calling.
+"""
+
 from typing import Union, Type
 import logging
 
@@ -26,7 +32,7 @@ class LLMResponse(BaseResponse):
     model_name: str
     prompt: AnyResponse = Field(default="", validate_default=True)
     history: int = 5
-    filter_func: BaseFilter = lambda *args: True
+    filter_func: BaseFilter = BaseFilter()
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     max_size: int = 1000
 

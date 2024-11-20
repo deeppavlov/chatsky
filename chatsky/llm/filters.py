@@ -25,7 +25,7 @@ class BaseFilter(BaseModel, abc.ABC):
         :param response: Response message.
         :param model_name: Name of the model in the Pipeline.models.
         """
-        raise NotImplementedError
+        return True
 
 
 class IsImportant(BaseFilter):
