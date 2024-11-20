@@ -1,8 +1,8 @@
 """
 LLM methods
 -----------
-In this file stored unified functions for some basic condition cases
-including regex search, semantic distance (cosine) etc.
+This module provides basic methods to support LLM conditions.
+These methods return bool values based on LLM result.
 """
 
 import abc
@@ -20,11 +20,19 @@ class BaseMethod(BaseModel, abc.ABC):
 
     @abc.abstractmethod
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
+        """
+        Take Context and LLMResult as an input and return boolean.
+
+        :param ctx: Current dialog context.
+        :param model_result: Result of langchain model's invoke.
+
+        :rtype: bool
+        """
         raise NotImplementedError
 
     async def model_result_to_text(self, model_result: LLMResult) -> str:
         """
-        Converts raw model generation to a string.
+        Extract text from raw model result.
         """
         return model_result.generations[0][0].text
 
@@ -33,15 +41,16 @@ class Contains(BaseMethod):
     """
     Simple method to check if a string contains a pattern.
 
-    :param str pattern: pattern to check
-
-    :return: True if pattern is contained in model result
-    :rtype: bool
+    :param pattern: pattern that will be searched in model_result.
     """
 
     pattern: str
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
+        """
+        :return: True if pattern is contained in model_result.
+        :rtype: bool
+        """
         text = await self.model_result_to_text(model_result)
         return bool(self.pattern.lower() in text.lower())
 
@@ -52,15 +61,16 @@ class LogProb(BaseMethod):
 
     :param str target_token: token to check (e.g. `"TRUE"`)
     :param float threshold: threshold to bypass. by default `-0.5`
-
-    :return: True if logprob is higher then threshold
-    :rtype: bool
     """
 
     target_token: str
     threshold: float = -0.5
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
+        """
+        :return: True if logprob is higher then threshold
+        :rtype: bool
+        """
         try:
             result = model_result.generations[0][0].generation_info["logprobs"]["content"][0]["top_logprobs"]
         except ValueError:
