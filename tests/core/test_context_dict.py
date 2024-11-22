@@ -2,20 +2,20 @@ import pytest
 
 from chatsky.context_storages import MemoryContextStorage
 from chatsky.core.message import Message
-from chatsky.core.ctx_dict import ContextDict
+from chatsky.core.ctx_dict import ContextDict, MessageContextDict
 
 
 class TestContextDict:
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
         # Empty (disconnected) context dictionary
-        return ContextDict.empty(Message)
+        return MessageContextDict()
 
     @pytest.fixture(scope="function")
     async def attached_dict(self) -> ContextDict:
         # Attached, but not backed by any data context dictionary
         storage = MemoryContextStorage()
-        return await ContextDict.new(storage, "ID", storage._requests_field_name, Message)
+        return await MessageContextDict.new(storage, "ID", storage._requests_field_name)
 
     @pytest.fixture(scope="function")
     async def prefilled_dict(self) -> ContextDict:
@@ -28,7 +28,7 @@ class TestContextDict:
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),
         ]
         await storage.update_field_items(ctx_id, storage._requests_field_name, requests)
-        return await ContextDict.connected(storage, ctx_id, storage._requests_field_name, Message)
+        return await MessageContextDict.connected(storage, ctx_id, storage._requests_field_name)
 
     async def test_creation(
         self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
@@ -122,11 +122,11 @@ class TestContextDict:
 
     async def test_eq_validate(self, empty_dict: ContextDict) -> None:
         # Checking empty dict validation
-        assert empty_dict == ContextDict.model_validate(dict())
+        assert empty_dict == MessageContextDict.model_validate(dict())
         # Checking non-empty dict validation
         empty_dict[0] = Message("msg")
         empty_dict._added = set()
-        assert empty_dict == ContextDict.model_validate({0: Message("msg")})
+        assert empty_dict == MessageContextDict.model_validate({0: Message("msg")})
 
     async def test_serialize_store(
         self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict

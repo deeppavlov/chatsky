@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 from asyncio import gather
 from hashlib import sha256
 import logging
@@ -22,6 +23,8 @@ from typing import (
 
 from pydantic import BaseModel, PrivateAttr, TypeAdapter, model_serializer, model_validator
 
+from chatsky.core.message import Message
+from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.utils.logging import collapse_num_list
 
 if TYPE_CHECKING:
@@ -47,17 +50,15 @@ class ContextDict(BaseModel, Generic[K, V]):
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
     _ctx_id: str = PrivateAttr(default_factory=str)
     _field_name: str = PrivateAttr(default_factory=str)
-    _value_type: Optional[TypeAdapter[Type[V]]] = PrivateAttr(None)
+
+    @property
+    @abstractmethod
+    def _value_type(self) -> TypeAdapter[Type[V]]:
+        raise NotImplementedError
 
     @classmethod
-    def empty(cls, value_type: Type[V]) -> "ContextDict":
+    async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
         instance = cls()
-        instance._value_type = TypeAdapter(value_type)
-        return instance
-
-    @classmethod
-    async def new(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
-        instance = cls.empty(value_type)
         logger.debug(f"Disconnected context dict created for id {id} and field name: {field}")
         instance._ctx_id = id
         instance._field_name = field
@@ -65,21 +66,18 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
-        val_adapter = TypeAdapter(value_type)
+    async def connected(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
         logger.debug(f"Connected context dict created for {id}, {field}")
         keys, items = await gather(storage.load_field_keys(id, field), storage.load_field_latest(id, field))
         val_key_items = [(k, v) for k, v in items if v is not None]
-        hashes = {k: get_hash(v) for k, v in val_key_items}
-        objected = {k: val_adapter.validate_json(v) for k, v in val_key_items}
-        instance = cls.model_validate(objected)
         logger.debug(f"Context dict for {id}, {field} loaded: {collapse_num_list(keys)}")
+        instance = cls()
         instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._value_type = val_adapter
         instance._keys = set(keys)
-        instance._hashes = hashes
+        instance._items = {k: instance._value_type.validate_json(v) for k, v in val_key_items}
+        instance._hashes = {k: get_hash(v) for k, v in val_key_items}
         return instance
 
     async def _load_items(self, keys: List[K]) -> Dict[K, V]:
@@ -277,3 +275,15 @@ class ContextDict(BaseModel, Generic[K, V]):
                     self._hashes[k] = get_hash(self._value_type.dump_json(v))
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+
+
+class LabelContextDict(ContextDict[int, AbsoluteNodeLabel]):
+    @property
+    def _value_type(self) -> TypeAdapter[Type[AbsoluteNodeLabel]]:
+        return TypeAdapter(AbsoluteNodeLabel)
+
+
+class MessageContextDict(ContextDict[int, Message]):
+    @property
+    def _value_type(self) -> TypeAdapter[Type[Message]]:
+        return TypeAdapter(Message)

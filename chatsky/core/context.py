@@ -29,7 +29,7 @@ from chatsky.context_storages.database import DBContextStorage
 from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.core.ctx_dict import ContextDict
+from chatsky.core.ctx_dict import ContextDict, LabelContextDict, MessageContextDict
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
@@ -102,9 +102,9 @@ class Context(BaseModel):
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
     current_turn_id: int = Field(default=0)
-    labels: ContextDict[int, AbsoluteNodeLabel] = Field(default_factory=lambda: ContextDict.empty(AbsoluteNodeLabel))
-    requests: ContextDict[int, Message] = Field(default_factory=lambda: ContextDict.empty(Message))
-    responses: ContextDict[int, Message] = Field(default_factory=lambda: ContextDict.empty(Message))
+    labels: LabelContextDict = Field(default_factory=LabelContextDict)
+    requests: MessageContextDict = Field(default_factory=MessageContextDict)
+    responses: MessageContextDict = Field(default_factory=MessageContextDict)
     """
     `turns` stores the history of all passed `labels`, `requests`, and `responses`.
 
@@ -139,9 +139,9 @@ class Context(BaseModel):
             uid = str(uuid4())
             logger.debug(f"Disconnected context created with uid: {uid}")
             instance = cls(id=uid)
-            instance.requests = await ContextDict.new(storage, uid, storage._requests_field_name, Message)
-            instance.responses = await ContextDict.new(storage, uid, storage._responses_field_name, Message)
-            instance.labels = await ContextDict.new(storage, uid, storage._labels_field_name, AbsoluteNodeLabel)
+            instance.requests = await MessageContextDict.new(storage, uid, storage._requests_field_name)
+            instance.responses = await MessageContextDict.new(storage, uid, storage._responses_field_name)
+            instance.labels = await LabelContextDict.new(storage, uid, storage._labels_field_name)
             await instance.labels.update({0: start_label})
             instance._storage = storage
             return instance
@@ -152,9 +152,9 @@ class Context(BaseModel):
             logger.debug(f"Connected context created with uid: {id}")
             main, labels, requests, responses = await gather(
                 storage.load_main_info(id),
-                ContextDict.connected(storage, id, storage._labels_field_name, AbsoluteNodeLabel),
-                ContextDict.connected(storage, id, storage._requests_field_name, Message),
-                ContextDict.connected(storage, id, storage._responses_field_name, Message),
+                LabelContextDict.connected(storage, id, storage._labels_field_name),
+                MessageContextDict.connected(storage, id, storage._requests_field_name),
+                MessageContextDict.connected(storage, id, storage._responses_field_name),
             )
             if main is None:
                 crt_at = upd_at = time_ns()
@@ -250,17 +250,17 @@ class Context(BaseModel):
             labels_obj = value.get("labels", dict())
             if isinstance(labels_obj, Dict):
                 labels_obj = TypeAdapter(Dict[int, AbsoluteNodeLabel]).validate_python(labels_obj)
-            instance.labels = ContextDict.model_validate(labels_obj)
+            instance.labels = LabelContextDict.model_validate(labels_obj)
             instance.labels._ctx_id = instance.id
             requests_obj = value.get("requests", dict())
             if isinstance(requests_obj, Dict):
                 requests_obj = TypeAdapter(Dict[int, Message]).validate_python(requests_obj)
-            instance.requests = ContextDict.model_validate(requests_obj)
+            instance.requests = MessageContextDict.model_validate(requests_obj)
             instance.requests._ctx_id = instance.id
             responses_obj = value.get("responses", dict())
             if isinstance(responses_obj, Dict):
                 responses_obj = TypeAdapter(Dict[int, Message]).validate_python(responses_obj)
-            instance.responses = ContextDict.model_validate(responses_obj)
+            instance.responses = MessageContextDict.model_validate(responses_obj)
             instance.responses._ctx_id = instance.id
             return instance
         else:

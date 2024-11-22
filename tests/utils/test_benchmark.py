@@ -50,8 +50,8 @@ async def test_get_context(context_storage: JSONContextStorage):
     context = await get_context(context_storage, 2, (1, 2), (2, 3))
     copy_ctx = await Context.connected(context_storage, ("flow", "node"))
     await copy_ctx.labels.update({0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")})
-    await copy_ctx.requests.update({0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})})
-    await copy_ctx.responses.update({0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})})
+    await copy_ctx.requests.update({0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "zv"})})
+    await copy_ctx.responses.update({0: Message(misc={"0": "3 "}), 1: Message(misc={"0": "sh"})})
     copy_ctx.misc.update({"0": " d]", "1": " (b"})
     assert context.model_dump(exclude={"id", "current_turn_id"}) == copy_ctx.model_dump(exclude={"id", "current_turn_id"})
 
