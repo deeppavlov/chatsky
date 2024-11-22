@@ -1,6 +1,6 @@
 import pytest
 
-from chatsky.slots.slots import (
+from chatsky.slots.base_slots import (
     SlotManager,
     RegexpSlot,
     GroupSlot,

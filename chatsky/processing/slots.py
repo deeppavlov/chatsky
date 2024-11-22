@@ -9,7 +9,7 @@ import asyncio
 import logging
 from typing import List
 
-from chatsky.slots.slots import SlotName
+from chatsky.slots.base_slots import SlotName
 from chatsky.core import Context, BaseProcessing
 from chatsky.responses.slots import FilledTemplate
 

@@ -21,7 +21,7 @@ from chatsky.core.message import Message
 
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
-from chatsky.slots.slots import GroupSlot
+from chatsky.slots.base_slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
 from .service import Service

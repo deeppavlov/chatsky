@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from chatsky.core import Message
-from chatsky.slots.slots import (
+from chatsky.slots.base_slots import (
     RegexpSlot,
     GroupSlot,
     FunctionSlot,
