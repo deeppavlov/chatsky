@@ -50,13 +50,18 @@ class ContextDict(BaseModel, Generic[K, V]):
     _value_type: Optional[TypeAdapter[Type[V]]] = PrivateAttr(None)
 
     @classmethod
-    async def new(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
+    def empty(cls, value_type: Type[V]) -> "ContextDict":
         instance = cls()
+        instance._value_type = TypeAdapter(value_type)
+        return instance
+
+    @classmethod
+    async def new(cls, storage: DBContextStorage, id: str, field: str, value_type: Type[V]) -> "ContextDict":
+        instance = cls.empty(value_type)
         logger.debug(f"Disconnected context dict created for id {id} and field name: {field}")
-        instance._storage = storage
         instance._ctx_id = id
         instance._field_name = field
-        instance._value_type = TypeAdapter(value_type)
+        instance._storage = storage
         return instance
 
     @classmethod

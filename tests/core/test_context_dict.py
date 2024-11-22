@@ -1,7 +1,5 @@
 import pytest
 
-from pydantic import TypeAdapter
-
 from chatsky.context_storages import MemoryContextStorage
 from chatsky.core.message import Message
 from chatsky.core.ctx_dict import ContextDict
@@ -11,9 +9,7 @@ class TestContextDict:
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
         # Empty (disconnected) context dictionary
-        ctx_dict = ContextDict()
-        ctx_dict._value_type = TypeAdapter(Message)
-        return ctx_dict
+        return ContextDict.empty(Message)
 
     @pytest.fixture(scope="function")
     async def attached_dict(self) -> ContextDict:

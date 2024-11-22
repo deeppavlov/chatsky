@@ -20,7 +20,7 @@ from __future__ import annotations
 from asyncio import Event, gather
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Callable, Optional, Dict, TYPE_CHECKING
+from typing import Any, Callable, Iterable, Optional, Dict, TYPE_CHECKING, Tuple
 import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
@@ -37,14 +37,6 @@ if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
-
-
-"""
-class Turn(BaseModel):
-    label: Optional[NodeLabel2Type] = Field(default=None)
-    request: Optional[Message] = Field(default=None)
-    response: Optional[Message] = Field(default=None)
-"""
 
 
 class ContextError(Exception):
@@ -110,9 +102,9 @@ class Context(BaseModel):
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
     current_turn_id: int = Field(default=0)
-    labels: ContextDict[int, AbsoluteNodeLabel] = Field(default_factory=ContextDict)
-    requests: ContextDict[int, Message] = Field(default_factory=ContextDict)
-    responses: ContextDict[int, Message] = Field(default_factory=ContextDict)
+    labels: ContextDict[int, AbsoluteNodeLabel] = Field(default_factory=lambda: ContextDict.empty(AbsoluteNodeLabel))
+    requests: ContextDict[int, Message] = Field(default_factory=lambda: ContextDict.empty(Message))
+    responses: ContextDict[int, Message] = Field(default_factory=lambda: ContextDict.empty(Message))
     """
     `turns` stores the history of all passed `labels`, `requests`, and `responses`.
 
@@ -226,6 +218,13 @@ class Context(BaseModel):
         if node is None:
             raise ContextError("Current node is not set.")
         return node
+
+    async def turns(self, key: slice) -> Iterable[Tuple[AbsoluteNodeLabel, Message, Message]]:
+        return zip(*gather(
+            self.labels.__getitem__(key),
+            self.requests.__getitem__(key),
+            self.responses.__getitem__(key)
+        ))
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Context):
