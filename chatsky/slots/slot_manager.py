@@ -115,7 +115,7 @@ class SlotManager(BaseModel):
             return slot
         raise KeyError(f"Could not find slot {slot_name!r}.")
 
-    async def extract_slot(self, slot_name: SlotName, ctx: Context, success_only: bool) -> None:
+    async def extract_slot(self, slot_name: SlotName, ctx: Context, save_on_failure: bool) -> None:
         """
         Extract slot `slot_name` and store extracted value in `slot_storage`.
 
@@ -123,12 +123,12 @@ class SlotManager(BaseModel):
 
         :param slot_name: Name of the slot to extract.
         :param ctx: Context.
-        :param success_only: Whether to store the value only if it is successfully extracted.
+        :param save_on_failure: Whether to store the value only if it is successfully extracted.
         """
         slot = self.get_slot(slot_name)
         value = await slot.get_value(ctx)
 
-        if value.__slot_extracted__ or success_only is False:
+        if value.__slot_extracted__ or save_on_failure is False:
             recursive_setattr(self.slot_storage, slot_name, value)
 
     async def extract_all(self, ctx: Context):

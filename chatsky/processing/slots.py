@@ -24,16 +24,16 @@ class Extract(BaseProcessing):
 
     slots: List[SlotName]
     """A list of slot names to extract."""
-    success_only: bool = True
+    save_on_failure: bool = True
     """If set, only successfully extracted values will be stored in the slot storage."""
 
-    def __init__(self, *slots: SlotName, success_only: bool = True):
-        super().__init__(slots=slots, success_only=success_only)
+    def __init__(self, *slots: SlotName, save_on_failure: bool = True):
+        super().__init__(slots=slots, save_on_failure=save_on_failure)
 
     async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         results = await asyncio.gather(
-            *(manager.extract_slot(slot, ctx, self.success_only) for slot in self.slots), return_exceptions=True
+            *(manager.extract_slot(slot, ctx, self.save_on_failure) for slot in self.slots), return_exceptions=True
         )
 
         for result in results:

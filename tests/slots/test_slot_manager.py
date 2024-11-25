@@ -174,7 +174,7 @@ def test_get_slot_by_name(empty_slot_manager):
     ],
 )
 async def test_slot_extraction(slot_name, expected_slot_storage, empty_slot_manager, context_with_request):
-    await empty_slot_manager.extract_slot(slot_name, context_with_request, success_only=False)
+    await empty_slot_manager.extract_slot(slot_name, context_with_request, save_on_failure=False)
     assert empty_slot_manager.slot_storage == expected_slot_storage
 
 
@@ -206,7 +206,7 @@ async def test_slot_extraction(slot_name, expected_slot_storage, empty_slot_mana
     ],
 )
 async def test_successful_extraction(slot_name, expected_slot_storage, empty_slot_manager, context_with_request):
-    await empty_slot_manager.extract_slot(slot_name, context_with_request, success_only=True)
+    await empty_slot_manager.extract_slot(slot_name, context_with_request, save_on_failure=True)
     assert empty_slot_manager.slot_storage == expected_slot_storage
 
 
