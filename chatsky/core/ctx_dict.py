@@ -57,7 +57,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         raise NotImplementedError
 
     @classmethod
-    async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
+    async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict[K, V]":
         instance = cls()
         logger.debug(f"Disconnected context dict created for id {id} and field name: {field}")
         instance._ctx_id = id
@@ -66,7 +66,7 @@ class ContextDict(BaseModel, Generic[K, V]):
         return instance
 
     @classmethod
-    async def connected(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict":
+    async def connected(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict[K, V]":
         logger.debug(f"Connected context dict created for {id}, {field}")
         keys, items = await gather(storage.load_field_keys(id, field), storage.load_field_latest(id, field))
         val_key_items = [(k, v) for k, v in items if v is not None]

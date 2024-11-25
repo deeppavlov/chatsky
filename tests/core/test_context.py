@@ -1,3 +1,4 @@
+from altair import Key
 import pytest
 
 from chatsky.core.context import Context, ContextError
@@ -13,11 +14,11 @@ class TestLabels:
     def ctx(self, context_factory):
         return context_factory(forbidden_fields=["requests", "responses"])
 
-    def test_raises_on_empty_labels(self, ctx):
+    def test_raises_on_empty_labels(self, ctx: Context):
         with pytest.raises(ContextError):
             ctx.last_label
 
-    def test_existing_labels(self, ctx):
+    def test_existing_labels(self, ctx: Context):
         ctx.labels[5] = ("flow", "node1")
 
         assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
@@ -31,14 +32,14 @@ class TestRequests:
     def ctx(self, context_factory):
         return context_factory(forbidden_fields=["labels", "responses"])
 
-    def test_existing_requests(self, ctx):
+    def test_existing_requests(self, ctx: Context):
         ctx.requests[5] = Message(text="text1")
         assert ctx.last_request == Message(text="text1")
         ctx.requests[6] = "text2"
         assert ctx.requests.keys() == [5, 6]
         assert ctx.last_request == Message(text="text2")
 
-    def test_empty_requests(self, ctx):
+    def test_empty_requests(self, ctx: Context):
         with pytest.raises(ContextError):
             ctx.last_request
 
@@ -52,20 +53,58 @@ class TestResponses:
     def ctx(self, context_factory):
         return context_factory(forbidden_fields=["labels", "requests"])
 
-    def test_existing_responses(self, ctx):
+    def test_existing_responses(self, ctx: Context):
         ctx.responses[5] = Message(text="text1")
         assert ctx.last_response == Message(text="text1")
         ctx.responses[6] = "text2"
         assert ctx.responses.keys() == [5, 6]
         assert ctx.last_response == Message(text="text2")
 
-    def test_empty_responses(self, ctx):
+    def test_empty_responses(self, ctx: Context):
         with pytest.raises(ContextError):
             ctx.last_response
 
         ctx.responses[1] = "text"
         assert ctx.last_response == Message(text="text")
         assert ctx.responses.keys() == [1]
+
+
+class TestTurns:
+    @pytest.fixture
+    def ctx(self, context_factory):
+        return context_factory()
+    
+    async def test_complete_turn(self, ctx: Context):
+        ctx.labels[5] = ("flow", "node5")
+        ctx.requests[5] = Message(text="text5")
+        ctx.responses[5] = Message(text="text5")
+        ctx.current_turn_id = 5
+
+        label, request, response = list(await ctx.turns(5))[0]
+        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node5")
+        assert request == Message(text="text5")
+        assert response == Message(text="text5")
+
+    async def test_partial_turn(self, ctx: Context):
+        ctx.labels[6] = ("flow", "node6")
+        ctx.requests[6] = Message(text="text6")
+        ctx.current_turn_id = 6
+
+        with pytest.raises(KeyError):
+            await ctx.turns(6)
+
+    async def test_slice_turn(self, ctx: Context):
+        for i in range(2, 6):
+            ctx.labels[i] = ("flow", f"node{i}")
+            ctx.requests[i] = Message(text=f"text{i}")
+            ctx.responses[i] = Message(text=f"text{i}")
+            ctx.current_turn_id = i
+
+        labels, requests, responses = zip(*(await ctx.turns(slice(2, 6))))
+        for i in range(2, 6):
+            assert AbsoluteNodeLabel(flow_name="flow", node_name=f"node{i}") in labels
+            assert Message(text=f"text{i}") in requests
+            assert Message(text=f"text{i}") in responses
 
 
 async def test_pipeline_available():

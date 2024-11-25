@@ -20,7 +20,7 @@ from __future__ import annotations
 from asyncio import Event, gather
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Callable, Iterable, Optional, Dict, TYPE_CHECKING, Tuple
+from typing import Any, Callable, Iterable, Optional, Dict, TYPE_CHECKING, Tuple, Union
 import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
@@ -219,12 +219,12 @@ class Context(BaseModel):
             raise ContextError("Current node is not set.")
         return node
 
-    async def turns(self, key: slice) -> Iterable[Tuple[AbsoluteNodeLabel, Message, Message]]:
-        return zip(*gather(
-            self.labels.__getitem__(key),
-            self.requests.__getitem__(key),
-            self.responses.__getitem__(key)
-        ))
+    async def turns(self, key: Union[int, slice]) -> Iterable[Tuple[AbsoluteNodeLabel, Message, Message]]:
+        turn_ids = range(self.current_turn_id + 1)[key]
+        turn_ids = turn_ids if isinstance(key, slice) else [turn_ids]
+        context_dicts = (self.labels, self.requests, self.responses)
+        turns_lists = await gather(*[gather(*[ctd.__getitem__(ti) for ti in turn_ids]) for ctd in context_dicts])
+        return zip(*turns_lists)
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Context):
