@@ -40,7 +40,7 @@ class IsImportant(BaseFilter):
         return False
 
 
-class FromTheModel(BaseFilter):
+class FromModel(BaseFilter):
     """
     Filter that checks if the message was sent by the model.
     """

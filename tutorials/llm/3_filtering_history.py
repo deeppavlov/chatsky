@@ -66,7 +66,7 @@ Alternatively, if you use several models in one script
 (e.g. one for chatting, one for text summarization),
 you may want to separate the models memory
 using the same `filter_func` parameter.
-There is a function `FromTheModel` that
+There is a function `FromModel` that
 can be used to separate the models memory.
 """
 # %%

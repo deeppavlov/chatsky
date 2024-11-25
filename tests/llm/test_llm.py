@@ -5,7 +5,7 @@ from chatsky.llm._langchain_imports import HumanMessage, AIMessage, langchain_av
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.llm.utils import message_to_langchain, context_to_history
-from chatsky.llm.filters import IsImportant, FromTheModel
+from chatsky.llm.filters import IsImportant, FromModel
 from chatsky.llm.methods import Contains, LogProb
 from chatsky.core.message import Message, Image
 from chatsky.core.context import Context
@@ -204,7 +204,7 @@ def test_is_important_filter(filter_context):
 
 
 def test_model_filter(filter_context):
-    filter_func = FromTheModel()
+    filter_func = FromModel()
     ctx = filter_context
     # Test filtering messages from a certain model
     assert filter_func(ctx, ctx.requests[1], ctx.responses[1], model_name="test_model")
