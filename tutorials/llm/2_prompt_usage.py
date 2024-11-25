@@ -7,16 +7,16 @@ simple way of using multiple prompts throughout your script.
 The main idea behind that is the hierarchy of prompts. It can be portrayed as
 follows:
 ```
-SYSTEM: SYSTEM_PROMPT
-SYSTEM: NODE_PROMPT
-SYSTEM: GLOBAL_PROMPT
-SYSTEM: LOCAL_PROMPT
+SYSTEM: SYSTEM_PROMPT   (from LLM_API)
+SYSTEM: GLOBAL_PROMPT   (from MISC field)
+SYSTEM: LOCAL_PROMPT    (from MISC field)
+SYSTEM: NODE_PROMPT     (from MISC field)
 
 # history `n` turns
 HUMAN: req
 AI: resp
 
-SYSTEM: RESPONSE_PROMPT
+SYSTEM: PROMPT (from ``prompt`` field in LLMResponse or LLMCondition)
 HUMAN: CURRENT_REQUEST
 ```
 

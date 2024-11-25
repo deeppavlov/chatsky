@@ -51,6 +51,7 @@ class LLMSlot(ValueSlot, frozen=True):
 class LLMGroupSlot(GroupSlot):
     """
     LLMSlots based :py:class:`~.GroupSlot` implementation.
+    Fetches data for all LLMSlots in a single API request contrary to :py:class:`~.GroupSlot`.
     """
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]

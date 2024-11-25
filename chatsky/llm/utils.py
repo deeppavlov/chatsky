@@ -1,3 +1,9 @@
+"""
+LLM Utils.
+----------
+The Utils module contains functions for converting Chatsky's objects to an LLM_API and langchain compatible versions.
+"""
+
 import base64
 import logging
 
@@ -36,19 +42,6 @@ async def message_to_langchain(
         return SystemMessage(content=content)
     else:
         return HumanMessage(content=content)
-
-
-async def attachment_to_content(attachment: Image, iface) -> str:
-    """
-    Convert chatsky.Image to base64 string.
-    """
-    image_bytes = await attachment.get_bytes(iface)
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-    extension = str(attachment.source).split(".")[-1]
-    if image_b64 == "" or extension is None:
-        raise ValueError("Data image is not accessible.")
-    image_b64 = f"data:image/{extension};base64,{image_b64}"
-    return image_b64
 
 
 async def context_to_history(

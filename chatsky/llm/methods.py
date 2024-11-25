@@ -21,12 +21,11 @@ class BaseMethod(BaseModel, abc.ABC):
     @abc.abstractmethod
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
-        Take Context and LLMResult as an input and return boolean.
+        Determine if result of an LLM invocation satisfies the condition of this method.
 
         :param ctx: Current dialog context.
         :param model_result: Result of langchain model's invoke.
 
-        :rtype: bool
         """
         raise NotImplementedError
 
@@ -49,7 +48,6 @@ class Contains(BaseMethod):
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
         :return: True if pattern is contained in model_result.
-        :rtype: bool
         """
         text = await self.model_result_to_text(model_result)
         return bool(self.pattern.lower() in text.lower())
@@ -68,8 +66,7 @@ class LogProb(BaseMethod):
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
-        :return: True if logprob is higher then threshold
-        :rtype: bool
+        :return: True if logprob of the token is higher then threshold.
         """
         try:
             result = model_result.generations[0][0].generation_info["logprobs"]["content"][0]["top_logprobs"]

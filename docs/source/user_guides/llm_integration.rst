@@ -55,7 +55,6 @@ Once model is defined, generating a response from an LLM is very simple:
     RESPONSE: rsp.LLMResponse(model_name="model_name_1")
     RESPONSE: rsp.LLMResponse(model_name="model_name_2", prompt="some prompt")
 
-Although you can overwrite this function for more fine-grained usage.
 
 Conditions
 ==========
@@ -86,16 +85,16 @@ There is a certain order of the prompts inside of the "history" list that goes i
 
 ::
 
-    SYSTEM: SYSTEM_PROMPT
-    SYSTEM: GLOBAL_PROMPT
-    SYSTEM: LOCAL_PROMPT
-    SYSTEM: NODE_PROMPT
+    SYSTEM: SYSTEM_PROMPT   (from LLM_API)
+    SYSTEM: GLOBAL_PROMPT   (from MISC field)
+    SYSTEM: LOCAL_PROMPT    (from MISC field)
+    SYSTEM: NODE_PROMPT     (from MISC field)
 
     # history `n` turns
     HUMAN: req
     AI: resp
 
-    SYSTEM: RESPONSE_PROMPT
+    SYSTEM: PROMPT (from ``prompt`` field in LLMResponse or LLMCondition)
     HUMAN: CURRENT_REQUEST
 
 Also, there are several ways to pass a prompt into a model. First is to directly pass it as an argument inside of the ``LLMResponse`` call.
@@ -118,6 +117,7 @@ Another one is to define it in the "MISC" dictionary inside of the node.
     For example if using the same key (e.g. "prompt") in both the local and global nodes, only the local "prompt" will be used.
     This can be used in scripts but overwriting the "global_prompt" is not an intended behaviour.
 
+For more detailed examples for prompting please refer to `LLM Prompt Usage <../tutorials/tutorials.llm.2_prompt_usage.py>`__
 
 History management
 ==================
