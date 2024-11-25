@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from chatsky.llm._langchain_imports import HumanMessage, AIMessage, langchain_available
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
-from chatsky.llm.utils import message_to_langchain, attachment_to_content, context_to_history
+from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import IsImportant, FromTheModel
 from chatsky.llm.methods import Contains, LogProb
 from chatsky.core.message import Message, Image
