@@ -25,7 +25,7 @@ from typing import Any, Optional, Union, Dict, TYPE_CHECKING
 from pydantic import BaseModel, Field
 
 from chatsky.core.message import Message, MessageInitTypes
-from chatsky.slots.base_slots import SlotManager
+from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 
 if TYPE_CHECKING:

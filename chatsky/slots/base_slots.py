@@ -7,74 +7,18 @@ This module defines base classes for slots.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
-from typing_extensions import TypeAlias
+from typing import TYPE_CHECKING, Any, Union
 import logging
-from functools import reduce
-from string import Formatter
 
 from pydantic import BaseModel
+from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 
 if TYPE_CHECKING:
     from chatsky.core import Context
+    from chatsky.slots.slots import ExtractedValueSlot
 
 
 logger = logging.getLogger(__name__)
-
-
-SlotName: TypeAlias = str
-"""
-A string to identify slots.
-
-Top-level slots are identified by their key in a :py:class:`~.GroupSlot`.
-
-E.g.
-
-.. code:: python
-
-    GroupSlot(
-        user=RegexpSlot(),
-        password=FunctionSlot,
-    )
-
-Has two slots with names "user" and "password".
-
-For nested group slots use dots to separate names:
-
-.. code:: python
-
-    GroupSlot(
-        user=GroupSlot(
-            name=FunctionSlot,
-            password=FunctionSlot,
-        )
-    )
-
-Has two slots with names "user.name" and "user.password".
-"""
-
-
-def recursive_getattr(obj, slot_name: SlotName):
-    def two_arg_getattr(__o, name):
-        # pydantic handles exception when accessing a non-existing extra-field on its own
-        # return None by default to avoid that
-        return getattr(__o, name, None)
-
-    return reduce(two_arg_getattr, [obj, *slot_name.split(".")])
-
-
-def recursive_setattr(obj, slot_name: SlotName, value):
-    parent_slot, _, slot = slot_name.rpartition(".")
-
-    if parent_slot:
-        setattr(recursive_getattr(obj, parent_slot), slot, value)
-    else:
-        setattr(obj, slot, value)
-
-
-class KwargOnlyFormatter(Formatter):
-    def get_value(self, key, args, kwargs):
-        return super().get_value(str(key), args, kwargs)
 
 
 class SlotNotExtracted(Exception):
@@ -126,3 +70,50 @@ class BaseSlot(BaseModel, frozen=True):
         Provide an initial value to fill slot storage with.
         """
         raise NotImplementedError
+
+
+class ValueSlot(BaseSlot, frozen=True):
+    """
+    Value slot is a base class for all slots that are designed to extract concrete values.
+    Subclass it, if you want to declare your own slot type.
+    """
+
+    default_value: Any = None
+
+    @abstractmethod
+    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+        """
+        Return value extracted from context.
+
+        Return :py:exc:`~.SlotNotExtracted` to mark extraction as unsuccessful.
+
+        Raising exceptions is also allowed and will result in an unsuccessful extraction as well.
+        """
+        raise NotImplementedError
+
+    async def get_value(self, ctx: Context) -> ExtractedValueSlot:
+        """Wrapper for :py:meth:`~.ValueSlot.extract_value` to handle exceptions."""
+        extracted_value = SlotNotExtracted("Caught an exit exception.")
+        is_slot_extracted = False
+
+        try:
+            extracted_value = await wrap_sync_function_in_async(self.extract_value, ctx)
+            is_slot_extracted = not isinstance(extracted_value, SlotNotExtracted)
+        except Exception as error:
+            logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
+            extracted_value = error
+        finally:
+            if not is_slot_extracted:
+                logger.debug(f"Slot {self.__class__.__name__!r} was not extracted: {extracted_value}")
+            return ExtractedValueSlot.model_construct(
+                is_slot_extracted=is_slot_extracted,
+                extracted_value=extracted_value,
+                default_value=self.default_value,
+            )
+
+    def init_value(self) -> ExtractedValueSlot:
+        return ExtractedValueSlot.model_construct(
+            is_slot_extracted=False,
+            extracted_value=SlotNotExtracted("Initial slot extraction."),
+            default_value=self.default_value,
+        )
