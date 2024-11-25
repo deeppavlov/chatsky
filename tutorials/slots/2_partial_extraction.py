@@ -73,7 +73,8 @@ flag set to True.
 Any slot in this group is saved if and only if all of the slots in the group
 are successfully extracted within a single `Extract` call.
 
-Group `save_on_failure_false` is extracted with the `save_on_failure` set to False.
+Group `save_on_failure_false` is extracted with the `save_on_failure`
+flag set to False.
 Every slot in this group is saved (even if extraction was not successful).
 
 Group `sub_slot_save_on_failure_extraction` is extracted by passing all of its
