@@ -6,7 +6,9 @@ import pytest
 from chatsky import Context
 from chatsky.core import BaseResponse, Node
 from chatsky.core.message import MessageInitTypes, Message
-from chatsky.slots.base_slots import ValueSlot, SlotNotExtracted, GroupSlot, SlotManager
+from chatsky.slots.base_slots import ValueSlot, SlotNotExtracted
+from chatsky.slots.slots import GroupSlot
+from chatsky.slots.slot_manager import SlotManager
 from chatsky import conditions as cnd, responses as rsp, processing as proc
 from chatsky.processing.slots import logger as proc_logger
 from chatsky.slots.base_slots import logger as slot_logger

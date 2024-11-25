@@ -1,5 +1,5 @@
 from chatsky.slots import RegexpSlot, GroupSlot
-from chatsky.slots.base_slots import SlotManager
+from chatsky.slots.slot_manager import SlotManager
 from chatsky.core import Message
 
 import pytest

@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Literal, List, Any
 
 from chatsky.core import Context, BaseCondition
-from chatsky.slots.base_slots import SlotName
+from chatsky.slots.slot_manager import SlotName
 
 
 class SlotsExtracted(BaseCondition):

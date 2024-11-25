@@ -11,8 +11,9 @@ import re
 from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Dict
 from typing_extensions import Annotated
 import logging
+from string import Formatter
 
-from pydantic import BaseModel, model_validator, Field, field_serializer, field_validator
+from pydantic import model_validator, Field, field_serializer, field_validator
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.utils.devel.json_serialization import pickle_serializer, pickle_validator
@@ -22,13 +23,17 @@ from chatsky.slots.base_slots import (
     ValueSlot,
     SlotNotExtracted,
 )
-from chatsky.slots.slot_manager import KwargOnlyFormatter
 
 if TYPE_CHECKING:
     from chatsky.core import Context, Message
 
 
 logger = logging.getLogger(__name__)
+
+
+class KwargOnlyFormatter(Formatter):
+    def get_value(self, key, args, kwargs):
+        return super().get_value(str(key), args, kwargs)
 
 
 class ExtractedValueSlot(ExtractedSlot):
@@ -78,9 +83,7 @@ class ExtractedValueSlot(ExtractedSlot):
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
     value_format: str = None
-    slots: Dict[
-        str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
-    ]
+    slots: Dict[str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]]
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -122,7 +125,7 @@ class GroupSlot(BaseSlot, frozen=True):
     """
 
     value_format: str = None
-    slots: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    slots: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]] = {}
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)
@@ -197,15 +200,22 @@ class RegexpGroupSlot(GroupSlot, frozen=True):
         super().__init__(**kwargs)
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
-        child_values = await asyncio.gather(
-            *(
-                RegexpSlot(regexp=self.regexp, match_group_id=match_group).get_value(ctx)
-                for match_group in self.groups.values()
+        request_text = ctx.last_request.text
+        search = re.search(self.regexp, request_text)
+        if search:
+            return ExtractedGroupSlot(
+                slots={
+                    child_name: search.group(match_group)
+                    for child_name, match_group in zip(self.groups.keys(), self.groups.values())
+                }
             )
-        )
-        return ExtractedGroupSlot(
-            slots={child_name: child_value for child_value, child_name in zip(child_values, self.groups.keys())}
-        )
+        else:
+            return ExtractedGroupSlot(
+                slots={
+                    child_name: SlotNotExtracted(f"Failed to match pattern {self.regexp!r} in {request_text!r}.")
+                    for child_name in self.groups.keys()
+                }
+            )
 
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(

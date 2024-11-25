@@ -11,15 +11,14 @@ from typing import Union, TYPE_CHECKING, Optional
 import logging
 
 from functools import reduce
-from string import Formatter
 
-from pydantic import BaseModel, model_validator, Field, field_serializer, field_validator
+from pydantic import BaseModel, Field
 
 from chatsky.slots.base_slots import (
     ExtractedSlot,
     BaseSlot,
 )
-from chatsky.slots.slots import ExtractedGroupSlot, GroupSlot, ExtractedValueSlot
+from chatsky.slots.slots import ExtractedGroupSlot, GroupSlot, ExtractedValueSlot, KwargOnlyFormatter
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -74,11 +73,6 @@ def recursive_setattr(obj, slot_name: SlotName, value):
         setattr(recursive_getattr(obj, parent_slot), slot, value)
     else:
         setattr(obj, slot, value)
-
-
-class KwargOnlyFormatter(Formatter):
-    def get_value(self, key, args, kwargs):
-        return super().get_value(str(key), args, kwargs)
 
 
 class SlotManager(BaseModel):
