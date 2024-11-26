@@ -33,7 +33,6 @@ from chatsky.utils.testing import (
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 
 
-
 # %% [markdown]
 """
 In this example we define LLM Group Slot with two LLM Slots in it.

@@ -10,7 +10,7 @@ import logging
 from chatsky.core.context import Context
 from chatsky.core.message import Image, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
-from chatsky.llm.filters import BaseFilter
+from chatsky.llm.filters import BaseHistoryFilter
 
 
 async def message_to_langchain(
@@ -45,7 +45,7 @@ async def message_to_langchain(
 
 
 async def context_to_history(
-    ctx: Context, length: int, filter_func: BaseFilter, model_name: str, max_size: int
+    ctx: Context, length: int, filter_func: BaseHistoryFilter, model_name: str, max_size: int
 ) -> list[HumanMessage | AIMessage | SystemMessage]:
     """
     Convert context to list of langchain messages.

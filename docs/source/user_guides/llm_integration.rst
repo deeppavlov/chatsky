@@ -145,5 +145,5 @@ Another way of dealing with unwanted messages is by using filtering functions.
     from chatsky.llm import IsImportant
     RESPONSE: LLMResponse(model_name="model_name_1", history=15, filter_func=IsImportant)
 
-These functions should be classes inheriting from ``BaseFilter``, having a ``__call__`` function with the following signature:
+These functions should be classes inheriting from ``BaseHistoryFilter``, having a ``__call__`` function with the following signature:
 ``def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool``

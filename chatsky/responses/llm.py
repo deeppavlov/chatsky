@@ -13,7 +13,7 @@ from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm._langchain_imports import SystemMessage, check_langchain_available
-from chatsky.llm.filters import BaseFilter
+from chatsky.llm.filters import BaseHistoryFilter
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
 
@@ -32,7 +32,7 @@ class LLMResponse(BaseResponse):
     model_name: str
     prompt: AnyResponse = Field(default="", validate_default=True)
     history: int = 5
-    filter_func: BaseFilter = BaseFilter()
+    filter_func: BaseHistoryFilter = BaseHistoryFilter()
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     max_size: int = 1000
 

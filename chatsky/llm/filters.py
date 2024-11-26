@@ -16,7 +16,7 @@ from chatsky.core.context import Context
 logger = Logger(name=__name__)
 
 
-class BaseFilter(BaseModel, abc.ABC):
+class BaseHistoryFilter(BaseModel, abc.ABC):
     """
     Base class for all message history filters.
     """
@@ -50,7 +50,7 @@ class BaseFilter(BaseModel, abc.ABC):
         return []
 
 
-class MessageFilter(BaseFilter):
+class MessageFilter(BaseHistoryFilter):
     @abc.abstractmethod
     def call(self, ctx, message, model_name):
         raise NotImplemented
@@ -59,7 +59,7 @@ class MessageFilter(BaseFilter):
         return self.call(ctx, request, model_name) + self.call(ctx, response, model_name)
 
 
-class IsImportant(BaseFilter):
+class IsImportant(BaseHistoryFilter):
     """
     Filter that checks if the "important" field in a Message.misc is True.
     """
@@ -72,7 +72,7 @@ class IsImportant(BaseFilter):
         return False
 
 
-class FromModel(BaseFilter):
+class FromModel(BaseHistoryFilter):
     """
     Filter that checks if the message was sent by the model.
     """

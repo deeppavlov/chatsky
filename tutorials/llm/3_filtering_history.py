@@ -25,9 +25,8 @@ from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
-from chatsky.llm.filters import BaseFilter
+from chatsky.llm.filters import BaseHistoryFilter
 from chatsky.core.context import Context
-
 
 
 # %%
@@ -41,11 +40,13 @@ model = LLM_API(
 """
 In this example we will use very simple filtering function to
 retrieve only the important messages.
+If you want to learn more about filters see
+[API ref](%doclink(api,llm.filters,BaseHistoryFilter)).
 """
 
 
 # %%
-class FilterImportant(BaseFilter):
+class FilterImportant(BaseHistoryFilter):
     def __call__(
         self,
         ctx: Context = None,

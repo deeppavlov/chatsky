@@ -29,14 +29,15 @@ from chatsky.responses.llm import LLMResponse
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 
-
 # %% [markdown]
 """
 In this tutorial we will define two models.
 """
 # %%
 assistant_model = LLM_API(ChatOllama(model="llama3.2:1b", temperature=0))
-movie_model = LLM_API(ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0))
+movie_model = LLM_API(
+    ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0)
+)
 
 # %% [markdown]
 """
