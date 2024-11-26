@@ -1,17 +1,20 @@
 import pytest
 from pydantic import BaseModel
 
-from chatsky.llm._langchain_imports import HumanMessage, AIMessage, langchain_available
+from chatsky.llm._langchain_imports import langchain_available
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import IsImportant, FromModel
 from chatsky.llm.methods import Contains, LogProb
-from chatsky.core.message import Message, Image
+from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.core.script import Node
 from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.llm._langchain_imports import LLMResult, HumanMessage
+
+if not langchain_available:
+    pytest.skip(allow_module_level=True, reason="Langchain not available.")
+from chatsky.llm._langchain_imports import AIMessage, LLMResult, HumanMessage
 from langchain_core.outputs.chat_generation import ChatGeneration
 
 from chatsky import (
@@ -20,11 +23,6 @@ from chatsky import (
     Pipeline,
     Transition as Tr,
 )
-
-from chatsky.messengers.common import MessengerInterfaceWithAttachments
-
-if not langchain_available:
-    pytest.skip(allow_module_level=True, reason="Langchain not available.")
 
 
 class MockChatOpenAI:

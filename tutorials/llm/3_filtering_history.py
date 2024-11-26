@@ -20,7 +20,7 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
@@ -29,12 +29,10 @@ from chatsky.llm.filters import BaseFilter
 from chatsky.core.context import Context
 
 
-os.environ["OPENAI_API_KEY"] = "<TOKEN>"
-
 
 # %%
 model = LLM_API(
-    ChatOpenAI(model="gpt-4o-mini"),
+    ChatOllama(model="phi3:instruct", temperature=0),
     system_prompt="You are a database assistant and must help your user to "
     "recover the demanded data from your memory.",
 )

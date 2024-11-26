@@ -44,13 +44,14 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
+
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 
-os.environ["OPENAI_API_KEY"] = "<TOKEN>"
+
 # %% [markdown]
 """
 Let's create a simple script to demonstrate this. Note, that prompts should go
@@ -67,7 +68,7 @@ using `MISC` for storing multiple prompts.
 # this `system_prompt` will be always on the top of the history
 # during models response
 model = LLM_API(
-    ChatOpenAI(model="gpt-4o-mini"),
+    ChatOllama(model="phi3:instruct", temperature=0),
     system_prompt="You will represent different bank workers. "
     "Answer users' questions according to your role.",
 )

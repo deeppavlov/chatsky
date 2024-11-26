@@ -19,8 +19,7 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
@@ -30,17 +29,14 @@ from chatsky.responses.llm import LLMResponse
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 
-os.environ["OPENAI_API_KEY"] = "<OPENAI_TOKEN>"
-os.environ["ANTHROPIC_API_KEY"] = "<ANTHROPIC_TOKEN>"
-
 
 # %% [markdown]
 """
 In this tutorial we will define two models.
 """
 # %%
-assistant_model = LLM_API(ChatOpenAI(model="gpt-4o-mini"))
-movie_model = LLM_API(ChatAnthropic(model="claude-3-opus-20240229"))
+assistant_model = LLM_API(ChatOllama(model="llama3.2:1b", temperature=0))
+movie_model = LLM_API(ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0))
 
 # %% [markdown]
 """

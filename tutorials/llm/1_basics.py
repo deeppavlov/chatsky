@@ -11,7 +11,7 @@ Chatsky uses langchain under the hood to connect to the remote models.
 
 # %%
 import os
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from chatsky.core.message import Message
 from chatsky import (
     TRANSITIONS,
@@ -28,8 +28,6 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
-
-os.environ["OPENAI_API_KEY"] = "<TOKEN>"
 
 
 # %% [markdown]
@@ -48,7 +46,7 @@ that the model will use as the history. Default value is `5`.
 
 # %%
 model = LLM_API(
-    ChatOpenAI(model="gpt-4o-mini"),
+    ChatOllama(model="phi3:instruct", temperature=0),
     system_prompt="You are an experienced barista in a local coffeshop. "
     "Answer your customer's questions about coffee and barista work.",
 )
@@ -82,10 +80,6 @@ toy_script = {
                     cnd=cnd.ExactMatch("Tell me about latte art."),
                 ),
                 Tr(
-                    dst="image_desc_node",
-                    cnd=cnd.ExactMatch("Tell me what coffee is it?"),
-                ),
-                Tr(
                     dst="boss_node",
                     cnd=LLMCondition(
                         model_name="barista_model",
@@ -115,15 +109,6 @@ toy_script = {
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))
             ],
-        },
-        "image_desc_node": {
-            # we expect user to send some images of coffee.
-            RESPONSE: LLMResponse(
-                model_name="barista_model",
-                prompt="PROMPT: user will give you some images of coffee. "
-                "Describe them.",
-            ),
-            TRANSITIONS: [Tr(dst="main_node")],
         },
         "fallback_node": {
             RESPONSE: Message("I didn't quite understand you..."),

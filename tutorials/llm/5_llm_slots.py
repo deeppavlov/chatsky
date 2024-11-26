@@ -25,15 +25,13 @@ from chatsky import (
     processing as proc,
     responses as rsp,
 )
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 
 from chatsky.utils.testing import (
     is_interactive_mode,
 )
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 
-
-os.environ["OPENAI_API_KEY"] = "<OPENAI_TOKEN>"
 
 
 # %% [markdown]
@@ -52,7 +50,7 @@ not `chatsky.llm.LLM_API` here.
 """
 
 # %%
-model = ChatOpenAI(model="gpt-4o-mini")
+model = ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0)
 
 SLOTS = {
     "person": LLMGroupSlot(
