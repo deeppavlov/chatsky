@@ -3,6 +3,7 @@ import git
 import json
 import re
 
+BASE_URL = "https://deeppavlov.github.io/chatsky/"
 
 # Filter function for building latest versions of each major tag.
 # For example, out of ["v0.8.0", "v0.8.1", "v0.9.2", "v0.9.3"]
@@ -59,18 +60,18 @@ def generate_version_switcher():
     latest_data = {
         "name": "latest",
         "version": "master",
-        "url": "https://deeppavlov.github.io/chatsky/master/",
+        "url": BASE_URL + "master/",
     }
     switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
-        "url": "https://deeppavlov.github.io/chatsky/dev/",
+        "url": BASE_URL + "dev/",
     }
     switcher_json += [dev_data]
 
     for tag in tags:
-        url = "https://deeppavlov.github.io/chatsky/" + str(tag) + "/"
+        url = BASE_URL + str(tag) + "/"
         tag_data = {
             "name": str(tag),
             "version": str(tag),
