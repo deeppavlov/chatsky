@@ -17,8 +17,11 @@ from pydantic import BaseModel, Field
 from chatsky.slots.base_slots import (
     ExtractedSlot,
     BaseSlot,
+    ExtractedValueSlot,
+    ExtractedGroupSlot,
+    GroupSlot,
+    KwargOnlyFormatter,
 )
-from chatsky.slots.slots import ExtractedGroupSlot, GroupSlot, ExtractedValueSlot, KwargOnlyFormatter
 
 if TYPE_CHECKING:
     from chatsky.core import Context
