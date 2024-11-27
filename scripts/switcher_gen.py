@@ -47,8 +47,7 @@ def generate_version_switcher():
     tags = latest_tags_filter(tags, start_version)
 
     # Remove blacklisted tags and add whitelisted tags.
-    tags = [x for x in tags if x not in blacklisted_tags]
-    tags = tags + [x for x in whitelisted_tags if x not in tags]
+    tags = list(set(tags) - set(blacklisted_tags) | set(whitelisted_tags))
 
     # Sort the tags for the version switcher button.
     tags.sort(key=lambda x: x.replace("v", "").split("."))
