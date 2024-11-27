@@ -210,7 +210,7 @@ markers = [
     "no_coverage: tests that either cannot run inside the `coverage` workflow or do not affect coverage stats",
     "all: reserved by allow-skip",
     "none: reserved by allow-skip",
-    "needs_dependencies: marks tests as requiring poetry.lock dependencies to run"
+    "needs_dependencies: marks tests as requiring any extra dependencies to run"
 ]
 asyncio_mode = "auto"
 
