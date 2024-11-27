@@ -50,7 +50,7 @@ def generate_version_switcher():
     tags = list(set(tags) - set(blacklisted_tags) | set(whitelisted_tags))
 
     # Sort the tags for the version switcher button.
-    tags.sort(key=lambda x: x.replace("v", "").split("."))
+    tags.sort(key=lambda x: list(map(int, x.replace("v", "").split("."))))
     tags.reverse()
 
     # Create the version switcher
