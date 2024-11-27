@@ -11,12 +11,10 @@ import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
 from typing import List, Set, Tuple, Dict, Optional
-import logging
 
 from pydantic import BaseModel, Field
 
 from .database import DBContextStorage, _SUBSCRIPT_DICT
-from chatsky.utils.logging import collapse_num_list
 
 try:
     from aiofiles import open
@@ -28,9 +26,6 @@ try:
 except ImportError:
     json_available = False
     pickle_available = False
-
-
-logger = logging.getLogger(__name__)
 
 
 class SerializableStorage(BaseModel):
@@ -58,6 +53,10 @@ class FileContextStorage(DBContextStorage, ABC):
         asyncio.run(self._load())
         self._first_time_saved = True
 
+    @property
+    def is_concurrent(self):
+        return self._first_time_saved
+
     @abstractmethod
     async def _save(self, data: SerializableStorage) -> None:
         raise NotImplementedError
@@ -66,36 +65,25 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
-        logger.debug(f"Loading main info for {ctx_id}...")
-        result = (await self._load()).main.get(ctx_id, None)
-        logger.debug(f"Main info loaded for {ctx_id}")
-        return result
+    @DBContextStorage._lock
+    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+        return (await self._load()).main.get(ctx_id, None)
 
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
-        logger.debug(f"Updating main info for {ctx_id}...")
+    @DBContextStorage._lock
+    async def _update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         storage = await self._load()
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
         await self._save(storage)
-        logger.debug(f"Main info updated for {ctx_id}")
 
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def delete_context(self, ctx_id: str) -> None:
-        logger.debug(f"Deleting context {ctx_id}...")
+    @DBContextStorage._lock
+    async def _delete_context(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
         await self._save(storage)
-        logger.debug(f"Context {ctx_id} deleted")
 
-    @DBContextStorage._verify_field_name
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
-        logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
+    @DBContextStorage._lock
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         storage = await self._load()
         select = sorted(
             [(k, v) for c, f, k, v in storage.turns if c == ctx_id and f == field_name and v is not None],
@@ -106,33 +94,22 @@ class FileContextStorage(DBContextStorage, ABC):
             select = select[: self._subscripts[field_name]]
         elif isinstance(self._subscripts[field_name], Set):
             select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
-        logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in select))}")
         return select
 
-    @DBContextStorage._verify_field_name
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
-        logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
-        result = [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
-        logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
-        return result
+    @DBContextStorage._lock
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        return [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
 
-    @DBContextStorage._verify_field_name
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
-        logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
-        result = [
+    @DBContextStorage._lock
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+        return [
             (k, v)
             for c, f, k, v in (await self._load()).turns
             if c == ctx_id and f == field_name and k in keys and v is not None
         ]
-        logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
-        return result
 
-    @DBContextStorage._verify_field_name
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
+    @DBContextStorage._lock
+    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         storage = await self._load()
         for k, v in items:
             upd = (ctx_id, field_name, k, v)
@@ -143,11 +120,9 @@ class FileContextStorage(DBContextStorage, ABC):
             else:
                 storage.turns += [upd]
         await self._save(storage)
-        logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
-    @DBContextStorage._synchronously_lock(lambda s: s._first_time_saved)
-    async def clear_all(self) -> None:
-        logger.debug("Clearing all")
+    @DBContextStorage._lock
+    async def _clear_all(self) -> None:
         await self._save(SerializableStorage())
 
 

@@ -46,6 +46,8 @@ class RedisContextStorage(DBContextStorage):
     :param key_prefix: "namespace" prefix for all keys, should be set for efficient clearing of all data.
     """
 
+    is_concurrent: bool = True
+
     def __init__(
         self,
         path: str,
@@ -74,7 +76,7 @@ class RedisContextStorage(DBContextStorage):
     def _bytes_to_keys(keys: List[bytes]) -> List[int]:
         return [int(f.decode("utf-8")) for f in keys]
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
             cti, ca, ua, msc, fd = await gather(
                 self.database.hget(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name),
@@ -87,7 +89,7 @@ class RedisContextStorage(DBContextStorage):
         else:
             return None
 
-    async def update_main_info(
+    async def _update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
         await gather(
@@ -98,13 +100,12 @@ class RedisContextStorage(DBContextStorage):
             self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data),
         )
 
-    async def delete_context(self, ctx_id: str) -> None:
+    async def _delete_context(self, ctx_id: str) -> None:
         keys = await self.database.keys(f"{self._prefix}:*:{ctx_id}*")
         if len(keys) > 0:
             await self.database.delete(*keys)
 
-    @DBContextStorage._verify_field_name
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         keys = sorted(await self.database.hkeys(field_key), key=lambda k: int(k), reverse=True)
         if isinstance(self._subscripts[field_name], int):
@@ -114,29 +115,25 @@ class RedisContextStorage(DBContextStorage):
         values = await gather(*[self.database.hget(field_key, k) for k in keys])
         return [(k, v) for k, v in zip(self._bytes_to_keys(keys), values)]
 
-    @DBContextStorage._verify_field_name
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         return self._bytes_to_keys(await self.database.hkeys(f"{self._turns_key}:{ctx_id}:{field_name}"))
 
-    @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         load = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         values = await gather(*[self.database.hget(field_key, k) for k in load])
         return [(k, v) for k, v in zip(self._bytes_to_keys(load), values)]
 
-    @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
+    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         await gather(*[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in items])
 
-    @DBContextStorage._verify_field_name
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
+    async def _delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
         match = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         if len(match) > 0:
             await self.database.hdel(field_key, *match)
 
-    async def clear_all(self) -> None:
+    async def _clear_all(self) -> None:
         keys = await self.database.keys(f"{self._prefix}:*")
         if len(keys) > 0:
             await self.database.delete(*keys)

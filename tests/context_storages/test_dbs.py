@@ -213,19 +213,19 @@ class TestContextStorages:
 
     async def test_wrong_field_name(self, db: DBContextStorage):
         with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for method 'load_field_latest' argument 'field_name'!"
+            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
         ):
             await db.load_field_latest("1", "non-existent")
         with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for method 'load_field_keys' argument 'field_name'!"
+            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
         ):
             await db.load_field_keys("1", "non-existent")
         with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for method 'load_field_items' argument 'field_name'!"
+            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
         ):
             await db.load_field_items("1", "non-existent", [1, 2])
         with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for method 'update_field_items' argument 'field_name'!"
+            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
         ):
             await db.update_field_items("1", "non-existent", [(1, b"2")])
 

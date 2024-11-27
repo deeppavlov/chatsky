@@ -16,6 +16,8 @@ class MemoryContextStorage(DBContextStorage):
     - `misc`: [context_id, turn_number, misc]
     """
 
+    is_concurrent: bool = True
+
     def __init__(
         self,
         path: str = "",
@@ -30,21 +32,20 @@ class MemoryContextStorage(DBContextStorage):
             self._responses_field_name: dict(),
         }
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return self._main_storage.get(ctx_id, None)
 
-    async def update_main_info(
+    async def _update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
         self._main_storage[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
 
-    async def delete_context(self, ctx_id: str) -> None:
+    async def _delete_context(self, ctx_id: str) -> None:
         self._main_storage.pop(ctx_id, None)
         for storage in self._aux_storage.values():
             storage.pop(ctx_id, None)
 
-    @DBContextStorage._verify_field_name
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         select = sorted(
             [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None], reverse=True
         )
@@ -54,21 +55,18 @@ class MemoryContextStorage(DBContextStorage):
             select = [k for k in select if k in self._subscripts[field_name]]
         return [(k, self._aux_storage[field_name][ctx_id][k]) for k in select]
 
-    @DBContextStorage._verify_field_name
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         return [k for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if v is not None]
 
-    @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         return [
             (k, v) for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys and v is not None
         ]
 
-    @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
+    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         self._aux_storage[field_name].setdefault(ctx_id, dict()).update(items)
 
-    async def clear_all(self) -> None:
+    async def _clear_all(self) -> None:
         self._main_storage = dict()
         for key in self._aux_storage.keys():
             self._aux_storage[key] = dict()

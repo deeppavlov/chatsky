@@ -43,6 +43,8 @@ class MongoContextStorage(DBContextStorage):
     _UNIQUE_KEYS = "unique_keys"
     _ID_FIELD = "_id"
 
+    is_concurrent: bool = True
+
     def __init__(
         self,
         path: str,
@@ -70,7 +72,7 @@ class MongoContextStorage(DBContextStorage):
             )
         )
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         result = await self.main_table.find_one(
             {self._id_column_name: ctx_id},
             [
@@ -93,7 +95,7 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
-    async def update_main_info(
+    async def _update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
         await self.main_table.update_one(
@@ -111,14 +113,13 @@ class MongoContextStorage(DBContextStorage):
             upsert=True,
         )
 
-    async def delete_context(self, ctx_id: str) -> None:
+    async def _delete_context(self, ctx_id: str) -> None:
         await asyncio.gather(
             self.main_table.delete_one({self._id_column_name: ctx_id}),
             self.turns_table.delete_one({self._id_column_name: ctx_id}),
         )
 
-    @DBContextStorage._verify_field_name
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         limit, key = 0, dict()
         if isinstance(self._subscripts[field_name], int):
             limit = self._subscripts[field_name]
@@ -135,8 +136,7 @@ class MongoContextStorage(DBContextStorage):
         )
         return [(item[self._key_column_name], item[field_name]) for item in result]
 
-    @DBContextStorage._verify_field_name
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         result = await self.turns_table.aggregate(
             [
                 {"$match": {self._id_column_name: ctx_id, field_name: {"$ne": None}}},
@@ -145,8 +145,7 @@ class MongoContextStorage(DBContextStorage):
         ).to_list(None)
         return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
 
-    @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[Tuple[int, bytes]]:
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[Tuple[int, bytes]]:
         result = await self.turns_table.find(
             {
                 self._id_column_name: ctx_id,
@@ -157,10 +156,7 @@ class MongoContextStorage(DBContextStorage):
         ).to_list(None)
         return [(item[self._key_column_name], item[field_name]) for item in result]
 
-    @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        if len(items) == 0:
-            return
+    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         await self.turns_table.bulk_write(
             [
                 UpdateOne(
@@ -172,5 +168,5 @@ class MongoContextStorage(DBContextStorage):
             ]
         )
 
-    async def clear_all(self) -> None:
+    async def _clear_all(self) -> None:
         await asyncio.gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

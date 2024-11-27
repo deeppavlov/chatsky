@@ -1,7 +1,7 @@
 from typing import Union
 
 
-def collapse_num_list(num_list: list[Union[int, float]]) -> str:
+def collapse_num_list(num_list: Union[list[int], list[float]]) -> str:
     """
     Produce representation for a list of numbers while collapsing large lists.
 

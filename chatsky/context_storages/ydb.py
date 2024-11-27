@@ -58,6 +58,8 @@ class YDBContextStorage(DBContextStorage):
     _LIMIT_VAR = "limit"
     _KEY_VAR = "key"
 
+    is_concurrent: bool = True
+
     def __init__(
         self,
         path: str,
@@ -133,7 +135,7 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes, bytes]]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -163,7 +165,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def update_main_info(
+    async def _update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
         async def callee(session: Session) -> None:
@@ -193,7 +195,7 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def delete_context(self, ctx_id: str) -> None:
+    async def _delete_context(self, ctx_id: str) -> None:
         def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
             async def callee(session: Session) -> None:
                 query = f"""
@@ -217,8 +219,7 @@ class YDBContextStorage(DBContextStorage):
             self.pool.retry_operation(construct_callee(self.turns_table)),
         )
 
-    @DBContextStorage._verify_field_name
-    async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         async def callee(session: Session) -> List[Tuple[int, bytes]]:
             declare, prepare, limit, key = list(), dict(), "", ""
             if isinstance(self._subscripts[field_name], int):
@@ -257,8 +258,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @DBContextStorage._verify_field_name
-    async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         async def callee(session: Session) -> List[int]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -278,8 +278,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @DBContextStorage._verify_field_name
-    async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         async def callee(session: Session) -> List[Tuple[int, bytes]]:
             declare, prepare = list(), dict()
             for i, k in enumerate(keys):
@@ -310,11 +309,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @DBContextStorage._verify_field_name
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        if len(items) == 0:
-            return
-
+    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         async def callee(session: Session) -> None:
             declare, prepare, values = list(), dict(), list()
             for i, (k, v) in enumerate(items):
@@ -346,7 +341,7 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def clear_all(self) -> None:
+    async def _clear_all(self) -> None:
         def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
             async def callee(session: Session) -> None:
                 query = f"""
