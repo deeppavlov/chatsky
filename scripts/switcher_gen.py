@@ -85,4 +85,5 @@ def generate_version_switcher():
         f.write(switcher_json_obj)
 
 
-generate_version_switcher()
+if __name__ == "__main__":
+    generate_version_switcher()
