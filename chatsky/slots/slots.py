@@ -83,7 +83,9 @@ class ExtractedValueSlot(ExtractedSlot):
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
     value_format: str = None
-    slots: Dict[str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]]
+    slots: Dict[
+        str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
+    ] = Field(default_factory=dict)
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -125,7 +127,9 @@ class GroupSlot(BaseSlot, frozen=True):
     """
 
     value_format: str = None
-    slots: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]] = {}
+    slots: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]] = Field(
+        default_factory=dict
+    )
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)
@@ -183,18 +187,18 @@ class RegexpSlot(ValueSlot, frozen=True):
         )
 
 
-# TODO: Change class and method descriptions.
 class RegexpGroupSlot(GroupSlot, frozen=True):
     """
-    RegexpGroupSlot is semantically equal to a GroupSlot of RegexpSlots.
-    You can pass a compiled or a non-compiled pattern to the `regexp` argument.
-    If you want to extract a particular group, but not the full match,
-    change the `match_group_idx` parameter.
+    A slot type that applies a regex pattern once to extract values for
+    multiple child slots. Accepts a `regexp` pattern and a `groups` dictionary
+    mapping slot names to group indexes. Improves efficiency by performing a
+    single regex search for all specified groups, thus reducing the amount
+    of calls to your model.
     """
 
     regexp: str
     groups: dict[str, int]
-    "Index of the group to match."
+    "A dictionary mapping slot names to match_group indexes."
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)
@@ -205,7 +209,10 @@ class RegexpGroupSlot(GroupSlot, frozen=True):
         if search:
             return ExtractedGroupSlot(
                 slots={
-                    child_name: search.group(match_group)
+                    child_name: ExtractedValueSlot.model_construct(
+                        is_slot_extracted=True,
+                        extracted_value=search.group(match_group),
+                    )
                     for child_name, match_group in zip(self.groups.keys(), self.groups.values())
                 }
             )
