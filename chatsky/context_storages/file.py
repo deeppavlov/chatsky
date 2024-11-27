@@ -65,24 +65,20 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
-    @DBContextStorage._lock
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return (await self._load()).main.get(ctx_id, None)
 
-    @DBContextStorage._lock
     async def _update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         storage = await self._load()
         storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
         await self._save(storage)
 
-    @DBContextStorage._lock
     async def _delete_context(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)
         storage.turns = [(c, f, k, v) for c, f, k, v in storage.turns if c != ctx_id]
         await self._save(storage)
 
-    @DBContextStorage._lock
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         storage = await self._load()
         select = sorted(
@@ -96,11 +92,9 @@ class FileContextStorage(DBContextStorage, ABC):
             select = [(k, v) for k, v in select if k in self._subscripts[field_name]]
         return select
 
-    @DBContextStorage._lock
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         return [k for c, f, k, v in (await self._load()).turns if c == ctx_id and f == field_name and v is not None]
 
-    @DBContextStorage._lock
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         return [
             (k, v)
@@ -108,7 +102,6 @@ class FileContextStorage(DBContextStorage, ABC):
             if c == ctx_id and f == field_name and k in keys and v is not None
         ]
 
-    @DBContextStorage._lock
     async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         storage = await self._load()
         for k, v in items:
@@ -121,7 +114,6 @@ class FileContextStorage(DBContextStorage, ABC):
                 storage.turns += [upd]
         await self._save(storage)
 
-    @DBContextStorage._lock
     async def _clear_all(self) -> None:
         await self._save(SerializableStorage())
 

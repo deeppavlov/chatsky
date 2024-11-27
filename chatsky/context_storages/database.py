@@ -89,6 +89,7 @@ class DBContextStorage(ABC):
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         raise NotImplementedError
 
+    @_lock
     async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         """
         Load main information about the context.
@@ -102,6 +103,7 @@ class DBContextStorage(ABC):
     async def _update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         raise NotImplementedError
 
+    @_lock
     async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
         """
         Update main information about the context.
@@ -114,6 +116,7 @@ class DBContextStorage(ABC):
     async def _delete_context(self, ctx_id: str) -> None:
         raise NotImplementedError
 
+    @_lock
     async def delete_context(self, ctx_id: str) -> None:
         """
         Delete context from context storage.
@@ -126,6 +129,7 @@ class DBContextStorage(ABC):
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         raise NotImplementedError
 
+    @_lock
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         """
         Load the latest field data.
@@ -139,6 +143,7 @@ class DBContextStorage(ABC):
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         raise NotImplementedError
 
+    @_lock
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         """
         Load all field keys.
@@ -152,6 +157,7 @@ class DBContextStorage(ABC):
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         raise NotImplementedError
 
+    @_lock
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         """
         Load field items.
@@ -164,7 +170,8 @@ class DBContextStorage(ABC):
     @abstractmethod
     async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         raise NotImplementedError
-    
+
+    @_lock
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         """
         Update field items.
@@ -176,6 +183,7 @@ class DBContextStorage(ABC):
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
+    @_lock
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         """
         Delete field keys.
@@ -190,7 +198,8 @@ class DBContextStorage(ABC):
     @abstractmethod
     async def _clear_all(self) -> None:
         raise NotImplementedError
-    
+
+    @_lock
     async def clear_all(self) -> None:
         """
         Clear all the chatsky tables and records.

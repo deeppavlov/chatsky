@@ -215,14 +215,12 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    @DBContextStorage._lock
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return None if result is None else result[1:]
 
-    @DBContextStorage._lock
     async def _update_main_info(
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
@@ -251,7 +249,6 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(update_stmt)
 
     # TODO: use foreign keys instead maybe?
-    @DBContextStorage._lock
     async def _delete_context(self, ctx_id: str) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(
@@ -259,7 +256,6 @@ class SQLContextStorage(DBContextStorage):
                 conn.execute(delete(self.turns_table).where(self.turns_table.c[self._id_column_name] == ctx_id)),
             )
 
-    @DBContextStorage._lock
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
@@ -273,7 +269,6 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
-    @DBContextStorage._lock
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[self._key_column_name])
@@ -282,7 +277,6 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
-    @DBContextStorage._lock
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
@@ -292,7 +286,6 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
-    @DBContextStorage._lock
     async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
             [
@@ -313,7 +306,6 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
 
-    @DBContextStorage._lock
     async def _clear_all(self) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(conn.execute(delete(self.main_table)), conn.execute(delete(self.turns_table)))
