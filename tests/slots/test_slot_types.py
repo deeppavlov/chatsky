@@ -2,13 +2,8 @@ import pytest
 from pydantic import ValidationError
 
 from chatsky.core import Message
-from chatsky.slots.base_slots import SlotNotExtracted, ExtractedValueSlot
-from chatsky.slots.slots import (
-    RegexpSlot,
-    GroupSlot,
-    FunctionSlot,
-    ExtractedGroupSlot,
-)
+from chatsky.slots.base_slots import SlotNotExtracted, ExtractedValueSlot, GroupSlot, ExtractedGroupSlot
+from chatsky.slots.slots import RegexpSlot, FunctionSlot
 
 
 @pytest.mark.parametrize(

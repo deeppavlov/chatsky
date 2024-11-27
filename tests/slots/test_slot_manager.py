@@ -1,13 +1,12 @@
 import pytest
 
-from chatsky.slots.slots import (
-    RegexpSlot,
+from chatsky.slots.base_slots import (
     GroupSlot,
-    FunctionSlot,
     ExtractedGroupSlot,
     ExtractedValueSlot,
     SlotNotExtracted,
 )
+from chatsky.slots.slots import RegexpSlot, FunctionSlot
 from chatsky.slots.slot_manager import SlotManager
 from chatsky.core import Message, Context
 
