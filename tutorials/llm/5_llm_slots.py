@@ -12,7 +12,6 @@ the hood to extract more obscure information from users input.
 """
 # %pip install chatsky[llm] langchain-openai
 # %%
-import os
 from chatsky import (
     RESPONSE,
     TRANSITIONS,

@@ -35,22 +35,22 @@ class LLMSlot(ValueSlot, frozen=True):
 
     caption: str
     return_type: type = str
-    model_name: str = ""
+    model: str = ""
 
-    def __init__(self, caption, model_name=None):
-        super().__init__(caption=caption, model_name=model_name)
+    def __init__(self, caption, model=None):
+        super().__init__(caption=caption, model=model)
 
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         if request_text == "":
             return SlotNotExtracted()
-        model = ctx.pipeline.models[self.model_name]
+        model_instance = ctx.pipeline.models[self.model]
 
         # Dynamically create a Pydantic model based on the caption
         class DynamicModel(BaseModel):
             value: self.return_type = Field(description=self.caption)
 
-        structured_model = model.with_structured_output(DynamicModel)
+        structured_model = model_instance.with_structured_output(DynamicModel)
 
         result = await structured_model.ainvoke(request_text)
         return result.value
@@ -64,7 +64,7 @@ class LLMGroupSlot(GroupSlot):
     """
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
-    model_name: str
+    model: str
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         flat_items = self.__flatten_llm_group_slot(self)
@@ -78,8 +78,8 @@ class LLMGroupSlot(GroupSlot):
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
 
-        model = ctx.pipeline.models[self.model_name]
-        structured_model = model.with_structured_output(DynamicGroupModel)
+        model_instance = ctx.pipeline.models[self.model]
+        structured_model = model_instance.with_structured_output(DynamicGroupModel)
         result = await structured_model.ainvoke(ctx.last_request.text)
         result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")

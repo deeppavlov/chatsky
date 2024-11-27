@@ -10,7 +10,6 @@ Chatsky uses langchain under the hood to connect to the remote models.
 # %pip install chatsky[llm] langchain-openai
 
 # %%
-import os
 from langchain_ollama import ChatOllama
 from chatsky.core.message import Message
 from chatsky import (
