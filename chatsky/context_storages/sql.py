@@ -91,17 +91,6 @@ def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
-def _get_write_limit(dialect: str):
-    if dialect == "sqlite":
-        return (int(getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 4
-    elif dialect == "mysql":
-        return False
-    elif dialect == "postgresql":
-        return 32757 // 4
-    else:
-        return 9990 // 4
-
-
 def _get_upsert_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
     if dialect == "postgresql" or dialect == "sqlite":
         if len(columns) > 0:
@@ -160,7 +149,6 @@ class SQLContextStorage(DBContextStorage):
         self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
-        self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
         if self.dialect == "sqlite":
