@@ -96,15 +96,19 @@ fallback_label:
   - tech_flow
   - fallback_node
 slots:
-  person:
-    name:
-      chatsky.slots.RegexpSlot:
-        regexp: "My name is (.+)"
-        match_group_idx: 1
-    age:
-      chatsky.slots.RegexpSlot:
-        regexp: "I'm ([0-9]+) years old"
-        match_group_idx: 1
+  chatsky.slots.GroupSlot:
+    slots:
+      person:
+        chatsky.slots.GroupSlot:
+          slots:
+            name:
+              chatsky.slots.RegexpSlot:
+                regexp: "My name is (.+)"
+                match_group_idx: 1
+            age:
+              chatsky.slots.RegexpSlot:
+                regexp: "I'm ([0-9]+) years old"
+                match_group_idx: 1
 messenger_interface:
   chatsky.messengers.TelegramInterface:
     token:
