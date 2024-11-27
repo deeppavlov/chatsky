@@ -10,7 +10,7 @@ with Yandex Cloud services using python. This allows Chatsky to easily integrate
 take advantage of the scalability and high-availability features provided by the service.
 """
 
-from asyncio import gather, run
+from asyncio import gather
 from os.path import join
 from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
@@ -76,7 +76,12 @@ class YDBContextStorage(DBContextStorage):
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
         self.table_prefix = table_name_prefix
-        run(self._init_drive(timeout, f"{protocol}://{netloc}"))
+        self._timeout = timeout
+        self._endpoint = f"{protocol}://{netloc}"
+
+    async def connect(self):
+        await super().connect()
+        await self._init_drive(self._timeout, self._endpoint)
 
     async def _init_drive(self, timeout: int, endpoint: str) -> None:
         self._driver = Driver(endpoint=endpoint, database=self.database)

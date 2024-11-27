@@ -7,7 +7,6 @@ store and retrieve context data.
 """
 
 from abc import ABC, abstractmethod
-import asyncio
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
 from typing import List, Set, Tuple, Dict, Optional
@@ -48,14 +47,11 @@ class FileContextStorage(DBContextStorage, ABC):
         rewrite_existing: bool = False,
         configuration: Optional[_SUBSCRIPT_DICT] = None,
     ):
-        self._first_time_saved = False
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
-        asyncio.run(self._load())
-        self._first_time_saved = True
 
     @property
     def is_concurrent(self):
-        return self._first_time_saved
+        return not self.connected
 
     @abstractmethod
     async def _save(self, data: SerializableStorage) -> None:
@@ -64,6 +60,10 @@ class FileContextStorage(DBContextStorage, ABC):
     @abstractmethod
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
+
+    async def connect(self):
+        await self._load()
+        await super().connect()
 
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return (await self._load()).main.get(ctx_id, None)

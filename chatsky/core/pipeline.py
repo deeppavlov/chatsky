@@ -242,6 +242,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         :return: Modified context ``ctx_id``.
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
+        if not self.context_storage.connected:
+            await self.context_storage.connect()
+
         logger.debug(f"Received request: {request}.")
         ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 

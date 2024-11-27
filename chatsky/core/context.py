@@ -223,7 +223,7 @@ class Context(BaseModel):
         turn_ids = range(self.current_turn_id + 1)[key]
         turn_ids = turn_ids if isinstance(key, slice) else [turn_ids]
         context_dicts = (self.labels, self.requests, self.responses)
-        turns_lists = await gather(*[gather(*[ctd.__getitem__(ti) for ti in turn_ids]) for ctd in context_dicts])
+        turns_lists = await gather(*[gather(*[ctd.get(ti, None) for ti in turn_ids]) for ctd in context_dicts])
         return zip(*turns_lists)
 
     def __eq__(self, value: object) -> bool:

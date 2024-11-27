@@ -8,6 +8,7 @@ from typing import (
     Callable,
     Dict,
     Generic,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -150,11 +151,20 @@ class ContextDict(BaseModel, Generic[K, V]):
     def __len__(self) -> int:
         return len(self.keys() if self._storage is not None else self._items.keys())
 
-    async def get(self, key: K, default=None) -> V:
+    @overload
+    async def get(self, key: K) -> V: ...  # noqa: E704
+
+    @overload
+    async def get(self, key: Iterable[K]) -> List[V]: ...  # noqa: E704
+
+    async def get(self, key, default=None) -> V:
         try:
             return await self[key]
         except KeyError:
-            return default
+            if isinstance(key, Iterable):
+                return [self._items.get(k, default) for k in key]
+            else:
+                return default
 
     def __contains__(self, key: K) -> bool:
         return key in self.keys()

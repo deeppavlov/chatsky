@@ -12,7 +12,7 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 
-import asyncio
+from asyncio import gather
 from typing import Set, Tuple, Optional, List
 
 try:
@@ -63,13 +63,11 @@ class MongoContextStorage(DBContextStorage):
         self.main_table = db[f"{collection_prefix}_{self._main_table_name}"]
         self.turns_table = db[f"{collection_prefix}_{self._turns_table_name}"]
 
-        asyncio.run(
-            asyncio.gather(
-                self.main_table.create_index(self._id_column_name, background=True, unique=True),
-                self.turns_table.create_index(
-                    [self._id_column_name, self._key_column_name], background=True, unique=True
-                ),
-            )
+    async def connect(self):
+        await super().connect()
+        await gather(
+            self.main_table.create_index(self._id_column_name, background=True, unique=True),
+            self.turns_table.create_index([self._id_column_name, self._key_column_name], background=True, unique=True),
         )
 
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
@@ -114,7 +112,7 @@ class MongoContextStorage(DBContextStorage):
         )
 
     async def _delete_context(self, ctx_id: str) -> None:
-        await asyncio.gather(
+        await gather(
             self.main_table.delete_one({self._id_column_name: ctx_id}),
             self.turns_table.delete_one({self._id_column_name: ctx_id}),
         )
@@ -169,4 +167,4 @@ class MongoContextStorage(DBContextStorage):
         )
 
     async def _clear_all(self) -> None:
-        await asyncio.gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))
+        await gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

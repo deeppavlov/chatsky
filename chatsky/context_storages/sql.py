@@ -181,16 +181,12 @@ class SQLContextStorage(DBContextStorage):
             Index(f"{self._turns_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
         )
 
-        asyncio.run(self._create_self_tables())
-
     @property
     def is_concurrent(self) -> bool:
         return self.dialect != "sqlite"
 
-    async def _create_self_tables(self):
-        """
-        Create tables required for context storing, if they do not exist yet.
-        """
+    async def connect(self):
+        await super().connect()
         async with self.engine.begin() as conn:
             for table in [self.main_table, self.turns_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):

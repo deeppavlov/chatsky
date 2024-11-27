@@ -90,8 +90,10 @@ class TestTurns:
         ctx.requests[6] = Message(text="text6")
         ctx.current_turn_id = 6
 
-        with pytest.raises(KeyError):
-            await ctx.turns(6)
+        label, request, response = list(await ctx.turns(6))[0]
+        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node5")
+        assert request == Message(text="text5")
+        assert response is None
 
     async def test_slice_turn(self, ctx: Context):
         for i in range(2, 6):
