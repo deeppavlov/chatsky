@@ -73,7 +73,6 @@ def generate_version_switcher():
     for tag in tags:
         url = BASE_URL + str(tag) + "/"
         tag_data = {
-            "name": str(tag),
             "version": str(tag),
             "url": url,
         }
