@@ -135,7 +135,7 @@ class SQLContextStorage(DBContextStorage):
         set this parameter to `True` to bypass the import checks.
     """
 
-    _UUID_LENGTH = 64
+    _ID_LENGTH = 255
 
     def __init__(
         self,
@@ -158,7 +158,7 @@ class SQLContextStorage(DBContextStorage):
         self.main_table = Table(
             f"{table_name_prefix}_{self._main_table_name}",
             metadata,
-            Column(self._id_column_name, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+            Column(self._id_column_name, String(self._ID_LENGTH), index=True, unique=True, nullable=False),
             Column(self._current_turn_id_column_name, BigInteger(), nullable=False),
             Column(self._created_at_column_name, BigInteger(), nullable=False),
             Column(self._updated_at_column_name, BigInteger(), nullable=False),
@@ -170,7 +170,7 @@ class SQLContextStorage(DBContextStorage):
             metadata,
             Column(
                 self._id_column_name,
-                String(self._UUID_LENGTH),
+                String(self._ID_LENGTH),
                 ForeignKey(self.main_table.name, self._id_column_name),
                 nullable=False,
             ),
