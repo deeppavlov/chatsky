@@ -21,7 +21,7 @@ from chatsky.utils.logging import collapse_num_list
 from .protocol import PROTOCOLS
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int]
-_SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE]]
+_SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], Union[_SUBSCRIPT_TYPE]]
 
 logger = getLogger(__name__)
 
