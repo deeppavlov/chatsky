@@ -34,4 +34,3 @@ dbs
 benchmarks
 benchmark_results_files.json
 uploaded_benchmarks
-chatsky/utils/logging/*.log
