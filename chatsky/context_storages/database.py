@@ -21,7 +21,7 @@ from chatsky.utils.logging import collapse_num_list
 from .protocol import PROTOCOLS
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[str]]
-_SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE, Literal["__none__"]]]
+_SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE]]
 
 logger = getLogger(__name__)
 
@@ -60,7 +60,10 @@ class DBContextStorage(ABC):
         self.connected = False
         for field in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
             value = configuration.get(field, self._default_subscript_value)
-            self._subscripts[field] = 0 if value == "__none__" else value
+            if (not isinstance(value, int)) or value >= 1:
+                self._subscripts[field] = value
+            else:
+                raise ValueError(f"Invalid subscript value ({value}) for field {field}")
 
     @property
     @abstractmethod
