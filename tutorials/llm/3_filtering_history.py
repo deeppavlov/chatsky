@@ -88,7 +88,10 @@ toy_script = {
             ],
         },
         "main_node": {
-            RESPONSE: LLMResponse(model_name="note_model", history=3),
+            RESPONSE: Message("Hi! I am your note taking assistant. "
+                              "Just send me your thoughts and if you need to "
+                              "rewind a bit just send /remind and I will send "
+                              "you a summary of your #important notes."),
             TRANSITIONS: [
                 Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
                 Tr(dst=dst.Current()),
@@ -96,7 +99,7 @@ toy_script = {
         },
         "remind_node": {
             RESPONSE: LLMResponse(
-                model_name="assistant_note_modelmodel",
+                model_name="note_model",
                 prompt="Create a bullet list from all the previous "
                 "messages tagged with #important.",
                 history=15,
