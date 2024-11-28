@@ -1,6 +1,7 @@
 import pytest
 
 from chatsky.context_storages import MemoryContextStorage
+from chatsky.context_storages.database import NameConfig
 from chatsky.core.message import Message
 from chatsky.core.ctx_dict import ContextDict, MessageContextDict
 
@@ -15,20 +16,20 @@ class TestContextDict:
     async def attached_dict(self) -> ContextDict:
         # Attached, but not backed by any data context dictionary
         storage = MemoryContextStorage()
-        return await MessageContextDict.new(storage, "ID", storage._requests_field_name)
+        return await MessageContextDict.new(storage, "ID", NameConfig._requests_field)
 
     @pytest.fixture(scope="function")
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
-        storage = MemoryContextStorage(rewrite_existing=False, configuration={"requests": "__none__"})
+        storage = MemoryContextStorage(rewrite_existing=False, configuration={"requests": 1})
         await storage.update_main_info(ctx_id, 0, 0, 0, b"", b"")
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),
         ]
-        await storage.update_field_items(ctx_id, storage._requests_field_name, requests)
-        return await MessageContextDict.connected(storage, ctx_id, storage._requests_field_name)
+        await storage.update_field_items(ctx_id, NameConfig._requests_field, requests)
+        return await MessageContextDict.connected(storage, ctx_id, NameConfig._requests_field)
 
     async def test_creation(
         self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
@@ -36,9 +37,13 @@ class TestContextDict:
         # Checking creation correctness
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             assert ctx_dict._storage is not None or ctx_dict == empty_dict
-            assert ctx_dict._items == ctx_dict._hashes == dict()
             assert ctx_dict._added == ctx_dict._removed == set()
-            assert ctx_dict._keys == set() if ctx_dict != prefilled_dict else {1, 2}
+            if ctx_dict != prefilled_dict:
+                assert ctx_dict._items == ctx_dict._hashes == dict()
+                assert ctx_dict._keys == set()
+            else:
+                assert len(ctx_dict._items) == len(ctx_dict._hashes) == 1
+                assert ctx_dict._keys == {1, 2}
 
     async def test_get_set_del(
         self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
@@ -50,7 +55,7 @@ class TestContextDict:
             assert await ctx_dict[0] == message
             assert 0 in ctx_dict._keys
             assert ctx_dict._added == {0}
-            assert ctx_dict._items == {0: message}
+            assert ctx_dict._items[0] == message
             # Setting several items
             ctx_dict[1] = ctx_dict[2] = ctx_dict[3] = Message()
             messages = (Message("1"), Message("2"), Message("3"))
@@ -78,17 +83,17 @@ class TestContextDict:
         assert prefilled_dict._added == set()
         assert prefilled_dict.keys() == [1, 2]
         assert 1 in prefilled_dict and 2 in prefilled_dict
-        assert prefilled_dict._items == dict()
+        assert set(prefilled_dict._items.keys()) == {2}
         # Loading item
         assert await prefilled_dict.get(100, None) is None
         assert await prefilled_dict.get(1, None) is not None
         assert prefilled_dict._added == set()
-        assert len(prefilled_dict._hashes) == 1
-        assert len(prefilled_dict._items) == 1
+        assert len(prefilled_dict._hashes) == 2
+        assert len(prefilled_dict._items) == 2
         # Deleting loaded item
         del prefilled_dict[1]
         assert prefilled_dict._removed == {1}
-        assert len(prefilled_dict._items) == 0
+        assert len(prefilled_dict._items) == 1
         assert prefilled_dict._keys == {2}
         assert 1 not in prefilled_dict
         assert set(prefilled_dict.keys()) == {2}

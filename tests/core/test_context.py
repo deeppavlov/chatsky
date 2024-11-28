@@ -91,8 +91,8 @@ class TestTurns:
         ctx.current_turn_id = 6
 
         label, request, response = list(await ctx.turns(6))[0]
-        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node5")
-        assert request == Message(text="text5")
+        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node6")
+        assert request == Message(text="text6")
         assert response is None
 
     async def test_slice_turn(self, ctx: Context):

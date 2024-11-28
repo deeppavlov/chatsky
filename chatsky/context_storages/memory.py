@@ -1,6 +1,6 @@
 from typing import List, Optional, Set, Tuple
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -27,9 +27,9 @@ class MemoryContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path, rewrite_existing, configuration)
         self._main_storage = dict()
         self._aux_storage = {
-            self._labels_field_name: dict(),
-            self._requests_field_name: dict(),
-            self._responses_field_name: dict(),
+            NameConfig._labels_field: dict(),
+            NameConfig._requests_field: dict(),
+            NameConfig._responses_field: dict(),
         }
 
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:

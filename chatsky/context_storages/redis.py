@@ -23,7 +23,7 @@ try:
 except ImportError:
     redis_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 
@@ -65,8 +65,8 @@ class RedisContextStorage(DBContextStorage):
         self.database = Redis.from_url(self.full_path)
 
         self._prefix = key_prefix
-        self._main_key = f"{key_prefix}:{self._main_table_name}"
-        self._turns_key = f"{key_prefix}:{self._turns_table_name}"
+        self._main_key = f"{key_prefix}:{NameConfig._main_table}"
+        self._turns_key = f"{key_prefix}:{NameConfig._turns_table}"
 
     @staticmethod
     def _keys_to_bytes(keys: List[int]) -> List[bytes]:
@@ -79,11 +79,11 @@ class RedisContextStorage(DBContextStorage):
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
             cti, ca, ua, msc, fd = await gather(
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name),
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._created_at_column_name),
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._updated_at_column_name),
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._misc_column_name),
-                self.database.hget(f"{self._main_key}:{ctx_id}", self._framework_data_column_name),
+                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column),
+                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column),
+                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column),
+                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._misc_column),
+                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column),
             )
             return (int(cti), int(ca), int(ua), msc, fd)
         else:
@@ -93,11 +93,11 @@ class RedisContextStorage(DBContextStorage):
         self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
     ) -> None:
         await gather(
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._current_turn_id_column_name, str(turn_id)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._created_at_column_name, str(crt_at)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._updated_at_column_name, str(upd_at)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._misc_column_name, misc),
-            self.database.hset(f"{self._main_key}:{ctx_id}", self._framework_data_column_name, fw_data),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(turn_id)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(crt_at)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(upd_at)),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, misc),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, fw_data),
         )
 
     async def _delete_context(self, ctx_id: str) -> None:

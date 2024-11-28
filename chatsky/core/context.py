@@ -25,7 +25,7 @@ import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
 
-from chatsky.context_storages.database import DBContextStorage
+from chatsky.context_storages.database import DBContextStorage, NameConfig
 from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
@@ -139,9 +139,9 @@ class Context(BaseModel):
             uid = str(uuid4())
             logger.debug(f"Disconnected context created with uid: {uid}")
             instance = cls(id=uid)
-            instance.requests = await MessageContextDict.new(storage, uid, storage._requests_field_name)
-            instance.responses = await MessageContextDict.new(storage, uid, storage._responses_field_name)
-            instance.labels = await LabelContextDict.new(storage, uid, storage._labels_field_name)
+            instance.requests = await MessageContextDict.new(storage, uid, NameConfig._requests_field)
+            instance.responses = await MessageContextDict.new(storage, uid, NameConfig._responses_field)
+            instance.labels = await LabelContextDict.new(storage, uid, NameConfig._labels_field)
             await instance.labels.update({0: start_label})
             instance._storage = storage
             return instance
@@ -152,9 +152,9 @@ class Context(BaseModel):
             logger.debug(f"Connected context created with uid: {id}")
             main, labels, requests, responses = await gather(
                 storage.load_main_info(id),
-                LabelContextDict.connected(storage, id, storage._labels_field_name),
-                MessageContextDict.connected(storage, id, storage._requests_field_name),
-                MessageContextDict.connected(storage, id, storage._responses_field_name),
+                LabelContextDict.connected(storage, id, NameConfig._labels_field),
+                MessageContextDict.connected(storage, id, NameConfig._requests_field),
+                MessageContextDict.connected(storage, id, NameConfig._responses_field),
             )
             if main is None:
                 crt_at = upd_at = time_ns()

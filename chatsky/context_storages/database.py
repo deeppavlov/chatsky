@@ -26,19 +26,22 @@ _SUBSCRIPT_DICT = Dict[str, Union[_SUBSCRIPT_TYPE]]
 logger = getLogger(__name__)
 
 
+class NameConfig:
+    _main_table: Literal["main"] = "main"
+    _turns_table: Literal["turns"] = "turns"
+    _key_column: Literal["key"] = "key"
+    _id_column: Literal["id"] = "id"
+    _current_turn_id_column: Literal["current_turn_id"] = "current_turn_id"
+    _created_at_column: Literal["created_at"] = "created_at"
+    _updated_at_column: Literal["updated_at"] = "updated_at"
+    _misc_column: Literal["misc"] = "misc"
+    _framework_data_column: Literal["framework_data"] = "framework_data"
+    _labels_field: Literal["labels"] = "labels"
+    _requests_field: Literal["requests"] = "requests"
+    _responses_field: Literal["responses"] = "responses"
+
+
 class DBContextStorage(ABC):
-    _main_table_name: Literal["main"] = "main"
-    _turns_table_name: Literal["turns"] = "turns"
-    _key_column_name: Literal["key"] = "key"
-    _id_column_name: Literal["id"] = "id"
-    _current_turn_id_column_name: Literal["current_turn_id"] = "current_turn_id"
-    _created_at_column_name: Literal["created_at"] = "created_at"
-    _updated_at_column_name: Literal["updated_at"] = "updated_at"
-    _misc_column_name: Literal["misc"] = "misc"
-    _framework_data_column_name: Literal["framework_data"] = "framework_data"
-    _labels_field_name: Literal["labels"] = "labels"
-    _requests_field_name: Literal["requests"] = "requests"
-    _responses_field_name: Literal["responses"] = "responses"
     _default_subscript_value: int = 3
 
     def __init__(
@@ -58,7 +61,7 @@ class DBContextStorage(ABC):
         self._subscripts = dict()
         self._sync_lock = Lock()
         self.connected = False
-        for field in (self._labels_field_name, self._requests_field_name, self._responses_field_name):
+        for field in (NameConfig._labels_field, NameConfig._requests_field, NameConfig._responses_field):
             value = configuration.get(field, self._default_subscript_value)
             if (not isinstance(value, int)) or value >= 1:
                 self._subscripts[field] = value
@@ -84,7 +87,7 @@ class DBContextStorage(ABC):
 
     @classmethod
     def _validate_field_name(cls, field_name: str) -> str:
-        if field_name not in (cls._labels_field_name, cls._requests_field_name, cls._responses_field_name):
+        if field_name not in (NameConfig._labels_field, NameConfig._requests_field, NameConfig._responses_field):
             raise ValueError(f"Invalid value '{field_name}' for argument 'field_name'!")
         else:
             return field_name

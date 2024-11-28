@@ -21,7 +21,7 @@ from typing import Callable, Collection, List, Optional, Set, Tuple
 import logging
 
 from chatsky.utils.logging import collapse_num_list
-from .database import DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -87,7 +87,7 @@ def _sqlite_enable_foreign_key(dbapi_con, con_record):
     dbapi_con.execute("pragma foreign_keys=ON")
 
 
-def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
+def _import_insert_for_dialect(dialect: str) -> Callable[[Table], "Insert"]:
     return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
@@ -156,29 +156,29 @@ class SQLContextStorage(DBContextStorage):
 
         metadata = MetaData()
         self.main_table = Table(
-            f"{table_name_prefix}_{self._main_table_name}",
+            f"{table_name_prefix}_{NameConfig._main_table}",
             metadata,
-            Column(self._id_column_name, String(self._ID_LENGTH), index=True, unique=True, nullable=False),
-            Column(self._current_turn_id_column_name, BigInteger(), nullable=False),
-            Column(self._created_at_column_name, BigInteger(), nullable=False),
-            Column(self._updated_at_column_name, BigInteger(), nullable=False),
-            Column(self._misc_column_name, LargeBinary(), nullable=False),
-            Column(self._framework_data_column_name, LargeBinary(), nullable=False),
+            Column(NameConfig._id_column, String(self._ID_LENGTH), index=True, unique=True, nullable=False),
+            Column(NameConfig._current_turn_id_column, BigInteger(), nullable=False),
+            Column(NameConfig._created_at_column, BigInteger(), nullable=False),
+            Column(NameConfig._updated_at_column, BigInteger(), nullable=False),
+            Column(NameConfig._misc_column, LargeBinary(), nullable=False),
+            Column(NameConfig._framework_data_column, LargeBinary(), nullable=False),
         )
         self.turns_table = Table(
-            f"{table_name_prefix}_{self._turns_table_name}",
+            f"{table_name_prefix}_{NameConfig._turns_table}",
             metadata,
             Column(
-                self._id_column_name,
+                NameConfig._id_column,
                 String(self._ID_LENGTH),
-                ForeignKey(self.main_table.name, self._id_column_name),
+                ForeignKey(self.main_table.name, NameConfig._id_column),
                 nullable=False,
             ),
-            Column(self._key_column_name, Integer(), nullable=False),
-            Column(self._labels_field_name, LargeBinary(), nullable=True),
-            Column(self._requests_field_name, LargeBinary(), nullable=True),
-            Column(self._responses_field_name, LargeBinary(), nullable=True),
-            Index(f"{self._turns_table_name}_index", self._id_column_name, self._key_column_name, unique=True),
+            Column(NameConfig._key_column, Integer(), nullable=False),
+            Column(NameConfig._labels_field, LargeBinary(), nullable=True),
+            Column(NameConfig._requests_field, LargeBinary(), nullable=True),
+            Column(NameConfig._responses_field, LargeBinary(), nullable=True),
+            Index(f"{NameConfig._turns_table}_index", NameConfig._id_column, NameConfig._key_column, unique=True),
         )
 
     @property
@@ -212,7 +212,7 @@ class SQLContextStorage(DBContextStorage):
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
-        stmt = select(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)
+        stmt = select(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return None if result is None else result[1:]
@@ -222,24 +222,24 @@ class SQLContextStorage(DBContextStorage):
     ) -> None:
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
-                self._id_column_name: ctx_id,
-                self._current_turn_id_column_name: turn_id,
-                self._created_at_column_name: crt_at,
-                self._updated_at_column_name: upd_at,
-                self._misc_column_name: misc,
-                self._framework_data_column_name: fw_data,
+                NameConfig._id_column: ctx_id,
+                NameConfig._current_turn_id_column: turn_id,
+                NameConfig._created_at_column: crt_at,
+                NameConfig._updated_at_column: upd_at,
+                NameConfig._misc_column: misc,
+                NameConfig._framework_data_column: fw_data,
             }
         )
         update_stmt = _get_upsert_stmt(
             self.dialect,
             insert_stmt,
             [
-                self._updated_at_column_name,
-                self._current_turn_id_column_name,
-                self._misc_column_name,
-                self._framework_data_column_name,
+                NameConfig._updated_at_column,
+                NameConfig._current_turn_id_column,
+                NameConfig._misc_column,
+                NameConfig._framework_data_column,
             ],
-            [self._id_column_name],
+            [NameConfig._id_column],
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)
@@ -248,36 +248,36 @@ class SQLContextStorage(DBContextStorage):
     async def _delete_context(self, ctx_id: str) -> None:
         async with self.engine.begin() as conn:
             await asyncio.gather(
-                conn.execute(delete(self.main_table).where(self.main_table.c[self._id_column_name] == ctx_id)),
-                conn.execute(delete(self.turns_table).where(self.turns_table.c[self._id_column_name] == ctx_id)),
+                conn.execute(delete(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)),
+                conn.execute(delete(self.turns_table).where(self.turns_table.c[NameConfig._id_column] == ctx_id)),
             )
 
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
-        stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[field_name] != None)
-        stmt = stmt.order_by(self.turns_table.c[self._key_column_name].desc())
+        stmt = stmt.order_by(self.turns_table.c[NameConfig._key_column].desc())
         if isinstance(self._subscripts[field_name], int):
             stmt = stmt.limit(self._subscripts[field_name])
         elif isinstance(self._subscripts[field_name], Set):
-            stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(self._subscripts[field_name]))
+            stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(self._subscripts[field_name]))
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
-        stmt = select(self.turns_table.c[self._key_column_name])
-        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
+        stmt = select(self.turns_table.c[NameConfig._key_column])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[field_name] != None)
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
-        stmt = select(self.turns_table.c[self._key_column_name], self.turns_table.c[field_name])
-        stmt = stmt.where(self.turns_table.c[self._id_column_name] == ctx_id)
-        stmt = stmt.where(self.turns_table.c[self._key_column_name].in_(tuple(keys)))
+        stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(tuple(keys)))
         stmt = stmt.where(self.turns_table.c[field_name] != None)
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
@@ -286,8 +286,8 @@ class SQLContextStorage(DBContextStorage):
         insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
             [
                 {
-                    self._id_column_name: ctx_id,
-                    self._key_column_name: k,
+                    NameConfig._id_column: ctx_id,
+                    NameConfig._key_column: k,
                     field_name: v,
                 }
                 for k, v in items
@@ -297,7 +297,7 @@ class SQLContextStorage(DBContextStorage):
             self.dialect,
             insert_stmt,
             [field_name],
-            [self._id_column_name, self._key_column_name],
+            [NameConfig._id_column, NameConfig._key_column],
         )
         async with self.engine.begin() as conn:
             await conn.execute(update_stmt)

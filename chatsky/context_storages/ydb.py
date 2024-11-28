@@ -15,7 +15,7 @@ from os.path import join
 from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -91,11 +91,11 @@ class YDBContextStorage(DBContextStorage):
 
         self.pool = SessionPool(self._driver, size=10)
 
-        self.main_table = f"{self.table_prefix}_{self._main_table_name}"
+        self.main_table = f"{self.table_prefix}_{NameConfig._main_table}"
         if not await self._does_table_exist(self.main_table):
             await self._create_main_table(self.main_table)
 
-        self.turns_table = f"{self.table_prefix}_{self._turns_table_name}"
+        self.turns_table = f"{self.table_prefix}_{NameConfig._turns_table}"
         if not await self._does_table_exist(self.turns_table):
             await self._create_turns_table(self.turns_table)
 
@@ -114,13 +114,13 @@ class YDBContextStorage(DBContextStorage):
             await session.create_table(
                 "/".join([self.database, table_name]),
                 TableDescription()
-                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
-                .with_column(Column(self._current_turn_id_column_name, PrimitiveType.Uint64))
-                .with_column(Column(self._created_at_column_name, PrimitiveType.Uint64))
-                .with_column(Column(self._updated_at_column_name, PrimitiveType.Uint64))
-                .with_column(Column(self._misc_column_name, PrimitiveType.String))
-                .with_column(Column(self._framework_data_column_name, PrimitiveType.String))
-                .with_primary_key(self._id_column_name),
+                .with_column(Column(NameConfig._id_column, PrimitiveType.Utf8))
+                .with_column(Column(NameConfig._current_turn_id_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._created_at_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._updated_at_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._misc_column, PrimitiveType.String))
+                .with_column(Column(NameConfig._framework_data_column, PrimitiveType.String))
+                .with_primary_key(NameConfig._id_column),
             )
 
         await self.pool.retry_operation(callee)
@@ -130,12 +130,12 @@ class YDBContextStorage(DBContextStorage):
             await session.create_table(
                 "/".join([self.database, table_name]),
                 TableDescription()
-                .with_column(Column(self._id_column_name, PrimitiveType.Utf8))
-                .with_column(Column(self._key_column_name, PrimitiveType.Uint32))
-                .with_column(Column(self._labels_field_name, OptionalType(PrimitiveType.String)))
-                .with_column(Column(self._requests_field_name, OptionalType(PrimitiveType.String)))
-                .with_column(Column(self._responses_field_name, OptionalType(PrimitiveType.String)))
-                .with_primary_keys(self._id_column_name, self._key_column_name),
+                .with_column(Column(NameConfig._id_column, PrimitiveType.Utf8))
+                .with_column(Column(NameConfig._key_column, PrimitiveType.Uint32))
+                .with_column(Column(NameConfig._labels_field, OptionalType(PrimitiveType.String)))
+                .with_column(Column(NameConfig._requests_field, OptionalType(PrimitiveType.String)))
+                .with_column(Column(NameConfig._responses_field, OptionalType(PrimitiveType.String)))
+                .with_primary_keys(NameConfig._id_column, NameConfig._key_column),
             )
 
         await self.pool.retry_operation(callee)
@@ -144,25 +144,25 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes, bytes]]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
-                SELECT {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._misc_column_name}, {self._framework_data_column_name}
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                SELECT {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column}
                 FROM {self.main_table}
-                WHERE {self._id_column_name} = ${self._id_column_name};
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
+                    f"${NameConfig._id_column}": ctx_id,
                 },
                 commit_tx=True,
             )
             return (
                 (
-                    result_sets[0].rows[0][self._current_turn_id_column_name],
-                    result_sets[0].rows[0][self._created_at_column_name],
-                    result_sets[0].rows[0][self._updated_at_column_name],
-                    result_sets[0].rows[0][self._misc_column_name],
-                    result_sets[0].rows[0][self._framework_data_column_name],
+                    result_sets[0].rows[0][NameConfig._current_turn_id_column],
+                    result_sets[0].rows[0][NameConfig._created_at_column],
+                    result_sets[0].rows[0][NameConfig._updated_at_column],
+                    result_sets[0].rows[0][NameConfig._misc_column],
+                    result_sets[0].rows[0][NameConfig._framework_data_column],
                 )
                 if len(result_sets[0].rows) > 0
                 else None
@@ -176,24 +176,24 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session: Session) -> None:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
-                DECLARE ${self._current_turn_id_column_name} AS Uint64;
-                DECLARE ${self._created_at_column_name} AS Uint64;
-                DECLARE ${self._updated_at_column_name} AS Uint64;
-                DECLARE ${self._misc_column_name} AS String;
-                DECLARE ${self._framework_data_column_name} AS String;
-                UPSERT INTO {self.main_table} ({self._id_column_name}, {self._current_turn_id_column_name}, {self._created_at_column_name}, {self._updated_at_column_name}, {self._misc_column_name}, {self._framework_data_column_name})
-                VALUES (${self._id_column_name}, ${self._current_turn_id_column_name}, ${self._created_at_column_name}, ${self._updated_at_column_name}, ${self._misc_column_name}, ${self._framework_data_column_name});
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                DECLARE ${NameConfig._current_turn_id_column} AS Uint64;
+                DECLARE ${NameConfig._created_at_column} AS Uint64;
+                DECLARE ${NameConfig._updated_at_column} AS Uint64;
+                DECLARE ${NameConfig._misc_column} AS String;
+                DECLARE ${NameConfig._framework_data_column} AS String;
+                UPSERT INTO {self.main_table} ({NameConfig._id_column}, {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column})
+                VALUES (${NameConfig._id_column}, ${NameConfig._current_turn_id_column}, ${NameConfig._created_at_column}, ${NameConfig._updated_at_column}, ${NameConfig._misc_column}, ${NameConfig._framework_data_column});
                 """  # noqa: E501
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
-                    f"${self._current_turn_id_column_name}": turn_id,
-                    f"${self._created_at_column_name}": crt_at,
-                    f"${self._updated_at_column_name}": upd_at,
-                    f"${self._misc_column_name}": misc,
-                    f"${self._framework_data_column_name}": fw_data,
+                    f"${NameConfig._id_column}": ctx_id,
+                    f"${NameConfig._current_turn_id_column}": turn_id,
+                    f"${NameConfig._created_at_column}": crt_at,
+                    f"${NameConfig._updated_at_column}": upd_at,
+                    f"${NameConfig._misc_column}": misc,
+                    f"${NameConfig._framework_data_column}": fw_data,
                 },
                 commit_tx=True,
             )
@@ -205,14 +205,14 @@ class YDBContextStorage(DBContextStorage):
             async def callee(session: Session) -> None:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
-                    DECLARE ${self._id_column_name} AS Utf8;
+                    DECLARE ${NameConfig._id_column} AS Utf8;
                     DELETE FROM {table_name}
-                    WHERE {self._id_column_name} = ${self._id_column_name};
+                    WHERE {NameConfig._id_column} = ${NameConfig._id_column};
                     """  # noqa: E501
                 await session.transaction(SerializableReadWrite()).execute(
                     await session.prepare(query),
                     {
-                        f"${self._id_column_name}": ctx_id,
+                        f"${NameConfig._id_column}": ctx_id,
                     },
                     commit_tx=True,
                 )
@@ -240,23 +240,23 @@ class YDBContextStorage(DBContextStorage):
                 key = f"AND {self._KEY_VAR} IN ({', '.join(values)})"
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
+                DECLARE ${NameConfig._id_column} AS Utf8;
                 {" ".join(declare)}
-                SELECT {self._key_column_name}, {field_name}
+                SELECT {NameConfig._key_column}, {field_name}
                 FROM {self.turns_table}
-                WHERE {self._id_column_name} = ${self._id_column_name} AND {field_name} IS NOT NULL {key}
-                ORDER BY {self._key_column_name} DESC {limit};
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL {key}
+                ORDER BY {NameConfig._key_column} DESC {limit};
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
+                    f"${NameConfig._id_column}": ctx_id,
                     **prepare,
                 },
                 commit_tx=True,
             )
             return (
-                [(e[self._key_column_name], e[field_name]) for e in result_sets[0].rows]
+                [(e[NameConfig._key_column], e[field_name]) for e in result_sets[0].rows]
                 if len(result_sets[0].rows) > 0
                 else list()
             )
@@ -267,19 +267,19 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session: Session) -> List[int]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
-                SELECT {self._key_column_name}
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                SELECT {NameConfig._key_column}
                 FROM {self.turns_table}
-                WHERE {self._id_column_name} = ${self._id_column_name} AND {field_name} IS NOT NULL;
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL;
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
+                    f"${NameConfig._id_column}": ctx_id,
                 },
                 commit_tx=True,
             )
-            return [e[self._key_column_name] for e in result_sets[0].rows] if len(result_sets[0].rows) > 0 else list()
+            return [e[NameConfig._key_column] for e in result_sets[0].rows] if len(result_sets[0].rows) > 0 else list()
 
         return await self.pool.retry_operation(callee)
 
@@ -291,23 +291,23 @@ class YDBContextStorage(DBContextStorage):
                 prepare.update({f"${self._KEY_VAR}_{i}": k})
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
+                DECLARE ${NameConfig._id_column} AS Utf8;
                 {" ".join(declare)}
-                SELECT {self._key_column_name}, {field_name}
+                SELECT {NameConfig._key_column}, {field_name}
                 FROM {self.turns_table}
-                WHERE {self._id_column_name} = ${self._id_column_name} AND {field_name} IS NOT NULL
-                AND {self._key_column_name} IN ({", ".join(prepare.keys())});
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL
+                AND {NameConfig._key_column} IN ({", ".join(prepare.keys())});
                 """  # noqa: E501
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
+                    f"${NameConfig._id_column}": ctx_id,
                     **prepare,
                 },
                 commit_tx=True,
             )
             return (
-                [(e[self._key_column_name], e[field_name]) for e in result_sets[0].rows]
+                [(e[NameConfig._key_column], e[field_name]) for e in result_sets[0].rows]
                 if len(result_sets[0].rows) > 0
                 else list()
             )
@@ -326,19 +326,19 @@ class YDBContextStorage(DBContextStorage):
                     value_param = f"${field_name}_{i}"
                 else:
                     value_param = "NULL"
-                values += [f"(${self._id_column_name}, ${self._KEY_VAR}_{i}, {value_param})"]
+                values += [f"(${NameConfig._id_column}, ${self._KEY_VAR}_{i}, {value_param})"]
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${self._id_column_name} AS Utf8;
+                DECLARE ${NameConfig._id_column} AS Utf8;
                 {" ".join(declare)}
-                UPSERT INTO {self.turns_table} ({self._id_column_name}, {self._key_column_name}, {field_name})
+                UPSERT INTO {self.turns_table} ({NameConfig._id_column}, {NameConfig._key_column}, {field_name})
                 VALUES {", ".join(values)};
                 """  # noqa: E501
 
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._id_column_name}": ctx_id,
+                    f"${NameConfig._id_column}": ctx_id,
                     **prepare,
                 },
                 commit_tx=True,
