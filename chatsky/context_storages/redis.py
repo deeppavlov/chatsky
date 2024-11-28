@@ -52,10 +52,10 @@ class RedisContextStorage(DBContextStorage):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
         key_prefix: str = "chatsky_keys",
     ):
-        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")

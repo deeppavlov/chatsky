@@ -22,9 +22,9 @@ class MemoryContextStorage(DBContextStorage):
         self,
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
     ):
-        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
         self._main_storage = dict()
         self._aux_storage = {
             NameConfig._labels_field: dict(),

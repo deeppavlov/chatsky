@@ -49,10 +49,10 @@ class MongoContextStorage(DBContextStorage):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
         collection_prefix: str = "chatsky_collection",
     ):
-        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")

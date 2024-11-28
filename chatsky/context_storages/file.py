@@ -45,9 +45,9 @@ class FileContextStorage(DBContextStorage, ABC):
         self,
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
     ):
-        DBContextStorage.__init__(self, path, rewrite_existing, configuration)
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
     @property
     def is_concurrent(self):
@@ -159,10 +159,10 @@ class ShelveContextStorage(FileContextStorage):
         self,
         path: str = "",
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
     ):
         self._storage = None
-        FileContextStorage.__init__(self, path, rewrite_existing, configuration)
+        FileContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
     async def _save(self, data: SerializableStorage) -> None:
         self._storage[self._SHELVE_ROOT] = data.model_dump()

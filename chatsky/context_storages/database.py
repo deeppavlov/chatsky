@@ -48,10 +48,10 @@ class DBContextStorage(ABC):
         self,
         path: str,
         rewrite_existing: bool = False,
-        configuration: Optional[_SUBSCRIPT_DICT] = None,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
     ):
         _, _, file_path = path.partition("://")
-        configuration = configuration if configuration is not None else dict()
+        configuration = partial_read_config if partial_read_config is not None else dict()
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
         self.path = Path(file_path)
