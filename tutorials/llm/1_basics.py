@@ -10,7 +10,7 @@ Chatsky uses langchain under the hood to connect to the remote models.
 # %pip install chatsky[llm] langchain-openai
 
 # %%
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from chatsky.core.message import Message
 from chatsky import (
     TRANSITIONS,
@@ -27,7 +27,11 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
 """
@@ -45,7 +49,7 @@ that the model will use as the history. Default value is `5`.
 
 # %%
 model = LLM_API(
-    ChatOllama(model="phi3:instruct", temperature=0),
+    ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key),
     system_prompt="You are an experienced barista in a local coffeshop. "
     "Answer your customer's questions about coffee and barista work.",
 )

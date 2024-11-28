@@ -25,7 +25,6 @@ model's behavior.
 """
 
 # %pip install chatsky[llm] langchain-openai
-
 # %%
 
 
@@ -43,13 +42,17 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
 """
@@ -67,7 +70,7 @@ using `MISC` for storing multiple prompts.
 # this `system_prompt` will be always on the top of the history
 # during models response
 model = LLM_API(
-    ChatOllama(model="phi3:instruct", temperature=0),
+    ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key),
     system_prompt="You will represent different bank workers. "
     "Answer users' questions according to your role.",
 )

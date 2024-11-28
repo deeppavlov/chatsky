@@ -6,7 +6,7 @@ Wrapper around langchain.
 
 from typing import Union, Type, Optional
 from pydantic import BaseModel
-
+import logging
 from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.methods import BaseMethod
@@ -45,8 +45,10 @@ class LLM_API:
             return Message(text=result)
         elif issubclass(message_schema, Message):
             # Case if the message_schema describes Message structure
-            structured_model = self.model.with_structured_output(message_schema)
-            return Message.model_validate(await structured_model.ainvoke(history))
+            structured_model = self.model.with_structured_output(message_schema, method="json_mode")
+            model_result = await structured_model.ainvoke(history)
+            logging.debug(f"Generated response: {model_result}")
+            return Message.model_validate(model_result)
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema describes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)

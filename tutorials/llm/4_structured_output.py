@@ -2,9 +2,11 @@
 """
 # LLM: 4. Structured Output
 
-Sometimes, we want to output structured data, such as a valid JSON object or
-want to automatically fill particular fields in the output Message.
-In Chatsky we can do that using Structured Output.
+Chatsky provides two powerful ways to get structured output from LLMs:
+1. Using BaseModel to get structured text content (like JSON)
+2. Using Message subclass to add metadata to messages
+
+This tutorial demonstrates both approaches with practical examples.
 """
 
 # %pip install chatsky[llm] langchain-openai langchain-anthropic
@@ -17,53 +19,45 @@ from chatsky import (
     Pipeline,
     Transition as Tr,
     conditions as cnd,
-    destinations as dst,
 )
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
+from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 
 
-from langchain_core.pydantic_v1 import BaseModel, Field
 
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
-# %% [markdown]
-"""
-In this tutorial we will define two models.
-"""
-# %%
-assistant_model = LLM_API(ChatOllama(model="llama3.2:1b", temperature=0))
+# Initialize our models
 movie_model = LLM_API(
-    ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0)
+    ChatAnthropic(model="claude-3.5-sonnet", api_key=anthropic_api_key), 
+    temperature=0
+)
+review_model = LLM_API(
+    ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, temperature=0),
 )
 
-# %% [markdown]
-"""
-For the structured output we will use two classes to show two possible ways of
-using `message_schema` in responses.
-The `Movie`, inherited from the `BaseModel` will act as a schema for the
-response _text_, that will contain valid JSON containing desribed information.
-The `ImportantMessage`, inherited from the `Message` class, will otherwise
-define the fields of the output `Message`. In this example we will use this
-to mark the message as important.
-"""
-
-
-# %%
+# Define structured output schemas
 class Movie(BaseModel):
     name: str = Field(description="Name of the movie")
     genre: str = Field(description="Genre of the movie")
     plot: str = Field(description="Plot of the movie in chapters")
     cast: list = Field(description="List of the actors")
 
-
-class ImportantMessage(Message):
-    text: str = Field(description="Text of the note")
+class MovieReview(Message):
+    """Schema for movie reviews (uses Message.misc for metadata)"""
+    text: str = Field(description="The actual review text")
     misc: dict = Field(
-        description="A dictionary with 'important' "
-        "key and true/false value in it"
+        description="A dictionary with the following keys and values:"
+        "k: rating v [int]: number between 0 and 5, "
+        "k: spoiler_alert v [boolean]: is there a spoilers in this review"
     )
 
 
@@ -72,41 +66,42 @@ class ImportantMessage(Message):
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(
-                dst=("greeting_flow", "start_node"),
-                cnd=cnd.ExactMatch("/start"),
-            ),
-            Tr(dst=("movie_flow", "main_node"), cnd=cnd.ExactMatch("/movie")),
-            Tr(dst=("note_flow", "main_node"), cnd=cnd.ExactMatch("/note")),
+            Tr(dst=("greeting_flow", "start_node"), cnd=cnd.ExactMatch("/start")),
+            Tr(dst=("movie_flow", "create"), cnd=cnd.ExactMatch("/create")),
+            Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review \w*")),
         ]
     },
     "greeting_flow": {
         "start_node": {
-            RESPONSE: Message(),
+            RESPONSE: Message(
+                "Welcome to MovieBot! Try:\n"
+                "/create - Create a movie idea\n"
+                "/review - Write a movie review"
+            ),
         },
         "fallback_node": {
-            RESPONSE: Message("I did not quite understand you..."),
+            RESPONSE: Message("I didn't understand. Try /create or /review"),
             TRANSITIONS: [Tr(dst="start_node")],
         },
     },
     "movie_flow": {
-        "main_node": {
+        "create": {
             RESPONSE: LLMResponse(
-                "movie_model",
-                prompt="Ask user to request you for movie ideas.",
+                model_name="movie_model",
+                prompt="Create a movie idea for the user.",
                 message_schema=Movie,
             ),
-            TRANSITIONS: [Tr(dst=dst.Current())],
-        }
-    },
-    "note_flow": {
-        "main_node": {
+            TRANSITIONS: [Tr(dst=("greeting_flow", "start_node"))],
+        },
+        "review": {
             RESPONSE: LLMResponse(
-                "note_model",
-                prompt="Help user take notes and mark the important ones.",
-                message_schema=ImportantMessage,
+                model_name="review_model",
+                prompt="Generate a movie review based on user's input. "
+                "Include rating, and mark if it contains spoilers. "
+                "Use JSON with the `text` and `misc` fields to produce the output.",
+                message_schema=MovieReview,
             ),
-            TRANSITIONS: [Tr(dst=dst.Current())],
+            TRANSITIONS: [Tr(dst=("greeting_flow", "start_node"))],
         }
     },
 }
@@ -116,7 +111,10 @@ pipeline = Pipeline(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    models={"movie_model": movie_model, "note_model": assistant_model},
+    models={
+        "movie_model": movie_model,
+        "review_model": review_model
+    },
 )
 
 if __name__ == "__main__":
