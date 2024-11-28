@@ -54,9 +54,9 @@ Note that we are passing the name of the model
 """
 
 # %%
-slot_model = LLM_API(ChatOpenAI(
-    model="gpt-4o-mini", api_key=openai_api_key, temperature=0
-))
+slot_model = LLM_API(
+    ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, temperature=0)
+)
 
 SLOTS = {
     "person": LLMGroupSlot(
@@ -108,9 +108,7 @@ pipeline = Pipeline(
     start_label=("user_flow", "start"),
     fallback_label=("user_flow", "repeat_question"),
     slots=SLOTS,
-    models={
-        "slot_model": slot_model
-    }
+    models={"slot_model": slot_model},
 )
 
 

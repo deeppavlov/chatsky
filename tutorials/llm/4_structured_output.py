@@ -30,19 +30,19 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 
-
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
 # Initialize our models
 movie_model = LLM_API(
-    ChatAnthropic(model="claude-3.5-sonnet", api_key=anthropic_api_key), 
-    temperature=0
+    ChatAnthropic(model="claude-3.5-sonnet", api_key=anthropic_api_key),
+    temperature=0,
 )
 review_model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, temperature=0),
 )
+
 
 # Define structured output schemas
 class Movie(BaseModel):
@@ -51,8 +51,10 @@ class Movie(BaseModel):
     plot: str = Field(description="Plot of the movie in chapters")
     cast: list = Field(description="List of the actors")
 
+
 class MovieReview(Message):
     """Schema for movie reviews (uses Message.misc for metadata)"""
+
     text: str = Field(description="The actual review text")
     misc: dict = Field(
         description="A dictionary with the following keys and values:"
@@ -66,7 +68,10 @@ class MovieReview(Message):
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("greeting_flow", "start_node"), cnd=cnd.ExactMatch("/start")),
+            Tr(
+                dst=("greeting_flow", "start_node"),
+                cnd=cnd.ExactMatch("/start"),
+            ),
             Tr(dst=("movie_flow", "create"), cnd=cnd.ExactMatch("/create")),
             Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review \w*")),
         ]
@@ -102,7 +107,7 @@ script = {
                 message_schema=MovieReview,
             ),
             TRANSITIONS: [Tr(dst=("greeting_flow", "start_node"))],
-        }
+        },
     },
 }
 
@@ -111,10 +116,7 @@ pipeline = Pipeline(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    models={
-        "movie_model": movie_model,
-        "review_model": review_model
-    },
+    models={"movie_model": movie_model, "review_model": review_model},
 )
 
 if __name__ == "__main__":

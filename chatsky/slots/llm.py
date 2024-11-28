@@ -12,13 +12,7 @@ import logging
 
 from pydantic import BaseModel, Field, create_model
 
-from chatsky.slots.slots import (
-    ValueSlot, 
-    SlotNotExtracted, 
-    GroupSlot, 
-    ExtractedGroupSlot, 
-    ExtractedValueSlot
-)
+from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -70,9 +64,7 @@ class LLMGroupSlot(GroupSlot):
         flat_items = self._flatten_llm_group_slot(self)
         captions = {}
         for child_name, slot_item in flat_items.items():
-            captions[child_name] = (slot_item.return_type, 
-                                    Field(description=slot_item.caption, 
-                                    default=None))
+            captions[child_name] = (slot_item.return_type, Field(description=slot_item.caption, default=None))
 
         logger.debug(f"Flattened group slot: {flat_items}")
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
@@ -85,8 +77,7 @@ class LLMGroupSlot(GroupSlot):
         logger.debug(f"Result JSON: {result_json}")
 
         res = {
-            name: ExtractedValueSlot.model_construct(is_slot_extracted=True, 
-                                                     extracted_value=result_json[name])
+            name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
             for name in result_json
             if result_json[name] is not None or not self.allow_partial_extraction
         }

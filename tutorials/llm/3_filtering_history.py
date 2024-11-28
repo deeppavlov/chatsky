@@ -88,10 +88,12 @@ toy_script = {
             ],
         },
         "main_node": {
-            RESPONSE: Message("Hi! I am your note taking assistant. "
-                              "Just send me your thoughts and if you need to "
-                              "rewind a bit just send /remind and I will send "
-                              "you a summary of your #important notes."),
+            RESPONSE: Message(
+                "Hi! I am your note taking assistant. "
+                "Just send me your thoughts and if you need to "
+                "rewind a bit just send /remind and I will send "
+                "you a summary of your #important notes."
+            ),
             TRANSITIONS: [
                 Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
                 Tr(dst=dst.Current()),
