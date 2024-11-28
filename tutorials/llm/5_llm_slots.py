@@ -24,13 +24,19 @@ from chatsky import (
     processing as proc,
     responses as rsp,
 )
-from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 from chatsky.utils.testing import (
     is_interactive_mode,
 )
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
+from chatsky.llm import LLM_API
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
 """
@@ -43,18 +49,20 @@ In the `LLMSlot.caption` parameter you should put description of a data piece
 you want to retrieve. More specific descriptions will yield better results,
 especially when using smaller models.
 
-Note that we are using `langchain_community.chat_models.openai.ChatOpenAI` and
-not `chatsky.llm.LLM_API` here.
+Note that we are passing the name of the model
+ from pipeline.models dictionary to LLMGroupSlot.model field.
 """
 
 # %%
-model = ChatOllama(model="kuqoi/qwen2-tools:latest", temperature=0)
+slot_model = LLM_API(ChatOpenAI(
+    model="gpt-4o-mini", api_key=openai_api_key, temperature=0
+))
 
 SLOTS = {
     "person": LLMGroupSlot(
         username=LLMSlot(caption="User's username in uppercase"),
         job=LLMSlot(caption="User's occupation, job, profession"),
-        model=model,
+        model="slot_model",
     )
 }
 
@@ -100,6 +108,9 @@ pipeline = Pipeline(
     start_label=("user_flow", "start"),
     fallback_label=("user_flow", "repeat_question"),
     slots=SLOTS,
+    models={
+        "slot_model": slot_model
+    }
 )
 
 
