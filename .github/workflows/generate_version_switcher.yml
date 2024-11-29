@@ -24,6 +24,10 @@ jobs:
         run: python -m pip install GitPython
 
       - name: generate version switcher
+        env:
+          VERSION_SWITCHER_STARTING_TAG: ${{ vars.VERSION_SWITCHER_STARTING_TAG }}
+          VERSION_SWITCHER_TAG_BLACKLIST: ${{ vars.VERSION_SWITCHER_TAG_BLACKLIST }}
+          VERSION_SWITCHER_TAG_WHITELIST: ${{ vars.VERSION_SWITCHER_TAG_WHITELIST }}
         run: |
           python ./scripts/switcher_gen.py
 
