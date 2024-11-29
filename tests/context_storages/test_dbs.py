@@ -19,6 +19,7 @@ from chatsky.context_storages import (
     mongo_available,
     ydb_available,
 )
+from chatsky.core.context import FrameworkData
 from chatsky.utils.testing.cleanup_db import (
     delete_file,
     delete_mongo,
@@ -28,7 +29,7 @@ from chatsky.utils.testing.cleanup_db import (
 )
 from chatsky import Pipeline
 from chatsky.context_storages import DBContextStorage
-from chatsky.context_storages.database import _SUBSCRIPT_TYPE
+from chatsky.context_storages.database import _SUBSCRIPT_TYPE, ContextInfo
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_path
 
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -167,7 +168,7 @@ class TestContextStorages:
     @pytest.fixture
     async def add_context(self, db):
         async def add_context(ctx_id: str):
-            await db.update_main_info(ctx_id, 1, 1, 1, b"1", b"1")
+            await db.update_main_info(ctx_id, ContextInfo(turn_id=1, created_at=1, updated_at=1))
             await db.update_field_items(ctx_id, "labels", [(0, b"0")])
 
         yield add_context
@@ -198,18 +199,18 @@ class TestContextStorages:
 
     async def test_get_main_info(self, db: DBContextStorage, add_context):
         await add_context("1")
-        assert await db.load_main_info("1") == (1, 1, 1, b"1", b"1")
+        assert await db.load_main_info("1") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
         assert await db.load_main_info("2") is None
 
     async def test_update_main_info(self, db: DBContextStorage, add_context):
         await add_context("1")
         await add_context("2")
-        assert await db.load_main_info("1") == (1, 1, 1, b"1", b"1")
-        assert await db.load_main_info("2") == (1, 1, 1, b"1", b"1")
+        assert await db.load_main_info("1") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
+        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
-        await db.update_main_info("1", 2, 1, 3, b"4", b"5")
-        assert await db.load_main_info("1") == (2, 1, 3, b"4", b"5")
-        assert await db.load_main_info("2") == (1, 1, 1, b"1", b"1")
+        await db.update_main_info("1", ContextInfo(turn_id=2, created_at=1, updated_at=3))
+        assert await db.load_main_info("1") == ContextInfo(turn_id=2, created_at=1, updated_at=3)
+        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
     async def test_wrong_field_name(self, db: DBContextStorage):
         with pytest.raises(
@@ -298,7 +299,7 @@ class TestContextStorages:
         await db.delete_context("1")
 
         assert await db.load_main_info("1") is None
-        assert await db.load_main_info("2") == (1, 1, 1, b"1", b"1")
+        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
         assert set(await db.load_field_keys("1", "labels")) == set()
         assert set(await db.load_field_keys("2", "labels")) == {0}
@@ -307,11 +308,11 @@ class TestContextStorages:
     async def test_concurrent_operations(self, db: DBContextStorage):
         async def db_operations(key: int):
             str_key = str(key)
-            byte_key = bytes(key)
+            key_misc = {f"{key}": key + 2}
             await asyncio.sleep(random.random() / 100)
-            await db.update_main_info(str_key, key, key + 1, key, byte_key, byte_key)
+            await db.update_main_info(str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc))
             await asyncio.sleep(random.random() / 100)
-            assert await db.load_main_info(str_key) == (key, key + 1, key, byte_key, byte_key)
+            assert await db.load_main_info(str_key) == ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc)
 
             for idx in range(1, 20):
                 await db.update_field_items(str_key, "requests", [(0, bytes(2 * key + idx)), (idx, bytes(key + idx))])

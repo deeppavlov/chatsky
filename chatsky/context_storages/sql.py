@@ -21,7 +21,7 @@ from typing import Callable, Collection, List, Optional, Set, Tuple
 import logging
 
 from chatsky.utils.logging import collapse_num_list
-from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -211,23 +211,22 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         stmt = select(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
-            return None if result is None else result[1:]
+            return None if result is None else ContextInfo.model_validate({"turn_id": result[1], "created_at": result[2], "updated_at": result[3], "misc": result[4], "framework_data": result[5]})
 
-    async def _update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+        ctx_info_dump = ctx_info.model_dump(mode="python")
         insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
                 NameConfig._id_column: ctx_id,
-                NameConfig._current_turn_id_column: turn_id,
-                NameConfig._created_at_column: crt_at,
-                NameConfig._updated_at_column: upd_at,
-                NameConfig._misc_column: misc,
-                NameConfig._framework_data_column: fw_data,
+                NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                NameConfig._created_at_column: ctx_info_dump["created_at"],
+                NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                NameConfig._misc_column: ctx_info_dump["misc"],
+                NameConfig._framework_data_column: ctx_info_dump["framework_data"],
             }
         )
         update_stmt = _get_upsert_stmt(

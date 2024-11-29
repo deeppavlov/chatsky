@@ -13,7 +13,7 @@ from typing import List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT
 
 try:
     from aiofiles import open
@@ -28,7 +28,7 @@ except ImportError:
 
 
 class SerializableStorage(BaseModel):
-    main: Dict[str, Tuple[int, int, int, bytes, bytes]] = Field(default_factory=dict)
+    main: Dict[str, ContextInfo] = Field(default_factory=dict)
     turns: List[Tuple[str, str, int, Optional[bytes]]] = Field(default_factory=list)
 
 
@@ -65,12 +65,12 @@ class FileContextStorage(DBContextStorage, ABC):
         await super().connect()
         await self._load()
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         return (await self._load()).main.get(ctx_id, None)
 
-    async def _update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         storage = await self._load()
-        storage.main[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
+        storage.main[ctx_id] = ctx_info
         await self._save(storage)
 
     async def _delete_context(self, ctx_id: str) -> None:

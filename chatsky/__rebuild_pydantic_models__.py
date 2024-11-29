@@ -5,11 +5,12 @@ from chatsky.core import Context, Script
 from chatsky.core.script import Node
 from chatsky.core.pipeline import Pipeline
 from chatsky.slots.slots import SlotManager
-from chatsky.context_storages import DBContextStorage
+from chatsky.context_storages import DBContextStorage, ContextInfo
 from chatsky.core.ctx_dict import ContextDict
 from chatsky.core.context import FrameworkData, ServiceState
 from chatsky.core.service import PipelineComponent
 
+ContextInfo.model_rebuild()
 ContextDict.model_rebuild()
 PipelineComponent.model_rebuild()
 Pipeline.model_rebuild()

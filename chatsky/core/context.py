@@ -25,11 +25,11 @@ import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
 
-from chatsky.context_storages.database import DBContextStorage, NameConfig
+from chatsky.context_storages.database import DBContextStorage, ContextInfo, NameConfig
 from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
-from chatsky.core.ctx_dict import ContextDict, LabelContextDict, MessageContextDict
+from chatsky.core.ctx_dict import LabelContextDict, MessageContextDict
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
@@ -163,9 +163,11 @@ class Context(BaseModel):
                 fw_data = FrameworkData()
                 labels[0] = start_label
             else:
-                turn_id, crt_at, upd_at, misc, fw_data = main
-                misc = TypeAdapter(Dict[str, Any]).validate_json(misc)
-                fw_data = FrameworkData.model_validate_json(fw_data)
+                turn_id = main.turn_id
+                crt_at = main.created_at
+                upd_at = main.updated_at
+                misc = main.misc
+                fw_data = main.framework_data
             logger.debug(f"Context loaded with turns number: {len(labels)}")
             instance = cls(
                 id=id,
@@ -270,12 +272,8 @@ class Context(BaseModel):
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
-            misc_byted = TypeAdapter(Dict[str, Any]).dump_json(self.misc)
-            fw_data_byted = self.framework_data.model_dump_json().encode()
             await gather(
-                self._storage.update_main_info(
-                    self.id, self.current_turn_id, self._created_at, self._updated_at, misc_byted, fw_data_byted
-                ),
+                self._storage.update_main_info(self.id, ContextInfo(turn_id=self.current_turn_id, created_at=self._created_at, updated_at=self._updated_at, misc=self.misc, framework_data=self.framework_data)),
                 self.labels.store(),
                 self.requests.store(),
                 self.responses.store(),

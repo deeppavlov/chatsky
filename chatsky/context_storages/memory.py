@@ -1,6 +1,6 @@
 from typing import List, Optional, Set, Tuple
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -32,13 +32,11 @@ class MemoryContextStorage(DBContextStorage):
             NameConfig._responses_field: dict(),
         }
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         return self._main_storage.get(ctx_id, None)
 
-    async def _update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
-        self._main_storage[ctx_id] = (turn_id, crt_at, upd_at, misc, fw_data)
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+        self._main_storage[ctx_id] = ctx_info
 
     async def _delete_context(self, ctx_id: str) -> None:
         self._main_storage.pop(ctx_id, None)

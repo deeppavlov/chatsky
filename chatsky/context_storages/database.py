@@ -14,11 +14,17 @@ from functools import wraps
 from importlib import import_module
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
+from time import time_ns
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
+
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, ValidationError, field_serializer, field_validator
 
 from chatsky.utils.logging import collapse_num_list
 
 from .protocol import PROTOCOLS
+
+if TYPE_CHECKING:
+    from chatsky.core.context import FrameworkData
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int]
 _SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], Union[_SUBSCRIPT_TYPE]]
@@ -39,6 +45,44 @@ class NameConfig:
     _labels_field: Literal["labels"] = "labels"
     _requests_field: Literal["requests"] = "requests"
     _responses_field: Literal["responses"] = "responses"
+
+
+class ContextInfo(BaseModel):
+    turn_id: int
+    created_at: int = Field(default_factory=time_ns)
+    updated_at: int = Field(default_factory=time_ns)
+    misc: Dict[str, Any] = Field(default_factory=dict)
+    framework_data: FrameworkData = Field(default_factory=FrameworkData)
+
+    _misc_adaptor: TypeAdapter[Dict[str, Any]] = PrivateAttr(default=TypeAdapter(Dict[str, Any]))
+
+    @field_validator("misc")
+    @classmethod
+    def _validate_misc(cls, value: Any) -> Dict[str, Any]:
+        if isinstance(value, Dict):
+            return value
+        elif isinstance(value, bytes) or isinstance(value, str):
+            return cls._misc_adaptor.validate_json(value)
+        else:
+            raise ValidationError(f"Value of type {type(value).__name__} can not be validated as misc!")
+
+    @field_validator("framework_data")
+    @classmethod
+    def _validate_framework_data(cls, value: Any) -> FrameworkData:
+        if isinstance(value, FrameworkData):
+            return value
+        elif isinstance(value, bytes) or isinstance(value, str):
+            return FrameworkData.model_validate_json(value)
+        else:
+            raise ValidationError(f"Value of type {type(value).__name__} can not be validated as framework data!")
+    
+    @field_serializer("misc", when_used="always")
+    def _serialize_misc(self, misc: Dict[str, Any]) -> bytes:
+        return self._misc_adaptor.dump_json(misc)
+    
+    @field_serializer("framework_data", when_used="always")
+    def serialize_courses_in_order(self, framework_data: FrameworkData) -> bytes:
+        return framework_data.model_dump_json().encode()
 
 
 class DBContextStorage(ABC):
@@ -97,11 +141,11 @@ class DBContextStorage(ABC):
         self.connected = True
 
     @abstractmethod
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         raise NotImplementedError
 
     @_lock
-    async def load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         """
         Load main information about the context.
         """
@@ -113,18 +157,18 @@ class DBContextStorage(ABC):
         return result
 
     @abstractmethod
-    async def _update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         raise NotImplementedError
 
     @_lock
-    async def update_main_info(self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes) -> None:
+    async def update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         """
         Update main information about the context.
         """
         if not self.connected:
             await self.connect()
         logger.debug(f"Updating main info for {ctx_id}...")
-        await self._update_main_info(ctx_id, turn_id, crt_at, upd_at, misc, fw_data)
+        await self._update_main_info(ctx_id, ctx_info)
         logger.debug(f"Main info updated for {ctx_id}")
 
     @abstractmethod

@@ -23,7 +23,7 @@ try:
 except ImportError:
     mongo_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 
@@ -70,7 +70,7 @@ class MongoContextStorage(DBContextStorage):
             self.turns_table.create_index([NameConfig._id_column, NameConfig._key_column], background=True, unique=True),
         )
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         result = await self.main_table.find_one(
             {NameConfig._id_column: ctx_id},
             [
@@ -82,30 +82,29 @@ class MongoContextStorage(DBContextStorage):
             ],
         )
         return (
-            (
-                result[NameConfig._current_turn_id_column],
-                result[NameConfig._created_at_column],
-                result[NameConfig._updated_at_column],
-                result[NameConfig._misc_column],
-                result[NameConfig._framework_data_column],
-            )
+            ContextInfo.model_validate({
+                "turn_id": result[NameConfig._current_turn_id_column],
+                "created_at": result[NameConfig._created_at_column],
+                "updated_at": result[NameConfig._updated_at_column],
+                "misc": result[NameConfig._misc_column],
+                "framework_data": result[NameConfig._framework_data_column],
+            })
             if result is not None
             else None
         )
 
-    async def _update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+        ctx_info_dump = ctx_info.model_dump(mode="python")
         await self.main_table.update_one(
             {NameConfig._id_column: ctx_id},
             {
                 "$set": {
                     NameConfig._id_column: ctx_id,
-                    NameConfig._current_turn_id_column: turn_id,
-                    NameConfig._created_at_column: crt_at,
-                    NameConfig._updated_at_column: upd_at,
-                    NameConfig._misc_column: misc,
-                    NameConfig._framework_data_column: fw_data,
+                    NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                    NameConfig._created_at_column: ctx_info_dump["created_at"],
+                    NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                    NameConfig._misc_column: ctx_info_dump["misc"],
+                    NameConfig._framework_data_column: ctx_info_dump["framework_data"],
                 }
             },
             upsert=True,

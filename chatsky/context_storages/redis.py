@@ -23,7 +23,7 @@ try:
 except ImportError:
     redis_available = False
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 
@@ -76,7 +76,7 @@ class RedisContextStorage(DBContextStorage):
     def _bytes_to_keys(keys: List[bytes]) -> List[int]:
         return [int(f.decode("utf-8")) for f in keys]
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
             cti, ca, ua, msc, fd = await gather(
                 self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column),
@@ -85,19 +85,18 @@ class RedisContextStorage(DBContextStorage):
                 self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._misc_column),
                 self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column),
             )
-            return (int(cti), int(ca), int(ua), msc, fd)
+            return ContextInfo.model_validate({"turn_id": cti, "created_at": ca, "updated_at": ua, "misc": msc, "framework_data": fd})
         else:
             return None
 
-    async def _update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+        ctx_info_dump = ctx_info.model_dump(mode="python")
         await gather(
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(turn_id)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(crt_at)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(upd_at)),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, misc),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, fw_data),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(ctx_info_dump["created_at"])),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(ctx_info_dump["updated_at"])),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, ctx_info_dump["misc"]),
+            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]),
         )
 
     async def _delete_context(self, ctx_id: str) -> None:

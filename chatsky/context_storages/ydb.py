@@ -15,7 +15,7 @@ from os.path import join
 from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
 
-from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -140,8 +140,8 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
-        async def callee(session: Session) -> Optional[Tuple[int, int, int, bytes, bytes]]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+        async def callee(session: Session) -> Optional[ContextInfo]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;
@@ -157,23 +157,22 @@ class YDBContextStorage(DBContextStorage):
                 commit_tx=True,
             )
             return (
-                (
-                    result_sets[0].rows[0][NameConfig._current_turn_id_column],
-                    result_sets[0].rows[0][NameConfig._created_at_column],
-                    result_sets[0].rows[0][NameConfig._updated_at_column],
-                    result_sets[0].rows[0][NameConfig._misc_column],
-                    result_sets[0].rows[0][NameConfig._framework_data_column],
-                )
+                ContextInfo.model_validate({
+                    "turn_id": result_sets[0].rows[0][NameConfig._current_turn_id_column],
+                    "created_at": result_sets[0].rows[0][NameConfig._created_at_column],
+                    "updated_at": result_sets[0].rows[0][NameConfig._updated_at_column],
+                    "misc": result_sets[0].rows[0][NameConfig._misc_column],
+                    "framework_data": result_sets[0].rows[0][NameConfig._framework_data_column],
+                })
                 if len(result_sets[0].rows) > 0
                 else None
             )
 
         return await self.pool.retry_operation(callee)
 
-    async def _update_main_info(
-        self, ctx_id: str, turn_id: int, crt_at: int, upd_at: int, misc: bytes, fw_data: bytes
-    ) -> None:
+    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         async def callee(session: Session) -> None:
+            ctx_info_dump = ctx_info.model_dump(mode="python")
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;
@@ -189,11 +188,11 @@ class YDBContextStorage(DBContextStorage):
                 await session.prepare(query),
                 {
                     f"${NameConfig._id_column}": ctx_id,
-                    f"${NameConfig._current_turn_id_column}": turn_id,
-                    f"${NameConfig._created_at_column}": crt_at,
-                    f"${NameConfig._updated_at_column}": upd_at,
-                    f"${NameConfig._misc_column}": misc,
-                    f"${NameConfig._framework_data_column}": fw_data,
+                    f"${NameConfig._current_turn_id_column}": ctx_info_dump["turn_id"],
+                    f"${NameConfig._created_at_column}": ctx_info_dump["created_at"],
+                    f"${NameConfig._updated_at_column}": ctx_info_dump["updated_at"],
+                    f"${NameConfig._misc_column}": ctx_info_dump["misc"],
+                    f"${NameConfig._framework_data_column}": ctx_info_dump["framework_data"],
                 },
                 commit_tx=True,
             )
