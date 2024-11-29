@@ -36,6 +36,14 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
 
 
 def generate_version_switcher():
+    """
+    Generate switcher.json file for the PyData Sphinx Theme's version switcher button.
+
+    There are GitHub Actions variables which can dictate the start_version, and if certain versions should be
+    whitelisted or blacklisted.
+
+    Versions with 'rc', 'dev' or other postfixes are ignored, unless overridden with GitHub Actions variables.
+    """
     # Retrieve GitHub Actions variables and parse them
     start_version = os.getenv("VERSION_SWITCHER_STARTING_TAG", default="v0.8.0")
 
