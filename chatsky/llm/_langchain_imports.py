@@ -8,7 +8,7 @@ try:
     from langchain_core.outputs.llm_result import LLMResult
 
     langchain_available = True
-except ImportError:
+except ImportError: # pragma: no cover
     StrOutputParser = Any
     BaseChatModel = Any
     BaseMessage = Any
@@ -20,6 +20,6 @@ except ImportError:
     langchain_available = False
 
 
-def check_langchain_available():
+def check_langchain_available():    # pragma: no cover
     if not langchain_available:
         raise ImportError("Langchain is not available. Please install it with `pip install chatsky[llm]`.")
