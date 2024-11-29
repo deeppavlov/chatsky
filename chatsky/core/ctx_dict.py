@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from asyncio import gather
 from hashlib import sha256
 import logging
@@ -41,7 +41,7 @@ def get_hash(string: bytes) -> bytes:
     return sha256(string).digest()
 
 
-class ContextDict(BaseModel, Generic[K, V]):
+class ContextDict(ABC, BaseModel, Generic[K, V]):
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
     _keys: Set[K] = PrivateAttr(default_factory=set)
