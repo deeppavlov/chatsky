@@ -79,15 +79,11 @@ class YDBContextStorage(DBContextStorage):
         self._timeout = timeout
         self._endpoint = f"{protocol}://{netloc}"
 
-    async def connect(self):
-        await super().connect()
-        await self._init_drive(self._timeout, self._endpoint)
-
-    async def _init_drive(self, timeout: int, endpoint: str) -> None:
-        self._driver = Driver(endpoint=endpoint, database=self.database)
+    async def _connect(self) -> None:
+        self._driver = Driver(endpoint=self._endpoint, database=self.database)
         client_settings = self._driver.table_client._table_client_settings.with_allow_truncated_result(True)
         self._driver.table_client._table_client_settings = client_settings
-        await self._driver.wait(fail_fast=True, timeout=timeout)
+        await self._driver.wait(fail_fast=True, timeout=self._timeout)
 
         self.pool = SessionPool(self._driver, size=10)
 

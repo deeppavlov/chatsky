@@ -41,6 +41,8 @@ class FileContextStorage(DBContextStorage, ABC):
     :param serializer: Serializer that will be used for serializing contexts.
     """
 
+    is_concurrent: bool = False
+
     def __init__(
         self,
         path: str = "",
@@ -48,10 +50,6 @@ class FileContextStorage(DBContextStorage, ABC):
         partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
-
-    @property
-    def is_concurrent(self):
-        return not self.connected
 
     @abstractmethod
     async def _save(self, data: SerializableStorage) -> None:
@@ -61,8 +59,7 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load(self) -> SerializableStorage:
         raise NotImplementedError
 
-    async def connect(self):
-        await super().connect()
+    async def _connect(self):
         await self._load()
 
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:

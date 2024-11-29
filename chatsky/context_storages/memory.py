@@ -32,6 +32,9 @@ class MemoryContextStorage(DBContextStorage):
             NameConfig._responses_field: dict(),
         }
 
+    async def _connect(self):
+        pass
+
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         return self._main_storage.get(ctx_id, None)
 

@@ -63,8 +63,7 @@ class MongoContextStorage(DBContextStorage):
         self.main_table = db[f"{collection_prefix}_{NameConfig._main_table}"]
         self.turns_table = db[f"{collection_prefix}_{NameConfig._turns_table}"]
 
-    async def connect(self):
-        await super().connect()
+    async def _connect(self):
         await gather(
             self.main_table.create_index(NameConfig._id_column, background=True, unique=True),
             self.turns_table.create_index([NameConfig._id_column, NameConfig._key_column], background=True, unique=True),

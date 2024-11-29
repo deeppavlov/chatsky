@@ -185,8 +185,7 @@ class SQLContextStorage(DBContextStorage):
     def is_concurrent(self) -> bool:
         return self.dialect != "sqlite"
 
-    async def connect(self):
-        await super().connect()
+    async def _connect(self):
         async with self.engine.begin() as conn:
             for table in [self.main_table, self.turns_table]:
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):

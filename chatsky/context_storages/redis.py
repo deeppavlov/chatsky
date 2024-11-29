@@ -68,6 +68,9 @@ class RedisContextStorage(DBContextStorage):
         self._main_key = f"{key_prefix}:{NameConfig._main_table}"
         self._turns_key = f"{key_prefix}:{NameConfig._turns_table}"
 
+    async def _connect(self):
+        pass
+
     @staticmethod
     def _keys_to_bytes(keys: List[int]) -> List[bytes]:
         return [str(f).encode("utf-8") for f in keys]

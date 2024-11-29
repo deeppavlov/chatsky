@@ -80,15 +80,15 @@ class ContextInfo(BaseModel):
 
 
 def _lock(function: Callable[..., Awaitable[Any]]):
-        @wraps(function)
-        async def wrapped(self, *args, **kwargs):
-            if not self.is_concurrent:
-                async with self._sync_lock:
-                    return await function(self, *args, **kwargs)
-            else:
+    @wraps(function)
+    async def wrapped(self: DBContextStorage, *args, **kwargs):
+        if not self.is_concurrent or not self.connected:
+            async with self._sync_lock:
                 return await function(self, *args, **kwargs)
+        else:
+            return await function(self, *args, **kwargs)
 
-        return wrapped
+    return wrapped
 
 
 class DBContextStorage(ABC):
@@ -130,8 +130,13 @@ class DBContextStorage(ABC):
         else:
             return field_name
 
+    @abstractmethod
+    async def _connect(self) -> None:
+        raise NotImplementedError
+
     async def connect(self) -> None:
         logger.info(f"Connecting to context storage {type(self).__name__} ...")
+        await self._connect()
         self.connected = True
 
     @abstractmethod
@@ -246,6 +251,9 @@ class DBContextStorage(ABC):
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
 
+    async def _delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
+        await self._update_field_items(ctx_id, field_name, [(k, None) for k in keys])
+
     @_lock
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         """
@@ -257,7 +265,7 @@ class DBContextStorage(ABC):
         elif not self.connected:
             await self.connect()
         logger.debug(f"Deleting fields for {ctx_id}, {field_name}: {collapse_num_list(keys)}...")
-        await self._update_field_items(ctx_id, self._validate_field_name(field_name), [(k, None) for k in keys])
+        await self._delete_field_keys(ctx_id, self._validate_field_name(field_name), keys)
         logger.debug(f"Fields deleted for {ctx_id}, {field_name}")
 
     @abstractmethod
