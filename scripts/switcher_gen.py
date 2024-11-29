@@ -16,6 +16,8 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     :param start_version: The first version to allow through.
     """
     regex = re.compile(r"^v\d+\.\d+\.\d+$")
+    if re.match(regex, start_version) is None:
+        raise ValueError("Received start_version doesn't match the required regex for doc versions.")
     tag_list = list(filter(regex.match, tag_list))
     latest_tags = {}
     start_version = str(start_version).replace("v", "").split(".")
