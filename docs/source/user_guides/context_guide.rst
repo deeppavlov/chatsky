@@ -197,7 +197,7 @@ and the connection parameters, for example, *mongodb://admin:pass@localhost:2701
 
 The GitHub-based distribution of Chatsky includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
-distribution and to take advantage of the packaged :github_versioned_link:`docker compose file <compose.yml>`.
+distribution and to take advantage of the packaged :github_source_link:`docker compose file <compose.yml>`.
 
 .. code-block:: shell
   :linenos:
@@ -208,7 +208,7 @@ distribution and to take advantage of the packaged :github_versioned_link:`docke
   docker compose up mongo
 
 The images can be configured using the docker compose file or the
-:github_versioned_link:`environment file <.env_file>`,
+:github_source_link:`environment file <.env_file>`,
 also available in the distribution. Consult these files for more options.
 
 .. warning::

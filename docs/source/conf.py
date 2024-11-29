@@ -100,7 +100,7 @@ nbsphinx_prolog = f"""
 """
 
 extlinks = {
-    'github_versioned_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}%s", None),
+    'github_source_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}%s", None),
 }
 
 html_logo = "_static/images/Chatsky-full-dark.svg"
