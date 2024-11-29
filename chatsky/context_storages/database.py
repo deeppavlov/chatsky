@@ -8,8 +8,10 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import Lock
+from json import loads
 from functools import wraps
 from importlib import import_module
 from logging import getLogger
@@ -52,29 +54,16 @@ class ContextInfo(BaseModel):
     created_at: int = Field(default_factory=time_ns)
     updated_at: int = Field(default_factory=time_ns)
     misc: Dict[str, Any] = Field(default_factory=dict)
-    framework_data: FrameworkData = Field(default_factory=FrameworkData)
+    framework_data: FrameworkData = Field(default_factory=dict, validate_default=True)
 
     _misc_adaptor: TypeAdapter[Dict[str, Any]] = PrivateAttr(default=TypeAdapter(Dict[str, Any]))
 
-    @field_validator("misc")
+    @field_validator("framework_data", "misc", mode="before")
     @classmethod
-    def _validate_misc(cls, value: Any) -> Dict[str, Any]:
-        if isinstance(value, Dict):
-            return value
-        elif isinstance(value, bytes) or isinstance(value, str):
-            return cls._misc_adaptor.validate_json(value)
-        else:
-            raise ValidationError(f"Value of type {type(value).__name__} can not be validated as misc!")
-
-    @field_validator("framework_data")
-    @classmethod
-    def _validate_framework_data(cls, value: Any) -> FrameworkData:
-        if isinstance(value, FrameworkData):
-            return value
-        elif isinstance(value, bytes) or isinstance(value, str):
-            return FrameworkData.model_validate_json(value)
-        else:
-            raise ValidationError(f"Value of type {type(value).__name__} can not be validated as framework data!")
+    def _validate_framework_data(cls, value: Any) -> Dict:
+        if isinstance(value, bytes) or isinstance(value, str):
+            value = loads(value)
+        return value
     
     @field_serializer("misc", when_used="always")
     def _serialize_misc(self, misc: Dict[str, Any]) -> bytes:
@@ -83,6 +72,11 @@ class ContextInfo(BaseModel):
     @field_serializer("framework_data", when_used="always")
     def serialize_courses_in_order(self, framework_data: FrameworkData) -> bytes:
         return framework_data.model_dump_json().encode()
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BaseModel):
+            return self.model_dump() == other.model_dump()
+        return super().__eq__(other)
 
 
 class DBContextStorage(ABC):
