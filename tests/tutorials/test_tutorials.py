@@ -33,6 +33,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     # re.sub(r"chatsky(\[(.*)\])?==\{chatsky\}", r".\1", f"python -m pip install {deps}")
     versions_dict = InstallationCell.versions()
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
+        print(f"python -m pip install {deps}")
         venv.run(
             re.sub(r"chatsky\[(.*)\]==\{chatsky\}", r".[\1]", f"python -m pip install {deps}").format(**versions_dict),
             check_rc=True,
