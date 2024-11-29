@@ -57,6 +57,18 @@ class InstallationCell(ReplacePattern):
     pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)( # noqa: E501)?\n")
 
     @staticmethod
+    def replace_versions(cmd: str):
+        """
+        Replaces "{dependency}" with its "version" so that the cmd can install the right
+        dependency version required by tests or tutorials.
+
+        :param cmd: The installation command string to format.
+        :return: Formatted string.
+        """
+        versions_dict = InstallationCell.versions()
+        return cmd.format(**versions_dict)
+
+    @staticmethod
     @cache
     def versions() -> dict:
         """
@@ -71,13 +83,11 @@ class InstallationCell(ReplacePattern):
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
-        return replace_versions(
-            f"""
+        return f"""
 # %%
 # installing dependencies
-%pip install -q {matchobj.group(1)}
+%pip install -q {InstallationCell.replace_versions(matchobj.group(1))}
 """
-        )
 
 
 class DocumentationLink(ReplacePattern):
@@ -228,15 +238,3 @@ def py_percent_to_notebook(text: str):
     if jupytext is None:
         raise ModuleNotFoundError("`doc` dependencies are not installed.")
     return jupytext.reads(apply_replace_patterns(text), "py:percent")
-
-
-def replace_versions(cmd: str):
-    """
-    Replaces "{dependency}" with its "version" so that the cmd can install the right
-    dependency version required by tests or tutorials.
-
-    :param cmd: The installation command string to format.
-    :return: Formatted string.
-    """
-    versions_dict = InstallationCell.versions()
-    return cmd.format(**versions_dict)

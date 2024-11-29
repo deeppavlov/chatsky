@@ -8,7 +8,7 @@ import pytest
 if TYPE_CHECKING:
     from pytest_virtualenv import VirtualEnv
 
-from docs.source.utils.notebook import InstallationCell, replace_versions
+from docs.source.utils.notebook import InstallationCell
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
@@ -29,13 +29,11 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 
     with open(tutorial_path, "w") as fd:
         fd.write(tutorial_source_code)
-    # re.sub(r"chatsky\[(.*)\]==\{chatsky\}", r".[\1]", f"python -m pip install {deps}").format(**versions_dict),
-    # re.sub(r"chatsky(\[(.*)\])?==\{chatsky\}", r".\1", f"python -m pip install {deps}")
-    versions_dict = InstallationCell.versions()
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        print(f"python -m pip install {deps}")
         venv.run(
-            re.sub(r"chatsky\[(.*)\]==\{chatsky\}", r".[\1]", f"python -m pip install {deps}").format(**versions_dict),
+            InstallationCell.replace_versions(
+                f"python -m pip install {deps[0]}".replace("=={chatsky}", "").replace("chatsky", ".")
+            ),
             check_rc=True,
             cd=os.getcwd(),
         )
