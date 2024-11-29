@@ -238,4 +238,5 @@ def replace_versions(cmd: str):
     :param cmd: The installation command string to format.
     :return: Formatted string.
     """
-    return cmd.format(**InstallationCell.versions())
+    versions_dict = InstallationCell.versions()
+    return cmd.format(**versions_dict)
