@@ -53,7 +53,7 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
 class MessageFilter(BaseHistoryFilter):
     @abc.abstractmethod
     def call(self, ctx, message, model_name):
-        raise NotImplemented
+        raise NotImplementedError
 
     def __call__(self, ctx, request, response, model_name):
         return self.call(ctx, request, model_name) + self.call(ctx, response, model_name)

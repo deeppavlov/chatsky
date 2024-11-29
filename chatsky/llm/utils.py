@@ -8,7 +8,7 @@ import logging
 from typing import Literal, Union
 
 from chatsky.core.context import Context
-from chatsky.core.message import Image, Message
+from chatsky.core.message import Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter
 

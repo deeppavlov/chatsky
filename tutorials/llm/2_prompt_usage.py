@@ -42,7 +42,7 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
     BaseResponse,
-    Context
+    Context,
 )
 from langchain_openai import ChatOpenAI
 
@@ -80,11 +80,12 @@ model = LLM_API(
 # %% [markdown]
 """
 Chatsky enables you to use more complex prompts then a simple string in need be.
-In this example we create a VacantPlaces class, that can dynamically retrieve 
+In this example we create a VacantPlaces class, that can dynamically retrieve
 some external data and put them into the prompt.
 
 """
 # %%
+
 
 class VacantPlaces(BaseResponse):
     async def call(self, ctx: Context) -> str:
@@ -95,7 +96,8 @@ class VacantPlaces(BaseResponse):
 
     async def request_data(self) -> list[str]:
         # do come requests
-        return ['Java-developer', 'InfoSec-specialist']
+        return ["Java-developer", "InfoSec-specialist"]
+
 
 toy_script = {
     GLOBAL: {

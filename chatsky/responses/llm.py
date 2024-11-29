@@ -54,7 +54,9 @@ class LLMResponse(BaseResponse):
                         current_prompt = await current_prompt(ctx=ctx)
                         history_messages.append(await message_to_langchain(current_prompt, ctx=ctx, source="system"))
                     elif isinstance(current_prompt, str):
-                        history_messages.append(await message_to_langchain(Message(current_prompt), ctx=ctx, source="system"))
+                        history_messages.append(
+                            await message_to_langchain(Message(current_prompt), ctx=ctx, source="system")
+                        )
 
         # iterate over context to retrieve history messages
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):

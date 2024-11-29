@@ -73,7 +73,7 @@ script = {
                 cnd=cnd.ExactMatch("/start"),
             ),
             Tr(dst=("movie_flow", "create"), cnd=cnd.ExactMatch("/create")),
-            Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review \w*")),
+            Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review .*")),
         ]
     },
     "greeting_flow": {
@@ -103,7 +103,8 @@ script = {
                 model_name="review_model",
                 prompt="Generate a movie review based on user's input. "
                 "Include rating, and mark if it contains spoilers. "
-                "Use JSON with the `text` and `misc` fields to produce the output.",
+                "Use JSON with the `text` and `misc` fields"
+                " to produce the output.",
                 message_schema=MovieReview,
             ),
             TRANSITIONS: [Tr(dst=("greeting_flow", "start_node"))],

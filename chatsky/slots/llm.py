@@ -7,7 +7,7 @@ that can easily infer requested information from an unstructured user's request.
 
 from __future__ import annotations
 
-from typing import Union, Optional, Dict, Any, TYPE_CHECKING
+from typing import Union, Dict, TYPE_CHECKING
 import logging
 
 from pydantic import BaseModel, Field, create_model
