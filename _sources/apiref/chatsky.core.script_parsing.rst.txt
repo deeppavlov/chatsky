@@ -1,6 +1,0 @@
-:source_name: chatsky/core/script_parsing
-
-.. automodule:: chatsky.core.script_parsing
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,6 +1,0 @@
-:source_name: chatsky/core/pipeline
-
-.. automodule:: chatsky.core.pipeline
-   :members:
-   :undoc-members:
-   :show-inheritance:
