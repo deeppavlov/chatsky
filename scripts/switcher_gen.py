@@ -3,11 +3,18 @@ import git
 import json
 import re
 
+BASE_URL = "https://deeppavlov.github.io/chatsky/"
 
-# Filter function for building latest versions of each major tag.
-# For example, out of ["v0.8.0", "v0.8.1", "v0.9.2", "v0.9.3"]
-# those would be ["v0.8.1", "v0.9.3"]
+
 def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
+    """
+    Filter function for building latest versions of each major tag.
+    For example, out of ["v0.8.0", "v0.8.1", "v0.9.2", "v0.9.3"]
+    those would be ["v0.8.1", "v0.9.3"]
+
+    :param tag_list: List of tags to be filtered.
+    :param start_version: The first version to allow through.
+    """
     regex = re.compile(r"^v\d+\.\d+\.\d+$")
     tag_list = list(filter(regex.match, tag_list))
     latest_tags = {}
@@ -47,11 +54,10 @@ def generate_version_switcher():
     tags = latest_tags_filter(tags, start_version)
 
     # Remove blacklisted tags and add whitelisted tags.
-    tags = [x for x in tags if x not in blacklisted_tags]
-    tags = tags + [x for x in whitelisted_tags if x not in tags]
+    tags = list(set(tags) - set(blacklisted_tags) | set(whitelisted_tags))
 
     # Sort the tags for the version switcher button.
-    tags.sort(key=lambda x: x.replace("v", "").split("."))
+    tags.sort(key=lambda x: list(map(int, x.replace("v", "").split("."))))
     tags.reverse()
 
     # Create the version switcher
@@ -60,20 +66,19 @@ def generate_version_switcher():
     latest_data = {
         "name": "latest",
         "version": "master",
-        "url": "https://deeppavlov.github.io/chatsky/master/",
+        "url": BASE_URL + "master/",
     }
     switcher_json += [latest_data]
 
     dev_data = {
         "version": "dev",
-        "url": "https://deeppavlov.github.io/chatsky/dev/",
+        "url": BASE_URL + "dev/",
     }
     switcher_json += [dev_data]
 
     for tag in tags:
-        url = "https://deeppavlov.github.io/chatsky/" + str(tag) + "/"
+        url = BASE_URL + str(tag) + "/"
         tag_data = {
-            "name": str(tag),
             "version": str(tag),
             "url": url,
         }
@@ -86,4 +91,5 @@ def generate_version_switcher():
         f.write(switcher_json_obj)
 
 
-generate_version_switcher()
+if __name__ == "__main__":
+    generate_version_switcher()
