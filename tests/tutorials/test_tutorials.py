@@ -33,10 +33,11 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 
     versions_dict = InstallationCell.versions()
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
+        cmd = f"python -m pip install {deps}".replace("=={chatsky}", "")
+        cmd = cmd.replace("chatsky", ".")
+        cmd = cmd.format(**versions_dict)
         venv.run(
-            (f"python -m pip install {deps}".replace("=={chatsky}", "").replace("chatsky", ".")).format(
-                **versions_dict
-            ),
+            cmd,
             check_rc=True,
             cd=os.getcwd(),
         )
