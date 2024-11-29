@@ -55,9 +55,6 @@ jobs:
         run: |
           python -m poetry run poe docs
 
-      - name: remove jekyll theming
-        run: touch docs/build/.nojekyll
-
       - name: deploy website
         uses: JamesIves/github-pages-deploy-action@v4
         with:
