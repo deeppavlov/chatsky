@@ -253,7 +253,6 @@ class SQLContextStorage(DBContextStorage):
             )
 
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
-        logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[field_name] != None)
@@ -266,7 +265,6 @@ class SQLContextStorage(DBContextStorage):
             return list((await conn.execute(stmt)).fetchall())
 
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
-        logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         stmt = select(self.turns_table.c[NameConfig._key_column])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[field_name] != None)
@@ -274,7 +272,6 @@ class SQLContextStorage(DBContextStorage):
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
-        logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(tuple(keys)))
