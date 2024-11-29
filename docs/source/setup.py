@@ -3,7 +3,7 @@ from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 
-def setup(_):
+def setup():
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",

@@ -174,4 +174,4 @@ autodoc_default_options = {
 
 def setup(_):
     from setup import setup
-    setup(_)
+    setup()
