@@ -22,7 +22,7 @@ class TestContextDict:
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
-        storage = MemoryContextStorage(rewrite_existing=False, configuration={"requests": 1})
+        storage = MemoryContextStorage(rewrite_existing=False, partial_read_config={"requests": 1})
         await storage.update_main_info(ctx_id, 0, 0, 0, b"", b"")
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
