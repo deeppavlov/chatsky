@@ -59,6 +59,11 @@ class InstallationCell(ReplacePattern):
     @staticmethod
     @cache
     def versions() -> dict:
+        """
+        Return a dictionary containing information about all the distributions installed in the current venv.
+
+        :return: A dictionary, where distribution names are keys and their corresponding versions are values.
+        """
         versions = {}
         for dist in metadata.distributions():
             versions[dist.name] = dist.version
