@@ -8,22 +8,10 @@ import pytest
 if TYPE_CHECKING:
     from pytest_virtualenv import VirtualEnv
 
-from docs.source.utils.notebook import InstallationCell
-
+from docs.source.utils.notebook import InstallationCell, replace_versions
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
-
-
-def replace_versions(cmd: str):
-    """
-    Replaces "{dependency}" with its "version" so that the cmd can install the right
-    dependency version required by tests or tutorials.
-
-    :param cmd: The installation command string to format.
-    :return: Formatted string.
-    """
-    return cmd.format(**InstallationCell.versions())
 
 
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):

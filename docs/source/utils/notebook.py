@@ -6,8 +6,6 @@ from typing import ClassVar, Literal, Optional
 from pydantic import BaseModel
 from importlib import metadata
 
-from tests.tutorials.test_tutorials import replace_versions
-
 try:
     from jupytext import jupytext
 except ImportError:
@@ -230,3 +228,14 @@ def py_percent_to_notebook(text: str):
     if jupytext is None:
         raise ModuleNotFoundError("`doc` dependencies are not installed.")
     return jupytext.reads(apply_replace_patterns(text), "py:percent")
+
+
+def replace_versions(cmd: str):
+    """
+    Replaces "{dependency}" with its "version" so that the cmd can install the right
+    dependency version required by tests or tutorials.
+
+    :param cmd: The installation command string to format.
+    :return: Formatted string.
+    """
+    return cmd.format(**InstallationCell.versions())
