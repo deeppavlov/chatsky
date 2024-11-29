@@ -2,9 +2,7 @@ import logging
 
 import pytest
 
-from pydantic import TypeAdapter
-
-from chatsky import Pipeline, Context, AbsoluteNodeLabel, Message
+from chatsky import Pipeline, Context, AbsoluteNodeLabel
 
 
 def pytest_report_header(config, start_path):

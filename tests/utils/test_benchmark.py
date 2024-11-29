@@ -53,7 +53,9 @@ async def test_get_context(context_storage: JSONContextStorage):
     await copy_ctx.requests.update({0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "zv"})})
     await copy_ctx.responses.update({0: Message(misc={"0": "3 "}), 1: Message(misc={"0": "sh"})})
     copy_ctx.misc.update({"0": " d]", "1": " (b"})
-    assert context.model_dump(exclude={"id", "current_turn_id"}) == copy_ctx.model_dump(exclude={"id", "current_turn_id"})
+    assert context.model_dump(exclude={"id", "current_turn_id"}) == copy_ctx.model_dump(
+        exclude={"id", "current_turn_id"}
+    )
 
 
 async def test_benchmark_config(context_storage: JSONContextStorage, monkeypatch: pytest.MonkeyPatch):

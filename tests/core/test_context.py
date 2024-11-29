@@ -72,7 +72,7 @@ class TestTurns:
     @pytest.fixture
     def ctx(self, context_factory):
         return context_factory()
-    
+
     async def test_complete_turn(self, ctx: Context):
         ctx.labels[5] = ("flow", "node5")
         ctx.requests[5] = Message(text="text5")

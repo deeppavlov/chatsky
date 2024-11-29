@@ -16,11 +16,9 @@ public-domain, SQL database engine.
 from __future__ import annotations
 import asyncio
 from importlib import import_module
-from os import getenv
 from typing import Callable, Collection, List, Optional, Set, Tuple
 import logging
 
-from chatsky.utils.logging import collapse_num_list
 from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
@@ -214,7 +212,19 @@ class SQLContextStorage(DBContextStorage):
         stmt = select(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
-            return None if result is None else ContextInfo.model_validate({"turn_id": result[1], "created_at": result[2], "updated_at": result[3], "misc": result[4], "framework_data": result[5]})
+            return (
+                None
+                if result is None
+                else ContextInfo.model_validate(
+                    {
+                        "turn_id": result[1],
+                        "created_at": result[2],
+                        "updated_at": result[3],
+                        "misc": result[4],
+                        "framework_data": result[5],
+                    }
+                )
+            )
 
     async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
@@ -253,7 +263,7 @@ class SQLContextStorage(DBContextStorage):
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
-        stmt = stmt.where(self.turns_table.c[field_name] != None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
         stmt = stmt.order_by(self.turns_table.c[NameConfig._key_column].desc())
         if isinstance(self._subscripts[field_name], int):
             stmt = stmt.limit(self._subscripts[field_name])
@@ -265,7 +275,7 @@ class SQLContextStorage(DBContextStorage):
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         stmt = select(self.turns_table.c[NameConfig._key_column])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
-        stmt = stmt.where(self.turns_table.c[field_name] != None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
         async with self.engine.begin() as conn:
             return [k[0] for k in (await conn.execute(stmt)).fetchall()]
 
@@ -273,7 +283,7 @@ class SQLContextStorage(DBContextStorage):
         stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
         stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
         stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(tuple(keys)))
-        stmt = stmt.where(self.turns_table.c[field_name] != None)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
 

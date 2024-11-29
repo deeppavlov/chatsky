@@ -66,7 +66,9 @@ class MongoContextStorage(DBContextStorage):
     async def _connect(self):
         await gather(
             self.main_table.create_index(NameConfig._id_column, background=True, unique=True),
-            self.turns_table.create_index([NameConfig._id_column, NameConfig._key_column], background=True, unique=True),
+            self.turns_table.create_index(
+                [NameConfig._id_column, NameConfig._key_column], background=True, unique=True
+            ),
         )
 
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
@@ -81,13 +83,15 @@ class MongoContextStorage(DBContextStorage):
             ],
         )
         return (
-            ContextInfo.model_validate({
-                "turn_id": result[NameConfig._current_turn_id_column],
-                "created_at": result[NameConfig._created_at_column],
-                "updated_at": result[NameConfig._updated_at_column],
-                "misc": result[NameConfig._misc_column],
-                "framework_data": result[NameConfig._framework_data_column],
-            })
+            ContextInfo.model_validate(
+                {
+                    "turn_id": result[NameConfig._current_turn_id_column],
+                    "created_at": result[NameConfig._created_at_column],
+                    "updated_at": result[NameConfig._updated_at_column],
+                    "misc": result[NameConfig._misc_column],
+                    "framework_data": result[NameConfig._framework_data_column],
+                }
+            )
             if result is not None
             else None
         )

@@ -153,13 +153,15 @@ class YDBContextStorage(DBContextStorage):
                 commit_tx=True,
             )
             return (
-                ContextInfo.model_validate({
-                    "turn_id": result_sets[0].rows[0][NameConfig._current_turn_id_column],
-                    "created_at": result_sets[0].rows[0][NameConfig._created_at_column],
-                    "updated_at": result_sets[0].rows[0][NameConfig._updated_at_column],
-                    "misc": result_sets[0].rows[0][NameConfig._misc_column],
-                    "framework_data": result_sets[0].rows[0][NameConfig._framework_data_column],
-                })
+                ContextInfo.model_validate(
+                    {
+                        "turn_id": result_sets[0].rows[0][NameConfig._current_turn_id_column],
+                        "created_at": result_sets[0].rows[0][NameConfig._created_at_column],
+                        "updated_at": result_sets[0].rows[0][NameConfig._updated_at_column],
+                        "misc": result_sets[0].rows[0][NameConfig._misc_column],
+                        "framework_data": result_sets[0].rows[0][NameConfig._framework_data_column],
+                    }
+                )
                 if len(result_sets[0].rows) > 0
                 else None
             )

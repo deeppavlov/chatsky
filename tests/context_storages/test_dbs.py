@@ -19,7 +19,6 @@ from chatsky.context_storages import (
     mongo_available,
     ydb_available,
 )
-from chatsky.core.context import FrameworkData
 from chatsky.utils.testing.cleanup_db import (
     delete_file,
     delete_mongo,
@@ -213,21 +212,13 @@ class TestContextStorages:
         assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
     async def test_wrong_field_name(self, db: DBContextStorage):
-        with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
-        ):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
             await db.load_field_latest("1", "non-existent")
-        with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
-        ):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
             await db.load_field_keys("1", "non-existent")
-        with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
-        ):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
             await db.load_field_items("1", "non-existent", [1, 2])
-        with pytest.raises(
-            ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"
-        ):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
             await db.update_field_items("1", "non-existent", [(1, b"2")])
 
     async def test_field_get(self, db: DBContextStorage, add_context):
@@ -310,9 +301,13 @@ class TestContextStorages:
             str_key = str(key)
             key_misc = {f"{key}": key + 2}
             await asyncio.sleep(random.random() / 100)
-            await db.update_main_info(str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc))
+            await db.update_main_info(
+                str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc)
+            )
             await asyncio.sleep(random.random() / 100)
-            assert await db.load_main_info(str_key) == ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc)
+            assert await db.load_main_info(str_key) == ContextInfo(
+                turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc
+            )
 
             for idx in range(1, 20):
                 await db.update_field_items(str_key, "requests", [(0, bytes(2 * key + idx)), (idx, bytes(key + idx))])

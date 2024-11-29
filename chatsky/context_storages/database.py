@@ -17,9 +17,9 @@ from importlib import import_module
 from logging import getLogger
 from pathlib import Path
 from time import time_ns
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Literal, Optional, Tuple, Union
 
-from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, ValidationError, field_serializer, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
 from chatsky.utils.logging import collapse_num_list
 
@@ -64,11 +64,11 @@ class ContextInfo(BaseModel):
         if isinstance(value, bytes) or isinstance(value, str):
             value = loads(value)
         return value
-    
+
     @field_serializer("misc", when_used="always")
     def _serialize_misc(self, misc: Dict[str, Any]) -> bytes:
         return self._misc_adaptor.dump_json(misc)
-    
+
     @field_serializer("framework_data", when_used="always")
     def serialize_courses_in_order(self, framework_data: FrameworkData) -> bytes:
         return framework_data.model_dump_json().encode()

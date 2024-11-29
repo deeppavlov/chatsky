@@ -88,18 +88,28 @@ class RedisContextStorage(DBContextStorage):
                 self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._misc_column),
                 self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column),
             )
-            return ContextInfo.model_validate({"turn_id": cti, "created_at": ca, "updated_at": ua, "misc": msc, "framework_data": fd})
+            return ContextInfo.model_validate(
+                {"turn_id": cti, "created_at": ca, "updated_at": ua, "misc": msc, "framework_data": fd}
+            )
         else:
             return None
 
     async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
         await gather(
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(ctx_info_dump["created_at"])),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(ctx_info_dump["updated_at"])),
+            self.database.hset(
+                f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])
+            ),
+            self.database.hset(
+                f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(ctx_info_dump["created_at"])
+            ),
+            self.database.hset(
+                f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(ctx_info_dump["updated_at"])
+            ),
             self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, ctx_info_dump["misc"]),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]),
+            self.database.hset(
+                f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
+            ),
         )
 
     async def _delete_context(self, ctx_id: str) -> None:
