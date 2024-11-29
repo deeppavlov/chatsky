@@ -6,6 +6,8 @@ from typing import ClassVar, Literal, Optional
 from pydantic import BaseModel
 from importlib import metadata
 
+from tests.tutorials.test_tutorials import replace_versions
+
 try:
     from jupytext import jupytext
 except ImportError:
@@ -71,12 +73,12 @@ class InstallationCell(ReplacePattern):
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
-        return f"""
+        return replace_versions(
+            f"""
 # %%
 # installing dependencies
 %pip install -q {matchobj.group(1)}
-""".format(
-            **InstallationCell.versions()
+"""
         )
 
 

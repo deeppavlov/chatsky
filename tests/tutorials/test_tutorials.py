@@ -15,6 +15,17 @@ PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
+def replace_versions(cmd: str):
+    """
+    Replaces "{dependency}" with its "version" so that the cmd can install the right
+    dependency version required by tests or tutorials.
+
+    :param cmd: The installation command string to format.
+    :return: Formatted string.
+    """
+    return cmd.format(**InstallationCell.versions())
+
+
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     """
     Install dependencies required by a tutorial in `venv` and run the tutorial.
@@ -31,13 +42,9 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     with open(tutorial_path, "w") as fd:
         fd.write(tutorial_source_code)
 
-    versions_dict = InstallationCell.versions()
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        cmd = f"python -m pip install {deps}".replace("=={chatsky}", "")
-        cmd = cmd.replace("chatsky", ".")
-        cmd = cmd.format(**versions_dict)
         venv.run(
-            cmd,
+            replace_versions(re.sub(r"chatsky(\[(.*)\])?==\{chatsky\}", r".\1", f"python -m pip install {deps}")),
             check_rc=True,
             cd=os.getcwd(),
         )
