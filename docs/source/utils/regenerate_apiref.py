@@ -64,7 +64,7 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
 
         with open(doc_file, "r+") as file:
             contents = file.read()
-            doc_version = os.getenv("DOC_VERSION", default="")
+            doc_version = os.getenv("DOC_VERSION", default="master")
             if doc_version != "":
                 doc_version = doc_version + "/"
             doc_file.write_text(

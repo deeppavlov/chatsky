@@ -89,7 +89,7 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
-doc_version = os.getenv("DOC_VERSION", default="")
+doc_version = os.getenv("DOC_VERSION", default="master")
 if doc_version != "":
     doc_version = doc_version + '/'
 # Finding tutorials directories
@@ -121,7 +121,7 @@ html_css_files = [
 ]
 
 # Version switcher data
-version_data = os.getenv("DOC_VERSION", default="latest")
+version_data = os.getenv("DOC_VERSION", default="master")
 switcher_url = "https://deeppavlov.github.io/chatsky/switcher.json"
 
 # Theme options
