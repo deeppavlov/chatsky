@@ -93,6 +93,7 @@ class DBContextStorage(ABC):
             return field_name
 
     async def connect(self) -> None:
+        logger.info(f"Connecting to context storage {type(self).__name__} ...")
         self.connected = True
 
     @abstractmethod
@@ -105,7 +106,6 @@ class DBContextStorage(ABC):
         Load main information about the context.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Loading main info for {ctx_id}...")
         result = await self._load_main_info(ctx_id)
@@ -122,7 +122,6 @@ class DBContextStorage(ABC):
         Update main information about the context.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Updating main info for {ctx_id}...")
         await self._update_main_info(ctx_id, turn_id, crt_at, upd_at, misc, fw_data)
@@ -138,7 +137,6 @@ class DBContextStorage(ABC):
         Delete context from context storage.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Deleting context {ctx_id}...")
         await self._delete_context(ctx_id)
@@ -154,7 +152,6 @@ class DBContextStorage(ABC):
         Load the latest field data.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         result = await self._load_field_latest(ctx_id, self._validate_field_name(field_name))
@@ -171,7 +168,6 @@ class DBContextStorage(ABC):
         Load all field keys.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         result = await self._load_field_keys(ctx_id, self._validate_field_name(field_name))
@@ -188,7 +184,6 @@ class DBContextStorage(ABC):
         Load field items.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         result = await self._load_field_items(ctx_id, self._validate_field_name(field_name), keys)
@@ -208,7 +203,6 @@ class DBContextStorage(ABC):
             logger.debug(f"No fields to update in {ctx_id}, {field_name}!")
             return
         elif not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
@@ -223,7 +217,6 @@ class DBContextStorage(ABC):
             logger.debug(f"No fields to delete in {ctx_id}, {field_name}!")
             return
         elif not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug(f"Deleting fields for {ctx_id}, {field_name}: {collapse_num_list(keys)}...")
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), [(k, None) for k in keys])
@@ -239,7 +232,6 @@ class DBContextStorage(ABC):
         Clear all the chatsky tables and records.
         """
         if not self.connected:
-            logger.debug(f"Connecting to context storage {type(self).__name__} ...")
             await self.connect()
         logger.debug("Clearing all")
         await self._clear_all()
