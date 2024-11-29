@@ -79,6 +79,18 @@ class ContextInfo(BaseModel):
         return super().__eq__(other)
 
 
+def _lock(function: Callable[..., Awaitable[Any]]):
+        @wraps(function)
+        async def wrapped(self, *args, **kwargs):
+            if not self.is_concurrent:
+                async with self._sync_lock:
+                    return await function(self, *args, **kwargs)
+            else:
+                return await function(self, *args, **kwargs)
+
+        return wrapped
+
+
 class DBContextStorage(ABC):
     _default_subscript_value: int = 3
 
@@ -110,18 +122,6 @@ class DBContextStorage(ABC):
     @abstractmethod
     def is_concurrent(self) -> bool:
         raise NotImplementedError
-
-    @staticmethod
-    def _lock(function: Callable[..., Awaitable[Any]]):
-        @wraps(function)
-        async def wrapped(self, *args, **kwargs):
-            if not self.is_concurrent:
-                async with self._sync_lock:
-                    return await function(self, *args, **kwargs)
-            else:
-                return await function(self, *args, **kwargs)
-
-        return wrapped
 
     @classmethod
     def _validate_field_name(cls, field_name: str) -> str:

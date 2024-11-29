@@ -1,4 +1,3 @@
-from altair import Key
 import pytest
 
 from chatsky.core.context import Context, ContextError
