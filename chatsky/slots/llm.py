@@ -88,7 +88,7 @@ class LLMGroupSlot(GroupSlot):
         for key, value in slot.__pydantic_extra__.items():
             new_key = f"{parent_key}.{key}" if parent_key else key
             if isinstance(value, LLMGroupSlot):
-                items.update(self.__flatten_llm_group_slot(value, new_key))
+                items.update(self._flatten_llm_group_slot(value, new_key))
             else:
                 items[new_key] = value
         return items

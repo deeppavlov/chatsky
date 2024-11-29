@@ -44,18 +44,17 @@ class LLMResponse(BaseResponse):
         else:
             history_messages = [SystemMessage(model.system_prompt)]
         current_node = ctx.current_node
-        current_misc = current_node.misc if current_node is not None else None
+        current_misc = current_node.misc
         if current_misc is not None:
             # populate history with global and local prompts
-            if "global_prompt" in current_misc:
-                global_prompt = current_misc["global_prompt"]
-                history_messages.append(await message_to_langchain(Message(global_prompt), ctx=ctx, source="system"))
-            if "local_prompt" in current_misc:
-                local_prompt = current_misc["local_prompt"]
-                history_messages.append(await message_to_langchain(Message(local_prompt), ctx=ctx, source="system"))
-            if "prompt" in current_misc:
-                node_prompt = current_misc["prompt"]
-                history_messages.append(await message_to_langchain(Message(node_prompt), ctx=ctx, source="system"))
+            for prompt in ("global_prompt", "local_prompt", "prompt"):
+                if prompt in current_misc:
+                    current_prompt = current_misc[prompt]
+                    if isinstance(current_prompt, BaseResponse):
+                        current_prompt = await current_prompt(ctx=ctx)
+                        history_messages.append(await message_to_langchain(current_prompt, ctx=ctx, source="system"))
+                    elif isinstance(current_prompt, str):
+                        history_messages.append(await message_to_langchain(Message(current_prompt), ctx=ctx, source="system"))
 
         # iterate over context to retrieve history messages
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):

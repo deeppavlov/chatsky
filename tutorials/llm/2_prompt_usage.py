@@ -41,6 +41,8 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
     destinations as dst,
+    BaseResponse,
+    Context
 )
 from langchain_openai import ChatOpenAI
 
@@ -74,6 +76,26 @@ model = LLM_API(
     system_prompt="You will represent different bank workers. "
     "Answer users' questions according to your role.",
 )
+
+# %% [markdown]
+"""
+Chatsky enables you to use more complex prompts then a simple string in need be.
+In this example we create a VacantPlaces class, that can dynamically retrieve 
+some external data and put them into the prompt.
+
+"""
+# %%
+
+class VacantPlaces(BaseResponse):
+    async def call(self, ctx: Context) -> str:
+        data = await self.request_data()
+        return f""""Your role is a bank HR. "
+                "Provide user with the information about our vacant places. "
+                f"Vacancies: {data}."""
+
+    async def request_data(self) -> list[str]:
+        # do come requests
+        return ['Java-developer', 'InfoSec-specialist']
 
 toy_script = {
     GLOBAL: {
@@ -139,9 +161,7 @@ toy_script = {
             MISC: {
                 # you can easily pass additional data to the model
                 # using the prompts
-                "prompt": "Your role is a bank HR. "
-                "Provide user with the information about our vacant places. "
-                f"Vacancies: {('Java-developer', 'InfoSec-specialist')}.",
+                "prompt": VacantPlaces()
             }
         },
         "start_node": {

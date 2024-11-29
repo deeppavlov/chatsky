@@ -42,9 +42,6 @@ therefore it will store all dialogue history.
 This is not advised if you are short on tokens or
 if you do not need to store all dialogue history.
 Alternatively you can instantiate model object inside
-of RESPONSE field in the nodes you need.
-Via `history` parameter you can set number of dialogue _turns_
-that the model will use as the history. Default value is `5`.
 """
 
 # %%
@@ -60,6 +57,9 @@ will be processed and sent to the LLM in an appropriate format.
 
 As you can see in this script, you can pass an additional prompt to the LLM.
 We will cover that thoroughly in the Prompt usage tutorial.
+of RESPONSE field in the nodes you need.
+Via `history` parameter in LLMResponse you can set number of dialogue _turns_
+that the model will use as the history. Default value is `5`.
 """
 
 # %%
