@@ -12,6 +12,8 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     For example, out of ["v0.8.0", "v0.8.1", "v0.9.2", "v0.9.3"]
     those would be ["v0.8.1", "v0.9.3"]
 
+    :raises ValueError: If the start_version doesn't match regex to be a real version.
+
     :param tag_list: List of tags to be filtered.
     :param start_version: The first version to allow through.
     """
@@ -24,12 +26,11 @@ def latest_tags_filter(tag_list: list, start_version: str = "v0.8.0") -> list:
     for tag in tag_list:
         tag = str(tag).replace("v", "").split(".")
         tag_group = (tag[0], tag[1])
-        # Not building versions lower than the start version (initially, "v0.8.0")
-        if not (int(tag[0]) == int(start_version[0]) and int(tag[1]) < int(start_version[1])):
+        # Not building versions lower than the start version
+        if tuple(map(int, tag)) >= tuple(map(int, start_version)):
             # If there is a greater tag in this group, it will have priority over others
             if int(tag[2]) > int(latest_tags.get(tag_group, -1)):
                 latest_tags[tag_group] = tag[2]
-    # Could return that dictionary, but it looks unclear.
     tag_list = ["v" + x[0] + "." + x[1] + "." + latest_tags[x] for x in latest_tags.keys()]
     return tag_list
 
