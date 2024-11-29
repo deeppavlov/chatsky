@@ -62,8 +62,8 @@ class FileContextStorage(DBContextStorage, ABC):
         raise NotImplementedError
 
     async def connect(self):
-        await self._load()
         await super().connect()
+        await self._load()
 
     async def _load_main_info(self, ctx_id: str) -> Optional[Tuple[int, int, int, bytes, bytes]]:
         return (await self._load()).main.get(ctx_id, None)
