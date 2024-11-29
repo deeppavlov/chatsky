@@ -152,12 +152,12 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
         return len(self.keys() if self._storage is not None else self._items.keys())
 
     @overload
-    async def get(self, key: K) -> V: ...  # noqa: E704
+    async def get(self, key: K, default=None) -> V: ...  # noqa: E704
 
     @overload
-    async def get(self, key: Iterable[K]) -> List[V]: ...  # noqa: E704
+    async def get(self, key: Iterable[K], default=None) -> List[V]: ...  # noqa: E704
 
-    async def get(self, key, default=None) -> V:
+    async def get(self, key, default=None):
         try:
             return await self[key]
         except KeyError:
