@@ -27,10 +27,8 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
@@ -42,6 +40,9 @@ therefore it will store all dialogue history.
 This is not advised if you are short on tokens or
 if you do not need to store all dialogue history.
 Alternatively you can instantiate model object inside
+
+Also note, that langchain reads environment variables for the models
+automatically and you do not necessarily need to set them explicitly.
 """
 
 # %%

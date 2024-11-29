@@ -15,7 +15,7 @@ from chatsky.llm.filters import BaseHistoryFilter
 
 async def message_to_langchain(
     message: Message, ctx: Context, source: Literal["human", "ai", "system"] = "human", max_size: int = 1000
-) -> Union[HumanMessage | AIMessage | SystemMessage]:
+) -> Union[HumanMessage, AIMessage, SystemMessage]:
     """
     Create a langchain message from a :py:class:`~chatsky.script.core.message.Message` object.
 

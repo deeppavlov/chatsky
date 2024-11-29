@@ -50,10 +50,8 @@ from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]

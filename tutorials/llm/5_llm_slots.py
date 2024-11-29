@@ -32,10 +32,8 @@ from chatsky.utils.testing import (
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 from chatsky.llm import LLM_API
 
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]

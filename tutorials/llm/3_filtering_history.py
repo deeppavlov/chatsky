@@ -25,10 +25,8 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.llm.filters import BaseHistoryFilter
 from chatsky.core.context import Context
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %%
