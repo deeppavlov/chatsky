@@ -17,16 +17,12 @@ fallback_label:
   - other_flow
   - other_node
 slots:
-  chatsky.slots.GroupSlot:
-    slots:
-      person:
-        chatsky.slots.GroupSlot:
-          slots:
-            likes:
-              chatsky.slots.RegexpSlot:
-                regexp: "I like (.+)"
-                match_group_idx: 1
-            age:
-              chatsky.slots.RegexpSlot:
-                regexp: "I'm ([0-9]+) years old"
-                match_group_idx: 1
+  person:
+    likes:
+      chatsky.slots.RegexpSlot:
+        regexp: "I like (.+)"
+        match_group_idx: 1
+    age:
+      chatsky.slots.RegexpSlot:
+        regexp: "I'm ([0-9]+) years old"
+        match_group_idx: 1
