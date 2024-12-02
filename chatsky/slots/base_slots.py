@@ -179,6 +179,29 @@ class GroupSlot(BaseSlot, frozen=True):
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)
 
+    @model_validator(mode="before")
+    @classmethod
+    def __validate_from_keywords__(cls, data: Any):
+        """
+        Add support for initializing slots from keywords instead of a dictionary.
+        """
+        if isinstance(data, dict):
+            if "slots" not in data:
+                return {"slots": data}
+            return data
+        return {"slots": dict(data)}
+
+        """
+        def inner_func(*args: Any, **kwargs: Any):
+            if len(kwargs) > 0:
+                return dict(kwargs)
+
+        result = inner_func(data)
+        if result is not None:
+            return result
+        return data
+        """
+
     @model_validator(mode="after")
     def __check_slot_names__(self):
         """
