@@ -6,7 +6,7 @@ from chatsky.slots.base_slots import (
     ExtractedValueSlot,
     SlotNotExtracted,
 )
-from chatsky.slots.slots import RegexpSlot, FunctionSlot
+from chatsky.slots.standard_slots import RegexpSlot, FunctionSlot
 from chatsky.slots.slot_manager import SlotManager
 from chatsky.core import Message, Context
 

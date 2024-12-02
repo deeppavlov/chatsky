@@ -4,7 +4,7 @@ from chatsky.core.service.types import ExtraHandlerRuntimeInfo, ComponentExecuti
 from chatsky.core import Context, Message, Script
 from chatsky.core.script import Node
 from chatsky.core.pipeline import Pipeline
-from chatsky.slots.slots import FunctionSlot
+from chatsky.slots.standard_slots import FunctionSlot
 from chatsky.slots.slot_manager import SlotManager
 from chatsky.core.context import FrameworkData, ServiceState
 from chatsky.core.service import PipelineComponent
