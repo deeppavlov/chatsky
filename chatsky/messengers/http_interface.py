@@ -33,7 +33,7 @@ class HTTPMessengerInterface(MessengerInterface):
             user_message: str,  # TODO: change type to Message after core rework is done
         ):
             message = Message(text=user_message)
-            context = await pipeline_runner(message)
+            context = await pipeline_runner(message, user_id)
             return {"user_id": user_id, "response": context.last_response}
         
         @app.get("/health", response_model=HealthStatus)
