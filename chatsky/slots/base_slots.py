@@ -181,15 +181,29 @@ class GroupSlot(BaseSlot, frozen=True):
 
     @model_validator(mode="before")
     @classmethod
-    def __validate_from_keywords__(cls, data: Any):
+    def __validate_group_slot__(cls, data: Any):
         """
-        Add support for initializing slots from keywords instead of a dictionary.
+        Add support for initializing slots from keywords or a dictionary.
+        A combination is possible, in that case keywords will take priority.
         """
         if isinstance(data, dict):
+            result = {"slots": dict()}
+            if data.get("value_format") is not None:
+                result.update({"value_format": data.get("value_format")})
+            result.update(data.get("value_format", dict()))
+            result["slots"].update(data.get("slots", dict()))
+            for key, value in data.items():
+                if key not in ["value_format", "slots"]:
+                    result["slots"][key] = value
+            return result
+        return data
+
+        """
             if "slots" not in data:
                 return {"slots": data}
             return data
         return {"slots": dict(data)}
+        """
 
         """
         def inner_func(*args: Any, **kwargs: Any):
