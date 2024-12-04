@@ -20,21 +20,33 @@ from chatsky.core.script_function import BaseResponse, AnyResponse
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.
-    :param model_name: Name of the model from the `Pipeline.models` dictionary.
-    :param prompt: Prompt for the model.
-    :param history: Number of messages to keep in history. `-1` for full history.
-    :param filter_func: Filter function to filter messages that will go the models context.
-    :param max_size: Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.
-
-    :raise ValueError: If any message longer than `max_size`.
+    Uses prompt to produce result from model.
     """
 
     model_name: str
+    """
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    """
     prompt: AnyResponse = Field(default="", validate_default=True)
+    """
+    Response prompt.
+    """
     history: int = 5
+    """
+    Number of dialogue turns to keep in history. `-1` for full history.
+    """
     filter_func: BaseHistoryFilter = BaseHistoryFilter()
+    """
+    Filter function to filter messages that will go the models context.
+    """
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
+    """
+    Schema for model output validation.
+    """
     max_size: int = 1000
+    """
+    Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.
+    """
 
     async def call(self, ctx: Context) -> Message:
         check_langchain_available()
