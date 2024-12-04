@@ -127,10 +127,10 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    string_format: Optional[str] = None
     __pydantic_extra__: Dict[
         str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
     ]
+    string_format: Optional[str] = None
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -166,13 +166,60 @@ class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
                     self.__pydantic_extra__[slot] = old_slot
 
 
-class GroupSlot(BaseSlot, frozen=True):
+class ValueSlot(BaseSlot, frozen=True):
+    """
+    Value slot is a base class for all slots that are designed to extract concrete values.
+    Subclass it, if you want to declare your own slot type.
+    """
+
+    default_value: Any = None
+
+    @abstractmethod
+    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
+        """
+        Return value extracted from context.
+
+        Return :py:exc:`~.SlotNotExtracted` to mark extraction as unsuccessful.
+
+        Raising exceptions is also allowed and will result in an unsuccessful extraction as well.
+        """
+        raise NotImplementedError
+
+    async def get_value(self, ctx: Context) -> ExtractedValueSlot:
+        """Wrapper for :py:meth:`~.ValueSlot.extract_value` to handle exceptions."""
+        extracted_value = SlotNotExtracted("Caught an exit exception.")
+        is_slot_extracted = False
+
+        try:
+            extracted_value = await wrap_sync_function_in_async(self.extract_value, ctx)
+            is_slot_extracted = not isinstance(extracted_value, SlotNotExtracted)
+        except Exception as error:
+            logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
+            extracted_value = error
+        finally:
+            if not is_slot_extracted:
+                logger.debug(f"Slot {self.__class__.__name__!r} was not extracted: {extracted_value}")
+            return ExtractedValueSlot.model_construct(
+                is_slot_extracted=is_slot_extracted,
+                extracted_value=extracted_value,
+                default_value=self.default_value,
+            )
+
+    def init_value(self) -> ExtractedValueSlot:
+        return ExtractedValueSlot.model_construct(
+            is_slot_extracted=False,
+            extracted_value=SlotNotExtracted("Initial slot extraction."),
+            default_value=self.default_value,
+        )
+
+
+class GroupSlot(BaseSlot, extra="allow", frozen=True):
     """
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    string_format: Optional[str] = None
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    string_format: Optional[str] = None
     allow_partial_extraction: bool = False
     """If True, extraction returns only successfully extracted child slots."""
 
@@ -227,51 +274,4 @@ class GroupSlot(BaseSlot, frozen=True):
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(
             **{child_name: child.init_value() for child_name, child in self.__pydantic_extra__.items()}
-        )
-
-
-class ValueSlot(BaseSlot, frozen=True):
-    """
-    Value slot is a base class for all slots that are designed to extract concrete values.
-    Subclass it, if you want to declare your own slot type.
-    """
-
-    default_value: Any = None
-
-    @abstractmethod
-    async def extract_value(self, ctx: Context) -> Union[Any, SlotNotExtracted]:
-        """
-        Return value extracted from context.
-
-        Return :py:exc:`~.SlotNotExtracted` to mark extraction as unsuccessful.
-
-        Raising exceptions is also allowed and will result in an unsuccessful extraction as well.
-        """
-        raise NotImplementedError
-
-    async def get_value(self, ctx: Context) -> ExtractedValueSlot:
-        """Wrapper for :py:meth:`~.ValueSlot.extract_value` to handle exceptions."""
-        extracted_value = SlotNotExtracted("Caught an exit exception.")
-        is_slot_extracted = False
-
-        try:
-            extracted_value = await wrap_sync_function_in_async(self.extract_value, ctx)
-            is_slot_extracted = not isinstance(extracted_value, SlotNotExtracted)
-        except Exception as error:
-            logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
-            extracted_value = error
-        finally:
-            if not is_slot_extracted:
-                logger.debug(f"Slot {self.__class__.__name__!r} was not extracted: {extracted_value}")
-            return ExtractedValueSlot.model_construct(
-                is_slot_extracted=is_slot_extracted,
-                extracted_value=extracted_value,
-                default_value=self.default_value,
-            )
-
-    def init_value(self) -> ExtractedValueSlot:
-        return ExtractedValueSlot.model_construct(
-            is_slot_extracted=False,
-            extracted_value=SlotNotExtracted("Initial slot extraction."),
-            default_value=self.default_value,
         )
