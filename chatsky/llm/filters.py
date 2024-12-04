@@ -56,10 +56,10 @@ class MessageFilter(BaseHistoryFilter):
         raise NotImplementedError
 
     def __call__(self, ctx, request, response, model_name):
-        return self.call(ctx, request, model_name) + self.call(ctx, response, model_name)
+        return self.call(ctx, request, model_name) | self.call(ctx, response, model_name)
 
 
-class IsImportant(BaseHistoryFilter):
+class IsImportant(MessageFilter):
     """
     Filter that checks if the "important" field in a Message.misc is True.
     """
@@ -72,7 +72,7 @@ class IsImportant(BaseHistoryFilter):
         return False
 
 
-class FromModel(BaseHistoryFilter):
+class FromModel(MessageFilter):
     """
     Filter that checks if the message was sent by the model.
     """
