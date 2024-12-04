@@ -3,13 +3,14 @@ LLM Conditions
 --------------
 This module provides LLM-based conditions.
 """
+
 from pydantic import Field
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.utils import context_to_history, message_to_langchain
-from chatsky.llm.filters import BaseHistoryFilter
+from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 
 
 class LLMCondition(BaseCondition):
@@ -30,7 +31,7 @@ class LLMCondition(BaseCondition):
     """
     Number of dialogue turns to keep in history. `-1` for full history.
     """
-    filter_func: BaseHistoryFilter = BaseHistoryFilter()
+    filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
     """
     Filter function to filter messages that will go the models context.
     """
@@ -49,19 +50,19 @@ class LLMCondition(BaseCondition):
         if model.system_prompt == "":
             history_messages = []
         else:
-            history_messages = [message_to_langchain(model.system_prompt, ctx=ctx, source='system')]
+            history_messages = [message_to_langchain(model.system_prompt, ctx=ctx, source="system")]
 
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
             history_messages.extend(
-                    await context_to_history(
-                        ctx=ctx,
-                        length=self.history,
-                        filter_func=self.filter_func,
-                        model_name=self.model_name,
-                        max_size=self.max_size,
-                    )
+                await context_to_history(
+                    ctx=ctx,
+                    length=self.history,
+                    filter_func=self.filter_func,
+                    model_name=self.model_name,
+                    max_size=self.max_size,
                 )
-        
+            )
+
         history_messages.append(
             await message_to_langchain(self.prompt, ctx=ctx, source="system", max_size=self.max_size)
         )

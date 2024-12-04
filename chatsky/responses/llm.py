@@ -13,7 +13,7 @@ from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm._langchain_imports import SystemMessage, check_langchain_available
-from chatsky.llm.filters import BaseHistoryFilter
+from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
 
@@ -35,7 +35,7 @@ class LLMResponse(BaseResponse):
     """
     Number of dialogue turns to keep in history. `-1` for full history.
     """
-    filter_func: BaseHistoryFilter = BaseHistoryFilter()
+    filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
     """
     Filter function to filter messages that will go the models context.
     """

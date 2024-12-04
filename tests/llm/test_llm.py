@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from chatsky.llm._langchain_imports import langchain_available
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
+from chatsky.slots.llm import LLMGroupSlot, LLMSlot
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import IsImportant, FromModel
 from chatsky.llm.methods import Contains, LogProb
@@ -248,3 +249,12 @@ async def test_logprob_method(filter_context, llmresult):
     assert await c(ctx, llmresult)
     c = LogProb(target_token="true", threshold=0.3)
     assert not await c(ctx, llmresult)
+
+
+# async def test_llm_slot(pipeline, context):
+#     slot = LLMSlot(caption="test_caption", model="struct_model")
+#     res = await slot.extract_value(context)
+
+
+# async def test_llm_group_slot():
+#     pass

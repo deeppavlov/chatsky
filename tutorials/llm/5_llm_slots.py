@@ -66,7 +66,7 @@ SLOTS = {
         username=LLMSlot(caption="User's username in uppercase"),
         job=LLMSlot(caption="User's occupation, job, profession"),
         model="slot_model",
-        allow_partial_extraction=True
+        allow_partial_extraction=True,
     )
 }
 
