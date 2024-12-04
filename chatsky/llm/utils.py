@@ -26,6 +26,8 @@ async def message_to_langchain(
         If exceed the limit will raise ValueError.
     """
     check_langchain_available()
+    if isinstance(message, str):
+        message = Message(text=message)
     if message.text is None:
         content = []
     elif len(message.text) > max_size:

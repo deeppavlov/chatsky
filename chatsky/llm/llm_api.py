@@ -32,7 +32,7 @@ class LLM_API:
         check_langchain_available()
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
-        self.system_prompt = Message(system_prompt)
+        self.system_prompt = system_prompt
 
     async def respond(
         self,
