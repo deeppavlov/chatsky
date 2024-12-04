@@ -8,9 +8,7 @@ from typing import Union, Type, Optional
 from pydantic import BaseModel
 import logging
 from chatsky.core.message import Message
-from chatsky.core.context import Context
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.utils import message_to_langchain
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
@@ -32,7 +30,7 @@ class LLM_API:
         check_langchain_available()
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
-        self.system_prompt = system_prompt
+        self.system_prompt = Message(text=system_prompt)
 
     async def respond(
         self,

@@ -77,7 +77,7 @@ model = LLM_API(
 
 # %% [markdown]
 """
-Chatsky enables you to use more complex prompts then a simple string in need be.
+Chatsky enables you to use more complex prompts then a simple string if need be.
 In this example we create a VacantPlaces class, that can dynamically retrieve
 some external data and put them into the prompt.
 

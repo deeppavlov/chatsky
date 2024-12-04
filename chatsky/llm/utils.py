@@ -28,6 +28,7 @@ async def message_to_langchain(
     check_langchain_available()
     if isinstance(message, str):
         message = Message(text=message)
+
     if message.text is None:
         content = []
     elif len(message.text) > max_size:
