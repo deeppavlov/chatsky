@@ -70,12 +70,17 @@ def recursive_getattr(obj, slot_name: SlotName):
 
 
 def recursive_setattr(obj, slot_name: SlotName, value):
-    parent_slot, _, slot = slot_name.rpartition(".")
+    parent_slot, sep, slot = slot_name.rpartition(".")
 
-    if parent_slot:
-        setattr(recursive_getattr(obj, parent_slot), slot, value)
+    if sep == ".":
+        parent_obj = recursive_getattr(obj, parent_slot)
     else:
-        setattr(obj, slot, value)
+        parent_obj = obj
+
+    if isinstance(value, ExtractedGroupSlot):
+        getattr(parent_obj, slot).update(value)
+    else:
+        setattr(parent_obj, slot, value)
 
 
 class SlotManager(BaseModel):
