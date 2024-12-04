@@ -53,7 +53,7 @@ Note that we are passing the name of the model
 Also, as you can see we set `allow_partial_extraction` flag in "person" slot to
 `True`. That will allow us to fill this template across multiple messages.
 To see how to use partial extraction please address the
-following tutorial %mddoclink(tutorial,llm.5_llm_slots).
+following tutorial %mddoclink(tutorial,slots.2_partial_extraction).
 """
 
 # %%
