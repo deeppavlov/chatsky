@@ -12,11 +12,11 @@ import logging
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from chatsky.slots.base_slots import (
-    ValueSlot,
     SlotNotExtracted,
-    GroupSlot,
-    ExtractedGroupSlot,
     ExtractedValueSlot,
+    ExtractedGroupSlot,
+    ValueSlot,
+    BaseSlot,
 )
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ class RegexpSlot(ValueSlot, frozen=True):
         )
 
 
-class RegexpGroupSlot(GroupSlot, frozen=True):
+class RegexpGroupSlot(BaseSlot, frozen=True):
     """
     A slot type that applies a regex pattern once to extract values for
     multiple child slots. Accepts a `regexp` pattern and a `groups` dictionary
