@@ -71,6 +71,9 @@ you may want to separate the models memory
 using the same `filter_func` parameter.
 There is a function `FromModel` that
 can be used to separate the models memory.
+
+Via `history` parameter in LLMResponse you can set number of dialogue _turns_
+that the model will use as the history. Default value is `5`.
 """
 # %%
 toy_script = {
