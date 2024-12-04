@@ -32,7 +32,7 @@ class LLM_API:
         check_langchain_available()
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
-        self.system_prompt = system_prompt
+        self.system_prompt = Message(system_prompt)
 
     async def respond(
         self,
@@ -58,11 +58,7 @@ class LLM_API:
             raise ValueError
 
     async def condition(
-        self, ctx: Context, prompt: str, method: BaseMethod, return_schema: Optional[BaseModel] = None
+        self, history: list[BaseMessage], method: BaseMethod, return_schema: Optional[BaseModel] = None
     ) -> bool:
-        condition_history = [
-            await message_to_langchain(Message(prompt), ctx=ctx, source="system"),
-            await message_to_langchain(ctx.last_request, ctx=ctx, source="human"),
-        ]
-        result = await method(ctx, await self.model.agenerate([condition_history], logprobs=True, top_logprobs=10))
+        result = await method(history, await self.model.agenerate([history], logprobs=True, top_logprobs=10))
         return result

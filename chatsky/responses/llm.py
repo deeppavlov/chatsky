@@ -23,7 +23,7 @@ class LLMResponse(BaseResponse):
     :param model_name: Name of the model from the `Pipeline.models` dictionary.
     :param prompt: Prompt for the model.
     :param history: Number of messages to keep in history. `-1` for full history.
-    :param filter_func: filter function to filter messages that will go the models context.
+    :param filter_func: Filter function to filter messages that will go the models context.
     :param max_size: Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.
 
     :raise ValueError: If any message longer than `max_size`.
