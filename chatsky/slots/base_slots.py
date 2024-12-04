@@ -245,11 +245,12 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
         """
         Extra field names cannot be dunder names or contain dots.
         """
-        for field in self.__pydantic_extra__.keys():
-            if "." in field:
-                raise ValueError(f"Extra field name cannot contain dots: {field!r}")
-            if field.startswith("__") and field.endswith("__"):
-                raise ValueError(f"Extra field names cannot be dunder: {field!r}")
+        if self.__pydantic_extra__ is not None:
+            for field in self.__pydantic_extra__.keys():
+                if "." in field:
+                    raise ValueError(f"Extra field name cannot contain dots: {field!r}")
+                if field.startswith("__") and field.endswith("__"):
+                    raise ValueError(f"Extra field names cannot be dunder: {field!r}")
         return self
 
     def _flatten_group_slot(self, slot, parent_key=""):
