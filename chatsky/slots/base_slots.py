@@ -127,25 +127,25 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    value_format: str = None
-    slots: Dict[
+    string_format: str | None = None
+    __pydantic_extra__: Dict[
         str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
-    ] = Field(default_factory=dict)
+    ]
 
     @property
     def __slot_extracted__(self) -> bool:
-        return all([slot.__slot_extracted__ for slot in self.slots.values()])
+        return all([slot.__slot_extracted__ for slot in self.__pydantic_extra__.values()])
 
     def __unset__(self):
-        for child in self.slots.values():
+        for child in self.__pydantic_extra__.values():
             child.__unset__()
 
     # fill template here
     def __str__(self):
-        if self.value_format is not None:
-            return KwargOnlyFormatter().format(self.value_format, **self.slots)
+        if self.string_format is not None:
+            return KwargOnlyFormatter().format(self.string_format, **self.__pydantic_extra__)
         else:
-            return str({key: str(value) for key, value in self.slots.items()})
+            return str({key: str(value) for key, value in self.__pydantic_extra__.items()})
 
     def update(self, old: "ExtractedGroupSlot"):
         """
@@ -156,14 +156,14 @@ class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
         :param old: An instance of :py:class:`~.ExtractedGroupSlot` stored in-context.
             Extracted values will be transferred to this object.
         """
-        for slot in old.slots:
-            if slot in self.slots:
-                new_slot = self.slots[slot]
-                old_slot = old.slots[slot]
+        for slot in old.__pydantic_extra__:
+            if slot in self.__pydantic_extra__:
+                new_slot = self.__pydantic_extra__[slot]
+                old_slot = old.__pydantic_extra__[slot]
                 if isinstance(new_slot, ExtractedGroupSlot) and isinstance(old_slot, ExtractedGroupSlot):
                     new_slot.update(old_slot)
                 if isinstance(new_slot, ExtractedValueSlot) and isinstance(old_slot, ExtractedValueSlot):
-                    self.slots[slot] = old_slot
+                    self.__pydantic_extra__[slot] = old_slot
 
 
 class GroupSlot(BaseSlot, frozen=True):
@@ -171,59 +171,38 @@ class GroupSlot(BaseSlot, frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    value_format: str = None
-    slots: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]] = Field(
-        default_factory=dict
-    )
+    string_format: str = None
+    __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
+    allow_partial_extraction: bool = False
+    """If True, extraction returns only successfully extracted child slots."""
 
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    def __init__(self, allow_partial_extraction=False, **kwargs):
+        super().__init__(allow_partial_extraction=allow_partial_extraction, **kwargs)
 
     @model_validator(mode="before")
     @classmethod
-    def __validate_group_slot__(cls, data: Any):
+    def __check_reserved_slot_names__(cls, data: Any):
         """
-        Add support for initializing slots from keywords or a dictionary.
-        A combination is possible, in that case keywords will take priority.
+        Check that reserved names are used correctly and not taken by the user's slots.
         """
         if isinstance(data, dict):
-            result = {"slots": dict()}
-            if data.get("value_format") is not None:
-                result.update({"value_format": data.get("value_format")})
-            result.update(data.get("value_format", dict()))
-            result["slots"].update(data.get("slots", dict()))
-            for key, value in data.items():
-                if key not in ["value_format", "slots"]:
-                    result["slots"][key] = value
-            return result
+            reserved_names = ["string_format", "allow_partial_extraction"]
+            for name in reserved_names:
+                if data.get(name) is not None:
+                    if isinstance(data.get(name), BaseSlot):
+                        raise TypeError(f"Slots cannot be named '{name}', it's a reserved name.")
         return data
-
-        """
-            if "slots" not in data:
-                return {"slots": data}
-            return data
-        return {"slots": dict(data)}
-        """
-
-        """
-        def inner_func(*args: Any, **kwargs: Any):
-            if len(kwargs) > 0:
-                return dict(kwargs)
-
-        result = inner_func(data)
-        if result is not None:
-            return result
-        return data
-        """
 
     @model_validator(mode="after")
-    def __check_slot_names__(self):
+    def __check_extra_field_names__(self):
         """
-        Slot names cannot contain dots.
+        Extra field names cannot be dunder names or contain dots.
         """
-        for field in self.slots.keys():
+        for field in self.__pydantic_extra__.keys():
             if "." in field:
                 raise ValueError(f"Extra field name cannot contain dots: {field!r}")
+            if field.startswith("__") and field.endswith("__"):
+                raise ValueError(f"Extra field names cannot be dunder: {field!r}")
         return self
 
     def _flatten_group_slot(self, slot, parent_key=""):
@@ -237,14 +216,18 @@ class GroupSlot(BaseSlot, frozen=True):
         return items
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
-        child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.slots.values()))
-        return ExtractedGroupSlot(
-            value_format=self.value_format,
-            slots={child_name: child_value for child_value, child_name in zip(child_values, self.slots.keys())},
-        )
+        child_values = await asyncio.gather(*(child.get_value(ctx) for child in self.__pydantic_extra__.values()))
+        extracted_values = {}
+        for child_value, child_name in zip(child_values, self.__pydantic_extra__.keys()):
+            if child_value.__slot_extracted__ or not self.allow_partial_extraction:
+                extracted_values[child_name] = child_value
+
+        return ExtractedGroupSlot(string_format=self.string_format, **extracted_values)
 
     def init_value(self) -> ExtractedGroupSlot:
-        return ExtractedGroupSlot(slots={child_name: child.init_value() for child_name, child in self.slots.items()})
+        return ExtractedGroupSlot(
+            **{child_name: child.init_value() for child_name, child in self.__pydantic_extra__.items()}
+        )
 
 
 class ValueSlot(BaseSlot, frozen=True):

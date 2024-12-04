@@ -193,7 +193,7 @@ class SlotManager(BaseModel):
         "Your username is admin".
         """
         try:
-            return KwargOnlyFormatter().format(template, **dict(self.slot_storage.slots.items()))
+            return KwargOnlyFormatter().format(template, **dict(self.slot_storage.__pydantic_extra__.items()))
         except Exception as exc:
             logger.exception("An exception occurred during template filling.", exc_info=exc)
             return None

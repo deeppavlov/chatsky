@@ -149,12 +149,8 @@ class TestImportPipelineFile:
         assert start_node.transitions[0].dst == chatsky.dst.Previous()
         assert start_node.transitions[0].cnd == chatsky.cnd.HasText("t")
 
-        assert pipeline.slots.slots["person"].slots["likes"] == chatsky.slots.RegexpSlot(
-            regexp="I like (.+)", match_group_idx=1
-        )
-        assert pipeline.slots.slots["person"].slots["age"] == chatsky.slots.RegexpSlot(
-            regexp="I'm ([0-9]+) years old", match_group_idx=1
-        )
+        assert pipeline.slots.person.likes == chatsky.slots.RegexpSlot(regexp="I like (.+)", match_group_idx=1)
+        assert pipeline.slots.person.age == chatsky.slots.RegexpSlot(regexp="I'm ([0-9]+) years old", match_group_idx=1)
 
     def test_import_json(self):
         pipeline = chatsky.Pipeline.from_file(current_dir / "pipeline.json", custom_dir=current_dir / "custom")

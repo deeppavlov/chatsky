@@ -69,7 +69,7 @@ class RegexpGroupSlot(GroupSlot, frozen=True):
         search = re.search(self.regexp, request_text)
         if search:
             return ExtractedGroupSlot(
-                slots={
+                **{
                     child_name: ExtractedValueSlot.model_construct(
                         is_slot_extracted=True,
                         extracted_value=search.group(match_group),
@@ -79,7 +79,7 @@ class RegexpGroupSlot(GroupSlot, frozen=True):
             )
         else:
             return ExtractedGroupSlot(
-                slots={
+                **{
                     child_name: SlotNotExtracted(f"Failed to match pattern {self.regexp!r} in {request_text!r}.")
                     for child_name in self.groups.keys()
                 }
@@ -87,7 +87,7 @@ class RegexpGroupSlot(GroupSlot, frozen=True):
 
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(
-            slots={
+            **{
                 child_name: RegexpSlot(regexp=self.regexp, match_group_id=match_group).init_value()
                 for child_name, match_group in self.groups.items()
             }
