@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Union, Dict
+from typing import TYPE_CHECKING, Any, Union, Dict, Optional
 from typing_extensions import Annotated
 import logging
 from string import Formatter
@@ -127,7 +127,7 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    string_format: str | None = None
+    string_format: Optional[str] = None
     __pydantic_extra__: Dict[
         str, Annotated[Union["ExtractedGroupSlot", "ExtractedValueSlot"], Field(union_mode="left_to_right")]
     ]
@@ -171,7 +171,7 @@ class GroupSlot(BaseSlot, frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    string_format: str = None
+    string_format: Optional[str] = None
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
     allow_partial_extraction: bool = False
     """If True, extraction returns only successfully extracted child slots."""
