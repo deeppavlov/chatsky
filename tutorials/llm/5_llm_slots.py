@@ -49,6 +49,11 @@ especially when using smaller models.
 
 Note that we are passing the name of the model
  from pipeline.models dictionary to LLMGroupSlot.model field.
+
+Also, as you can see we set `allow_partial_extraction` flag in "person" slot to
+`True`. That will allow us to fill this template across multiple messages.
+To see how to use partial extraction please address the
+following tutorial %mddoclink(tutorials,llm.5_llm_slots).
 """
 
 # %%
@@ -61,6 +66,7 @@ SLOTS = {
         username=LLMSlot(caption="User's username in uppercase"),
         job=LLMSlot(caption="User's occupation, job, profession"),
         model="slot_model",
+        allow_partial_extraction=True
     )
 }
 
