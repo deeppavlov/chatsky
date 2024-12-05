@@ -1,13 +1,14 @@
-import uvicorn
-from fastapi import FastAPI
-from pydantic import BaseModel
-import dotenv
-from chatsky.messengers.common import MessengerInterface
-from chatsky.core import Message
 import os
 import time
 from typing import Optional
 
+import dotenv
+import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from chatsky.core import Message
+from chatsky.messengers.common import MessengerInterface
 
 dotenv.load_dotenv()
 
@@ -30,12 +31,12 @@ class HTTPMessengerInterface(MessengerInterface):
         @app.post("/chat", response_model=Output)
         async def respond(
             user_id: str,
-            user_message: str,  # TODO: change type to Message after core rework is done
+            user_message: Message,
         ):
             message = Message(text=user_message)
             context = await pipeline_runner(message, user_id)
             return {"user_id": user_id, "response": context.last_response}
-        
+
         @app.get("/health", response_model=HealthStatus)
         async def health_check():
             return {
