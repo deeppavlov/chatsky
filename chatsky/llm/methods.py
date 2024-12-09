@@ -39,11 +39,12 @@ class BaseMethod(BaseModel, abc.ABC):
 class Contains(BaseMethod):
     """
     Simple method to check if a string contains a pattern.
-
-    :param pattern: pattern that will be searched in model_result.
     """
 
     pattern: str
+    """
+    pattern that will be searched in model_result.
+    """
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
