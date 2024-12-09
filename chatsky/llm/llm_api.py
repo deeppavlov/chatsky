@@ -24,8 +24,8 @@ class LLM_API:
         system_prompt: Optional[str] = "",
     ) -> None:
         """
-        :param model: Model object.
-        :param system_prompt: System prompt for the model.
+        :param model: Model object
+        :param system_prompt: System prompt for the model
         """
         check_langchain_available()
         self.model: BaseChatModel = model
@@ -37,6 +37,15 @@ class LLM_API:
         history: list[BaseMessage],
         message_schema: Union[None, Type[Message], Type[BaseModel]] = None,
     ) -> Message:
+        """
+        Process and structure the model's response based on the provided schema.
+
+        :param history: List of previous messages in the conversation
+        :param message_schema: Schema for structuring the output, defaults to None
+        :return: Processed model response
+
+        :raises ValueError: If message_schema is not None, Message, or BaseModel
+        """
 
         if message_schema is None:
             result = await self.parser.ainvoke(await self.model.ainvoke(history))
@@ -58,5 +67,14 @@ class LLM_API:
     async def condition(
         self, history: list[BaseMessage], method: BaseMethod, return_schema: Optional[BaseModel] = None
     ) -> bool:
+        """
+        Execute a conditional method on the conversation history.
+
+        :param history: List of previous messages in the conversation
+        :param method: Method to evaluate the condition
+        :param return_schema: Optional schema for structuring the output
+
+        :return: Boolean result of the condition evaluation
+        """
         result = await method(history, await self.model.agenerate([history], logprobs=True, top_logprobs=10))
         return result
