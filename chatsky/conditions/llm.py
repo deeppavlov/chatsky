@@ -50,7 +50,7 @@ class LLMCondition(BaseCondition):
         if model.system_prompt == "":
             history_messages = []
         else:
-            history_messages = [message_to_langchain(model.system_prompt, ctx=ctx, source="system")]
+            history_messages = [await message_to_langchain(model.system_prompt, ctx=ctx, source="system")]
 
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
             history_messages.extend(

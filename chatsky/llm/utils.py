@@ -9,6 +9,7 @@ from typing import Literal, Union
 
 from chatsky.core.context import Context
 from chatsky.core.message import Message
+from chatsky.core.script_function import ConstResponse
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter
 
@@ -28,6 +29,8 @@ async def message_to_langchain(
     check_langchain_available()
     if isinstance(message, str):
         message = Message(text=message)
+    if isinstance(message, ConstResponse):
+        message = message.root
 
     if message.text is None:
         content = []
