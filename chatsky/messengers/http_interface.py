@@ -1,8 +1,5 @@
-import os
 import time
-from typing import Optional
 
-import dotenv
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -10,43 +7,37 @@ from pydantic import BaseModel
 from chatsky.core import Message
 from chatsky.messengers.common import MessengerInterface
 
-dotenv.load_dotenv()
-
-HTTP_INTERFACE_PORT = int(os.getenv("HTTP_INTERFACE_PORT", 8020))
-
-
 class HealthStatus(BaseModel):
     status: str
-    uptime: Optional[float]
+    uptime: float = None
 
 
 class HTTPMessengerInterface(MessengerInterface):
+    class ChatskyResponse(BaseModel):
+        user_id: str
+        response: Message
+
+    def __init__(self, port: int):
+        self.port = port
+        self.start_time = None
+
+    def health_check(self):
+        return {
+            "status": "ok",
+            "uptime": time.time() - self.start_time,
+        }
+
     async def connect(self, pipeline_runner):
         app = FastAPI()
 
-        class Output(BaseModel):
-            user_id: str
-            response: Message
-
-        @app.post("/chat", response_model=Output)
-        async def respond(
-            user_id: str,
-            user_message: Message,
-        ):
+        @app.post("/chat", response_model=self.ChatskyResponse)
+        async def respond(user_id: str, user_message: str):
             message = Message(text=user_message)
             context = await pipeline_runner(message, user_id)
             return {"user_id": user_id, "response": context.last_response}
 
-        @app.get("/health", response_model=HealthStatus)
-        async def health_check():
-            return {
-                "status": "ok",
-                "uptime": str(time.time() - self.start_time),
-            }
+        app.get("/health", response_model=HealthStatus)(self.health_check)
 
         self.start_time = time.time()
-        uvicorn.run(
-            app,
-            host="0.0.0.0",
-            port=HTTP_INTERFACE_PORT,
-        )
+        uvicorn.run(app, host="0.0.0.0", port=self.port)
+
