@@ -183,8 +183,6 @@ async def test_regex_group_slot_extraction(user_request, slot, expected, is_extr
     assert result.__slot_extracted__ == is_extracted
 
 
-# string_format="Your name is {name}. Your email is {email}.",
-# TODO: this test
 @pytest.mark.parametrize(
     ("user_request", "slot", "expected_str_format", "is_extracted"),
     [
@@ -205,7 +203,7 @@ async def test_regex_group_slot_extraction(user_request, slot, expected, is_extr
                 name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
                 email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ),
-            None,
+            "Your name is Bot. Your email is None.",
             False,
         ),
     ],
