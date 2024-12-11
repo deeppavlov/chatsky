@@ -69,6 +69,8 @@ async def test_basic_functions(context, manager, log_event_catcher):
     await proc.Extract("0", "2", "err", save_on_failure=False).wrapped_call(context)
 
     assert manager.get_extracted_slot("0").value == 4
+    assert await cnd.SlotValueEquals("0", "5") is False
+    assert await cnd.SlotValueEquals("0", "4") is True
     assert manager.is_slot_extracted("1") is False
     assert isinstance(manager.get_extracted_slot("err").extracted_value, RuntimeError)
 
