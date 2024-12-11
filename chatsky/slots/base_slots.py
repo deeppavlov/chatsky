@@ -143,7 +143,11 @@ class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
     # fill template here
     def __str__(self):
         if self.string_format is not None:
-            return KwargOnlyFormatter().format(self.string_format, **self.__pydantic_extra__)
+            try:
+                return KwargOnlyFormatter().format(self.string_format, **self.__pydantic_extra__)
+            except Exception as exc:
+                logger.exception("An exception occurred during template filling.", exc_info=exc)
+                return None
         else:
             return str({key: str(value) for key, value in self.__pydantic_extra__.items()})
 

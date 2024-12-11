@@ -130,7 +130,6 @@ async def test_group_slot_extraction(user_request, slot, expected, is_extracted,
     [
         (
             Message(text="I am Bot. I have a colleague, his name is Carl."),
-            # Message(text="I am Bot. My email is bot@bot"),
             RegexpGroupSlot(
                 regexp=r"am (.+?)\..*name is (.+?)\.",
                 groups={"name_1": 1, "name_2": 2},
@@ -184,54 +183,37 @@ async def test_regex_group_slot_extraction(user_request, slot, expected, is_extr
     assert result.__slot_extracted__ == is_extracted
 
 
+# string_format="Your name is {name}. Your email is {email}.",
 # TODO: this test
 @pytest.mark.parametrize(
-    ("user_request", "slot", "expected", "is_extracted"),
+    ("user_request", "slot", "expected_str_format", "is_extracted"),
     [
         (
             Message(text="I am Bot. My email is bot@bot"),
             GroupSlot(
+                string_format="Your name is {name}. Your email is {email}.",
                 name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
                 email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ),
-            ExtractedGroupSlot(
-                name=ExtractedValueSlot.model_construct(
-                    is_slot_extracted=True, extracted_value="Bot", default_value=None
-                ),
-                email=ExtractedValueSlot.model_construct(
-                    is_slot_extracted=True, extracted_value="bot@bot", default_value=None
-                ),
-            ),
+            "Your name is Bot. Your email is bot@bot.",
             True,
         ),
         (
             Message(text="I am Bot. I won't tell you my email"),
             GroupSlot(
+                string_format="Your name is {name}. Your email is {email}.",
                 name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
                 email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ),
-            ExtractedGroupSlot(
-                name=ExtractedValueSlot.model_construct(
-                    is_slot_extracted=True, extracted_value="Bot", default_value=None
-                ),
-                email=ExtractedValueSlot.model_construct(
-                    is_slot_extracted=False,
-                    extracted_value=SlotNotExtracted(
-                        "Failed to match pattern {regexp!r} in {request_text!r}.".format(
-                            regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+", request_text="I am Bot. I won't tell you my email"
-                        )
-                    ),
-                    default_value=None,
-                ),
-            ),
+            None,
             False,
         ),
     ],
 )
-async def test_group_slot_string_format(user_request, slot, expected, is_extracted, context):
+async def test_group_slot_string_format(user_request, slot, expected_str_format, is_extracted, context):
     context.add_request(user_request)
     result = await slot.get_value(context)
-    assert result == expected
+    assert str(result) == expected_str_format
     assert result.__slot_extracted__ == is_extracted
 
 
