@@ -184,14 +184,55 @@ async def test_regex_group_slot_extraction(user_request, slot, expected, is_extr
     assert result.__slot_extracted__ == is_extracted
 
 
-"""
 # TODO: this test
-async def test_group_slot_string_format(user_request, regexp, expected, context):
+@pytest.mark.parametrize(
+    ("user_request", "slot", "expected", "is_extracted"),
+    [
+        (
+            Message(text="I am Bot. My email is bot@bot"),
+            GroupSlot(
+                name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
+                email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
+            ),
+            ExtractedGroupSlot(
+                name=ExtractedValueSlot.model_construct(
+                    is_slot_extracted=True, extracted_value="Bot", default_value=None
+                ),
+                email=ExtractedValueSlot.model_construct(
+                    is_slot_extracted=True, extracted_value="bot@bot", default_value=None
+                ),
+            ),
+            True,
+        ),
+        (
+            Message(text="I am Bot. I won't tell you my email"),
+            GroupSlot(
+                name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
+                email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
+            ),
+            ExtractedGroupSlot(
+                name=ExtractedValueSlot.model_construct(
+                    is_slot_extracted=True, extracted_value="Bot", default_value=None
+                ),
+                email=ExtractedValueSlot.model_construct(
+                    is_slot_extracted=False,
+                    extracted_value=SlotNotExtracted(
+                        "Failed to match pattern {regexp!r} in {request_text!r}.".format(
+                            regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+", request_text="I am Bot. I won't tell you my email"
+                        )
+                    ),
+                    default_value=None,
+                ),
+            ),
+            False,
+        ),
+    ],
+)
+async def test_group_slot_string_format(user_request, slot, expected, is_extracted, context):
     context.add_request(user_request)
-    slot = RegexpSlot(regexp=regexp)
     result = await slot.get_value(context)
     assert result == expected
-"""
+    assert result.__slot_extracted__ == is_extracted
 
 
 @pytest.mark.parametrize("forbidden_name", ["__dunder__", "contains.dot"])
