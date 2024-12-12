@@ -65,14 +65,13 @@ class LLM_API:
             raise ValueError
 
     async def condition(
-        self, history: list[BaseMessage], method: BaseMethod, return_schema: Optional[BaseModel] = None
+        self, history: list[BaseMessage], method: BaseMethod
     ) -> bool:
         """
         Execute a conditional method on the conversation history.
 
         :param history: List of previous messages in the conversation
         :param method: Method to evaluate the condition
-        :param return_schema: Optional schema for structuring the output
 
         :return: Boolean result of the condition evaluation
         """
