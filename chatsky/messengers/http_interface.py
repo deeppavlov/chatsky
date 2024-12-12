@@ -1,7 +1,12 @@
 import time
 
-import uvicorn
-from fastapi import FastAPI
+try:
+    import uvicorn
+    from fastapi import FastAPI
+    web_api_available = True
+except ImportError as exc:
+    web_api_available = False
+    import_error = exc
 from pydantic import BaseModel
 
 from chatsky.core import Message
@@ -18,6 +23,11 @@ class HTTPMessengerInterface(MessengerInterface):
         response: Message
 
     def __init__(self, port: int):
+        if not web_api_available:
+            raise ImportError(
+                "Some packages are missing.\nTry to run `pip install chatsky[web-api]`."
+            ) from import_error
+        super().__init__()
         self.port = port
         self.start_time = None
 
