@@ -64,9 +64,7 @@ class LLM_API:
         else:
             raise ValueError
 
-    async def condition(
-        self, history: list[BaseMessage], method: BaseMethod
-    ) -> bool:
+    async def condition(self, history: list[BaseMessage], method: BaseMethod) -> bool:
         """
         Execute a conditional method on the conversation history.
 

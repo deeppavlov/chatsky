@@ -1,12 +1,12 @@
 import pytest
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel
 
 from chatsky.llm._langchain_imports import langchain_available
 from chatsky.llm.llm_api import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
-from chatsky.slots.llm import LLMGroupSlot, LLMSlot
-from chatsky.slots.slots import SlotNotExtracted, ExtractedGroupSlot
+from chatsky.slots.llm import LLMSlot
+from chatsky.slots.slots import SlotNotExtracted
 from chatsky.llm.utils import message_to_langchain, context_to_history
 from chatsky.llm.filters import IsImportant, FromModel
 from chatsky.llm.methods import Contains, LogProb, BaseMethod
@@ -31,40 +31,39 @@ class MockChatOpenAI:
             content=f"Mock response with history: {[message.content[0]['text'] for message in history]}"
         )
         return response
-    
+
     async def agenerate(self, history: list, logprobs=True, top_logprobs=10):
         return LLMResult(
-        generations=[
-            [
-                ChatGeneration(
-                    message=HumanMessage(content=f"Mock generation without history."),
-                    generation_info={
-                        "logprobs": {
-                            "content": [
-                                {
-                                    "top_logprobs": [
-                                        {"token": "true", "logprob": 0.1},
-                                        {"token": "false", "logprob": 0.5},
-                                    ]
-                                }
-                            ]
-                        }
-                    },
-                )
+            generations=[
+                [
+                    ChatGeneration(
+                        message=HumanMessage(content="Mock generation without history."),
+                        generation_info={
+                            "logprobs": {
+                                "content": [
+                                    {
+                                        "top_logprobs": [
+                                            {"token": "true", "logprob": 0.1},
+                                            {"token": "false", "logprob": 0.5},
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                    )
+                ]
             ]
-        ]
-    )
+        )
 
     def with_structured_output(self, message_schema):
         return MockedStructuredModel(root_model=message_schema)
 
     async def respond(self, history: list, message_schema=None):
         return self.ainvoke(history)
-    
+
     async def condition(self, history: list, method: BaseMethod):
         result = await method(history, await self.model.agenerate(history, logprobs=True, top_logprobs=10))
         return result
-
 
 
 class MockedStructuredModel:
@@ -80,13 +79,9 @@ class MockedStructuredModel:
                 inst = self.root(value="mocked_value")
             # For LLMGroupSlot
             else:
-                inst = self.root(
-                    name="John",
-                    age=25,
-                    nested={"city": "New York"}
-                )
+                inst = self.root(name="John", age=25, nested={"city": "New York"})
         return inst
-    
+
     def with_structured_output(self, message_schema):
         return message_schema
 
@@ -120,6 +115,7 @@ class MessageSchema(BaseModel):
 def mock_structured_model():
     return MockedStructuredModel
 
+
 @pytest.fixture
 def llmresult():
     return LLMResult(
@@ -144,6 +140,7 @@ def llmresult():
         ]
     )
 
+
 async def test_structured_output(monkeypatch, mock_structured_model):
     # Create a mock LLM_API instance
     llm_api = LLM_API(MockChatOpenAI())
@@ -166,9 +163,11 @@ def mock_model():
 
 class MockPipeline:
     def __init__(self, mock_model):
-        self.models = {"test_model": LLM_API(mock_model),
-                       "struct_model": LLM_API(MockChatOpenAI),
-                       "slot_model": LLM_API(SlotStructuredModel)}
+        self.models = {
+            "test_model": LLM_API(mock_model),
+            "struct_model": LLM_API(MockChatOpenAI),
+            "slot_model": LLM_API(SlotStructuredModel),
+        }
         # self.models = {"test_model": LLM_API(mock_model)}
 
 
@@ -272,18 +271,17 @@ async def test_context_to_history(context):
 
 async def test_conditions(context):
     cond1 = LLMCondition(
-                model_name="test_model",
-                prompt="test_prompt",
-                method=Contains(pattern="history"),
-            )
+        model_name="test_model",
+        prompt="test_prompt",
+        method=Contains(pattern="history"),
+    )
     cond2 = LLMCondition(
-                model_name="test_model",
-                prompt="test_prompt",
-                method=Contains(pattern="abrakadabra"),
-            )
-    assert await cond1(ctx=context) == True
-    assert await cond2(ctx=context) == False
-    
+        model_name="test_model",
+        prompt="test_prompt",
+        method=Contains(pattern="abrakadabra"),
+    )
+    assert await cond1(ctx=context)
+    assert not await cond2(ctx=context)
 
 
 def test_is_important_filter(filter_context):
@@ -307,8 +305,6 @@ def test_model_filter(filter_context):
     assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], model_name="test_model")
     assert filter_func(ctx, ctx.requests[3], ctx.responses[3], model_name="test_model")
     assert filter_func(ctx, ctx.requests[2], ctx.responses[3], model_name="test_model")
-
-
 
 
 async def test_base_method(llmresult):
@@ -337,7 +333,7 @@ async def test_llm_slot(pipeline, context):
     # Test empty request
     context.add_request("")
     assert isinstance(await slot.extract_value(context), SlotNotExtracted)
-    
+
     # Test normal request
     context.add_request("test request")
     result = await slot.extract_value(context)
@@ -358,10 +354,10 @@ async def test_llm_slot(pipeline, context):
 #             )
 #         }
 #     )
-    
+
 #     context.add_request("John is 25 years old and lives in New York")
 #     result = await slot.get_value(context)
-    
+
 #     assert isinstance(result, ExtractedGroupSlot)
 #     assert result.name.extracted_value == "John"
 #     assert result.age.extracted_value == 25
