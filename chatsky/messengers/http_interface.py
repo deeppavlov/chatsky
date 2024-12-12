@@ -3,6 +3,7 @@ import time
 try:
     import uvicorn
     from fastapi import FastAPI
+
     web_api_available = True
 except ImportError as exc:
     web_api_available = False
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 
 from chatsky.core import Message
 from chatsky.messengers.common import MessengerInterface
+
 
 class HealthStatus(BaseModel):
     status: str
@@ -50,4 +52,3 @@ class HTTPMessengerInterface(MessengerInterface):
 
         self.start_time = time.time()
         uvicorn.run(app, host="0.0.0.0", port=self.port)
-
