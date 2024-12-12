@@ -76,6 +76,8 @@ The slots module provides several functions for managing slots in-script:
 
 - %mddoclink(api,conditions.slots,SlotsExtracted):
     Condition for checking if specified slots are extracted.
+- %mddoclink(api,conditions.slots,SlotValueEquals):
+    Condition for checking if the specified slots' value is equal to a given value.
 - %mddoclink(api,processing.slots,Extract):
     A processing function that extracts specified slots.
 - %mddoclink(api,processing.slots,Unset):
