@@ -71,15 +71,12 @@ async def context_to_history(
         [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
     )
     logging.debug(f"Dialogue turns: {pairs}")
-    if length != -1:
-        for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)[-length:]):
-            logging.debug(f"This pair is valid: {req, resp}")
-            history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
-            history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
-    else:
-        # TODO: Fix redundant code
-        for req, resp in filter(lambda x: filter_func(ctx, x[0], x[1], model_name), list(pairs)):
-            logging.debug(f"This pair is valid: {req, resp}")
-            history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
-            history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
+    pairs_list = list(pairs)
+    filtered_pairs = filter(lambda x: filter_func(ctx, x[0], x[1], model_name), 
+                          pairs_list[-length:] if length != -1 else pairs_list)
+    
+    for req, resp in filtered_pairs:
+        logging.debug(f"This pair is valid: {req, resp}")
+        history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
+        history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     return history
