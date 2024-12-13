@@ -46,9 +46,9 @@ of the parent slot. In the following cell, we define two slot groups:
 
 Currently there are two types of value slots:
 
-- %mddoclink(api,slots.slots,RegexpSlot):
+- %mddoclink(api,slots.standard_slots,RegexpSlot):
     Extracts slot values via regexp.
-- %mddoclink(api,slots.slots,FunctionSlot):
+- %mddoclink(api,slots.standard_slots,FunctionSlot):
     Extracts slot values with the help of a user-defined function.
 """
 
