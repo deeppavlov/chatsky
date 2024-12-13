@@ -1,6 +1,6 @@
 """
 Slot Manager
------
+------------
 This module defines the SlotManager class, facilitating slot management for Pipeline.
 """
 

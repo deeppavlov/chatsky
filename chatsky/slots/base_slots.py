@@ -1,6 +1,6 @@
 """
 Base Slots
------
+----------
 This module defines base classes for slots.
 """
 

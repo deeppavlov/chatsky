@@ -1,6 +1,6 @@
 """
-Slots
------
+Standard Slots
+--------------
 This module defines some concrete implementations of slots.
 """
 
