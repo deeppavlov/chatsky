@@ -19,7 +19,6 @@ from chatsky.slots.base_slots import (
     ExtractedValueSlot,
     ExtractedGroupSlot,
     ValueSlot,
-    BaseSlot,
     GroupSlot,
 )
 

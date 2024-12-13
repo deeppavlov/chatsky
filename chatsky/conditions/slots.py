@@ -59,4 +59,4 @@ class SlotValueEquals(BaseCondition):
 
     async def call(self, ctx: Context) -> bool:
         manager = ctx.framework_data.slot_manager
-        return manager.get_extracted_slot(self.slot_name).self.value == self.value
+        return manager.get_extracted_slot(self.slot_name).value == self.value
