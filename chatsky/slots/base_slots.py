@@ -253,12 +253,11 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
                     raise ValueError(f"Extra field names cannot be dunder: {field!r}")
         return self
 
-# TODO: rewrite docs
-    def _flatten_group_slot(self, slot, parent_key=""):
+    def _flatten_group_slot(self, slot, parent_key="") -> dict:
         """
-        Flattens GroupSlot from nested into a single dictionary.
+        Unpacks a GroupSlot's nested `Slots` into a single dictionary.
 
-        Helper method for reimplementing GroupSlots.
+        Intended as a helper method for making GroupSlot child classes.
         """
         items = {}
         for key, value in slot.__pydantic_extra__.items():
