@@ -69,6 +69,7 @@ class RegexpGroupSlot(GroupSlot, extra="forbid", frozen=True):
     groups: dict[str, int]
     "A dictionary mapping slot names to match_group indexes."
     default_values: dict[str, Any] = Field(default_factory=dict)
+    # TODO: write docstring, could copy from tutorial
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)

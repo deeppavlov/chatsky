@@ -32,6 +32,34 @@ from chatsky.utils.testing import (
 
 # %% [markdown]
 """
+## RegexpGroupSlot extraction
+
+The `RegexpGroupSlot` class reuses one regex.search() call to save on
+execution time in specific cases like LLM, where the amount of get_value()
+calls is important. 
+
+## RegexpGroupSlot arguments
+
+* `regexp` - the regular expression to match with the `ctx.last_request.text`.
+* `groups` - a dictionary mapping slot names to group indexes, where numbers
+        mean the index of the capture group that was found with `re.search()`
+* `default_values` - a list of functions that run after the service.
+        You can read more about the handlers in this [tutorial]
+
+This means higher efficiency than a GroupSlot of RegexpSlots,
+because only a single regex search is performed. It is saved and reused
+for all specified groups, thus reducing the amount of calls to your model,
+for example an LLM model.
+
+The `RegexpGroupSlot` class is derived from `GroupSlot` class, inheriting
+its `string_format()` feature, which will be explained later in this tutorial.
+Though, `partial extraction` is turned off for this class.
+
+This means that unsuccessfully trying to extract a slot will not overwrite
+its previously extracted value.
+
+Note that `save_on_failure` is `True` by default.
+
 The slots fall into the following category groups:
 
 - Value slots can be used to extract slot values from user utterances.

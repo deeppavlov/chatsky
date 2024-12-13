@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 2. Partial slot extraction
+# 3. Partial slot extraction
 
 This tutorial shows advanced options for slot extraction allowing
 to extract only some of the slots.
