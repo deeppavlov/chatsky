@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from pydantic import ValidationError
 
@@ -147,7 +149,7 @@ async def test_group_slot_extraction(user_request, slot, expected, is_extracted,
         (
             Message(text="I am Bot. I won't tell you my email"),
             RegexpGroupSlot(
-                regexp=r"(?<=am ).+?(?=\.).*[a-zA-Z\.]+@[a-zA-Z\.]+",
+                regexp=r"am (.+?)\..*email is (.+?)\.",
                 groups={"name": 1, "email": 2},
             ),
             ExtractedGroupSlot(
@@ -155,7 +157,7 @@ async def test_group_slot_extraction(user_request, slot, expected, is_extracted,
                     is_slot_extracted=False,
                     extracted_value=SlotNotExtracted(
                         "Failed to match pattern {regexp!r} in {request_text!r}.".format(
-                            regexp=r"(?<=am ).+?(?=\.).*[a-zA-Z\.]+@[a-zA-Z\.]+",
+                            regexp=re.compile(r"am (.+?)\..*email is (.+?)\."),
                             request_text="I am Bot. I won't tell you my email",
                         )
                     ),
@@ -165,7 +167,7 @@ async def test_group_slot_extraction(user_request, slot, expected, is_extracted,
                     is_slot_extracted=False,
                     extracted_value=SlotNotExtracted(
                         "Failed to match pattern {regexp!r} in {request_text!r}.".format(
-                            regexp=r"(?<=am ).+?(?=\.).*[a-zA-Z\.]+@[a-zA-Z\.]+",
+                            regexp=re.compile(r"am (.+?)\..*email is (.+?)\."),
                             request_text="I am Bot. I won't tell you my email",
                         )
                     ),
