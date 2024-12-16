@@ -7,10 +7,11 @@ This module defines some concrete implementations of slots.
 from __future__ import annotations
 
 import re
+from re import Pattern
 from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, Dict, Optional
 import logging
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from typing_extensions import Annotated
 
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
@@ -38,6 +39,7 @@ class RegexpSlot(ValueSlot, frozen=True):
     """
 
     regexp: str
+    "The regexp to search for in ctx.last_request.text"
     match_group_idx: int = 0
     "Index of the group to match."
 
@@ -64,15 +66,41 @@ class RegexpGroupSlot(GroupSlot, extra="forbid", frozen=True):
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
     string_format: Optional[str] = None
     allow_partial_extraction: bool = False
+    "Unlike in `GroupSlot` this field has no effect in this class. If a slot doesn't"
 
-    regexp: str
+    regexp: Pattern
+    "The regexp to search for in ctx.last_request.text"
     groups: dict[str, int]
     "A dictionary mapping slot names to match_group indexes."
     default_values: dict[str, Any] = Field(default_factory=dict)
-    # TODO: write docstring, could copy from tutorial
+    "A dictionary with default values for each slot name in case a slot's extraction fails."
 
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    @model_validator(mode="after")
+    def validate_groups(self):
+        for elem in self.groups.values():
+            if elem > self.regexp.groups:
+                raise ValueError("Requested group number is too high, there aren't that many capture groups!")
+            if elem < 0:
+                raise ValueError("Requested capture group number cannot be negative.")
+        return self
+
+    def __init__(self, regexp: Union[str, Pattern], groups: dict[str, int], default_values: dict[str, Any] = None,
+                 string_format: str = None, flags: int = 0):
+        init_dict = {
+            "regexp": re.compile(regexp, flags),
+            "groups": groups,
+            "default_values": default_values,
+            "string_format": string_format,
+        }
+        empty_fields = set()
+        for k, v in init_dict.items():
+            if k not in self.model_fields:
+                raise NotImplementedError("Init method contains a field not in model fields.")
+            if v is None:
+                empty_fields.add(k)
+        for field in empty_fields:
+            del init_dict[field]
+        super().__init__(**init_dict)
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         request_text = ctx.last_request.text

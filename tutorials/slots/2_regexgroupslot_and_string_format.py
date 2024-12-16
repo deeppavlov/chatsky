@@ -53,7 +53,6 @@ for example an LLM model.
 
 The `RegexpGroupSlot` class is derived from `GroupSlot` class, inheriting
 its `string_format()` feature, which will be explained later in this tutorial.
-Though, `partial extraction` is turned off for this class.
 
 This means that unsuccessfully trying to extract a slot will not overwrite
 its previously extracted value.
