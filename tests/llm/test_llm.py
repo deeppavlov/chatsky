@@ -336,5 +336,4 @@ async def test_llm_group_slot(pipeline, context):
 
     assert result.name.extracted_value == "test_data"
     assert result.age.extracted_value == "test_data"
-    # why does it fail?
-    # assert result.nested.city.extracted_value == "test_data"
+    assert result.nested.city.extracted_value == "test_data"
