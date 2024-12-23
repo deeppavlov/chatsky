@@ -9,7 +9,7 @@ from pydantic import Field
 from chatsky.core import BaseCondition, Context
 from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.utils import context_to_history, message_to_langchain
+from chatsky.llm.langchain_context import context_to_history, message_to_langchain
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 
 

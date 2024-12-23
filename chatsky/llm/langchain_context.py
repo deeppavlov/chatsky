@@ -12,6 +12,7 @@ from chatsky.core.message import Message
 from chatsky.core.script_function import ConstResponse
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter
+from chatsky.llm.prompt import Prompt, DesaultPositionConfig
 
 
 async def message_to_langchain(
@@ -80,3 +81,15 @@ async def context_to_history(
         history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
         history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     return history
+
+# get a list of messages to pass to LLM from context and prompts
+# called in LLM_API
+def get_langchain_context(
+        system_prompt: Prompt,
+        ctx: Context,
+        call_prompt,
+        prompt_misc_filter: str=r"prompt",  # r"prompt" -> extract misc prompts
+        postition_config: DesaultPositionConfig=DesaultPositionConfig,
+        **history_args,
+    ):
+        history = context_to_history(ctx, history_args)
