@@ -55,25 +55,23 @@ class RegexpSlot(ValueSlot, frozen=True):
 
 class RegexpGroupSlot(GroupSlot, extra="forbid", frozen=True):
     """
-    A slot type that applies a regex pattern once to extract values for
-    multiple child slots. Accepts a `regexp` pattern and a `groups` dictionary
-    mapping slot names to group indexes. Improves efficiency by performing a
-    single regex search for all specified groups, thus reducing the amount
-    of calls to your model.
+    A slot type that reuses one regex.search() call for several slots
+    to save on execution time in specific cases like LLM, where the amount of
+    get_value() calls is important.
     """
 
     # Parent fields repeated for Pydantic issues
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
     string_format: Optional[str] = None
     allow_partial_extraction: bool = False
-    "Unlike in `GroupSlot` this field has no effect in this class. If a slot doesn't"
+    "Unlike in `GroupSlot` this field has no effect in this class."
 
     regexp: Pattern
     "The regexp to search for in ctx.last_request.text"
     groups: dict[str, int]
-    "A dictionary mapping slot names to match_group indexes."
+    "A dictionary mapping slot names to capture group indexes (like `match_group` in RegexpSlot)."
     default_values: dict[str, Any] = Field(default_factory=dict)
-    "A dictionary with default values for each slot name in case a slot's extraction fails."
+    "A dictionary with default values for each slot name in case the regexp search fails."
 
     @model_validator(mode="after")
     def validate_groups(self):
@@ -84,8 +82,14 @@ class RegexpGroupSlot(GroupSlot, extra="forbid", frozen=True):
                 raise ValueError("Requested capture group number cannot be negative.")
         return self
 
-    def __init__(self, regexp: Union[str, Pattern], groups: dict[str, int], default_values: dict[str, Any] = None,
-                 string_format: str = None, flags: int = 0):
+    def __init__(
+        self,
+        regexp: Union[str, Pattern],
+        groups: dict[str, int],
+        default_values: dict[str, Any] = None,
+        string_format: str = None,
+        flags: int = 0,
+    ):
         init_dict = {
             "regexp": re.compile(regexp, flags),
             "groups": groups,

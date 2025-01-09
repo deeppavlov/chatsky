@@ -23,7 +23,7 @@ from chatsky import (
     responses as rsp,
 )
 
-from chatsky.slots import RegexpSlot
+from chatsky.slots import RegexpSlot, RegexpGroupSlot, GroupSlot
 
 from chatsky.utils.testing import (
     check_happy_path,
@@ -34,99 +34,76 @@ from chatsky.utils.testing import (
 """
 ## RegexpGroupSlot extraction
 
-The `RegexpGroupSlot` class reuses one regex.search() call to save on
-execution time in specific cases like LLM, where the amount of get_value()
-calls is important. 
+The `RegexpGroupSlot` is a slot type that reuses one regex.search() call for
+several slots to save on execution time in specific cases like LLM, where the
+amount of get_value() calls is important.
 
 ## RegexpGroupSlot arguments
 
 * `regexp` - the regular expression to match with the `ctx.last_request.text`.
 * `groups` - a dictionary mapping slot names to group indexes, where numbers
         mean the index of the capture group that was found with `re.search()`
-* `default_values` - a list of functions that run after the service.
-        You can read more about the handlers in this [tutorial]
-
-This means higher efficiency than a GroupSlot of RegexpSlots,
-because only a single regex search is performed. It is saved and reused
-for all specified groups, thus reducing the amount of calls to your model,
-for example an LLM model.
+        (like `match_group` in RegexpSlot).
+* `default_values` - a dictionary with default values for each slot name in
+        case the regexp search fails.
 
 The `RegexpGroupSlot` class is derived from `GroupSlot` class, inheriting
-its `string_format()` feature, which will be explained later in this tutorial.
+its `string_format()` feature.
 
-This means that unsuccessfully trying to extract a slot will not overwrite
-its previously extracted value.
+## `string_format` usage
 
-Note that `save_on_failure` is `True` by default.
+You can set `string_format` to change the `__str__` representation of the
+`ExtractedValueSlot`. `string_format` can be set to a string, which will
+be formatted with Python's `str.format()`, using extracted slots names and
+their values as keyword arguments.
 
-The slots fall into the following category groups:
+The reason this exists at all is so you don't have to specify each and every
+child slot name and can now represent a GroupSlot in a pre-determined way.
 
-- Value slots can be used to extract slot values from user utterances.
-- Group slots can be used to split value slots into groups
-    with an arbitrary level of nesting.
-
-You can build the slot tree by passing the child slot instances as extra fields
-of the parent slot. In the following cell, we define two slot groups:
-
-    Group 1: person.username, person.email
-    Group 2: friend.first_name, friend.last_name
-
-Currently there are two types of value slots:
-
-- %mddoclink(api,slots.standard_slots,RegexpSlot):
-    Extracts slot values via regexp.
-- %mddoclink(api,slots.standard_slots,FunctionSlot):
-    Extracts slot values with the help of a user-defined function.
+Here are some examples of `RegexpGroupSlot` and `string_format `use:
 """
 
 # %%
+two_numbers_regexp_group_slot = RegexpGroupSlot(
+    string_format="Second number is {second_number},"
+    "first_number is {first_number}.",
+    regexp=r"first number is (\d+)\D*second number is (\d+)",
+    groups={"first_number": 1, "second_number": 2},
+)
+
+# date -> RegexpGroupSlot.
+sub_slots_for_group_slot = {
+    "date": RegexpSlot(
+        regexp=r"(0?[1-9]|(?:1|2)[0-9]|3[0-1])[\.\/]"
+        r"(0?[1-9]|1[0-2])[\.\/](\d{4}|\d{2})",
+    ),
+    "email": RegexpSlot(
+        regexp=r"[\w\.-]+@[\w\.-]+\.\w{2,4}",
+    ),
+}
+string_format_group_slot = GroupSlot(
+    string_format="Date is {date}, email is {email}", **sub_slots_for_group_slot
+)
+
 SLOTS = {
-    "person": {
-        "username": RegexpSlot(
-            regexp=r"username is ([a-zA-Z]+)",
-            match_group_idx=1,
-        ),
-        "email": RegexpSlot(
-            regexp=r"email is ([a-z@\.A-Z]+)",
-            match_group_idx=1,
-        ),
-    },
-    "friend": {
-        "first_name": RegexpSlot(regexp=r"^[A-Z][a-z]+?(?= )"),
-        "last_name": RegexpSlot(regexp=r"(?<= )[A-Z][a-z]+"),
-    },
+    "two_numbers_slot": two_numbers_regexp_group_slot,
+    "string_format_group_slot": string_format_group_slot,
 }
 
-# %% [markdown]
-"""
-The slots module provides several functions for managing slots in-script:
-
-- %mddoclink(api,conditions.slots,SlotsExtracted):
-    Condition for checking if specified slots are extracted.
-- %mddoclink(api,processing.slots,Extract):
-    A processing function that extracts specified slots.
-- %mddoclink(api,processing.slots,Unset):
-    A processing function that marks specified slots as not extracted,
-    effectively resetting their state.
-- %mddoclink(api,processing.slots,UnsetAll):
-    A processing function that marks all slots as not extracted.
-- %mddoclink(api,processing.slots,FillTemplate):
-    A processing function that fills the `response`
-    Message text with extracted slot values.
-- %mddoclink(api,responses.slots,FilledTemplate):
-    A response function that takes a Message with a
-    format-string text and returns Message
-    with its text string filled with extracted slot values.
-
-The usage of all the above functions is shown in the following script:
-"""
-
-# %%
 script = {
     GLOBAL: {
         TRANSITIONS: [
             Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
         ]
+    },
+    "two_numbers_flow": {
+        "ask": {
+            RESPONSE: "Write two numbers: ",
+            PRE_TRANSITION: {"get_slot": proc.Extract("two_numbers_slot")},
+        },
+        "answer_node": {
+            PRE_RESPONSE: {"get_slot": proc.Extract("two_numbers_slot")}
+        },
     },
     "username_flow": {
         LOCAL: {

@@ -220,6 +220,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
 
     __pydantic_extra__: Dict[str, Annotated[Union["GroupSlot", "ValueSlot"], Field(union_mode="left_to_right")]]
     string_format: Optional[str] = None
+    """Makes the str() representation formatted with slot values being the keywords."""
     allow_partial_extraction: bool = False
     """If True, extraction returns only successfully extracted child slots."""
 
