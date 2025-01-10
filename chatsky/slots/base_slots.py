@@ -281,5 +281,5 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     def init_value(self) -> ExtractedGroupSlot:
         return ExtractedGroupSlot(
             string_format=self.string_format,
-            **{child_name: child.init_value() for child_name, child in self.__pydantic_extra__.items()}
+            **{child_name: child.init_value() for child_name, child in self.__pydantic_extra__.items()},
         )
