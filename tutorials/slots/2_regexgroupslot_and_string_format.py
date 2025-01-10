@@ -9,18 +9,19 @@ and `string format` feature of GroupSlot.
 # %pip install chatsky
 
 # %%
+import re
+
 from chatsky import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITION,
-    PRE_RESPONSE,
     GLOBAL,
-    LOCAL,
     Pipeline,
     Transition as Tr,
     conditions as cnd,
     processing as proc,
     responses as rsp,
+    destinations as dst,
 )
 
 from chatsky.slots import RegexpSlot, RegexpGroupSlot, GroupSlot
@@ -60,141 +61,87 @@ their values as keyword arguments.
 The reason this exists at all is so you don't have to specify each and every
 child slot name and can now represent a GroupSlot in a pre-determined way.
 
-Here are some examples of `RegexpGroupSlot` and `string_format `use:
+Below are some examples of `RegexpGroupSlot` and `string_format `use:
 """
 
 # %%
-two_numbers_regexp_group_slot = RegexpGroupSlot(
-    string_format="Second number is {second_number},"
-    "first_number is {first_number}.",
-    regexp=r"first number is (\d+)\D*second number is (\d+)",
-    groups={"first_number": 1, "second_number": 2},
-)
-
-# date -> RegexpGroupSlot.
 sub_slots_for_group_slot = {
-    "date": RegexpSlot(
+    "date": RegexpGroupSlot(
+        string_format="{day}/{month}/{year}",
         regexp=r"(0?[1-9]|(?:1|2)[0-9]|3[0-1])[\.\/]"
         r"(0?[1-9]|1[0-2])[\.\/](\d{4}|\d{2})",
+        groups={"day": 1, "month": 2, "year": 3},
     ),
     "email": RegexpSlot(
         regexp=r"[\w\.-]+@[\w\.-]+\.\w{2,4}",
     ),
 }
-string_format_group_slot = GroupSlot(
-    string_format="Date is {date}, email is {email}", **sub_slots_for_group_slot
+date_and_email = GroupSlot(
+    string_format="Your date of birth is {date}, email is {email}",
+    **sub_slots_for_group_slot
 )
 
 SLOTS = {
-    "two_numbers_slot": two_numbers_regexp_group_slot,
-    "string_format_group_slot": string_format_group_slot,
+    "date_and_email": date_and_email,
 }
 
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+            Tr(
+                dst=("date_and_email_flow", "ask_email"),
+                cnd=cnd.Regexp(r"^[sS]tart"),
+            ),
         ]
     },
-    "two_numbers_flow": {
-        "ask": {
-            RESPONSE: "Write two numbers: ",
-            PRE_TRANSITION: {"get_slot": proc.Extract("two_numbers_slot")},
-        },
-        "answer_node": {
-            PRE_RESPONSE: {"get_slot": proc.Extract("two_numbers_slot")}
-        },
-    },
-    "username_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.username")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("email_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username"),
-                    priority=1.2,
-                ),
-                Tr(dst=("username_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {
-            RESPONSE: "Write your username (my username is ...):",
-        },
-        "repeat_question": {
-            RESPONSE: "Please, type your username again (my username is ...):",
-        },
-    },
-    "email_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.email")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("friend_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username", "person.email"),
-                    priority=1.2,
-                ),
-                Tr(dst=("email_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {
-            RESPONSE: "Write your email (my email is ...):",
-        },
-        "repeat_question": {
-            RESPONSE: "Please, write your email again (my email is ...):",
-        },
-    },
-    "friend_flow": {
-        LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("friend")},
-            TRANSITIONS: [
-                Tr(
-                    dst=("root", "utter"),
-                    cnd=cnd.SlotsExtracted(
-                        "friend.first_name", "friend.last_name", mode="any"
-                    ),
-                    priority=1.2,
-                ),
-                Tr(dst=("friend_flow", "repeat_question"), priority=0.8),
-            ],
-        },
-        "ask": {RESPONSE: "Please, name me one of your friends: (John Doe)"},
-        "repeat_question": {
-            RESPONSE: "Please, name me one of your friends again: (John Doe)"
-        },
-    },
-    "root": {
+    "date_and_email_flow": {
         "start": {
-            TRANSITIONS: [Tr(dst=("username_flow", "ask"))],
+            TRANSITIONS: [Tr(dst=("date_and_email_flow", "ask_date"))],
         },
         "fallback": {
             RESPONSE: "Finishing query",
-            TRANSITIONS: [Tr(dst=("username_flow", "ask"))],
+            TRANSITIONS: [
+                Tr(dst=("date_and_email_flow", "ask_email")),
+                Tr(
+                    dst=dst.Backward(),
+                    cnd=cnd.Regexp(r"back", flags=re.IGNORECASE),
+                ),
+            ],
         },
-        "utter": {
-            RESPONSE: rsp.FilledTemplate(
-                "Your friend is {friend.first_name} {friend.last_name}"
-            ),
-            TRANSITIONS: [Tr(dst=("root", "utter_alternative"))],
+        "ask_email": {
+            RESPONSE: "Write your email (my email is ...):",
+            PRE_TRANSITION: {"get_slot": proc.Extract("date_and_email.email")},
+            TRANSITIONS: [
+                Tr(
+                    dst="ask_email",
+                    cnd=cnd.SlotsExtracted("date_and_email.email"),
+                )
+            ],
         },
-        "utter_alternative": {
-            RESPONSE: "Your username is {person.username}. "
-            "Your email is {person.email}.",
-            PRE_RESPONSE: {"fill": proc.FillTemplate()},
+        "ask_date": {
+            RESPONSE: "Write your date of birth:",
+            PRE_TRANSITION: {"get_slot": proc.Extract("date_and_email.date")},
+            TRANSITIONS: [
+                Tr(
+                    dst="answer_node",
+                    cnd=cnd.SlotsExtracted("date_and_email.date"),
+                )
+            ],
         },
+        "answer_node": {RESPONSE: rsp.FilledTemplate("{date_and_email}")},
     },
 }
 
 # %%
 HAPPY_PATH = [
-    ("hi", "Write your username (my username is ...):"),
-    ("my username is groot", "Write your email (my email is ...):"),
+    ("hi", "Write your email (my email is ...):"),
+    ("my email is groot@gmail.com", "Write your date of birth:"),
     (
-        "my email is groot@gmail.com",
-        "Please, name me one of your friends: (John Doe)",
+        "my date of birth is 06/10/1984",
+        "Your date of birth is 06/10/1984, email is groot@gmail.com",
     ),
-    ("Bob Page", "Your friend is Bob Page"),
-    ("ok", "Your username is groot. Your email is groot@gmail.com."),
     ("ok", "Finishing query"),
+    ("start", "Write your email (my email is ...):"),
 ]
 
 # %%
