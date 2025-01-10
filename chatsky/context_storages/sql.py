@@ -133,14 +133,13 @@ class SQLContextStorage(DBContextStorage):
         set this parameter to `True` to bypass the import checks.
     """
 
-    _ID_LENGTH = 255
-
     def __init__(
         self,
         path: str,
         rewrite_existing: bool = False,
         partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
         table_name_prefix: str = "chatsky_table",
+        database_id_length: int = 255,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
@@ -156,7 +155,7 @@ class SQLContextStorage(DBContextStorage):
         self.main_table = Table(
             f"{table_name_prefix}_{NameConfig._main_table}",
             metadata,
-            Column(NameConfig._id_column, String(self._ID_LENGTH), index=True, unique=True, nullable=False),
+            Column(NameConfig._id_column, String(database_id_length), index=True, unique=True, nullable=False),
             Column(NameConfig._current_turn_id_column, BigInteger(), nullable=False),
             Column(NameConfig._created_at_column, BigInteger(), nullable=False),
             Column(NameConfig._updated_at_column, BigInteger(), nullable=False),
@@ -168,7 +167,7 @@ class SQLContextStorage(DBContextStorage):
             metadata,
             Column(
                 NameConfig._id_column,
-                String(self._ID_LENGTH),
+                String(database_id_length),
                 ForeignKey(self.main_table.name, NameConfig._id_column),
                 nullable=False,
             ),
