@@ -24,7 +24,7 @@ from chatsky import (
     destinations as dst,
 )
 
-from chatsky.slots import RegexpSlot, RegexpGroupSlot, GroupSlot
+from chatsky.slots import RegexpSlot, RegexpGroupSlot
 
 from chatsky.utils.testing import (
     check_happy_path,
@@ -65,24 +65,16 @@ Below are some examples of `RegexpGroupSlot` and `string_format `use:
 """
 
 # %%
-sub_slots_for_group_slot = {
+SLOTS = {
     "date": RegexpGroupSlot(
-        string_format="{day}/{month}/{year}",
         regexp=r"(0?[1-9]|(?:1|2)[0-9]|3[0-1])[\.\/]"
         r"(0?[1-9]|1[0-2])[\.\/](\d{4}|\d{2})",
         groups={"day": 1, "month": 2, "year": 3},
+        string_format="{day}/{month}/{year}",
     ),
     "email": RegexpSlot(
         regexp=r"[\w\.-]+@[\w\.-]+\.\w{2,4}",
     ),
-}
-date_and_email = GroupSlot(
-    string_format="Your date of birth is {date}, email is {email}",
-    **sub_slots_for_group_slot
-)
-
-SLOTS = {
-    "date_and_email": date_and_email,
 }
 
 script = {
@@ -96,39 +88,43 @@ script = {
     },
     "date_and_email_flow": {
         "start": {
-            TRANSITIONS: [Tr(dst=("date_and_email_flow", "ask_date"))],
+            TRANSITIONS: [Tr(dst=("date_and_email_flow", "ask_email"))],
         },
         "fallback": {
             RESPONSE: "Finishing query",
             TRANSITIONS: [
-                Tr(dst=("date_and_email_flow", "ask_email")),
                 Tr(
                     dst=dst.Backward(),
                     cnd=cnd.Regexp(r"back", flags=re.IGNORECASE),
                 ),
+                Tr(dst=("date_and_email_flow", "ask_email"), priority=0.8),
             ],
         },
         "ask_email": {
             RESPONSE: "Write your email (my email is ...):",
-            PRE_TRANSITION: {"get_slot": proc.Extract("date_and_email.email")},
+            PRE_TRANSITION: {"get_slot": proc.Extract("email")},
             TRANSITIONS: [
                 Tr(
-                    dst="ask_email",
-                    cnd=cnd.SlotsExtracted("date_and_email.email"),
+                    dst="ask_date",
+                    cnd=cnd.SlotsExtracted("email"),
                 )
             ],
         },
         "ask_date": {
             RESPONSE: "Write your date of birth:",
-            PRE_TRANSITION: {"get_slot": proc.Extract("date_and_email.date")},
+            PRE_TRANSITION: {"get_slot": proc.Extract("date")},
             TRANSITIONS: [
                 Tr(
                     dst="answer_node",
-                    cnd=cnd.SlotsExtracted("date_and_email.date"),
+                    cnd=cnd.SlotsExtracted("date"),
                 )
             ],
         },
-        "answer_node": {RESPONSE: rsp.FilledTemplate("{date_and_email}")},
+        "answer_node": {
+            RESPONSE: rsp.FilledTemplate(
+                "Your date of birth is {date}, email is {email}"
+            )
+        },
     },
 }
 
@@ -147,8 +143,8 @@ HAPPY_PATH = [
 # %%
 pipeline = Pipeline(
     script=script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("date_and_email_flow", "start"),
+    fallback_label=("date_and_email_flow", "fallback"),
     slots=SLOTS,
 )
 

@@ -38,7 +38,7 @@ class RegexpSlot(ValueSlot, frozen=True):
     change the `match_group_idx` parameter.
     """
 
-    regexp: str
+    regexp: str | Pattern
     "The regexp to search for in ctx.last_request.text"
     match_group_idx: int = 0
     "Index of the group to match."
