@@ -4,6 +4,7 @@ LLM Utils.
 The Utils module contains functions for converting Chatsky's objects to an LLM_API and langchain compatible versions.
 """
 
+import re
 import logging
 from typing import Literal, Union
 
@@ -84,12 +85,32 @@ async def context_to_history(
 
 # get a list of messages to pass to LLM from context and prompts
 # called in LLM_API
-def get_langchain_context(
+async def get_langchain_context(
         system_prompt: Prompt,
         ctx: Context,
         call_prompt,
         prompt_misc_filter: str=r"prompt",  # r"prompt" -> extract misc prompts
-        postition_config: DesaultPositionConfig=DesaultPositionConfig,
+        postition_config: DesaultPositionConfig=DesaultPositionConfig(),
         **history_args,
     ):
-        history = context_to_history(ctx, history_args)
+    """
+    Get a list of Langchain messages using the context and prompts.
+    """
+    history = context_to_history(ctx, history_args)
+    prompts = [(system_prompt, system_prompt.position)]
+    misc_prompts = []
+    
+    for element in ctx.current_node.misc:
+        if re.match(prompt_misc_filter, element):
+            misc_prompts.append(element)
+    
+    misc_prompts.append(call_prompt)
+    prompts.extend(misc_prompts)
+
+    prompts = sorted(prompts, key=lambda x: x.position)
+
+    # merge prompts and history
+    langchain_context = []
+    for prompt in prompts:
+        langchain_context.append(await message_to_langchain(prompt, ctx, source="system"))
+        langchain_context
