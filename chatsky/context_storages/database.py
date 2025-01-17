@@ -35,6 +35,11 @@ logger = getLogger(__name__)
 
 
 class NameConfig:
+    """
+    Configuration of names of different database parts,
+    including table names, column names, field names, etc.
+    """
+
     _main_table: Literal["main"] = "main"
     _turns_table: Literal["turns"] = "turns"
     _key_column: Literal["key"] = "key"
@@ -50,6 +55,13 @@ class NameConfig:
 
 
 class ContextInfo(BaseModel):
+    """
+    Main context fields, that are stored in `MAIN` table.
+    For most of the database backends, it will be serialized to json.
+    For SQL database backends, it will be written to different table columns.
+    For memory context storage, it won't be serialized at all.
+    """
+
     turn_id: int
     created_at: int = Field(default_factory=time_ns)
     updated_at: int = Field(default_factory=time_ns)
@@ -70,7 +82,7 @@ class ContextInfo(BaseModel):
         return self._misc_adaptor.dump_json(misc)
 
     @field_serializer("framework_data", when_used="always")
-    def serialize_courses_in_order(self, framework_data: FrameworkData) -> bytes:
+    def _serialize_framework_data(self, framework_data: FrameworkData) -> bytes:
         return framework_data.model_dump_json().encode()
 
     def __eq__(self, other: Any) -> bool:
@@ -92,6 +104,15 @@ def _lock(function: Callable[..., Awaitable[Any]]):
 
 
 class DBContextStorage(ABC):
+    """
+    Base context storage class.
+    Includes a set of methods for storing and reading different context parts.
+
+    :param path: Path to the storage instance.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    """
+
     _default_subscript_value: int = 3
 
     def __init__(
@@ -102,15 +123,42 @@ class DBContextStorage(ABC):
     ):
         _, _, file_path = path.partition("://")
         configuration = partial_read_config if partial_read_config is not None else dict()
+
         self.full_path = path
-        """Full path to access the context storage, as it was provided by user."""
+        """
+        Full path to access the context storage, as it was provided by user.
+        """
+
         self.path = Path(file_path)
-        """`full_path` without a prefix defining db used."""
+        """
+        `full_path` without a prefix defining db used.
+        """
+
         self.rewrite_existing = rewrite_existing
-        """Whether to rewrite existing data in the storage."""
+        """
+        Whether to rewrite existing data in the storage.
+        """
+
         self._subscripts = dict()
+        """
+        Subscripts control how many elements will be loaded from the database.
+        Can be an integer, meaning the number of *last* elements to load.
+        A special value for loading all the elements at once: "__all__".
+        Can also be a set of keys that should be loaded.
+        """
+
         self._sync_lock = Lock()
+        """
+        Synchronization lock for the databases that don't support
+        asynchronous atomic reads and writes.
+        """
+
         self.connected = False
+        """
+        Flag that marks if the storage is connected to the backend.
+        Should be set in `pipeline.run` or later (lazily).
+        """
+
         for field in (NameConfig._labels_field, NameConfig._requests_field, NameConfig._responses_field):
             value = configuration.get(field, self._default_subscript_value)
             if (not isinstance(value, int)) or value >= 1:
@@ -121,6 +169,10 @@ class DBContextStorage(ABC):
     @property
     @abstractmethod
     def is_concurrent(self) -> bool:
+        """
+        If the database backend support asynchronous IO.
+        """
+
         raise NotImplementedError
 
     @classmethod
@@ -135,6 +187,10 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     async def connect(self) -> None:
+        """
+        Connect to the backend context storage.
+        """
+
         logger.info(f"Connecting to context storage {type(self).__name__} ...")
         await self._connect()
         self.connected = True
@@ -147,7 +203,11 @@ class DBContextStorage(ABC):
     async def load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         """
         Load main information about the context.
+
+        :param ctx_id: Context identifier.
+        :return: Context main information (from `MAIN` table).
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Loading main info for {ctx_id}...")
@@ -163,7 +223,11 @@ class DBContextStorage(ABC):
     async def update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
         """
         Update main information about the context.
+
+        :param ctx_id: Context identifier.
+        :param ctx_info: New context information (will be written to `MAIN` table).
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Updating main info for {ctx_id}...")
@@ -178,7 +242,10 @@ class DBContextStorage(ABC):
     async def delete_context(self, ctx_id: str) -> None:
         """
         Delete context from context storage.
+
+        :param ctx_id: Context identifier.
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Deleting context {ctx_id}...")
@@ -192,8 +259,13 @@ class DBContextStorage(ABC):
     @_lock
     async def load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
         """
-        Load the latest field data.
+        Load the latest field data (specified by `subscript` value).
+
+        :param ctx_id: Context identifier.
+        :param field_name: Field name to load from `TURNS` table.
+        :return: List of tuples (step number, serialized value).
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
@@ -209,7 +281,12 @@ class DBContextStorage(ABC):
     async def load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
         """
         Load all field keys.
+
+        :param ctx_id: Context identifier.
+        :param field_name: Field name to load from `TURNS` table.
+        :return: List of all the step numbers.
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
@@ -224,8 +301,15 @@ class DBContextStorage(ABC):
     @_lock
     async def load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
         """
-        Load field items.
+        Load field items (specified by key list).
+        The items that are equal to `None` will be ignored.
+
+        :param ctx_id: Context identifier.
+        :param field_name: Field name to load from `TURNS` table.
+        :param keys: List of keys to load.
+        :return: List of tuples (step number, serialized value).
         """
+
         if not self.connected:
             await self.connect()
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
@@ -241,7 +325,12 @@ class DBContextStorage(ABC):
     async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
         """
         Update field items.
+
+        :param ctx_id: Context identifier.
+        :param field_name: Field name to load from `TURNS` table.
+        :param items: List of tuples that will be written (step number, serialized value or `None`).
         """
+
         if len(items) == 0:
             logger.debug(f"No fields to update in {ctx_id}, {field_name}!")
             return
@@ -258,7 +347,12 @@ class DBContextStorage(ABC):
     async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         """
         Delete field keys.
+
+        :param ctx_id: Context identifier.
+        :param field_name: Field name to load from `TURNS` table.
+        :param keys: List of keys to delete (will be just overwritten with `None`).
         """
+
         if len(keys) == 0:
             logger.debug(f"No fields to delete in {ctx_id}, {field_name}!")
             return
@@ -277,6 +371,7 @@ class DBContextStorage(ABC):
         """
         Clear all the chatsky tables and records.
         """
+
         if not self.connected:
             await self.connect()
         logger.debug("Clearing all")
@@ -323,6 +418,7 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
 
     :param path: Path to the file.
     """
+
     if path == "":
         module = "memory"
         _class = "MemoryContextStorage"

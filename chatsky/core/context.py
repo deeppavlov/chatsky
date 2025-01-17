@@ -102,18 +102,40 @@ class Context(BaseModel):
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
     current_turn_id: int = Field(default=0)
+    """
+    Current turn number, specifies the last turn number,
+    that is also the last turn available in `labels`, `requests`, and `responses`.
+    """
     labels: LabelContextDict = Field(default_factory=LabelContextDict)
+    """
+    `labels` stores dialog labels.
+    A new label is stored in the dictionary on every turn, the keys are consecutive integers.
+    The first ever (initial) has key `0`.
+
+        - key - Label identification numbers.
+        - value - Label data: `AbsoluteNodeLabel`.
+    """
     requests: MessageContextDict = Field(default_factory=MessageContextDict)
+    """
+    `requests` stores dialog requests.
+    A new request is stored in the dictionary on every turn, the keys are consecutive integers.
+    The first ever (initial) has key `1`.
+
+        - key - Request identification numbers.
+        - value - Request data: `Message`.
+    """
     responses: MessageContextDict = Field(default_factory=MessageContextDict)
     """
-    `turns` stores the history of all passed `labels`, `requests`, and `responses`.
+    `responses` stores dialog responses.
+    A new response is stored in the dictionary on every turn, the keys are consecutive integers.
+    The first ever (initial) has key `1`.
 
-        - key - `id` of the turn.
-        - value - `label` on this turn.
+        - key - Response identification numbers.
+        - value - Response data: `Message`.
     """
     misc: Dict[str, Any] = Field(default_factory=dict)
     """
-    ``misc`` stores any custom data. The framework doesn't use this dictionary,
+    `misc` stores any custom data. The framework doesn't use this dictionary,
     so storage of any data won't reflect on the work of the internal Chatsky functions.
 
         - key - Arbitrary data name.
@@ -135,6 +157,18 @@ class Context(BaseModel):
     async def connected(
         cls, storage: DBContextStorage, start_label: Optional[AbsoluteNodeLabel] = None, id: Optional[str] = None
     ) -> Context:
+        """
+        Create context **connected** to the given database storage.
+        If context ID is given, the corresponding context is loaded from the database.
+        If the context does not exist in database or ID is `None`, a new context with new ID is created.
+        A connected context can be later stored in the database.
+
+        :param storage: context storage to connect to.
+        :param start_label: new context start label (will be set only if the context is created).
+        :param id: context ID.
+        :return: context, connected to the database.
+        """
+
         if id is None:
             uid = str(uuid4())
             logger.debug(f"Disconnected context created with uid: {uid}")
@@ -182,32 +216,61 @@ class Context(BaseModel):
             return instance
 
     async def delete(self) -> None:
+        """
+        Delete connected context from the context storage and disconnect it.
+        Throw an error if the context is not connected.
+        No local context fields will be affected.
+        If the context is not connected, throw a runtime error.
+        """
+
         if self._storage is not None:
             await self._storage.delete_context(self.id)
+            self._storage = None
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
     @property
     def last_label(self) -> AbsoluteNodeLabel:
+        """
+        Receive last turn label.
+        Throw an error if no labels are present or the last label is absent.
+        :return: The last turn label.
+        """
+
         if len(self.labels) == 0:
             raise ContextError("Labels are empty.")
         return self.labels._items[self.labels.keys()[-1]]
 
     @property
     def last_response(self) -> Message:
+        """
+        Receive last turn response.
+        Throw an error if no responses are present or the last response is absent.
+        :return: The last turn response.
+        """
+
         if len(self.responses) == 0:
             raise ContextError("Responses are empty.")
         return self.responses._items[self.responses.keys()[-1]]
 
     @property
     def last_request(self) -> Message:
+        """
+        Receive last turn request.
+        Throw an error if no requests are present or the last request is absent.
+        :return: The last turn request.
+        """
+
         if len(self.requests) == 0:
             raise ContextError("Requests are empty.")
         return self.requests._items[self.requests.keys()[-1]]
 
     @property
     def pipeline(self) -> Pipeline:
-        """Return :py:attr:`.FrameworkData.pipeline`."""
+        """
+        Return :py:attr:`.FrameworkData.pipeline`.
+        """
+
         pipeline = self.framework_data.pipeline
         if pipeline is None:
             raise ContextError("Pipeline is not set.")
@@ -215,13 +278,23 @@ class Context(BaseModel):
 
     @property
     def current_node(self) -> Node:
-        """Return :py:attr:`.FrameworkData.current_node`."""
+        """
+        Return :py:attr:`.FrameworkData.current_node`.
+        """
+
         node = self.framework_data.current_node
         if node is None:
             raise ContextError("Current node is not set.")
         return node
 
     async def turns(self, key: Union[int, slice]) -> Iterable[Tuple[AbsoluteNodeLabel, Message, Message]]:
+        """
+        Get one or more nodes, requests and responses sharing common keys simultaneously.
+        Acts just like context dict `get` method, but queries all three dicts at the same time asinchronously.
+        :param key: Context dict key that will be queried from `labels`, `requests` and `responses`.
+        :return: Tuples of (`label`, `request`, `response`), sharing a common key.
+        """
+
         turn_ids = range(self.current_turn_id + 1)[key]
         turn_ids = turn_ids if isinstance(key, slice) else [turn_ids]
         context_dicts = (self.labels, self.requests, self.responses)
@@ -269,6 +342,13 @@ class Context(BaseModel):
             raise ValueError(f"Unknown type of Context value: {type(value).__name__}!")
 
     async def store(self) -> None:
+        """
+        Store connected context in the context storage.
+        Depending on the context storage settings ("rewrite_existing" flag in particular),
+        either only write new and deleted values or also modify the changed ones.
+        All the context storage tables are updated asynchronously and simultaneously.
+        """
+
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()

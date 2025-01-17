@@ -37,20 +37,56 @@ V = TypeVar("V")
 logger = logging.getLogger(__name__)
 
 
-def get_hash(string: bytes) -> bytes:
+def _get_hash(string: bytes) -> bytes:
     return sha256(string).digest()
 
 
 class ContextDict(ABC, BaseModel, Generic[K, V]):
+    """
+    Dictionary-like structure for storing different dialog types in a context storage.
+    It holds all the possible keys, but may not store all the values locally.
+    Some of them might be loaded lazily upon querying.
+    """
+
     _items: Dict[K, V] = PrivateAttr(default_factory=dict)
+    """
+    Already loaded from storage items collection.
+    """
+
     _hashes: Dict[K, int] = PrivateAttr(default_factory=dict)
+    """
+    Hashes of the loaded items (as they were upon loading), only populated if `rewrite_existing` flag is enabled.
+    """
+
     _keys: Set[K] = PrivateAttr(default_factory=set)
+    """
+    All the item keys available in the storage.
+    """
+
     _added: Set[K] = PrivateAttr(default_factory=set)
+    """
+    Keys added localy (need to be synchronized with the storage).
+    """
+
     _removed: Set[K] = PrivateAttr(default_factory=set)
+    """
+    Keys removed localy (need to be synchronized with the storage).
+    """
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
+    """
+    Context storage for item synchronization.
+    """
+
     _ctx_id: str = PrivateAttr(default_factory=str)
+    """
+    Corresponding context ID.
+    """
+
     _field_name: str = PrivateAttr(default_factory=str)
+    """
+    Name of the field that is represented by the given dict.
+    """
 
     @property
     @abstractmethod
@@ -59,6 +95,17 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
 
     @classmethod
     async def new(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict[K, V]":
+        """
+        Create a new context dict, without connecting it to the context storage.
+        No keys or items will be loaded, but any newly added items will be available for synchronization.
+        Should be used when we are *sure* that context with given ID does not exist in the storage.
+
+        :param storage: Context storage, where the new items will be added.
+        :param id: Newly created context ID.
+        :param field: Current dict field name.
+        :return: New "disconnected" context dict.
+        """
+
         instance = cls()
         logger.debug(f"Disconnected context dict created for id {id} and field name: {field}")
         instance._ctx_id = id
@@ -68,6 +115,17 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
 
     @classmethod
     async def connected(cls, storage: DBContextStorage, id: str, field: str) -> "ContextDict[K, V]":
+        """
+        Create a new context dict, connecting it to the context storage.
+        All the keys and some items will be loaded, all the other items will be available for synchronization.
+        Also hashes will be calculated for the initially loaded items for modification tracking.
+
+        :param storage: Context storage, keeping the current context.
+        :param id: Newly created context ID.
+        :param field: Current dict field name.
+        :return: New "connected" context dict.
+        """
+
         logger.debug(f"Connected context dict created for {id}, {field}")
         keys, items = await gather(storage.load_field_keys(id, field), storage.load_field_latest(id, field))
         val_key_items = [(k, v) for k, v in items if v is not None]
@@ -78,10 +136,18 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
         instance._field_name = field
         instance._keys = set(keys)
         instance._items = {k: instance._value_type.validate_json(v) for k, v in val_key_items}
-        instance._hashes = {k: get_hash(v) for k, v in val_key_items}
+        instance._hashes = {k: _get_hash(v) for k, v in val_key_items} if storage.rewrite_existing else dict()
         return instance
 
-    async def _load_items(self, keys: List[K]) -> Dict[K, V]:
+    async def _load_items(self, keys: List[K]) -> None:
+        """
+        Load items for the given keys from the connected context storage.
+        Update the `_items` and `_hashes` fields if necessary.
+        NB! If not all the requested items are available, only the successfully loaded will be updated and no error will be raised.
+
+        :param keys: The requested key array.
+        """
+
         logger.debug(
             f"Context dict for {self._ctx_id}, {self._field_name} loading extra items: {collapse_num_list(keys)}..."
         )
@@ -92,7 +158,7 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
         for key, value in items:
             self._items[key] = self._value_type.validate_json(value)
             if not self._storage.rewrite_existing:
-                self._hashes[key] = get_hash(value)
+                self._hashes[key] = _get_hash(value)
 
     @overload
     async def __getitem__(self, key: K) -> V: ...  # noqa: E704
@@ -158,6 +224,16 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
     async def get(self, key: Iterable[K], default=None) -> List[V]: ...  # noqa: E704
 
     async def get(self, key, default=None):
+        """
+        Get one or many items from the dict.
+        Asynchronously load missing ones, if context storage is connected.
+        Raise an error if any requested elements are still missing after.
+
+        :param key: Key or slice for item retrieving.
+        :param default: Default value.
+        :return: One value or value list.
+        """
+
         try:
             return await self[key]
         except KeyError:
@@ -261,13 +337,19 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
             result = dict()
             for k, v in self._items.items():
                 value = self._value_type.dump_json(v)
-                if get_hash(value) != self._hashes.get(k, None):
+                if _get_hash(value) != self._hashes.get(k, None):
                     result[k] = value.decode()
             return result
         else:
             return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
 
     async def store(self) -> None:
+        """
+        Synchronize dict state with the connected storage.
+        Update added and removed elements, also update modified ones if `rewrite_existing` flag is enabled.
+        Raise an error if no storage is connected.
+        """
+
         if self._storage is not None:
             logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
             stored = [(k, e.encode()) for k, e in self.model_dump().items()]
@@ -282,18 +364,26 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
             self._added, self._removed = set(), set()
             if not self._storage.rewrite_existing:
                 for k, v in self._items.items():
-                    self._hashes[k] = get_hash(self._value_type.dump_json(v))
+                    self._hashes[k] = _get_hash(self._value_type.dump_json(v))
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
 
 class LabelContextDict(ContextDict[int, AbsoluteNodeLabel]):
+    """
+    Context dictionary for storing `AbsoluteNodeLabel` types.
+    """
+
     @property
     def _value_type(self) -> TypeAdapter[Type[AbsoluteNodeLabel]]:
         return TypeAdapter(AbsoluteNodeLabel)
 
 
 class MessageContextDict(ContextDict[int, Message]):
+    """
+    Context dictionary for storing `Message` types.
+    """
+
     @property
     def _value_type(self) -> TypeAdapter[Type[Message]]:
         return TypeAdapter(Message)

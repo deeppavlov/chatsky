@@ -31,18 +31,17 @@ class RedisContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
-    The relations between primary identifiers and active context storage keys are stored
-    as a redis hash ("KEY_PREFIX:index:general").
-    The keys of active contexts are stored as redis sets ("KEY_PREFIX:index:subindex:PRIMARY_ID").
+    The main context info is stored in redis hashes, one for each context.
+    The `TURNS` table values are stored in redis hashes, one for each field.
 
-    That's how CONTEXT table fields are stored:
-    `"KEY_PREFIX:contexts:PRIMARY_ID:FIELD": "DATA"`
-    That's how LOGS table fields are stored:
-    `"KEY_PREFIX:logs:PRIMARY_ID:FIELD": "DATA"`
+    That's how MAIN table fields are stored:
+    `"KEY_PREFIX:main:ctx_id": "DATA"`
+    That's how TURNS table fields are stored:
+    `"KEY_PREFIX:turns:ctx_id:FIELD_NAME": "DATA"`
 
     :param path: Database URI string. Example: `redis://user:password@host:port`.
-    :param context_schema: Context schema for this storage.
-    :param serializer: Serializer that will be used for serializing contexts.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     :param key_prefix: "namespace" prefix for all keys, should be set for efficient clearing of all data.
     """
 

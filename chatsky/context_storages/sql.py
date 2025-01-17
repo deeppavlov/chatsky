@@ -111,26 +111,25 @@ def _get_upsert_stmt(dialect: str, insert_stmt, columns: Collection[str], unique
 
 class SQLContextStorage(DBContextStorage):
     """
-    | SQL-based version of the :py:class:`.DBContextStorage`.
-    | Compatible with MySQL, Postgresql, Sqlite.
-    | When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
-    | instead of forward slashes '/' in the file path.
+    SQL-based version of the :py:class:`.DBContextStorage`.
+    Compatible with MySQL, Postgresql, Sqlite.
+    When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
+    instead of forward slashes '/' in the file path.
 
-    CONTEXT table is represented by `contexts` table.
-    Columns of the table are: active_ctx, id, storage_key, data, created_at and updated_at.
+    `MAIN` table is represented by `main` table.
+    Columns of the table are: `id`, `current_turn_id`, `created_at` `updated_at`, `misc` and `framework_data`.
 
-    LOGS table is represented by `logs` table.
-    Columns of the table are: id, field, key, value and updated_at.
+    `TURNS` table is represented by `turns` table.
+    Columns of the table are: `id`, `key`, `label`, `request` and `response`.
 
     :param path: Standard sqlalchemy URI string.
         Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
         `mysql+asyncmy://root:pass@localhost:3306/test`,
         `postgresql+asyncpg://postgres:pass@localhost:5430/test`.
-    :param context_schema: Context schema for this storage.
-    :param serializer: Serializer that will be used for serializing contexts.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
-    :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
-        set this parameter to `True` to bypass the import checks.
+    :param database_id_length: Length of context ID column in the database.
     """
 
     def __init__(
