@@ -25,9 +25,6 @@ pipeline = Pipeline(**TOY_SCRIPT_KWARGS, context_storage=db)
 
 # %% [markdown]
 """
-
-## Context Dictionary
-
 Most of the `Context` fields, that might grow in size uncontrollably,
 are stored in a special structure, `ContextDict`.
 This structure can be used for fine-grained access to the underlying
@@ -114,6 +111,16 @@ this feature probably might be avoided.
 # Any modifications done to the elements already present in storage
 # will be preserved.
 db.rewrite_existing = True
+
+# %% [markdown]
+"""
+A few more words about the `labels`, `requests` and `responses` fields.
+One and only one label, request and response is added on every dialog turn,
+and they are numbered consecutively.
+
+Framework ensures this ordering is preserved, each of them can be modified or
+replaced with `None`, but never deleted or removed completely.
+"""
 
 # %%
 if __name__ == "__main__":

@@ -35,8 +35,8 @@ class MongoContextStorage(DBContextStorage):
     LOGS table is stored as `COLLECTION_PREFIX_logs` collection.
 
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :param context_schema: Context schema for this storage.
-    :param serializer: Serializer that will be used for serializing contexts.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     :param collection_prefix: "namespace" prefix for the two collections created for context storing.
     """
 

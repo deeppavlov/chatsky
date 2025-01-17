@@ -28,17 +28,22 @@ except ImportError:
 
 
 class SerializableStorage(BaseModel):
+    """
+    A special serializable database implementation.
+    One element of this class will be used to store all the contexts, read and written to file on every turn.
+    """
+
     main: Dict[str, ContextInfo] = Field(default_factory=dict)
     turns: List[Tuple[str, str, int, Optional[bytes]]] = Field(default_factory=list)
 
 
 class FileContextStorage(DBContextStorage, ABC):
     """
-    Implements :py:class:`.DBContextStorage` with `json` as the storage format.
+    Implements :py:class:`.DBContextStorage` with any file-based storage format.
 
-    :param path: Target file URI. Example: `json://file.json`.
-    :param context_schema: Context schema for this storage.
-    :param serializer: Serializer that will be used for serializing contexts.
+    :param path: Target file URI.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     """
 
     is_concurrent: bool = False
@@ -116,6 +121,14 @@ class FileContextStorage(DBContextStorage, ABC):
 
 
 class JSONContextStorage(FileContextStorage):
+    """
+    Implements :py:class:`.DBContextStorage` with `json` as the storage format.
+
+    :param path: Target file URI. Example: `json://file.json`.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    """
+
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
@@ -133,6 +146,14 @@ class JSONContextStorage(FileContextStorage):
 
 
 class PickleContextStorage(FileContextStorage):
+    """
+    Implements :py:class:`.DBContextStorage` with `pickle` as the storage format.
+
+    :param path: Target file URI. Example: `pickle://file.pkl`.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    """
+
     async def _save(self, data: SerializableStorage) -> None:
         if not await isfile(self.path) or (await stat(self.path)).st_size == 0:
             await makedirs(self.path.parent, exist_ok=True)
@@ -150,6 +171,14 @@ class PickleContextStorage(FileContextStorage):
 
 
 class ShelveContextStorage(FileContextStorage):
+    """
+    Implements :py:class:`.DBContextStorage` with `shelve` as the storage format.
+
+    :param path: Target file URI. Example: `shelve://file.shlv`.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    """
+
     _SHELVE_ROOT = "root"
 
     def __init__(

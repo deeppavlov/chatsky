@@ -39,20 +39,20 @@ class YDBContextStorage(DBContextStorage):
     """
     Version of the :py:class:`.DBContextStorage` for YDB.
 
-    CONTEXT table is represented by `contexts` table.
-    Columns of the table are: active_ctx, id, storage_key, data, created_at and updated_at.
+    `CONTEXT` table is represented by `contexts` table.
+    Columns of the table are: `id`, `current_turn_id`, `created_at` `updated_at`, `misc` and `framework_data`.
 
-    LOGS table is represented by `logs` table.
-    Columns of the table are: id, field, key, value and updated_at.
+    `TURNS` table is represented by `turns` table.
+    olumns of the table are: `id`, `key`, `label`, `request` and `response`.
 
     :param path: Standard sqlalchemy URI string. One of `grpc` or `grpcs` can be chosen as a protocol.
         Example: `grpc://localhost:2134/local`.
         NB! Do not forget to provide credentials in environmental variables
         or set `YDB_ANONYMOUS_CREDENTIALS` variable to `1`!
-    :param context_schema: Context schema for this storage.
-    :param serializer: Serializer that will be used for serializing contexts.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
-    :param table_name: The name of the table to use.
+    :param timeout: Waiting timeout for the database driver.
     """
 
     _LIMIT_VAR = "limit"

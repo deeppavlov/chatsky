@@ -6,14 +6,16 @@ from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 class MemoryContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` storing contexts in memory, wthout file backend.
-    Uses :py:class:`.JsonSerializer` as the default serializer.
-    By default it sets path to an empty string.
+    Does not serialize any data. By default it sets path to an empty string.
 
-    Keeps data in a dictionary and two lists:
+    Keeps data in a dictionary and two dictionaries:
 
-    - `main`: {context_id: [created_at, turn_id, updated_at, framework_data]}
-    - `turns`: [context_id, turn_number, label, request, response]
-    - `misc`: [context_id, turn_number, misc]
+    - `main`: {context_id: context_info}
+    - `turns`: {context_id: {labels, requests, responses}}
+
+    :param path: Any string, won't be used.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
     """
 
     is_concurrent: bool = True
