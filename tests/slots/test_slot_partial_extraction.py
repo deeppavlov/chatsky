@@ -1,4 +1,3 @@
-from chatsky.core.context import Context
 from chatsky.slots import RegexpSlot, GroupSlot
 from chatsky.slots.slots import SlotManager
 from chatsky.core import Message

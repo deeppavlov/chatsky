@@ -143,7 +143,8 @@ class ContextDict(ABC, BaseModel, Generic[K, V]):
         """
         Load items for the given keys from the connected context storage.
         Update the `_items` and `_hashes` fields if necessary.
-        NB! If not all the requested items are available, only the successfully loaded will be updated and no error will be raised.
+        NB! If not all the requested items are available,
+        only the successfully loaded will be updated and no error will be raised.
 
         :param keys: The requested key array.
         """

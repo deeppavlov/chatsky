@@ -58,7 +58,13 @@ static class.
 """
 
 # %%
-print({k: v for k, v in vars(NameConfig).items() if not k.startswith("__") and not callable(v)})
+print(
+    {
+        k: v
+        for k, v in vars(NameConfig).items()
+        if not k.startswith("__") and not callable(v)
+    }
+)
 
 # %% [markdown]
 """
