@@ -22,7 +22,7 @@ class TestContextDict:
     async def prefilled_dict(self) -> ContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
-        storage = MemoryContextStorage(rewrite_existing=False, partial_read_config={"requests": 1})
+        storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
         await storage.update_main_info(ctx_id, ContextInfo(turn_id=0, created_at=0, updated_at=0))
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
@@ -88,7 +88,7 @@ class TestContextDict:
         assert await prefilled_dict.get(100, None) is None
         assert await prefilled_dict.get(1, None) is not None
         assert prefilled_dict._added == set()
-        assert len(prefilled_dict._hashes) == 2
+        assert len(prefilled_dict._hashes) == 1
         assert len(prefilled_dict._items) == 2
         # Deleting loaded item
         del prefilled_dict[1]
