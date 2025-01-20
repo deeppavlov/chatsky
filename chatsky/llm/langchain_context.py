@@ -74,43 +74,53 @@ async def context_to_history(
     )
     logging.debug(f"Dialogue turns: {pairs}")
     pairs_list = list(pairs)
-    filtered_pairs = filter(lambda x: filter_func(ctx, x[0], x[1], model_name), 
-                          pairs_list[-length:] if length != -1 else pairs_list)
-    
+    filtered_pairs = filter(
+        lambda x: filter_func(ctx, x[0], x[1], model_name), pairs_list[-length:] if length != -1 else pairs_list
+    )
+
     for req, resp in filtered_pairs:
         logging.debug(f"This pair is valid: {req, resp}")
         history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
         history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
     return history
 
+
 # get a list of messages to pass to LLM from context and prompts
 # called in LLM_API
 async def get_langchain_context(
-        system_prompt: Prompt,
-        ctx: Context,
-        call_prompt,
-        prompt_misc_filter: str=r"prompt",  # r"prompt" -> extract misc prompts
-        postition_config: DesaultPositionConfig=DesaultPositionConfig(),
-        **history_args,
-    ):
+    system_prompt: Prompt,
+    ctx: Context,
+    call_prompt,
+    prompt_misc_filter: str = r"prompt",  # r"prompt" -> extract misc prompts
+    postition_config: DesaultPositionConfig = DesaultPositionConfig(),
+    **history_args,
+) -> list[HumanMessage | AIMessage | SystemMessage]:
     """
     Get a list of Langchain messages using the context and prompts.
     """
     history = context_to_history(ctx, history_args)
     prompts = [(system_prompt, system_prompt.position)]
     misc_prompts = []
-    
+
     for element in ctx.current_node.misc:
         if re.match(prompt_misc_filter, element):
-            misc_prompts.append(element)
-    
+            misc_prompts.append(ctx.current_node.misc[element], ctx.current_node.misc[element].position)
+
     misc_prompts.append(call_prompt)
     prompts.extend(misc_prompts)
 
+    for prompt in prompts:
+        if prompt[1] is not None:
+            prompt[1] = postition_config.get_position(prompt[1])
+
     prompts = sorted(prompts, key=lambda x: x.position)
+
+    logging.debug(f"Sorted prompts: {prompts}")
 
     # merge prompts and history
     langchain_context = []
     for prompt in prompts:
         langchain_context.append(await message_to_langchain(prompt, ctx, source="system"))
-        langchain_context
+
+    langchain_context.extend(history)
+    return langchain_context

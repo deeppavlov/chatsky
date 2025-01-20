@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from chatsky.llm.langchain_context import message_to_langchain, context_to_history
+from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
 from chatsky.llm._langchain_imports import check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.core.script_function import BaseResponse, AnyResponse
@@ -73,12 +73,16 @@ class LLMResponse(BaseResponse):
         # iterate over context to retrieve history messages
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
             history_messages.extend(
-                await context_to_history(
+                await get_langchain_context(
+                    system_prompt=model.system_prompt,
                     ctx=ctx,
-                    length=self.history,
-                    filter_func=self.filter_func,
-                    model_name=self.model_name,
-                    max_size=self.max_size,
+                    call_prompt="",
+                    history_args={
+                        "length": self.history,
+                        "filter_func": self.filter_func,
+                        "model_name": self.model_name,
+                        "max_size": self.max_size,
+                    },
                 )
             )
 

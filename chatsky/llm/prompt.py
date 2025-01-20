@@ -16,17 +16,15 @@ class Prompt(BaseModel):
     position: Optional[AnyPriority] = None
 
     def __init__(
-        self,
-        prompt: Union[MessageInitTypes, BaseResponse],
-        position: Optional[Union[float, BasePriority]] = None
+        self, prompt: Union[MessageInitTypes, BaseResponse], position: Optional[Union[float, BasePriority]] = None
     ):
         super().__init__(prompt=prompt, position=position)
 
     @model_validator(mode="before")
     @classmethod
     def validate_from_message(cls, data):
-            # MISC: {"prompt": "message", "prompt": Message("text"), "prompt": FilledTemplate(), "prompt": Prompt(prompt=FilledTemplate(), position=-2)
-            # Prompt.model_validate
+        # MISC: {"prompt": "message", "prompt": Message("text"), "prompt": FilledTemplate(), "prompt": Prompt(prompt=FilledTemplate(), position=-2)
+        # Prompt.model_validate
         if isinstance(data, (str, Message, BaseResponse)):
             return {"prompt": data}
         return data
