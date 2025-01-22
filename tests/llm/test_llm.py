@@ -221,13 +221,13 @@ async def test_message_to_langchain(context):
     ],
 )
 async def test_history(context, pipeline, hist, expected):
-    res = await LLMResponse(model_name="test_model", history=hist)(context)
+    res = await LLMResponse(llm_model_name="test_model", history=hist)(context)
     assert res == Message(expected, annotations={"__generated_by_model__": "test_model"})
 
 
 async def test_context_to_history(context):
     res = await context_to_history(
-        ctx=context, length=-1, filter_func=lambda *args: True, model_name="test_model", max_size=100
+        ctx=context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
     )
     expected = [
         HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
@@ -239,7 +239,7 @@ async def test_context_to_history(context):
     ]
     assert res == expected
     res = await context_to_history(
-        ctx=context, length=1, filter_func=lambda *args: True, model_name="test_model", max_size=100
+        ctx=context, length=1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
     )
     expected = [
         HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
@@ -250,12 +250,12 @@ async def test_context_to_history(context):
 
 async def test_conditions(context):
     cond1 = LLMCondition(
-        model_name="test_model",
+        llm_model_name="test_model",
         prompt="test_prompt",
         method=Contains(pattern="history"),
     )
     cond2 = LLMCondition(
-        model_name="test_model",
+        llm_model_name="test_model",
         prompt="test_prompt",
         method=Contains(pattern="abrakadabra"),
     )
@@ -268,22 +268,22 @@ def test_is_important_filter(filter_context):
     ctx = filter_context
 
     # Test filtering important messages
-    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], model_name="test_model")
-    assert filter_func(ctx, ctx.requests[2], ctx.responses[2], model_name="test_model")
-    assert not filter_func(ctx, ctx.requests[3], ctx.responses[3], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
+    assert filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
+    assert not filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
 
-    assert not filter_func(ctx, None, ctx.responses[1], model_name="test_model")
-    assert filter_func(ctx, ctx.requests[1], None, model_name="test_model")
+    assert not filter_func(ctx, None, ctx.responses[1], llm_model_name="test_model")
+    assert filter_func(ctx, ctx.requests[1], None, llm_model_name="test_model")
 
 
 def test_model_filter(filter_context):
     filter_func = FromModel()
     ctx = filter_context
     # Test filtering messages from a certain model
-    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], model_name="test_model")
-    assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], model_name="test_model")
-    assert filter_func(ctx, ctx.requests[3], ctx.responses[3], model_name="test_model")
-    assert filter_func(ctx, ctx.requests[2], ctx.responses[3], model_name="test_model")
+    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
+    assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
+    assert filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
+    assert filter_func(ctx, ctx.requests[2], ctx.responses[3], llm_model_name="test_model")
 
 
 async def test_base_method(llmresult):

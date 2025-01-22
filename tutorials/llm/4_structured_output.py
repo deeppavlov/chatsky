@@ -90,7 +90,7 @@ script = {
     "movie_flow": {
         "create": {
             RESPONSE: LLMResponse(
-                model_name="movie_model",
+                llm_model_name="movie_model",
                 prompt="Create a movie idea for the user.",
                 message_schema=Movie,
             ),
@@ -98,7 +98,7 @@ script = {
         },
         "review": {
             RESPONSE: LLMResponse(
-                model_name="review_model",
+                llm_model_name="review_model",
                 prompt="Generate a movie review based on user's input. "
                 "Include rating, and mark if it contains spoilers. "
                 "Use JSON with the `text` and `misc` fields"

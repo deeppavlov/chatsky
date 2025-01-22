@@ -29,26 +29,26 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
     """
 
     @abc.abstractmethod
-    def call(self, ctx: Context, request: Message, response: Message, model_name: str) -> Union[Return, int]:
+    def call(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> Union[Return, int]:
         """
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param model_name: Name of the model in the Pipeline.models.
+        :param llm_model_name: Name of the model in the Pipeline.models.
 
         :return: Instance of Return enum or a corresponding int value.
         """
         raise NotImplementedError
 
-    def __call__(self, ctx: Context, request: Message, response: Message, model_name: str):
+    def __call__(self, ctx: Context, request: Message, response: Message, llm_model_name: str):
         """
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param model_name: Name of the model in the Pipeline.models.
+        :param llm_model_name: Name of the model in the Pipeline.models.
         """
         try:
-            result = self.call(ctx, request, response, model_name)
+            result = self.call(ctx, request, response, llm_model_name)
 
             if isinstance(result, int):
                 result = Return(result)
@@ -66,18 +66,18 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
 
 class MessageFilter(BaseHistoryFilter):
     @abc.abstractmethod
-    def call(self, ctx, message, model_name) -> bool:
+    def call(self, ctx, message, llm_model_name) -> bool:
         raise NotImplementedError
 
-    def __call__(self, ctx, request, response, model_name):
+    def __call__(self, ctx, request, response, llm_model_name):
         return (
-            int(self.call(ctx, request, model_name)) * Return.Request.value
-            + int(self.call(ctx, response, model_name)) * Return.Response.value
+            int(self.call(ctx, request, llm_model_name)) * Return.Request.value
+            + int(self.call(ctx, response, llm_model_name)) * Return.Response.value
         )
 
 
 class DefaultFilter(BaseHistoryFilter):
-    def call(self, ctx: Context, request: Message, response: Message, model_name: str) -> Union[Return, int]:
+    def call(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> Union[Return, int]:
         return Return.Turn
 
 
@@ -86,7 +86,7 @@ class IsImportant(MessageFilter):
     Filter that checks if the "important" field in a Message.misc is True.
     """
 
-    def call(self, ctx: Context, message: Message, model_name: str) -> bool:
+    def call(self, ctx: Context, message: Message, llm_model_name: str) -> bool:
         if message is not None and message.misc is not None and message.misc.get("important", None):
             return True
         return False
@@ -97,11 +97,11 @@ class FromModel(MessageFilter):
     Filter that checks if the message was sent by the model.
     """
 
-    def call(self, ctx: Context, message: Message, model_name: str) -> bool:
+    def call(self, ctx: Context, message: Message, llm_model_name: str) -> bool:
         if (
             message is not None
             and message.annotations is not None
-            and message.annotations.get("__generated_by_model__") == model_name
+            and message.annotations.get("__generated_by_model__") == llm_model_name
         ):
             return True
         return False

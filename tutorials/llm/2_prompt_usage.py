@@ -116,7 +116,7 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(model_name="bank_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="bank_model", history=0),
             TRANSITIONS: [
                 Tr(
                     dst=("loan_flow", "start_node"), cnd=cnd.ExactMatch("/loan")
@@ -146,7 +146,7 @@ toy_script = {
             },
         },
         "start_node": {
-            RESPONSE: LLMResponse(model_name="bank_model"),
+            RESPONSE: LLMResponse(llm_model_name="bank_model"),
             TRANSITIONS: [
                 Tr(
                     dst=("greeting_flow", "greeting_node"),
@@ -165,7 +165,7 @@ toy_script = {
             }
         },
         "start_node": {
-            RESPONSE: LLMResponse(model_name="bank_model"),
+            RESPONSE: LLMResponse(llm_model_name="bank_model"),
             TRANSITIONS: [
                 Tr(
                     dst=("greeting_flow", "greeting_node"),
@@ -176,7 +176,7 @@ toy_script = {
             ],
         },
         "cook_node": {
-            RESPONSE: LLMResponse(model_name="bank_model"),
+            RESPONSE: LLMResponse(llm_model_name="bank_model"),
             TRANSITIONS: [
                 Tr(dst="start_node", cnd=cnd.ExactMatch("/end")),
                 Tr(dst=dst.Current()),

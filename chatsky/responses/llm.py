@@ -23,7 +23,7 @@ class LLMResponse(BaseResponse):
     Uses prompt to produce result from model.
     """
 
-    model_name: str
+    llm_model_name: str
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
     """
@@ -50,41 +50,25 @@ class LLMResponse(BaseResponse):
 
     async def call(self, ctx: Context) -> Message:
         check_langchain_available()
-        model = ctx.pipeline.models[self.model_name]
-        if model.system_prompt.text == "":
-            history_messages = []
-        else:
-            history_messages = [await message_to_langchain(model.system_prompt, ctx=ctx, source="system")]
-        current_node = ctx.current_node
-        current_misc = current_node.misc
-        if current_misc is not None:
-            # populate history with global and local prompts
-            for prompt in ("global_prompt", "local_prompt", "prompt"):
-                if prompt in current_misc:
-                    current_prompt = current_misc[prompt]
-                    if isinstance(current_prompt, BaseResponse):
-                        current_prompt = await current_prompt(ctx=ctx)
-                        history_messages.append(await message_to_langchain(current_prompt, ctx=ctx, source="system"))
-                    elif isinstance(current_prompt, str):
-                        history_messages.append(
-                            await message_to_langchain(Message(current_prompt), ctx=ctx, source="system")
-                        )
+        model = ctx.pipeline.models[self.llm_model_name]
+        history_messages = []
 
         # iterate over context to retrieve history messages
         if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
+            logging.debug("Retrieving context history.")
             history_messages.extend(
                 await get_langchain_context(
-                    system_prompt=model.system_prompt,
+                    system_prompt=await model.system_prompt(ctx),
                     ctx=ctx,
                     call_prompt="",
-                    history_args={
-                        "length": self.history,
-                        "filter_func": self.filter_func,
-                        "model_name": self.model_name,
-                        "max_size": self.max_size,
-                    },
+                    length=self.history,
+                    filter_func=self.filter_func,
+                    llm_model_name=self.llm_model_name,
+                    max_size=self.max_size,
                 )
             )
+        else:
+            logging.debug("No context history to retrieve.")
 
         msg = await self.prompt(ctx)
         if msg.text:
@@ -97,8 +81,8 @@ class LLMResponse(BaseResponse):
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
         if result.annotations:
-            result.annotations["__generated_by_model__"] = self.model_name
+            result.annotations["__generated_by_model__"] = self.llm_model_name
         else:
-            result.annotations = {"__generated_by_model__": self.model_name}
+            result.annotations = {"__generated_by_model__": self.llm_model_name}
 
         return result

@@ -56,7 +56,7 @@ class FilterImportant(BaseHistoryFilter):
         ctx: Context = None,
         request: Message = None,
         response: Message = None,
-        model_name: str = None,
+        llm_model_name: str = None,
     ) -> bool:
         if "#important" in request.text.lower():
             return True
@@ -83,7 +83,7 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(model_name="note_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="note_model", history=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
@@ -102,7 +102,7 @@ toy_script = {
         },
         "remind_node": {
             RESPONSE: LLMResponse(
-                model_name="note_model",
+                llm_model_name="note_model",
                 prompt="Create a bullet list from all the previous "
                 "messages tagged with #important.",
                 history=15,

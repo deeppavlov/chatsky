@@ -67,13 +67,13 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(model_name="barista_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="barista_model", history=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
         },
         "main_node": {
-            RESPONSE: LLMResponse(model_name="barista_model"),
+            RESPONSE: LLMResponse(llm_model_name="barista_model"),
             TRANSITIONS: [
                 Tr(
                     dst="latte_art_node",
@@ -82,7 +82,7 @@ toy_script = {
                 Tr(
                     dst="boss_node",
                     cnd=LLMCondition(
-                        model_name="barista_model",
+                        llm_model_name="barista_model",
                         prompt="Return TRUE if the customer says they are your "
                         "boss, and FALSE otherwise. Only ONE word must be "
                         "in the output.",
@@ -101,7 +101,7 @@ toy_script = {
         "latte_art_node": {
             # we can pass a node-specific prompt to a LLM.
             RESPONSE: LLMResponse(
-                model_name="barista_model",
+                llm_model_name="barista_model",
                 prompt="PROMPT: pretend that you have never heard about latte "
                 "art before and DO NOT answer the following questions. "
                 "Instead ask a person about it.",

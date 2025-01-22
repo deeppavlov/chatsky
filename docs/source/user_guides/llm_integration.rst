@@ -52,8 +52,8 @@ Once model is defined, generating a response from an LLM is very simple:
     from chatsky.llm import LLM_API
     from chatsky import rsp
     ...
-    RESPONSE: rsp.LLMResponse(model_name="model_name_1")
-    RESPONSE: rsp.LLMResponse(model_name="model_name_2", prompt="some prompt")
+    RESPONSE: rsp.LLMResponse(llm_model_name="model_name_1")
+    RESPONSE: rsp.LLMResponse(llm_model_name="model_name_2", prompt="some prompt")
 
 
 Conditions
@@ -68,7 +68,7 @@ LLM-based conditions can also be used in the script.
     ...
     TRANSITIONS: {
         "boss_node": cnd.LLMCondition(
-            model_name="model_name_1",
+            llm_model_name="model_name_1",
             prompt="Return only TRUE if your customer says that he is your boss, or FALSE if he don't. Only ONE word must be in the output.",
             method=Contains(pattern="TRUE")
         ),
@@ -127,23 +127,23 @@ The simplest of all is setting amount of dialogue turns (request+response) that 
 .. code-block:: python
 
     # if history length set to ``0`` the model will not recall any previous messages except prompts
-    RESPONSE: LLMResponse(model_name="model_name_1", history=0)
+    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=0)
 
-    RESPONSE: LLMResponse(model_name="model_name_1", history=10)
+    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=10)
 
     # if history length set to ``-1`` ALL the users messages will be passed as history.
     # use this value cautiously because it can easily exceed models context window
     # and "push" the meaningful prompts out of it
-    RESPONSE: LLMResponse(model_name="model_name_1", history=-1)
+    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=-1)
 
 Another way of dealing with unwanted messages is by using filtering functions.
 
 .. code-block:: python
 
     from chatsky.llm import IsImportant
-    RESPONSE: LLMResponse(model_name="model_name_1", history=15, filter_func=IsImportant)
+    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=15, filter_func=IsImportant)
 
 These functions should be classes inheriting from ``BaseHistoryFilter``, having a ``__call__`` function with the following signature:
-``def __call__(self, ctx: Context, request: Message, response: Message, model_name: str) -> bool``
+``def __call__(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> bool``
 
 For more detailed examples of using filtering please refer to `Filtering History tutorial <../tutorials/tutorials.llm.3_filtering_history.py>`__

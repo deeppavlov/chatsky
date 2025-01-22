@@ -5,10 +5,13 @@ Wrapper around langchain.
 """
 
 from typing import Union, Type, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 import logging
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
+
+# from chatsky.llm.prompt import Prompt
+from chatsky.core import AnyResponse, MessageInitTypes
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
@@ -21,7 +24,7 @@ class LLM_API:
     def __init__(
         self,
         model: BaseChatModel,
-        system_prompt: Optional[str] = "",
+        system_prompt: Union[AnyResponse, MessageInitTypes] = "",
     ) -> None:
         """
         :param model: Model object
@@ -30,7 +33,7 @@ class LLM_API:
         check_langchain_available()
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
-        self.system_prompt = Message(text=system_prompt)
+        self.system_prompt = TypeAdapter(AnyResponse).validate_python(system_prompt)
 
     async def respond(
         self,
