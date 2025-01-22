@@ -8,10 +8,11 @@ Pipeline is responsible for managing and executing the various components
 including :py:class:`.Actor`.
 """
 
+from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable
+from typing import Union, List, Dict, Optional, Hashable, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
@@ -29,7 +30,9 @@ from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
-from chatsky.llm.llm_api import LLM_API
+
+if TYPE_CHECKING:
+    from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
 
