@@ -316,6 +316,20 @@ class Context(BaseModel):
         else:
             return False
 
+    def __copy__(self):
+        storage = self._storage
+        self._storage = None
+        copy = BaseModel.__copy__(self)
+        copy._storage = self._storage = storage
+        return copy
+
+    def __deepcopy__(self, memo: dict[int, Any] | None = None):
+        storage = self._storage
+        self._storage = None
+        copy = BaseModel.__deepcopy__(self, memo)
+        copy._storage = self._storage = storage
+        return copy
+
     @model_validator(mode="wrap")
     def _validate_model(value: Any, handler: Callable[[Any], "Context"], _) -> "Context":
         if isinstance(value, Context):

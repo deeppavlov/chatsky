@@ -94,7 +94,9 @@ class ContextInfo(BaseModel):
 def _lock(function: Callable[..., Awaitable[Any]]):
     @wraps(function)
     async def wrapped(self: DBContextStorage, *args, **kwargs):
-        if not self.is_concurrent or not self.connected:
+        if not self.connected:
+            await self.connect()
+        if not self.is_concurrent:
             async with self._sync_lock:
                 return await function(self, *args, **kwargs)
         else:
@@ -147,7 +149,7 @@ class DBContextStorage(ABC):
         Can also be a set of keys that should be loaded.
         """
 
-        self._sync_lock = Lock()
+        self._sync_lock = None
         """
         Synchronization lock for the databases that don't support
         asynchronous atomic reads and writes.
@@ -192,6 +194,7 @@ class DBContextStorage(ABC):
         """
 
         logger.info(f"Connecting to context storage {type(self).__name__} ...")
+        self._sync_lock = Lock()
         await self._connect()
         self.connected = True
 
@@ -208,8 +211,6 @@ class DBContextStorage(ABC):
         :return: Context main information (from `MAIN` table).
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Loading main info for {ctx_id}...")
         result = await self._load_main_info(ctx_id)
         logger.debug(f"Main info loaded for {ctx_id}")
@@ -228,8 +229,6 @@ class DBContextStorage(ABC):
         :param ctx_info: New context information (will be written to `MAIN` table).
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Updating main info for {ctx_id}...")
         await self._update_main_info(ctx_id, ctx_info)
         logger.debug(f"Main info updated for {ctx_id}")
@@ -246,8 +245,6 @@ class DBContextStorage(ABC):
         :param ctx_id: Context identifier.
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Deleting context {ctx_id}...")
         await self._delete_context(ctx_id)
         logger.debug(f"Context {ctx_id} deleted")
@@ -266,8 +263,6 @@ class DBContextStorage(ABC):
         :return: List of tuples (step number, serialized value).
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Loading latest items for {ctx_id}, {field_name}...")
         result = await self._load_field_latest(ctx_id, self._validate_field_name(field_name))
         logger.debug(f"Latest field loaded for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in result))}")
@@ -287,8 +282,6 @@ class DBContextStorage(ABC):
         :return: List of all the step numbers.
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Loading field keys for {ctx_id}, {field_name}...")
         result = await self._load_field_keys(ctx_id, self._validate_field_name(field_name))
         logger.debug(f"Field keys loaded for {ctx_id}, {field_name}: {collapse_num_list(result)}")
@@ -310,8 +303,6 @@ class DBContextStorage(ABC):
         :return: List of tuples (step number, serialized value).
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug(f"Loading field items for {ctx_id}, {field_name} ({collapse_num_list(keys)})...")
         result = await self._load_field_items(ctx_id, self._validate_field_name(field_name), keys)
         logger.debug(f"Field items loaded for {ctx_id}, {field_name}: {collapse_num_list([k for k, _ in result])}")
@@ -334,8 +325,6 @@ class DBContextStorage(ABC):
         if len(items) == 0:
             logger.debug(f"No fields to update in {ctx_id}, {field_name}!")
             return
-        elif not self.connected:
-            await self.connect()
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
@@ -356,8 +345,6 @@ class DBContextStorage(ABC):
         if len(keys) == 0:
             logger.debug(f"No fields to delete in {ctx_id}, {field_name}!")
             return
-        elif not self.connected:
-            await self.connect()
         logger.debug(f"Deleting fields for {ctx_id}, {field_name}: {collapse_num_list(keys)}...")
         await self._delete_field_keys(ctx_id, self._validate_field_name(field_name), keys)
         logger.debug(f"Fields deleted for {ctx_id}, {field_name}")
@@ -372,8 +359,6 @@ class DBContextStorage(ABC):
         Clear all the chatsky tables and records.
         """
 
-        if not self.connected:
-            await self.connect()
         logger.debug("Clearing all")
         await self._clear_all()
 
