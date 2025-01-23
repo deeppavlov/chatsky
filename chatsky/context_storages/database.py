@@ -95,7 +95,8 @@ def _lock(function: Callable[..., Awaitable[Any]]):
     @wraps(function)
     async def wrapped(self: DBContextStorage, *args, **kwargs):
         if not self.connected:
-            raise RuntimeError("ContextStorage has to be connected before it can be used!")
+            logger.warning("Initializing ContextStorage in-place, that is NOT thread-safe, dangerous and in general should be avoided!")
+            self.connect()
         if not self.is_concurrent:
             async with self._sync_lock:
                 return await function(self, *args, **kwargs)
@@ -193,12 +194,10 @@ class DBContextStorage(ABC):
         Connect to the backend context storage.
         """
 
+        logger.info(f"Connecting to context storage {type(self).__name__} ...")
+        await self._connect()
         self._sync_lock = Lock()
-        async with self._sync_lock:
-            if not self.connected:
-                logger.info(f"Connecting to context storage {type(self).__name__} ...")
-                await self._connect()
-                self.connected = True
+        self.connected = True
 
     @abstractmethod
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
