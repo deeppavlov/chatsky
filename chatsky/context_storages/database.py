@@ -193,10 +193,12 @@ class DBContextStorage(ABC):
         Connect to the backend context storage.
         """
 
-        logger.info(f"Connecting to context storage {type(self).__name__} ...")
         self._sync_lock = Lock()
-        await self._connect()
-        self.connected = True
+        async with self._sync_lock:
+            if not self.connected:
+                logger.info(f"Connecting to context storage {type(self).__name__} ...")
+                await self._connect()
+                self.connected = True
 
     @abstractmethod
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
