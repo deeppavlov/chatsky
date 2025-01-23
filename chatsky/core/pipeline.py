@@ -269,6 +269,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     def run(self):
         """
         Method that starts a pipeline and connects to :py:attr:`messenger_interface`.
+        It also connects to the :py:attr:`context_storage` (if it's not already connected).
 
         It passes :py:meth:`_run_pipeline` to :py:attr:`messenger_interface` as a callback,
         so every time user request is received, :py:meth:`_run_pipeline` will be called.
@@ -288,6 +289,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         Method that executes pipeline once.
         Basically, it is a shortcut for :py:meth:`_run_pipeline`.
         NB! When pipeline is executed this way, :py:attr:`messenger_interface` won't be initiated nor connected.
+        Still, it connects to the :py:attr:`context_storage` (if it's not already connected) to avoid sync issues.
 
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """

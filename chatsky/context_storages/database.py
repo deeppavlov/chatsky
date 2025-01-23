@@ -95,8 +95,10 @@ def _lock(function: Callable[..., Awaitable[Any]]):
     @wraps(function)
     async def wrapped(self: DBContextStorage, *args, **kwargs):
         if not self.connected:
-            logger.warning("Initializing ContextStorage in-place, that is NOT thread-safe, dangerous and in general should be avoided!")
-            self.connect()
+            logger.warning(
+                "Initializing ContextStorage in-place, that is NOT thread-safe and in general should be avoided!"
+            )
+            await self.connect()
         if not self.is_concurrent:
             async with self._sync_lock:
                 return await function(self, *args, **kwargs)
