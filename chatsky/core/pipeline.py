@@ -291,4 +291,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
+        if not self.context_storage.connected:
+            asyncio.run(self.context_storage.connect())
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))

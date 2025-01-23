@@ -158,6 +158,7 @@ class TestContextStorages:
             kwargs["__testing_file__"] = str(tmpdir_factory.mktemp("data").join("file.db"))
         db_kwargs["path"] = db_kwargs["path"].format(**kwargs)
         context_storage = context_storage_factory(**db_kwargs)
+        await context_storage.connect()
 
         yield context_storage
 

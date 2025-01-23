@@ -95,7 +95,7 @@ def _lock(function: Callable[..., Awaitable[Any]]):
     @wraps(function)
     async def wrapped(self: DBContextStorage, *args, **kwargs):
         if not self.connected:
-            await self.connect()
+            raise RuntimeError("ContextStorage has to be connected before it can be used!")
         if not self.is_concurrent:
             async with self._sync_lock:
                 return await function(self, *args, **kwargs)
