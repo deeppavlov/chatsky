@@ -4,8 +4,8 @@ LLM responses.
 Responses based on LLM_API calling.
 """
 
-from typing import Union, Type
 import logging
+from typing import Union, Type, Optional
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +14,7 @@ from chatsky.core.context import Context
 from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
 from chatsky.llm._langchain_imports import check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
+from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.core.script_function import BaseResponse, AnyResponse
 
 
@@ -27,7 +28,7 @@ class LLMResponse(BaseResponse):
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
     """
-    prompt: AnyResponse = Field(default="", validate_default=True)
+    prompt: Prompt = Field(default="", validate_default=True)
     """
     Response prompt.
     """
@@ -38,6 +39,14 @@ class LLMResponse(BaseResponse):
     filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
     """
     Filter function to filter messages that will go the models context.
+    """
+    prompt_misc_filter: str = Field(default=r"prompt")
+    """
+    idk
+    """
+    position_config: Optional[PositionConfig] = None
+    """
+    Defines prompts and messages positions in history sent to a LLM.
     """
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     """
@@ -54,29 +63,21 @@ class LLMResponse(BaseResponse):
         history_messages = []
 
         # iterate over context to retrieve history messages
-        if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
-            logging.debug("Retrieving context history.")
-            history_messages.extend(
-                await get_langchain_context(
-                    system_prompt=await model.system_prompt(ctx),
-                    ctx=ctx,
-                    call_prompt="",
-                    length=self.history,
-                    filter_func=self.filter_func,
-                    llm_model_name=self.llm_model_name,
-                    max_size=self.max_size,
-                )
+        logging.debug("Retrieving context history.")
+        history_messages.extend(
+            await get_langchain_context(
+                system_prompt=await model.system_prompt(ctx),
+                ctx=ctx,
+                call_prompt=self.prompt,
+                prompt_misc_filter=self.prompt_misc_filter,
+                position_config=self.position_config or model.position_config,
+                length=self.history,
+                filter_func=self.filter_func,
+                llm_model_name=self.llm_model_name,
+                max_size=self.max_size,
             )
-        else:
-            logging.debug("No context history to retrieve.")
-
-        msg = await self.prompt(ctx)
-        if msg.text:
-            history_messages.append(await message_to_langchain(msg, ctx=ctx, source="system"))
-
-        history_messages.append(
-            await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
+        
         logging.debug(f"History: {history_messages}")
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
