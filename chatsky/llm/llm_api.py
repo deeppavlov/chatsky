@@ -9,6 +9,7 @@ from pydantic import BaseModel, TypeAdapter
 import logging
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
+from chatsky.llm.prompt import PositionConfig
 
 # from chatsky.llm.prompt import Prompt
 from chatsky.core import AnyResponse, MessageInitTypes
@@ -25,6 +26,7 @@ class LLM_API:
         self,
         model: BaseChatModel,
         system_prompt: Union[AnyResponse, MessageInitTypes] = "",
+        position_config: PositionConfig = None
     ) -> None:
         """
         :param model: Model object
@@ -34,6 +36,7 @@ class LLM_API:
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
         self.system_prompt = TypeAdapter(AnyResponse).validate_python(system_prompt)
+        self.position_config = position_config or PositionConfig()
 
     async def respond(
         self,
