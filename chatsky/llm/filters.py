@@ -28,6 +28,8 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
     Base class for all message history filters.
     """
 
+    # TODO:
+    # Add Optional[] flag to request and response to the annotation
     @abc.abstractmethod
     def call(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> Union[Return, int]:
         """

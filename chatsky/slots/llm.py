@@ -26,6 +26,8 @@ class LLMSlot(ValueSlot, frozen=True):
     LLMSlot is a slot type that extract information described in
     `caption` parameter using LLM.
     """
+    # TODO:
+    # add history (and overall update the class)
 
     caption: str
     return_type: type = str
