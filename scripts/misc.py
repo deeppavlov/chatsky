@@ -33,13 +33,7 @@ def info():
         f"{Fore.BLUE}poetry run poe quick_test{Style.RESET_ALL}:"
         + " Run tests that do not require docker and are not marked with 'slow' and collect coverage"
     )
-    print(
-        f"{Fore.BLUE}poetry run poe docs{Style.RESET_ALL}:"
-        + " Build Sphinx docs"
-    )
-    print(
-        f"{Fore.BLUE}poetry run poe docs_no_docker{Style.RESET_ALL}:"
-        + " Build Sphinx docs; "
-    )
+    print(f"{Fore.BLUE}poetry run poe docs{Style.RESET_ALL}:" + " Build Sphinx docs")
+    print(f"{Fore.BLUE}poetry run poe docs_no_docker{Style.RESET_ALL}:" + " Build Sphinx docs; ")
     print(f"{Fore.BLUE}poetry run poe clean_docs{Style.RESET_ALL}: Remove all documentation build roots")
     print(f"{Fore.BLUE}poetry run poe clean{Style.RESET_ALL}: Clean all build artifacts\n")
