@@ -26,8 +26,20 @@ def info():
         + " Run ALL tests, prohibit skipping, run Docker (slow, closest to CI)"
     )
     print(
+        f"{Fore.BLUE}poetry run poe quick_test{Style.RESET_ALL}:"
+        + " Run tests that do not require docker and are not marked with 'slow'"
+    )
+    print(
+        f"{Fore.BLUE}poetry run poe quick_test{Style.RESET_ALL}:"
+        + " Run tests that do not require docker and are not marked with 'slow' and collect coverage"
+    )
+    print(
         f"{Fore.BLUE}poetry run poe docs{Style.RESET_ALL}:"
-        + " Build Sphinx docs; activate your virtual environment before execution"
+        + " Build Sphinx docs"
+    )
+    print(
+        f"{Fore.BLUE}poetry run poe docs_no_docker{Style.RESET_ALL}:"
+        + " Build Sphinx docs; "
     )
     print(f"{Fore.BLUE}poetry run poe clean_docs{Style.RESET_ALL}: Remove all documentation build roots")
-    print(f"{Fore.BLUE}poen clean{Style.RESET_ALL}: Clean all build artifacts\n")
+    print(f"{Fore.BLUE}poetry run poe clean{Style.RESET_ALL}: Clean all build artifacts\n")

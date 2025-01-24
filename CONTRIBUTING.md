@@ -73,6 +73,14 @@ Note that you'll need `pandoc` installed on your system in order to build docs.
 
 After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
 
+You can also build docs faster without docker by running
+
+```bash
+poetry run poe docs_no_docker
+```
+
+Without docker some tutorials (that require docker services) will show errors and drawio diagrams will not be built.
+
 #### Documentation links
 
 In your tutorials, you can use special expanding directives in markdown cells.
