@@ -10,7 +10,7 @@ Chatsky can be easily installed on your system using the ``pip`` package manager
    
    pip install chatsky
 
-This framework is compatible with Python 3.8 and newer versions.
+This framework is compatible with Python 3.9 and newer versions.
 
 The above command will set the minimum dependencies to start working with Chatsky.
 The installation process allows the user to choose from different packages based on their dependencies, which are:

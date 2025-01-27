@@ -91,14 +91,14 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
     Dialog length is configured using `from_dialog_len`, `to_dialog_len`, `step_dialog_len`.
     """
 
-    context_num: int = 30
+    context_num: int = 1
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
     """
-    from_dialog_len: int = 300
+    from_dialog_len: int = 50
     """Starting dialog len of a context."""
-    to_dialog_len: int = 311
+    to_dialog_len: int = 75
     """
     Final dialog len of a context.
     :py:meth:`~.BasicBenchmarkConfig.context_updater` will return contexts
@@ -182,31 +182,26 @@ basic_configurations = {
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "short-messages": BasicBenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
         message_dimensions=(2, 30),
         misc_dimensions=(0, 0),
     ),
     "default": BasicBenchmarkConfig(),
-    "large-misc--long-dialog": BasicBenchmarkConfig(
+    "large-misc-long-dialog": BasicBenchmarkConfig(
         from_dialog_len=500,
-        to_dialog_len=550,
+        to_dialog_len=510,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
     ),
     "very-long-dialog-len": BasicBenchmarkConfig(
-        context_num=10,
         from_dialog_len=10000,
-        to_dialog_len=10050,
+        to_dialog_len=10010,
     ),
     "very-long-message-len": BasicBenchmarkConfig(
-        context_num=10,
         from_dialog_len=1,
         to_dialog_len=3,
         message_dimensions=(10000, 1),
     ),
     "very-long-misc-len": BasicBenchmarkConfig(
-        context_num=10,
         from_dialog_len=1,
         to_dialog_len=3,
         misc_dimensions=(10000, 1),

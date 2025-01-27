@@ -46,7 +46,8 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
 ]
 
-suppress_warnings = ["image.nonlocal_uri"]
+suppress_warnings = ["image.nonlocal_uri", "config.cache"]
+nbsphinx_allow_errors = os.getenv("NBSPHINX_ALLOW_ERRORS", "false").lower() in ("true", "1")
 source_suffix = ".rst"
 master_doc = "index"
 

@@ -25,7 +25,6 @@ def cast_dict_to_happy_step(dictionary: Dict, update_only: bool = False) -> Unio
         update = eval(step["update"], imports)
         if not update_only:
             received = Message.model_validate(step["received_message"])
-            received.original_message = update
             response = Message.model_validate(step["response_message"])
             path_steps += [(update, received, response, step["response_functions"])]
         else:
