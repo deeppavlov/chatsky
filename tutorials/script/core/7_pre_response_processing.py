@@ -97,9 +97,10 @@ You can use `ModifyResponse` to catch exceptions in response functions:
             except Exception as exc:
                 return str(exc)
 
+However, this functionality is now available in the core library
+as the FallbackResponse class.
 </div>
 """
-
 
 # %%
 toy_script = {
