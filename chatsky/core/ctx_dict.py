@@ -354,11 +354,11 @@ class ContextDict(ABC, BaseModel):
             return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
 
     @model_validator(mode="wrap")
-    def _validate_model(value: Any, handler: Callable[[Any], "ContextDict"]) -> "ContextDict":
+    def _validate_parent_model(value: Any, handler: Callable[[Any], "ContextDict"], _) -> "ContextDict":
         return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
-    def _serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
+    def _serialize_parent_model(self) -> Dict[int, BaseModel]:
         return ContextDict._generic_serialize_model(self)
 
     async def store(self) -> None:
@@ -435,11 +435,11 @@ class LabelContextDict(ContextDict):
         return await super().setdefault(key, default)
 
     @model_validator(mode="wrap")
-    def _validate_model(value: Any, handler: Callable[[Any], "LabelContextDict"], _) -> "LabelContextDict":
+    def _validate_child_model(value: Any, handler: Callable[[Any], "LabelContextDict"], _) -> "LabelContextDict":
         return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
-    def _serialize_model(self) -> Dict[int, AbsoluteNodeLabel]:
+    def _serialize_child_model(self) -> Dict[int, AbsoluteNodeLabel]:
         return ContextDict._generic_serialize_model(self)
 
 
@@ -491,9 +491,9 @@ class MessageContextDict(ContextDict):
         return await super().setdefault(key, default)
 
     @model_validator(mode="wrap")
-    def _validate_model(value: Any, handler: Callable[[Any], "MessageContextDict"], _) -> "MessageContextDict":
+    def _validate_child_model(value: Any, handler: Callable[[Any], "MessageContextDict"], _) -> "MessageContextDict":
         return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
-    def _serialize_model(self) -> Dict[int, Message]:
+    def _serialize_child_model(self) -> Dict[int, Message]:
         return ContextDict._generic_serialize_model(self)
