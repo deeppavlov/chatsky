@@ -350,9 +350,7 @@ class ContextDict(ABC, BaseModel):
                     result[k] = value if to_bytes else v
             return result
         else:
-            return {
-                k: self._value_type.dump_json(self._items[k]) if to_bytes else self._items[k] for k in self._added
-            }
+            return {k: self._value_type.dump_json(self._items[k]) if to_bytes else self._items[k] for k in self._added}
 
     @model_serializer()
     def _serialize_model(self) -> Dict[int, BaseModel]:
