@@ -379,7 +379,7 @@ class ContextDict(ABC, BaseModel):
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 
 
-class LabelContextDict(ContextDict[int, AbsoluteNodeLabel]):
+class LabelContextDict(ContextDict):
     """
     Context dictionary for storing `AbsoluteNodeLabel` types.
     """
@@ -425,7 +425,7 @@ class LabelContextDict(ContextDict[int, AbsoluteNodeLabel]):
         return super()._serialize_model()
 
 
-class MessageContextDict(ContextDict[int, Message]):
+class MessageContextDict(ContextDict):
     """
     Context dictionary for storing `Message` types.
     """
