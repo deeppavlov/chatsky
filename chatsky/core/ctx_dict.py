@@ -340,7 +340,7 @@ class ContextDict(ABC, BaseModel):
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
     @staticmethod
-    def  _generic_serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
+    def _generic_serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
         if self._storage is None:
             return self._items
         elif not self._storage.rewrite_existing:
@@ -358,7 +358,7 @@ class ContextDict(ABC, BaseModel):
         return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
-    def  _generic_serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
+    def _serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
         return ContextDict._generic_serialize_model(self)
 
     async def store(self) -> None:
