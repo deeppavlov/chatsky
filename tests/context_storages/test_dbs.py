@@ -290,7 +290,6 @@ class TestContextStorages:
         await add_context("1")
         await add_context("2")
 
-        # test delete
         await db.delete_context("1")
 
         assert await db.load_main_info("1") is None
@@ -298,6 +297,17 @@ class TestContextStorages:
 
         assert set(await db.load_field_keys("1", "labels")) == set()
         assert set(await db.load_field_keys("2", "labels")) == {0}
+
+    async def test_clear_all(self, db: DBContextStorage, add_context):
+        await add_context("1")
+        await add_context("2")
+
+        await db.clear_all()
+
+        assert await db.load_main_info("1") is None
+        assert await db.load_main_info("2") is None
+        assert set(await db.load_field_keys("1", "labels")) == set()
+        assert set(await db.load_field_keys("2", "labels")) == set()
 
     @pytest.mark.slow
     async def test_concurrent_operations(self, db: DBContextStorage):
