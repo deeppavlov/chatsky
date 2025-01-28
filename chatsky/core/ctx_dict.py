@@ -396,6 +396,9 @@ class LabelContextDict(ContextDict):
     @overload
     async def __getitem__(self, key: slice) -> List[AbsoluteNodeLabel]: ...  # noqa: E704
 
+    async def __getitem__(self, key):
+        return await super().__getitem__(key)
+
     def __setitem__(self, key: Union[int, slice], value: Union[AbsoluteNodeLabel, Sequence[AbsoluteNodeLabel]]) -> None:
         return super().__setitem__(key, value)
 
@@ -405,20 +408,23 @@ class LabelContextDict(ContextDict):
     @overload
     async def get(self, key: Iterable[int], default=None) -> List[AbsoluteNodeLabel]: ...  # noqa: E704
 
+    async def get(self, key, default=None):
+        return await super().get(key, default)
+
     async def values(self) -> List[AbsoluteNodeLabel]:
-        return super().values()
+        return await super().values()
 
     async def items(self) -> List[Tuple[int, AbsoluteNodeLabel]]:
-        return super().items()
+        return await super().items()
 
     async def pop(self, key: int, default=None) -> AbsoluteNodeLabel:
-        return super().pop(key, default)
+        return await super().pop(key, default)
 
     async def popitem(self) -> Tuple[int, AbsoluteNodeLabel]:
-        return super().popitem()
+        return await super().popitem()
 
     async def setdefault(self, key: int, default=None) -> AbsoluteNodeLabel:
-        return super().setdefault(key, default)
+        return await super().setdefault(key, default)
 
     @model_serializer()
     def _serialize_model(self) -> Dict[int, AbsoluteNodeLabel]:
@@ -442,6 +448,9 @@ class MessageContextDict(ContextDict):
     @overload
     async def __getitem__(self, key: slice) -> List[Message]: ...  # noqa: E704
 
+    async def __getitem__(self, key):
+        return await super().__getitem__(key)
+
     def __setitem__(self, key: Union[int, slice], value: Union[Message, Sequence[Message]]) -> None:
         return super().__setitem__(key, value)
 
@@ -451,20 +460,23 @@ class MessageContextDict(ContextDict):
     @overload
     async def get(self, key: Iterable[int], default=None) -> List[Message]: ...  # noqa: E704
 
+    async def get(self, key, default=None):
+        return await super().get(key, default)
+
     async def values(self) -> List[Message]:
-        return super().values()
+        return await super().values()
 
     async def items(self) -> List[Tuple[int, Message]]:
-        return super().items()
+        return await super().items()
 
     async def pop(self, key: int, default=None) -> Message:
-        return super().pop(key, default)
+        return await super().pop(key, default)
 
     async def popitem(self) -> Tuple[int, Message]:
-        return super().popitem()
+        return await super().popitem()
 
     async def setdefault(self, key: int, default=None) -> Message:
-        return super().setdefault(key, default)
+        return await super().setdefault(key, default)
 
     @model_serializer()
     def _serialize_model(self) -> Dict[int, Message]:
