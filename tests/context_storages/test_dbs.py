@@ -270,6 +270,9 @@ class TestContextStorages:
         self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(5, b"5"), (2, b"2")]
 
+        self.configure_context_storage(db, requests_subscript={5, 1})
+        assert await db.load_field_latest("1", "requests") == [(5, b"5"), (1, b"1")]
+
     async def test_delete_field_key(self, db: DBContextStorage, add_context):
         await add_context("1")
 
