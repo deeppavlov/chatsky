@@ -85,7 +85,7 @@ class ContextDict(ABC, BaseModel):
 
     @property
     @abstractmethod
-    def _value_type(self) -> TypeAdapter[Type[BaseModel]]:
+    def _value_type(self) -> TypeAdapter[BaseModel]:
         raise NotImplementedError
 
     @classmethod
@@ -387,7 +387,7 @@ class LabelContextDict(ContextDict):
     _items: Dict[int, AbsoluteNodeLabel]
 
     @property
-    def _value_type(self) -> TypeAdapter[Type[AbsoluteNodeLabel]]:
+    def _value_type(self) -> TypeAdapter[AbsoluteNodeLabel]:
         return TypeAdapter(AbsoluteNodeLabel)
 
     @overload
@@ -435,7 +435,7 @@ class MessageContextDict(ContextDict):
     _items: Dict[int, Message]
 
     @property
-    def _value_type(self) -> TypeAdapter[Type[Message]]:
+    def _value_type(self) -> TypeAdapter[Message]:
         return TypeAdapter(Message)
 
     @overload
