@@ -328,7 +328,7 @@ class ContextDict(ABC, BaseModel):
         return copy
 
     @staticmethod
-    def _validate_model(value: Any, handler: Callable[[Any], "ContextDict"]) -> "ContextDict":
+    def _generic_validate_model(value: Any, handler: Callable[[Any], "ContextDict"]) -> "ContextDict":
         if isinstance(value, ContextDict):
             return value
         elif isinstance(value, Dict):
@@ -340,7 +340,7 @@ class ContextDict(ABC, BaseModel):
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
     @staticmethod
-    def _serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
+    def  _generic_serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
         if self._storage is None:
             return self._items
         elif not self._storage.rewrite_existing:
@@ -352,6 +352,14 @@ class ContextDict(ABC, BaseModel):
             return result
         else:
             return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
+
+    @model_validator(mode="wrap")
+    def _validate_model(value: Any, handler: Callable[[Any], "ContextDict"]) -> "ContextDict":
+        return ContextDict._generic_validate_model(value, handler)
+
+    @model_serializer()
+    def  _generic_serialize_model(self: "ContextDict") -> Dict[int, BaseModel]:
+        return ContextDict._generic_serialize_model(self)
 
     async def store(self) -> None:
         """
@@ -428,11 +436,11 @@ class LabelContextDict(ContextDict):
 
     @model_validator(mode="wrap")
     def _validate_model(value: Any, handler: Callable[[Any], "LabelContextDict"], _) -> "LabelContextDict":
-        return ContextDict._validate_model(value, handler)
+        return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
     def _serialize_model(self) -> Dict[int, AbsoluteNodeLabel]:
-        return ContextDict._serialize_model(self)
+        return ContextDict._generic_serialize_model(self)
 
 
 class MessageContextDict(ContextDict):
@@ -484,8 +492,8 @@ class MessageContextDict(ContextDict):
 
     @model_validator(mode="wrap")
     def _validate_model(value: Any, handler: Callable[[Any], "MessageContextDict"], _) -> "MessageContextDict":
-        return ContextDict._validate_model(value, handler)
+        return ContextDict._generic_validate_model(value, handler)
 
     @model_serializer()
     def _serialize_model(self) -> Dict[int, Message]:
-        return ContextDict._serialize_model(self)
+        return ContextDict._generic_serialize_model(self)
