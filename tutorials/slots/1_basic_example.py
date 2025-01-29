@@ -46,9 +46,9 @@ of the parent slot. In the following cell, we define two slot groups:
 
 Currently there are two types of value slots:
 
-- %mddoclink(api,slots.slots,RegexpSlot):
+- %mddoclink(api,slots.standard_slots,RegexpSlot):
     Extracts slot values via regexp.
-- %mddoclink(api,slots.slots,FunctionSlot):
+- %mddoclink(api,slots.standard_slots,FunctionSlot):
     Extracts slot values with the help of a user-defined function.
 """
 
@@ -76,6 +76,9 @@ The slots module provides several functions for managing slots in-script:
 
 - %mddoclink(api,conditions.slots,SlotsExtracted):
     Condition for checking if specified slots are extracted.
+- %mddoclink(api,conditions.slots,SlotValueEquals):
+    Condition for checking if the specified slots' value
+    is equal to a given value.
 - %mddoclink(api,processing.slots,Extract):
     A processing function that extracts specified slots.
 - %mddoclink(api,processing.slots,Unset):

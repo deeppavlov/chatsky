@@ -9,5 +9,5 @@ from chatsky.conditions.standard import (
     Not,
     HasCallbackQuery,
 )
-from chatsky.conditions.slots import SlotsExtracted
+from chatsky.conditions.slots import SlotsExtracted, SlotValueEquals
 from chatsky.conditions.service import ServiceFinished

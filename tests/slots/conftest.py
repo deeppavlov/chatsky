@@ -1,7 +1,7 @@
 import pytest
 
 from chatsky.core import Message, TRANSITIONS, RESPONSE, Context, Pipeline, Transition as Tr
-from chatsky.slots.slots import SlotNotExtracted
+from chatsky.slots.base_slots import SlotNotExtracted
 
 
 @pytest.fixture(scope="function", autouse=True)

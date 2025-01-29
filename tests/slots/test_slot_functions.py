@@ -6,10 +6,11 @@ import pytest
 from chatsky import Context
 from chatsky.core import BaseResponse, Node
 from chatsky.core.message import MessageInitTypes, Message
-from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, SlotManager
+from chatsky.slots.base_slots import ValueSlot, SlotNotExtracted, GroupSlot
+from chatsky.slots.slot_manager import SlotManager
 from chatsky import conditions as cnd, responses as rsp, processing as proc
 from chatsky.processing.slots import logger as proc_logger
-from chatsky.slots.slots import logger as slot_logger
+from chatsky.slots.base_slots import logger as slot_logger
 from chatsky.responses.slots import logger as rsp_logger
 
 
@@ -59,15 +60,19 @@ async def test_basic_functions(context, manager, log_event_catcher):
     await proc.Extract("0", "2", "err").wrapped_call(context)
 
     assert manager.get_extracted_slot("0").value == 4
+    assert await cnd.SlotValueEquals("0", 5).wrapped_call(context) is False
+    assert await cnd.SlotValueEquals("0", 4).wrapped_call(context) is True
     assert manager.is_slot_extracted("1") is False
     assert isinstance(manager.get_extracted_slot("err").extracted_value, SlotNotExtracted)
 
     proc_logs = log_event_catcher(proc_logger, level=logging.ERROR)
     slot_logs = log_event_catcher(slot_logger, level=logging.ERROR)
 
-    await proc.Extract("0", "2", "err", success_only=False).wrapped_call(context)
+    await proc.Extract("0", "2", "err", save_on_failure=False).wrapped_call(context)
 
     assert manager.get_extracted_slot("0").value == 4
+    assert await cnd.SlotValueEquals("0", 5).wrapped_call(context) is False
+    assert await cnd.SlotValueEquals("0", 4).wrapped_call(context) is True
     assert manager.is_slot_extracted("1") is False
     assert isinstance(manager.get_extracted_slot("err").extracted_value, RuntimeError)
 

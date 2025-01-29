@@ -1,5 +1,5 @@
 from chatsky.slots import RegexpSlot, GroupSlot
-from chatsky.slots.slots import SlotManager
+from chatsky.slots.slot_manager import SlotManager
 from chatsky.core import Message
 
 import pytest
@@ -65,20 +65,20 @@ def get_extracted_slots(manager: SlotManager):
     [("1 2 3", ["1", "2"]), ("1 3 5", ["1", "5"]), ("3 4 5 6", ["3", "4", "5", "6"])],
 )
 async def test_partial_extraction(message, extracted, context_with_request, empty_slot_manager):
-    await empty_slot_manager.extract_slot("root_slot", context_with_request(message), success_only=False)
+    await empty_slot_manager.extract_slot("root_slot", context_with_request(message), save_on_failure=False)
 
     assert extracted == get_extracted_slots(empty_slot_manager)
 
 
 async def test_slot_storage_update(context_with_request, empty_slot_manager):
-    await empty_slot_manager.extract_slot("root_slot", context_with_request("1 3 5"), success_only=False)
+    await empty_slot_manager.extract_slot("root_slot", context_with_request("1 3 5"), save_on_failure=False)
 
     assert get_extracted_slots(empty_slot_manager) == ["1", "5"]
 
-    await empty_slot_manager.extract_slot("root_slot", context_with_request("2 4 6"), success_only=False)
+    await empty_slot_manager.extract_slot("root_slot", context_with_request("2 4 6"), save_on_failure=False)
 
     assert get_extracted_slots(empty_slot_manager) == ["1", "2", "5", "6"]
 
-    await empty_slot_manager.extract_slot("root_slot.nested_group", context_with_request("3 4"), success_only=False)
+    await empty_slot_manager.extract_slot("root_slot.nested_group", context_with_request("3 4"), save_on_failure=False)
 
     assert get_extracted_slots(empty_slot_manager) == ["1", "2", "3", "4", "5", "6"]

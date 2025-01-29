@@ -1,1 +1,2 @@
-from chatsky.slots.slots import GroupSlot, ValueSlot, RegexpSlot, FunctionSlot
+from chatsky.slots.standard_slots import RegexpSlot, RegexpGroupSlot, FunctionSlot
+from chatsky.slots.base_slots import GroupSlot, ValueSlot
