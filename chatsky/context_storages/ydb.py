@@ -231,10 +231,10 @@ class YDBContextStorage(DBContextStorage):
             elif isinstance(self._subscripts[field_name], Set):
                 values = list()
                 for i, k in enumerate(self._subscripts[field_name]):
-                    declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Utf8;"]
+                    declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
                     prepare.update({f"${self._KEY_VAR}_{i}": k})
                     values += [f"${self._KEY_VAR}_{i}"]
-                key = f"AND {self._KEY_VAR} IN ({', '.join(values)})"
+                key = f"AND {NameConfig._key_column} IN ({', '.join(values)})"
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;

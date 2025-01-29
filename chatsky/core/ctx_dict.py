@@ -339,8 +339,7 @@ class ContextDict(ABC, BaseModel):
         else:
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
-    @model_serializer()
-    def _serialize_model(self) -> Dict[int, BaseModel]:
+    def _serialize_model_base(self, to_bytes: bool = False) -> Dict[int, Union[BaseModel, bytes]]:
         if self._storage is None:
             return self._items
         elif not self._storage.rewrite_existing:
@@ -348,10 +347,14 @@ class ContextDict(ABC, BaseModel):
             for k, v in self._items.items():
                 value = self._value_type.dump_json(v)
                 if _get_hash(value) != self._hashes.get(k, None):
-                    result[k] = value.decode()
+                    result[k] = value if to_bytes else v
             return result
         else:
-            return {k: self._value_type.dump_json(self._items[k]).decode() for k in self._added}
+            return {k: self._value_type.dump_json(self._items[k]) if to_bytes else self._items[k] for k in self._added}
+
+    @model_serializer()
+    def _serialize_model(self) -> Dict[int, BaseModel]:
+        return self._serialize_model_base()
 
     async def store(self) -> None:
         """
@@ -362,7 +365,7 @@ class ContextDict(ABC, BaseModel):
 
         if self._storage is not None:
             logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
-            stored = [(k, e.encode()) for k, e in self.model_dump().items()]
+            stored = [(k, e) for k, e in self._serialize_model_base(True).items()]
             await gather(
                 self._storage.update_field_items(self._ctx_id, self._field_name, stored),
                 self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
