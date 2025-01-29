@@ -4,12 +4,13 @@ LLM Conditions
 This module provides LLM-based conditions.
 """
 
+import logging
 from pydantic import Field
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.langchain_context import context_to_history, message_to_langchain
+from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 
 
@@ -47,27 +48,21 @@ class LLMCondition(BaseCondition):
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.llm_model_name]
 
-        if model.system_prompt == "":
-            history_messages = []
-        else:
-            history_messages = [await message_to_langchain(model.system_prompt, ctx=ctx, source="system")]
-
-        if not (self.history == 0 or len(ctx.responses) == 0 or len(ctx.requests) == 0):
-            history_messages.extend(
-                await context_to_history(
-                    ctx=ctx,
-                    length=self.history,
-                    filter_func=self.filter_func,
-                    llm_model_name=self.llm_model_name,
-                    max_size=self.max_size,
-                )
+        history_messages = []
+        # iterate over context to retrieve history messages
+        logging.debug("Retrieving context history.")
+        history_messages.extend(
+            await get_langchain_context(
+                system_prompt=await model.system_prompt(ctx),
+                ctx=ctx,
+                call_prompt=self.prompt,
+                prompt_misc_filter=self.prompt_misc_filter,
+                position_config=self.position_config or model.position_config,
+                length=self.history,
+                filter_func=self.filter_func,
+                llm_model_name=self.llm_model_name,
+                max_size=self.max_size,
             )
-
-        history_messages.append(
-            await message_to_langchain(self.prompt, ctx=ctx, source="system", max_size=self.max_size)
-        )
-        history_messages.append(
-            await message_to_langchain(ctx.last_request, ctx=ctx, source="human", max_size=self.max_size)
         )
 
         return await model.condition(history_messages, self.method)
