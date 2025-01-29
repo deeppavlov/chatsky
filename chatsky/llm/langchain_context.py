@@ -7,16 +7,15 @@ The Utils module contains functions for converting Chatsky's objects to an LLM_A
 import re
 import logging
 from typing import Literal, Union
-from pydantic import validate_call
 
-from chatsky.core import AnyResponse, Context, Message
-from chatsky.core.script_function import ConstResponse
+from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
 
 logger = logging.getLogger(__name__)
 logger.debug("Loaded LLM Utils logger.")
+
 
 async def message_to_langchain(
     message: Message, ctx: Context, source: Literal["human", "ai", "system"] = "human", max_size: int = 1000
@@ -64,22 +63,7 @@ async def context_to_history(
     :return: List of Langchain message objects.
     """
     history = []
-
-    # pairs = zip(
-    #     [ctx.requests[x] for x in range(1, len(ctx.requests) + 1)],
-    #     [ctx.responses[x] for x in range(1, len(ctx.responses) + 1)],
-    # )
-    # pairs_list = list(pairs)
-    # filtered_pairs = filter(
-    #     lambda x: filter_func(ctx, x[0], x[1], llm_model_name), pairs_list[-length:] if length != -1 else pairs_list
-    # )
-
-    # for req, resp in filtered_pairs:
-    #     logger.debug(f"This pair is valid: {req, resp}")
-    #     history.append(await message_to_langchain(req, ctx=ctx, max_size=max_size))
-    #     history.append(await message_to_langchain(resp, ctx=ctx, source="ai", max_size=max_size))
-
-    indices = range(1, min(max([*ctx.requests.keys(), 0]), max([*ctx.responses.keys(), 0]))+1)
+    indices = range(1, min(max([*ctx.requests.keys(), 0]), max([*ctx.responses.keys(), 0])) + 1)
 
     if length == 0:
         return []
@@ -112,6 +96,17 @@ async def get_langchain_context(
 ) -> list[HumanMessage | AIMessage | SystemMessage]:
     """
     Get a list of Langchain messages using the context and prompts.
+
+    :param system_prompt: System message to be included in the context.
+    :param ctx: Current dialog context.
+    :param call_prompt: Prompt to be used for the current call.
+    :param prompt_misc_filter: Regex pattern to filter miscellaneous prompts from context.
+        Defaults to r"prompt".
+    :param position_config: Configuration for positioning different parts of the context.
+        Defaults to default PositionConfig().
+    :param history_args: Additional arguments to be passed to context_to_history function.
+
+    :return: List of Langchain message objects ordered by their position values.
     """
     logger.debug(f"History args: {history_args}")
 

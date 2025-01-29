@@ -29,7 +29,9 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
     """
 
     @abc.abstractmethod
-    def call(self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str) -> Union[Return, int]:
+    def call(
+        self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
+    ) -> Union[Return, int]:
         """
         :param ctx: Context object.
         :param request: Request message.

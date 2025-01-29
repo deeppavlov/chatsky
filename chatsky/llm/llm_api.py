@@ -4,7 +4,7 @@ LLM responses.
 Wrapper around langchain.
 """
 
-from typing import Union, Type, Optional
+from typing import Union, Type
 from pydantic import BaseModel, TypeAdapter
 import logging
 from chatsky.core.message import Message
@@ -26,7 +26,7 @@ class LLM_API:
         self,
         model: BaseChatModel,
         system_prompt: Union[AnyResponse, MessageInitTypes] = "",
-        position_config: PositionConfig = None
+        position_config: PositionConfig = None,
     ) -> None:
         """
         :param model: Model object

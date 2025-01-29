@@ -11,11 +11,11 @@ from pydantic import BaseModel, Field
 
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
+from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm._langchain_imports import check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
-from chatsky.core.script_function import BaseResponse, AnyResponse
+from chatsky.core.script_function import BaseResponse
 
 
 class LLMResponse(BaseResponse):
@@ -77,7 +77,7 @@ class LLMResponse(BaseResponse):
                 max_size=self.max_size,
             )
         )
-        
+
         logging.debug(f"History: {history_messages}")
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
