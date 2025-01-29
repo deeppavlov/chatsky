@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from chatsky.core.context import FrameworkData
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int]
-_SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], Union[_SUBSCRIPT_TYPE]]
+_SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], _SUBSCRIPT_TYPE]
 
 logger = getLogger(__name__)
 
