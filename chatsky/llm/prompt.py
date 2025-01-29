@@ -12,8 +12,6 @@ class PositionConfig(BaseModel):
 
 
 class Prompt(BaseModel):
-    # TODO:
-    # rename prompt field into message
     message: AnyResponse
     position: Optional[AnyPriority] = None
 
