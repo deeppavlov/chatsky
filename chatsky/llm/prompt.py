@@ -14,7 +14,7 @@ class PositionConfig(BaseModel):
 class Prompt(BaseModel):
     # TODO:
     # rename prompt field into message
-    prompt: AnyResponse
+    message: AnyResponse
     position: Optional[AnyPriority] = None
 
     def __init__(

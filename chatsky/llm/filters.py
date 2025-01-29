@@ -7,7 +7,7 @@ This module contains a collection of basic functions for history filtering to av
 import abc
 from enum import Enum
 from logging import Logger
-from typing import Union
+from typing import Union, Optional
 
 from pydantic import BaseModel
 
@@ -28,10 +28,8 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
     Base class for all message history filters.
     """
 
-    # TODO:
-    # Add Optional[] flag to request and response to the annotation
     @abc.abstractmethod
-    def call(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> Union[Return, int]:
+    def call(self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str) -> Union[Return, int]:
         """
         :param ctx: Context object.
         :param request: Request message.

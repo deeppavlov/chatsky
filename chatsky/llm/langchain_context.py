@@ -113,8 +113,6 @@ async def get_langchain_context(
     """
     Get a list of Langchain messages using the context and prompts.
     """
-    # TODO:
-    # decide what to do with last response (it is stored in history)
     logger.debug(f"History args: {history_args}")
 
     history = await context_to_history(ctx, **history_args)
@@ -130,13 +128,13 @@ async def get_langchain_context(
         if re.match(prompt_misc_filter, element_name):
 
             prompt = Prompt.model_validate(element)
-            prompt_langchain_message = await message_to_langchain(await prompt.prompt(ctx), ctx, source="human")
+            prompt_langchain_message = await message_to_langchain(await prompt.message(ctx), ctx, source="human")
 
             if prompt.position is None:
                 prompt.position = position_config.misc_prompt
             prompts.append(([prompt_langchain_message], prompt.position))
 
-    call_prompt_text = await call_prompt.prompt(ctx)
+    call_prompt_text = await call_prompt.message(ctx)
     call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
     prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
 
