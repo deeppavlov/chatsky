@@ -1,7 +1,8 @@
 import pytest
 
-from chatsky import proc, Context, BaseResponse, MessageInitTypes, Message
+from chatsky import proc, Context, BaseResponse, MessageInitTypes, Message, BaseProcessing
 from chatsky.core.script import Node
+
 
 
 async def test_modify_response():
@@ -68,3 +69,35 @@ class TestFallbackResponse:
         exceptions = {}
         with pytest.raises(ValueError, match="Exceptions dict is empty"):
             proc.FallbackResponse(exceptions=exceptions)
+
+
+class TestConditionalResponce:
+    async def test_conditional_response(self):
+        ctx = Context()
+        ctx.framework_data.current_node = Node()
+        some_list = []
+
+        class SomeProcessing(BaseProcessing):
+            async def call(self, ctx: Context):
+                some_list.append("")
+
+        await SomeProcessing()(ctx)
+        assert some_list == [""]
+
+        await SomeProcessing().wrapped_call(ctx)
+        assert some_list == ["", ""]
+
+    async def test_conditional_processing_false_condition(self):
+        ctx = Context()
+        ctx.framework_data.current_node = Node()
+        some_list = []
+
+        class SomeProcessing(BaseProcessing):
+            async def call(self, ctx: Context):
+                some_list.append("")
+
+        await SomeProcessing(start_condition = False)(ctx)
+        assert some_list == []
+
+        await SomeProcessing(start_condition = False).wrapped_call(ctx)
+        assert some_list == []
