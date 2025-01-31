@@ -7,7 +7,8 @@ from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 from chatsky.slots.slots import SlotNotExtracted, ExtractedGroupSlot
-from chatsky.llm.langchain_context import message_to_langchain, context_to_history
+from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
+from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.llm.filters import IsImportant, FromModel
 from chatsky.llm.methods import Contains, LogProb, BaseMethod
 from chatsky.core.message import Message
@@ -246,6 +247,16 @@ async def test_context_to_history(context):
         AIMessage(content=[{"type": "text", "text": "Response 2"}]),
     ]
     assert res == expected
+
+
+async def test_get_langchain_context(context):
+    res = get_langchain_context(
+        system_prompt=Message(text="system prompt"),
+        ctx=context,
+        call_prompt=Prompt(message=Message(text="call prompt")),
+        position_config=PositionConfig(),
+        history_args={"length": 1, "filter_func": lambda *args: True, "llm_model_name": "test_model", "max_size": 100},
+    )
 
 
 async def test_conditions(context):
