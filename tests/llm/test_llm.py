@@ -207,8 +207,8 @@ async def test_message_to_langchain(context):
     [
         (
             2,
-            "Mock response with history: ['prompt', 'Request 1', 'Response 1', "
-            "'Request 2', 'Response 2', 'Last request']",
+            "Mock response with history: ['Request 1', 'Response 1', "
+            "'Request 2', 'Response 2', 'prompt', 'Last request']",
         ),
         (
             0,
@@ -216,8 +216,8 @@ async def test_message_to_langchain(context):
         ),
         (
             4,
-            "Mock response with history: ['prompt', 'Request 0', 'Response 0', "
-            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'Last request']",
+            "Mock response with history: ['Request 0', 'Response 0', "
+            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'prompt', 'Last request']",
         ),
     ],
 )

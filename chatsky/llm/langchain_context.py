@@ -113,9 +113,10 @@ async def get_langchain_context(
     history = await context_to_history(ctx, **history_args)
     logger.debug(f"Position config: {position_config}")
     prompts: list[tuple[list[Union[HumanMessage, AIMessage, SystemMessage]], float]] = [
-        ([await message_to_langchain(system_prompt, ctx, source="system")], position_config.system_prompt),
         (history, position_config.history),
     ]
+    if system_prompt.text != '':
+        prompts.append(([await message_to_langchain(system_prompt, ctx, source="system")], position_config.system_prompt))
 
     logger.debug(f"System prompt: {prompts[0]}")
 
@@ -130,8 +131,9 @@ async def get_langchain_context(
             prompts.append(([prompt_langchain_message], prompt.position))
 
     call_prompt_text = await call_prompt.message(ctx)
-    call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
-    prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
+    if call_prompt_text.text != '':
+        call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
+        prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
 
     prompts.append(([await message_to_langchain(ctx.last_request, ctx, source="human")], position_config.last_request))
 

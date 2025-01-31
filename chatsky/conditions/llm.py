@@ -36,6 +36,10 @@ class LLMCondition(BaseCondition):
     """
     Filter function to filter messages that will go the models context.
     """
+    prompt_misc_filter: str = Field(default=r"prompt")
+    """
+    idk
+    """
     max_size: int = 1000
     """
     Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.

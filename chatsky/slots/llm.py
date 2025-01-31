@@ -79,6 +79,7 @@ class LLMGroupSlot(GroupSlot):
         result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")
 
+        # TODO: un-flatten the dict with child.names.like.this
         res = {
             name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
             for name in result_json
