@@ -16,13 +16,13 @@ class Prompt(BaseModel):
     position: Optional[AnyPriority] = None
 
     def __init__(
-        self, prompt: Union[MessageInitTypes, BaseResponse], position: Optional[Union[float, BasePriority]] = None
+        self, message: Union[MessageInitTypes, BaseResponse], position: Optional[Union[float, BasePriority]] = None
     ):
-        super().__init__(prompt=prompt, position=position)
+        super().__init__(message=message, position=position)
 
     @model_validator(mode="before")
     @classmethod
     def validate_from_message(cls, data):
         if isinstance(data, (str, Message, BaseResponse)):
-            return {"prompt": data}
+            return {"message": data}
         return data
