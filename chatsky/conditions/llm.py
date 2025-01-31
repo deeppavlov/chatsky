@@ -6,12 +6,14 @@ This module provides LLM-based conditions.
 
 import logging
 from pydantic import Field
+from typing import Optional
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
+from chatsky.llm.prompt import PositionConfig
 
 
 class LLMCondition(BaseCondition):
@@ -39,6 +41,10 @@ class LLMCondition(BaseCondition):
     prompt_misc_filter: str = Field(default=r"prompt")
     """
     idk
+    """
+    position_config: Optional[PositionConfig] = None
+    """
+    Defines prompts and messages positions in history sent to a LLM.
     """
     max_size: int = 1000
     """
