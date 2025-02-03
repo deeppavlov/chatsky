@@ -13,7 +13,7 @@ from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
-from chatsky.llm.prompt import PositionConfig
+from chatsky.llm.prompt import PositionConfig, Prompt
 
 
 class LLMCondition(BaseCondition):
@@ -65,7 +65,7 @@ class LLMCondition(BaseCondition):
             await get_langchain_context(
                 system_prompt=await model.system_prompt(ctx),
                 ctx=ctx,
-                call_prompt=self.prompt,
+                call_prompt=Prompt(message=self.prompt),
                 prompt_misc_filter=self.prompt_misc_filter,
                 position_config=self.position_config or model.position_config,
                 length=self.history,

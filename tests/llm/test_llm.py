@@ -262,12 +262,12 @@ async def test_get_langchain_context(context):
 async def test_conditions(context):
     cond1 = LLMCondition(
         llm_model_name="test_model",
-        prompt="test_prompt",
+        prompt=Message("test_prompt"),
         method=Contains(pattern="history"),
     )
     cond2 = LLMCondition(
         llm_model_name="test_model",
-        prompt="test_prompt",
+        prompt=Message("test_prompt"),
         method=Contains(pattern="abrakadabra"),
     )
     assert await cond1(ctx=context)
