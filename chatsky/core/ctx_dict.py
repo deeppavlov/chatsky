@@ -177,7 +177,15 @@ class ContextDict(ABC, BaseModel):
         else:
             return self._items[key]
 
-    def __setitem__(self, key: Union[int, slice], value: Union[BaseModel, Sequence[BaseModel]]) -> None:
+    @overload
+    def __setitem__(self, key: int, value: BaseModel) -> None:
+        pass
+
+    @overload
+    def __setitem__(self, key: slice, value: Sequence[BaseModel]) -> None:
+        pass
+
+    def __setitem__(self, key, value):
         if isinstance(key, int) and key < 0:
             key = self.keys()[key]
         if isinstance(key, slice):
@@ -402,7 +410,15 @@ class LabelContextDict(ContextDict):
     async def __getitem__(self, key):
         return await super().__getitem__(key)
 
-    def __setitem__(self, key: Union[int, slice], value: Union[AbsoluteNodeLabel, Sequence[AbsoluteNodeLabel]]) -> None:
+    @overload
+    def __setitem__(self, key: int, value: AbsoluteNodeLabel) -> None:
+        pass
+
+    @overload
+    def __setitem__(self, key: slice, value: Sequence[AbsoluteNodeLabel]) -> None:
+        pass
+
+    def __setitem__(self, key, value):
         return super().__setitem__(key, value)
 
     @overload
@@ -450,7 +466,15 @@ class MessageContextDict(ContextDict):
     async def __getitem__(self, key):
         return await super().__getitem__(key)
 
-    def __setitem__(self, key: Union[int, slice], value: Union[Message, Sequence[Message]]) -> None:
+    @overload
+    def __setitem__(self, key: int, value: Message) -> None:
+        pass
+
+    @overload
+    def __setitem__(self, key: slice, value: Sequence[Message]) -> None:
+        pass
+
+    def __setitem__(self, key, value):
         return super().__setitem__(key, value)
 
     @overload
