@@ -79,13 +79,32 @@ class LLMGroupSlot(GroupSlot):
         result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")
 
-        # TODO: un-flatten the dict with child.names.like.this
-        res = {
-            name: ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=result_json[name])
-            for name in result_json
-            if result_json[name] is not None or not self.allow_partial_extraction
-        }
-        return ExtractedGroupSlot(**res)
+        # Convert flat dict to nested structure
+        nested_result = {}
+        for key, value in result_json.items():
+            if value is None and self.allow_partial_extraction:
+                continue
+
+            current = nested_result
+            parts = key.split(".")
+            *path_parts, final = parts
+
+            # Build nested dict structure
+            for part in path_parts:
+                if part not in current:
+                    current[part] = {}
+                current = current[part]
+
+            # Set the final value
+            current[final] = ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=value)
+
+        return self.__dict_to_extracted_slots(nested_result)
+
+    # Convert nested dict to ExtractedGroupSlot structure
+    def __dict_to_extracted_slots(self, d):
+        if not isinstance(d, dict):
+            return d
+        return ExtractedGroupSlot(**{k: self.__dict_to_extracted_slots(v) for k, v in d.items()})
 
     def _flatten_llm_group_slot(self, slot, parent_key=""):
         items = {}
