@@ -109,7 +109,7 @@ Attributes
   NB! It is usually preferrable to use `add_request` and `last_request` for the most simple use cases.
 
 * **responses**: This attribute keeps a record of all agent responses, mapping turn IDs to responses.
-   The is a special dynamically-loaded collection of type `ContextDict`,
+  The is a special dynamically-loaded collection of type `ContextDict`,
   so some of its methods are asynchronous.
 
   NB! It is usually preferrable to use `add_response` and `last_response` for the most simple use cases.
