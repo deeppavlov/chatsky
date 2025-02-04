@@ -18,7 +18,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 
 if not langchain_available:
     pytest.skip(allow_module_level=True, reason="Langchain not available.")
-from chatsky.llm._langchain_imports import AIMessage, LLMResult, HumanMessage
+from chatsky.llm._langchain_imports import AIMessage, LLMResult, HumanMessage, SystemMessage
 from langchain_core.outputs.chat_generation import ChatGeneration
 
 
@@ -185,7 +185,13 @@ def filter_context():
 def context(pipeline):
     ctx = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
     ctx.framework_data.pipeline = pipeline
-    ctx.framework_data.current_node = Node(misc={"prompt": "prompt"})
+    ctx.framework_data.current_node = Node(
+        misc={
+            "prompt": "prompt",
+            "tpmorp": "absolutely not a prompt",
+            "prompt_last": Prompt(message=Message("last prompt"), position=1000),
+        }
+    )
     for i in range(3):
         ctx.add_request(f"Request {i}")
         ctx.add_response(f"Response {i}")
@@ -208,16 +214,16 @@ async def test_message_to_langchain(context):
         (
             2,
             "Mock response with history: ['Request 1', 'Response 1', "
-            "'Request 2', 'Response 2', 'prompt', 'Last request']",
+            "'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
         ),
         (
             0,
-            "Mock response with history: ['prompt', 'Last request']",
+            "Mock response with history: ['prompt', 'Last request', 'last prompt']",
         ),
         (
             4,
             "Mock response with history: ['Request 0', 'Response 0', "
-            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'prompt', 'Last request']",
+            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
         ),
     ],
 )
@@ -249,14 +255,86 @@ async def test_context_to_history(context):
     assert res == expected
 
 
-async def test_get_langchain_context(context):
-    res = get_langchain_context(
+@pytest.mark.parametrize(
+    "cfg,expected,prompt_misc_filter",
+    [
+        (
+            PositionConfig(),
+            [
+                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+                HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
+            ],
+            None,
+        ),
+        (
+            PositionConfig(
+                system_prompt=10,
+                last_request=0,
+                misc_prompt=1,
+                history=2,
+            ),
+            [
+                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+                HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
+            ],
+            None,
+        ),
+        (
+            PositionConfig(
+                system_prompt=1,
+                last_request=1,
+                misc_prompt=1,
+                history=1,
+                call_prompt=1,
+            ),
+            [
+                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                HumanMessage(content=[{"type": "text", "text": "absolutely not a prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+            ],
+            "tpmorp",
+        ),
+    ],
+)
+async def test_get_langchain_context(context, cfg, expected, prompt_misc_filter):
+    res = await get_langchain_context(
         system_prompt=Message(text="system prompt"),
         ctx=context,
         call_prompt=Prompt(message=Message(text="call prompt")),
-        position_config=PositionConfig(),
-        history_args={"length": 1, "filter_func": lambda *args: True, "llm_model_name": "test_model", "max_size": 100},
+        position_config=cfg,
+        prompt_misc_filter=prompt_misc_filter if prompt_misc_filter else r"prompt",
+        length=-1,
+        filter_func=lambda *args: True,
+        llm_model_name="test_model",
+        max_size=100,
     )
+
+    assert res == expected
 
 
 async def test_conditions(context):
