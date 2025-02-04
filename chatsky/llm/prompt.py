@@ -1,6 +1,6 @@
 from typing import Optional, Union
 from pydantic import BaseModel, model_validator
-from chatsky.core import BaseResponse, BasePriority, AnyPriority, AnyResponse, MessageInitTypes, Message
+from chatsky.core import BaseResponse, AnyResponse, MessageInitTypes, Message
 
 
 class PositionConfig(BaseModel):
@@ -13,10 +13,10 @@ class PositionConfig(BaseModel):
 
 class Prompt(BaseModel):
     message: AnyResponse
-    position: Optional[AnyPriority] = None
+    position: Optional[float] = None
 
     def __init__(
-        self, message: Union[MessageInitTypes, BaseResponse], position: Optional[Union[float, BasePriority]] = None
+        self, message: Union[MessageInitTypes, BaseResponse], position: Optional[float] = None
     ):
         super().__init__(message=message, position=position)
 
