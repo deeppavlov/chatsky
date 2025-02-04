@@ -112,13 +112,12 @@ async def get_langchain_context(
 
     history = await context_to_history(ctx, **history_args)
     logger.debug(f"Position config: {position_config}")
-    prompts: list[tuple[list[Union[HumanMessage, AIMessage, SystemMessage]], float]] = [
-        (history, position_config.history),
-    ]
+    prompts: list[tuple[list[Union[HumanMessage, AIMessage, SystemMessage]], float]] = []
     if system_prompt.text != "":
         prompts.append(
             ([await message_to_langchain(system_prompt, ctx, source="system")], position_config.system_prompt)
         )
+    prompts.append((history, position_config.history))
 
     logger.debug(f"System prompt: {prompts[0]}")
 

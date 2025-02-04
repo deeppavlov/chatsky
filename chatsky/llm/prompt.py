@@ -15,9 +15,7 @@ class Prompt(BaseModel):
     message: AnyResponse
     position: Optional[float] = None
 
-    def __init__(
-        self, message: Union[MessageInitTypes, BaseResponse], position: Optional[float] = None
-    ):
+    def __init__(self, message: Union[MessageInitTypes, BaseResponse], position: Optional[float] = None):
         super().__init__(message=message, position=position)
 
     @model_validator(mode="before")
