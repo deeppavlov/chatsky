@@ -221,8 +221,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
+    
+    # Add ctx_id, update_ctx_misc, make method private
+    def run_pipeline(self, request: Message, ctx: Context) -> Context:
+        self._process_one_turn(request, ctx)
+        while ctx.framework_data.transition.passthrough:
+            passthrough = self._process_one_turn(Message(), ctx)
+        # Add exception 
 
-    async def _run_pipeline(
+    async def _process_one_turn(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """

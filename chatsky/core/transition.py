@@ -35,6 +35,8 @@ class Transition(BaseModel):
     """Destination node of the transition."""
     priority: AnyPriority = Field(default=None, validate_default=True)
     """Priority of the transition. Higher priority transitions are resolved first."""
+    passthrough: AnyCondition = Field(default = False, validate_default=True) 
+    """Determines if transition is pass-through."""
 
     def __init__(
         self,
@@ -42,13 +44,14 @@ class Transition(BaseModel):
         cnd: Union[bool, BaseCondition] = True,
         dst: Union[NodeLabelInitTypes, BaseDestination],
         priority: Union[Optional[float], BasePriority] = None,
+        passthrough: Union[bool, BaseCondition] = False
     ):
-        super().__init__(cnd=cnd, dst=dst, priority=priority)
+        super().__init__(cnd=cnd, dst=dst, priority=priority, passthrough=passthrough)
 
 
 async def get_next_label(
     ctx: Context, transitions: List[Transition], default_priority: float
-) -> Optional[AbsoluteNodeLabel]:
+) -> Optional[Tuple[AbsoluteNodeLabel, Transition]]:
     """
     Determine the next node based on ``transitions`` and ``ctx``.
 
@@ -72,6 +75,7 @@ async def get_next_label(
 
     :return: Label of the next node or ``None`` if no transition is left by the end of the process.
     """
+    # add transition
     filtered_transitions: List[Transition] = transitions.copy()
     condition_results = await asyncio.gather(*[transition.cnd.wrapped_call(ctx) for transition in filtered_transitions])
 
@@ -92,11 +96,11 @@ async def get_next_label(
 
     transitions_with_priorities = sorted(transitions_with_priorities, key=lambda x: x[1], reverse=True)
 
-    destination_results = await asyncio.gather(
+    destination_results: List[Union[AbsoluteNodeLabel, Exception]] = await asyncio.gather(
         *[transition.dst.wrapped_call(ctx) for transition, _ in transitions_with_priorities]
     )
 
-    for destination in destination_results:
+    for destination, transition in zip(destination_results, transitions_with_priorities):
         if isinstance(destination, AbsoluteNodeLabel):
-            return destination
+            return destination, transition[0]
     return None

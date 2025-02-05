@@ -27,6 +27,8 @@ from pydantic import BaseModel, Field
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
+from chatsky.core.script_function import AnyCondition
+from chatsky.core.transition import Transition
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
@@ -91,6 +93,8 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+    transition: Optional[Transition] = Field(default=None)
+    "Stores last transition's info."
 
 
 class Context(BaseModel):
