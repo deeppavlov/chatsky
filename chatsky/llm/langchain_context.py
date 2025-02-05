@@ -50,7 +50,7 @@ async def message_to_langchain(
 
 async def context_to_history(
     ctx: Context, length: int, filter_func: BaseHistoryFilter, llm_model_name: str, max_size: int
-) -> list[HumanMessage | AIMessage | SystemMessage]:
+) -> list[HumanMessage, AIMessage, SystemMessage]:
     """
     Convert context to list of langchain messages.
 
@@ -93,7 +93,7 @@ async def get_langchain_context(
     prompt_misc_filter: str = r"prompt",  # r"prompt" -> extract misc prompts
     position_config: PositionConfig = PositionConfig(),
     **history_args,
-) -> list[HumanMessage | AIMessage | SystemMessage]:
+) -> list[HumanMessage, AIMessage, SystemMessage]:
     """
     Get a list of Langchain messages using the context and prompts.
 
