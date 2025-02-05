@@ -73,7 +73,8 @@ async def get_next_label(
     If at any point any :py:class:`.BaseCondition`, :py:class:`.BaseDestination` or :py:class:`.BasePriority`
     produces an exception, the corresponding transition is filtered out.
 
-    :return: Label of the next node or ``None`` if no transition is left by the end of the process.
+    :return: Label of the next node or ``None`` if no transition is left by the end of the process and 
+    the transition that leads to the next node.
     """
     # add transition
     filtered_transitions: List[Transition] = transitions.copy()

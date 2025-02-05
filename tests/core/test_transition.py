@@ -56,11 +56,20 @@ async def test_get_next_label(context_factory, transitions, default_priority, re
     ctx = context_factory()
     ctx.add_label(("flow", "node1"))
 
-    next_label = await get_next_label(ctx, transitions, default_priority)
+    next_label, _ = await get_next_label(ctx, transitions, default_priority)
 
     assert next_label[0] if next_label is not None else None == (
         AbsoluteNodeLabel.model_validate(result) if result is not None else None
     )
 
-# check that get_next_label[1] -- type of transition
-# check get_next_label[1] return correct transition
+async def test_transition_for_nex_label(context_factory, transitions, default_priority):
+    ctx = context_factory()
+    ctx.add_label(("flow", "node1"))
+
+    _, transition = await get_next_label(ctx, transitions, default_priority)
+
+    # check that get_next_label[1] -- type of transition
+    assert type(transition) == Tr
+
+    # check get_next_label[1] return correct transition
+    
