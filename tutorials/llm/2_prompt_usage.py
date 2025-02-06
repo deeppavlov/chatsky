@@ -49,7 +49,6 @@ and misc prompts, prompt specified in response
 and last message by modifying `PositionConfig`.
 
 The default positions are as follows:
-    
     system_prompt
     message history
     misc_prompt
