@@ -2,7 +2,6 @@ from chatsky import proc, Context, BaseResponse, MessageInitTypes, Message, Base
 from chatsky.core.script import Node
 
 
-
 async def test_modify_response():
     ctx = Context()
     ctx.framework_data.current_node = Node()
@@ -23,6 +22,8 @@ async def test_modify_response():
     assert ctx.current_node.response.__class__.__name__ == "ModifiedResponse"
 
     assert await ctx.current_node.response(ctx) == Message(misc={"msg": Message("hi")})
+
+
 class TestConditionalResponce:
     async def test_conditional_response(self):
         ctx = Context()
@@ -48,8 +49,8 @@ class TestConditionalResponce:
             async def call(self, ctx: Context):
                 some_list.append("")
 
-        await SomeProcessing(start_condition = False)(ctx)
+        await SomeProcessing(start_condition=False)(ctx)
         assert some_list == []
 
-        await SomeProcessing(start_condition = False).wrapped_call(ctx)
+        await SomeProcessing(start_condition=False).wrapped_call(ctx)
         assert some_list == []

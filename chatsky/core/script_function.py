@@ -200,7 +200,7 @@ class BaseProcessing(BaseScriptFunc, ABC):
     These are used in :py:attr:`chatsky.core.script.Node.pre_transition`
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
-    
+
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     """
     :py:data:`~.AnyCondition` is invoked before each component execution;
@@ -219,8 +219,9 @@ class BaseProcessing(BaseScriptFunc, ABC):
     async def __call__(self, ctx: Context) -> None:
         if await self.start_condition.is_true(ctx):
             return await super().__call__(ctx)
-        else:
-            return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
+        # else:
+        #     return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
+
 
 class BasePriority(BaseScriptFunc, ABC):
     """
