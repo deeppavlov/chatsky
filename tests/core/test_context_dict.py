@@ -83,12 +83,13 @@ class TestContextDict:
         assert prefilled_dict._added == set()
         assert prefilled_dict.keys() == [1, 2]
         assert 1 in prefilled_dict and 2 in prefilled_dict
+        assert len(prefilled_dict._hashes) == 1
         assert set(prefilled_dict._items.keys()) == {2}
         # Loading item
         assert await prefilled_dict.get(100, None) is None
         assert await prefilled_dict.get(1, None) is not None
         assert prefilled_dict._added == set()
-        assert len(prefilled_dict._hashes) == 1
+        assert len(prefilled_dict._hashes) == 2
         assert len(prefilled_dict._items) == 2
         # Deleting loaded item
         del prefilled_dict[1]
@@ -157,3 +158,55 @@ class TestContextDict:
                     await ctx_dict.store()
             else:
                 await ctx_dict.store()
+
+    async def test_rewrite_existing_true(self):
+        rewrite_storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == set()
+        ctx_dict[0] = Message(text="0")
+        assert set(ctx_dict._hashes.keys()) == set()
+        await ctx_dict.store()
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == {0}
+        assert (await ctx_dict[0]).text == "0"
+        (await ctx_dict[0]).text = "0-mod"
+        ctx_dict[1] = Message(text="1")
+        assert set(ctx_dict._hashes.keys()) == {0}
+        await ctx_dict.store()
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == {1}
+        assert (await ctx_dict[0]).text == "0-mod"
+        assert set(ctx_dict._hashes.keys()) == {0, 1}
+        await ctx_dict.store()
+
+    async def test_rewrite_existing_false(self):
+        rewrite_storage = MemoryContextStorage(rewrite_existing=False, partial_read_config={"requests": 1})
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == set()
+        ctx_dict[0] = Message(text="0")
+        assert set(ctx_dict._hashes.keys()) == set()
+        await ctx_dict.store()
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == set()
+        assert (await ctx_dict[0]).text == "0"
+        (await ctx_dict[0]).text = "0-mod"
+        ctx_dict[1] = Message(text="1")
+        assert set(ctx_dict._hashes.keys()) == set()
+        await ctx_dict.store()
+
+        ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
+
+        assert set(ctx_dict._hashes.keys()) == set()
+        assert (await ctx_dict[0]).text == "0"
+        assert set(ctx_dict._hashes.keys()) == set()
+        await ctx_dict.store()

@@ -152,7 +152,7 @@ class ContextDict(ABC, BaseModel):
         )
         for key, value in items:
             self._items[key] = self._value_type.validate_json(value)
-            if not self._storage.rewrite_existing:
+            if self._storage.rewrite_existing:
                 self._hashes[key] = _get_hash(value)
 
     @overload
@@ -349,7 +349,7 @@ class ContextDict(ABC, BaseModel):
     def _serialize_model_base(self, to_bytes: bool = False) -> Dict[int, Union[BaseModel, bytes]]:
         if self._storage is None:
             return self._items
-        elif not self._storage.rewrite_existing:
+        elif self._storage.rewrite_existing:
             result = dict()
             for k, v in self._items.items():
                 value = self._value_type.dump_json(v)
@@ -382,7 +382,7 @@ class ContextDict(ABC, BaseModel):
                 f"{collapse_num_list([k for k, _ in stored])}"
             )
             self._added, self._removed = set(), set()
-            if not self._storage.rewrite_existing:
+            if self._storage.rewrite_existing:
                 for k, v in self._items.items():
                     self._hashes[k] = _get_hash(self._value_type.dump_json(v))
         else:
