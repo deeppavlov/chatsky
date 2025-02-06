@@ -15,7 +15,7 @@ Models
 ===============
 
 Under the hood Chatsky uses LangChain classes for accessing different models APIs.
-These models, defined in the ``langchain_*`` modules should be passed in the `LLM_API <../apiref/chatsky.llm.wrapper.html#chatsky.llm.wrapper.LLM_API>` object as a parameter.
+These models, defined in the ``langchain_*`` modules should be passed in the `LLM_API <../apiref/chatsky.llm.wrapper.html#chatsky.llm.LLM_API>` object as a parameter.
 
 .. code-block:: python
 
@@ -97,6 +97,20 @@ There is a certain order of the prompts inside of the "history" list that goes i
     SYSTEM: PROMPT (from ``prompt`` field in LLMResponse or LLMCondition)
     HUMAN: CURRENT_REQUEST
 
+You can specify the position of the system prompt, message history
+and misc prompts, prompt specified in response
+and last message by modifying `PositionConfig`.
+
+.. code-block:: python
+
+    my_position_config = PositionConfig(
+        system_prompt=0,
+        history=1,
+        misc_prompt=2,
+        call_prompt: float = 3,
+        last_request: float = 4
+    )
+
 Also, there are several ways to pass a prompt into a model. First is to directly pass it as an argument inside of the ``LLMResponse`` call.
 Another one is to define it in the "MISC" dictionary inside of the node.
 
@@ -114,6 +128,15 @@ Another one is to define it in the "MISC" dictionary inside of the node.
     Any key in the MISC in the can be overwritten in local and script nodes.
     For example if using the same key (e.g. "prompt") in both the local and global nodes, only the local "prompt" will be used.
     This can be used in scripts but overwriting the "global_prompt" is not an intended behaviour.
+
+    You can specify the regex that will be used to search for the key for the prompt in the MISC dictionary,
+    by setting the ``prompt_misc_filter`` parameter in `LLMResponse <../apiref/chatsky.llm.wrapper.html#chatsky.responses.llm.LLMResponse>`.
+
+.. code-block:: python
+
+    # this will search for the key containing "custom" and a digit
+    # in the MISC dictionary to use as call prompt
+    LLMResponse(llm_model_name="model", prompt_misc_filter=r"custom_\d+"),
 
 For more detailed examples for prompting please refer to `LLM Prompt Usage <../tutorials/tutorials.llm.2_prompt_usage.py>`__
 
