@@ -4,24 +4,9 @@
 
 Prompting is an essential step in using LLMs and Chatsky provides you with a
 simple way of using multiple prompts throughout your script.
-The main idea behind that is the hierarchy of prompts. It can be portrayed as
-follows:
-```
-SYSTEM: SYSTEM_PROMPT   (from LLM_API)
-SYSTEM: GLOBAL_PROMPT   (from MISC field)
-SYSTEM: LOCAL_PROMPT    (from MISC field)
-SYSTEM: NODE_PROMPT     (from MISC field)
 
-# history `n` turns
-HUMAN: req
-AI: resp
-
-SYSTEM: PROMPT (from ``prompt`` field in LLMResponse or LLMCondition)
-HUMAN: CURRENT_REQUEST
-```
-
-This way you can specify a certain prompt for each flow or node to alter the
-model's behavior.
+Using Chatsky you can specify a certain prompt
+for each flow or node to alter the model's behavior.
 """
 
 # %pip install chatsky[llm] langchain-openai
@@ -63,14 +48,22 @@ You can specify the position of the system prompt, message history
 and misc prompts, prompt specified in response
 and last message by modifying `PositionConfig`.
 
+The default positions are as follows:
+    
+    system_prompt
+    message history
+    misc_prompt
+    call_prompt
+    last_request
+
+`LLM_API` will use these positions to order the prompts
+if not specified otherwise.
+
 Let's create a simple script to demonstrate this. Note, that prompts should go
 the `MISC` field of the node.
-Inside `MISC` they can be stored under the `prompt`,
-`global_prompt` or `local_prompt` keys.
-Please note, that `MISC` is just a dictionary and its fields can be overwritten
-in any node, if given the same key. You can utilize this in your project,
-but below we present the intended way of
-using `MISC` for storing multiple prompts.
+Also you can alter the regular expression that is
+used to parse prompt fields in the `MISC` dictionary. By default it is "prompt"
+and can be changed by setting `prompt_misc_filter` in `LLMResponse`.
 """
 
 # %%
