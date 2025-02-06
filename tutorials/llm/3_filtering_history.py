@@ -51,7 +51,7 @@ If you want to learn more about filters see
 
 # %%
 class FilterImportant(BaseHistoryFilter):
-    def __call__(
+    def call(
         self,
         ctx: Context = None,
         request: Message = None,
