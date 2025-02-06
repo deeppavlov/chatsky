@@ -34,8 +34,9 @@ anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
 # Initialize our models
 movie_model = LLM_API(
-    ChatAnthropic(model="claude-3.5-sonnet", api_key=anthropic_api_key),
-    temperature=0,
+    ChatAnthropic(
+        model="claude-3.5-sonnet", api_key=anthropic_api_key, temperature=0
+    ),
 )
 review_model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, temperature=0),
