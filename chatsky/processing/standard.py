@@ -7,10 +7,13 @@ This module provides basic processing functions.
 """
 
 import abc
+import logging
 from typing import Literal, Type, Union, Dict
 from pydantic import field_validator
 
 from chatsky.core import BaseProcessing, BaseResponse, Context, MessageInitTypes, AnyResponse
+
+logger = logging.getLogger(__name__)
 
 
 class ModifyResponse(BaseProcessing, abc.ABC):
@@ -45,44 +48,43 @@ class ModifyResponse(BaseProcessing, abc.ABC):
         ctx.current_node.response = ModifiedResponse()
 
 
-class FallbackResponse(ModifyResponse, arbitrary_types_allowed=True):
+class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
     """
     ModifyResponse with pre-response processing to handle exceptions dynamically.
     """
 
-    exceptions: Dict[Union[Type[Exception], Literal["Else"]], AnyResponse]
+    exception_response: Dict[Union[Type[Exception], Literal["Else"]], AnyResponse]
     """
     Dictionary mapping exception types to fallback responses.
     """
 
-    @field_validator("exceptions")
+    @field_validator("exception_response")
     @classmethod
-    def validate_not_empty(cls, exceptions: dict) -> dict:
+    def validate_not_empty(cls, exception_response: dict) -> dict:
         """
-        Validate that the `exceptions` dictionary is not empty.
+        Validate that the `exception_response` dictionary is not empty.
 
-        :param exceptions: Dictionary mapping exception types to fallback responses.
-        :raises ValueError: If the `exceptions` dictionary is empty.
-        :return: Not empty dictionary of exceptions.
+        :param exception_response: Dictionary mapping exception types to fallback responses.
+        :raises ValueError: If the `exception_response` dictionary is empty.
+        :return: Not empty dictionary of exception_response.
         """
-        if len(exceptions) == 0:
+        if len(exception_response) == 0:
             raise ValueError("Exceptions dict is empty")
-        return exceptions
+        return exception_response
 
     async def modified_response(self, original_response: BaseResponse, ctx: Context) -> MessageInitTypes:
         """
-        Catch response errors and process them based on `exceptions`.
+        Catch response errors and process them based on `exception_response`.
 
         :param original_response: The original response of the current node.
         :param ctx: The current context.
 
         :return: Message to replace original response with modified due to fallback response.
         """
-        print("fallback modified framework", ctx.framework_data)
         try:
             return await original_response(ctx)
         except Exception as e:
-            exception = self.exceptions.get(type(e), self.exceptions.get("Else"))
-            print(e, type(e), str(e))
+            exception = self.exception_response.get(type(e), self.exception_response.get("Else"))
+            logger.exception(e)
             ctx.framework_data.response_exception = str(e)
             return await exception(ctx)

@@ -67,7 +67,7 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     """
 
 
-class FrameworkData(BaseModel, arbitrary_types_allowed=True, extra="allow"):
+class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     Framework uses this to store data related to any of its modules.
     """
@@ -91,6 +91,8 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+    response_exception: Optional[str] = Field(default=None, exclude=True)
+    "Stores response errors as exception"
 
 
 class Context(BaseModel):

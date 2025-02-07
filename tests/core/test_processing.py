@@ -26,7 +26,7 @@ async def test_modify_response():
     assert await ctx.current_node.response(ctx) == Message(misc={"msg": Message("hi")})
 
 
-class TestFallbackResponse:
+class TestAddFallbackResponses:
     """
     A class to group and test the functionality of FallbackResponse.
     """
@@ -56,7 +56,7 @@ class TestFallbackResponse:
 
         exceptions = {OverflowError: "Overflow!", ValueError: self.ReturnException(), "Else": "Other exception occured"}
 
-        fallback_response = proc.FallbackResponse(exceptions=exceptions)
+        fallback_response = proc.AddFallbackResponses(exception_response=exceptions)
         ctx.current_node.response = response_with_exception
         await fallback_response(ctx)
         assert await ctx.current_node.response(ctx) == Message(text=expected_response)
@@ -67,4 +67,4 @@ class TestFallbackResponse:
 
         exceptions = {}
         with pytest.raises(ValueError, match="Exceptions dict is empty"):
-            proc.FallbackResponse(exceptions=exceptions)
+            proc.AddFallbackResponses(exception_response=exceptions)

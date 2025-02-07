@@ -1,2 +1,2 @@
-from .standard import ModifyResponse, FallbackResponse
+from .standard import ModifyResponse, AddFallbackResponses
 from .slots import Extract, Unset, UnsetAll, FillTemplate
