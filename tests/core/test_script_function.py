@@ -47,8 +47,8 @@ class TestBaseFunctionCallWrapper:
                 raise RuntimeError()
 
         assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
-        assert len(log_list) == 1
-        assert log_list[0].levelname == "ERROR"
+        assert len(log_list) == 2
+        assert log_list[1].levelname == "ERROR"
 
     async def test_base_exception_not_handled(self):
         class SpecialException(BaseException):

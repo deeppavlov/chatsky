@@ -219,8 +219,8 @@ class BaseProcessing(BaseScriptFunc, ABC):
     async def __call__(self, ctx: Context) -> None:
         if await self.start_condition.is_true(ctx):
             return await super().__call__(ctx)
-        # else:
-        #     return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
+        else:
+            return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
 
 
 class BasePriority(BaseScriptFunc, ABC):
