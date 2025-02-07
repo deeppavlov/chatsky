@@ -220,21 +220,33 @@ class DBContextStorage(ABC):
         return result
 
     @abstractmethod
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         raise NotImplementedError
 
     @_lock
-    async def update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, bytes]], List[int]]]) -> None:
         """
-        Update main information about the context.
+        Update context intofrmation.
 
         :param ctx_id: Context identifier.
-        :param ctx_info: New context information (will be written to `MAIN` table).
+        :param ctx_info: Context information (will be written to different tables at once).
         """
 
-        logger.debug(f"Updating main info for {ctx_id}...")
-        await self._update_main_info(ctx_id, ctx_info)
-        logger.debug(f"Main info updated for {ctx_id}")
+        joined_field_info = list()
+        logger.debug(f"Updating context for {ctx_id}...")
+        for field, added, deleted in field_info:
+            if len(added) == 0:
+                logger.debug(f"\tNo fields to add in {field}!")
+            else:
+                joined_field_info += [(field, added)]
+                logger.debug(f"\tAdding fields for {field}: {collapse_num_list(list(k for k, _ in added))}...")
+            if len(deleted) == 0:
+                logger.debug(f"\tNo fields to delete in {field}!")
+            else:
+                joined_field_info += [(field, [(k, None) for k in deleted])]
+                logger.debug(f"\tDeleting fields for {field}: {collapse_num_list(deleted)}...")
+        await self._update_context(ctx_id, ctx_info, joined_field_info)
+        logger.debug(f"Context updated for {ctx_id}")
 
     @abstractmethod
     async def _delete_context(self, ctx_id: str) -> None:
@@ -331,26 +343,6 @@ class DBContextStorage(ABC):
         logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
         await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
         logger.debug(f"Fields updated for {ctx_id}, {field_name}")
-
-    async def _delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
-        await self._update_field_items(ctx_id, field_name, [(k, None) for k in keys])
-
-    @_lock
-    async def delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
-        """
-        Delete field keys.
-
-        :param ctx_id: Context identifier.
-        :param field_name: Field name to load from `TURNS` table.
-        :param keys: List of keys to delete (will be just overwritten with `None`).
-        """
-
-        if len(keys) == 0:
-            logger.debug(f"No fields to delete in {ctx_id}, {field_name}!")
-            return
-        logger.debug(f"Deleting fields for {ctx_id}, {field_name}: {collapse_num_list(keys)}...")
-        await self._delete_field_keys(ctx_id, self._validate_field_name(field_name), keys)
-        logger.debug(f"Fields deleted for {ctx_id}, {field_name}")
 
     @abstractmethod
     async def _clear_all(self) -> None:

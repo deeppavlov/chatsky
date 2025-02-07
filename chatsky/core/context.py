@@ -366,21 +366,17 @@ class Context(BaseModel):
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
-            await gather(
-                self._storage.update_main_info(
-                    self.id,
-                    ContextInfo(
-                        turn_id=self.current_turn_id,
-                        created_at=self._created_at,
-                        updated_at=self._updated_at,
-                        misc=self.misc,
-                        framework_data=self.framework_data,
-                    ),
-                ),
-                self.labels.store(),
-                self.requests.store(),
-                self.responses.store(),
+            main_into = ContextInfo(
+                turn_id=self.current_turn_id,
+                created_at=self._created_at,
+                updated_at=self._updated_at,
+                misc=self.misc,
+                framework_data=self.framework_data,
             )
+            labels_data = self.labels.extract_sync()
+            requests_data = self.requests.extract_sync()
+            responses_data = self.responses.extract_sync()
+            await self._storage.update_context(self.id, main_into, [labels_data, requests_data, responses_data])
             logger.debug(f"Context stored: {self.id}")
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")

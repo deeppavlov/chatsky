@@ -96,21 +96,32 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
-        await self.main_table.update_one(
-            {NameConfig._id_column: ctx_id},
-            {
-                "$set": {
-                    NameConfig._id_column: ctx_id,
-                    NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                    NameConfig._created_at_column: ctx_info_dump["created_at"],
-                    NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                    NameConfig._misc_column: ctx_info_dump["misc"],
-                    NameConfig._framework_data_column: ctx_info_dump["framework_data"],
-                }
-            },
-            upsert=True,
+        await self.turns_table.bulk_write(
+            [
+                UpdateOne(
+                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                    {"$set": {field_name: v}},
+                    upsert=True,
+                )
+                for field_name, items in field_info for k, v in items
+            ] + [
+                UpdateOne(
+                    {NameConfig._id_column: ctx_id},
+                    {
+                        "$set": {
+                            NameConfig._id_column: ctx_id,
+                            NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                            NameConfig._created_at_column: ctx_info_dump["created_at"],
+                            NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                            NameConfig._misc_column: ctx_info_dump["misc"],
+                            NameConfig._framework_data_column: ctx_info_dump["framework_data"],
+                        }
+                    },
+                    upsert=True,
+                )
+            ]
         )
 
     async def _delete_context(self, ctx_id: str) -> None:
@@ -155,18 +166,6 @@ class MongoContextStorage(DBContextStorage):
             [NameConfig._key_column, field_name],
         ).to_list(None)
         return [(item[NameConfig._key_column], item[field_name]) for item in result]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        await self.turns_table.bulk_write(
-            [
-                UpdateOne(
-                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
-                    {"$set": {field_name: v}},
-                    upsert=True,
-                )
-                for k, v in items
-            ]
-        )
 
     async def _clear_all(self) -> None:
         await gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

@@ -93,7 +93,7 @@ class RedisContextStorage(DBContextStorage):
         else:
             return None
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
         await gather(
             self.database.hset(
@@ -109,6 +109,7 @@ class RedisContextStorage(DBContextStorage):
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
             ),
+            *[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for field_name, items in field_info for k, v in items]
         )
 
     async def _delete_context(self, ctx_id: str) -> None:
@@ -134,9 +135,6 @@ class RedisContextStorage(DBContextStorage):
         load = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         values = await gather(*[self.database.hget(field_key, k) for k in load])
         return [(k, v) for k, v in zip(self._bytes_to_keys(load), values)]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        await gather(*[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in items])
 
     async def _delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
         field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
