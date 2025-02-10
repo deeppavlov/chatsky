@@ -98,31 +98,33 @@ class MongoContextStorage(DBContextStorage):
 
     async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
-        await self.turns_table.bulk_write(
-            [
-                UpdateOne(
-                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
-                    {"$set": {field_name: v}},
-                    upsert=True,
-                )
-                for field_name, items in field_info for k, v in items
-            ] + [
-                UpdateOne(
-                    {NameConfig._id_column: ctx_id},
-                    {
-                        "$set": {
-                            NameConfig._id_column: ctx_id,
-                            NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                            NameConfig._created_at_column: ctx_info_dump["created_at"],
-                            NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                            NameConfig._misc_column: ctx_info_dump["misc"],
-                            NameConfig._framework_data_column: ctx_info_dump["framework_data"],
-                        }
-                    },
-                    upsert=True,
-                )
-            ]
-        )
+        with self._mongo.start_session() as session:
+            await self.main_table.update_one(
+                {NameConfig._id_column: ctx_id},
+                {
+                    "$set": {
+                        NameConfig._id_column: ctx_id,
+                        NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                        NameConfig._created_at_column: ctx_info_dump["created_at"],
+                        NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                        NameConfig._misc_column: ctx_info_dump["misc"],
+                        NameConfig._framework_data_column: ctx_info_dump["framework_data"],
+                    }
+                },
+                upsert=True,
+                session=session
+            )
+            await self.turns_table.bulk_write(
+                [
+                    UpdateOne(
+                        {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                        {"$set": {field_name: v}},
+                        upsert=True,
+                    )
+                    for field_name, items in field_info for k, v in items
+                ],
+                session=session
+            )
 
     async def _delete_context(self, ctx_id: str) -> None:
         await gather(
