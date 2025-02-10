@@ -71,7 +71,8 @@ and can be changed by setting `prompt_misc_filter` in `LLMResponse`.
 
 # In this config `message history` will be
 # always on the second place of the history
-# and `misc_prompt` will be always on the third place of the history
+# misc_prompt is the default position for misc prompts
+# Misc prompts may override it and be ordered in a different way
 my_position_config = PositionConfig(system_prompt=0, history=1, misc_prompt=2)
 
 model = LLM_API(
@@ -83,9 +84,9 @@ model = LLM_API(
 
 # %% [markdown]
 """
-Chatsky enables you to use more complex prompts then a simple string if need be.
+Chatsky enables you to use more complex prompts than a simple string if needed.
 In this example we create a VacantPlaces class, that can dynamically retrieve
-some external data and put them into the prompt.
+some external data and put it into the prompt.
 
 """
 # %%
@@ -106,8 +107,8 @@ class VacantPlaces(BaseResponse):
 toy_script = {
     GLOBAL: {
         MISC: {
-            # this prompt will be overwritten with
-            # every node with `prompt` key in it
+            # this prompt will be overwritten in
+            # every node by the `prompt` key in it
             "prompt": "Your role is a bank receptionist. "
             "Provide user with the information about our bank and "
             "the services we can offer.",
