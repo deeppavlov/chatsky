@@ -107,7 +107,7 @@ class RedisContextStorage(DBContextStorage):
                 field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
                 valid_keys = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)]
                 delete_keys += [(field_name, valid_keys)]
-        operations = [
+        await gather(
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])
             ),
@@ -120,13 +120,10 @@ class RedisContextStorage(DBContextStorage):
             self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, ctx_info_dump["misc"]),
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
-            )
-        ] + [
-            self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in update_values
-        ] + [
-            self.database.hdel(f, *k) for f, k in delete_keys
-        ]
-        await gather(*operations)
+            ),
+            *[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in update_values],
+            *[self.database.hdel(f, *k) for f, k in delete_keys]
+        )
 
     async def _delete_context(self, ctx_id: str) -> None:
         keys = await self.database.keys(f"{self._prefix}:*:{ctx_id}*")

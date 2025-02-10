@@ -166,8 +166,8 @@ class TestContextStorages:
             await db_teardown(context_storage)
 
     @pytest.fixture
-    def ctx_info(self):
-        return ContextInfo(turn_id=1, created_at=1, updated_at=1)
+    async def ctx_info(self):
+        yield ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
     @pytest.fixture
     async def add_context(self, db, ctx_info):
