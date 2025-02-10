@@ -249,7 +249,7 @@ class TestContextStorages:
 
         await db.update_context("1", ctx_info, [("labels", [(0, b"1")], list())])
         await db.update_context("1", ctx_info, [("requests", [(4, b"4")], list())])
-        await db.update_context("1", ctx_info, [("responses", [(2, b"2")], list())])
+        await db.update_context("1", ctx_info, [("labels", [(2, b"2")], list())])
     
         assert await db.load_field_latest("1", "labels") == [(2, b"2"), (0, b"1")]
         assert set(await db.load_field_keys("1", "labels")) == {0, 2}
