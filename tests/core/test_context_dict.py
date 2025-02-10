@@ -154,10 +154,10 @@ class TestContextDict:
         # Throw error if store in disconnected
         if ctx_dict == empty_dict:
             with pytest.raises(KeyError) as e:
-                await ctx_dict.extract_sync()
+                ctx_dict.extract_sync()
             assert e
         else:
-            field_name, added_values, deleted_values = await ctx_dict.extract_sync()
+            field_name, added_values, deleted_values = ctx_dict.extract_sync()
             assert field_name == NameConfig._requests_field
             assert "2" in [k for k, _ in added_values]
             assert deleted_values == set()
