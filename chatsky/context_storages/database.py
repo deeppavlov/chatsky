@@ -324,27 +324,6 @@ class DBContextStorage(ABC):
         return result
 
     @abstractmethod
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        raise NotImplementedError
-
-    @_lock
-    async def update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        """
-        Update field items.
-
-        :param ctx_id: Context identifier.
-        :param field_name: Field name to load from `TURNS` table.
-        :param items: List of tuples that will be written (step number, serialized value or `None`).
-        """
-
-        if len(items) == 0:
-            logger.debug(f"No fields to update in {ctx_id}, {field_name}!")
-            return
-        logger.debug(f"Updating fields for {ctx_id}, {field_name}: {collapse_num_list(list(k for k, _ in items))}...")
-        await self._update_field_items(ctx_id, self._validate_field_name(field_name), items)
-        logger.debug(f"Fields updated for {ctx_id}, {field_name}")
-
-    @abstractmethod
     async def _clear_all(self) -> None:
         raise NotImplementedError
 

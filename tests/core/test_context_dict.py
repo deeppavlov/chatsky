@@ -23,12 +23,12 @@ class TestContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
         storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
-        await storage.update_main_info(ctx_id, ContextInfo(turn_id=0, created_at=0, updated_at=0))
+        main_info = ContextInfo(turn_id=0, created_at=0, updated_at=0)
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),
         ]
-        await storage.update_field_items(ctx_id, NameConfig._requests_field, requests)
+        await storage.update_context(ctx_id, main_info, [(NameConfig._requests_field, requests, list())])
         return await MessageContextDict.connected(storage, ctx_id, NameConfig._requests_field)
 
     async def test_creation(
