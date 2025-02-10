@@ -84,11 +84,6 @@ class FileContextStorage(DBContextStorage, ABC):
                     storage.turns += [upd]
         await self._save(storage)
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
-        storage = await self._load()
-        storage.main[ctx_id] = ctx_info
-        await self._save(storage)
-
     async def _delete_context(self, ctx_id: str) -> None:
         storage = await self._load()
         storage.main.pop(ctx_id, None)

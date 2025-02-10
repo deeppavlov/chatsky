@@ -211,7 +211,7 @@ class TestContextStorages:
         assert await db.load_main_info("1") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
         assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
-        await db.update_main_info("1", ContextInfo(turn_id=2, created_at=1, updated_at=3))
+        await db.update_context("1", ContextInfo(turn_id=2, created_at=1, updated_at=3), list())
         assert await db.load_main_info("1") == ContextInfo(turn_id=2, created_at=1, updated_at=3)
         assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
 
@@ -318,9 +318,7 @@ class TestContextStorages:
             str_key = str(key)
             key_misc = {f"{key}": key + 2}
             await asyncio.sleep(random.random() / 100)
-            await db.update_main_info(
-                str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc)
-            )
+            await db.update_context(str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc), list())
             await asyncio.sleep(random.random() / 100)
             assert await db.load_main_info(str_key) == ContextInfo(
                 turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc
