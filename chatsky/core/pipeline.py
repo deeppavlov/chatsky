@@ -225,6 +225,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     # Add ctx_id, update_ctx_misc, make method private
     def run_pipeline(self, request: Message, ctx: Context) -> Context:
         self._process_one_turn(request, ctx)
+    # Add tests for transition.passthrough 
         while ctx.framework_data.transition.passthrough:
             passthrough = self._process_one_turn(Message(), ctx)
         # Add exception 
