@@ -203,8 +203,8 @@ class BaseProcessing(BaseScriptFunc, ABC):
 
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     """
-    :py:data:`~.AnyCondition` is invoked before each component execution;
-    component is executed only if it returns ``True``.
+    :py:data:`~.AnyCondition` is checked before __call__;
+    __call__ is initiated only if start_condition returns ``True``.
     """
 
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = type(None)
