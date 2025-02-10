@@ -235,15 +235,16 @@ class DBContextStorage(ABC):
         joined_field_info = list()
         logger.debug(f"Updating context for {ctx_id}...")
         for field, added, deleted in field_info:
+            field = self._validate_field_name(field)
             if len(added) == 0:
                 logger.debug(f"\tNo fields to add in {field}!")
             else:
-                joined_field_info += [(self._validate_field_name(field), added)]
+                joined_field_info += [(field, added)]
                 logger.debug(f"\tAdding fields for {field}: {collapse_num_list(list(k for k, _ in added))}...")
             if len(deleted) == 0:
                 logger.debug(f"\tNo fields to delete in {field}!")
             else:
-                joined_field_info += [(self._validate_field_name(field), [(k, None) for k in deleted])]
+                joined_field_info += [(field, [(k, None) for k in deleted])]
                 logger.debug(f"\tDeleting fields for {field}: {collapse_num_list(deleted)}...")
         await self._update_context(ctx_id, ctx_info, joined_field_info)
         logger.debug(f"Context updated for {ctx_id}")

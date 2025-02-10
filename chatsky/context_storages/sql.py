@@ -247,25 +247,29 @@ class SQLContextStorage(DBContextStorage):
             ],
             [NameConfig._id_column],
         )
-        turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
-            [
-                {
-                    NameConfig._id_column: ctx_id,
-                    NameConfig._key_column: k,
-                    field_name: v,
-                }
-                for field_name, items in field_info for k, v in items
-            ]
-        )
-        turns_update_stmt = _get_upsert_stmt(
-            self.dialect,
-            turns_insert_stmt,
-            [field_name for field_name, _ in field_info],
-            [NameConfig._id_column, NameConfig._key_column],
-        )
-        async with self.engine.begin() as conn:
-            await conn.execute(main_update_stmt)
-            await conn.execute(turns_update_stmt)
+        if len(field_info) == 0:
+            async with self.engine.begin() as conn:
+                await conn.execute(main_update_stmt)
+        else:
+            turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
+                [
+                    {
+                        NameConfig._id_column: ctx_id,
+                        NameConfig._key_column: k,
+                        field_name: v,
+                    }
+                    for field_name, items in field_info for k, v in items
+                ]
+            )
+            turns_update_stmt = _get_upsert_stmt(
+                self.dialect,
+                turns_insert_stmt,
+                [field_name for field_name, _ in field_info],
+                [NameConfig._id_column, NameConfig._key_column],
+            )
+            async with self.engine.begin() as conn:
+                await conn.execute(main_update_stmt)
+                await conn.execute(turns_update_stmt)
 
     # TODO: use foreign keys instead maybe?
     async def _delete_context(self, ctx_id: str) -> None:
