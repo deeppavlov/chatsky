@@ -114,17 +114,18 @@ class MongoContextStorage(DBContextStorage):
             upsert=True,
             session=session
         )
-        await self.turns_table.bulk_write(
-            [
-                UpdateOne(
-                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
-                    {"$set": {field_name: v}},
-                    upsert=True,
-                )
-                for field_name, items in field_info for k, v in items
-            ],
-            session=session
-        )
+        if len(field_info) > 0:
+            await self.turns_table.bulk_write(
+                [
+                    UpdateOne(
+                        {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                        {"$set": {field_name: v}},
+                        upsert=True,
+                    )
+                    for field_name, items in field_info for k, v in items
+                ],
+                session=session
+            )
 
     async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")

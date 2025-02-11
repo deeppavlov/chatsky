@@ -106,7 +106,7 @@ class RedisContextStorage(DBContextStorage):
             if len(new_delete_keys) > 0:
                 field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
                 valid_keys = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)]
-                delete_keys += [(field_name, valid_keys)]
+                delete_keys += [(field_key, valid_keys)]
         await gather(
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])
