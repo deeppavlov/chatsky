@@ -268,7 +268,8 @@ class SQLContextStorage(DBContextStorage):
                 [NameConfig._id_column, NameConfig._key_column],
             )
             async with self.engine.begin() as conn:
-                await conn.execute([main_update_stmt, turns_update_stmt])
+                await conn.execute(main_update_stmt)
+                await conn.execute(turns_update_stmt)
 
     # TODO: use foreign keys instead maybe?
     async def _delete_context(self, ctx_id: str) -> None:
