@@ -249,29 +249,30 @@ class SQLContextStorage(DBContextStorage):
             ],
             [NameConfig._id_column],
         )
-        turns_insert_values = [
-            {
-                NameConfig._id_column: ctx_id,
-                NameConfig._key_column: k,
-                field_name: v,
-            }
-            for field_name, items in field_info
-            for k, v in items
-            if len(items) > 0
-        ]
-        if len(turns_insert_values) == 0:
-            async with self.engine.begin() as conn:
-                await conn.execute(main_update_stmt)
-        else:
-            turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(turns_insert_values)
-            turns_update_stmt = _get_upsert_stmt(
-                self.dialect,
-                turns_insert_stmt,
-                [field_name for field_name, _ in field_info],
-                [NameConfig._id_column, NameConfig._key_column],
-            )
-            async with self.engine.begin() as conn:
-                await conn.execute(main_update_stmt)
+        turns_update_stmts = list()
+        for field_name, items in field_info:
+            turns_insert_values = [
+                {
+                    NameConfig._id_column: ctx_id,
+                    NameConfig._key_column: k,
+                    field_name: v,
+                }
+                for k, v in items
+                if len(items) > 0
+            ]
+            if len(turns_insert_values) > 0:
+                turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(turns_insert_values)
+                turns_update_stmts += [
+                    _get_upsert_stmt(
+                        self.dialect,
+                        turns_insert_stmt,
+                        [field_name],
+                        [NameConfig._id_column, NameConfig._key_column],
+                    )
+                ]
+        async with self.engine.begin() as conn:
+            await conn.execute(main_update_stmt)
+            for turns_update_stmt in turns_update_stmts:
                 await conn.execute(turns_update_stmt)
 
     # TODO: use foreign keys instead maybe?
