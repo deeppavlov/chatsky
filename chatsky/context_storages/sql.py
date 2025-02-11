@@ -247,20 +247,19 @@ class SQLContextStorage(DBContextStorage):
             ],
             [NameConfig._id_column],
         )
-        if len(field_info) == 0:
+        turns_insert_values = [
+            {
+                NameConfig._id_column: ctx_id,
+                NameConfig._key_column: k,
+                field_name: v,
+            }
+            for field_name, items in field_info for k, v in items if len(items) > 0
+        ]
+        if len(turns_insert_values) == 0:
             async with self.engine.begin() as conn:
                 await conn.execute(main_update_stmt)
         else:
-            turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
-                [
-                    {
-                        NameConfig._id_column: ctx_id,
-                        NameConfig._key_column: k,
-                        field_name: v,
-                    }
-                    for field_name, items in field_info for k, v in items
-                ]
-            )
+            turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(turns_insert_values)
             turns_update_stmt = _get_upsert_stmt(
                 self.dialect,
                 turns_insert_stmt,
