@@ -16,8 +16,8 @@ from asyncio import gather
 from typing import Dict, Set, Tuple, Optional, List
 
 try:
-    from pymongo import UpdateOne, Session
-    from motor.motor_asyncio import AsyncIOMotorClient
+    from pymongo import UpdateOne
+    from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorClientSession
 
     mongo_available = True
 except ImportError:
@@ -98,7 +98,7 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
-    async def _inner_update_context(self, ctx_id: str, ctx_info_dump: Dict, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]], session: Optional[Session]) -> None:
+    async def _inner_update_context(self, ctx_id: str, ctx_info_dump: Dict, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]], session: Optional[AsyncIOMotorClientSession]) -> None:
         await self.main_table.update_one(
             {NameConfig._id_column: ctx_id},
             {
