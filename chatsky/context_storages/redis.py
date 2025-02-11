@@ -102,7 +102,7 @@ class RedisContextStorage(DBContextStorage):
                 if v is None:
                     new_delete_keys += [k]
                 else:
-                    update_values += [(k, v)]
+                    update_values += [(field_name, k, v)]
             if len(new_delete_keys) > 0:
                 field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
                 valid_keys = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)]
@@ -121,7 +121,7 @@ class RedisContextStorage(DBContextStorage):
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
             ),
-            *[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in update_values],
+            *[self.database.hset(f"{self._turns_key}:{ctx_id}:{f}", str(k), v) for f, k, v in update_values],
             *[self.database.hdel(f, *k) for f, k in delete_keys]
         )
 
