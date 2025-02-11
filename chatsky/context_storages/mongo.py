@@ -13,7 +13,7 @@ and high levels of read and write traffic.
 """
 
 from asyncio import gather
-from typing import Dict, Set, Tuple, Optional, List
+from typing import Any, Dict, Set, Tuple, Optional, List
 
 try:
     from pymongo import UpdateOne
@@ -21,6 +21,8 @@ try:
 
     mongo_available = True
 except ImportError:
+    AsyncIOMotorClientSession = Any
+
     mongo_available = False
 
 from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig

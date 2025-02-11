@@ -233,7 +233,8 @@ class DBContextStorage(ABC):
         Update context intofrmation.
 
         :param ctx_id: Context identifier.
-        :param ctx_info: Context information (will be written to different tables at once).
+        :param ctx_info: Context main information (will be written to MAIN table).
+        :param field_info: Context turns information (will be written to TURNS table).
         """
 
         joined_field_info = dict()
