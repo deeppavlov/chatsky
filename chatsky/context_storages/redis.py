@@ -93,7 +93,9 @@ class RedisContextStorage(DBContextStorage):
         else:
             return None
 
-    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
         update_values, delete_keys = list(), list()
         for field_name, items in field_info:
@@ -105,7 +107,9 @@ class RedisContextStorage(DBContextStorage):
                     update_values += [(field_name, k, v)]
             if len(new_delete_keys) > 0:
                 field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
-                valid_keys = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)]
+                valid_keys = [
+                    k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)
+                ]
                 delete_keys += [(field_key, valid_keys)]
         await gather(
             self.database.hset(
@@ -122,7 +126,7 @@ class RedisContextStorage(DBContextStorage):
                 f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
             ),
             *[self.database.hset(f"{self._turns_key}:{ctx_id}:{f}", str(k), v) for f, k, v in update_values],
-            *[self.database.hdel(f, *k) for f, k in delete_keys]
+            *[self.database.hdel(f, *k) for f, k in delete_keys],
         )
 
     async def _delete_context(self, ctx_id: str) -> None:

@@ -224,7 +224,9 @@ class SQLContextStorage(DBContextStorage):
                 )
             )
 
-    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
         main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
@@ -253,7 +255,9 @@ class SQLContextStorage(DBContextStorage):
                 NameConfig._key_column: k,
                 field_name: v,
             }
-            for field_name, items in field_info for k, v in items if len(items) > 0
+            for field_name, items in field_info
+            for k, v in items
+            if len(items) > 0
         ]
         if len(turns_insert_values) == 0:
             async with self.engine.begin() as conn:

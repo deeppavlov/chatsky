@@ -168,7 +168,9 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         async def callee(session: Session) -> None:
             ctx_info_dump = ctx_info.model_dump(mode="python")
             query = f"""

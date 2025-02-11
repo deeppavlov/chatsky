@@ -98,7 +98,13 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
-    async def _inner_update_context(self, ctx_id: str, ctx_info_dump: Dict, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]], session: Optional[AsyncIOMotorClientSession]) -> None:
+    async def _inner_update_context(
+        self,
+        ctx_id: str,
+        ctx_info_dump: Dict,
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+        session: Optional[AsyncIOMotorClientSession],
+    ) -> None:
         await self.main_table.update_one(
             {NameConfig._id_column: ctx_id},
             {
@@ -112,7 +118,7 @@ class MongoContextStorage(DBContextStorage):
                 }
             },
             upsert=True,
-            session=session
+            session=session,
         )
         if len(field_info) > 0:
             await self.turns_table.bulk_write(
@@ -122,12 +128,15 @@ class MongoContextStorage(DBContextStorage):
                         {"$set": {field_name: v}},
                         upsert=True,
                     )
-                    for field_name, items in field_info for k, v in items
+                    for field_name, items in field_info
+                    for k, v in items
                 ],
-                session=session
+                session=session,
             )
 
-    async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
         if self._transactions_enabled:
             async with await self._mongo.start_session() as session:
