@@ -171,9 +171,9 @@ class SQLContextStorage(DBContextStorage):
                 nullable=False,
             ),
             Column(NameConfig._key_column, Integer(), nullable=False),
-            Column(NameConfig._labels_field, LargeBinary(), nullable=True),
-            Column(NameConfig._requests_field, LargeBinary(), nullable=True),
-            Column(NameConfig._responses_field, LargeBinary(), nullable=True),
+            Column(NameConfig._labels_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._requests_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._responses_field, LargeBinary(), nullable=True, default=None),
             Index(f"{NameConfig._turns_table}_index", NameConfig._id_column, NameConfig._key_column, unique=True),
         )
 
