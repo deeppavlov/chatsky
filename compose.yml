@@ -56,7 +56,6 @@ services:
   mongo:
     env_file: [.env_file]
     image: mongo:latest
-    command: --replSet rs0
     profiles:
       - context_storage
     restart: unless-stopped

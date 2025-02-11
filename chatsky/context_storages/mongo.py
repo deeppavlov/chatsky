@@ -13,10 +13,10 @@ and high levels of read and write traffic.
 """
 
 from asyncio import gather
-from typing import Set, Tuple, Optional, List
+from typing import Dict, Set, Tuple, Optional, List
 
 try:
-    from pymongo import UpdateOne
+    from pymongo import UpdateOne, Session
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
@@ -51,12 +51,14 @@ class MongoContextStorage(DBContextStorage):
         rewrite_existing: bool = False,
         partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
         collection_prefix: str = "chatsky_collection",
+        transactions_enabled: bool = False,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
+        self._transactions_enabled = transactions_enabled
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
@@ -96,36 +98,42 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
+    async def _inner_update_context(self, ctx_id: str, ctx_info_dump: Dict, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]], session: Optional[Session]) -> None:
+        await self.main_table.update_one(
+            {NameConfig._id_column: ctx_id},
+            {
+                "$set": {
+                    NameConfig._id_column: ctx_id,
+                    NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                    NameConfig._created_at_column: ctx_info_dump["created_at"],
+                    NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                    NameConfig._misc_column: ctx_info_dump["misc"],
+                    NameConfig._framework_data_column: ctx_info_dump["framework_data"],
+                }
+            },
+            upsert=True,
+            session=session
+        )
+        await self.turns_table.bulk_write(
+            [
+                UpdateOne(
+                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                    {"$set": {field_name: v}},
+                    upsert=True,
+                )
+                for field_name, items in field_info for k, v in items
+            ],
+            session=session
+        )
+
     async def _update_context(self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
-        async with await self._mongo.start_session() as session:
-            async with session.start_transaction():
-                await self.main_table.update_one(
-                    {NameConfig._id_column: ctx_id},
-                    {
-                        "$set": {
-                            NameConfig._id_column: ctx_id,
-                            NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                            NameConfig._created_at_column: ctx_info_dump["created_at"],
-                            NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                            NameConfig._misc_column: ctx_info_dump["misc"],
-                            NameConfig._framework_data_column: ctx_info_dump["framework_data"],
-                        }
-                    },
-                    upsert=True,
-                    session=session
-                )
-                await self.turns_table.bulk_write(
-                    [
-                        UpdateOne(
-                            {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
-                            {"$set": {field_name: v}},
-                            upsert=True,
-                        )
-                        for field_name, items in field_info for k, v in items
-                    ],
-                    session=session
-                )
+        if self._transactions_enabled:
+            async with await self._mongo.start_session() as session:
+                async with session.start_transaction():
+                    await self._inner_update_context(ctx_id, ctx_info_dump, field_info, session)
+        else:
+            await self._inner_update_context(ctx_id, ctx_info_dump, field_info, None)
 
     async def _delete_context(self, ctx_id: str) -> None:
         await gather(
