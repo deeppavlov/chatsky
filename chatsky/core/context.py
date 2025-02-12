@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from chatsky.core.pipeline import Pipeline
     from chatsky.core.transition import Transition
 
+
 logger = logging.getLogger(__name__)
 
 

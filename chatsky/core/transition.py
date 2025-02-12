@@ -103,4 +103,4 @@ async def get_next_label(
     for destination, transition in zip(destination_results, transitions_with_priorities):
         if isinstance(destination, AbsoluteNodeLabel):
             return destination, transition[0]
-    return None
+    return (None, None)
