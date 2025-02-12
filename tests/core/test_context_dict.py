@@ -7,6 +7,10 @@ from chatsky.core.ctx_dict import ContextDict, MessageContextDict
 
 
 class TestContextDict:
+    @staticmethod
+    async def update_context_dict(db: MemoryContextStorage, ctx_dict: ContextDict, ctx_id):
+        await db.update_context(ctx_id, ContextInfo(turn_id=0), [ctx_dict.extract_sync()])
+
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
         # Empty (disconnected) context dictionary
@@ -170,7 +174,7 @@ class TestContextDict:
         assert set(ctx_dict._hashes.keys()) == set()
         ctx_dict[0] = Message(text="0")
         assert set(ctx_dict._hashes.keys()) == set()
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
 
         ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
 
@@ -179,14 +183,14 @@ class TestContextDict:
         (await ctx_dict[0]).text = "0-mod"
         ctx_dict[1] = Message(text="1")
         assert set(ctx_dict._hashes.keys()) == {0}
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
 
         ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
 
         assert set(ctx_dict._hashes.keys()) == {1}
         assert (await ctx_dict[0]).text == "0-mod"
         assert set(ctx_dict._hashes.keys()) == {0, 1}
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
 
     async def test_rewrite_existing_false(self):
         rewrite_storage = MemoryContextStorage(rewrite_existing=False, partial_read_config={"requests": 1})
@@ -196,7 +200,7 @@ class TestContextDict:
         assert set(ctx_dict._hashes.keys()) == set()
         ctx_dict[0] = Message(text="0")
         assert set(ctx_dict._hashes.keys()) == set()
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
 
         ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
 
@@ -205,11 +209,11 @@ class TestContextDict:
         (await ctx_dict[0]).text = "0-mod"
         ctx_dict[1] = Message(text="1")
         assert set(ctx_dict._hashes.keys()) == set()
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
 
         ctx_dict = await MessageContextDict.connected(rewrite_storage, "0", NameConfig._requests_field)
 
         assert set(ctx_dict._hashes.keys()) == set()
         assert (await ctx_dict[0]).text == "0"
         assert set(ctx_dict._hashes.keys()) == set()
-        await ctx_dict.store()
+        await self.update_context_dict(rewrite_storage, ctx_dict, "0")
