@@ -123,19 +123,20 @@ def llmresult():
     )
 
 
-async def test_structured_output(monkeypatch, mock_structured_model):
-    # Create a mock LLM_API instance
-    llm_api = LLM_API(MockChatOpenAI())
+class TestStructuredOutput:
+    async def test_structured_output(self, monkeypatch, mock_structured_model):
+        # Create a mock LLM_API instance
+        llm_api = LLM_API(MockChatOpenAI())
 
-    # Test data
-    history = ["message1", "message2"]
+        # Test data
+        history = ["message1", "message2"]
 
-    # Call the respond method
-    result = await llm_api.respond(message_schema=MessageSchema, history=history)
+        # Call the respond method
+        result = await llm_api.respond(message_schema=MessageSchema, history=history)
 
-    # Assert the result
-    expected_result = Message(text='{"history":["message1","message2"]}')
-    assert result == expected_result
+        # Assert the result
+        expected_result = Message(text='{"history":["message1","message2"]}')
+        assert result == expected_result
 
 
 @pytest.fixture
@@ -199,230 +200,238 @@ def context(pipeline):
     return ctx
 
 
-async def test_message_to_langchain(context):
-    assert await message_to_langchain(Message(text="hello"), context, source="human") == HumanMessage(
-        content=[{"type": "text", "text": "hello"}]
-    )
-    assert await message_to_langchain(Message(text="hello"), context, source="ai") == AIMessage(
-        content=[{"type": "text", "text": "hello"}]
-    )
+class TestMessageToLangchain:
+    async def test_message_to_langchain(self, context):
+        assert await message_to_langchain(Message(text="hello"), context, source="human") == HumanMessage(
+            content=[{"type": "text", "text": "hello"}]
+        )
+        assert await message_to_langchain(Message(text="hello"), context, source="ai") == AIMessage(
+            content=[{"type": "text", "text": "hello"}]
+        )
 
 
-@pytest.mark.parametrize(
-    "hist,expected",
-    [
-        (
-            2,
-            "Mock response with history: ['Request 1', 'Response 1', "
-            "'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
-        ),
-        (
-            0,
-            "Mock response with history: ['prompt', 'Last request', 'last prompt']",
-        ),
-        (
-            4,
-            "Mock response with history: ['Request 0', 'Response 0', "
-            "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
-        ),
-    ],
-)
-async def test_history(context, pipeline, hist, expected):
-    res = await LLMResponse(llm_model_name="test_model", history=hist)(context)
-    assert res == Message(expected, annotations={"__generated_by_model__": "test_model"})
-
-
-async def test_context_to_history(context):
-    res = await context_to_history(
-        ctx=context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
-    )
-    expected = [
-        HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
-        AIMessage(content=[{"type": "text", "text": "Response 0"}]),
-        HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
-        AIMessage(content=[{"type": "text", "text": "Response 1"}]),
-        HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
-        AIMessage(content=[{"type": "text", "text": "Response 2"}]),
-    ]
-    assert res == expected
-    res = await context_to_history(
-        ctx=context, length=1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
-    )
-    expected = [
-        HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
-        AIMessage(content=[{"type": "text", "text": "Response 2"}]),
-    ]
-    assert res == expected
-
-
-@pytest.mark.parametrize(
-    "cfg,expected,prompt_misc_filter",
-    [
-        (
-            PositionConfig(),
-            [
-                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
-                HumanMessage(content=[{"type": "text", "text": "prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
-                HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
-            ],
-            None,
-        ),
-        (
-            PositionConfig(
-                system_prompt=10,
-                last_request=0,
-                misc_prompt=1,
-                history=2,
+class TestHistory:
+    @pytest.mark.parametrize(
+        "hist,expected",
+        [
+            (
+                2,
+                "Mock response with history: ['Request 1', 'Response 1', "
+                "'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
             ),
-            [
-                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
-                HumanMessage(content=[{"type": "text", "text": "prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
-                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
-                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
-            ],
-            None,
-        ),
-        (
-            PositionConfig(
-                system_prompt=1,
-                last_request=1,
-                misc_prompt=1,
-                history=1,
-                call_prompt=1,
+            (
+                0,
+                "Mock response with history: ['prompt', 'Last request', 'last prompt']",
             ),
-            [
-                SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 0"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 1"}]),
-                HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
-                AIMessage(content=[{"type": "text", "text": "Response 2"}]),
-                HumanMessage(content=[{"type": "text", "text": "absolutely not a prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
-                HumanMessage(content=[{"type": "text", "text": "Last request"}]),
-            ],
-            "tpmorp",
-        ),
-    ],
-)
-async def test_get_langchain_context(context, cfg, expected, prompt_misc_filter):
-    res = await get_langchain_context(
-        system_prompt=Message(text="system prompt"),
-        ctx=context,
-        call_prompt=Prompt(message=Message(text="call prompt")),
-        position_config=cfg,
-        prompt_misc_filter=prompt_misc_filter if prompt_misc_filter else r"prompt",
-        length=-1,
-        filter_func=lambda *args: True,
-        llm_model_name="test_model",
-        max_size=100,
+            (
+                4,
+                "Mock response with history: ['Request 0', 'Response 0', "
+                "'Request 1', 'Response 1', 'Request 2', 'Response 2', 'prompt', 'Last request', 'last prompt']",
+            ),
+        ],
     )
+    async def test_history(self, context, pipeline, hist, expected):
+        res = await LLMResponse(llm_model_name="test_model", history=hist)(context)
+        assert res == Message(expected, annotations={"__generated_by_model__": "test_model"})
 
-    assert res == expected
+
+class TestContextToHistory:
+    async def test_context_to_history(self, context):
+        res = await context_to_history(
+            ctx=context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+        )
+        expected = [
+            HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+        ]
+        assert res == expected
+        res = await context_to_history(
+            ctx=context, length=1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+        )
+        expected = [
+            HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+        ]
+        assert res == expected
 
 
-async def test_conditions(context):
-    cond1 = LLMCondition(
-        llm_model_name="test_model",
-        prompt=Message("test_prompt"),
-        method=Contains(pattern="history"),
+class TestGetLangchainContext:
+    @pytest.mark.parametrize(
+        "cfg,expected,prompt_misc_filter",
+        [
+            (
+                PositionConfig(),
+                [
+                    SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                    HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+                    HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
+                ],
+                None,
+            ),
+            (
+                PositionConfig(
+                    system_prompt=10,
+                    last_request=0,
+                    misc_prompt=1,
+                    history=2,
+                ),
+                [
+                    HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+                    HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                    HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                    SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
+                ],
+                None,
+            ),
+            (
+                PositionConfig(
+                    system_prompt=1,
+                    last_request=1,
+                    misc_prompt=1,
+                    history=1,
+                    call_prompt=1,
+                ),
+                [
+                    SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 0"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 0"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+                    AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+                    HumanMessage(content=[{"type": "text", "text": "absolutely not a prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+                ],
+                "tpmorp",
+            ),
+        ],
     )
-    cond2 = LLMCondition(
-        llm_model_name="test_model",
-        prompt=Message("test_prompt"),
-        method=Contains(pattern="abrakadabra"),
-    )
-    assert await cond1(ctx=context)
-    assert not await cond2(ctx=context)
+    async def test_get_langchain_context(self, context, cfg, expected, prompt_misc_filter):
+        res = await get_langchain_context(
+            system_prompt=Message(text="system prompt"),
+            ctx=context,
+            call_prompt=Prompt(message=Message(text="call prompt")),
+            position_config=cfg,
+            prompt_misc_filter=prompt_misc_filter if prompt_misc_filter else r"prompt",
+            length=-1,
+            filter_func=lambda *args: True,
+            llm_model_name="test_model",
+            max_size=100,
+        )
+
+        assert res == expected
 
 
-def test_is_important_filter(filter_context):
-    filter_func = IsImportant()
-    ctx = filter_context
-
-    # Test filtering important messages
-    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
-    assert filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
-    assert not filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
-
-    assert not filter_func(ctx, None, ctx.responses[1], llm_model_name="test_model")
-    assert filter_func(ctx, ctx.requests[1], None, llm_model_name="test_model")
-
-
-def test_model_filter(filter_context):
-    filter_func = FromModel()
-    ctx = filter_context
-    # Test filtering messages from a certain model
-    assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
-    assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
-    assert filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
-    assert filter_func(ctx, ctx.requests[2], ctx.responses[3], llm_model_name="test_model")
+class TestConditions:
+    async def test_conditions(self, context):
+        cond1 = LLMCondition(
+            llm_model_name="test_model",
+            prompt=Message("test_prompt"),
+            method=Contains(pattern="history"),
+        )
+        cond2 = LLMCondition(
+            llm_model_name="test_model",
+            prompt=Message("test_prompt"),
+            method=Contains(pattern="abrakadabra"),
+        )
+        assert await cond1(ctx=context)
+        assert not await cond2(ctx=context)
 
 
-async def test_base_method(llmresult):
-    c = Contains(pattern="")
-    assert await c.model_result_to_text(llmresult) == "this is a very IMPORTANT message"
+class TestFilters:
+    def test_is_important_filter(self, filter_context):
+        filter_func = IsImportant()
+        ctx = filter_context
+
+        # Test filtering important messages
+        assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
+        assert filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
+        assert not filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
+
+        assert not filter_func(ctx, None, ctx.responses[1], llm_model_name="test_model")
+        assert filter_func(ctx, ctx.requests[1], None, llm_model_name="test_model")
+
+    def test_model_filter(self, filter_context):
+        filter_func = FromModel()
+        ctx = filter_context
+        # Test filtering messages from a certain model
+        assert filter_func(ctx, ctx.requests[1], ctx.responses[1], llm_model_name="test_model")
+        assert not filter_func(ctx, ctx.requests[2], ctx.responses[2], llm_model_name="test_model")
+        assert filter_func(ctx, ctx.requests[3], ctx.responses[3], llm_model_name="test_model")
+        assert filter_func(ctx, ctx.requests[2], ctx.responses[3], llm_model_name="test_model")
 
 
-async def test_contains_method(filter_context, llmresult):
-    ctx = filter_context
-    c = Contains(pattern="important")
-    assert await c(ctx, llmresult)
-    c = Contains(pattern="test")
-    assert not await c(ctx, llmresult)
+class TestBaseMethod:
+    async def test_base_method(self, llmresult):
+        c = Contains(pattern="")
+        assert await c.model_result_to_text(llmresult) == "this is a very IMPORTANT message"
 
 
-async def test_logprob_method(filter_context, llmresult):
-    ctx = filter_context
-    c = LogProb(target_token="false", threshold=0.3)
-    assert await c(ctx, llmresult)
-    c = LogProb(target_token="true", threshold=0.3)
-    assert not await c(ctx, llmresult)
+class TestContainsMethod:
+    async def test_contains_method(self, filter_context, llmresult):
+        ctx = filter_context
+        c = Contains(pattern="important")
+        assert await c(ctx, llmresult)
+        c = Contains(pattern="test")
+        assert not await c(ctx, llmresult)
 
 
-async def test_llm_slot(pipeline, context):
-    slot = LLMSlot(caption="test_caption", model="test_model")
-    # Test empty request
-    context.add_request("")
-    assert isinstance(await slot.extract_value(context), SlotNotExtracted)
-
-    # Test normal request
-    context.add_request("test request")
-    result = await slot.extract_value(context)
-    assert isinstance(result, str)
+class TestLogProbMethod:
+    async def test_logprob_method(self, filter_context, llmresult):
+        ctx = filter_context
+        c = LogProb(target_token="false", threshold=0.3)
+        assert await c(ctx, llmresult)
+        c = LogProb(target_token="true", threshold=0.3)
+        assert not await c(ctx, llmresult)
 
 
-async def test_llm_group_slot(pipeline, context):
-    slot = LLMGroupSlot(
-        model="test_model",
-        name=LLMSlot(caption="Extract person's name"),
-        age=LLMSlot(caption="Extract person's age"),
-        nested=LLMGroupSlot(model="test_model", city=LLMSlot(caption="Extract person's city")),
-    )
+class TestSlots:
+    async def test_llm_slot(self, pipeline, context):
+        slot = LLMSlot(caption="test_caption", model="test_model")
+        # Test empty request
+        context.add_request("")
+        assert isinstance(await slot.extract_value(context), SlotNotExtracted)
 
-    context.add_request("John is 25 years old and lives in New York")
-    result = await slot.get_value(context)
+        # Test normal request
+        context.add_request("test request")
+        result = await slot.extract_value(context)
+        assert isinstance(result, str)
 
-    assert isinstance(result, ExtractedGroupSlot)
+    async def test_llm_group_slot(self, pipeline, context):
+        slot = LLMGroupSlot(
+            model="test_model",
+            name=LLMSlot(caption="Extract person's name"),
+            age=LLMSlot(caption="Extract person's age"),
+            nested=LLMGroupSlot(model="test_model", city=LLMSlot(caption="Extract person's city")),
+        )
 
-    print(f"Extracted result: {result}")
+        context.add_request("John is 25 years old and lives in New York")
+        result = await slot.get_value(context)
 
-    assert result.name.extracted_value == "test_data"
-    assert result.age.extracted_value == "test_data"
-    assert result.nested.city.extracted_value == "test_data"
+        assert isinstance(result, ExtractedGroupSlot)
+
+        print(f"Extracted result: {result}")
+
+        assert result.name.extracted_value == "test_data"
+        assert result.age.extracted_value == "test_data"
+        assert result.nested.city.extracted_value == "test_data"
