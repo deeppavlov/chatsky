@@ -221,13 +221,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
-    
-    def run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None) -> Context:
+
+    def run_pipeline(
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         ctx = self._process_one_turn(request, ctx_id, update_ctx_misc)
-    # Add tests for transition.passthrough (check notes from Monday)
+        # Add tests for transition.passthrough (check notes from Monday)
         if ctx.framework_data.transition is not None:
-            while ctx.framework_data.transition is not None and \
-                ctx.framework_data.transition.passthrough:
+            while ctx.framework_data.transition is not None and ctx.framework_data.transition.passthrough:
                 ctx = self._process_one_turn(Message(), ctx_id, update_ctx_misc)
             else:
                 logger.warning("No transition found in framework_data")

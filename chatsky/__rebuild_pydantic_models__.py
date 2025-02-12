@@ -7,6 +7,7 @@ from chatsky.core.pipeline import Pipeline
 from chatsky.slots.slots import SlotManager
 from chatsky.core.context import FrameworkData, ServiceState
 from chatsky.core.service import PipelineComponent
+from chatsky.core.transition import Transition
 
 PipelineComponent.model_rebuild()
 Pipeline.model_rebuild()

@@ -35,7 +35,7 @@ class Transition(BaseModel):
     """Destination node of the transition."""
     priority: AnyPriority = Field(default=None, validate_default=True)
     """Priority of the transition. Higher priority transitions are resolved first."""
-    passthrough: AnyCondition = Field(default = False, validate_default=True) 
+    passthrough: AnyCondition = Field(default=False, validate_default=True)
     """Determines if transition is pass-through."""
 
     def __init__(
@@ -44,14 +44,14 @@ class Transition(BaseModel):
         cnd: Union[bool, BaseCondition] = True,
         dst: Union[NodeLabelInitTypes, BaseDestination],
         priority: Union[Optional[float], BasePriority] = None,
-        passthrough: Union[bool, BaseCondition] = False
+        passthrough: Union[bool, BaseCondition] = False,
     ):
         super().__init__(cnd=cnd, dst=dst, priority=priority, passthrough=passthrough)
 
 
 async def get_next_label(
     ctx: Context, transitions: List[Transition], default_priority: float
-) -> Optional[Tuple[AbsoluteNodeLabel, Transition]]:
+) -> Tuple[Optional[AbsoluteNodeLabel], Optional[Transition]]:
     """
     Determine the next node based on ``transitions`` and ``ctx``.
 
@@ -73,7 +73,7 @@ async def get_next_label(
     If at any point any :py:class:`.BaseCondition`, :py:class:`.BaseDestination` or :py:class:`.BasePriority`
     produces an exception, the corresponding transition is filtered out.
 
-    :return: Label of the next node or ``None`` if no transition is left by the end of the process and 
+    :return: Label of the next node or ``None`` if no transition is left by the end of the process and
     the transition that leads to the next node.
     """
     filtered_transitions: List[Transition] = transitions.copy()

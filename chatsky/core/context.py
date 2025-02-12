@@ -27,13 +27,12 @@ from pydantic import BaseModel, Field
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
-from chatsky.core.script_function import AnyCondition
-from chatsky.core.transition import Transition
 
 if TYPE_CHECKING:
     from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
+    from chatsky.core.transition import Transition
 
 logger = logging.getLogger(__name__)
 

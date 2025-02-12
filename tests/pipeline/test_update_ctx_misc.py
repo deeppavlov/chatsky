@@ -3,6 +3,7 @@ import pytest
 from chatsky import Context
 from chatsky.core import Message, RESPONSE, TRANSITIONS, Pipeline, Transition as Tr, BaseCondition
 
+
 @pytest.mark.asyncio
 async def test_update_ctx_misc():
     class MyCondition(BaseCondition):
