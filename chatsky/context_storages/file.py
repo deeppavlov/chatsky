@@ -70,9 +70,20 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         return (await self._load()).main.get(ctx_id, None)
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         storage = await self._load()
         storage.main[ctx_id] = ctx_info
+        for field_name, items in field_info:
+            for k, v in items:
+                upd = (ctx_id, field_name, k, v)
+                for i in range(len(storage.turns)):
+                    if storage.turns[i][:-1] == upd[:-1]:
+                        storage.turns[i] = upd
+                        break
+                else:
+                    storage.turns += [upd]
         await self._save(storage)
 
     async def _delete_context(self, ctx_id: str) -> None:
@@ -103,18 +114,6 @@ class FileContextStorage(DBContextStorage, ABC):
             for c, f, k, v in (await self._load()).turns
             if c == ctx_id and f == field_name and k in keys and v is not None
         ]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        storage = await self._load()
-        for k, v in items:
-            upd = (ctx_id, field_name, k, v)
-            for i in range(len(storage.turns)):
-                if storage.turns[i][:-1] == upd[:-1]:
-                    storage.turns[i] = upd
-                    break
-            else:
-                storage.turns += [upd]
-        await self._save(storage)
 
     async def _clear_all(self) -> None:
         await self._save(SerializableStorage())

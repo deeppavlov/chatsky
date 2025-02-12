@@ -168,7 +168,9 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         async def callee(session: Session) -> None:
             ctx_info_dump = ctx_info.model_dump(mode="python")
             query = f"""
@@ -194,6 +196,35 @@ class YDBContextStorage(DBContextStorage):
                 },
                 commit_tx=True,
             )
+
+            for field_name, items in field_info:
+                declare, prepare, values = list(), dict(), list()
+                for i, (k, v) in enumerate(items):
+                    declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
+                    prepare.update({f"${self._KEY_VAR}_{i}": k})
+                    if v is not None:
+                        declare += [f"DECLARE ${field_name}_{i} AS String;"]
+                        prepare.update({f"${field_name}_{i}": v})
+                        value_param = f"${field_name}_{i}"
+                    else:
+                        value_param = "NULL"
+                    values += [f"(${NameConfig._id_column}, ${self._KEY_VAR}_{i}, {value_param})"]
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${NameConfig._id_column} AS Utf8;
+                    {" ".join(declare)}
+                    UPSERT INTO {self.turns_table} ({NameConfig._id_column}, {NameConfig._key_column}, {field_name})
+                    VALUES {", ".join(values)};
+                    """  # noqa: E501
+
+                await session.transaction(SerializableReadWrite()).execute(
+                    await session.prepare(query),
+                    {
+                        f"${NameConfig._id_column}": ctx_id,
+                        **prepare,
+                    },
+                    commit_tx=True,
+                )
 
         await self.pool.retry_operation(callee)
 
@@ -310,38 +341,6 @@ class YDBContextStorage(DBContextStorage):
             )
 
         return await self.pool.retry_operation(callee)
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        async def callee(session: Session) -> None:
-            declare, prepare, values = list(), dict(), list()
-            for i, (k, v) in enumerate(items):
-                declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
-                prepare.update({f"${self._KEY_VAR}_{i}": k})
-                if v is not None:
-                    declare += [f"DECLARE ${field_name}_{i} AS String;"]
-                    prepare.update({f"${field_name}_{i}": v})
-                    value_param = f"${field_name}_{i}"
-                else:
-                    value_param = "NULL"
-                values += [f"(${NameConfig._id_column}, ${self._KEY_VAR}_{i}, {value_param})"]
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${NameConfig._id_column} AS Utf8;
-                {" ".join(declare)}
-                UPSERT INTO {self.turns_table} ({NameConfig._id_column}, {NameConfig._key_column}, {field_name})
-                VALUES {", ".join(values)};
-                """  # noqa: E501
-
-            await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                {
-                    f"${NameConfig._id_column}": ctx_id,
-                    **prepare,
-                },
-                commit_tx=True,
-            )
-
-        await self.pool.retry_operation(callee)
 
     async def _clear_all(self) -> None:
         def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:

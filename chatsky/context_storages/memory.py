@@ -40,8 +40,12 @@ class MemoryContextStorage(DBContextStorage):
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
         return self._main_storage.get(ctx_id, None)
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         self._main_storage[ctx_id] = ctx_info
+        for field_name, items in field_info:
+            self._aux_storage[field_name].setdefault(ctx_id, dict()).update(items)
 
     async def _delete_context(self, ctx_id: str) -> None:
         self._main_storage.pop(ctx_id, None)
@@ -65,9 +69,6 @@ class MemoryContextStorage(DBContextStorage):
         return [
             (k, v) for k, v in self._aux_storage[field_name].get(ctx_id, dict()).items() if k in keys and v is not None
         ]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        self._aux_storage[field_name].setdefault(ctx_id, dict()).update(items)
 
     async def _clear_all(self) -> None:
         self._main_storage = dict()

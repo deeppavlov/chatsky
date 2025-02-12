@@ -171,9 +171,9 @@ class SQLContextStorage(DBContextStorage):
                 nullable=False,
             ),
             Column(NameConfig._key_column, Integer(), nullable=False),
-            Column(NameConfig._labels_field, LargeBinary(), nullable=True),
-            Column(NameConfig._requests_field, LargeBinary(), nullable=True),
-            Column(NameConfig._responses_field, LargeBinary(), nullable=True),
+            Column(NameConfig._labels_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._requests_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._responses_field, LargeBinary(), nullable=True, default=None),
             Index(f"{NameConfig._turns_table}_index", NameConfig._id_column, NameConfig._key_column, unique=True),
         )
 
@@ -224,9 +224,11 @@ class SQLContextStorage(DBContextStorage):
                 )
             )
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
-        insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
+        main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
             {
                 NameConfig._id_column: ctx_id,
                 NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
@@ -236,9 +238,9 @@ class SQLContextStorage(DBContextStorage):
                 NameConfig._framework_data_column: ctx_info_dump["framework_data"],
             }
         )
-        update_stmt = _get_upsert_stmt(
+        main_update_stmt = _get_upsert_stmt(
             self.dialect,
-            insert_stmt,
+            main_insert_stmt,
             [
                 NameConfig._updated_at_column,
                 NameConfig._current_turn_id_column,
@@ -247,8 +249,31 @@ class SQLContextStorage(DBContextStorage):
             ],
             [NameConfig._id_column],
         )
+        turns_update_stmts = list()
+        for field_name, items in field_info:
+            turns_insert_values = [
+                {
+                    NameConfig._id_column: ctx_id,
+                    NameConfig._key_column: k,
+                    field_name: v,
+                }
+                for k, v in items
+                if len(items) > 0
+            ]
+            if len(turns_insert_values) > 0:
+                turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(turns_insert_values)
+                turns_update_stmts += [
+                    _get_upsert_stmt(
+                        self.dialect,
+                        turns_insert_stmt,
+                        [field_name],
+                        [NameConfig._id_column, NameConfig._key_column],
+                    )
+                ]
         async with self.engine.begin() as conn:
-            await conn.execute(update_stmt)
+            await conn.execute(main_update_stmt)
+            for turns_update_stmt in turns_update_stmts:
+                await conn.execute(turns_update_stmt)
 
     # TODO: use foreign keys instead maybe?
     async def _delete_context(self, ctx_id: str) -> None:
@@ -284,26 +309,6 @@ class SQLContextStorage(DBContextStorage):
         stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
         async with self.engine.begin() as conn:
             return list((await conn.execute(stmt)).fetchall())
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(
-            [
-                {
-                    NameConfig._id_column: ctx_id,
-                    NameConfig._key_column: k,
-                    field_name: v,
-                }
-                for k, v in items
-            ]
-        )
-        update_stmt = _get_upsert_stmt(
-            self.dialect,
-            insert_stmt,
-            [field_name],
-            [NameConfig._id_column, NameConfig._key_column],
-        )
-        async with self.engine.begin() as conn:
-            await conn.execute(update_stmt)
 
     async def _clear_all(self) -> None:
         async with self.engine.begin() as conn:

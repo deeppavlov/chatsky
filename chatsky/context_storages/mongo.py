@@ -13,14 +13,16 @@ and high levels of read and write traffic.
 """
 
 from asyncio import gather
-from typing import Set, Tuple, Optional, List
+from typing import Any, Dict, Set, Tuple, Optional, List
 
 try:
     from pymongo import UpdateOne
-    from motor.motor_asyncio import AsyncIOMotorClient
+    from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorClientSession
 
     mongo_available = True
 except ImportError:
+    AsyncIOMotorClientSession = Any
+
     mongo_available = False
 
 from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
@@ -51,12 +53,14 @@ class MongoContextStorage(DBContextStorage):
         rewrite_existing: bool = False,
         partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
         collection_prefix: str = "chatsky_collection",
+        transactions_enabled: bool = False,
     ):
         DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
+        self._transactions_enabled = transactions_enabled
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
@@ -96,8 +100,13 @@ class MongoContextStorage(DBContextStorage):
             else None
         )
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
-        ctx_info_dump = ctx_info.model_dump(mode="python")
+    async def _inner_update_context(
+        self,
+        ctx_id: str,
+        ctx_info_dump: Dict,
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+        session: Optional[AsyncIOMotorClientSession],
+    ) -> None:
         await self.main_table.update_one(
             {NameConfig._id_column: ctx_id},
             {
@@ -111,7 +120,32 @@ class MongoContextStorage(DBContextStorage):
                 }
             },
             upsert=True,
+            session=session,
         )
+        if len(field_info) > 0:
+            await self.turns_table.bulk_write(
+                [
+                    UpdateOne(
+                        {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                        {"$set": {field_name: v}},
+                        upsert=True,
+                    )
+                    for field_name, items in field_info
+                    for k, v in items
+                ],
+                session=session,
+            )
+
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
+        ctx_info_dump = ctx_info.model_dump(mode="python")
+        if self._transactions_enabled:
+            async with await self._mongo.start_session() as session:
+                async with session.start_transaction():
+                    await self._inner_update_context(ctx_id, ctx_info_dump, field_info, session)
+        else:
+            await self._inner_update_context(ctx_id, ctx_info_dump, field_info, None)
 
     async def _delete_context(self, ctx_id: str) -> None:
         await gather(
@@ -155,18 +189,6 @@ class MongoContextStorage(DBContextStorage):
             [NameConfig._key_column, field_name],
         ).to_list(None)
         return [(item[NameConfig._key_column], item[field_name]) for item in result]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        await self.turns_table.bulk_write(
-            [
-                UpdateOne(
-                    {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
-                    {"$set": {field_name: v}},
-                    upsert=True,
-                )
-                for k, v in items
-            ]
-        )
 
     async def _clear_all(self) -> None:
         await gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

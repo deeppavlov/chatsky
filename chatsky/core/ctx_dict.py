@@ -373,28 +373,26 @@ class ContextDict(ABC, BaseModel):
     def _serialize_model(self) -> Dict[int, BaseModel]:
         return self._serialize_model_base()
 
-    async def store(self) -> None:
+    def extract_sync(self) -> Tuple[str, List[Tuple[int, bytes]], List[int]]:
         """
-        Synchronize dict state with the connected storage.
+        Synchronize dict state with the connected storage, extract the data that should be updated.
         Update added and removed elements, also update modified ones if `rewrite_existing` flag is enabled.
         Raise an error if no storage is connected.
         """
 
         if self._storage is not None:
             logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
-            stored = [(k, e) for k, e in self._serialize_model_base(True).items()]
-            await gather(
-                self._storage.update_field_items(self._ctx_id, self._field_name, stored),
-                self._storage.delete_field_keys(self._ctx_id, self._field_name, list(self._removed - self._added)),
-            )
+            added_items = [(k, e) for k, e in self._serialize_model_base(True).items()]
+            removed_items = list(self._removed - self._added)
             logger.debug(
                 f"Context dict for {self._ctx_id}, {self._field_name} stored: "
-                f"{collapse_num_list([k for k, _ in stored])}"
+                f"{collapse_num_list([k for k, _ in added_items])}"
             )
             self._added, self._removed = set(), set()
             if self._storage.rewrite_existing:
                 for k, v in self._items.items():
                     self._hashes[k] = _get_hash(self._value_type.dump_json(v))
+            return self._field_name, added_items, removed_items
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
 

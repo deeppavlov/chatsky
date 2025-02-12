@@ -23,12 +23,12 @@ class TestContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
         storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
-        await storage.update_main_info(ctx_id, ContextInfo(turn_id=0, created_at=0, updated_at=0))
+        main_info = ContextInfo(turn_id=0, created_at=0, updated_at=0)
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),
         ]
-        await storage.update_field_items(ctx_id, NameConfig._requests_field, requests)
+        await storage.update_context(ctx_id, main_info, [(NameConfig._requests_field, requests, list())])
         return await MessageContextDict.connected(storage, ctx_id, NameConfig._requests_field)
 
     async def test_creation(
@@ -155,9 +155,12 @@ class TestContextDict:
             # Throw error if store in disconnected
             if ctx_dict is empty_dict:
                 with pytest.raises(RuntimeError):
-                    await ctx_dict.store()
+                    ctx_dict.extract_sync()
             else:
-                await ctx_dict.store()
+                field_name, added_values, deleted_values = ctx_dict.extract_sync()
+                assert field_name == NameConfig._requests_field
+                assert 2 in [k for k, _ in added_values]
+                assert deleted_values == [0]
 
     async def test_rewrite_existing_true(self):
         rewrite_storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})

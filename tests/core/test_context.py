@@ -1,3 +1,4 @@
+from copy import copy
 import pytest
 
 from chatsky.core.context import Context, ContextError
@@ -106,6 +107,16 @@ class TestTurns:
             assert AbsoluteNodeLabel(flow_name="flow", node_name=f"node{i}") in labels
             assert Message(text=f"text{i}") in requests
             assert Message(text=f"text{i}") in responses
+
+
+async def test_copy(context_factory):
+    ctx = context_factory()
+    ctx.misc["key"] = "value"
+
+    cpy = copy(ctx)
+    assert cpy.misc["key"] == "value"
+    assert cpy._storage == ctx._storage
+    assert cpy == ctx
 
 
 async def test_pipeline_available():

@@ -93,8 +93,24 @@ class RedisContextStorage(DBContextStorage):
         else:
             return None
 
-    async def _update_main_info(self, ctx_id: str, ctx_info: ContextInfo) -> None:
+    async def _update_context(
+        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+    ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python")
+        update_values, delete_keys = list(), list()
+        for field_name, items in field_info:
+            new_delete_keys = list()
+            for k, v in items:
+                if v is None:
+                    new_delete_keys += [k]
+                else:
+                    update_values += [(field_name, k, v)]
+            if len(new_delete_keys) > 0:
+                field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
+                valid_keys = [
+                    k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(new_delete_keys)
+                ]
+                delete_keys += [(field_key, valid_keys)]
         await gather(
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])
@@ -109,6 +125,8 @@ class RedisContextStorage(DBContextStorage):
             self.database.hset(
                 f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
             ),
+            *[self.database.hset(f"{self._turns_key}:{ctx_id}:{f}", str(k), v) for f, k, v in update_values],
+            *[self.database.hdel(f, *k) for f, k in delete_keys],
         )
 
     async def _delete_context(self, ctx_id: str) -> None:
@@ -134,15 +152,6 @@ class RedisContextStorage(DBContextStorage):
         load = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
         values = await gather(*[self.database.hget(field_key, k) for k in load])
         return [(k, v) for k, v in zip(self._bytes_to_keys(load), values)]
-
-    async def _update_field_items(self, ctx_id: str, field_name: str, items: List[Tuple[int, Optional[bytes]]]) -> None:
-        await gather(*[self.database.hset(f"{self._turns_key}:{ctx_id}:{field_name}", str(k), v) for k, v in items])
-
-    async def _delete_field_keys(self, ctx_id: str, field_name: str, keys: List[int]) -> None:
-        field_key = f"{self._turns_key}:{ctx_id}:{field_name}"
-        match = [k for k in await self.database.hkeys(field_key) if k in self._keys_to_bytes(keys)]
-        if len(match) > 0:
-            await self.database.hdel(field_key, *match)
 
     async def _clear_all(self) -> None:
         keys = await self.database.keys(f"{self._prefix}:*")

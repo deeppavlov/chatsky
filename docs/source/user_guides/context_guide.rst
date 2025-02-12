@@ -97,19 +97,24 @@ Attributes
   In most cases, this attribute will be used to identify a user.
 
 * **labels**: The labels attribute stores the history of all passed labels within the conversation.
-  It maps turn IDs to labels. The collection is ordered, so getting the last item of the mapping
-  always shows the last visited node.
+  It maps turn IDs to labels. The is a special dynamically-loaded collection of type `ContextDict`,
+  so some of its methods are asynchronous.
 
-  Note that `labels` only stores the nodes that were transitioned to
-  so `start_label` will not be in this attribute.
+  NB! It is usually preferrable to use `add_label` and `last_label` for the most simple use cases.
 
 * **requests**: The requests attribute maintains the history of all received requests by the agent.
-  It also maps turn IDs to requests. Like labels, it stores the requests in-order.
+  It also maps turn IDs to requests. The is a special dynamically-loaded collection of type `ContextDict`,
+  so some of its methods are asynchronous.
+
+  NB! It is usually preferrable to use `add_request` and `last_request` for the most simple use cases.
 
 * **responses**: This attribute keeps a record of all agent responses, mapping turn IDs to responses.
-  Stores the responses in-order.
+  The is a special dynamically-loaded collection of type `ContextDict`,
+  so some of its methods are asynchronous.
 
-* **misc**: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
+  NB! It is usually preferrable to use `add_response` and `last_response` for the most simple use cases.
+
+* **misc**: The misc attribute is a dictionary-like object for storing custom data. This field is not used by any of the
   built-in Chatsky classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
@@ -154,6 +159,15 @@ Public methods
 * **pipeline**: Return ``Pipeline`` object that is used to process this context.
   This can be used to get ``Script``, ``start_label`` or ``fallback_label``.
 
+Private methods
+^^^^^^^^^^^^^^^
+
+These methods should not be used outside of the internal workings.
+
+* **add_request**
+* **add_response**
+* **add_label**
+
 Context storages
 ~~~~~~~~~~~~~~~~
 
@@ -166,6 +180,7 @@ various database types (see the
 
 The supported storage options are as follows:
 
+* `In-memory storage`
 * `JSON <https://www.json.org/json-en.html>`_
 * `pickle <https://docs.python.org/3/library/pickle.html>`_
 * `shelve <https://docs.python.org/3/library/shelve.html>`_
@@ -203,8 +218,8 @@ also available in the distribution. Consult these files for more options.
 
 .. warning::
 
-  The data transmission protocols require the data to be JSON-serializable. Chatsky tackles this problem
-  through utilization of ``pydantic`` as described in the next section.
+  The data transmission protocols require all the data stored in all the `Context` fields to be JSON-serializable.
+  Chatsky tackles this problem through utilization of ``pydantic`` as described in the next section.
 
 Serialization
 ~~~~~~~~~~~~~
@@ -220,3 +235,9 @@ becomes as easy as calling the `model_dump_json` method:
     serialized_context = context.model_dump_json()
 
 Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.
+
+.. warning::
+
+  Keeping unserializable data types in `Context` fields (such as `misc`) is currently supported.
+  These values will be serialized using Python default `pickle` module, which is neither reliable nor portable.
+  This functionality should not be used or trusted and will be removed in the future.
