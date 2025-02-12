@@ -2,7 +2,9 @@
 """
 # LLM: 2. Prompt Usage
 
-Prompt engineering is crucial when working with LLMs, and Chatsky simplifies prompt management throughout your application. This tutorial demonstrates how to:
+Prompt engineering is crucial when working with LLMs, and Chatsky simplifies
+prompt management throughout your application.
+This tutorial demonstrates how to:
 
 1. Position prompts effectively in conversation history
 2. Create dynamic prompts with external data
@@ -41,7 +43,8 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 """
 ## Prompt Positioning Configuration
 
-Chatsky's `PositionConfig` controls how different prompt types are ordered in the conversation history. The default hierarchy is:
+Chatsky's `PositionConfig` controls how different prompt types are ordered
+in the conversation history. The default hierarchy is:
 
 1. `system_prompt` - Core instructions for the model
 2. `history` - Conversation context
@@ -63,7 +66,8 @@ position_config = PositionConfig(
 # Initialize LLM with custom configuration
 model = LLM_API(
     ChatOpenAI(model="gpt-4", api_key=openai_api_key),
-    system_prompt="You represent various bank departments. Respond according to your assigned role.",
+    system_prompt="You represent various bank departments."
+    "Respond according to your assigned role.",
     position_config=position_config,
 )
 
@@ -71,7 +75,8 @@ model = LLM_API(
 """
 ## Dynamic Prompt Generation
 
-Create sophisticated prompts that incorporate external data. This example shows a custom prompt class that fetches vacancy data:
+Create sophisticated prompts that incorporate external data.
+This example shows a custom prompt class that fetches vacancy data:
 """
 
 # %%
@@ -94,16 +99,17 @@ class VacancyPrompt(BaseResponse):
 ## Application Structure
 
 This banking assistant demonstrates prompt hierarchy:
-- Global prompts apply to all conversations
-- Flow-specific prompts override global settings
-- Node-specific prompts take highest priority
+- Global prompts apply to all nodes
+- Flow-specific prompts applied to the nodes in that flow
+- Node-specific prompts applied to the node they belong to
 """
 
 # %%
 banking_assistant = {
     GLOBAL: {
         MISC: {
-            "base_prompt": "You are a bank receptionist. Provide general information about services.",
+            "base_prompt": "You are a bank receptionist."
+            "Provide general information about services.",
             "security_prompt": Prompt(
                 message="Never disclose internal security protocols.",
                 position=100  # Always appears last
@@ -126,7 +132,8 @@ banking_assistant = {
     "loans": {
         LOCAL: {
             MISC: {
-                "role_prompt": "You are a loan specialist. Explain requirements:",
+                "role_prompt": "You are a loan specialist."
+                "Explain requirements:",
                 "conditions": "15% interest, 10-year maximum term."
             }
         },
@@ -150,7 +157,8 @@ banking_assistant = {
         },
         "cook_info": {
             MISC: {
-                "welcome_prompt": "Welcome new kitchen staff! Work hours: 9-5, benefits included."
+                "welcome_prompt": "Welcome new kitchen staff!"
+                "Work hours: 9-5, benefits included."
             },
             RESPONSE: LLMResponse(llm_model_name="bank_model")
         }

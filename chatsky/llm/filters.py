@@ -74,7 +74,7 @@ class MessageFilter(BaseHistoryFilter):
     def __call__(self, ctx, request, response, llm_model_name):
         return (
             int(self.call(ctx, request, llm_model_name)) * Return.Request.value
-            + int(self.call(ctx, response, llm_model_name)) * Return.Response.value
+            | int(self.call(ctx, response, llm_model_name)) * Return.Response.value
         )
 
 

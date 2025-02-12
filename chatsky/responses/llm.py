@@ -42,7 +42,7 @@ class LLMResponse(BaseResponse):
     """
     prompt_misc_filter: str = Field(default=r"prompt")
     """
-    idk
+    Regular expression to find prompts by key names in MISC dictionary.
     """
     position_config: Optional[PositionConfig] = None
     """
