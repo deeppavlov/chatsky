@@ -97,8 +97,8 @@ You can use `ModifyResponse` to catch exceptions in response functions:
             except Exception as exc:
                 return str(exc)
 
-Note: the functionality of adding custom responses for exceptions 
-is available in the core library as the 
+Note: the functionality of adding custom responses for exceptions
+is available in the core library as the
 %mddoclink(api,processing.standard,AddFallbackResponses) class.
 </div>
 """
