@@ -98,13 +98,13 @@ class LLMGroupSlot(GroupSlot):
             # Set the final value
             current[final] = ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=value)
 
-        return self.__dict_to_extracted_slots(nested_result)
+        return self._dict_to_extracted_slots(nested_result)
 
     # Convert nested dict to ExtractedGroupSlot structure
-    def __dict_to_extracted_slots(self, d):
+    def _dict_to_extracted_slots(self, d):
         if not isinstance(d, dict):
             return d
-        return ExtractedGroupSlot(**{k: self.__dict_to_extracted_slots(v) for k, v in d.items()})
+        return ExtractedGroupSlot(**{k: self._dict_to_extracted_slots(v) for k, v in d.items()})
 
     def _flatten_llm_group_slot(self, slot, parent_key=""):
         items = {}

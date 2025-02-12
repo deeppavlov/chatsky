@@ -43,7 +43,7 @@ class Contains(BaseMethod):
 
     pattern: str
     """
-    pattern that will be searched in model_result.
+    Pattern that will be searched in model_result.
     """
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
@@ -57,13 +57,16 @@ class Contains(BaseMethod):
 class LogProb(BaseMethod):
     """
     Method to check whether a target token's log probability is higher then a threshold.
-
-    :param str target_token: token to check (e.g. `"TRUE"`)
-    :param float threshold: threshold to bypass. by default `-0.5`
     """
 
     target_token: str
+    """
+    Token to check (e.g. `"TRUE"`)
+    """
     threshold: float = -0.5
+    """
+    Threshold to bypass. by default `-0.5`
+    """
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
