@@ -58,27 +58,24 @@ async def test_get_next_label(context_factory, transitions, default_priority, re
 
     next_label, _ = await get_next_label(ctx, transitions, default_priority)
 
-    assert next_label == (
-        AbsoluteNodeLabel.model_validate(result) if result is not None else None
-    )
+    assert next_label == (AbsoluteNodeLabel.model_validate(result) if result is not None else None)
 
 
 @pytest.mark.parametrize(
     "transitions,result",
     [
         ([Tr(dst=("service", "start"))], Tr(dst=("service", "start"))),
-        ([Tr(dst="node1", priority=1), Tr(dst="node2", priority=2), Tr(dst="node3", priority=3)], Tr(dst="node3", priority=3)),
+        (
+            [Tr(dst="node1", priority=1), Tr(dst="node2", priority=2), Tr(dst="node3", priority=3)],
+            Tr(dst="node3", priority=3),
+        ),
         ([Tr(dst="node1", cnd=False), Tr(dst="node2", cnd=False)], None),
-    ]
+    ],
 )
-
 async def test_transition_for_next_label(context_factory, transitions, result):
     ctx = context_factory()
     ctx.add_label(("flow", "node1"))
 
-    _, transition = await get_next_label(ctx, transitions, default_priority = 0)
+    _, transition = await get_next_label(ctx, transitions, default_priority=0)
 
     assert transition == result
-
-    # check get_next_label[1] return correct transition
-    

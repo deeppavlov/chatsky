@@ -9,7 +9,7 @@ async def test_update_ctx_misc():
     class MyCondition(BaseCondition):
         async def call(self, ctx: Context) -> bool:
             return ctx.misc["condition"]
-
+        
     toy_script = {
         "root": {
             "start": {TRANSITIONS: [Tr(dst="success", cnd=MyCondition())]},
