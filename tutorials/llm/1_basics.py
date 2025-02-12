@@ -36,7 +36,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 First we need to create a model object.
 Keep in mind, that if you instantiate model object outside of the script,
 it will be reused across all the nodes and
-therefore it will store all dialogue history.
+therefore it will store all dialogue history if not specified otherwise.
 This is not advised if you are short on tokens or
 if you do not need to store all dialogue history.
 
@@ -118,6 +118,8 @@ toy_script = {
 }
 
 # %%
+# Pass your model to the `models` field of the pipeline under the key
+# that will be used as `llm_model_name` in the script
 pipeline = Pipeline(
     toy_script,
     start_label=("main_flow", "start_node"),

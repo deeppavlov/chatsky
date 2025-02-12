@@ -4,8 +4,8 @@
 
 If you want to take the messages that meet your particular criteria and pass
 them to the LLMs context you can use the `LLMResponse`s `filter_func` parameter.
-It must be a function that takes a single `Message`
-object and returns a boolean.
+It must be a class, whose call method takes the following args:
+`context`, `request`, `response`, and `model_name`.
 """
 
 # %pip install chatsky[llm] langchain-openai
