@@ -30,8 +30,7 @@ are stored in a special structure, `ContextDict`.
 This structure can be used for fine-grained access to the underlying
 database, partial and asynchronous element loading.
 In particular, this is relevant for `labels`, `requests` and `responses`
-fields, while `misc` and `framework_data` are always loaded
-completely and synchronously.
+fields, while `misc` and `framework_data` are always loaded fully.
 
 How does that partial field writing work?
 In most cases, every context storage
@@ -44,8 +43,8 @@ The other one is called `TURNS` and contains triplets of the data generated on
 each conversation step: `label`, `request` and `response`.
 
 Whenever a context is loaded, only one item from `MAIN` teble
-and zero to few items from `TURNS` table are loaded synchronously.
-More items from `TURNS` table can be loaded later asynchronously on demand.
+and zero to few items from `TURNS` table are loaded.
+More items from `TURNS` table can be loaded later on demand.
 """
 
 # %% [markdown]
@@ -110,7 +109,7 @@ otherwise they are discarded.
 
 NB! Keeping track of the modified elements comes with a price of calculating
 their hashes and comparing them, so in performance-critical environments
-this feature probably might be avoided.
+this feature can be disabled by setting the flag to False.
 """
 
 # %%
