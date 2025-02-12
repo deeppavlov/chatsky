@@ -1,3 +1,9 @@
+"""
+Context Dict
+------------
+This module defines classes for lazy context data loading.
+"""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import gather
@@ -37,14 +43,14 @@ def _get_hash(string: bytes) -> bytes:
 
 class ContextDict(ABC, BaseModel):
     """
-    Dictionary-like structure for storing different dialog types in a context storage.
+    Dictionary-like structure for storing dialog data spanning multiple turns in a context storage.
     It holds all the possible keys, but may not store all the values locally.
-    Some of them might be loaded lazily upon querying.
+    Values not stored locally will be loaded upon querying.
     """
 
     _items: Dict[int, BaseModel] = PrivateAttr(default_factory=dict)
     """
-    Already loaded from storage items collection.
+    Dictionary of already loaded from storage items.
     """
 
     _hashes: Dict[int, int] = PrivateAttr(default_factory=dict)
@@ -54,17 +60,21 @@ class ContextDict(ABC, BaseModel):
 
     _keys: Set[int] = PrivateAttr(default_factory=set)
     """
-    All the item keys available in the storage.
+    All the item keys available either in storage or locally.
     """
 
     _added: Set[int] = PrivateAttr(default_factory=set)
     """
-    Keys added localy (need to be synchronized with the storage).
+    Keys added locally (need to be synchronized with the storage).
+    Synchronization happens whenever `store` is called (which is done at
+    the end of every turn).
     """
 
     _removed: Set[int] = PrivateAttr(default_factory=set)
     """
-    Keys removed localy (need to be synchronized with the storage).
+    Keys removed locally (need to be synchronized with the storage).
+    Synchronization happens whenever `store` is called (which is done at
+    the end of every turn).
     """
 
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
@@ -79,7 +89,7 @@ class ContextDict(ABC, BaseModel):
 
     _field_name: str = PrivateAttr(default_factory=str)
     """
-    Name of the field that is represented by the given dict.
+    Name of the field in the context storage that is represented by the given dict.
     """
 
     @property
