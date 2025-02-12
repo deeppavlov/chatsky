@@ -11,6 +11,7 @@ def docker_client(wrapped: Callable[[Optional[DockerClient]], int], _, __, ___) 
         docker = DockerClient(
             compose_files=["compose.yml"],
             compose_profiles=["context_storage", "stats"],
+            compose_compatibility=True,
         )
         docker.compose.up(detach=True, wait=True, quiet=True)
         error = None
