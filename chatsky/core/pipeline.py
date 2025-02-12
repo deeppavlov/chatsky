@@ -222,13 +222,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
     
-    # Add ctx_id, update_ctx_misc, make method private
-    def run_pipeline(self, request: Message, ctx: Context) -> Context:
-        self._process_one_turn(request, ctx)
-    # Add tests for transition.passthrough 
-        while ctx.framework_data.transition.passthrough:
-            passthrough = self._process_one_turn(Message(), ctx)
-        # Add exception 
+    def run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None) -> Context:
+        ctx = self._process_one_turn(request, ctx_id, update_ctx_misc)
+    # Add tests for transition.passthrough (check notes from Monday)
+        if ctx.framework_data.transition is not None:
+            while ctx.framework_data.transition is not None and \
+                ctx.framework_data.transition.passthrough:
+                ctx = self._process_one_turn(Message(), ctx_id, update_ctx_misc)
+            else:
+                logger.warning("No transition found in framework_data")
+        else:
+            logger.warning("No transition found in framework_data")
+        return ctx
 
     async def _process_one_turn(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
