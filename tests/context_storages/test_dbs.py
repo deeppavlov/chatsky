@@ -1,7 +1,7 @@
 import os
 from platform import system
 from socket import AF_INET, SOCK_STREAM, socket
-from typing import Optional
+from typing import Awaitable, Callable, Optional
 import asyncio
 import random
 
@@ -18,6 +18,7 @@ from chatsky.context_storages import (
     redis_available,
     mongo_available,
     ydb_available,
+    DBContextStorage,
 )
 from chatsky.utils.testing.cleanup_db import (
     delete_file,
@@ -27,11 +28,13 @@ from chatsky.utils.testing.cleanup_db import (
     delete_ydb,
 )
 from chatsky import Pipeline
-from chatsky.context_storages import DBContextStorage
-from chatsky.context_storages.database import _SUBSCRIPT_TYPE, ContextInfo
+from chatsky.core.context import ContextMainInfo
+from chatsky.context_storages.database import _SUBSCRIPT_TYPE
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_path
 
 from tests.test_utils import get_path_from_tests_to_current_dir
+
+AddContextType = Callable[[DBContextStorage, str, ContextMainInfo], Awaitable[None]]
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -167,14 +170,14 @@ class TestContextStorages:
 
     @pytest.fixture
     async def ctx_info(self):
-        yield ContextInfo(turn_id=1, created_at=1, updated_at=1)
+        yield ContextMainInfo(turn_id=1, created_at=1, updated_at=1)
 
     @pytest.fixture
-    async def add_context(self, db, ctx_info):
-        async def add_context(ctx_id: str):
+    async def add_context(self):
+        async def add_context_internal(db: DBContextStorage, ctx_id: str, ctx_info: ContextMainInfo) -> None:
             await db.update_context(ctx_id, ctx_info, [("labels", [(0, b"0")], list())])
 
-        yield add_context
+        yield add_context_internal
 
     @staticmethod
     def configure_context_storage(
@@ -196,24 +199,25 @@ class TestContextStorages:
         if responses_subscript is not None:
             context_storage._subscripts["responses"] = responses_subscript
 
-    async def test_add_context(self, db: DBContextStorage, add_context):
+    async def test_add_context(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
         # test the fixture
-        await add_context("1")
+        await add_context(db, "1", ctx_info)
 
-    async def test_get_main_info(self, db: DBContextStorage, add_context):
-        await add_context("1")
-        assert await db.load_main_info("1") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
+    async def test_get_main_info(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
+        assert await db.load_main_info("1") == ctx_info
         assert await db.load_main_info("2") is None
 
-    async def test_update_main_info(self, db: DBContextStorage, add_context):
-        await add_context("1")
-        await add_context("2")
-        assert await db.load_main_info("1") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
-        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
+    async def test_update_main_info(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
+        await add_context(db, "2", ctx_info)
+        assert await db.load_main_info("1") == ctx_info
+        assert await db.load_main_info("2") == ctx_info
 
-        await db.update_context("1", ContextInfo(turn_id=2, created_at=1, updated_at=3), list())
-        assert await db.load_main_info("1") == ContextInfo(turn_id=2, created_at=1, updated_at=3)
-        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
+        new_info = ContextMainInfo(turn_id=2, created_at=1, updated_at=3)
+        await db.update_context("1", new_info)
+        assert await db.load_main_info("1") == new_info
+        assert await db.load_main_info("2") == ctx_info
 
     async def test_wrong_field_name(self, db: DBContextStorage):
         with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
@@ -223,12 +227,10 @@ class TestContextStorages:
         with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
             await db.load_field_items("1", "non-existent", [1, 2])
         with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
-            await db.update_context(
-                "1", ContextInfo(turn_id=1, created_at=1, updated_at=1), [("non-existent", [(1, b"2")], list())]
-            )
+            await db.update_context("1", field_info=[("non-existent", [(1, b"2")], list())])
 
-    async def test_field_get(self, db: DBContextStorage, add_context):
-        await add_context("1")
+    async def test_field_get(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
 
         assert await db.load_field_latest("1", "labels") == [(0, b"0")]
         assert set(await db.load_field_keys("1", "labels")) == {0}
@@ -236,33 +238,33 @@ class TestContextStorages:
         assert await db.load_field_latest("1", "requests") == []
         assert set(await db.load_field_keys("1", "requests")) == set()
 
-    async def test_field_load(self, db: DBContextStorage, add_context, ctx_info):
-        await add_context("1")
+    async def test_field_load(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
 
-        await db.update_context("1", ctx_info, [("requests", [(1, b"1"), (3, b"3"), (2, b"2"), (4, b"4")], list())])
+        await db.update_context("1", field_info=[("requests", [(1, b"1"), (3, b"3"), (2, b"2"), (4, b"4")], list())])
 
         assert await db.load_field_items("1", "requests", [1, 2]) == [(1, b"1"), (2, b"2")]
         assert await db.load_field_items("1", "requests", [4, 3]) == [(3, b"3"), (4, b"4")]
 
-    async def test_field_update(self, db: DBContextStorage, add_context, ctx_info):
-        await add_context("1")
+    async def test_field_update(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
         assert await db.load_field_latest("1", "labels") == [(0, b"0")]
         assert await db.load_field_latest("1", "requests") == []
 
-        await db.update_context("1", ctx_info, [("labels", [(0, b"1")], list())])
-        await db.update_context("1", ctx_info, [("requests", [(4, b"4")], list())])
-        await db.update_context("1", ctx_info, [("labels", [(2, b"2")], list())])
+        await db.update_context("1", field_info=[("labels", [(0, b"1")], list())])
+        await db.update_context("1", field_info=[("requests", [(4, b"4")], list())])
+        await db.update_context("1", field_info=[("labels", [(2, b"2")], list())])
 
         assert await db.load_field_latest("1", "labels") == [(2, b"2"), (0, b"1")]
         assert set(await db.load_field_keys("1", "labels")) == {0, 2}
         assert await db.load_field_latest("1", "requests") == [(4, b"4")]
         assert set(await db.load_field_keys("1", "requests")) == {4}
 
-    async def test_int_key_field_subscript(self, db: DBContextStorage, add_context, ctx_info):
-        await add_context("1")
-        await db.update_context("1", ctx_info, [("requests", [(2, b"2")], list())])
-        await db.update_context("1", ctx_info, [("requests", [(1, b"1")], list())])
-        await db.update_context("1", ctx_info, [("requests", [(0, b"0")], list())])
+    async def test_int_key_field_subscript(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
+        await db.update_context("1", field_info=[("requests", [(2, b"2")], list())])
+        await db.update_context("1", field_info=[("requests", [(1, b"1")], list())])
+        await db.update_context("1", field_info=[("requests", [(0, b"0")], list())])
 
         self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1")]
@@ -270,7 +272,7 @@ class TestContextStorages:
         self.configure_context_storage(db, requests_subscript="__all__")
         assert await db.load_field_latest("1", "requests") == [(2, b"2"), (1, b"1"), (0, b"0")]
 
-        await db.update_context("1", ctx_info, [("requests", [(5, b"5")], list())])
+        await db.update_context("1", field_info=[("requests", [(5, b"5")], list())])
 
         self.configure_context_storage(db, requests_subscript=2)
         assert await db.load_field_latest("1", "requests") == [(5, b"5"), (2, b"2")]
@@ -278,34 +280,34 @@ class TestContextStorages:
         self.configure_context_storage(db, requests_subscript={5, 1})
         assert await db.load_field_latest("1", "requests") == [(5, b"5"), (1, b"1")]
 
-    async def test_delete_field_key(self, db: DBContextStorage, add_context, ctx_info):
-        await add_context("1")
+    async def test_delete_field_key(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
 
-        await db.update_context("1", ctx_info, [("labels", list(), [0])])
+        await db.update_context("1", field_info=[("labels", list(), [0])])
 
         assert await db.load_field_latest("1", "labels") == []
 
-    async def test_raises_on_missing_field_keys(self, db: DBContextStorage, add_context):
-        await add_context("1")
+    async def test_raises_on_missing_field_keys(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
 
         assert set(await db.load_field_items("1", "labels", [0, 1])) == {(0, b"0")}
         assert set(await db.load_field_items("1", "requests", [0])) == set()
 
-    async def test_delete_context(self, db: DBContextStorage, add_context):
-        await add_context("1")
-        await add_context("2")
+    async def test_delete_context(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
+        await add_context(db, "2", ctx_info)
 
         await db.delete_context("1")
 
         assert await db.load_main_info("1") is None
-        assert await db.load_main_info("2") == ContextInfo(turn_id=1, created_at=1, updated_at=1)
+        assert await db.load_main_info("2") == ContextMainInfo(turn_id=1, created_at=1, updated_at=1)
 
         assert set(await db.load_field_keys("1", "labels")) == set()
         assert set(await db.load_field_keys("2", "labels")) == {0}
 
-    async def test_clear_all(self, db: DBContextStorage, add_context):
-        await add_context("1")
-        await add_context("2")
+    async def test_clear_all(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+        await add_context(db, "1", ctx_info)
+        await add_context(db, "2", ctx_info)
 
         await db.clear_all()
 
@@ -315,22 +317,20 @@ class TestContextStorages:
         assert set(await db.load_field_keys("2", "labels")) == set()
 
     @pytest.mark.slow
-    async def test_concurrent_operations(self, db: DBContextStorage, ctx_info):
+    async def test_concurrent_operations(self, db: DBContextStorage):
         async def db_operations(key: int):
             str_key = str(key)
             key_misc = {f"{key}": key + 2}
             await asyncio.sleep(random.random() / 100)
-            await db.update_context(
-                str_key, ContextInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc), list()
-            )
+            await db.update_context(str_key, ContextMainInfo(turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc))
             await asyncio.sleep(random.random() / 100)
-            assert await db.load_main_info(str_key) == ContextInfo(
+            assert await db.load_main_info(str_key) == ContextMainInfo(
                 turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc
             )
 
             for idx in range(1, 20):
                 requests_update = [(0, bytes(2 * key + idx)), (idx, bytes(key + idx))]
-                await db.update_context(str_key, ctx_info, [("requests", requests_update, list())])
+                await db.update_context(str_key, [("requests", requests_update, list())])
                 await asyncio.sleep(random.random() / 100)
                 keys = list(range(idx + 1))
                 assert set(await db.load_field_keys(str_key, "requests")) == set(keys)

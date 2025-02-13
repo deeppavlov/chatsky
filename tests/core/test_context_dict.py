@@ -1,7 +1,8 @@
 import pytest
 
+from chatsky.core.context import ContextMainInfo
 from chatsky.context_storages import MemoryContextStorage
-from chatsky.context_storages.database import ContextInfo, NameConfig
+from chatsky.context_storages.database import NameConfig
 from chatsky.core.message import Message
 from chatsky.core.ctx_dict import ContextDict, MessageContextDict
 
@@ -27,7 +28,7 @@ class TestContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
         storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
-        main_info = ContextInfo(turn_id=0, created_at=0, updated_at=0)
+        main_info = ContextMainInfo(turn_id=0, created_at=0, updated_at=0)
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),

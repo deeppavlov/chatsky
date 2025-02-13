@@ -12,11 +12,8 @@ take advantage of the scalability and high-availability features provided by the
 
 from asyncio import gather
 from os.path import join
-from typing import Awaitable, Callable, Set, Tuple, List, Optional
+from typing import TYPE_CHECKING, Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
-
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
-from .protocol import get_protocol_install_suggestion
 
 try:
     from ydb import (
@@ -33,6 +30,12 @@ try:
     ydb_available = True
 except ImportError:
     ydb_available = False
+
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .protocol import get_protocol_install_suggestion
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 
 class YDBContextStorage(DBContextStorage):
@@ -136,8 +139,8 @@ class YDBContextStorage(DBContextStorage):
 
         await self.pool.retry_operation(callee)
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
-        async def callee(session: Session) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
+        async def callee(session: Session) -> Optional[ContextMainInfo]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;
@@ -153,14 +156,8 @@ class YDBContextStorage(DBContextStorage):
                 commit_tx=True,
             )
             return (
-                ContextInfo.model_validate(
-                    {
-                        "turn_id": result_sets[0].rows[0][NameConfig._current_turn_id_column],
-                        "created_at": result_sets[0].rows[0][NameConfig._created_at_column],
-                        "updated_at": result_sets[0].rows[0][NameConfig._updated_at_column],
-                        "misc": result_sets[0].rows[0][NameConfig._misc_column],
-                        "framework_data": result_sets[0].rows[0][NameConfig._framework_data_column],
-                    }
+                ContextMainInfo.model_validate(
+                    {f: result_sets[0].rows[0][f] for f in NameConfig.get_context_main_fields()}
                 )
                 if len(result_sets[0].rows) > 0
                 else None
@@ -169,34 +166,33 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
         async def callee(session: Session) -> None:
-            ctx_info_dump = ctx_info.model_dump(mode="python")
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${NameConfig._id_column} AS Utf8;
-                DECLARE ${NameConfig._current_turn_id_column} AS Uint64;
-                DECLARE ${NameConfig._created_at_column} AS Uint64;
-                DECLARE ${NameConfig._updated_at_column} AS Uint64;
-                DECLARE ${NameConfig._misc_column} AS String;
-                DECLARE ${NameConfig._framework_data_column} AS String;
-                UPSERT INTO {self.main_table} ({NameConfig._id_column}, {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column})
-                VALUES (${NameConfig._id_column}, ${NameConfig._current_turn_id_column}, ${NameConfig._created_at_column}, ${NameConfig._updated_at_column}, ${NameConfig._misc_column}, ${NameConfig._framework_data_column});
-                """  # noqa: E501
-            await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(query),
-                {
-                    f"${NameConfig._id_column}": ctx_id,
-                    f"${NameConfig._current_turn_id_column}": ctx_info_dump["turn_id"],
-                    f"${NameConfig._created_at_column}": ctx_info_dump["created_at"],
-                    f"${NameConfig._updated_at_column}": ctx_info_dump["updated_at"],
-                    f"${NameConfig._misc_column}": ctx_info_dump["misc"],
-                    f"${NameConfig._framework_data_column}": ctx_info_dump["framework_data"],
-                },
-                commit_tx=True,
-            )
-
+            transaction = await session.transaction(SerializableReadWrite()).begin()
+            if ctx_info is not None:
+                ctx_info_dump = ctx_info.model_dump(mode="python")
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${NameConfig._id_column} AS Utf8;
+                    DECLARE ${NameConfig._current_turn_id_column} AS Uint64;
+                    DECLARE ${NameConfig._created_at_column} AS Uint64;
+                    DECLARE ${NameConfig._updated_at_column} AS Uint64;
+                    DECLARE ${NameConfig._misc_column} AS String;
+                    DECLARE ${NameConfig._framework_data_column} AS String;
+                    UPSERT INTO {self.main_table} ({NameConfig._id_column}, {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column})
+                    VALUES (${NameConfig._id_column}, ${NameConfig._current_turn_id_column}, ${NameConfig._created_at_column}, ${NameConfig._updated_at_column}, ${NameConfig._misc_column}, ${NameConfig._framework_data_column});
+                    """  # noqa: E501
+                async with await transaction.execute(
+                    await session.prepare(query),
+                    {
+                        f"${NameConfig._id_column}": ctx_id,
+                    } | {
+                        f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
+                    },
+                    commit_tx=True,
+                ) as _:
+                    pass
             for field_name, items in field_info:
                 declare, prepare, values = list(), dict(), list()
                 for i, (k, v) in enumerate(items):
@@ -216,15 +212,16 @@ class YDBContextStorage(DBContextStorage):
                     UPSERT INTO {self.turns_table} ({NameConfig._id_column}, {NameConfig._key_column}, {field_name})
                     VALUES {", ".join(values)};
                     """  # noqa: E501
-
-                await session.transaction(SerializableReadWrite()).execute(
+                async with await transaction.execute(
                     await session.prepare(query),
                     {
                         f"${NameConfig._id_column}": ctx_id,
                         **prepare,
                     },
                     commit_tx=True,
-                )
+                ) as _:
+                    pass
+            await transaction.commit()
 
         await self.pool.retry_operation(callee)
 

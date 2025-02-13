@@ -9,11 +9,14 @@ store and retrieve context data.
 from abc import ABC, abstractmethod
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import List, Set, Tuple, Dict, Optional
+from typing import TYPE_CHECKING, List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT
+from .database import DBContextStorage, _SUBSCRIPT_DICT
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 try:
     from aiofiles import open
@@ -33,7 +36,7 @@ class SerializableStorage(BaseModel):
     One element of this class will be used to store all the contexts, read and written to file on every turn.
     """
 
-    main: Dict[str, ContextInfo] = Field(default_factory=dict)
+    main: Dict[str, ContextMainInfo] = Field(default_factory=dict)
     turns: List[Tuple[str, str, int, Optional[bytes]]] = Field(default_factory=list)
 
 
@@ -67,14 +70,15 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _connect(self):
         await self._load()
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         return (await self._load()).main.get(ctx_id, None)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
         storage = await self._load()
-        storage.main[ctx_id] = ctx_info
+        if ctx_info is not None:
+            storage.main[ctx_id] = ctx_info
         for field_name, items in field_info:
             for k, v in items:
                 upd = (ctx_id, field_name, k, v)

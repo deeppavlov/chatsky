@@ -11,22 +11,18 @@ This class implements the basic functionality and can be extended to add additio
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import Lock
-from json import loads
 from functools import wraps
 from importlib import import_module
 from logging import getLogger
 from pathlib import Path
-from time import time_ns
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Literal, Optional, Tuple, Union
-
-from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
 from chatsky.utils.logging import collapse_num_list
 
 from .protocol import PROTOCOLS
 
 if TYPE_CHECKING:
-    from chatsky.core.context import FrameworkData
+    from chatsky.core.context import ContextMainInfo
 
 _SUBSCRIPT_TYPE = Union[Literal["__all__"], int]
 _SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], _SUBSCRIPT_TYPE]
@@ -53,42 +49,14 @@ class NameConfig:
     _requests_field: Literal["requests"] = "requests"
     _responses_field: Literal["responses"] = "responses"
 
-
-class ContextInfo(BaseModel):
-    """
-    Main context fields, that are stored in `MAIN` table.
-    For most of the database backends, it will be serialized to json.
-    For SQL database backends, it will be written to different table columns.
-    For memory context storage, it won't be serialized at all.
-    """
-
-    turn_id: int
-    created_at: int = Field(default_factory=time_ns)
-    updated_at: int = Field(default_factory=time_ns)
-    misc: Dict[str, Any] = Field(default_factory=dict)
-    framework_data: FrameworkData = Field(default_factory=dict, validate_default=True)
-
-    _misc_adaptor: TypeAdapter[Dict[str, Any]] = PrivateAttr(default=TypeAdapter(Dict[str, Any]))
-
-    @field_validator("framework_data", "misc", mode="before")
-    @classmethod
-    def _validate_framework_data(cls, value: Any) -> Dict:
-        if isinstance(value, bytes) or isinstance(value, str):
-            value = loads(value)
-        return value
-
-    @field_serializer("misc", when_used="always")
-    def _serialize_misc(self, misc: Dict[str, Any]) -> bytes:
-        return self._misc_adaptor.dump_json(misc)
-
-    @field_serializer("framework_data", when_used="always")
-    def _serialize_framework_data(self, framework_data: FrameworkData) -> bytes:
-        return framework_data.model_dump_json().encode()
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, BaseModel):
-            return self.model_dump() == other.model_dump()
-        return super().__eq__(other)
+    def get_context_main_fields(self) -> List[str]:
+        return [
+            NameConfig._current_turn_id_column,
+            NameConfig._created_at_column,
+            NameConfig._updated_at_column,
+            NameConfig._misc_column,
+            NameConfig._framework_data_column,
+        ]
 
 
 def _lock(function: Callable[..., Awaitable[Any]]):
@@ -202,11 +170,11 @@ class DBContextStorage(ABC):
         self.connected = True
 
     @abstractmethod
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         raise NotImplementedError
 
     @_lock
-    async def load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         """
         Load main information about the context.
 
@@ -221,13 +189,13 @@ class DBContextStorage(ABC):
 
     @abstractmethod
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
         raise NotImplementedError
 
     @_lock
     async def update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, bytes]], List[int]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo] = None, field_info: Optional[List[Tuple[str, List[Tuple[int, bytes]], List[int]]]] = None
     ) -> None:
         """
         Update context intofrmation.
@@ -238,6 +206,7 @@ class DBContextStorage(ABC):
         """
 
         joined_field_info = dict()
+        field_info = list() if field_info is None else field_info
         logger.debug(f"Updating context for {ctx_id}...")
         for field, added, deleted in field_info:
             field_info = joined_field_info.setdefault(self._validate_field_name(field), list())

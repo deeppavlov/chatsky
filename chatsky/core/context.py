@@ -18,14 +18,15 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 from asyncio import Event, gather
+from json import loads
 from uuid import uuid4
 from time import time_ns
 from typing import Any, Callable, Iterable, Optional, Dict, TYPE_CHECKING, Tuple, Union
 import logging
 
-from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator, field_serializer, field_validator
 
-from chatsky.context_storages.database import DBContextStorage, ContextInfo, NameConfig
+from chatsky.context_storages.database import DBContextStorage, NameConfig
 from chatsky.core.message import Message
 from chatsky.slots.slots import SlotManager
 from chatsky.core.node_label import AbsoluteNodeLabel
@@ -80,6 +81,43 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+
+
+class ContextMainInfo(BaseModel):
+    """
+    Main context fields, that are stored in `MAIN` table.
+    For most of the database backends, it will be serialized to json.
+    For SQL database backends, it will be written to different table columns.
+    For memory context storage, it won't be serialized at all.
+    """
+
+    current_turn_id: int
+    created_at: int = Field(default_factory=time_ns)
+    updated_at: int = Field(default_factory=time_ns)
+    misc: Dict[str, Any] = Field(default_factory=dict)
+    framework_data: FrameworkData = Field(default_factory=dict, validate_default=True)
+
+    _misc_adaptor: TypeAdapter[Dict[str, Any]] = PrivateAttr(default=TypeAdapter(Dict[str, Any]))
+
+    @field_validator("framework_data", "misc", mode="before")
+    @classmethod
+    def _validate_framework_data(cls, value: Any) -> Dict:
+        if isinstance(value, bytes) or isinstance(value, str):
+            value = loads(value)
+        return value
+
+    @field_serializer("misc", when_used="always")
+    def _serialize_misc(self, misc: Dict[str, Any]) -> bytes:
+        return self._misc_adaptor.dump_json(misc)
+
+    @field_serializer("framework_data", when_used="always")
+    def _serialize_framework_data(self, framework_data: FrameworkData) -> bytes:
+        return framework_data.model_dump_json().encode()
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BaseModel):
+            return self.model_dump() == other.model_dump()
+        return super().__eq__(other)
 
 
 class Context(BaseModel):
@@ -366,8 +404,8 @@ class Context(BaseModel):
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
-            main_into = ContextInfo(
-                turn_id=self.current_turn_id,
+            main_into = ContextMainInfo(
+                current_turn_id=self.current_turn_id,
                 created_at=self._created_at,
                 updated_at=self._updated_at,
                 misc=self.misc,

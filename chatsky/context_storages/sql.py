@@ -16,11 +16,8 @@ public-domain, SQL database engine.
 from __future__ import annotations
 import asyncio
 from importlib import import_module
-from typing import Callable, Collection, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Callable, Collection, List, Optional, Set, Tuple
 import logging
-
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
-from .protocol import get_protocol_install_suggestion
 
 try:
     from sqlalchemy import (
@@ -77,6 +74,11 @@ except (ImportError, ModuleNotFoundError):
 if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .protocol import get_protocol_install_suggestion
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 logger = logging.getLogger(__name__)
 
@@ -206,50 +208,42 @@ class SQLContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("sqlite")
             raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         stmt = select(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
             return (
                 None
                 if result is None
-                else ContextInfo.model_validate(
-                    {
-                        "turn_id": result[1],
-                        "created_at": result[2],
-                        "updated_at": result[3],
-                        "misc": result[4],
-                        "framework_data": result[5],
-                    }
+                else ContextMainInfo.model_validate(
+                    {f: result[i + 1] for i, f in enumerate(NameConfig.get_context_main_fields())}
                 )
             )
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
-        ctx_info_dump = ctx_info.model_dump(mode="python")
-        main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
-            {
-                NameConfig._id_column: ctx_id,
-                NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                NameConfig._created_at_column: ctx_info_dump["created_at"],
-                NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                NameConfig._misc_column: ctx_info_dump["misc"],
-                NameConfig._framework_data_column: ctx_info_dump["framework_data"],
-            }
-        )
-        main_update_stmt = _get_upsert_stmt(
-            self.dialect,
-            main_insert_stmt,
-            [
-                NameConfig._updated_at_column,
-                NameConfig._current_turn_id_column,
-                NameConfig._misc_column,
-                NameConfig._framework_data_column,
-            ],
-            [NameConfig._id_column],
-        )
-        turns_update_stmts = list()
+        main_update_stmt, turns_update_stmts = None, list()
+        if ctx_info is not None:
+            ctx_info_dump = ctx_info.model_dump(mode="python")
+            main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
+                {
+                    NameConfig._id_column: ctx_id,
+                } | {
+                    f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
+                }
+            )
+            main_update_stmt = _get_upsert_stmt(
+                self.dialect,
+                main_insert_stmt,
+                [
+                    NameConfig._updated_at_column,
+                    NameConfig._current_turn_id_column,
+                    NameConfig._misc_column,
+                    NameConfig._framework_data_column,
+                ],
+                [NameConfig._id_column],
+            )
         for field_name, items in field_info:
             turns_insert_values = [
                 {
@@ -271,7 +265,8 @@ class SQLContextStorage(DBContextStorage):
                     )
                 ]
         async with self.engine.begin() as conn:
-            await conn.execute(main_update_stmt)
+            if main_update_stmt is not None:
+                await conn.execute(main_update_stmt)
             for turns_update_stmt in turns_update_stmts:
                 await conn.execute(turns_update_stmt)
 

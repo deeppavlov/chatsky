@@ -14,7 +14,7 @@ and powerful choice for data storage and management.
 """
 
 from asyncio import gather
-from typing import List, Set, Tuple, Optional
+from typing import TYPE_CHECKING, List, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -23,8 +23,11 @@ try:
 except ImportError:
     redis_available = False
 
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 
 class RedisContextStorage(DBContextStorage):
@@ -78,26 +81,24 @@ class RedisContextStorage(DBContextStorage):
     def _bytes_to_keys(keys: List[bytes]) -> List[int]:
         return [int(f.decode("utf-8")) for f in keys]
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
-            cti, ca, ua, msc, fd = await gather(
-                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column),
-                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._created_at_column),
-                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column),
-                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._misc_column),
-                self.database.hget(f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column),
+            retrieved_fields = await gather(
+                *[self.database.hget(f"{self._main_key}:{ctx_id}", f) for f in NameConfig.get_context_main_fields()]
             )
-            return ContextInfo.model_validate(
-                {"turn_id": cti, "created_at": ca, "updated_at": ua, "misc": msc, "framework_data": fd}
+            return ContextMainInfo.model_validate(
+                {f: v for f, v in zip(NameConfig.get_context_main_fields(), retrieved_fields)}
             )
         else:
             return None
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
-        ctx_info_dump = ctx_info.model_dump(mode="python")
-        update_values, delete_keys = list(), list()
+        update_main, update_values, delete_keys = list(), list(), list()
+        if ctx_info is not None:
+            ctx_info_dump = ctx_info.model_dump(mode="python")
+            update_main = [(f, ctx_info_dump[f] if isinstance(ctx_info_dump[f], bytes) else str(ctx_info_dump[f])) for f in NameConfig.get_context_main_fields()]
         for field_name, items in field_info:
             new_delete_keys = list()
             for k, v in items:
@@ -112,19 +113,7 @@ class RedisContextStorage(DBContextStorage):
                 ]
                 delete_keys += [(field_key, valid_keys)]
         await gather(
-            self.database.hset(
-                f"{self._main_key}:{ctx_id}", NameConfig._current_turn_id_column, str(ctx_info_dump["turn_id"])
-            ),
-            self.database.hset(
-                f"{self._main_key}:{ctx_id}", NameConfig._created_at_column, str(ctx_info_dump["created_at"])
-            ),
-            self.database.hset(
-                f"{self._main_key}:{ctx_id}", NameConfig._updated_at_column, str(ctx_info_dump["updated_at"])
-            ),
-            self.database.hset(f"{self._main_key}:{ctx_id}", NameConfig._misc_column, ctx_info_dump["misc"]),
-            self.database.hset(
-                f"{self._main_key}:{ctx_id}", NameConfig._framework_data_column, ctx_info_dump["framework_data"]
-            ),
+            *[self.database.hset(f"{self._main_key}:{ctx_id}", f, u) for f, u in update_main],
             *[self.database.hset(f"{self._turns_key}:{ctx_id}:{f}", str(k), v) for f, k, v in update_values],
             *[self.database.hdel(f, *k) for f, k in delete_keys],
         )

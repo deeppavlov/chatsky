@@ -1,6 +1,9 @@
-from typing import List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 
 class MemoryContextStorage(DBContextStorage):
@@ -37,13 +40,14 @@ class MemoryContextStorage(DBContextStorage):
     async def _connect(self):
         pass
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         return self._main_storage.get(ctx_id, None)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
-        self._main_storage[ctx_id] = ctx_info
+        if ctx_info is not None:
+            self._main_storage[ctx_id] = ctx_info
         for field_name, items in field_info:
             self._aux_storage[field_name].setdefault(ctx_id, dict()).update(items)
 

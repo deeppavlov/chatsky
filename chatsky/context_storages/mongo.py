@@ -13,7 +13,7 @@ and high levels of read and write traffic.
 """
 
 from asyncio import gather
-from typing import Any, Dict, Set, Tuple, Optional, List
+from typing import TYPE_CHECKING, Any, Dict, Set, Tuple, Optional, List
 
 try:
     from pymongo import UpdateOne
@@ -25,8 +25,11 @@ except ImportError:
 
     mongo_available = False
 
-from .database import ContextInfo, DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
+
+if TYPE_CHECKING:
+    from chatsky.core.context import ContextMainInfo
 
 
 class MongoContextStorage(DBContextStorage):
@@ -75,27 +78,13 @@ class MongoContextStorage(DBContextStorage):
             ),
         )
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         result = await self.main_table.find_one(
             {NameConfig._id_column: ctx_id},
-            [
-                NameConfig._current_turn_id_column,
-                NameConfig._created_at_column,
-                NameConfig._updated_at_column,
-                NameConfig._misc_column,
-                NameConfig._framework_data_column,
-            ],
+            NameConfig.get_context_main_fields(),
         )
         return (
-            ContextInfo.model_validate(
-                {
-                    "turn_id": result[NameConfig._current_turn_id_column],
-                    "created_at": result[NameConfig._created_at_column],
-                    "updated_at": result[NameConfig._updated_at_column],
-                    "misc": result[NameConfig._misc_column],
-                    "framework_data": result[NameConfig._framework_data_column],
-                }
-            )
+            ContextMainInfo.model_validate({f: result[f] for f in NameConfig.get_context_main_fields()})
             if result is not None
             else None
         )
@@ -103,25 +92,26 @@ class MongoContextStorage(DBContextStorage):
     async def _inner_update_context(
         self,
         ctx_id: str,
-        ctx_info_dump: Dict,
+        ctx_info_dump: Optional[Dict],
         field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
         session: Optional[AsyncIOMotorClientSession],
     ) -> None:
-        await self.main_table.update_one(
-            {NameConfig._id_column: ctx_id},
-            {
-                "$set": {
-                    NameConfig._id_column: ctx_id,
-                    NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                    NameConfig._created_at_column: ctx_info_dump["created_at"],
-                    NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                    NameConfig._misc_column: ctx_info_dump["misc"],
-                    NameConfig._framework_data_column: ctx_info_dump["framework_data"],
-                }
-            },
-            upsert=True,
-            session=session,
-        )
+        if ctx_info_dump is not None:
+            await self.main_table.update_one(
+                {NameConfig._id_column: ctx_id},
+                {
+                    "$set": {
+                        NameConfig._id_column: ctx_id,
+                        NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
+                        NameConfig._created_at_column: ctx_info_dump["created_at"],
+                        NameConfig._updated_at_column: ctx_info_dump["updated_at"],
+                        NameConfig._misc_column: ctx_info_dump["misc"],
+                        NameConfig._framework_data_column: ctx_info_dump["framework_data"],
+                    }
+                },
+                upsert=True,
+                session=session,
+            )
         if len(field_info) > 0:
             await self.turns_table.bulk_write(
                 [
@@ -137,9 +127,9 @@ class MongoContextStorage(DBContextStorage):
             )
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: ContextInfo, field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
-        ctx_info_dump = ctx_info.model_dump(mode="python")
+        ctx_info_dump = ctx_info.model_dump(mode="python") if ctx_info is not None else None
         if self._transactions_enabled:
             async with await self._mongo.start_session() as session:
                 async with session.start_transaction():
