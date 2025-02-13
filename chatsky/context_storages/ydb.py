@@ -90,7 +90,7 @@ class YDBContextStorage(DBContextStorage):
         self.main_table = f"{self.table_prefix}_{NameConfig._main_table}"
         self.turns_table = f"{self.table_prefix}_{NameConfig._turns_table}"
 
-        async with SessionPool(self._driver) as pool:
+        async with SessionPool(self._driver, size=10) as pool:
             if not await self._does_table_exist(pool, self.main_table):
                 await self._create_main_table(pool, self.main_table)
             if not await self._does_table_exist(pool, self.turns_table):
