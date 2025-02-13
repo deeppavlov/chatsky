@@ -79,10 +79,10 @@ class MongoContextStorage(DBContextStorage):
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         result = await self.main_table.find_one(
             {NameConfig._id_column: ctx_id},
-            NameConfig.get_context_main_fields(),
+            NameConfig.get_context_main_fields,
         )
         return (
-            ContextMainInfo.model_validate({f: result[f] for f in NameConfig.get_context_main_fields()})
+            ContextMainInfo.model_validate({f: result[f] for f in NameConfig.get_context_main_fields})
             if result is not None
             else None
         )
@@ -101,7 +101,7 @@ class MongoContextStorage(DBContextStorage):
                     "$set": {
                         NameConfig._id_column: ctx_id,
                     } | {
-                        f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
+                        f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields
                     }
                 },
                 upsert=True,

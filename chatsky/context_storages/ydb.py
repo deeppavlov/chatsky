@@ -155,7 +155,7 @@ class YDBContextStorage(DBContextStorage):
             )
             return (
                 ContextMainInfo.model_validate(
-                    {f: result_sets[0].rows[0][f] for f in NameConfig.get_context_main_fields()}
+                    {f: result_sets[0].rows[0][f] for f in NameConfig.get_context_main_fields}
                 )
                 if len(result_sets[0].rows) > 0
                 else None
@@ -186,7 +186,7 @@ class YDBContextStorage(DBContextStorage):
                     {
                         f"${NameConfig._id_column}": ctx_id,
                     } | {
-                        f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
+                        f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields
                     },
                     commit_tx=True,
                 ) as _:

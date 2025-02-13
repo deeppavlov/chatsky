@@ -82,10 +82,10 @@ class RedisContextStorage(DBContextStorage):
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
         if await self.database.exists(f"{self._main_key}:{ctx_id}"):
             retrieved_fields = await gather(
-                *[self.database.hget(f"{self._main_key}:{ctx_id}", f) for f in NameConfig.get_context_main_fields()]
+                *[self.database.hget(f"{self._main_key}:{ctx_id}", f) for f in NameConfig.get_context_main_fields]
             )
             return ContextMainInfo.model_validate(
-                {f: v for f, v in zip(NameConfig.get_context_main_fields(), retrieved_fields)}
+                {f: v for f, v in zip(NameConfig.get_context_main_fields, retrieved_fields)}
             )
         else:
             return None
@@ -96,7 +96,7 @@ class RedisContextStorage(DBContextStorage):
         update_main, update_values, delete_keys = list(), list(), list()
         if ctx_info is not None:
             ctx_info_dump = ctx_info.model_dump(mode="python")
-            update_main = [(f, ctx_info_dump[f] if isinstance(ctx_info_dump[f], bytes) else str(ctx_info_dump[f])) for f in NameConfig.get_context_main_fields()]
+            update_main = [(f, ctx_info_dump[f] if isinstance(ctx_info_dump[f], bytes) else str(ctx_info_dump[f])) for f in NameConfig.get_context_main_fields]
         for field_name, items in field_info:
             new_delete_keys = list()
             for k, v in items:

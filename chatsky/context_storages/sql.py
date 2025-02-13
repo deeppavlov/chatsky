@@ -214,7 +214,7 @@ class SQLContextStorage(DBContextStorage):
                 None
                 if result is None
                 else ContextMainInfo.model_validate(
-                    {f: result[i + 1] for i, f in enumerate(NameConfig.get_context_main_fields())}
+                    {f: result[i + 1] for i, f in enumerate(NameConfig.get_context_main_fields)}
                 )
             )
 
@@ -228,7 +228,7 @@ class SQLContextStorage(DBContextStorage):
                 {
                     NameConfig._id_column: ctx_id,
                 } | {
-                    f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
+                    f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields
                 }
             )
             main_update_stmt = _get_upsert_stmt(

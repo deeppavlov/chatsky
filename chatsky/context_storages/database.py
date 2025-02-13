@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Tuple, Union
 
 from chatsky.core.ctx_utils import ContextMainInfo
+from chatsky.utils.decorations import classproperty
 from chatsky.utils.logging import collapse_num_list
 from .protocol import PROTOCOLS
 
@@ -46,13 +47,14 @@ class NameConfig:
     _requests_field: Literal["requests"] = "requests"
     _responses_field: Literal["responses"] = "responses"
 
-    def get_context_main_fields(self) -> List[str]:
+    @classproperty
+    def get_context_main_fields(cls) -> List[str]:
         return [
-            NameConfig._current_turn_id_column,
-            NameConfig._created_at_column,
-            NameConfig._updated_at_column,
-            NameConfig._misc_column,
-            NameConfig._framework_data_column,
+            cls._current_turn_id_column,
+            cls._created_at_column,
+            cls._updated_at_column,
+            cls._misc_column,
+            cls._framework_data_column,
         ]
 
 
