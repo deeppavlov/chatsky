@@ -28,7 +28,7 @@ from chatsky.utils.testing.cleanup_db import (
     delete_ydb,
 )
 from chatsky import Pipeline
-from chatsky.core.context import ContextMainInfo
+from chatsky.core.ctx_utils import ContextMainInfo
 from chatsky.context_storages.database import _SUBSCRIPT_TYPE
 from chatsky.utils.testing import TOY_SCRIPT_KWARGS, HAPPY_PATH, check_happy_path
 

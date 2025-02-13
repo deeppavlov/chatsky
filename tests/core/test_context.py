@@ -1,7 +1,8 @@
 from copy import copy
 import pytest
 
-from chatsky.core.context import Context, ContextError
+from chatsky.core.context import Context
+from chatsky.core.ctx_utils import ContextError
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.script_function import BaseResponse, BaseProcessing

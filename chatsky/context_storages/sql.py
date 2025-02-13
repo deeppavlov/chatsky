@@ -14,10 +14,10 @@ public-domain, SQL database engine.
 """
 
 from __future__ import annotations
-import asyncio
+from asyncio import gather
 from importlib import import_module
-from typing import TYPE_CHECKING, Callable, Collection, List, Optional, Set, Tuple
-import logging
+from typing import Callable, Collection, List, Optional, Set, Tuple
+from logging import get_logger
 
 try:
     from sqlalchemy import (
@@ -74,13 +74,11 @@ except (ImportError, ModuleNotFoundError):
 if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
-
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 
 def _sqlite_enable_foreign_key(dbapi_con, con_record):
@@ -273,7 +271,7 @@ class SQLContextStorage(DBContextStorage):
     # TODO: use foreign keys instead maybe?
     async def _delete_context(self, ctx_id: str) -> None:
         async with self.engine.begin() as conn:
-            await asyncio.gather(
+            await gather(
                 conn.execute(delete(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)),
                 conn.execute(delete(self.turns_table).where(self.turns_table.c[NameConfig._id_column] == ctx_id)),
             )
@@ -307,4 +305,4 @@ class SQLContextStorage(DBContextStorage):
 
     async def _clear_all(self) -> None:
         async with self.engine.begin() as conn:
-            await asyncio.gather(conn.execute(delete(self.main_table)), conn.execute(delete(self.turns_table)))
+            await gather(conn.execute(delete(self.main_table)), conn.execute(delete(self.turns_table)))

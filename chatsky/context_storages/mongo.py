@@ -13,7 +13,7 @@ and high levels of read and write traffic.
 """
 
 from asyncio import gather
-from typing import TYPE_CHECKING, Any, Dict, Set, Tuple, Optional, List
+from typing import Any, Dict, Set, Tuple, Optional, List
 
 try:
     from pymongo import UpdateOne
@@ -25,11 +25,9 @@ except ImportError:
 
     mongo_available = False
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
-
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
 
 
 class MongoContextStorage(DBContextStorage):

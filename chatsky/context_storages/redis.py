@@ -14,7 +14,7 @@ and powerful choice for data storage and management.
 """
 
 from asyncio import gather
-from typing import TYPE_CHECKING, List, Set, Tuple, Optional
+from typing import List, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -23,11 +23,9 @@ try:
 except ImportError:
     redis_available = False
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
-
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
 
 
 class RedisContextStorage(DBContextStorage):

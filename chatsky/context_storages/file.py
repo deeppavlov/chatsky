@@ -9,14 +9,12 @@ store and retrieve context data.
 from abc import ABC, abstractmethod
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import TYPE_CHECKING, List, Set, Tuple, Dict, Optional
+from typing import List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT
-
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
 
 try:
     from aiofiles import open

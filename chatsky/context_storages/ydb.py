@@ -12,7 +12,7 @@ take advantage of the scalability and high-availability features provided by the
 
 from asyncio import gather
 from os.path import join
-from typing import TYPE_CHECKING, Awaitable, Callable, Set, Tuple, List, Optional
+from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
 
 try:
@@ -31,11 +31,9 @@ try:
 except ImportError:
     ydb_available = False
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
-
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
 
 
 class YDBContextStorage(DBContextStorage):

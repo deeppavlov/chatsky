@@ -7,7 +7,7 @@ from chatsky.core.pipeline import Pipeline
 from chatsky.slots.slots import SlotManager
 from chatsky.context_storages import DBContextStorage
 from chatsky.core.ctx_dict import ContextDict
-from chatsky.core.context import FrameworkData, ServiceState, ContextMainInfo
+from chatsky.core.ctx_utils import ServiceState, FrameworkData, ContextMainInfo
 from chatsky.core.service import PipelineComponent
 
 ContextMainInfo.model_rebuild()

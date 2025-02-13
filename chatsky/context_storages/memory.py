@@ -1,9 +1,7 @@
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
+from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
-
-if TYPE_CHECKING:
-    from chatsky.core.context import ContextMainInfo
 
 
 class MemoryContextStorage(DBContextStorage):
