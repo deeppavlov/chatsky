@@ -123,8 +123,8 @@ banking_assistant = {
         "greeting_node": {
             RESPONSE: LLMResponse(llm_model_name="bank_model", history=0),
             TRANSITIONS: [
-                Tr(dst=("loans", "start"), cnd=cnd.Contains("loan")),
-                Tr(dst=("hr", "start"), cnd=cnd.Contains("vacancy")),
+                Tr(dst=("loans", "start"), cnd=cnd.ExactMatch("loan")),
+                Tr(dst=("hr", "start"), cnd=cnd.ExactMatch("vacancy")),
                 Tr(dst=dst.Current()),
             ],
         },
@@ -139,7 +139,7 @@ banking_assistant = {
         },
         "start": {
             RESPONSE: LLMResponse(llm_model_name="bank_model"),
-            TRANSITIONS: [Tr(dst="main_flow", cnd=cnd.Contains("back"))],
+            TRANSITIONS: [Tr(dst="main_flow", cnd=cnd.Regexp("back"))],
         },
     },
     "hr": {
@@ -147,8 +147,8 @@ banking_assistant = {
         "start": {
             RESPONSE: LLMResponse(llm_model_name="bank_model"),
             TRANSITIONS: [
-                Tr(dst="cook_info", cnd=cnd.Regex(r"\bcook\b", re.I)),
-                Tr(dst="main_flow", cnd=cnd.Contains("back")),
+                Tr(dst="cook_info", cnd=cnd.Regexp(r"\bcook\b", re.I)),
+                Tr(dst="main_flow", cnd=cnd.ExactMatch("back")),
             ],
         },
         "cook_info": {
