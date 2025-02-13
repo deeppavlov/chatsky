@@ -228,7 +228,7 @@ class ContextDict(ABC, BaseModel):
         yield from self.keys()
 
     def __len__(self) -> int:
-        return len(self.keys() if self._storage is not None else self._items.keys())
+        return len(self._keys)
 
     @overload
     async def get(self, key: int, default=None) -> BaseModel: ...  # noqa: E704
