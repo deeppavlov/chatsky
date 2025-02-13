@@ -10,7 +10,6 @@ This tutorial demonstrates both approaches with practical examples.
 """
 
 # %pip install chatsky[llm] langchain-openai langchain-anthropic
-
 # %%
 import os
 from chatsky import (
