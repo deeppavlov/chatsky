@@ -9,7 +9,6 @@ Chatsky provides two powerful ways to get structured output from LLMs:
 This tutorial demonstrates both approaches with practical examples.
 """
 
-# Install required packages
 # %pip install chatsky[llm] langchain-openai langchain-anthropic
 
 # %%
