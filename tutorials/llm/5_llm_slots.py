@@ -2,13 +2,14 @@
 """
 # LLM: 5. LLM Slots
 
-If we want to retrieve some information from user input like name, address or
-email we can simply use Chatsky's Slot system and user regexes or other formally
-specified data retrieval techniques. But if the data is more finicky to get or
-not explicitly presented in utterance we
-encourage you to utilize Chatsky LLM Slots.
-In this tutorial we will see how we can set up Slots that uses LLM's under
-the hood to extract more obscure information from users input.
+When we need to retrieve specific information from user input—such as a name,
+address, or email we can use Chatsky's Slot system along with regexes or other
+formally specified data retrieval techniques.
+However, if the data is more nuanced or not explicitly stated in the user's
+utterance, we recommend using Chatsky's **LLM Slots**.
+
+In this tutorial, we will explore how to set up Slots that leverage LLMs
+to extract more complex or implicit information from user input.
 """
 # %pip install chatsky[llm] langchain-openai
 # %%
@@ -38,22 +39,20 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
 """
-In this example we define LLM Group Slot with two LLM Slots in it.
-Both of them can be used separately just as regular slots,
-but if you are going to extract several LLM Slots simultaneously
-we encourage you to put them in LLM Group Slot for optimization and convenience.
+In this example, we define an **LLM Group Slot** containing two **LLM Slots**.
+While these slots can be used independently as regular slots,
+grouping them together is recommended when extracting multiple LLM Slots
+simultaneously. This approach optimizes performance and improves convenience.
 
-In the `LLMSlot.caption` parameter you should put description of a data piece
-you want to retrieve. More specific descriptions will yield better results,
+- In the `LLMSlot.caption` parameter, provide a description of the data you
+want to retrieve. More specific descriptions yield better results,
 especially when using smaller models.
-
-Note that we are passing the name of the model
- from pipeline.models dictionary to LLMGroupSlot.model field.
-
-Also, as you can see we set `allow_partial_extraction` flag in "person" slot to
-`True`. That will allow us to fill this template across multiple messages.
-To see how to use partial extraction please address the
-following tutorial %mddoclink(tutorial,slots.2_partial_extraction).
+- Note that we pass the name of the model from the `pipeline.models`
+dictionary to the `LLMGroupSlot.model` field.
+- Additionally, the `allow_partial_extraction` flag is set to `True` for the
+"person" slot. This allows the slot to be filled across multiple messages.
+For more details on partial extraction,
+refer to the tutorial: %mddoclink(tutorial,slots.2_partial_extraction).
 """
 
 # %%

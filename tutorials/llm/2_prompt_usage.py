@@ -29,7 +29,6 @@ from chatsky import (
     Context,
 )
 from langchain_openai import ChatOpenAI
-from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
@@ -58,14 +57,14 @@ Let's create a custom configuration to demonstrate positioning:
 # %%
 # Custom position configuration
 position_config = PositionConfig(
-    system_prompt=0,   # First position
-    history=1,         # Second position
-    misc_prompt=2      # Third position
+    system_prompt=0,  # First position
+    history=1,  # Second position
+    misc_prompt=2,  # Third position
 )
 
 # Initialize LLM with custom configuration
 model = LLM_API(
-    ChatOpenAI(model="gpt-4", api_key=openai_api_key),
+    ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key),
     system_prompt="You represent various bank departments."
     "Respond according to your assigned role.",
     position_config=position_config,
@@ -79,16 +78,17 @@ Create sophisticated prompts that incorporate external data.
 This example shows a custom prompt class that fetches vacancy data:
 """
 
+
 # %%
 class VacancyPrompt(BaseResponse):
     """Dynamic prompt generator for HR vacancies"""
-    
+
     async def call(self, ctx: Context) -> str:
         vacancies = await self.fetch_vacancies()
-        return f"""You are a bank HR representative. 
+        return f"""You are a bank HR representative.
                 Provide information about current vacancies:
                 Available positions: {', '.join(vacancies)}."""
-    
+
     async def fetch_vacancies(self) -> list[str]:
         # Simulate API call
         return ["Java Developer", "Information Security Specialist"]
@@ -112,8 +112,8 @@ banking_assistant = {
             "Provide general information about services.",
             "security_prompt": Prompt(
                 message="Never disclose internal security protocols.",
-                position=100  # Always appears last
-            )
+                position=100,  # Always appears last
+            ),
         }
     },
     "main_flow": {
@@ -125,44 +125,40 @@ banking_assistant = {
             TRANSITIONS: [
                 Tr(dst=("loans", "start"), cnd=cnd.Contains("loan")),
                 Tr(dst=("hr", "start"), cnd=cnd.Contains("vacancy")),
-                Tr(dst=dst.Current())
+                Tr(dst=dst.Current()),
             ],
-        }
+        },
     },
     "loans": {
         LOCAL: {
             MISC: {
                 "role_prompt": "You are a loan specialist."
                 "Explain requirements:",
-                "conditions": "15% interest, 10-year maximum term."
+                "conditions": "15% interest, 10-year maximum term.",
             }
         },
         "start": {
             RESPONSE: LLMResponse(llm_model_name="bank_model"),
-            TRANSITIONS: [Tr(dst="main_flow", cnd=cnd.Contains("back"))]
-        }
+            TRANSITIONS: [Tr(dst="main_flow", cnd=cnd.Contains("back"))],
+        },
     },
     "hr": {
-        LOCAL: {
-            MISC: {
-                "prompt": VacancyPrompt()  # Uses our dynamic prompt
-            }
-        },
+        LOCAL: {MISC: {"prompt": VacancyPrompt()}},  # Uses our dynamic prompt
         "start": {
             RESPONSE: LLMResponse(llm_model_name="bank_model"),
             TRANSITIONS: [
                 Tr(dst="cook_info", cnd=cnd.Regex(r"\bcook\b", re.I)),
-                Tr(dst="main_flow", cnd=cnd.Contains("back"))
-            ]
+                Tr(dst="main_flow", cnd=cnd.Contains("back")),
+            ],
         },
         "cook_info": {
             MISC: {
                 "welcome_prompt": "Welcome new kitchen staff!"
                 "Work hours: 9-5, benefits included."
             },
-            RESPONSE: LLMResponse(llm_model_name="bank_model")
-        }
-    }
+            RESPONSE: LLMResponse(llm_model_name="bank_model"),
+        },
+    },
 }
 
 # %% [markdown]
@@ -176,7 +172,7 @@ Execute the pipeline with our configuration:
 pipeline = Pipeline(
     banking_assistant,
     start_label=("main_flow", "entry_node"),
-    models={"bank_model": model}
+    models={"bank_model": model},
 )
 
 if __name__ == "__main__":

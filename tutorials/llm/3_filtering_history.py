@@ -2,10 +2,11 @@
 """
 # LLM: 3. Filtering History
 
-If you want to take the messages that meet your particular criteria and pass
-them to the LLMs context you can use the `LLMResponse`s `filter_func` parameter.
-It must be a class, whose call method takes the following args:
-`context`, `request`, `response`, and `model_name`.
+If you want to pass only the messages that meet specific criteria to the LLM's
+context, you can use the `filter_func` parameter in `LLMResponse`.
+This parameter requires a class whose `call` method accepts the following
+arguments: `context`, `request`, `response`, and `model_name`.
+
 """
 
 # %pip install chatsky[llm] langchain-openai
@@ -38,14 +39,15 @@ model = LLM_API(
 
 # %% [markdown]
 """
-Imagine having a bot for taking notes that will have a huge dialogue history.
-In this example we will use very simple filtering function to
-retrieve only the important messages from such a bot to use
-context window more efficiently. Here, we can mart notes with "#important" tag
-and then ask a bot to create a summary of all important messages using "/remind"
-command.
-If you want to learn more about filters see
-[API ref](%doclink(api,llm.filters,BaseHistoryFilter)).
+Imagine having a bot for taking notes that accumulates a large dialogue history.
+In this example, we will use a simple filtering function to retrieve only the
+important messages from such a bot, making the context window usage
+more efficient. Here, we can mark notes with the `#important` tag and then ask
+the bot to create a summary of all
+important messages using the `/remind` command.
+
+If you want to learn more about filters,
+refer to the [API reference](%doclink(api,llm.filters,BaseHistoryFilter)).
 """
 
 
@@ -65,15 +67,15 @@ class FilterImportant(BaseHistoryFilter):
 
 # %% [markdown]
 """
-Alternatively, if you use several models in one script
-(e.g. one for chatting, one for text summarization),
-you may want to separate the models memory
-using the same `filter_func` parameter.
-There is a function `FromModel` that
-can be used to separate the models memory.
+Alternatively, if you use multiple models in one script
+(e.g., one for chatting and another for text summarization),
+you may want to separate the models' memory using the same `filter_func`
+parameter. There is a function called `FromModel`
+that can be used to achieve this separation.
 
-Via `history` parameter in LLMResponse you can set number of dialogue _turns_
-that the model will use as the history. Default value is `5`.
+Additionally, the `history` parameter in `LLMResponse` allows you to
+specify the number of dialogue _turns_ that the model will use as history.
+The default value is `5`.
 """
 # %%
 toy_script = {
@@ -90,10 +92,10 @@ toy_script = {
         },
         "main_node": {
             RESPONSE: Message(
-                "Hi! I am your note taking assistant. "
-                "Just send me your thoughts and if you need to "
-                "rewind a bit just send /remind and I will send "
-                "you a summary of your #important notes."
+                "Hi! I am your note-taking assistant. "
+                "Just send me your thoughts, and if you need to "
+                "rewind a bit, send `/remind`, and I will provide "
+                "a summary of your #important notes."
             ),
             TRANSITIONS: [
                 Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),

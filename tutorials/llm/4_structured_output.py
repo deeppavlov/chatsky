@@ -3,13 +3,15 @@
 # LLM: 4. Structured Output
 
 Chatsky provides two powerful ways to get structured output from LLMs:
-1. Using BaseModel to get structured text content (like JSON)
-2. Using Message subclass to add metadata to messages
+1. **Using `BaseModel`**: To get structured text content (like JSON).
+2. **Using `Message` subclass**: To add metadata to messages.
 
 This tutorial demonstrates both approaches with practical examples.
 """
 
+# Install required packages
 # %pip install chatsky[llm] langchain-openai langchain-anthropic
+
 # %%
 import os
 from chatsky import (
@@ -28,7 +30,7 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from pydantic import BaseModel, Field
 
-
+# Load API keys from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
@@ -45,6 +47,8 @@ review_model = LLM_API(
 
 # Define structured output schemas
 class Movie(BaseModel):
+    """Schema for movie details."""
+
     name: str = Field(description="Name of the movie")
     genre: str = Field(description="Genre of the movie")
     plot: str = Field(description="Plot of the movie in chapters")
@@ -52,13 +56,13 @@ class Movie(BaseModel):
 
 
 class MovieReview(Message):
-    """Schema for movie reviews (uses Message.misc for metadata)"""
+    """Schema for movie reviews (uses `Message.misc` for metadata)."""
 
     text: str = Field(description="The actual review text")
     misc: dict = Field(
-        description="A dictionary with the following keys and values:"
+        description="A dictionary with the following keys and values: "
         "k: rating v [int]: number between 0 and 5, "
-        "k: spoiler_alert v [boolean]: is there a spoilers in this review"
+        "k: spoiler_alert v [boolean]: is there a spoiler in this review"
     )
 
 
@@ -102,8 +106,8 @@ script = {
                 llm_model_name="review_model",
                 prompt="Generate a movie review based on user's input. "
                 "Include rating, and mark if it contains spoilers. "
-                "Use JSON with the `text` and `misc` fields"
-                " to produce the output.",
+                "Use JSON with the `text` and `misc` fields "
+                "to produce the output.",
                 message_schema=MovieReview,
             ),
             TRANSITIONS: [Tr(dst=("greeting_flow", "start_node"))],
@@ -120,7 +124,8 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    # This runs tutorial in interactive mode if not in IPython env
+    # This runs the tutorial in interactive mode
+    # if not in an IPython environment
     # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        pipeline.run()  # This runs tutorial in interactive mode
+        pipeline.run()  # This runs the tutorial in interactive mode

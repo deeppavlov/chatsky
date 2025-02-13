@@ -2,9 +2,12 @@
 """
 # LLM: 1. Basics
 
-Using Chatsky you can easily add LLM invocations to your script.
-In this tutorial we will see how to use LLMs for responses and conditions.
-Chatsky uses langchain under the hood to connect to the remote models.
+With Chatsky, you can easily integrate LLM (Large Language Model)
+invocations into your scripts.
+This tutorial demonstrates how to use LLMs for generating responses and handling
+conditional logic in your conversational flows.
+
+Chatsky leverages LangChain internally to interface with remote LLM providers.
 """
 
 # %pip install chatsky[llm] langchain-openai
@@ -33,15 +36,17 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # %% [markdown]
 """
-First we need to create a model object.
-Keep in mind, that if you instantiate model object outside of the script,
-it will be reused across all the nodes and
-therefore it will store all dialogue history if not specified otherwise.
-This is not advised if you are short on tokens or
-if you do not need to store all dialogue history.
+## Model Configuration
 
-Also note, that langchain reads environment variables for the models
-automatically and you do not necessarily need to set them explicitly.
+First, we need to create a model object. Important considerations:
+
+- Instantiate the model outside your script nodes to reuse it across the
+pipeline
+- This shared instance maintains full dialogue history by default
+- Not recommended for token-limited scenarios or when history isn't required
+
+LangChain automatically reads environment variables for model configurations,
+so explicit API key settings aren't always necessary.
 """
 
 # %%
@@ -52,9 +57,6 @@ model = LLM_API(
 )
 # %% [markdown]
 """
-Also you can pass images to the LLM: any chatsky Images in message attachments
-will be processed and sent to the LLM in an appropriate format.
-
 As you can see in this script, you can pass an additional prompt to the LLM.
 We will cover that thoroughly in the Prompt usage tutorial.
 """
@@ -118,8 +120,8 @@ toy_script = {
 }
 
 # %%
-# Pass your model to the `models` field of the pipeline under the key
-# that will be used as `llm_model_name` in the script
+# Register your model in the pipeline's `models` field using the same key
+# referenced as `llm_model_name` in your script nodes
 pipeline = Pipeline(
     toy_script,
     start_label=("main_flow", "start_node"),
