@@ -17,7 +17,7 @@ from __future__ import annotations
 from asyncio import gather
 from importlib import import_module
 from typing import Callable, Collection, List, Optional, Set, Tuple
-from logging import get_logger
+from logging import getLogger
 
 try:
     from sqlalchemy import (
