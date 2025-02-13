@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class Context(BaseModel):
+class Context(ContextMainInfo):
     """
     A structure that is used to store data about the context of a dialog.
     """
@@ -46,21 +46,6 @@ class Context(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()), exclude=True, frozen=True)
     """
     `id` is the unique context identifier. By default, randomly generated using `uuid4` is used.
-    """
-    _created_at: int = PrivateAttr(default_factory=time_ns)
-    """
-    Timestamp when the context was **first time saved to database**.
-    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
-    """
-    _updated_at: int = PrivateAttr(default_factory=time_ns)
-    """
-    Timestamp when the context was **last time saved to database**.
-    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
-    """
-    current_turn_id: int = Field(default=0)
-    """
-    Current turn number, specifies the last turn number,
-    that is also the last turn available in `labels`, `requests`, and `responses`.
     """
     labels: LabelContextDict = Field(default_factory=LabelContextDict)
     """
@@ -89,24 +74,9 @@ class Context(BaseModel):
         - key - Response identification numbers.
         - value - Response data: `Message`.
     """
-    misc: Dict[str, Any] = Field(default_factory=dict)
-    """
-    `misc` stores any custom data. The framework doesn't use this dictionary,
-    so storage of any data won't reflect on the work of the internal Chatsky functions.
-
-        - key - Arbitrary data name.
-        - value - Arbitrary data.
-    """
-    framework_data: FrameworkData = Field(default_factory=FrameworkData)
-    """
-    This attribute is used for storing custom data required for pipeline execution.
-    It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
-    """
     _storage: Optional[DBContextStorage] = PrivateAttr(None)
-
-    origin_interface: Optional[str] = Field(default=None)
     """
-    Name of the interface that produced the first request in this context.
+    Context storage this context is connected to (if any).
     """
 
     @classmethod
@@ -162,13 +132,15 @@ class Context(BaseModel):
             instance = cls(
                 id=id,
                 current_turn_id=current_turn_id,
+                created_at=crt_at,
+                updated_at=upd_at,
+                misc=misc,
+                framework_data=fw_data,
                 labels=labels,
                 requests=requests,
                 responses=responses,
-                misc=misc,
-                framework_data=fw_data,
             )
-            instance._created_at, instance._updated_at, instance._storage = crt_at, upd_at, storage
+            instance._storage = storage
             return instance
 
     async def delete(self) -> None:
@@ -321,11 +293,10 @@ class Context(BaseModel):
 
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
-            self._updated_at = time_ns()
             main_into = ContextMainInfo(
                 current_turn_id=self.current_turn_id,
-                created_at=self._created_at,
-                updated_at=self._updated_at,
+                created_at=self.created_at,
+                updated_at=time_ns(),
                 misc=self.misc,
                 framework_data=self.framework_data,
             )

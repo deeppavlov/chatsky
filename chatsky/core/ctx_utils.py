@@ -65,11 +65,38 @@ class ContextMainInfo(BaseModel):
     For memory context storage, it won't be serialized at all.
     """
 
-    current_turn_id: int
-    created_at: int = Field(default_factory=time_ns)
-    updated_at: int = Field(default_factory=time_ns)
+    current_turn_id: int = Field(default=0)
+    """
+    Current turn number, specifies the last turn number,
+    that is also the last turn available in `labels`, `requests`, and `responses`.
+    """
+    created_at: int = Field(default_factory=time_ns, frozen=True)
+    """
+    Timestamp when the context was **first time saved to database**.
+    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
+    """
+    updated_at: int = Field(default_factory=time_ns, frozen=True)
+    """
+    Timestamp when the context was **last time saved to database**.
+    It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
+    """
     misc: Dict[str, Any] = Field(default_factory=dict)
-    framework_data: FrameworkData = Field(default_factory=dict, validate_default=True)
+    """
+    `misc` stores any custom data. The framework doesn't use this dictionary,
+    so storage of any data won't reflect on the work of the internal Chatsky functions.
+
+        - key - Arbitrary data name.
+        - value - Arbitrary data.
+    """
+    framework_data: FrameworkData = Field(default_factory=FrameworkData, validate_default=True)
+    """
+    This attribute is used for storing custom data required for pipeline execution.
+    It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
+    """
+    origin_interface: Optional[str] = Field(default=None)
+    """
+    Name of the interface that produced the first request in this context.
+    """
 
     _misc_adaptor: TypeAdapter[Dict[str, Any]] = PrivateAttr(default=TypeAdapter(Dict[str, Any]))
 
