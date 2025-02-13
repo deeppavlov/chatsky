@@ -5,12 +5,13 @@ from chatsky.context_storages import MemoryContextStorage
 from chatsky.context_storages.database import NameConfig
 from chatsky.core.message import Message
 from chatsky.core.ctx_dict import ContextDict, MessageContextDict
+from chatsky.core.ctx_utils import ContextMainInfo
 
 
 class TestContextDict:
     @staticmethod
     async def update_context_dict(db: MemoryContextStorage, ctx_dict: ContextDict, ctx_id):
-        await db.update_context(ctx_id, ContextInfo(turn_id=0), [ctx_dict.extract_sync()])
+        await db.update_context(ctx_id, ContextMainInfo(current_turn_id=0), [ctx_dict.extract_sync()])
 
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
@@ -28,7 +29,7 @@ class TestContextDict:
         # Attached pre-filled context dictionary
         ctx_id = "ctx1"
         storage = MemoryContextStorage(rewrite_existing=True, partial_read_config={"requests": 1})
-        main_info = ContextMainInfo(turn_id=0, created_at=0, updated_at=0)
+        main_info = ContextMainInfo(current_turn_id=0, created_at=0, updated_at=0)
         requests = [
             (1, Message("longer text", misc={"k": "v"}).model_dump_json().encode()),
             (2, Message("text 2", misc={"1": 0, "2": 8}).model_dump_json().encode()),

@@ -100,11 +100,8 @@ class MongoContextStorage(DBContextStorage):
                 {
                     "$set": {
                         NameConfig._id_column: ctx_id,
-                        NameConfig._current_turn_id_column: ctx_info_dump["turn_id"],
-                        NameConfig._created_at_column: ctx_info_dump["created_at"],
-                        NameConfig._updated_at_column: ctx_info_dump["updated_at"],
-                        NameConfig._misc_column: ctx_info_dump["misc"],
-                        NameConfig._framework_data_column: ctx_info_dump["framework_data"],
+                    } | {
+                        f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields()
                     }
                 },
                 upsert=True,

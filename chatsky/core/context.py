@@ -148,12 +148,12 @@ class Context(BaseModel):
             )
             if main is None:
                 crt_at = upd_at = time_ns()
-                turn_id = 0
+                current_turn_id = 0
                 misc = dict()
                 fw_data = FrameworkData()
                 labels[0] = start_label
             else:
-                turn_id = main.turn_id
+                current_turn_id = main.current_turn_id
                 crt_at = main.created_at
                 upd_at = main.updated_at
                 misc = main.misc
@@ -161,7 +161,7 @@ class Context(BaseModel):
             logger.debug(f"Context loaded with turns number: {len(labels)}")
             instance = cls(
                 id=id,
-                current_turn_id=turn_id,
+                current_turn_id=current_turn_id,
                 labels=labels,
                 requests=requests,
                 responses=responses,
