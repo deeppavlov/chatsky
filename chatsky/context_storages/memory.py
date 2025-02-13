@@ -42,7 +42,10 @@ class MemoryContextStorage(DBContextStorage):
         return self._main_storage.get(ctx_id, None)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         if ctx_info is not None:
             self._main_storage[ctx_id] = ctx_info

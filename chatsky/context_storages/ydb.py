@@ -163,7 +163,10 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         async def callee(session: Session) -> None:
             transaction = await session.transaction(SerializableReadWrite()).begin()
@@ -184,9 +187,8 @@ class YDBContextStorage(DBContextStorage):
                     await session.prepare(query),
                     {
                         f"${NameConfig._id_column}": ctx_id,
-                    } | {
-                        f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields
-                    },
+                    }
+                    | {f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields},
                 )
             for field_name, items in field_info:
                 declare, prepare, values = list(), dict(), list()
@@ -339,9 +341,7 @@ class YDBContextStorage(DBContextStorage):
                     PRAGMA TablePathPrefix("{self.database}");
                     DELETE FROM {table_name};
                     """  # noqa: E501
-                await session.transaction().execute(
-                    await session.prepare(query), dict(), commit_tx=True
-                )
+                await session.transaction().execute(await session.prepare(query), dict(), commit_tx=True)
 
             return callee
 

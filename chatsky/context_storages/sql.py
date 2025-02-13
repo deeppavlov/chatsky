@@ -42,8 +42,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     sqlalchemy_available = False
 
-postgres_available = sqlite_available = mysql_available = False
-
 try:
     import asyncpg
 
@@ -51,7 +49,7 @@ try:
 
     postgres_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
+    postgres_available = False
 
 try:
     import asyncmy
@@ -60,7 +58,7 @@ try:
 
     mysql_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
+    mysql_available = True
 
 try:
     import aiosqlite
@@ -69,14 +67,14 @@ try:
 
     sqlite_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
-
-if not sqlalchemy_available:
-    postgres_available = sqlite_available = mysql_available = False
+    sqlite_available = False
 
 from chatsky.core.ctx_utils import ContextMainInfo
 from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
+
+if not sqlalchemy_available:
+    postgres_available = sqlite_available = mysql_available = False
 
 logger = getLogger(__name__)
 
@@ -219,7 +217,10 @@ class SQLContextStorage(DBContextStorage):
             )
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         main_update_stmt, turns_update_stmts = None, list()
         if ctx_info is not None:
@@ -227,9 +228,8 @@ class SQLContextStorage(DBContextStorage):
             main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
                 {
                     NameConfig._id_column: ctx_id,
-                } | {
-                    f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields
                 }
+                | {f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields}
             )
             main_update_stmt = _get_upsert_stmt(
                 self.dialect,
