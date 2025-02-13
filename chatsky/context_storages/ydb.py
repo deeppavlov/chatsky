@@ -24,8 +24,7 @@ try:
         OptionalType,
         PrimitiveType,
     )
-    from ydb.aio import Driver, SessionPool
-    from ydb.table import Session
+    from ydb.aio import Driver, QuerySessionPool, QuerySession
 
     ydb_available = True
 except ImportError:
@@ -86,7 +85,7 @@ class YDBContextStorage(DBContextStorage):
         self._driver.table_client._table_client_settings = client_settings
         await self._driver.wait(fail_fast=True, timeout=self._timeout)
 
-        self.pool = SessionPool(self._driver, size=10)
+        self.pool = QuerySessionPool(self._driver, size=10)
 
         self.main_table = f"{self.table_prefix}_{NameConfig._main_table}"
         if not await self._does_table_exist(self.main_table):
@@ -97,17 +96,17 @@ class YDBContextStorage(DBContextStorage):
             await self._create_turns_table(self.turns_table)
 
     async def _does_table_exist(self, table_name: str) -> bool:
-        async def callee(session: Session) -> None:
+        async def callee(session: QuerySessionPool) -> None:
             await session.describe_table(join(self.database, table_name))
 
         try:
-            await self.pool.retry_operation(callee)
+            await self.pool.retry_operation_async(callee)
             return True
         except SchemeError:
             return False
 
     async def _create_main_table(self, table_name: str) -> None:
-        async def callee(session: Session) -> None:
+        async def callee(session: QuerySessionPool) -> None:
             await session.create_table(
                 "/".join([self.database, table_name]),
                 TableDescription()
@@ -120,10 +119,10 @@ class YDBContextStorage(DBContextStorage):
                 .with_primary_key(NameConfig._id_column),
             )
 
-        await self.pool.retry_operation(callee)
+        await self.pool.retry_operation_async(callee)
 
     async def _create_turns_table(self, table_name: str) -> None:
-        async def callee(session: Session) -> None:
+        async def callee(session: QuerySessionPool) -> None:
             await session.create_table(
                 "/".join([self.database, table_name]),
                 TableDescription()
@@ -135,10 +134,10 @@ class YDBContextStorage(DBContextStorage):
                 .with_primary_keys(NameConfig._id_column, NameConfig._key_column),
             )
 
-        await self.pool.retry_operation(callee)
+        await self.pool.retry_operation_async(callee)
 
     async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
-        async def callee(session: Session) -> Optional[ContextMainInfo]:
+        async def callee(session: QuerySessionPool) -> Optional[ContextMainInfo]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;
@@ -161,12 +160,12 @@ class YDBContextStorage(DBContextStorage):
                 else None
             )
 
-        return await self.pool.retry_operation(callee)
+        return await self.pool.retry_operation_async(callee)
 
     async def _update_context(
         self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
-        async def callee(session: Session) -> None:
+        async def callee(session: QuerySessionPool) -> None:
             transaction = await session.transaction(SerializableReadWrite()).begin()
             if ctx_info is not None:
                 ctx_info_dump = ctx_info.model_dump(mode="python")
@@ -221,11 +220,11 @@ class YDBContextStorage(DBContextStorage):
                     pass
             await transaction.commit()
 
-        await self.pool.retry_operation(callee)
+        await self.pool.retry_operation_async(callee)
 
     async def _delete_context(self, ctx_id: str) -> None:
-        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
-            async def callee(session: Session) -> None:
+        def construct_callee(table_name: str) -> Callable[[QuerySessionPool], Awaitable[None]]:
+            async def callee(session: QuerySessionPool) -> None:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DECLARE ${NameConfig._id_column} AS Utf8;
@@ -243,12 +242,12 @@ class YDBContextStorage(DBContextStorage):
             return callee
 
         await gather(
-            self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table)),
+            self.pool.retry_operation_async(construct_callee(self.main_table)),
+            self.pool.retry_operation_async(construct_callee(self.turns_table)),
         )
 
     async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
-        async def callee(session: Session) -> List[Tuple[int, bytes]]:
+        async def callee(session: QuerySessionPool) -> List[Tuple[int, bytes]]:
             declare, prepare, limit, key = list(), dict(), "", ""
             if isinstance(self._subscripts[field_name], int):
                 declare += [f"DECLARE ${self._LIMIT_VAR} AS Uint64;"]
@@ -284,10 +283,10 @@ class YDBContextStorage(DBContextStorage):
                 else list()
             )
 
-        return await self.pool.retry_operation(callee)
+        return await self.pool.retry_operation_async(callee)
 
     async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
-        async def callee(session: Session) -> List[int]:
+        async def callee(session: QuerySessionPool) -> List[int]:
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${NameConfig._id_column} AS Utf8;
@@ -304,10 +303,10 @@ class YDBContextStorage(DBContextStorage):
             )
             return [e[NameConfig._key_column] for e in result_sets[0].rows] if len(result_sets[0].rows) > 0 else list()
 
-        return await self.pool.retry_operation(callee)
+        return await self.pool.retry_operation_async(callee)
 
     async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
-        async def callee(session: Session) -> List[Tuple[int, bytes]]:
+        async def callee(session: QuerySessionPool) -> List[Tuple[int, bytes]]:
             declare, prepare = list(), dict()
             for i, k in enumerate(keys):
                 declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
@@ -335,11 +334,11 @@ class YDBContextStorage(DBContextStorage):
                 else list()
             )
 
-        return await self.pool.retry_operation(callee)
+        return await self.pool.retry_operation_async(callee)
 
     async def _clear_all(self) -> None:
-        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
-            async def callee(session: Session) -> None:
+        def construct_callee(table_name: str) -> Callable[[QuerySessionPool], Awaitable[None]]:
+            async def callee(session: QuerySessionPool) -> None:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DELETE FROM {table_name};
@@ -351,6 +350,6 @@ class YDBContextStorage(DBContextStorage):
             return callee
 
         await gather(
-            self.pool.retry_operation(construct_callee(self.main_table)),
-            self.pool.retry_operation(construct_callee(self.turns_table)),
+            self.pool.retry_operation_async(construct_callee(self.main_table)),
+            self.pool.retry_operation_async(construct_callee(self.turns_table)),
         )

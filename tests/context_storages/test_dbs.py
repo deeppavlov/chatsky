@@ -330,7 +330,7 @@ class TestContextStorages:
 
             for idx in range(1, 20):
                 requests_update = [(0, bytes(2 * key + idx)), (idx, bytes(key + idx))]
-                await db.update_context(str_key, [("requests", requests_update, list())])
+                await db.update_context(str_key, field_info=[("requests", requests_update, list())])
                 await asyncio.sleep(random.random() / 100)
                 keys = list(range(idx + 1))
                 assert set(await db.load_field_keys(str_key, "requests")) == set(keys)
