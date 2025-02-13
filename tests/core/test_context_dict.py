@@ -87,7 +87,7 @@ class TestContextDict:
         assert len(prefilled_dict) == 2
         assert prefilled_dict._keys == {1, 2}
         assert prefilled_dict._added == set()
-        assert prefilled_dict.keys() == [1, 2]
+        assert prefilled_dict.keys() == list(prefilled_dict.__iter__()) == [1, 2]
         assert 1 in prefilled_dict and 2 in prefilled_dict
         assert len(prefilled_dict._hashes) == 1
         assert set(prefilled_dict._items.keys()) == {2}

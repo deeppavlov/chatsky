@@ -224,8 +224,8 @@ class ContextDict(ABC, BaseModel):
             self._keys.discard(key)
             del self._items[key]
 
-    def __iter__(self) -> Sequence[int]:
-        return iter(self.keys() if self._storage is not None else self._items.keys())
+    def __iter__(self) -> Iterable[int]:
+        yield from self.keys()
 
     def __len__(self) -> int:
         return len(self.keys() if self._storage is not None else self._items.keys())
