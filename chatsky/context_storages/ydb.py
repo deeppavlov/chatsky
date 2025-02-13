@@ -17,7 +17,6 @@ from urllib.parse import urlsplit
 
 try:
     from ydb import (
-        SerializableReadWrite,
         SchemeError,
         TableDescription,
         Column,
@@ -146,7 +145,7 @@ class YDBContextStorage(DBContextStorage):
                 FROM {self.main_table}
                 WHERE {NameConfig._id_column} = ${NameConfig._id_column};
                 """  # noqa: E501
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
+            result_sets = await session.transaction().execute(
                 await session.prepare(query),
                 {
                     f"${NameConfig._id_column}": ctx_id,
@@ -167,7 +166,7 @@ class YDBContextStorage(DBContextStorage):
         self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
     ) -> None:
         async def callee(session: QuerySession) -> None:
-            transaction = await session.transaction(SerializableReadWrite()).begin()
+            transaction = await session.transaction().begin()
             if ctx_info is not None:
                 ctx_info_dump = ctx_info.model_dump(mode="python")
                 query = f"""
@@ -230,7 +229,7 @@ class YDBContextStorage(DBContextStorage):
                     DELETE FROM {table_name}
                     WHERE {NameConfig._id_column} = ${NameConfig._id_column};
                     """  # noqa: E501
-                await session.transaction(SerializableReadWrite()).execute(
+                await session.transaction().execute(
                     await session.prepare(query),
                     {
                         f"${NameConfig._id_column}": ctx_id,
@@ -268,7 +267,7 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL {key}
                 ORDER BY {NameConfig._key_column} DESC {limit};
                 """  # noqa: E501
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
+            result_sets = await session.transaction().execute(
                 await session.prepare(query),
                 {
                     f"${NameConfig._id_column}": ctx_id,
@@ -293,7 +292,7 @@ class YDBContextStorage(DBContextStorage):
                 FROM {self.turns_table}
                 WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL;
                 """  # noqa: E501
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
+            result_sets = await session.transaction().execute(
                 await session.prepare(query),
                 {
                     f"${NameConfig._id_column}": ctx_id,
@@ -319,7 +318,7 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL
                 AND {NameConfig._key_column} IN ({", ".join(prepare.keys())});
                 """  # noqa: E501
-            result_sets = await session.transaction(SerializableReadWrite()).execute(
+            result_sets = await session.transaction().execute(
                 await session.prepare(query),
                 {
                     f"${NameConfig._id_column}": ctx_id,
@@ -342,7 +341,7 @@ class YDBContextStorage(DBContextStorage):
                     PRAGMA TablePathPrefix("{self.database}");
                     DELETE FROM {table_name};
                     """  # noqa: E501
-                await session.transaction(SerializableReadWrite()).execute(
+                await session.transaction().execute(
                     await session.prepare(query), dict(), commit_tx=True
                 )
 

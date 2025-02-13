@@ -82,8 +82,12 @@ async def delete_ydb(storage: YDBContextStorage):
     if not ydb_available:
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
-    async def callee(session: Any) -> None:
+    from ydb.aio import SessionPool
+    from ydb.table import Session
+
+    async def callee(session: Session) -> None:
         for table in [storage.main_table, storage.turns_table]:
             await session.drop_table("/".join([storage.database, table]))
 
-    await storage.pool.retry_operation(callee)
+    async with SessionPool(storage._driver, size=10) as pool:
+        await pool.retry_operation(callee)
