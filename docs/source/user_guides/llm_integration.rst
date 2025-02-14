@@ -49,11 +49,12 @@ Once model is defined, generating a response from an LLM is very simple:
 
 .. code-block:: python
 
-    from chatsky.llm import LLM_API
     from chatsky import rsp
+    from chatsky.llm import LLM_API
+    from chatsky.llm.prompt import Prompt
     ...
     RESPONSE: rsp.LLMResponse(llm_model_name="model_name_1")
-    RESPONSE: rsp.LLMResponse(llm_model_name="model_name_2", prompt="some prompt")
+    RESPONSE: rsp.LLMResponse(llm_model_name="model_name_2", prompt=Prompt(Message("some prompt")))
 
 
 Conditions
@@ -83,19 +84,11 @@ Prompts
 Another useful feature is the definition of multiple prompts for the different flows and nodes of the script.
 There is a certain order of the prompts inside of the "history" list that goes into the model as input.
 
-::
-
-    SYSTEM: SYSTEM_PROMPT   (from LLM_API)
-    SYSTEM: GLOBAL_PROMPT   (from MISC field)
-    SYSTEM: LOCAL_PROMPT    (from MISC field)
-    SYSTEM: NODE_PROMPT     (from MISC field)
-
-    # history `n` turns
-    HUMAN: req
-    AI: resp
-
-    SYSTEM: PROMPT (from ``prompt`` field in LLMResponse or LLMCondition)
-    HUMAN: CURRENT_REQUEST
+1. `system_prompt` - Core instructions for the model
+2. `history` - Conversation context
+3. `misc_prompt` - Additional prompts from nodes/flows
+4. `call_prompt` - Direct response prompts
+5. `last_request` - User's most recent input
 
 You can specify the position of the system prompt, message history
 and misc prompts, prompt specified in response
