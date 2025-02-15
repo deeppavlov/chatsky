@@ -249,26 +249,37 @@ class ContextDict(ABC, BaseModel):
     async def get(self, key: int, default=None) -> BaseModel: ...  # noqa: E704
 
     @overload
-    async def get(self, key: Iterable[int], default=None) -> List[BaseModel]: ...  # noqa: E704
+    async def get(self, key: Iterable[int], default=None) -> Tuple[BaseModel]: ...  # noqa: E704
 
     async def get(self, key, default=None):
         """
         Get one or many items from the dict.
         Asynchronously load missing ones, if context storage is connected.
-        Raise an error if any requested elements are still missing after.
 
-        :param key: Key or slice for item retrieving.
-        :param default: Default value.
-        :return: One value or value list.
+        :param key: Key or an iterable of keys for item retrieving.
+        :param default:
+            Default value.
+            Default is returned when `key` is a single key that is not in the dict.
+            If `key` is an iterable of keys, default is returned instead of all
+            the values that are not in the dict.
+        :return:
+            A single value if `key` is a single key.
+            Tuple of values if `key` is an iterable.
         """
+        if isinstance(key, int):
+            if self._storage is not None and key in self and key not in self._items:
+                await self._load_items([key])
+            return self._items.get(key, default)
 
-        try:
-            return await self[key]
-        except KeyError:
-            if isinstance(key, Iterable):
-                return [self._items.get(k, default) for k in key]
-            else:
-                return default
+        if isinstance(key, Iterable) and all([isinstance(k, int) for k in key]):
+            keys_to_load = [k for k in key if k in self and k not in self._items]
+
+            if self._storage is not None and keys_to_load:
+                await self._load_items(keys_to_load)
+
+            return tuple(self._items.get(k, default) for k in key)
+        else:
+            raise TypeError("Key must be either an integer or an iterable of integers.")
 
     def __contains__(self, key: int) -> bool:
         return key in self._keys

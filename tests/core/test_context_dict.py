@@ -119,6 +119,23 @@ class TestContextDict:
             with pytest.raises(TypeError):
                 del ctx_dict["text"]
 
+    async def test_get_with_default(self, prefilled_dict):
+        assert await prefilled_dict.get(1) == Message("longer text", misc={"k": "v"})
+        # after loading from storage
+        assert await prefilled_dict.get(1) == Message("longer text", misc={"k": "v"})
+        assert await prefilled_dict.get(5) is None
+        assert await prefilled_dict.get(6, default=1) == 1
+
+        assert await prefilled_dict.get((2, 3)) == (Message("text 2", misc={"1": 0, "2": 8}), None)
+        assert await prefilled_dict.get((2, 1)) == (
+            Message("text 2", misc={"1": 0, "2": 8}),
+            Message("longer text", misc={"k": "v"}),
+        )
+        assert await prefilled_dict.get((2, 3, 4), default=1) == (Message("text 2", misc={"1": 0, "2": 8}), 1, 1)
+
+        with pytest.raises(TypeError):
+            await prefilled_dict.get("text")
+
     async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict) -> None:
         # Checking keys
         assert len(prefilled_dict) == 2
