@@ -75,14 +75,14 @@ class TestContextDict:
             assert ctx_dict._removed == {0}
 
     async def test_get_set_del_multiple_items(
-            self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+        self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
     ) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
             # Get test
             if ctx_dict is prefilled_dict:
                 assert await ctx_dict[1:3] == (
                     Message("longer text", misc={"k": "v"}),
-                    Message("text 2", misc={"1": 0, "2": 8})
+                    Message("text 2", misc={"1": 0, "2": 8}),
                 )
             else:
                 with pytest.raises(KeyError):
