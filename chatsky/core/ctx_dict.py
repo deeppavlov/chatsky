@@ -179,7 +179,7 @@ class ContextDict(ABC, BaseModel):
                 await self._load_items([key])
             return self._items[key]
 
-        if isinstance(key, slice):
+        elif isinstance(key, slice):
             slice_keys = list(range(key.start, key.stop, key.step if key.step is not None else 1))
 
             invalid_keys = [k for k in slice_keys if k not in self]
