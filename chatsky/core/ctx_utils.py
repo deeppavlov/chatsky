@@ -1,3 +1,12 @@
+"""
+Context Utils
+-------------
+This module defines classes used by :py:class:`~chatsky.core.context.Context`.
+
+The most important ones here are :py:class:`FrameworkData` and :py:class:`ContextMainInfo`
+that define all non-turn related data stored in contexts.
+"""
+
 from __future__ import annotations
 from asyncio import Event
 from json import loads

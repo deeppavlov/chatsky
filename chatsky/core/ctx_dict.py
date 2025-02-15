@@ -46,6 +46,17 @@ class ContextDict(ABC, BaseModel):
     Dictionary-like structure for storing dialog data spanning multiple turns in a context storage.
     It holds all the possible keys, but may not store all the values locally.
     Values not stored locally will be loaded upon querying.
+
+    Keys of the dictionary are turn ids.
+    Get, set and delete operations support slices in addition to regular single-key operation.
+    Examples:
+
+    1. ``await ctx.labels[0]`` returns label at turn 0 (start label).
+    2. ``await ctx.requests[1:4]`` returns the first 3 requests (requests at turns 1, 2, 3).
+    3. ``ctx.responses[2:5:2] = Message("2"), Message("4")`` sets responses at turns 2 and 4.
+
+    Get operation is asynchronous (and requires ``await``) since it calls
+    :py:meth:`_load_items` in order to get items that need to be loaded from DB.
     """
 
     _items: Dict[int, BaseModel] = PrivateAttr(default_factory=dict)
@@ -55,7 +66,7 @@ class ContextDict(ABC, BaseModel):
 
     _hashes: Dict[int, int] = PrivateAttr(default_factory=dict)
     """
-    Hashes of the loaded items (as they were upon loading), only populated if `rewrite_existing` flag is enabled.
+    Hashes of the loaded items (as they were upon loading), only used if `rewrite_existing` flag is enabled.
     """
 
     _keys: Set[int] = PrivateAttr(default_factory=set)
