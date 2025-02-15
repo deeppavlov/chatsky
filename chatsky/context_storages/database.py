@@ -188,13 +188,19 @@ class DBContextStorage(ABC):
 
     @abstractmethod
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         raise NotImplementedError
 
     @_lock
     async def update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo] = None, field_info: Optional[List[Tuple[str, List[Tuple[int, bytes]], List[int]]]] = None
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo] = None,
+        field_info: Optional[List[Tuple[str, List[Tuple[int, bytes]], List[int]]]] = None,
     ) -> None:
         """
         Update context intofrmation.

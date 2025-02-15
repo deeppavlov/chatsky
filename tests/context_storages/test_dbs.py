@@ -260,7 +260,9 @@ class TestContextStorages:
         assert await db.load_field_latest("1", "requests") == [(4, b"4")]
         assert set(await db.load_field_keys("1", "requests")) == {4}
 
-    async def test_int_key_field_subscript(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+    async def test_int_key_field_subscript(
+        self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType
+    ):
         await add_context(db, "1", ctx_info)
         await db.update_context("1", field_info=[("requests", [(2, b"2")], list())])
         await db.update_context("1", field_info=[("requests", [(1, b"1")], list())])
@@ -287,7 +289,9 @@ class TestContextStorages:
 
         assert await db.load_field_latest("1", "labels") == []
 
-    async def test_raises_on_missing_field_keys(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
+    async def test_raises_on_missing_field_keys(
+        self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType
+    ):
         await add_context(db, "1", ctx_info)
 
         assert set(await db.load_field_items("1", "labels", [0, 1])) == {(0, b"0")}
@@ -322,7 +326,9 @@ class TestContextStorages:
             str_key = str(key)
             key_misc = {f"{key}": key + 2}
             await asyncio.sleep(random.random() / 100)
-            await db.update_context(str_key, ContextMainInfo(current_turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc))
+            await db.update_context(
+                str_key, ContextMainInfo(current_turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc)
+            )
             await asyncio.sleep(random.random() / 100)
             assert await db.load_main_info(str_key) == ContextMainInfo(
                 current_turn_id=key, created_at=key + 1, updated_at=key, misc=key_misc

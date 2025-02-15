@@ -100,9 +100,8 @@ class MongoContextStorage(DBContextStorage):
                 {
                     "$set": {
                         NameConfig._id_column: ctx_id,
-                    } | {
-                        f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields
                     }
+                    | {f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields}
                 },
                 upsert=True,
                 session=session,
@@ -122,7 +121,10 @@ class MongoContextStorage(DBContextStorage):
             )
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         ctx_info_dump = ctx_info.model_dump(mode="python") if ctx_info is not None else None
         if self._transactions_enabled:

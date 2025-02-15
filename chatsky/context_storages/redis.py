@@ -91,12 +91,18 @@ class RedisContextStorage(DBContextStorage):
             return None
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         update_main, update_values, delete_keys = list(), list(), list()
         if ctx_info is not None:
             ctx_info_dump = ctx_info.model_dump(mode="python")
-            update_main = [(f, ctx_info_dump[f] if isinstance(ctx_info_dump[f], bytes) else str(ctx_info_dump[f])) for f in NameConfig.get_context_main_fields]
+            update_main = [
+                (f, ctx_info_dump[f] if isinstance(ctx_info_dump[f], bytes) else str(ctx_info_dump[f]))
+                for f in NameConfig.get_context_main_fields
+            ]
         for field_name, items in field_info:
             new_delete_keys = list()
             for k, v in items:

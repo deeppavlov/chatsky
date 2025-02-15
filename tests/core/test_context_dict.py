@@ -1,6 +1,5 @@
 import pytest
 
-from chatsky.core.ctx_utils import ContextMainInfo
 from chatsky.context_storages import MemoryContextStorage
 from chatsky.context_storages.database import NameConfig
 from chatsky.core.message import Message

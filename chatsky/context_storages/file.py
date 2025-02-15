@@ -72,7 +72,10 @@ class FileContextStorage(DBContextStorage, ABC):
         return (await self._load()).main.get(ctx_id, None)
 
     async def _update_context(
-        self, ctx_id: str, ctx_info: Optional[ContextMainInfo], field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]]
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         storage = await self._load()
         if ctx_info is not None:
