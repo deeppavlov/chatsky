@@ -193,7 +193,7 @@ class ContextDict(ABC, BaseModel):
 
             return tuple(self._items[k] for k in slice_keys)
         else:
-            raise TypeError("Key must be either a non-negative integer or a slice.")
+            raise TypeError(f"Key must be either an integer or an iterable of integers: {key}.")
 
     @overload
     def __setitem__(self, key: int, value: BaseModel) -> None:
@@ -222,7 +222,7 @@ class ContextDict(ABC, BaseModel):
             else:
                 raise ValueError("Key slice must have sequence value.")
         else:
-            raise TypeError("Key must be either a non-negative integer or a slice.")
+            raise TypeError(f"Key must be either an integer or an iterable of integers: {key}.")
 
     def __delitem__(self, key: Union[int, slice]) -> None:
         if isinstance(key, int):
@@ -237,7 +237,7 @@ class ContextDict(ABC, BaseModel):
             for k in slice_keys:
                 del self[k]
         else:
-            raise TypeError("Key must be either a non-negative integer or a slice.")
+            raise TypeError(f"Key must be either an integer or an iterable of integers: {key}.")
 
     def __iter__(self) -> Iterable[int]:
         yield from self.keys()
@@ -279,7 +279,7 @@ class ContextDict(ABC, BaseModel):
 
             return tuple(self._items.get(k, default) for k in key)
         else:
-            raise TypeError("Key must be either an integer or an iterable of integers.")
+            raise TypeError(f"Key must be either an integer or an iterable of integers: {key}.")
 
     def __contains__(self, key: int) -> bool:
         return key in self._keys
