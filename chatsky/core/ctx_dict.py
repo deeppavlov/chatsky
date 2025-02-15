@@ -169,22 +169,31 @@ class ContextDict(ABC, BaseModel):
     async def __getitem__(self, key: int) -> BaseModel: ...  # noqa: E704
 
     @overload
-    async def __getitem__(self, key: slice) -> List[BaseModel]: ...  # noqa: E704
+    async def __getitem__(self, key: slice) -> Tuple[BaseModel]: ...  # noqa: E704
 
     async def __getitem__(self, key):
-        if isinstance(key, int) and key < 0:
-            key = self.keys()[key]
-        if self._storage is not None:
-            if isinstance(key, slice):
-                await self._load_items(
-                    [self.keys()[k] for k in range(len(self.keys()))[key] if k not in self._items.keys()]
-                )
-            elif key not in self._items.keys():
+        if isinstance(key, int):
+            if key not in self:
+                raise KeyError(f"Key {key} does not exist.")
+            if self._storage is not None and key not in self._items:
                 await self._load_items([key])
-        if isinstance(key, slice):
-            return [self._items[k] for k in self.keys()[key]]
-        else:
             return self._items[key]
+
+        if isinstance(key, slice):
+            slice_keys = list(range(key.start, key.stop, key.step if key.step is not None else 1))
+
+            invalid_keys = [k for k in slice_keys if k not in self]
+            if invalid_keys:
+                raise KeyError(f"The following keys do not exist: {invalid_keys}.")
+
+            keys_to_load = [k for k in slice_keys if k not in self._items]
+
+            if self._storage is not None and keys_to_load:
+                await self._load_items(keys_to_load)
+
+            return tuple(self._items[k] for k in slice_keys)
+        else:
+            raise TypeError("Key must be either a non-negative integer or a slice.")
 
     @overload
     def __setitem__(self, key: int, value: BaseModel) -> None:
@@ -195,34 +204,40 @@ class ContextDict(ABC, BaseModel):
         pass
 
     def __setitem__(self, key, value):
-        if isinstance(key, int) and key < 0:
-            key = self.keys()[key]
-        if isinstance(key, slice):
-            if isinstance(value, Sequence):
-                key_slice = self.keys()[key]
-                if len(key_slice) != len(value):
-                    raise ValueError("Slices must have the same length!")
-                for k, v in zip(key_slice, value):
-                    self[k] = v
-            else:
-                raise ValueError("Slice key must have sequence value!")
-        else:
+        if isinstance(key, int):
             self._keys.add(key)
             self._added.add(key)
             self._removed.discard(key)
+
             self._items[key] = self._value_type.validate_python(value)
+        elif isinstance(key, slice):
+            if isinstance(value, Sequence):
+                slice_keys = list(range(key.start, key.stop, key.step if key.step is not None else 1))
+
+                if len(slice_keys) != len(value):
+                    raise ValueError("Key slice and value sequence must have the same length.")
+
+                for k, v in zip(slice_keys, value):
+                    self[k] = v
+            else:
+                raise ValueError("Key slice must have sequence value.")
+        else:
+            raise TypeError("Key must be either a non-negative integer or a slice.")
 
     def __delitem__(self, key: Union[int, slice]) -> None:
-        if isinstance(key, int) and key < 0:
-            key = self.keys()[key]
-        if isinstance(key, slice):
-            for k in self.keys()[key]:
-                del self[k]
-        else:
+        if isinstance(key, int):
             self._removed.add(key)
             self._added.discard(key)
             self._keys.discard(key)
+
             del self._items[key]
+        elif isinstance(key, slice):
+            slice_keys = list(range(key.start, key.stop, key.step if key.step is not None else 1))
+
+            for k in slice_keys:
+                del self[k]
+        else:
+            raise TypeError("Key must be either a non-negative integer or a slice.")
 
     def __iter__(self) -> Iterable[int]:
         yield from self.keys()
@@ -262,7 +277,11 @@ class ContextDict(ABC, BaseModel):
         return sorted(self._keys)
 
     async def values(self) -> List[BaseModel]:
-        return await self[:]
+        keys_to_load = [k for k in self.keys() if k not in self._items]
+
+        if self._storage is not None and keys_to_load:
+            await self._load_items(keys_to_load)
+        return [self._items[key] for key in self.keys()]
 
     async def items(self) -> List[Tuple[int, BaseModel]]:
         return [(k, v) for k, v in zip(self.keys(), await self.values())]
@@ -286,7 +305,8 @@ class ContextDict(ABC, BaseModel):
         return key, value
 
     def clear(self) -> None:
-        del self[:]
+        for key in self.keys():
+            del self[key]
 
     async def update(self, other: Any = (), /, **kwds) -> None:
         if isinstance(other, ContextDict):

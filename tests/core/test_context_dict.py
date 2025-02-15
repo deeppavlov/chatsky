@@ -51,36 +51,74 @@ class TestContextDict:
                 assert len(ctx_dict._items) == len(ctx_dict._hashes) == 1
                 assert ctx_dict._keys == {1, 2}
 
-    async def test_get_set_del(
+    async def test_get_set_del_1_item(
         self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
     ) -> None:
         for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
-            # Setting 1 item
+            # Get test
+            if ctx_dict is prefilled_dict:
+                assert await ctx_dict[1] == Message("longer text", misc={"k": "v"})
+            else:
+                with pytest.raises(KeyError):
+                    await ctx_dict[1]
+
+            # Set test
             message = Message("message")
             ctx_dict[0] = message
             assert await ctx_dict[0] == message
             assert 0 in ctx_dict._keys
             assert ctx_dict._added == {0}
             assert ctx_dict._items[0] == message
-            # Setting several items
-            ctx_dict[1] = ctx_dict[2] = ctx_dict[3] = Message()
-            messages = (Message("1"), Message("2"), Message("3"))
-            ctx_dict[1:] = messages
-            assert await ctx_dict[1:] == list(messages)
-            assert ctx_dict._keys == {0, 1, 2, 3}
-            assert ctx_dict._added == {0, 1, 2, 3}
-            # Deleting item
+
+            # Delete test
             del ctx_dict[0]
-            assert ctx_dict._keys == {1, 2, 3}
-            assert ctx_dict._added == {1, 2, 3}
+            assert ctx_dict._added == set()
             assert ctx_dict._removed == {0}
-            # Getting deleted item
-            with pytest.raises(KeyError) as e:
-                _ = await ctx_dict[0]
-            assert e
-            # negative index
-            (await ctx_dict[-1]).text = "4"
-            assert (await ctx_dict[3]).text == "4"
+
+    async def test_get_set_del_multiple_items(
+            self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+    ) -> None:
+        for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
+            # Get test
+            if ctx_dict is prefilled_dict:
+                assert await ctx_dict[1:3] == (
+                    Message("longer text", misc={"k": "v"}),
+                    Message("text 2", misc={"1": 0, "2": 8})
+                )
+            else:
+                with pytest.raises(KeyError):
+                    await ctx_dict[1:3]
+
+            # Set test
+            messages = (Message("1"), Message("2"), Message("3"))
+            ctx_dict[0:3] = messages
+            assert await ctx_dict[0:3] == tuple(messages)
+            assert ctx_dict._keys == {0, 1, 2}
+            assert ctx_dict._added == {0, 1, 2}
+
+            with pytest.raises(ValueError):
+                ctx_dict[0:3] = 1
+            with pytest.raises(ValueError):
+                ctx_dict[0:3] = (1, 2)
+
+            # Delete test
+            del ctx_dict[0:2]
+            assert ctx_dict._keys == {2}
+            assert ctx_dict._added == {2}
+            assert ctx_dict._removed == {0, 1}
+
+    async def test_get_set_del_wrong_type(
+        self, empty_dict: ContextDict, attached_dict: ContextDict, prefilled_dict: ContextDict
+    ) -> None:
+        for ctx_dict in [empty_dict, attached_dict, prefilled_dict]:
+            with pytest.raises(TypeError):
+                await ctx_dict["text"]
+
+            with pytest.raises(TypeError):
+                ctx_dict["text"] = 1
+
+            with pytest.raises(TypeError):
+                del ctx_dict["text"]
 
     async def test_load_len_in_contains_keys_values(self, prefilled_dict: ContextDict) -> None:
         # Checking keys
