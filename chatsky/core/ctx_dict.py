@@ -256,7 +256,7 @@ class ContextDict(ABC, BaseModel):
                 return default
 
     def __contains__(self, key: int) -> bool:
-        return key in self.keys()
+        return key in self._keys
 
     def keys(self) -> List[int]:
         return sorted(self._keys)
