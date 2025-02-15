@@ -295,15 +295,6 @@ class ContextDict(ABC, BaseModel):
             del self[key]
             return value
 
-    async def popitem(self) -> Tuple[int, BaseModel]:
-        try:
-            key = next(iter(self))
-        except StopIteration:
-            raise KeyError from None
-        value = await self[key]
-        del self[key]
-        return key, value
-
     def clear(self) -> None:
         for key in self.keys():
             del self[key]
@@ -466,9 +457,6 @@ class LabelContextDict(ContextDict):
     async def pop(self, key: int, default=None) -> AbsoluteNodeLabel:
         return await super().pop(key, default)
 
-    async def popitem(self) -> Tuple[int, AbsoluteNodeLabel]:
-        return await super().popitem()
-
     async def setdefault(self, key: int, default=None) -> AbsoluteNodeLabel:
         return await super().setdefault(key, default)
 
@@ -521,9 +509,6 @@ class MessageContextDict(ContextDict):
 
     async def pop(self, key: int, default=None) -> Message:
         return await super().pop(key, default)
-
-    async def popitem(self) -> Tuple[int, Message]:
-        return await super().popitem()
 
     async def setdefault(self, key: int, default=None) -> Message:
         return await super().setdefault(key, default)

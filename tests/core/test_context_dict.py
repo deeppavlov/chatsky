@@ -155,9 +155,6 @@ class TestContextDict:
         assert len(prefilled_dict) == 1
         # Popping nonexistent item
         assert await prefilled_dict.pop(100, None) is None
-        # Poppint last item
-        assert (await prefilled_dict.popitem())[0] == 2
-        assert prefilled_dict._removed == {1, 2}
         # Updating dict with new values
         await prefilled_dict.update({1: Message("some"), 2: Message("random")})
         assert set(prefilled_dict.keys()) == {1, 2}
