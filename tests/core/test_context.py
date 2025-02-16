@@ -75,13 +75,13 @@ class TestTurns:
     def ctx(self, context_factory):
         return context_factory()
 
-    async def test_complete_turn(self, ctx: Context):
+    async def test_negative_index(self, ctx: Context):
         ctx.labels[5] = ("flow", "node5")
         ctx.requests[5] = Message(text="text5")
         ctx.responses[5] = Message(text="text5")
         ctx.current_turn_id = 5
 
-        label, request, response = list(await ctx.turns(5))[0]
+        request, label, response = await ctx.turns[-1]
         assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node5")
         assert request == Message(text="text5")
         assert response == Message(text="text5")
@@ -91,7 +91,7 @@ class TestTurns:
         ctx.requests[6] = Message(text="text6")
         ctx.current_turn_id = 6
 
-        label, request, response = list(await ctx.turns(6))[0]
+        request, label, response = await ctx.turns[6]
         assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node6")
         assert request == Message(text="text6")
         assert response is None
@@ -103,11 +103,11 @@ class TestTurns:
             ctx.responses[i] = Message(text=f"text{i}")
             ctx.current_turn_id = i
 
-        labels, requests, responses = zip(*(await ctx.turns(slice(2, 6))))
-        for i in range(2, 6):
-            assert AbsoluteNodeLabel(flow_name="flow", node_name=f"node{i}") in labels
-            assert Message(text=f"text{i}") in requests
-            assert Message(text=f"text{i}") in responses
+        for i, turn in zip(range(2, 6), await ctx.turns[2:6]):
+            request, label, response = turn
+            assert AbsoluteNodeLabel(flow_name="flow", node_name=f"node{i}") == label
+            assert Message(text=f"text{i}") == request
+            assert Message(text=f"text{i}") == response
 
 
 async def test_copy(context_factory):
