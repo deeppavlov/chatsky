@@ -160,9 +160,13 @@ class Context(ContextMainInfo):
     @property
     def last_label(self) -> AbsoluteNodeLabel:
         """
-        Receive last turn label.
-        Throw an error if no labels are present or the last label is absent.
-        :return: The last turn label.
+        Return label with the highest turn id that is present in :py:attr:`labels`.
+
+        This is not always the label of the transition made during the current turn.
+        For that, use ``ctx.labels[ctx.current_turn_id]``.
+
+        :return: Label with the highest turn id.
+        :raises ContextError: If there are no labels.
         """
 
         if len(self.labels) == 0:
@@ -172,9 +176,13 @@ class Context(ContextMainInfo):
     @property
     def last_response(self) -> Message:
         """
-        Receive last turn response.
-        Throw an error if no responses are present or the last response is absent.
-        :return: The last turn response.
+        Return response with the highest turn id that is present in :py:attr:`responses`.
+
+        This is not always the response produced during the current turn.
+        For that, use ``ctx.responses[ctx.current_turn_id]``.
+
+        :return: Response with the highest turn id.
+        :raises ContextError: If there are no responses.
         """
 
         if len(self.responses) == 0:
@@ -184,9 +192,13 @@ class Context(ContextMainInfo):
     @property
     def last_request(self) -> Message:
         """
-        Receive last turn request.
-        Throw an error if no requests are present or the last request is absent.
-        :return: The last turn request.
+        Return request with the highest turn id that is present in :py:attr:`requests`.
+
+        This is not always the request that initiated the current turn.
+        For that, use ``ctx.requests[ctx.current_turn_id]``.
+
+        :return: Request with the highest turn id.
+        :raises ContextError: If there are no requests.
         """
 
         if len(self.requests) == 0:
