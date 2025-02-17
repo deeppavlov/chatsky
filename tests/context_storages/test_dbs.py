@@ -220,13 +220,13 @@ class TestContextStorages:
         assert await db.load_main_info("2") == ctx_info
 
     async def test_wrong_field_name(self, db: DBContextStorage):
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'."):
             await db.load_field_latest("1", "non-existent")
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'."):
             await db.load_field_keys("1", "non-existent")
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'."):
             await db.load_field_items("1", "non-existent", [1, 2])
-        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'!"):
+        with pytest.raises(ValueError, match="Invalid value 'non-existent' for argument 'field_name'."):
             await db.update_context("1", field_info=[("non-existent", [(1, b"2")], list())])
 
     async def test_field_get(self, db: DBContextStorage, ctx_info: ContextMainInfo, add_context: AddContextType):
