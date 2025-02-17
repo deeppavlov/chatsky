@@ -1,9 +1,8 @@
 """
-JSON
+File
 ----
-The JSON module provides a json-based version of the :py:class:`.DBContextStorage` class.
-This class is used to store and retrieve context data in a JSON. It allows Chatsky to easily
-store and retrieve context data.
+The File module provides simple file-based versions of the :py:class:`.DBContextStorage` class
+such as json, pickle and shelve.
 """
 
 from abc import ABC, abstractmethod

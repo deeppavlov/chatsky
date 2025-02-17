@@ -1,3 +1,9 @@
+"""
+Memory
+------
+The Memory module provides an in-RAM version of the :py:class:`.DBContextStorage` class.
+"""
+
 from typing import List, Optional, Set, Tuple
 
 from chatsky.core.ctx_utils import ContextMainInfo
@@ -6,8 +12,8 @@ from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 
 class MemoryContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBContextStorage` storing contexts in memory, wthout file backend.
-    Does not serialize any data. By default it sets path to an empty string.
+    Implements :py:class:`.DBContextStorage` storing contexts in memory, without file backend.
+    Does not serialize any data. By default, it sets path to an empty string.
 
     Keeps data in a dictionary and two dictionaries:
 

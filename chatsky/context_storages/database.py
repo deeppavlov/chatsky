@@ -203,7 +203,7 @@ class DBContextStorage(ABC):
         field_info: Optional[List[Tuple[str, List[Tuple[int, bytes]], List[int]]]] = None,
     ) -> None:
         """
-        Update context intofrmation.
+        Update context information.
 
         :param ctx_id: Context identifier.
         :param ctx_info: Context main information (will be written to MAIN table).
