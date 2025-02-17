@@ -64,7 +64,7 @@ pipeline = Pipeline(
 Model name is used to reference the model config in the LLM script functions.
 
 You can also make multiple models and pass them together in the `models`
-dictionary. This allows using different system prompts and/or 
+dictionary. This allows using different system prompts and/or
 model configs in the same script.
 """
 
