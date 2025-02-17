@@ -174,19 +174,18 @@ class Context(ContextMainInfo):
         return self.labels._items[self.labels.keys()[-1]]
 
     @property
-    def last_response(self) -> Message:
+    def last_response(self) -> Optional[Message]:
         """
         Return response with the highest turn id that is present in :py:attr:`responses`.
 
         This is not always the response produced during the current turn.
         For that, use ``ctx.responses[ctx.current_turn_id]``.
 
-        :return: Response with the highest turn id.
-        :raises ContextError: If there are no responses.
+        :return: Response with the highest turn id or ``None`` if there are no responses.
         """
 
         if len(self.responses) == 0:
-            raise ContextError("Responses are empty.")
+            return None
         return self.responses._items[self.responses.keys()[-1]]
 
     @property

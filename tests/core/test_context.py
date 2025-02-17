@@ -62,8 +62,7 @@ class TestResponses:
         assert ctx.last_response == Message(text="text2")
 
     def test_empty_responses(self, ctx: Context):
-        with pytest.raises(ContextError):
-            ctx.last_response
+        assert ctx.last_response is None
 
         ctx.responses[1] = "text"
         assert ctx.last_response == Message(text="text")
