@@ -15,14 +15,14 @@ from functools import wraps
 from importlib import import_module
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Awaitable, Callable, Dict, List, Literal, Optional, Tuple, Union, Set
 
 from chatsky.core.ctx_utils import ContextMainInfo
 from chatsky.utils.decorations import classproperty
 from chatsky.utils.logging import collapse_num_list
 from .protocol import PROTOCOLS
 
-_SUBSCRIPT_TYPE = Union[Literal["__all__"], int]
+_SUBSCRIPT_TYPE = Union[Literal["__all__"], int, Set[int]]
 _SUBSCRIPT_DICT = Dict[Literal["labels", "requests", "responses"], _SUBSCRIPT_TYPE]
 
 logger = getLogger(__name__)
