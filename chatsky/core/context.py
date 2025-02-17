@@ -252,9 +252,9 @@ class Context(ContextMainInfo):
 
         **Examples:**
 
-            1. ``ctx.turns[0] == None, start_label, None``;
-            2. ``ctx.turns[-2]`` -- request, label, response of the second to last turn;
-            3. ``for request, label, response in ctx.turns[-5:]`` -- iterate over the last 5 turns.
+            1. ``await ctx.turns[0] == None, start_label, None``;
+            2. ``await ctx.turns[-2]`` -- request, label, response of the second to last turn;
+            3. ``for request, label, response in await ctx.turns[-5:]`` -- iterate over the last 5 turns.
         """
 
         def __init__(self, ctx: Context):
