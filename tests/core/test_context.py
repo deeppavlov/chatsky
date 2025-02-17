@@ -1,6 +1,8 @@
+from copy import copy
 import pytest
 
-from chatsky.core.context import get_last_index, Context, ContextError
+from chatsky.core.context import Context
+from chatsky.core.ctx_utils import ContextError
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.script_function import BaseResponse, BaseProcessing
@@ -8,109 +10,113 @@ from chatsky.core.pipeline import Pipeline
 from chatsky.core import RESPONSE, PRE_TRANSITION, PRE_RESPONSE
 
 
-class TestGetLastIndex:
-    @pytest.mark.parametrize(
-        "dict,result",
-        [
-            ({1: None, 5: None}, 5),
-            ({5: None, 1: None}, 5),
-        ],
-    )
-    def test_normal(self, dict, result):
-        assert get_last_index(dict) == result
-
-    def test_exception(self):
-        with pytest.raises(ValueError):
-            get_last_index({})
-
-
-def test_init():
-    ctx1 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
-    ctx2 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"))
-    assert ctx1.labels == {0: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
-    assert ctx1.requests == {}
-    assert ctx1.responses == {}
-    assert ctx1.id != ctx2.id
-
-    ctx3 = Context.init(AbsoluteNodeLabel(flow_name="flow", node_name="node"), id="id")
-    assert ctx3.labels == {0: AbsoluteNodeLabel(flow_name="flow", node_name="node")}
-    assert ctx3.requests == {}
-    assert ctx3.responses == {}
-    assert ctx3.id == "id"
-
-
 class TestLabels:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["requests", "responses"], add_start_label=False)
+        return context_factory(forbidden_fields=["requests", "responses"])
 
-    def test_raises_on_empty_labels(self, ctx):
-        with pytest.raises(ContextError):
-            ctx.add_label(("flow", "node"))
-
+    def test_raises_on_empty_labels(self, ctx: Context):
         with pytest.raises(ContextError):
             ctx.last_label
 
-    def test_existing_labels(self, ctx):
-        ctx.labels = {5: AbsoluteNodeLabel.model_validate(("flow", "node1"))}
+    def test_existing_labels(self, ctx: Context):
+        ctx.labels[5] = ("flow", "node1")
 
         assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
-        ctx.add_label(("flow", "node2"))
-        assert ctx.labels == {
-            5: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
-            6: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
-        }
+        ctx.labels[6] = ("flow", "node2")
+        assert ctx.labels.keys() == [5, 6]
         assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
 
 
 class TestRequests:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["labels", "responses"], add_start_label=False)
+        return context_factory(forbidden_fields=["labels", "responses"])
 
-    def test_existing_requests(self, ctx):
-        ctx.requests = {5: Message(text="text1")}
+    def test_existing_requests(self, ctx: Context):
+        ctx.requests[5] = Message(text="text1")
         assert ctx.last_request == Message(text="text1")
-        ctx.add_request("text2")
-        assert ctx.requests == {5: Message(text="text1"), 6: Message(text="text2")}
+        ctx.requests[6] = "text2"
+        assert ctx.requests.keys() == [5, 6]
         assert ctx.last_request == Message(text="text2")
 
-    def test_empty_requests(self, ctx):
+    def test_empty_requests(self, ctx: Context):
         with pytest.raises(ContextError):
             ctx.last_request
 
-        ctx.add_request("text")
+        ctx.requests[1] = "text"
         assert ctx.last_request == Message(text="text")
-        assert list(ctx.requests.keys()) == [1]
+        assert ctx.requests.keys() == [1]
 
 
 class TestResponses:
     @pytest.fixture
     def ctx(self, context_factory):
-        return context_factory(forbidden_fields=["labels", "requests"], add_start_label=False)
+        return context_factory(forbidden_fields=["labels", "requests"])
 
-    def test_existing_responses(self, ctx):
-        ctx.responses = {5: Message(text="text1")}
+    def test_existing_responses(self, ctx: Context):
+        ctx.responses[5] = Message(text="text1")
         assert ctx.last_response == Message(text="text1")
-        ctx.add_response("text2")
-        assert ctx.responses == {5: Message(text="text1"), 6: Message(text="text2")}
+        ctx.responses[6] = "text2"
+        assert ctx.responses.keys() == [5, 6]
         assert ctx.last_response == Message(text="text2")
 
-    def test_empty_responses(self, ctx):
+    def test_empty_responses(self, ctx: Context):
         assert ctx.last_response is None
 
-        ctx.add_response("text")
+        ctx.responses[1] = "text"
         assert ctx.last_response == Message(text="text")
-        assert list(ctx.responses.keys()) == [1]
+        assert ctx.responses.keys() == [1]
 
 
-def test_last_items_on_init():
-    ctx = Context.init(("flow", "node"))
+class TestTurns:
+    @pytest.fixture
+    def ctx(self, context_factory):
+        return context_factory()
 
-    assert ctx.last_label == AbsoluteNodeLabel(flow_name="flow", node_name="node")
-    assert ctx.last_response is None
-    with pytest.raises(ContextError):
-        ctx.last_request
+    async def test_negative_index(self, ctx: Context):
+        ctx.labels[5] = ("flow", "node5")
+        ctx.requests[5] = Message(text="text5")
+        ctx.responses[5] = Message(text="text5")
+        ctx.current_turn_id = 5
+
+        request, label, response = await ctx.turns[-1]
+        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node5")
+        assert request == Message(text="text5")
+        assert response == Message(text="text5")
+
+    async def test_partial_turn(self, ctx: Context):
+        ctx.labels[6] = ("flow", "node6")
+        ctx.requests[6] = Message(text="text6")
+        ctx.current_turn_id = 6
+
+        request, label, response = await ctx.turns[6]
+        assert label == AbsoluteNodeLabel(flow_name="flow", node_name="node6")
+        assert request == Message(text="text6")
+        assert response is None
+
+    async def test_slice_turn(self, ctx: Context):
+        for i in range(2, 6):
+            ctx.labels[i] = ("flow", f"node{i}")
+            ctx.requests[i] = Message(text=f"text{i}")
+            ctx.responses[i] = Message(text=f"text{i}")
+            ctx.current_turn_id = i
+
+        for i, turn in zip(range(2, 6), await ctx.turns[2:6]):
+            request, label, response = turn
+            assert AbsoluteNodeLabel(flow_name="flow", node_name=f"node{i}") == label
+            assert Message(text=f"text{i}") == request
+            assert Message(text=f"text{i}") == response
+
+
+async def test_copy(context_factory):
+    ctx = context_factory()
+    ctx.misc["key"] = "value"
+
+    cpy = copy(ctx)
+    assert cpy.misc["key"] == "value"
+    assert cpy._storage == ctx._storage
+    assert cpy == ctx
 
 
 async def test_pipeline_available():

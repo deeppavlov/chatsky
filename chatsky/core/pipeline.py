@@ -12,14 +12,14 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable, TYPE_CHECKING
+from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
-from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
 from chatsky.core.context import Context
 from chatsky.core.message import Message
 
+from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
@@ -92,7 +92,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     It handles connections to interfaces that provide user requests and accept bot responses.
     """
-    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    context_storage: DBContextStorage = Field(default_factory=MemoryContextStorage)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
@@ -126,7 +126,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         slots: GroupSlot = None,
         models: dict = None,
         messenger_interface: MessengerInterface = None,
-        context_storage: Union[DBContextStorage, dict] = None,
+        context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
         post_services: ServiceGroupInitTypes = None,
         before_handler: ComponentExtraHandlerInitTypes = None,
@@ -233,7 +233,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -253,12 +253,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
         logger.debug(f"Received request: {request}.")
-        if ctx_id is None:
-            ctx = Context.init(self.start_label)
-        elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context.init(self.start_label, id=ctx_id))
-        else:
-            ctx = self.context_storage.get(ctx_id, Context.init(self.start_label, id=ctx_id))
+        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)
@@ -269,22 +264,22 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.framework_data.pipeline = self
         initialize_service_states(ctx, self.services_pipeline)
 
-        ctx.add_request(request)
+        ctx.current_turn_id = ctx.current_turn_id + 1
+
+        ctx.requests[ctx.current_turn_id] = request
         await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 
-        if isinstance(self.context_storage, DBContextStorage):
-            await self.context_storage.set_item_async(ctx_id, ctx)
-        else:
-            self.context_storage[ctx_id] = ctx
+        await ctx.store()
 
         return ctx
 
     def run(self):
         """
         Method that starts a pipeline and connects to :py:attr:`messenger_interface`.
+        It also connects to the :py:attr:`context_storage` (if it's not already connected).
 
         It passes :py:meth:`_run_pipeline` to :py:attr:`messenger_interface` as a callback,
         so every time user request is received, :py:meth:`_run_pipeline` will be called.
@@ -292,17 +287,22 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         This method can be both blocking and non-blocking. It depends on current :py:attr:`messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
+        if not self.context_storage.connected:
+            asyncio.run(self.context_storage.connect())
         logger.info("Pipeline is accepting requests.")
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for :py:meth:`_run_pipeline`.
         NB! When pipeline is executed this way, :py:attr:`messenger_interface` won't be initiated nor connected.
+        Still, it connects to the :py:attr:`context_storage` (if it's not already connected) to avoid sync issues.
 
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
+        if not self.context_storage.connected:
+            asyncio.run(self.context_storage.connect())
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))

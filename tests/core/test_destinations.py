@@ -7,7 +7,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 
 @pytest.fixture
 def ctx(context_factory):
-    return context_factory(forbidden_fields=("requests", "responses", "misc"))
+    return context_factory(forbidden_fields=("requests", "responses", "misc"), start_label=("service", "start"))
 
 
 async def test_from_history(ctx):
@@ -16,10 +16,10 @@ async def test_from_history(ctx):
         == await dst.Current()(ctx)
         == AbsoluteNodeLabel(flow_name="service", node_name="start")
     )
-    with pytest.raises(KeyError):
+    with pytest.raises(IndexError):
         await dst.FromHistory(position=-2)(ctx)
 
-    ctx.add_label(("flow", "node1"))
+    ctx.labels[1] = ("flow", "node1")
     assert (
         await dst.FromHistory(position=-1)(ctx)
         == await dst.Current()(ctx)
@@ -30,10 +30,10 @@ async def test_from_history(ctx):
         == await dst.Previous()(ctx)
         == AbsoluteNodeLabel(flow_name="service", node_name="start")
     )
-    with pytest.raises(KeyError):
+    with pytest.raises(IndexError):
         await dst.FromHistory(position=-3)(ctx)
 
-    ctx.add_label(("flow", "node2"))
+    ctx.labels[2] = ("flow", "node2")
     assert await dst.Current()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node2")
     assert await dst.FromHistory(position=-3)(ctx) == AbsoluteNodeLabel(flow_name="service", node_name="start")
 
@@ -78,19 +78,19 @@ class TestForwardBackward:
             dst.get_next_node_in_flow(("flow", "node4"), ctx)
 
     async def test_forward(self, ctx):
-        ctx.add_label(("flow", "node2"))
+        ctx.labels[1] = ("flow", "node2")
         assert await dst.Forward()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node3")
 
-        ctx.add_label(("flow", "node3"))
+        ctx.labels[2] = ("flow", "node3")
         assert await dst.Forward(loop=True)(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
         with pytest.raises(IndexError):
             await dst.Forward(loop=False)(ctx)
 
     async def test_backward(self, ctx):
-        ctx.add_label(("flow", "node2"))
+        ctx.labels[1] = ("flow", "node2")
         assert await dst.Backward()(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node1")
 
-        ctx.add_label(("flow", "node1"))
+        ctx.labels[2] = ("flow", "node1")
         assert await dst.Backward(loop=True)(ctx) == AbsoluteNodeLabel(flow_name="flow", node_name="node3")
         with pytest.raises(IndexError):
             await dst.Backward(loop=False)(ctx)

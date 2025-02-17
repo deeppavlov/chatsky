@@ -103,7 +103,9 @@ async def main(n_iterations: int = 100, n_workers: int = 4):
     ctxs = asyncio.Queue()
     parallel_iterations = n_iterations // n_workers
     for _ in range(n_workers):
-        await ctxs.put(Context.init(("root", "start")))
+        ctx = Context()
+        ctx.last_label = ("root", "start")
+        await ctxs.put(ctx)
     for _ in tqdm(range(parallel_iterations)):
         await asyncio.gather(*(worker(ctxs) for _ in range(n_workers)))
 
