@@ -51,7 +51,9 @@ in the conversation history. The default hierarchy is:
 2. `history` - Conversation context
 3. `misc_prompt` - Additional prompts from nodes/flows
 4. `call_prompt` - Direct response prompts
-5. `last_request` - User's most recent input
+5. `last_turn` - Request and response from the current turn
+    (if response has not yet been generated during current turn,
+    only request is included)
 
 Let's create a custom configuration to demonstrate positioning:
 """

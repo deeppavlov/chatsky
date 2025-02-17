@@ -8,7 +8,7 @@ class PositionConfig(BaseModel):
     history: float = 1
     misc_prompt: float = 2
     call_prompt: float = 3
-    last_request: float = 4
+    last_turn: float = 4
 
 
 class Prompt(BaseModel):

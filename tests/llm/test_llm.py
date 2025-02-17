@@ -259,6 +259,18 @@ class TestContextToHistory:
         ]
         assert res == expected
 
+    async def test_context_with_response_to_history(self, filter_context):
+        res = await context_to_history(
+            ctx=filter_context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+        )
+        expected = [
+            HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+        ]
+        assert res == expected
+
 
 class TestGetLangchainContext:
     @pytest.mark.parametrize(
@@ -284,7 +296,7 @@ class TestGetLangchainContext:
             (
                 PositionConfig(
                     system_prompt=10,
-                    last_request=0,
+                    last_turn=0,
                     misc_prompt=1,
                     history=2,
                 ),
@@ -306,7 +318,7 @@ class TestGetLangchainContext:
             (
                 PositionConfig(
                     system_prompt=1,
-                    last_request=1,
+                    last_turn=1,
                     misc_prompt=1,
                     history=1,
                     call_prompt=1,
@@ -340,6 +352,35 @@ class TestGetLangchainContext:
             max_size=100,
         )
 
+        assert res == expected
+
+    async def test_context_with_response(self, context):
+        context.responses[4] = "Last response"
+
+        res = await get_langchain_context(
+            system_prompt=Message(text="system prompt"),
+            ctx=context,
+            call_prompt=Prompt(message=Message(text="call prompt")),
+            length=-1,
+            filter_func=lambda *args: True,
+            llm_model_name="test_model",
+            max_size=100,
+        )
+
+        expected = [
+            SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 1"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 2"}]),
+            HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 3"}]),
+            HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+            HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
+            HumanMessage(content=[{"type": "text", "text": "Last request"}]),
+            AIMessage(content=[{"type": "text", "text": "Last response"}]),
+            HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
+        ]
         assert res == expected
 
 

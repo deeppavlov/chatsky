@@ -88,11 +88,11 @@ There is a certain order of the prompts inside of the "history" list that goes i
 2. `history` - Conversation context
 3. `misc_prompt` - Additional prompts from nodes/flows
 4. `call_prompt` - Direct response prompts
-5. `last_request` - User's most recent input
+5. `last_turn` - Request and response from the current turn
+   (if response has not yet been generated during current turn,
+   only request is included)
 
-You can specify the position of the system prompt, message history
-and misc prompts, prompt specified in response
-and last message by modifying `PositionConfig`.
+You can change the position of all of the above by modifying `PositionConfig`.
 
 .. code-block:: python
 
@@ -101,7 +101,7 @@ and last message by modifying `PositionConfig`.
         history=1,
         misc_prompt=2,
         call_prompt: float = 3,
-        last_request: float = 4
+        last_turn: float = 4
     )
 
 Also, there are several ways to pass a prompt into a model. First is to directly pass it as an argument inside of the ``LLMResponse`` call.

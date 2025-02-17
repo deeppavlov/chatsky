@@ -134,11 +134,14 @@ async def get_langchain_context(
         prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
 
     last_turn_request = await ctx.requests.get(ctx.current_turn_id)
+    last_turn_response = await ctx.responses.get(ctx.current_turn_id)
 
     if last_turn_request:
         prompts.append(
-            ([await message_to_langchain(last_turn_request, ctx, source="human")], position_config.last_request)
+            ([await message_to_langchain(last_turn_request, ctx, source="human")], position_config.last_turn)
         )
+    if last_turn_response:
+        prompts.append(([await message_to_langchain(last_turn_response, ctx, source="ai")], position_config.last_turn))
 
     logger.debug(f"Prompts: {prompts}")
     prompts = sorted(prompts, key=lambda x: x[1])
