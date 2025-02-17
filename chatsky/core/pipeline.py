@@ -84,7 +84,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     models: Dict[str, LLM_API] = Field(default_factory=dict)
     """
-    LLM models.
+    LLM models to be made available in custom functions.
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
