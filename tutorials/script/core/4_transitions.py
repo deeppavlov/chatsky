@@ -44,7 +44,7 @@ to the fallback node.
 Each transition is represented by the %mddoclink(api,core.transition,Transition)
 class.
 
-It has three main fields:
+It has four main fields:
 
 - dst: Destination determines the node to which the transition is made.
 - cnd: Condition determines if the transition is allowed.
@@ -54,6 +54,9 @@ It has three main fields:
     %mddoclink(api,core.pipeline,Pipeline.default_priority)
     is used instead.
     Default priority is 1 by default (but may be set via Pipeline).
+- passthrough: Sets transition to pass-through mode, when
+    a request from the user is not required to move to the next node.
+    If passthrough is not set, it is False by default. 
 
 For more details on how the next node is chosen see
 [here](%doclink(api,core.transition,get_next_label)).
@@ -261,6 +264,20 @@ toy_script = {
                 # Otherwise, this transition will never be made
             ],
         },
+    },
+    "pass_through_flow": {
+        "node1": {
+            TRANSITIONS: [Tr(dst="node2")],
+        },
+        "node2": {
+            RESPONSE: "Moved to node 2",
+            TRANSITIONS: [Tr(dst="node3", passthrough=True)],
+        },
+        "node3": {
+            RESPONSE: "Moved to node3",
+            TRANSITIONS: [Tr(dst="node4", passthrough=True)],
+        },
+        "node4": {RESPONSE: "That's all I know."},
     },
 }
 

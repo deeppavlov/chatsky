@@ -225,9 +225,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     async def run_pipeline(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
-        # TODO: rewrite with while true-break
+        ctx = await self._process_one_turn(request, ctx_id, update_ctx_misc)
         while True:
-            ctx = await self._process_one_turn(request, ctx_id, update_ctx_misc)
+            ctx = await self._process_one_turn(Message(), ctx_id, update_ctx_misc)
             if ctx.framework_data.transition is None:
                 logger.warning("No transition found in framework_data")
                 break
