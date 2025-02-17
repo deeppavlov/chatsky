@@ -37,11 +37,11 @@ class LLMResponse(BaseResponse):
     """
     history: int = 5
     """
-    Number of dialogue turns to keep in history. `-1` for full history.
+    Number of dialogue turns aside from the current one to keep in history. `-1` for full history.
     """
     filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
     """
-    Filter function to filter messages that will go the models context.
+    Filter function to filter messages in history.
     """
     prompt_misc_filter: str = Field(default=r"prompt")
     """
@@ -49,7 +49,7 @@ class LLMResponse(BaseResponse):
     """
     position_config: Optional[PositionConfig] = None
     """
-    Defines prompts and messages positions in history sent to a LLM.
+    Config for positions of prompts and messages in history.
     """
     message_schema: Union[None, Type[Message], Type[BaseModel]] = None
     """
@@ -59,7 +59,7 @@ class LLMResponse(BaseResponse):
     """
     Maximum size of any message in chat in symbols.
     If a message exceeds the limit it will not be sent to the LLM and a warning
-    will be produced
+    will be produced.
     """
 
     async def call(self, ctx: Context) -> Message:
@@ -67,7 +67,6 @@ class LLMResponse(BaseResponse):
         model = ctx.pipeline.models[self.llm_model_name]
         history_messages = []
 
-        # iterate over context to retrieve history messages
         logger.debug("Retrieving context history.")
         history_messages.extend(
             await get_langchain_context(
