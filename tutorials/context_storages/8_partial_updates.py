@@ -33,41 +33,36 @@ In particular, this is relevant for `labels`, `requests` and `responses`
 fields, while `misc` and `framework_data` are always loaded fully.
 
 How does that partial field writing work?
+
 In most cases, every context storage
 operates two "tables", "dictionaries", "files", etc.
+
 One of them is called `MAIN` and contains all the "primitive" `Context`
-data (and also the data that will be read and written completely every time,
-serialized) - that includes context `id`, `current_turn_id`, `_created_at`,
+data (and also the data that will be read and written completely every time) -
+that includes context `id`, `current_turn_id`, `_created_at`,
 `_updated_at`, `misc` and `framework_data` fields.
+
 The other one is called `TURNS` and contains triplets of the data generated on
 each conversation step: `label`, `request` and `response`.
 
-Whenever a context is loaded, only one item from `MAIN` teble
-and zero to few items from `TURNS` table are loaded.
-More items from `TURNS` table can be loaded later on demand.
+Whenever a context is loaded, all of its information from `MAIN` table
+and one to few items from `TURNS` table are loaded.
+More items from `TURNS` table can be loaded later on demand
+(via the `get` or `__getitem__` methods of corresponding fields).
 """
 
 # %% [markdown]
 """
-Database table layout and default behavior is controlled by
+Database table layout and default behavior are controlled by
 some special fields of the `DBContextStorage` class.
 
 All the table and field names are stored in a special `NameConfig`
 static class.
 """
 
-# %%
-print(
-    {
-        k: v
-        for k, v in vars(NameConfig).items()
-        if not k.startswith("__") and not callable(v)
-    }
-)
-
 # %% [markdown]
 """
-Another property worth mentioning is `_subscripts`:
+One of the important configuration options is `_subscripts`:
 this property controls the number of *last* dictionary items
 that will be read and written
 (the items are ordered by keys, ascending) - default value is 3.
@@ -78,34 +73,32 @@ can be set to a set of desired integers.
 """
 
 # %%
-# All items will be read.
+# All items will be loaded on every turn.
 db._subscripts[NameConfig._requests_field] = "__all__"
 
 # %%
-# 5 last items will be read.
+# 5 last items will be loaded on every turn.
 db._subscripts[NameConfig._requests_field] = 5
 
 # %%
-# Items 1, 3, 5 and 7 will be read.
+# Items 1, 3, 5 and 7 will be loaded on every turn.
 db._subscripts[NameConfig._requests_field] = {1, 3, 5, 7}
 
 # %% [markdown]
 """
 Last but not least, comes `rewrite_existing` boolean flag.
-In order to understand it, let's explore `ContextDict` class more.
 
-`ContextDict` provides dict-like access to its elements, however
-by default not all of them might be loaded from the very beginning.
-Usually, only the keys are loaded completely, while values loading is
-controlled by `subscript` mentioned above.
+Without it any "silent" modifications to the values of `ContextDict` will be
+discarded at the end of each turn.
 
-Still, `ContextDict` allows accessing items that are not yet loaded
-(they are loaded lazily), as well as deleting and overwriting them.
-Once `ContextDict` is serialized, it always includes information about
-all the added and removed elements.
-As for the modified elements, that's where `rewrite_existing` flag
-comes into play: if it is set to `True`, modifications are included,
-otherwise they are discarded.
+I.e. explicit modification of values via methods such as `__setitem__`,
+`__delitem__` or `pop` will be kept track of and preserved, while
+implicit modification via object manipulation,
+e.g. ``ctx.last_request.text = "new_text"``, will be discarded.
+
+Turning the option on will enable calculating hashes for all items stored
+locally and comparing them at the end of every turn, updating any
+that were implicitly changed.
 
 NB! Keeping track of the modified elements comes with a price of calculating
 their hashes and comparing them, so in performance-critical environments
@@ -116,16 +109,6 @@ this feature can be disabled by setting the flag to False.
 # Any modifications done to the elements already present in storage
 # will be preserved.
 db.rewrite_existing = True
-
-# %% [markdown]
-"""
-A few more words about the `labels`, `requests` and `responses` fields.
-One and only one label, request and response is added on every dialog turn,
-and they are numbered consecutively.
-
-Framework ensures this ordering is preserved, each of them can be modified or
-replaced with `None`, but never deleted or removed completely.
-"""
 
 # %%
 if __name__ == "__main__":
