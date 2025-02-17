@@ -33,7 +33,7 @@ class FromHistory(BaseDestination):
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
-        return await ctx.labels[self.position]
+        return await ctx.labels[ctx.labels.keys()[self.position]]
 
 
 class Current(FromHistory):
