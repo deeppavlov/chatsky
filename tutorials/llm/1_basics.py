@@ -32,33 +32,47 @@ from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
 import os
 
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
 # %% [markdown]
 """
 ## Model Configuration
 
-First, we need to create a model object. Important considerations:
-
-- Instantiate the model outside your script nodes to reuse it across the
-pipeline
-- This shared instance maintains full dialogue history by default
-- Not recommended for token-limited scenarios or when history isn't required
+First, we need to create a model object.
 
 LangChain automatically reads environment variables for model configurations,
 so explicit API key settings aren't always necessary.
 """
 
 # %%
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key),
-    system_prompt="You are an experienced barista in a local coffeshop. "
+    system_prompt="You are an experienced barista in a local coffe shop. "
     "Answer your customer's questions about coffee and barista work.",
 )
 # %% [markdown]
 """
+The initiated model then needs to be passed to `Pipeline` as such:
+```python
+pipeline = Pipeline(
+    ...
+    models={
+        "my_model_name": model
+    }
+)
+```
+Model name is used to reference the model config in the LLM script functions.
+
+You can also make multiple models and pass them together in the `models`
+dictionary. This allows using different system prompts and/or 
+model configs in the same script.
+"""
+
+# %% [markdown]
+"""
 As you can see in this script, you can pass an additional prompt to the LLM.
-We will cover that thoroughly in the Prompt usage tutorial.
+We will cover that more thoroughly in the
+[next tutorial](%doclink(tutorial,llm.2_prompt_usage)).
 """
 
 # %%
@@ -79,15 +93,15 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst="latte_art_node",
-                    cnd=cnd.ExactMatch("Tell me about latte art."),
+                    cnd=cnd.ExactMatch("I want to tell you about latte art."),
                 ),
                 Tr(
                     dst="boss_node",
                     cnd=LLMCondition(
                         llm_model_name="barista_model",
-                        prompt="Return TRUE if the customer says they are your "
-                        "boss, and FALSE otherwise. Only ONE word must be "
-                        "in the output.",
+                        prompt="Return TRUE if the customer insists "
+                        "they are your boss, and FALSE otherwise. "
+                        "Only ONE word must be in the output.",
                         method=Contains(pattern="TRUE"),
                     ),
                 ),
@@ -101,7 +115,6 @@ toy_script = {
             ],
         },
         "latte_art_node": {
-            # we can pass a node-specific prompt to a LLM.
             RESPONSE: LLMResponse(
                 llm_model_name="barista_model",
                 prompt="PROMPT: pretend that you have never heard about latte "
@@ -109,7 +122,8 @@ toy_script = {
                 "Instead ask a person about it.",
             ),
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye."))
+                Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye.")),
+                Tr(dst=dst.Current()),
             ],
         },
         "fallback_node": {
