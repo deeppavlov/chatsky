@@ -7,6 +7,7 @@ The Utils module contains functions for converting Chatsky's objects to an LLM_A
 import re
 import logging
 from typing import Literal, Union
+import asyncio
 
 from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
@@ -63,18 +64,14 @@ async def context_to_history(
     :return: List of Langchain message objects.
     """
     history = []
-    indices = range(1, min(max([*ctx.requests.keys(), 0]), max([*ctx.responses.keys(), 0])) + 1)
+    indices = list(range(1, ctx.current_turn_id))
 
     if length == 0:
         return []
     elif length > 0:
         indices = indices[-length:]
 
-    # TODO:
-    # Refactor this after #93 PR merge
-    for turn_id in indices:
-        request = ctx.requests[turn_id]
-        response = ctx.responses[turn_id]
+    for request, response in zip(*await asyncio.gather(ctx.requests.get(indices), ctx.responses.get(indices))):
         if filter_func(ctx, request, response, llm_model_name):
             if request:
                 history.append(await message_to_langchain(request, ctx=ctx, max_size=max_size))
@@ -136,7 +133,12 @@ async def get_langchain_context(
         call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
         prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
 
-    prompts.append(([await message_to_langchain(ctx.last_request, ctx, source="human")], position_config.last_request))
+    last_turn_request = await ctx.requests.get(ctx.current_turn_id)
+
+    if last_turn_request:
+        prompts.append(
+            ([await message_to_langchain(last_turn_request, ctx, source="human")], position_config.last_request)
+        )
 
     logger.debug(f"Prompts: {prompts}")
     prompts = sorted(prompts, key=lambda x: x[1])
