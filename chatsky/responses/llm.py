@@ -12,7 +12,6 @@ from pydantic import BaseModel, Field
 from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.langchain_context import get_langchain_context
-from chatsky.llm._langchain_imports import check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.core.script_function import BaseResponse
@@ -63,7 +62,6 @@ class LLMResponse(BaseResponse):
     """
 
     async def call(self, ctx: Context) -> Message:
-        check_langchain_available()
         model = ctx.pipeline.models[self.llm_model_name]
         history_messages = []
 

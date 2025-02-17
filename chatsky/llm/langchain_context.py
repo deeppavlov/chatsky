@@ -64,6 +64,7 @@ async def context_to_history(
 
     :return: List of Langchain message objects.
     """
+    check_langchain_available()
     history = []
     indices = list(range(1, ctx.current_turn_id))
 
@@ -106,6 +107,7 @@ async def get_langchain_context(
 
     :return: List of Langchain message objects ordered by their position values.
     """
+    check_langchain_available()
     logger.debug(f"History args: {history_args}")
 
     history = await context_to_history(ctx, **history_args)
