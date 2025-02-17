@@ -52,9 +52,11 @@ class LLMResponse(BaseResponse):
     """
     Schema for model output validation.
     """
-    max_size: int = 1000
+    max_size: int = 5000
     """
-    Maximum size of any message in chat in symbols. If exceed the limit will raise ValueError.
+    Maximum size of any message in chat in symbols.
+    If a message exceeds the limit it will not be sent to the LLM and a warning
+    will be produced
     """
 
     async def call(self, ctx: Context) -> Message:

@@ -19,7 +19,7 @@ logger.debug("Loaded LLM Utils logger.")
 
 
 async def message_to_langchain(
-    message: Message, ctx: Context, source: Literal["human", "ai", "system"] = "human", max_size: int = 1000
+    message: Message, ctx: Context, source: Literal["human", "ai", "system"] = "human", max_size: int = 5000
 ) -> Union[HumanMessage, AIMessage, SystemMessage]:
     """
     Create a langchain message from a :py:class:`~chatsky.script.core.message.Message` object.
@@ -27,8 +27,9 @@ async def message_to_langchain(
     :param message: Chatsky Message to convert to Langchain Message.
     :param ctx: Current dialog context.
     :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
-    :param max_size: Maximum size of the message in symbols.
-        If exceed the limit will raise ValueError.
+    :param max_size: Maximum size of any message in chat measured in characters.
+        If a message exceeds the limit it will not be sent to the LLM and a warning
+        will be produced
     """
     check_langchain_available()
     if message.text is None:
