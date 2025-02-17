@@ -150,7 +150,7 @@ class DBContextStorage(ABC):
     @classmethod
     def _validate_field_name(cls, field_name: str) -> str:
         if field_name not in (NameConfig._labels_field, NameConfig._requests_field, NameConfig._responses_field):
-            raise ValueError(f"Invalid value '{field_name}' for argument 'field_name'!")
+            raise ValueError(f"Invalid value '{field_name}' for argument 'field_name'.")
         else:
             return field_name
 

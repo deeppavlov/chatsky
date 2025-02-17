@@ -155,7 +155,7 @@ class Context(ContextMainInfo):
             await self._storage.delete_context(self.id)
             self._storage = None
         else:
-            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage.")
 
     @property
     def last_label(self) -> AbsoluteNodeLabel:
@@ -339,7 +339,7 @@ class Context(ContextMainInfo):
             instance.responses._ctx_id = instance.id
             return instance
         else:
-            raise ValueError(f"Unknown type of Context value: {type(value).__name__}!")
+            raise ValueError(f"Unknown type of Context value: {type(value).__name__}.")
 
     async def store(self) -> None:
         """
@@ -364,4 +364,4 @@ class Context(ContextMainInfo):
             await self._storage.update_context(self.id, main_into, [labels_data, requests_data, responses_data])
             logger.debug(f"Context stored: {self.id}")
         else:
-            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage.")

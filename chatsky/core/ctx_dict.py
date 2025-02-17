@@ -387,7 +387,7 @@ class ContextDict(ABC, BaseModel):
             instance._keys = set(value.keys())
             return instance
         else:
-            raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
+            raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}.")
 
     def _serialize_model_base(self, to_bytes: bool = False) -> Dict[int, Union[BaseModel, bytes]]:
         if self._storage is None:
@@ -427,7 +427,7 @@ class ContextDict(ABC, BaseModel):
                     self._hashes[k] = _get_hash(self._value_type.dump_json(v))
             return self._field_name, added_items, removed_items
         else:
-            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage!")
+            raise RuntimeError(f"{type(self).__name__} is not attached to any context storage.")
 
 
 class LabelContextDict(ContextDict):
