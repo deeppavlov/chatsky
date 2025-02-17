@@ -14,8 +14,8 @@ from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessag
 from chatsky.llm.filters import BaseHistoryFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
 
+
 logger = logging.getLogger(__name__)
-logger.debug("Loaded LLM Utils logger.")
 
 
 async def message_to_langchain(

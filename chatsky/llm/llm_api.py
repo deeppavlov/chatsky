@@ -16,6 +16,9 @@ from chatsky.core import AnyResponse, MessageInitTypes
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
+logger = logging.getLogger(__name__)
+
+
 class LLM_API:
     """
     This class acts as a wrapper for all LLMs from langchain
@@ -60,7 +63,7 @@ class LLM_API:
             # Case if the message_schema describes Message structure
             structured_model = self.model.with_structured_output(message_schema, method="json_mode")
             model_result = await structured_model.ainvoke(history)
-            logging.debug(f"Generated response: {model_result}")
+            logger.debug(f"Generated response: {model_result}")
             return Message.model_validate(model_result)
         elif issubclass(message_schema, BaseModel):
             # Case if the message_schema describes Message.text structure

@@ -18,6 +18,9 @@ from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.core.script_function import BaseResponse
 
 
+logger = logging.getLogger(__name__)
+
+
 class LLMResponse(BaseResponse):
     """
     Basic function for receiving LLM responses.
@@ -65,7 +68,7 @@ class LLMResponse(BaseResponse):
         history_messages = []
 
         # iterate over context to retrieve history messages
-        logging.debug("Retrieving context history.")
+        logger.debug("Retrieving context history.")
         history_messages.extend(
             await get_langchain_context(
                 system_prompt=await model.system_prompt(ctx),
@@ -80,7 +83,7 @@ class LLMResponse(BaseResponse):
             )
         )
 
-        logging.debug(f"History: {history_messages}")
+        logger.debug(f"History: {history_messages}")
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
         if result.annotations:

@@ -16,6 +16,9 @@ from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import PositionConfig, Prompt
 
 
+logger = logging.getLogger(__name__)
+
+
 class LLMCondition(BaseCondition):
     """
     LLM-based condition.
@@ -62,7 +65,7 @@ class LLMCondition(BaseCondition):
 
         history_messages = []
         # iterate over context to retrieve history messages
-        logging.debug("Retrieving context history.")
+        logger.debug("Retrieving context history.")
         history_messages.extend(
             await get_langchain_context(
                 system_prompt=await model.system_prompt(ctx),
