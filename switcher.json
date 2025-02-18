@@ -1,0 +1,11 @@
+[
+    {
+        "name": "latest",
+        "version": "master",
+        "url": "https://deeppavlov.github.io/chatsky/master/"
+    },
+    {
+        "version": "dev",
+        "url": "https://deeppavlov.github.io/chatsky/dev/"
+    }
+]
