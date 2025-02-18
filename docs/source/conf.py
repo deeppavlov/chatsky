@@ -16,7 +16,7 @@ from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
-copyright = "2022 - 2024, DeepPavlov"
+copyright = "2022 - 2025, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
