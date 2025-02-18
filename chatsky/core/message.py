@@ -14,7 +14,7 @@ from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
+from pydantic import BaseModel, Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
 from pydantic_core import Url
 
 from chatsky.utils.devel import (
@@ -257,6 +257,43 @@ class MediaGroup(Attachment):
     chatsky_attachment_type: Literal["media_group"] = "media_group"
 
 
+class Origin(BaseModel):
+    """
+    Denotes the origin of the message.
+    """
+
+    message: Optional[Any] = None
+    """
+    Original data that the message is created from.
+    E.g. telegram update.
+    """
+    interface: Optional[str] = None
+    """
+    Name of the interface that produced the message.
+    """
+
+    @field_serializer("message", when_used="json")
+    def pickle_serialize_message(self, value):
+        """
+        Cast :py:attr:`message` to string via pickle.
+        Allows storing arbitrary data in this field when using context storages.
+        """
+        if value is not None:
+            return pickle_serializer(value)
+        return value
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def pickle_validate_message(cls, value):
+        """
+        Restore :py:attr:`message` after being processed with
+        :py:meth:`pickle_serialize_message`.
+        """
+        if value is not None:
+            return pickle_validator(value)
+        return value
+
+
 class Message(DataModel):
     """
     Class representing a message and contains several
@@ -292,7 +329,7 @@ class Message(DataModel):
     ] = None
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
-    original_message: Optional[Any] = None
+    origin: Optional[Origin] = None
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,
@@ -320,7 +357,7 @@ class Message(DataModel):
         ] = None,
         annotations: Optional[Dict[str, Any]] = None,
         misc: Optional[Dict[str, Any]] = None,
-        original_message: Optional[Any] = None,
+        origin: Optional[Origin] = None,
         **kwargs,
     ):
         super().__init__(
@@ -328,7 +365,7 @@ class Message(DataModel):
             attachments=attachments,
             annotations=annotations,
             misc=misc,
-            original_message=original_message,
+            origin=origin,
             **kwargs,
         )
 
@@ -348,27 +385,6 @@ class Message(DataModel):
         """Restore values serialized with :py:meth:`pickle_serialize_dicts`."""
         if isinstance(value, dict):
             return json_pickle_validator(value)
-        return value
-
-    @field_serializer("original_message", when_used="json")
-    def pickle_serialize_original_message(self, value):
-        """
-        Cast :py:attr:`original_message` to string via pickle.
-        Allows storing arbitrary data in this field when using context storages.
-        """
-        if value is not None:
-            return pickle_serializer(value)
-        return value
-
-    @field_validator("original_message", mode="before")
-    @classmethod
-    def pickle_validate_original_message(cls, value):
-        """
-        Restore :py:attr:`original_message` after being processed with
-        :py:meth:`pickle_serialize_original_message`.
-        """
-        if value is not None:
-            return pickle_validator(value)
         return value
 
     def __str__(self) -> str:

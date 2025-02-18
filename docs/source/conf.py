@@ -14,7 +14,7 @@ from utils.notebook import py_percent_to_notebook  # noqa: E402
 _distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
-copyright = "2022 - 2024, DeepPavlov"
+copyright = "2022 - 2025, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
@@ -48,6 +48,7 @@ extensions = [
 ]
 
 suppress_warnings = ["image.nonlocal_uri", "config.cache"]
+nbsphinx_allow_errors = os.getenv("NBSPHINX_ALLOW_ERRORS", "false").lower() in ("true", "1")
 source_suffix = ".rst"
 master_doc = "index"
 

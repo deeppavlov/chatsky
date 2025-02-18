@@ -8,7 +8,7 @@ import collections
 from typing import List
 
 from chatsky.core import Context
-from chatsky.core.context import ServiceState
+from chatsky.core.ctx_utils import ServiceState
 from .service.component import PipelineComponent
 from .service.group import ServiceGroup
 

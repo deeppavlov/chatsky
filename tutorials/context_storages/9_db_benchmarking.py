@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 8. Context storage benchmarking
+# 9. Context storage benchmarking
 
 This tutorial shows how to benchmark context storages.
 
