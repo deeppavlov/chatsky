@@ -383,30 +383,46 @@ class ContextDict(ABC, BaseModel):
             return value
         elif isinstance(value, Dict):
             instance = handler(dict())
-            instance._items = value.copy()
-            instance._keys = set(value.keys())
+            instance._items = value["items"]
+            instance._hashes = value["hashes"]
+            instance._keys = value["keys"]
+            instance._added = value["added"]
+            instance._removed = value["removed"]
+            instance._ctx_id = value["ctx_id"]
+            instance._field_name = value["field_name"]
             return instance
         else:
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}.")
 
-    def _serialize_model_base(self, to_bytes: bool = False) -> Dict[int, Union[BaseModel, bytes]]:
-        if self._storage is None:
-            return self._items
-        elif self._storage.rewrite_existing:
-            result = dict()
-            for k, v in self._items.items():
-                value = self._value_type.dump_json(v)
-                if _get_hash(value) != self._hashes.get(k, None):
-                    result[k] = value if to_bytes else v
-            return result
+    @model_serializer(mode="wrap", when_used="always")
+    def _serialize_model(self, original_serializer) -> Dict[str, Any]:
+        model_dict = original_serializer(self)
+        model_dict.update(
+            {
+                "items": self._items,
+                "hashes": self._hashes,
+                "keys": self._keys,
+                "added": self._added,
+                "removed": self._removed,
+                "ctx_id": self._ctx_id,
+                "field_name": self._field_name
+            }
+        )
+        return model_dict
+
+    @classmethod
+    def import_items(cls, value: Any) -> "ContextDict":
+        if isinstance(value, ContextDict):
+            return value
+        elif isinstance(value, Dict):
+            instance = cls()
+            instance._items = value.copy()
+            instance._keys = set(value.keys())
+            return instance
         else:
-            return {k: self._value_type.dump_json(self._items[k]) if to_bytes else self._items[k] for k in self._added}
+            raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}!")
 
-    @model_serializer()
-    def _serialize_model(self) -> Dict[int, BaseModel]:
-        return self._serialize_model_base()
-
-    def extract_sync(self) -> Tuple[str, List[Tuple[int, bytes]], List[int]]:
+    def extract_items(self) -> Tuple[str, List[Tuple[int, bytes]], List[int]]:
         """
         Synchronize dict state with the connected storage, extract the data that should be updated.
         Update added and removed elements, also update modified ones if `rewrite_existing` flag is enabled.
@@ -414,8 +430,16 @@ class ContextDict(ABC, BaseModel):
         """
 
         if self._storage is not None:
+            logger.debug(f"Extracting items for {self._ctx_id}...")
+            if self._storage.rewrite_existing:
+                added_items = list()
+                for k, v in self._items.items():
+                    value = self._value_type.dump_json(v)
+                    if _get_hash(value) != self._hashes.get(k):
+                        added_items += [(k, value)]
+            else:
+                added_items = [(k, self._value_type.dump_json(self._items[k])) for k in self._added]
             logger.debug(f"Storing context dict for {self._ctx_id}, {self._field_name}...")
-            added_items = [(k, e) for k, e in self._serialize_model_base(True).items()]
             removed_items = list(self._removed - self._added)
             logger.debug(
                 f"Context dict for {self._ctx_id}, {self._field_name} stored: "
