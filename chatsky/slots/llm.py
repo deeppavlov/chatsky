@@ -1,6 +1,8 @@
 """
 LLM Slots
 ---------
+Warning! This is an experimental feature.
+
 This module contains Slots based on LLMs structured outputs,
 that can easily extract requested information from an unstructured user's request.
 """
