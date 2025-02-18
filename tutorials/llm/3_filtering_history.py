@@ -9,7 +9,7 @@ This parameter expects an instance of `BaseHistoryFilter` with its
 abstract `call` method defined.
 """
 
-# %pip install chatsky[llm] langchain-openai
+# %pip install chatsky[llm]=={chatsky} langchain-openai=={langchain-openai}
 # %%
 import os
 from typing import Optional

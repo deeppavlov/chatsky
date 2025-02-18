@@ -8,7 +8,7 @@ and how to add a condition for component execution.
 [API ref for service conditions](%doclink(api,conditions.service))
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging

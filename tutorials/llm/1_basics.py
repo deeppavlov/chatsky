@@ -10,7 +10,7 @@ conditional logic in your conversational flows.
 Chatsky leverages LangChain internally to interface with remote LLM providers.
 """
 
-# %pip install chatsky[llm] langchain-openai
+# %pip install chatsky[llm]=={chatsky} langchain-openai=={langchain-openai}
 
 # %%
 import os

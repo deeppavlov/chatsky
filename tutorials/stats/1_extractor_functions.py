@@ -40,7 +40,7 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 
 """
 
-# %pip install chatsky[stats]
+# %pip install chatsky[stats]=={chatsky}
 
 # %%
 import asyncio

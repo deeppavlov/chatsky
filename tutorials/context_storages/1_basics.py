@@ -10,7 +10,7 @@ for creating a context storage by path.
 In this example JSON file is used as a storage.
 """
 
-# %pip install chatsky[json,pickle]
+# %pip install chatsky[json,pickle]=={chatsky}
 
 # %%
 import pathlib

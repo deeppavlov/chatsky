@@ -10,7 +10,7 @@ This tutorial demonstrates how to:
 2. Create dynamic prompts with external data
 3. Manage prompt hierarchy across different application flows
 """
-# %pip install chatsky[llm] langchain-openai
+# %pip install chatsky[llm]=={chatsky} langchain-openai=={langchain-openai}
 # %%
 
 
