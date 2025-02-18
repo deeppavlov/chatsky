@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/default_extractors
+:doc_version: dev/
+
+.. automodule:: chatsky.stats.default_extractors
+   :members:
+   :undoc-members:
+   :show-inheritance:

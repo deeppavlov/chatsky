@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/common
+:doc_version: dev/
+
+.. automodule:: chatsky.utils.testing.common
+   :members:
+   :undoc-members:
+   :show-inheritance:

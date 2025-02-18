@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/console
+:doc_version: dev/
+
+.. automodule:: chatsky.messengers.console
+   :members:
+   :undoc-members:
+   :show-inheritance:
