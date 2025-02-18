@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/llm
+:doc_version: master/
+
+.. automodule:: chatsky.conditions.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:
