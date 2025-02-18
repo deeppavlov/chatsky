@@ -8,7 +8,7 @@ such as json, pickle and shelve.
 from abc import ABC, abstractmethod
 from pickle import loads, dumps
 from shelve import DbfilenameShelf
-from typing import List, Set, Tuple, Dict, Optional
+from typing import Any, List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Field
 
@@ -67,13 +67,13 @@ class FileContextStorage(DBContextStorage, ABC):
     async def _connect(self):
         await self._load()
 
-    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
+    async def _load_main_info(self, ctx_id: str) -> Optional[Dict[str, Any]]:
         return (await self._load()).main.get(ctx_id, None)
 
     async def _update_context(
         self,
         ctx_id: str,
-        ctx_info: Optional[ContextMainInfo],
+        ctx_info: Optional[Dict[str, Any]],
         field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
     ) -> None:
         storage = await self._load()
