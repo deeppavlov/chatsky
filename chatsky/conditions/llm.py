@@ -4,7 +4,6 @@ LLM Conditions
 This module provides LLM-based conditions.
 """
 
-import logging
 from pydantic import Field
 from typing import Optional
 
@@ -14,9 +13,6 @@ from chatsky.llm.methods import BaseMethod
 from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import PositionConfig, Prompt
-
-
-logger = logging.getLogger(__name__)
 
 
 class LLMCondition(BaseCondition):
@@ -64,7 +60,6 @@ class LLMCondition(BaseCondition):
         model = ctx.pipeline.models[self.llm_model_name]
 
         history_messages = []
-        logger.debug("Retrieving context history.")
         history_messages.extend(
             await get_langchain_context(
                 system_prompt=await model.system_prompt(ctx),

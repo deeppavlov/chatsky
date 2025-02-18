@@ -4,7 +4,6 @@ LLM responses.
 Responses based on LLM_API calling.
 """
 
-import logging
 from typing import Union, Type, Optional
 
 from pydantic import BaseModel, Field
@@ -15,9 +14,6 @@ from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.core.script_function import BaseResponse
-
-
-logger = logging.getLogger(__name__)
 
 
 class LLMResponse(BaseResponse):
@@ -65,7 +61,6 @@ class LLMResponse(BaseResponse):
         model = ctx.pipeline.models[self.llm_model_name]
         history_messages = []
 
-        logger.debug("Retrieving context history.")
         history_messages.extend(
             await get_langchain_context(
                 system_prompt=await model.system_prompt(ctx),
@@ -80,7 +75,6 @@ class LLMResponse(BaseResponse):
             )
         )
 
-        logger.debug(f"History: {history_messages}")
         result = await model.respond(history_messages, message_schema=self.message_schema)
 
         if result.annotations:
