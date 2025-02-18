@@ -12,7 +12,7 @@ library are used for accessing telegram API in polling mode.
 Telegram API token is required to access telegram API.
 """
 
-# %pip install chatsky[telegram]
+# %pip install chatsky[telegram]=={chatsky}
 
 # %%
 import os

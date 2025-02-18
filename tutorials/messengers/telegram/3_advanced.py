@@ -11,7 +11,7 @@ library are used for accessing telegram API in polling mode.
 Telegram API token is required to access telegram API.
 """
 
-# %pip install chatsky[telegram]
+# %pip install chatsky[telegram]=={chatsky}
 
 # %%
 import os
@@ -90,7 +90,7 @@ image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
 
 formatted_text = """
 Visit [this link](https://core.telegram.org/bots/api#formatting-options)
-for more information about formatting options in telegram\.
+for more information about formatting options in telegram\\.
 """  # noqa: W605
 
 location_data = {"latitude": 59.9386, "longitude": 30.3141}

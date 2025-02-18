@@ -1,3 +1,4 @@
+import os
 from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
@@ -63,7 +64,12 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
 
         with open(doc_file, "r+") as file:
             contents = file.read()
-            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n\n{contents}")
+            doc_version = os.getenv("DOC_VERSION", default="master")
+            if doc_version != "":
+                doc_version = doc_version + "/"
+            doc_file.write_text(
+                f":source_name: {join(*doc_file.stem.split('.'))}\n:doc_version: {doc_version}\n\n{contents}"
+            )
 
     for name, (alias, files) in doc_containers.items():
         generate_doc_container(source / Path(f"{name}.rst"), alias, files)

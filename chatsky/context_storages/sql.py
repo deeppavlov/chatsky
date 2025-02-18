@@ -13,25 +13,34 @@ reliability and scalability. SQLite is a self-contained, high-reliability, embed
 public-domain, SQL database engine.
 """
 
-import asyncio
-import importlib
-import json
-from typing import Hashable
-
-from chatsky.core import Context
-
-from .database import DBContextStorage, threadsafe_method
-from .protocol import get_protocol_install_suggestion
+from __future__ import annotations
+from asyncio import gather
+from importlib import import_module
+from typing import Callable, Collection, List, Optional, Set, Tuple
+from logging import getLogger
 
 try:
-    from sqlalchemy import Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy import (
+        Table,
+        MetaData,
+        Column,
+        LargeBinary,
+        String,
+        BigInteger,
+        ForeignKey,
+        Integer,
+        Index,
+        Insert,
+        inspect,
+        select,
+        delete,
+        event,
+    )
     from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
 except (ImportError, ModuleNotFoundError):
     sqlalchemy_available = False
-
-postgres_available = sqlite_available = mysql_available = False
 
 try:
     import asyncpg
@@ -40,7 +49,7 @@ try:
 
     postgres_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
+    postgres_available = False
 
 try:
     import asyncmy
@@ -49,7 +58,7 @@ try:
 
     mysql_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
+    mysql_available = True
 
 try:
     import aiosqlite
@@ -58,135 +67,242 @@ try:
 
     sqlite_available = True
 except (ImportError, ModuleNotFoundError):
-    pass
+    sqlite_available = False
+
+from chatsky.core.ctx_utils import ContextMainInfo
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .protocol import get_protocol_install_suggestion
 
 if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
+logger = getLogger(__name__)
 
-def import_insert_for_dialect(dialect: str):
-    """
-    Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
 
-    :param dialect: Chosen sqlalchemy dialect.
-    """
-    global insert
-    insert = getattr(
-        importlib.import_module(f"sqlalchemy.dialects.{dialect}"),
-        "insert",
-    )
+def _sqlite_enable_foreign_key(dbapi_con, con_record):
+    dbapi_con.execute("pragma foreign_keys=ON")
+
+
+def _import_insert_for_dialect(dialect: str) -> Callable[[Table], "Insert"]:
+    return getattr(import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
+
+
+def _get_upsert_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
+    if dialect == "postgresql" or dialect == "sqlite":
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_conflict_do_update(
+                index_elements=unique, set_={column: insert_stmt.excluded[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.on_conflict_do_nothing()
+    elif dialect == "mysql":
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_duplicate_key_update(
+                **{column: insert_stmt.inserted[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.prefix_with("IGNORE")
+    else:
+        update_stmt = insert_stmt
+    return update_stmt
 
 
 class SQLContextStorage(DBContextStorage):
     """
-    | SQL-based version of the :py:class:`.DBContextStorage`.
-    | Compatible with MySQL, Postgresql, Sqlite.
+    SQL-based version of the :py:class:`.DBContextStorage`.
+    Compatible with MySQL, Postgresql, Sqlite.
+    When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
+    instead of forward slashes '/' in the file path.
+
+    `MAIN` table is represented by `main` table.
+    Columns of the table are: `id`, `current_turn_id`, `created_at` `updated_at`, `misc` and `framework_data`.
+
+    `TURNS` table is represented by `turns` table.
+    Columns of the table are: `id`, `key`, `label`, `request` and `response`.
 
     :param path: Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
-        instead of forward slashes '/' in the file path.
-    :param table_name: The name of the table to use.
-    :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
-        set this parameter to `True` to bypass the import checks.
+        Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
+        `mysql+asyncmy://root:pass@localhost:3306/test`,
+        `postgresql+asyncpg://postgres:pass@localhost:5430/test`.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
+    :param database_id_length: Length of context ID column in the database.
     """
 
-    def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        DBContextStorage.__init__(self, path)
+    def __init__(
+        self,
+        path: str,
+        rewrite_existing: bool = False,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
+        table_name_prefix: str = "chatsky_table",
+        database_id_length: int = 255,
+    ):
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
 
-        self._check_availability(custom_driver)
+        self._check_availability()
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
+        self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        id_column_args = {"primary_key": True}
         if self.dialect == "sqlite":
-            id_column_args["sqlite_on_conflict_primary_key"] = "REPLACE"
+            event.listen(self.engine.sync_engine, "connect", _sqlite_enable_foreign_key)
 
-        self.metadata = MetaData()
-        self.table = Table(
-            table_name,
-            self.metadata,
-            Column("id", String(36), **id_column_args),
-            Column("context", JSON),  # column for storing serialized contexts
+        metadata = MetaData()
+        self.main_table = Table(
+            f"{table_name_prefix}_{NameConfig._main_table}",
+            metadata,
+            Column(NameConfig._id_column, String(database_id_length), index=True, unique=True, nullable=False),
+            Column(NameConfig._current_turn_id_column, BigInteger(), nullable=False),
+            Column(NameConfig._created_at_column, BigInteger(), nullable=False),
+            Column(NameConfig._updated_at_column, BigInteger(), nullable=False),
+            Column(NameConfig._misc_column, LargeBinary(), nullable=False),
+            Column(NameConfig._framework_data_column, LargeBinary(), nullable=False),
+        )
+        self.turns_table = Table(
+            f"{table_name_prefix}_{NameConfig._turns_table}",
+            metadata,
+            Column(
+                NameConfig._id_column,
+                String(database_id_length),
+                ForeignKey(self.main_table.name, NameConfig._id_column),
+                nullable=False,
+            ),
+            Column(NameConfig._key_column, Integer(), nullable=False),
+            Column(NameConfig._labels_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._requests_field, LargeBinary(), nullable=True, default=None),
+            Column(NameConfig._responses_field, LargeBinary(), nullable=True, default=None),
+            Index(f"{NameConfig._turns_table}_index", NameConfig._id_column, NameConfig._key_column, unique=True),
         )
 
-        asyncio.run(self._create_self_table())
+    @property
+    def is_concurrent(self) -> bool:
+        return self.dialect != "sqlite"
 
-        import_insert_for_dialect(self.dialect)
-
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        value = Context.model_validate(value)
-        value = json.loads(value.model_dump_json())
-
-        insert_stmt = insert(self.table).values(id=str(key), context=value)
-        update_stmt = await self._get_update_stmt(insert_stmt)
-
-        async with self.engine.connect() as conn:
-            await conn.execute(update_stmt)
-            await conn.commit()
-
-    @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            row = result.fetchone()
-            if row:
-                return Context.model_validate(row[0])
-        raise KeyError
-
-    @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        stmt = delete(self.table).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            await conn.execute(stmt)
-            await conn.commit()
-
-    @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return bool(result.fetchone())
-
-    @threadsafe_method
-    async def len_async(self) -> int:
-        stmt = select(func.count()).select_from(self.table)
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return result.fetchone()[0]
-
-    @threadsafe_method
-    async def clear_async(self):
-        stmt = delete(self.table)
-        async with self.engine.connect() as conn:
-            await conn.execute(stmt)
-            await conn.commit()
-
-    async def _create_self_table(self):
+    async def _connect(self):
         async with self.engine.begin() as conn:
-            if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(self.table.name)):
-                await conn.run_sync(self.table.create, self.engine)
+            for table in [self.main_table, self.turns_table]:
+                if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
+                    logger.debug(f"SQL table created: {table.name}")
+                    await conn.run_sync(table.create, self.engine)
+                else:
+                    logger.debug(f"SQL table already exists: {table.name}")
 
-    async def _get_update_stmt(self, insert_stmt):
-        if self.dialect == "sqlite":
-            return insert_stmt
-        elif self.dialect == "mysql":
-            update_stmt = insert_stmt.on_duplicate_key_update(context=insert_stmt.inserted.context)
-        else:
-            update_stmt = insert_stmt.on_conflict_do_update(
-                index_elements=["id"], set_=dict(context=insert_stmt.excluded.context)
+    def _check_availability(self):
+        """
+        Chech availability of the specified backend, raise error if not available.
+
+        :param custom_driver: custom driver is requested - no checks will be performed.
+        """
+        if self.full_path.startswith("postgresql") and not postgres_available:
+            install_suggestion = get_protocol_install_suggestion("postgresql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("mysql") and not mysql_available:
+            install_suggestion = get_protocol_install_suggestion("mysql")
+            raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
+        elif self.full_path.startswith("sqlite") and not sqlite_available:
+            install_suggestion = get_protocol_install_suggestion("sqlite")
+            raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
+        stmt = select(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)
+        async with self.engine.begin() as conn:
+            result = (await conn.execute(stmt)).fetchone()
+            return (
+                None
+                if result is None
+                else ContextMainInfo.model_validate(
+                    {f: result[i + 1] for i, f in enumerate(NameConfig.get_context_main_fields)}
+                )
             )
-        return update_stmt
 
-    def _check_availability(self, custom_driver: bool):
-        if not custom_driver:
-            if self.full_path.startswith("postgresql") and not postgres_available:
-                install_suggestion = get_protocol_install_suggestion("postgresql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("mysql") and not mysql_available:
-                install_suggestion = get_protocol_install_suggestion("mysql")
-                raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
-            elif self.full_path.startswith("sqlite") and not sqlite_available:
-                install_suggestion = get_protocol_install_suggestion("sqlite")
-                raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+    async def _update_context(
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+    ) -> None:
+        main_update_stmt, turns_update_stmts = None, list()
+        if ctx_info is not None:
+            ctx_info_dump = ctx_info.model_dump(mode="python")
+            main_insert_stmt = self._INSERT_CALLABLE(self.main_table).values(
+                {
+                    NameConfig._id_column: ctx_id,
+                }
+                | {f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields}
+            )
+            main_update_stmt = _get_upsert_stmt(
+                self.dialect,
+                main_insert_stmt,
+                [
+                    NameConfig._updated_at_column,
+                    NameConfig._current_turn_id_column,
+                    NameConfig._misc_column,
+                    NameConfig._framework_data_column,
+                ],
+                [NameConfig._id_column],
+            )
+        for field_name, items in field_info:
+            turns_insert_values = [
+                {
+                    NameConfig._id_column: ctx_id,
+                    NameConfig._key_column: k,
+                    field_name: v,
+                }
+                for k, v in items
+                if len(items) > 0
+            ]
+            if len(turns_insert_values) > 0:
+                turns_insert_stmt = self._INSERT_CALLABLE(self.turns_table).values(turns_insert_values)
+                turns_update_stmts += [
+                    _get_upsert_stmt(
+                        self.dialect,
+                        turns_insert_stmt,
+                        [field_name],
+                        [NameConfig._id_column, NameConfig._key_column],
+                    )
+                ]
+        async with self.engine.begin() as conn:
+            if main_update_stmt is not None:
+                await conn.execute(main_update_stmt)
+            for turns_update_stmt in turns_update_stmts:
+                await conn.execute(turns_update_stmt)
+
+    # TODO: use foreign keys instead maybe?
+    async def _delete_context(self, ctx_id: str) -> None:
+        async with self.engine.begin() as conn:
+            await gather(
+                conn.execute(delete(self.main_table).where(self.main_table.c[NameConfig._id_column] == ctx_id)),
+                conn.execute(delete(self.turns_table).where(self.turns_table.c[NameConfig._id_column] == ctx_id)),
+            )
+
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
+        stmt = stmt.order_by(self.turns_table.c[NameConfig._key_column].desc())
+        if isinstance(self._subscripts[field_name], int):
+            stmt = stmt.limit(self._subscripts[field_name])
+        elif isinstance(self._subscripts[field_name], Set):
+            stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(self._subscripts[field_name]))
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        stmt = select(self.turns_table.c[NameConfig._key_column])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
+        async with self.engine.begin() as conn:
+            return [k[0] for k in (await conn.execute(stmt)).fetchall()]
+
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+        stmt = select(self.turns_table.c[NameConfig._key_column], self.turns_table.c[field_name])
+        stmt = stmt.where(self.turns_table.c[NameConfig._id_column] == ctx_id)
+        stmt = stmt.where(self.turns_table.c[NameConfig._key_column].in_(tuple(keys)))
+        stmt = stmt.where(self.turns_table.c[field_name] != None)  # noqa: E711
+        async with self.engine.begin() as conn:
+            return list((await conn.execute(stmt)).fetchall())
+
+    async def _clear_all(self) -> None:
+        async with self.engine.begin() as conn:
+            await gather(conn.execute(delete(self.main_table)), conn.execute(delete(self.turns_table)))

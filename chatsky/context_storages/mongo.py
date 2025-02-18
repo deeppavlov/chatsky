@@ -12,23 +12,21 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 
-from typing import Hashable, Dict, Any
+from asyncio import gather
+from typing import Any, Dict, Set, Tuple, Optional, List
 
 try:
-    from motor.motor_asyncio import AsyncIOMotorClient
-    from bson.objectid import ObjectId
+    from pymongo import UpdateOne
+    from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorClientSession
 
     mongo_available = True
 except ImportError:
+    AsyncIOMotorClientSession = Any
+
     mongo_available = False
-    AsyncIOMotorClient = None
-    ObjectId = Any
 
-import json
-
-from chatsky.core import Context
-
-from .database import DBContextStorage, threadsafe_method
+from chatsky.core.ctx_utils import ContextMainInfo
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
 from .protocol import get_protocol_install_suggestion
 
 
@@ -36,60 +34,148 @@ class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
+    CONTEXTS table is stored as `COLLECTION_PREFIX_contexts` collection.
+    LOGS table is stored as `COLLECTION_PREFIX_logs` collection.
+
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :param collection: Name of the collection to store the data in.
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    :param collection_prefix: "namespace" prefix for the two collections created for context storing.
     """
 
-    def __init__(self, path: str, collection: str = "context_collection"):
-        DBContextStorage.__init__(self, path)
+    _UNIQUE_KEYS = "unique_keys"
+    _ID_FIELD = "_id"
+
+    is_concurrent: bool = True
+
+    def __init__(
+        self,
+        path: str,
+        rewrite_existing: bool = False,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
+        collection_prefix: str = "chatsky_collection",
+        transactions_enabled: bool = False,
+    ):
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
+
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
-        self._mongo = AsyncIOMotorClient(self.full_path)
+        self._transactions_enabled = transactions_enabled
+        self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
-        self.collection = db[collection]
 
-    @staticmethod
-    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
-        """Convert a n-digit context id to a 24-digit mongo id"""
-        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
-        new_key = (new_key * (24 // len(new_key) + 1))[:24]
-        assert len(new_key) == 24
-        return {"_id": ObjectId(new_key)}
+        self.main_table = db[f"{collection_prefix}_{NameConfig._main_table}"]
+        self.turns_table = db[f"{collection_prefix}_{NameConfig._turns_table}"]
 
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        new_key = self._adjust_key(key)
-        value = Context.model_validate(value)
-        document = json.loads(value.model_dump_json())
+    async def _connect(self):
+        await gather(
+            self.main_table.create_index(NameConfig._id_column, background=True, unique=True),
+            self.turns_table.create_index(
+                [NameConfig._id_column, NameConfig._key_column], background=True, unique=True
+            ),
+        )
 
-        document.update(new_key)
-        await self.collection.replace_one(new_key, document, upsert=True)
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
+        result = await self.main_table.find_one(
+            {NameConfig._id_column: ctx_id},
+            NameConfig.get_context_main_fields,
+        )
+        return (
+            ContextMainInfo.model_validate({f: result[f] for f in NameConfig.get_context_main_fields})
+            if result is not None
+            else None
+        )
 
-    @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        adjust_key = self._adjust_key(key)
-        document = await self.collection.find_one(adjust_key)
-        if document:
-            document.pop("_id")
-            ctx = Context.model_validate(document)
-            return ctx
-        raise KeyError
+    async def _inner_update_context(
+        self,
+        ctx_id: str,
+        ctx_info_dump: Optional[Dict],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+        session: Optional[AsyncIOMotorClientSession],
+    ) -> None:
+        if ctx_info_dump is not None:
+            await self.main_table.update_one(
+                {NameConfig._id_column: ctx_id},
+                {
+                    "$set": {
+                        NameConfig._id_column: ctx_id,
+                    }
+                    | {f: ctx_info_dump[f] for f in NameConfig.get_context_main_fields}
+                },
+                upsert=True,
+                session=session,
+            )
+        if len(field_info) > 0:
+            await self.turns_table.bulk_write(
+                [
+                    UpdateOne(
+                        {NameConfig._id_column: ctx_id, NameConfig._key_column: k},
+                        {"$set": {field_name: v}},
+                        upsert=True,
+                    )
+                    for field_name, items in field_info
+                    for k, v in items
+                ],
+                session=session,
+            )
 
-    @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        adjust_key = self._adjust_key(key)
-        await self.collection.delete_one(adjust_key)
+    async def _update_context(
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+    ) -> None:
+        ctx_info_dump = ctx_info.model_dump(mode="python") if ctx_info is not None else None
+        if self._transactions_enabled:
+            async with await self._mongo.start_session() as session:
+                async with session.start_transaction():
+                    await self._inner_update_context(ctx_id, ctx_info_dump, field_info, session)
+        else:
+            await self._inner_update_context(ctx_id, ctx_info_dump, field_info, None)
 
-    @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        adjust_key = self._adjust_key(key)
-        return bool(await self.collection.find_one(adjust_key))
+    async def _delete_context(self, ctx_id: str) -> None:
+        await gather(
+            self.main_table.delete_one({NameConfig._id_column: ctx_id}),
+            self.turns_table.delete_one({NameConfig._id_column: ctx_id}),
+        )
 
-    @threadsafe_method
-    async def len_async(self) -> int:
-        return await self.collection.estimated_document_count()
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        limit, key = 0, dict()
+        if isinstance(self._subscripts[field_name], int):
+            limit = self._subscripts[field_name]
+        elif isinstance(self._subscripts[field_name], Set):
+            key = {NameConfig._key_column: {"$in": list(self._subscripts[field_name])}}
+        result = (
+            await self.turns_table.find(
+                {NameConfig._id_column: ctx_id, field_name: {"$exists": True, "$ne": None}, **key},
+                [NameConfig._key_column, field_name],
+                sort=[(NameConfig._key_column, -1)],
+            )
+            .limit(limit)
+            .to_list(None)
+        )
+        return [(item[NameConfig._key_column], item[field_name]) for item in result]
 
-    @threadsafe_method
-    async def clear_async(self):
-        await self.collection.delete_many(dict())
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        result = await self.turns_table.aggregate(
+            [
+                {"$match": {NameConfig._id_column: ctx_id, field_name: {"$ne": None}}},
+                {"$group": {"_id": None, self._UNIQUE_KEYS: {"$addToSet": f"${NameConfig._key_column}"}}},
+            ]
+        ).to_list(None)
+        return result[0][self._UNIQUE_KEYS] if len(result) == 1 else list()
+
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: Set[int]) -> List[Tuple[int, bytes]]:
+        result = await self.turns_table.find(
+            {
+                NameConfig._id_column: ctx_id,
+                NameConfig._key_column: {"$in": list(keys)},
+                field_name: {"$exists": True, "$ne": None},
+            },
+            [NameConfig._key_column, field_name],
+        ).to_list(None)
+        return [(item[NameConfig._key_column], item[field_name]) for item in result]
+
+    async def _clear_all(self) -> None:
+        await gather(self.main_table.delete_many({}), self.turns_table.delete_many({}))

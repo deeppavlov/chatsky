@@ -8,7 +8,7 @@ For more information, see
 [API ref](%doclink(api,core.service.group,ServiceGroup)).
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import asyncio

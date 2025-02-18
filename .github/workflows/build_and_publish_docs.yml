@@ -6,6 +6,8 @@ on:
     - dev
     - master
     - test/**
+    tags:
+    - v[0-9]+.[0-9]+.[0-9]+
   pull_request:
     branches:
     - dev
@@ -21,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -33,40 +37,29 @@ jobs:
 
       - name: setup poetry and install dependencies
         run: |
-          python -m pip install --upgrade pip poetry
+          python -m pip install --upgrade pip poetry==1.8.5
           python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
+
+      - name: save docs version into a variable
+        run: |
+          echo "DOC_VERSION=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
 
       - name: build documentation
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          DOC_VERSION: ${{ env.DOC_VERSION }}
         run: |
           python -m poetry run poe docs
 
-      - name: remove jekyll theming
-        run: touch docs/build/.nojekyll
-
-      - name: save branch name without slashes
-        if: ${{ github.ref != 'refs/heads/master' }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: |
-          BRANCH_NAME=${{ env.BRANCH_NAME }}
-          BRANCH_NAME=${BRANCH_NAME////_}
-          echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
-
-      - name: save artifact
-        if: ${{ github.ref != 'refs/heads/master' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
-          path: docs/build/
-          retention-days: 3
-
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: JamesIves/github-pages-deploy-action@v4.6.4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
-          single-commit: True
+          target-folder: ${{ env.DOC_VERSION }}
+          clean: True
+
+      - name: print link to the documentation
+        run: |
+          echo "https://deeppavlov.github.io/chatsky/${{ github.head_ref || github.ref_name }}"

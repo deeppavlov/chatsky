@@ -9,7 +9,7 @@ Here, [conditions](%doclink(api,conditions.standard))
 for script transitions are shown.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import re
