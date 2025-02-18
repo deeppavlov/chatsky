@@ -2,7 +2,7 @@
 LLM Slots
 ---------
 This module contains Slots based on LLMs structured outputs,
-that can easily infer requested information from an unstructured user's request.
+that can easily extract requested information from an unstructured user's request.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class LLMSlot(ValueSlot, frozen=True):
     """
-    LLMSlot is a slot type that extract information described in
+    LLMSlot is a slot type that extracts information described in
     `caption` parameter using LLM.
     """
 
@@ -32,16 +32,16 @@ class LLMSlot(ValueSlot, frozen=True):
 
     caption: str
     return_type: type = str
-    model: str = ""
+    llm_model_name: str = ""
 
-    def __init__(self, caption, model=""):
-        super().__init__(caption=caption, model=model)
+    def __init__(self, caption, llm_model_name=""):
+        super().__init__(caption=caption, llm_model_name=llm_model_name)
 
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         if request_text == "":
             return SlotNotExtracted()
-        model_instance = ctx.pipeline.models[self.model].model
+        model_instance = ctx.pipeline.models[self.llm_model_name].model
 
         # Dynamically create a Pydantic model based on the caption
         class DynamicModel(BaseModel):
@@ -61,9 +61,12 @@ class LLMGroupSlot(GroupSlot):
     """
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
-    model: str
+    llm_model_name: str
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
+        request_text = ctx.last_request.text
+        if request_text == "":
+            return ExtractedGroupSlot()
         flat_items = self._flatten_llm_group_slot(self)
         captions = {}
         for child_name, slot_item in flat_items.items():
@@ -73,9 +76,9 @@ class LLMGroupSlot(GroupSlot):
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
 
-        model_instance = ctx.pipeline.models[self.model].model
+        model_instance = ctx.pipeline.models[self.llm_model_name].model
         structured_model = model_instance.with_structured_output(DynamicGroupModel)
-        result = await structured_model.ainvoke(ctx.last_request.text)
+        result = await structured_model.ainvoke(request_text)
         result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")
 
@@ -96,17 +99,28 @@ class LLMGroupSlot(GroupSlot):
                 current = current[part]
 
             # Set the final value
-            current[final] = ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=value)
+            current[final] = ExtractedValueSlot.model_construct(
+                is_slot_extracted=value is not None, extracted_value=value
+            )
 
         return self._dict_to_extracted_slots(nested_result)
 
-    # Convert nested dict to ExtractedGroupSlot structure
     def _dict_to_extracted_slots(self, d):
+        """
+        Convert nested dictionary of ExtractedValueSlots into an ExtractedGroupSlot.
+        """
         if not isinstance(d, dict):
             return d
         return ExtractedGroupSlot(**{k: self._dict_to_extracted_slots(v) for k, v in d.items()})
 
-    def _flatten_llm_group_slot(self, slot, parent_key=""):
+    def _flatten_llm_group_slot(self, slot, parent_key="") -> Dict[str, LLMSlot]:
+        """
+        Convert potentially nested group slot into a dictionary with
+        flat keys.
+        Nested keys are flattened as concatenations via ".".
+
+        As such, values in the returned dictionary are only of type :py:class:`LLMSlot`.
+        """
         items = {}
         for key, value in slot.__pydantic_extra__.items():
             new_key = f"{parent_key}.{key}" if parent_key else key

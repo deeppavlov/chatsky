@@ -5,13 +5,13 @@ Wrapper around langchain.
 """
 
 from typing import Union, Type
-from pydantic import BaseModel, TypeAdapter
 import logging
+
+from pydantic import BaseModel, TypeAdapter
+
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.prompt import PositionConfig
-
-# from chatsky.llm.prompt import Prompt
 from chatsky.core import AnyResponse, MessageInitTypes
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 

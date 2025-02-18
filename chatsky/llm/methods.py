@@ -29,7 +29,7 @@ class BaseMethod(BaseModel, abc.ABC):
         """
         raise NotImplementedError
 
-    async def model_result_to_text(self, model_result: LLMResult) -> str:
+    def model_result_to_text(self, model_result: LLMResult) -> str:
         """
         Extract text from raw model result.
         """
@@ -50,13 +50,13 @@ class Contains(BaseMethod):
         """
         :return: True if pattern is contained in model_result.
         """
-        text = await self.model_result_to_text(model_result)
-        return bool(self.pattern.lower() in text.lower())
+        text = self.model_result_to_text(model_result)
+        return self.pattern.lower() in text.lower()
 
 
 class LogProb(BaseMethod):
     """
-    Method to check whether a target token's log probability is higher then a threshold.
+    Method to check whether a target token's log probability is higher than a threshold.
     """
 
     target_token: str
@@ -70,7 +70,7 @@ class LogProb(BaseMethod):
 
     async def __call__(self, ctx: Context, model_result: LLMResult) -> bool:
         """
-        :return: True if logprob of the token is higher then threshold.
+        :return: True if logprob of the token is higher than threshold.
         """
         try:
             result = model_result.generations[0][0].generation_info["logprobs"]["content"][0]["top_logprobs"]

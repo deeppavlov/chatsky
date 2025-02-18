@@ -3,8 +3,9 @@
 # LLM: 4. Structured Output
 
 Chatsky provides two powerful ways to get structured output from LLMs:
-1. **Using `BaseModel`**: To get structured text content (like JSON).
-2. **Using `Message` subclass**: To add metadata to messages.
+
+1. **Using BaseModel**: To get structured text content (like JSON).
+2. **Using Message subclass**: To add metadata to messages.
 
 This tutorial demonstrates both approaches with practical examples.
 """
@@ -12,6 +13,9 @@ This tutorial demonstrates both approaches with practical examples.
 # %pip install chatsky[llm] langchain-openai langchain-anthropic
 # %%
 import os
+
+from pydantic import BaseModel, Field
+
 from chatsky import (
     TRANSITIONS,
     RESPONSE,
@@ -20,13 +24,13 @@ from chatsky import (
     Transition as Tr,
     conditions as cnd,
 )
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 from chatsky.core.message import Message
 from chatsky.utils.testing import is_interactive_mode
 from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
-from pydantic import BaseModel, Field
+
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
 # Load API keys from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -122,8 +126,5 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    # This runs the tutorial in interactive mode
-    # if not in an IPython environment
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        pipeline.run()  # This runs the tutorial in interactive mode
+        pipeline.run()

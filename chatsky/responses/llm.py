@@ -1,5 +1,5 @@
 """
-LLM responses.
+LLM responses
 --------------
 Responses based on LLM_API calling.
 """

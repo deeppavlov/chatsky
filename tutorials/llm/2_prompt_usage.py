@@ -44,8 +44,8 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 """
 ## Prompt Positioning Configuration
 
-Chatsky's `PositionConfig` controls how different prompt types are ordered
-in the conversation history. The default hierarchy is:
+Chatsky's %mddoclink(api,llm.prompt,PositionConfig) controls how different
+prompt types are ordered in the conversation history. The default hierarchy is:
 
 1. `system_prompt` - Core instructions for the model
 2. `history` - Conversation context
@@ -55,7 +55,7 @@ in the conversation history. The default hierarchy is:
     (if response has not yet been generated during current turn,
     only request is included)
 
-Let's create a custom configuration to demonstrate positioning:
+Below is an example of specifying custom prompt positions:
 """
 
 # %%
@@ -71,9 +71,11 @@ model = LLM_API(
 
 # %% [markdown]
 """
-## Dynamic Prompt Generation
+## Dynamic Prompts
 
-Create sophisticated prompts that incorporate external data.
+Prompts can be instances of `BaseResponse` which allows generating
+custom prompts based on the context.
+
 This example shows a custom prompt class that fetches vacancy data:
 """
 
@@ -95,6 +97,31 @@ class VacancyPrompt(BaseResponse):
 
 # %% [markdown]
 """
+## MISC prompts
+
+The script in this tutorial demonstrates that prompts can be defined
+inside the MISC field of the nodes.
+
+This allows setting different prompts for each node or flow as well as
+define a global prompt in the global node.
+
+Keep in mind that node-specific MISC values overwrite local node MISC values
+with the same key which in turn overwrite global node MISC values with the same
+key. I.e. if a prompt with the key "prompt" is defined in global, local
+and regular node all at once, only the latter will actually be used when
+calling `LLMResponse` from this node.
+
+### Prompt regex
+
+Not all the items of the MISC dictionary are considered prompts.
+
+Both `LLMResponse` and `LLMCondition` accept parameter `prompt_misc_filter`
+which allows passing a regex string that is used to determine which
+keys in the MISC dictionary represent prompts.
+"""
+
+# %% [markdown]
+"""
 ## Application Structure
 
 This banking assistant demonstrates prompt hierarchy:
@@ -108,11 +135,11 @@ toy_script = {
     GLOBAL: {
         MISC: {
             # this prompt will be overwritten in
-            # every node by the `prompt` key in it
+            # every node with the `prompt` key in it
             "prompt": "Your role is a bank receptionist. "
             "Provide user with the information about our bank and "
             "the services we can offer.",
-            # this prompt will NOT be overwritten and
+            # this prompt will not be overwritten and
             # will apply to each message in the chat
             # also it will be THE LAST message in the history
             # due to its position
@@ -151,10 +178,10 @@ toy_script = {
     "loan_flow": {
         LOCAL: {
             MISC: {
+                # these prompts will be applied to every message in this flow
                 "prompt": "Your role is a bank employee specializing in loans. "
                 "Provide user with the information about our loan requirements "
                 "and conditions.",
-                # this prompt will be applied to every message in this flow
                 "local_prompt": "Loan requirements: 18+ year old, "
                 "Have sufficient income to make your monthly payments."
                 "\nLoan conditions: 15% interest rate, 10 years max term.",
@@ -213,7 +240,5 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    # This runs tutorial in interactive mode if not in IPython env
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        pipeline.run()  # This runs tutorial in interactive mode
+        pipeline.run()

@@ -26,8 +26,8 @@ async def message_to_langchain(
 
     :param message: Chatsky Message to convert to Langchain Message.
     :param ctx: Current dialog context.
-    :param source: Source of a message [`human`, `ai`, `system`]. Defaults to "human".
-    :param max_size: Maximum size of any message in chat measured in characters.
+    :param source: Source of the message [`human`, `ai`, `system`]. Defaults to "human".
+    :param max_size: Maximum size of the message measured in characters.
         If a message exceeds the limit it will not be sent to the LLM and a warning
         will be produced
     """
@@ -83,8 +83,6 @@ async def context_to_history(
     return history
 
 
-# get a list of messages to pass to LLM from context and prompts
-# called in LLM_API
 async def get_langchain_context(
     system_prompt: Message,
     ctx: Context,
@@ -122,19 +120,27 @@ async def get_langchain_context(
     logger.debug(f"System prompt: {prompts[0]}")
 
     for element_name, element in ctx.current_node.misc.items():
-        if re.match(prompt_misc_filter, element_name):
+        if re.compile(prompt_misc_filter).match(element_name):
 
             prompt = Prompt.model_validate(element)
             prompt_langchain_message = await message_to_langchain(await prompt.message(ctx), ctx, source="human")
 
-            if prompt.position is None:
-                prompt.position = position_config.misc_prompt
-            prompts.append(([prompt_langchain_message], prompt.position))
+            prompts.append(
+                (
+                    [prompt_langchain_message],
+                    prompt.position if prompt.position is not None else position_config.misc_prompt,
+                )
+            )
 
     call_prompt_text = await call_prompt.message(ctx)
     if call_prompt_text.text != "":
         call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
-        prompts.append(([call_prompt_message], call_prompt.position or position_config.call_prompt))
+        prompts.append(
+            (
+                [call_prompt_message],
+                call_prompt.position if call_prompt.position is not None else position_config.call_prompt,
+            )
+        )
 
     last_turn_request = await ctx.requests.get(ctx.current_turn_id)
     last_turn_response = await ctx.responses.get(ctx.current_turn_id)
@@ -148,7 +154,6 @@ async def get_langchain_context(
 
     logger.debug(f"Prompts: {prompts}")
     prompts = sorted(prompts, key=lambda x: x[1])
-    logger.debug(f"Sorted prompts: {prompts}")
 
     # flatten prompts list
     langchain_context = []

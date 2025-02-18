@@ -2,9 +2,10 @@
 """
 # LLM: 5. LLM Slots
 
-When we need to retrieve specific information from user input—such as a name,
+When we need to retrieve specific information from user input such as a name,
 address, or email we can use Chatsky's Slot system along with regexes or other
 formally specified data retrieval techniques.
+
 However, if the data is more nuanced or not explicitly stated in the user's
 utterance, we recommend using Chatsky's **LLM Slots**.
 
@@ -13,6 +14,8 @@ to extract more complex or implicit information from user input.
 """
 # %pip install chatsky[llm] langchain-openai
 # %%
+import os
+
 from chatsky import (
     RESPONSE,
     TRANSITIONS,
@@ -25,15 +28,13 @@ from chatsky import (
     processing as proc,
     responses as rsp,
 )
-from langchain_openai import ChatOpenAI
 
 from chatsky.utils.testing import (
     is_interactive_mode,
 )
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 from chatsky.llm import LLM_API
-
-import os
+from langchain_openai import ChatOpenAI
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
@@ -47,7 +48,7 @@ simultaneously. This approach optimizes performance and improves convenience.
 - In the `LLMSlot.caption` parameter, provide a description of the data you
 want to retrieve. More specific descriptions yield better results,
 especially when using smaller models.
-- Note that we pass the name of the model from the `pipeline.models`
+- Pass the name of the model from the `pipeline.models`
 dictionary to the `LLMGroupSlot.model` field.
 - Additionally, the `allow_partial_extraction` flag is set to `True` for the
 "person" slot. This allows the slot to be filled across multiple messages.
@@ -64,7 +65,7 @@ SLOTS = {
     "person": LLMGroupSlot(
         username=LLMSlot(caption="User's username in uppercase"),
         job=LLMSlot(caption="User's occupation, job, profession"),
-        model="slot_model",
+        llm_model_name="slot_model",
         allow_partial_extraction=True,
     )
 }
@@ -74,6 +75,9 @@ script = {
         TRANSITIONS: [
             Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
         ]
+    },
+    "start_flow": {
+        "start": {RESPONSE: "", TRANSITIONS: [Tr(dst=("user_flow", "ask"))]},
     },
     "user_flow": {
         LOCAL: {
@@ -87,7 +91,6 @@ script = {
                 Tr(dst=("user_flow", "repeat_question"), priority=0.8),
             ],
         },
-        "start": {RESPONSE: "", TRANSITIONS: [Tr(dst=("user_flow", "ask"))]},
         "ask": {
             RESPONSE: "Hello! Tell me about yourself: what are you doing for "
             "the living or your hobbies. "
@@ -108,7 +111,7 @@ script = {
 
 pipeline = Pipeline(
     script=script,
-    start_label=("user_flow", "start"),
+    start_label=("start_flow", "start"),
     fallback_label=("user_flow", "repeat_question"),
     slots=SLOTS,
     models={"slot_model": slot_model},

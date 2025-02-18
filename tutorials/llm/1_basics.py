@@ -13,7 +13,8 @@ Chatsky leverages LangChain internally to interface with remote LLM providers.
 # %pip install chatsky[llm] langchain-openai
 
 # %%
-from langchain_openai import ChatOpenAI
+import os
+
 from chatsky.core.message import Message
 from chatsky import (
     TRANSITIONS,
@@ -30,7 +31,7 @@ from chatsky.llm import LLM_API
 from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.llm.methods import Contains
-import os
+from langchain_openai import ChatOpenAI
 
 # %% [markdown]
 """
@@ -144,7 +145,5 @@ pipeline = Pipeline(
 )
 
 if __name__ == "__main__":
-    # This runs tutorial in interactive mode if not in IPython env
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
-        pipeline.run()  # This runs tutorial in interactive mode
+        pipeline.run()

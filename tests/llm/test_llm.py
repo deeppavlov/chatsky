@@ -425,7 +425,7 @@ class TestFilters:
 class TestBaseMethod:
     async def test_base_method(self, llmresult):
         c = Contains(pattern="")
-        assert await c.model_result_to_text(llmresult) == "this is a very IMPORTANT message"
+        assert c.model_result_to_text(llmresult) == "this is a very IMPORTANT message"
 
 
 class TestContainsMethod:
@@ -448,7 +448,7 @@ class TestLogProbMethod:
 
 class TestSlots:
     async def test_llm_slot(self, pipeline, context):
-        slot = LLMSlot(caption="test_caption", model="test_model")
+        slot = LLMSlot(caption="test_caption", llm_model_name="test_model")
         context.current_turn_id = 5
         # Test empty request
         context.requests[5] = ""
@@ -461,10 +461,10 @@ class TestSlots:
 
     async def test_llm_group_slot(self, pipeline, context):
         slot = LLMGroupSlot(
-            model="test_model",
+            llm_model_name="test_model",
             name=LLMSlot(caption="Extract person's name"),
             age=LLMSlot(caption="Extract person's age"),
-            nested=LLMGroupSlot(model="test_model", city=LLMSlot(caption="Extract person's city")),
+            nested=LLMGroupSlot(llm_model_name="test_model", city=LLMSlot(caption="Extract person's city")),
         )
 
         context.current_turn_id = 5

@@ -13,7 +13,7 @@ about current script execution.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The LLM Integration guide covers functionality for incorporating LLMs into the script for
-generating responses and managing conditions.
+generating responses and checking conditions.
 
 :doc:`Slot extraction <./user_guides/slot_extraction>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
