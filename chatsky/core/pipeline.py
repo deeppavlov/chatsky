@@ -8,10 +8,11 @@ Pipeline is responsible for managing and executing the various components
 including :py:class:`.Actor`.
 """
 
+from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Optional
+from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.core.script import Script
@@ -29,6 +30,9 @@ from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
+
+if TYPE_CHECKING:
+    from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +82,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
+    models: Dict[str, LLM_API] = Field(default_factory=dict)
+    """
+    LLM models to be made available in custom functions.
+    """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
     A `MessengerInterface` instance for this pipeline.
@@ -116,6 +124,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         *,
         default_priority: float = None,
         slots: GroupSlot = None,
+        models: dict = None,
         messenger_interface: MessengerInterface = None,
         context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
@@ -133,6 +142,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "fallback_label": fallback_label,
             "default_priority": default_priority,
             "slots": slots,
+            "models": models,
             "messenger_interface": messenger_interface,
             "context_storage": context_storage,
             "pre_services": pre_services,

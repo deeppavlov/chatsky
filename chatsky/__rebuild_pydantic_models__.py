@@ -9,6 +9,7 @@ from chatsky.context_storages import DBContextStorage
 from chatsky.core.ctx_dict import ContextDict
 from chatsky.core.ctx_utils import ServiceState, FrameworkData, ContextMainInfo
 from chatsky.core.service import PipelineComponent
+from chatsky.llm import LLM_API
 
 ContextMainInfo.model_rebuild()
 ContextDict.model_rebuild()
