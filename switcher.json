@@ -7,5 +7,9 @@
     {
         "version": "dev",
         "url": "https://deeppavlov.github.io/chatsky/dev/"
+    },
+    {
+        "version": "v0.10.0",
+        "url": "https://deeppavlov.github.io/chatsky/v0.10.0/"
     }
 ]
