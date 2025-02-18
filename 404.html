@@ -8,19 +8,19 @@
     <script>
         window.onload = function () {
             const destination = window.location.href;
-            if (window.location.href.includes("zerglev.github.io/chatsky/latest")) {
+            if (window.location.href.includes("deeppavlov.github.io/chatsky/latest")) {
                 const redirectLocation = window.location.href.replace(
-                    "zerglev.github.io/chatsky/latest",
-                    "zerglev.github.io/chatsky/master"
+                    "deeppavlov.github.io/chatsky/latest",
+                    "deeppavlov.github.io/chatsky/master"
                 );
                 document.getElementById("body").innerHTML = "Version is set to latest, redirecting to 'master'.<br/><br/>Redirecting to " + redirectLocation + " ...";
                 window.location.href = redirectLocation;
             }
-            if (!window.location.href.includes("zerglev.github.io/chatsky/master")) {
-                if (window.location.href.includes("zerglev.github.io/chatsky")) {
+            if (!window.location.href.includes("deeppavlov.github.io/chatsky/master")) {
+                if (window.location.href.includes("deeppavlov.github.io/chatsky")) {
                     const redirectLocation = window.location.href.replace(
-                        "zerglev.github.io/chatsky",
-                        "zerglev.github.io/chatsky/master"
+                        "deeppavlov.github.io/chatsky",
+                        "deeppavlov.github.io/chatsky/master"
                     );
                     document.getElementById("body").innerHTML = "Version not specified, choosing the latest version by default.<br/><br/>Redirecting to " + redirectLocation + " ...";
                     window.location.href = redirectLocation;
