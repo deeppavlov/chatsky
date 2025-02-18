@@ -6,7 +6,7 @@ The following tutorial shows the advanced usage
 of context storage and context storage schema.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from pathlib import Path

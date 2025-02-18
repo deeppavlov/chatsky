@@ -10,7 +10,7 @@ Chatsky provides two powerful ways to get structured output from LLMs:
 This tutorial demonstrates both approaches with practical examples.
 """
 
-# %pip install chatsky[llm] langchain-openai langchain-anthropic
+# %pip install chatsky[llm]=={chatsky} langchain-openai=={langchain-openai} langchain-anthropic=={langchain-anthropic} # noqa: E501
 # %%
 import os
 
