@@ -201,6 +201,12 @@ class BaseProcessing(BaseScriptFunc, ABC):
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
 
+    start_condition: AnyCondition = Field(default=True, validate_default=True)
+    """
+    :py:data:`~.AnyCondition` is checked before __call__;
+    __call__ is initiated only if start_condition returns ``True``.
+    """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = type(None)
 
     @abstractmethod
@@ -211,7 +217,10 @@ class BaseProcessing(BaseScriptFunc, ABC):
         return await super().wrapped_call(ctx, info=info)
 
     async def __call__(self, ctx: Context) -> None:
-        return await super().__call__(ctx)
+        if await self.start_condition.is_true(ctx):
+            return await super().__call__(ctx)
+        else:
+            return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
 
 
 class BasePriority(BaseScriptFunc, ABC):
