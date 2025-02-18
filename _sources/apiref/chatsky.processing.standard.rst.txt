@@ -1,6 +1,0 @@
-:source_name: chatsky/processing/standard
-
-.. automodule:: chatsky.processing.standard
-   :members:
-   :undoc-members:
-   :show-inheritance:

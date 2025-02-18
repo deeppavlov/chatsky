@@ -1,6 +1,0 @@
-:source_name: chatsky/responses/standard
-
-.. automodule:: chatsky.responses.standard
-   :members:
-   :undoc-members:
-   :show-inheritance:

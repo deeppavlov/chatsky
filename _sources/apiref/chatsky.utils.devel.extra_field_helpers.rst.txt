@@ -1,6 +1,0 @@
-:source_name: chatsky/utils/devel/extra_field_helpers
-
-.. automodule:: chatsky.utils.devel.extra_field_helpers
-   :members:
-   :undoc-members:
-   :show-inheritance:

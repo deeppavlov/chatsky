@@ -1,6 +1,0 @@
-:source_name: chatsky/core/service/actor
-
-.. automodule:: chatsky.core.service.actor
-   :members:
-   :undoc-members:
-   :show-inheritance:
