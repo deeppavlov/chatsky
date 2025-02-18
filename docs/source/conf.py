@@ -52,7 +52,7 @@ nbsphinx_allow_errors = os.getenv("NBSPHINX_ALLOW_ERRORS", "false").lower() in (
 source_suffix = ".rst"
 master_doc = "index"
 
-version = re.match(r"^\d\.\d", release).group()
+version = re.match(r"^\d+\.\d+", release).group()
 language = "en"
 
 pygments_style = "default"
