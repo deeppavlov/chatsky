@@ -19,9 +19,26 @@ logger = Logger(name=__name__)
 
 
 class Return(Enum):
+    """
+    Enum that defines options for filtering turns.
+    """
+
+    NoReturn = 0
+    """
+    Do not include the turn.
+    """
     Request = 1
+    """
+    Include request only.
+    """
     Response = 2
+    """
+    Include response only.
+    """
     Turn = 3
+    """
+    Include the entire turn (both request and response).
+    """
 
 
 class BaseHistoryFilter(BaseModel, abc.ABC):
@@ -34,53 +51,88 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
         self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
     ) -> Union[Return, int]:
         """
+        Decide whether to include request or response or both in the context history from
+        a single turn.
+
+        The filter function is called repeatedly over all turns in context (up to history length limit in
+        :py:func:`~chatsky.llm.langchain_context.context_to_history`) to determine which parts of the turn
+        to include.
+
+        Both request and response may be ``None``. Even if such messages are not filtered out by this filter,
+        they won't be included in history.
+
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param llm_model_name: Name of the model in the Pipeline.models.
+        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
 
         :return: Instance of Return enum or a corresponding int value.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
 
-    def __call__(self, ctx: Context, request: Message, response: Message, llm_model_name: str):
+    def __call__(
+        self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
+    ) -> Return:
         """
+        Wrapper for call that catches exceptions and does not return any turn items if an exception occurs.
+
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param llm_model_name: Name of the model in the Pipeline.models.
+        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
+
+        :return: Instance of Return enum.
         """
         try:
             result = self.call(ctx, request, response, llm_model_name)
 
             if isinstance(result, int):
                 result = Return(result)
+
+            return result
         except Exception as exc:
             logger.warning(exc)
-            return []
-        if result == Return.Turn:
-            return [request, response]
-        if result == Return.Response:
-            return [response]
-        if result == Return.Request:
-            return [request]
-        return []
+            return Return.NoReturn
 
 
 class MessageFilter(BaseHistoryFilter):
-    @abc.abstractmethod
-    def call(self, ctx, message, llm_model_name) -> bool:
-        raise NotImplementedError
+    """
+    Variant of history filter that allows to define simple filters that do not
+    differentiate between requests and responses.
+    """
 
-    def __call__(self, ctx, request, response, llm_model_name):
+    @abc.abstractmethod
+    def single_message_filter_call(self, ctx: Context, message: Optional[Message], llm_model_name: str) -> bool:
+        """
+        Determine based on a single message (which may be either request or response)
+        whether to include the message in history.
+
+        :param ctx: Context object.
+        :param message: Either request or response message.
+        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
+
+        :return: Whether the `message` should be included in history.
+        """
+        raise NotImplementedError()
+
+    def call(
+        self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
+    ) -> Union[Return, int]:
         return (
-            int(self.call(ctx, request, llm_model_name)) * Return.Request.value
-            | int(self.call(ctx, response, llm_model_name)) * Return.Response.value
+            int(self.single_message_filter_call(ctx, request, llm_model_name)) * Return.Request.value
+            | int(self.single_message_filter_call(ctx, response, llm_model_name)) * Return.Response.value
         )
 
 
 class DefaultFilter(BaseHistoryFilter):
-    def call(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> Union[Return, int]:
+    """
+    Filter used by default.
+    Never filters out messages.
+    """
+
+    def call(
+        self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
+    ) -> Union[Return, int]:
         return Return.Turn
 
 
@@ -89,22 +141,24 @@ class IsImportant(MessageFilter):
     Filter that checks if the "important" field in a Message.misc is True.
     """
 
-    def call(self, ctx: Context, message: Message, llm_model_name: str) -> bool:
+    def single_message_filter_call(self, ctx: Context, message: Optional[Message], llm_model_name: str) -> bool:
         if message is not None and message.misc is not None and message.misc.get("important", None):
             return True
         return False
 
 
-class FromModel(MessageFilter):
+class FromModel(BaseHistoryFilter):
     """
-    Filter that checks if the message was sent by the model.
+    Filter that checks if the response of the turn is generated by the currently
     """
 
-    def call(self, ctx: Context, message: Message, llm_model_name: str) -> bool:
+    def call(
+        self, ctx: Context, request: Optional[Message], response: Optional[Message], llm_model_name: str
+    ) -> Union[Return, int]:
         if (
-            message is not None
-            and message.annotations is not None
-            and message.annotations.get("__generated_by_model__") == llm_model_name
+            response is not None
+            and response.annotations is not None
+            and response.annotations.get("__generated_by_model__") == llm_model_name
         ):
-            return True
-        return False
+            return Return.Turn
+        return Return.NoReturn

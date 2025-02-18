@@ -157,9 +157,10 @@ Another way of dealing with unwanted messages is by using filtering functions.
 .. code-block:: python
 
     from chatsky.llm import IsImportant
-    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=15, filter_func=IsImportant)
+    RESPONSE: LLMResponse(llm_model_name="model_name_1", history=15, filter_func=IsImportant())
 
-These functions should be classes inheriting from ``BaseHistoryFilter``, having a ``__call__`` function with the following signature:
-``def __call__(self, ctx: Context, request: Message, response: Message, llm_model_name: str) -> bool``
+These functions should be inherit from either
+`BaseHistoryFilter <../apiref/chatsky.llm.filters.html#chatsky.llm.filters.BaseHistoryFilter>`_
+or `MessageFilter <../apiref/chatsky.llm.filters.html#chatsky.llm.filters.MessageFilter>`_.
 
-For more detailed examples of using filtering please refer to `Filtering History tutorial <../tutorials/tutorials.llm.3_filtering_history.py>`__
+For more detailed examples of using filtering please refer to `Filtering History tutorial <../tutorials/tutorials.llm.3_filtering_history.py>`__.

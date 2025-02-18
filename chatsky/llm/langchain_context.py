@@ -11,7 +11,7 @@ import asyncio
 
 from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
-from chatsky.llm.filters import BaseHistoryFilter
+from chatsky.llm.filters import BaseHistoryFilter, Return
 from chatsky.llm.prompt import Prompt, PositionConfig
 
 
@@ -74,11 +74,11 @@ async def context_to_history(
         indices = indices[-length:]
 
     for request, response in zip(*await asyncio.gather(ctx.requests.get(indices), ctx.responses.get(indices))):
-        if filter_func(ctx, request, response, llm_model_name):
-            if request:
-                history.append(await message_to_langchain(request, ctx=ctx, max_size=max_size))
-            if response:
-                history.append(await message_to_langchain(response, ctx=ctx, source="ai", max_size=max_size))
+        filter_result = filter_func(ctx, request, response, llm_model_name)
+        if request is not None and filter_result in (Return.Request, Return.Turn):
+            history.append(await message_to_langchain(request, ctx=ctx, max_size=max_size))
+        if response is not None and filter_result in (Return.Response, Return.Turn):
+            history.append(await message_to_langchain(response, ctx=ctx, source="ai", max_size=max_size))
 
     return history
 

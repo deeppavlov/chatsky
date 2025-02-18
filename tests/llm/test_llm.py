@@ -9,7 +9,7 @@ from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 from chatsky.slots.slots import SlotNotExtracted, ExtractedGroupSlot
 from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
 from chatsky.llm.prompt import Prompt, PositionConfig
-from chatsky.llm.filters import IsImportant, FromModel
+from chatsky.llm.filters import IsImportant, FromModel, Return, DefaultFilter
 from chatsky.llm.methods import Contains, LogProb, BaseMethod
 from chatsky.core.message import Message
 from chatsky.core.script import Node
@@ -239,7 +239,7 @@ class TestHistory:
 class TestContextToHistory:
     async def test_context_to_history(self, context):
         res = await context_to_history(
-            ctx=context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+            ctx=context, length=-1, filter_func=DefaultFilter(), llm_model_name="test_model", max_size=100
         )
         expected = [
             HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
@@ -251,7 +251,7 @@ class TestContextToHistory:
         ]
         assert res == expected
         res = await context_to_history(
-            ctx=context, length=1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+            ctx=context, length=1, filter_func=DefaultFilter(), llm_model_name="test_model", max_size=100
         )
         expected = [
             HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
@@ -261,7 +261,7 @@ class TestContextToHistory:
 
     async def test_context_with_response_to_history(self, filter_context):
         res = await context_to_history(
-            ctx=filter_context, length=-1, filter_func=lambda *args: True, llm_model_name="test_model", max_size=100
+            ctx=filter_context, length=-1, filter_func=DefaultFilter(), llm_model_name="test_model", max_size=100
         )
         expected = [
             HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
@@ -347,7 +347,7 @@ class TestGetLangchainContext:
             position_config=cfg,
             prompt_misc_filter=prompt_misc_filter if prompt_misc_filter else r"prompt",
             length=-1,
-            filter_func=lambda *args: True,
+            filter_func=DefaultFilter(),
             llm_model_name="test_model",
             max_size=100,
         )
@@ -362,7 +362,7 @@ class TestGetLangchainContext:
             ctx=context,
             call_prompt=Prompt(message=Message(text="call prompt")),
             length=-1,
-            filter_func=lambda *args: True,
+            filter_func=DefaultFilter(),
             llm_model_name="test_model",
             max_size=100,
         )
@@ -405,22 +405,21 @@ class TestFilters:
         filter_func = IsImportant()
         ctx = filter_context
 
-        # Test filtering important messages
-        assert filter_func(ctx, await ctx.requests[1], await ctx.responses[1], llm_model_name="test_model")
-        assert filter_func(ctx, await ctx.requests[2], await ctx.responses[2], llm_model_name="test_model")
-        assert not filter_func(ctx, await ctx.requests[3], await ctx.responses[3], llm_model_name="test_model")
-
-        assert not filter_func(ctx, None, await ctx.responses[1], llm_model_name="test_model")
-        assert filter_func(ctx, await ctx.requests[1], None, llm_model_name="test_model")
+        assert filter_func(ctx, await ctx.requests[1], await ctx.responses[1], "test_model") == Return.Request
+        assert filter_func(ctx, await ctx.requests[2], await ctx.responses[2], "test_model") == Return.Response
+        assert filter_func(ctx, await ctx.requests[3], await ctx.responses[3], "test_model") == Return.NoReturn
+        assert filter_func(ctx, None, await ctx.responses[1], "test_model") == Return.NoReturn
+        assert filter_func(ctx, await ctx.requests[1], None, "test_model") == Return.Request
 
     async def test_model_filter(self, filter_context):
         filter_func = FromModel()
         ctx = filter_context
-        # Test filtering messages from a certain model
-        assert filter_func(ctx, await ctx.requests[1], await ctx.responses[1], llm_model_name="test_model")
-        assert not filter_func(ctx, await ctx.requests[2], await ctx.responses[2], llm_model_name="test_model")
-        assert filter_func(ctx, await ctx.requests[3], await ctx.responses[3], llm_model_name="test_model")
-        assert filter_func(ctx, await ctx.requests[2], await ctx.responses[3], llm_model_name="test_model")
+
+        assert filter_func(ctx, await ctx.requests[1], await ctx.responses[1], "test_model") == Return.Turn
+        assert filter_func(ctx, await ctx.requests[2], await ctx.responses[2], "test_model") == Return.NoReturn
+        assert filter_func(ctx, await ctx.requests[3], await ctx.responses[3], "test_model") == Return.Turn
+        assert filter_func(ctx, await ctx.requests[2], await ctx.responses[3], "test_model") == Return.Turn
+        assert filter_func(ctx, await ctx.requests[3], await ctx.responses[2], "test_model") == Return.NoReturn
 
 
 class TestBaseMethod:
