@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/prompt
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.llm.prompt
+   :members:
+   :undoc-members:
+   :show-inheritance:

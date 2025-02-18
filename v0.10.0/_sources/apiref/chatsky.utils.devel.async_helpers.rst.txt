@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/devel/async_helpers
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.utils.devel.async_helpers
+   :members:
+   :undoc-members:
+   :show-inheritance:

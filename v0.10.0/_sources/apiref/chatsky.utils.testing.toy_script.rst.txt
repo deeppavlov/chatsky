@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/toy_script
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.utils.testing.toy_script
+   :members:
+   :undoc-members:
+   :show-inheritance:

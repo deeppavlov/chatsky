@@ -1,0 +1,7 @@
+:source_name: chatsky/core/transition
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.core.transition
+   :members:
+   :undoc-members:
+   :show-inheritance:

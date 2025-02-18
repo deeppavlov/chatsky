@@ -1,0 +1,7 @@
+:source_name: chatsky/core/ctx_utils
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.core.ctx_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

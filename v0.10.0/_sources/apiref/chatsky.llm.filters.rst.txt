@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/filters
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.llm.filters
+   :members:
+   :undoc-members:
+   :show-inheritance:

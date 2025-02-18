@@ -1,0 +1,7 @@
+:source_name: chatsky/core/service/service
+:doc_version: v0.10.0/
+
+.. automodule:: chatsky.core.service.service
+   :members:
+   :undoc-members:
+   :show-inheritance:
