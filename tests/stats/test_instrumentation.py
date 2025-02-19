@@ -1,7 +1,12 @@
 import pytest
 
+from chatsky import Context
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo
+from chatsky.core.utils import initialize_service_states
+
 try:
     from chatsky.stats import default_extractors
+    from chatsky.stats.instrumentor import logger as instrumentor_logger
     from chatsky.stats import OtelInstrumentor
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk._logs import LoggerProvider
@@ -36,3 +41,23 @@ def test_keyword_arguments():
     assert instrumentor._meter_provider is not get_meter_provider()
     assert instrumentor._logger_provider is not get_logger_provider()
     assert instrumentor._tracer_provider is not get_tracer_provider()
+
+
+async def test_failed_stats_collection(log_event_catcher, context_factory):
+    chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+    chatsky_instrumentor.instrument()
+
+    @chatsky_instrumentor
+    async def bad_stats_collector(_: Context, __: ExtraHandlerRuntimeInfo):
+        raise Exception
+
+    service = Service(handler=lambda _: None, before_handler=bad_stats_collector, path=".service")
+
+    log_list = log_event_catcher(logger=instrumentor_logger, level="ERROR")
+
+    ctx = context_factory()
+    initialize_service_states(ctx, service)
+
+    await service(ctx)
+
+    assert len(log_list) == 1

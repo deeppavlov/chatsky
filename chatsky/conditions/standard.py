@@ -69,7 +69,7 @@ class HasText(BaseCondition):
     Text to search for in the last request.
     """
 
-    def __init__(self, text):
+    def __init__(self, text: str):
         super().__init__(text=text)
 
     async def call(self, ctx: Context) -> bool:
@@ -94,7 +94,7 @@ class Regexp(BaseCondition):
     Flags to pass to ``re.compile``.
     """
 
-    def __init__(self, pattern, *, flags=0):
+    def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):
         super().__init__(pattern=pattern, flags=flags)
 
     @computed_field
@@ -120,7 +120,7 @@ class Any(BaseCondition):
     List of conditions.
     """
 
-    def __init__(self, *conditions):
+    def __init__(self, *conditions: BaseCondition):
         super().__init__(conditions=list(conditions))
 
     async def call(self, ctx: Context) -> bool:
@@ -137,7 +137,7 @@ class All(BaseCondition):
     List of conditions.
     """
 
-    def __init__(self, *conditions):
+    def __init__(self, *conditions: BaseCondition):
         super().__init__(conditions=list(conditions))
 
     async def call(self, ctx: Context) -> bool:
@@ -154,7 +154,7 @@ class Negation(BaseCondition):
     Condition to negate.
     """
 
-    def __init__(self, condition):
+    def __init__(self, condition: BaseCondition):
         super().__init__(condition=condition)
 
     async def call(self, ctx: Context) -> bool:
@@ -189,7 +189,11 @@ class CheckLastLabels(BaseCondition):
     """
 
     def __init__(
-        self, *, flow_labels=None, labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None, last_n_indices=1
+        self,
+        *,
+        flow_labels: Optional[List[str]] = None,
+        labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None,
+        last_n_indices: int = 1
     ):
         if flow_labels is None:
             flow_labels = []
@@ -198,7 +202,7 @@ class CheckLastLabels(BaseCondition):
         super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
 
     async def call(self, ctx: Context) -> bool:
-        labels = list(ctx.labels.values())[-self.last_n_indices :]  # noqa: E203
+        labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
         for label in labels:
             if label.flow_name in self.flow_labels or label in self.labels:
                 return True
@@ -216,7 +220,7 @@ class HasCallbackQuery(BaseCondition):
     Query string to find in last request's attachments.
     """
 
-    def __init__(self, query_string):
+    def __init__(self, query_string: str):
         super().__init__(query_string=query_string)
 
     async def call(self, ctx: Context) -> bool:

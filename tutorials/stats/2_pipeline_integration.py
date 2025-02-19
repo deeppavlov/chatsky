@@ -3,8 +3,8 @@
 # 2. Pipeline Integration
 
 In the Chatsky ecosystem, extractor functions act as regular extra handlers (
-[see the pipeline module documentation](
-%doclink(tutorial,pipeline.6_extra_handlers_basic)
+[see the extra handlers tutorial](
+%doclink(tutorial,service.5_extra_handlers)
 )
 ).
 Hence, you can decorate any part of your pipeline, including services,
@@ -24,7 +24,7 @@ docker compose --profile stats up
 </div>
 """
 
-# %pip install chatsky[stats]
+# %pip install chatsky[stats]=={chatsky}
 
 # %%
 import asyncio
@@ -32,7 +32,7 @@ import asyncio
 from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
     ServiceGroup,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
 )
 from chatsky import Context, Pipeline
 from chatsky.stats import OTLPLogExporter, OTLPSpanExporter
@@ -43,7 +43,7 @@ from chatsky.stats import (
 )
 from chatsky.stats import default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
@@ -54,10 +54,10 @@ chatsky_instrumentor.instrument()
 
 # example extractor function
 @chatsky_instrumentor
-async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
-        "execution_state": info.component.execution_state,
+        "execution_state": info.component.get_state(ctx),
     }
     # return a record to save into connected database
     return data
@@ -92,46 +92,42 @@ run stage: for instance, `get_current_label` needs to only be used as an
 
 """
 # %%
-pipeline = Pipeline.model_validate(
-    {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": ServiceGroup(
-            before_handler=[default_extractors.get_timing_before],
-            after_handler=[
-                get_service_state,
-                default_extractors.get_timing_after,
-            ],
-            components=[
-                {"handler": heavy_service},
-                {"handler": heavy_service},
-            ],
-        ),
-    }
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS,
+    pre_services=ServiceGroup(
+        before_handler=[default_extractors.get_timing_before],
+        after_handler=[
+            get_service_state,
+            default_extractors.get_timing_after,
+        ],
+        components=[
+            heavy_service,
+            heavy_service,
+        ],
+    ),
 )
 # These are Extra Handlers for Actor.
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before
+    ExtraHandlerType.BEFORE, default_extractors.get_timing_before
+)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, get_service_state)
+pipeline.actor.add_extra_handler(
+    ExtraHandlerType.AFTER, default_extractors.get_current_label
 )
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, get_service_state
-)
-pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, default_extractors.get_current_label
-)
-pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after
+    ExtraHandlerType.AFTER, default_extractors.get_timing_after
 )
 
-# These are global Extra Handlers for Pipeline.
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before
+# These are global Extra Handlers for Pipeline service
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.BEFORE, default_extractors.get_timing_before
 )
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.AFTER_ALL, default_extractors.get_timing_after
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.AFTER, default_extractors.get_timing_after
 )
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_service_state)
+pipeline.services_pipeline.add_extra_handler(
+    ExtraHandlerType.AFTER, get_service_state
+)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH, printout=True)

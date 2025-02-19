@@ -12,8 +12,7 @@ extractor functions. You can find API reference for default extractors
 
 It is a preferred practice to define extractors as asynchronous functions.
 Extractors need to have the following uniform signature:
-the expected arguments are always `Context`,
-`Pipeline`, and `ExtraHandlerRuntimeInfo`,
+the expected arguments are always `Context`, and `ExtraHandlerRuntimeInfo`,
 while the expected return value is an arbitrary `dict` or a `None`.
 The returned value gets persisted to Clickhouse as JSON
 which is why it can contain arbitrarily nested dictionaries,
@@ -41,20 +40,20 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 
 """
 
-# %pip install chatsky[stats]
+# %pip install chatsky[stats]=={chatsky}
 
 # %%
 import asyncio
 
 from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
-    GlobalExtraHandlerType,
+    ExtraHandlerType,
     to_service,
 )
 from chatsky import Context, Pipeline
 from chatsky.stats import OtelInstrumentor, default_extractors
 from chatsky.utils.testing import is_interactive_mode, check_happy_path
-from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %% [markdown]
 """
@@ -97,10 +96,10 @@ that the output is logged by OpenTelemetry.
 # %%
 # decorated by an OTLP Instrumentor instance
 @chatsky_instrumentor
-async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {
-        "execution_state": info.component.execution_state,
+        "execution_state": info.component.get_state(ctx),
     }
     # return the state as an arbitrary dict for further logging
     return data
@@ -115,17 +114,10 @@ async def heavy_service(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.model_validate(
-    {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "pre_services": heavy_service,
-    }
-)
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, pre_services=[heavy_service])
 
 pipeline.actor.add_extra_handler(
-    GlobalExtraHandlerType.BEFORE, default_extractors.get_current_label
+    ExtraHandlerType.BEFORE, default_extractors.get_current_label
 )
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH, printout=True)

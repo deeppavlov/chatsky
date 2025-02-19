@@ -10,7 +10,7 @@ Chatsky can be easily installed on your system using the ``pip`` package manager
    
    pip install chatsky
 
-This framework is compatible with Python 3.8 and newer versions.
+This framework is compatible with Python 3.9 and newer versions.
 
 The above command will set the minimum dependencies to start working with Chatsky.
 The installation process allows the user to choose from different packages based on their dependencies, which are:
@@ -39,8 +39,13 @@ Additionally, you also have the option to download the source code directly from
    git clone https://github.com/deeppavlov/chatsky.git
    cd chatsky
 
-Once you are in the directory, you can run the command ``make venv`` to set up all the necessary requirements for the library.
-If you need to update the requirements, use the command ``make clean`` to remove `venv` first.
+Once you are in the directory, you can run the command ``poetry install --all-extras`` to set up all the requirements for the library.
+
+Quick start with a project template
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you don't want to bother with setting up project files, you can use the `Chatsky Project Template <https://github.com/deeppavlov/chatsky-template>`_
+repository, which offers a ready-to-use simple bot that can be modified to your needs.
 
 Key concepts
 ~~~~~~~~~~~~

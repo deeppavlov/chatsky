@@ -12,7 +12,7 @@ import random
 import asyncio
 from tqdm import tqdm
 from chatsky.core import Context, Message, Pipeline
-from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, ExtraHandlerType
 from chatsky.stats import (
     default_extractors,
     OtelInstrumentor,
@@ -37,7 +37,7 @@ def slot_processor_2(ctx: Context):
 
 
 @chatsky_instrumentor
-async def get_slots(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_slots(ctx: Context, info: ExtraHandlerRuntimeInfo):
     return ctx.misc["slots"]
 
 
@@ -46,7 +46,7 @@ def confidence_processor(ctx: Context):
 
 
 @chatsky_instrumentor
-async def get_confidence(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_confidence(ctx: Context, info: ExtraHandlerRuntimeInfo):
     data = {"response_confidence": ctx.misc["response_confidence"]}
     return data
 
@@ -61,14 +61,14 @@ pipeline = Pipeline.model_validate(
             Service(handler=slot_processor_1, after_handler=[get_slots]),
             Service(handler=slot_processor_2, after_handler=[get_slots]),
         ],
-        "post_services": Service(handler=confidence_processor, after_handler=[get_confidence]),
+        "post_services": [Service(handler=confidence_processor, after_handler=[get_confidence])],
     }
 )
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.BEFORE, default_extractors.get_timing_before)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_timing_after)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_current_label)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_last_request)
-pipeline.actor.add_extra_handler(GlobalExtraHandlerType.AFTER, default_extractors.get_last_response)
+pipeline.actor.add_extra_handler(ExtraHandlerType.BEFORE, default_extractors.get_timing_before)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_timing_after)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_current_label)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_last_request)
+pipeline.actor.add_extra_handler(ExtraHandlerType.AFTER, default_extractors.get_last_response)
 
 
 # %%
@@ -103,7 +103,9 @@ async def main(n_iterations: int = 100, n_workers: int = 4):
     ctxs = asyncio.Queue()
     parallel_iterations = n_iterations // n_workers
     for _ in range(n_workers):
-        await ctxs.put(Context.init(("root", "start")))
+        ctx = Context()
+        ctx.last_label = ("root", "start")
+        await ctxs.put(ctx)
     for _ in tqdm(range(parallel_iterations)):
         await asyncio.gather(*(worker(ctxs) for _ in range(n_workers)))
 

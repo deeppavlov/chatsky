@@ -10,3 +10,5 @@ from chatsky.conditions.standard import (
     HasCallbackQuery,
 )
 from chatsky.conditions.slots import SlotsExtracted
+from chatsky.conditions.service import ServiceFinished
+from chatsky.conditions.llm import LLMCondition

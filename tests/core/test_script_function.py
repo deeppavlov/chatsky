@@ -48,7 +48,7 @@ class TestBaseFunctionCallWrapper:
 
         assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
         assert len(log_list) == 1
-        assert log_list[0].levelname == "WARNING"
+        assert log_list[0].levelname == "ERROR"
 
     async def test_base_exception_not_handled(self):
         class SpecialException(BaseException):
@@ -97,29 +97,20 @@ class TestNodeLabelValidation:
     def pipeline(self):
         return Pipeline(script={"flow1": {"node": {}}, "flow2": {"node": {}}}, start_label=("flow1", "node"))
 
-    @pytest.fixture
-    def context_flow_factory(self, pipeline):
-        def factory(flow_name: str):
-            ctx = Context.init((flow_name, "node"))
-            ctx.framework_data.pipeline = pipeline
-            return ctx
-
-        return factory
-
     @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))
-    async def test_const_destination(self, context_flow_factory, flow_name):
+    async def test_const_destination(self, context_factory, flow_name):
         const_dst = ConstDestination.model_validate("node")
 
-        dst = await const_dst.wrapped_call(context_flow_factory(flow_name))
+        dst = await const_dst.wrapped_call(context_factory(start_label=(flow_name, "node")))
         assert dst.flow_name == flow_name
 
     @pytest.mark.parametrize("flow_name", ("flow1", "flow2"))
-    async def test_base_destination(self, context_flow_factory, flow_name):
+    async def test_base_destination(self, context_factory, flow_name):
         class MyDestination(BaseDestination):
             def call(self, ctx):
                 return "node"
 
-        dst = await MyDestination().wrapped_call(context_flow_factory(flow_name))
+        dst = await MyDestination().wrapped_call(context_factory(start_label=(flow_name, "node")))
         assert dst.flow_name == flow_name
 
 
@@ -135,7 +126,7 @@ async def test_const_object_immutability():
     message = Message(text="text1")
     response = ConstResponse.model_validate(message)
 
-    response_result = await response.wrapped_call(Context.init(("", "")))
+    response_result = await response.wrapped_call(Context())
 
     response_result.text = "text2"
 

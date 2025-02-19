@@ -12,7 +12,7 @@ They can be attached to any message but will only work if the chosen
 [messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

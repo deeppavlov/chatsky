@@ -8,31 +8,31 @@ Pipeline is responsible for managing and executing the various components
 including :py:class:`.Actor`.
 """
 
+from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, Hashable
+from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
-from chatsky.context_storages import DBContextStorage
 from chatsky.core.script import Script
 from chatsky.core.context import Context
 from chatsky.core.message import Message
 
+from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
-from chatsky.core.service.types import (
-    GlobalExtraHandlerType,
-    ExtraHandlerFunction,
-)
 from .service import Service
-from .utils import finalize_service_group
+from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
+
+if TYPE_CHECKING:
+    from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +82,17 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
+    models: Dict[str, LLM_API] = Field(default_factory=dict)
+    """
+    LLM models to be made available in custom functions.
+    """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
     A `MessengerInterface` instance for this pipeline.
 
     It handles connections to interfaces that provide user requests and accept bot responses.
     """
-    context_storage: Union[DBContextStorage, Dict] = Field(default_factory=dict)
+    context_storage: DBContextStorage = Field(default_factory=MemoryContextStorage)
     """
     A :py:class:`~.DBContextStorage` instance for this pipeline or
     a dict to store dialog :py:class:`~.Context`.
@@ -105,15 +109,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Timeout to add to pipeline root service group.
     """
-    optimization_warnings: bool = False
-    """
-    Asynchronous pipeline optimization check request flag;
-    warnings will be sent to logs. Additionally, it has some calculated fields:
-
-    - `services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-    - `actor` is a pipeline actor, found among services.
-
-    """
     parallelize_processing: bool = False
     """
     This flag determines whether or not the functions
@@ -129,14 +124,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         *,
         default_priority: float = None,
         slots: GroupSlot = None,
+        models: dict = None,
         messenger_interface: MessengerInterface = None,
-        context_storage: Union[DBContextStorage, dict] = None,
+        context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
         post_services: ServiceGroupInitTypes = None,
         before_handler: ComponentExtraHandlerInitTypes = None,
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
-        optimization_warnings: bool = None,
         parallelize_processing: bool = None,
     ):
         if fallback_label is None:
@@ -147,6 +142,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "fallback_label": fallback_label,
             "default_priority": default_priority,
             "slots": slots,
+            "models": models,
             "messenger_interface": messenger_interface,
             "context_storage": context_storage,
             "pre_services": pre_services,
@@ -154,7 +150,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "before_handler": before_handler,
             "after_handler": after_handler,
             "timeout": timeout,
-            "optimization_warnings": optimization_warnings,
             "parallelize_processing": parallelize_processing,
         }
         empty_fields = set()
@@ -216,13 +211,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             after_handler=self.after_handler,
             timeout=self.timeout,
         )
-        services_pipeline.name = "pipeline"
-        services_pipeline.path = ".pipeline"
+        services_pipeline.name = ""
+        services_pipeline.path = ""
 
         finalize_service_group(services_pipeline, path=services_pipeline.path)
-
-        if self.optimization_warnings:
-            services_pipeline.log_optimization_warnings()
 
         return services_pipeline
 
@@ -240,62 +232,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
 
-    def add_global_handler(
-        self,
-        global_handler_type: GlobalExtraHandlerType,
-        extra_handler: ExtraHandlerFunction,
-        whitelist: Optional[List[str]] = None,
-        blacklist: Optional[List[str]] = None,
-    ):
-        """
-        Method for adding global wrappers to pipeline.
-        Different types of global wrappers are called before/after pipeline execution
-        or before/after each pipeline component.
-        They can be used for pipeline statistics collection or other functionality extensions.
-        NB! Global wrappers are still wrappers,
-        they shouldn't be used for much time-consuming tasks (see :py:mod:`chatsky.core.service.extra`).
-
-        :param global_handler_type: (required) indication where the wrapper
-            function should be executed.
-        :param extra_handler: (required) wrapper function itself.
-        :type extra_handler: ExtraHandlerFunction
-        :param whitelist: a list of services to only add this wrapper to.
-        :param blacklist: a list of services to not add this wrapper to.
-        :return: `None`
-        """
-
-        def condition(name: str) -> bool:
-            return (whitelist is None or name in whitelist) and (blacklist is None or name not in blacklist)
-
-        if (
-            global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-            or global_handler_type is GlobalExtraHandlerType.AFTER_ALL
-        ):
-            whitelist = ["pipeline"]
-            global_handler_type = (
-                GlobalExtraHandlerType.BEFORE
-                if global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
-                else GlobalExtraHandlerType.AFTER
-            )
-
-        self.services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
-
-    @property
-    def info_dict(self) -> dict:
-        """
-        Property for retrieving info dictionary about this pipeline.
-        Returns info dict, containing most important component public fields as well as its type.
-        All complex or unserializable fields here are replaced with 'Instance of [type]'.
-        """
-        return {
-            "type": type(self).__name__,
-            "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
-            "context_storage": f"Instance of {type(self.context_storage).__name__}",
-            "services": [self.services_pipeline.info_dict],
-        }
-
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -315,12 +253,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
         logger.debug(f"Received request: {request}.")
-        if ctx_id is None:
-            ctx = Context.init(self.start_label)
-        elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context.init(self.start_label, id=ctx_id))
-        else:
-            ctx = self.context_storage.get(ctx_id, Context.init(self.start_label, id=ctx_id))
+        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)
@@ -329,26 +262,24 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
         ctx.framework_data.pipeline = self
+        initialize_service_states(ctx, self.services_pipeline)
 
-        ctx.add_request(request)
-        result = await self.services_pipeline(ctx, self)
+        ctx.current_turn_id = ctx.current_turn_id + 1
 
-        if asyncio.iscoroutine(result):
-            await result
+        ctx.requests[ctx.current_turn_id] = request
+        await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 
-        if isinstance(self.context_storage, DBContextStorage):
-            await self.context_storage.set_item_async(ctx_id, ctx)
-        else:
-            self.context_storage[ctx_id] = ctx
+        await ctx.store()
 
         return ctx
 
     def run(self):
         """
         Method that starts a pipeline and connects to :py:attr:`messenger_interface`.
+        It also connects to the :py:attr:`context_storage` (if it's not already connected).
 
         It passes :py:meth:`_run_pipeline` to :py:attr:`messenger_interface` as a callback,
         so every time user request is received, :py:meth:`_run_pipeline` will be called.
@@ -356,17 +287,22 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         This method can be both blocking and non-blocking. It depends on current :py:attr:`messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
+        if not self.context_storage.connected:
+            asyncio.run(self.context_storage.connect())
         logger.info("Pipeline is accepting requests.")
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for :py:meth:`_run_pipeline`.
         NB! When pipeline is executed this way, :py:attr:`messenger_interface` won't be initiated nor connected.
+        Still, it connects to the :py:attr:`context_storage` (if it's not already connected) to avoid sync issues.
 
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
+        if not self.context_storage.connected:
+            asyncio.run(self.context_storage.connect())
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))

@@ -97,19 +97,31 @@ Attributes
   In most cases, this attribute will be used to identify a user.
 
 * **labels**: The labels attribute stores the history of all passed labels within the conversation.
-  It maps turn IDs to labels. The collection is ordered, so getting the last item of the mapping
-  always shows the last visited node.
-
-  Note that `labels` only stores the nodes that were transitioned to
-  so `start_label` will not be in this attribute.
+  It maps turn IDs to labels. The is a special dynamically-loaded collection of type
+  `ContextDict <../apiref/chatsky.core.ctx_dict.html#chatsky.core.ctx_dict.ContextDict>`_,
+  so some of its methods are asynchronous.
+  In particular, it is required to await when getting items (e.g. ``await ctx.labels[1]``).
 
 * **requests**: The requests attribute maintains the history of all received requests by the agent.
-  It also maps turn IDs to requests. Like labels, it stores the requests in-order.
+  It also maps turn IDs to requests. The is a special dynamically-loaded collection of type
+  `ContextDict <../apiref/chatsky.core.ctx_dict.html#chatsky.core.ctx_dict.ContextDict>`_,
+  so some of its methods are asynchronous.
+  In particular, it is required to await when getting items (e.g. ``await ctx.requests[1]``).
 
 * **responses**: This attribute keeps a record of all agent responses, mapping turn IDs to responses.
-  Stores the responses in-order.
+  The is a special dynamically-loaded collection of type
+  `ContextDict <../apiref/chatsky.core.ctx_dict.html#chatsky.core.ctx_dict.ContextDict>`_,
+  so some of its methods are asynchronous.
+  In particular, it is required to await when getting items (e.g. ``await ctx.responses[1]``).
 
-* **misc**: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
+* **current_turn_id**: ID of the current turn. Can be used to access specific labels/requests/responses.
+  E.g. ``ctx.requests[ctx.current_turn_id - 1]`` gives the request received on the previous turn.
+
+  Turn ids are integers that go up by 1 every turn.
+  Turn id 0 is reserved for start label and does not have any associated response or request.
+  The first request from user has the turn id of 1.
+
+* **misc**: The misc attribute is a dictionary object for storing custom data. This field is not used by any of the
   built-in Chatsky classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
@@ -121,14 +133,7 @@ Attributes
 Methods
 =======
 
-The methods of the ``Context`` class can be divided into two categories:
-
-* Public methods that get called manually in custom callbacks and in functions that depend on the context.
-* Methods that are not designed for manual calls and get called automatically during pipeline runs,
-  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying Chatsky.
-
-Public methods
-^^^^^^^^^^^^^^
+The most useful methods of the ``Context`` class are the following:
 
 * **last_request**: Return the last request of the context.
 
@@ -137,10 +142,6 @@ Public methods
   Responses are added at the end of each turn, so an empty ``response`` field is something you should definitely consider.
 
 * **last_label**: Return the last node label of the context (i.e. name of the current node).
-
-* **clear**: Clear all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
-  You can specify which fields to clear using the `field_names` parameter. This method is designed for cases
-  when contexts are shared over high latency networks.
 
 * **current_node**: Return the current node of the context.
   Use this property to access properties of the current node.
@@ -154,16 +155,7 @@ Public methods
 * **pipeline**: Return ``Pipeline`` object that is used to process this context.
   This can be used to get ``Script``, ``start_label`` or ``fallback_label``.
 
-Private methods
-^^^^^^^^^^^^^^^
-
-These methods should not be used outside of the internal workings.
-
-* **set_last_response**
-* **set_last_request**
-* **add_request**
-* **add_response**
-* **add_label**
+* **turns**: A list-like property that allows iterating over requests, labels and responses by turn id.
 
 Context storages
 ~~~~~~~~~~~~~~~~
@@ -177,6 +169,7 @@ various database types (see the
 
 The supported storage options are as follows:
 
+* `In-memory storage`
 * `JSON <https://www.json.org/json-en.html>`_
 * `pickle <https://docs.python.org/3/library/pickle.html>`_
 * `shelve <https://docs.python.org/3/library/shelve.html>`_
@@ -197,8 +190,7 @@ and the connection parameters, for example, *mongodb://admin:pass@localhost:2701
 
 The GitHub-based distribution of Chatsky includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
-distribution and to take advantage of the packaged
-`docker compose file <https://github.com/deeppavlov/chatsky/blob/master/compose.yml>`_.
+distribution and to take advantage of the packaged :github_source_link:`docker compose file <compose.yml>`.
 
 .. code-block:: shell
   :linenos:
@@ -209,25 +201,5 @@ distribution and to take advantage of the packaged
   docker compose up mongo
 
 The images can be configured using the docker compose file or the
-`environment file <https://github.com/deeppavlov/chatsky/blob/master/.env_file>`_,
+:github_source_link:`environment file <.env_file>`,
 also available in the distribution. Consult these files for more options.
-
-.. warning::
-
-  The data transmission protocols require the data to be JSON-serializable. Chatsky tackles this problem
-  through utilization of ``pydantic`` as described in the next section.
-
-Serialization
-~~~~~~~~~~~~~
-
-The fact that the ``Context`` class is a Pydantic model makes it easily convertible to other data formats,
-such as JSON. For instance, as a developer, you don't need to implement instructions on how datetime fields
-need to be marshalled, since this functionality is provided by Pydantic out of the box.
-As a result, working with web interfaces and databases that require the transmitted data to be serialized
-becomes as easy as calling the `model_dump_json` method:
-
-.. code-block:: python
-
-    serialized_context = context.model_dump_json()
-
-Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.

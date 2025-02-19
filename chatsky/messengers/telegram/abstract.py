@@ -22,6 +22,7 @@ from chatsky.core.message import (
     Invoice,
     Location,
     Message,
+    Origin,
     Poll,
     PollOption,
     Sticker,
@@ -597,7 +598,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 ),
                             ]
                         else:
-                            raise ValueError(f"Attachment {type(media).__name__} can not be sent in a media group!")
+                            raise ValueError(f"Attachment {type(media).__name__} can not be sent in a media group.")
                     await bot.send_media_group(
                         chat_id,
                         files,
@@ -614,7 +615,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         ),
                     )
                 else:
-                    raise ValueError(f"Attachment {type(attachment).__name__} is not supported!")
+                    raise ValueError(f"Attachment {type(attachment).__name__} is not supported.")
 
     async def _on_event(self, update: Update, _: Any, create_message: Callable[[Update], Message]) -> None:
         """
@@ -627,8 +628,8 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
             message = create_message(update)
-            message.original_message = update
-            resp = await self._pipeline_runner(message, update.effective_chat.id)
+            message.origin = Origin.model_construct(message=update, interface=self.id)
+            resp = await self._pipeline_runner(message, str(update.effective_chat.id))
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
                     self.application.bot, update.effective_chat.id, resp.last_response

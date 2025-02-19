@@ -73,6 +73,14 @@ Note that you'll need `pandoc` installed on your system in order to build docs.
 
 After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
 
+You can also build docs faster without docker by running
+
+```bash
+poetry run poe docs_no_docker
+```
+
+Without docker some tutorials (that require docker services) will show errors and drawio diagrams will not be built.
+
 #### Documentation links
 
 In your tutorials, you can use special expanding directives in markdown cells.
@@ -120,6 +128,9 @@ poetry run poe quick_test
 ```
 
 _There's also quick_test_coverage for quick htmlcov generation, though it is very likely to be incomplete due to deselection of some tests._
+
+Both `quick_test_coverage` and `test_all` generate html coverage report.
+You can view it by opening the `htmlcov/index.html` file.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash

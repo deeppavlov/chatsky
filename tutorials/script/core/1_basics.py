@@ -12,7 +12,7 @@ that can be used for Pipeline testing is presented.
 Let's do all the necessary imports from Chatsky:
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (
@@ -133,7 +133,7 @@ happy_path = (
 
 # %% [markdown]
 """
-A `Pipeline` is an object that processes user
+`Pipeline` is an object that processes user
 inputs and produces responses.
 
 To create the pipeline you need to pass the script (`script`),

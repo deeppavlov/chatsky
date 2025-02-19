@@ -12,7 +12,7 @@ and [asyncmy](https://github.com/long2ice/asyncmy)
 libraries for asynchronous access to MySQL DB.
 """
 
-# %pip install chatsky[mysql]
+# %pip install chatsky[mysql]=={chatsky}
 
 # %%
 import os
