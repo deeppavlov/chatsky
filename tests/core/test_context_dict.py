@@ -10,7 +10,7 @@ from chatsky.core.ctx_utils import ContextMainInfo
 class TestContextDict:
     @staticmethod
     async def update_context_dict(db: MemoryContextStorage, ctx_dict: ContextDict, ctx_id):
-        await db.update_context(ctx_id, ContextMainInfo(current_turn_id=0), [ctx_dict.extract_sync()])
+        await db.update_context(ctx_id, ContextMainInfo(current_turn_id=0), [ctx_dict.extract_items()])
 
     @pytest.fixture(scope="function")
     async def empty_dict(self) -> ContextDict:
@@ -212,9 +212,9 @@ class TestContextDict:
             # Throw error if store in disconnected
             if ctx_dict is empty_dict:
                 with pytest.raises(RuntimeError):
-                    ctx_dict.extract_sync()
+                    ctx_dict.extract_items()
             else:
-                field_name, added_values, deleted_values = ctx_dict.extract_sync()
+                field_name, added_values, deleted_values = ctx_dict.extract_items()
                 assert field_name == NameConfig._requests_field
                 assert 2 in [k for k, _ in added_values]
                 assert deleted_values == [0]

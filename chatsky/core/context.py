@@ -351,9 +351,9 @@ class Context(ContextMainInfo):
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
             self._updated_at = time_ns()
-            labels_data = self.labels.extract_sync()
-            requests_data = self.requests.extract_sync()
-            responses_data = self.responses.extract_sync()
+            labels_data = self.labels.extract_items()
+            requests_data = self.requests.extract_items()
+            responses_data = self.responses.extract_items()
             await self._storage.update_context(self.id, self, [labels_data, requests_data, responses_data])
             logger.debug(f"Context stored: {self.id}")
         else:
