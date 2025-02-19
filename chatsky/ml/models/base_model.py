@@ -56,23 +56,3 @@ class ExtrasBaseAPIModel(ABC):
         ctx.framework_data.models_labels[self.model_id] = labels
 
         return ctx
-
-    async def save(self, path: str, **kwargs) -> None:
-        """
-        Save the model to a specified location.
-
-        :param path: string-formatted path. If tokenizer state
-            needs to be saved, the path is used as the base.
-        """
-        raise NotImplementedError
-
-    @classmethod
-    async def load(cls, path: str, namespace_key: str):
-        """
-        Load a model from the specified location and instantiate the model.
-
-        :param str: Path to saving directory.
-        :param namespace_key: Name of the namespace in that the model will be using.
-            Will be forwarded to the model on construction.
-        """
-        raise NotImplementedError
