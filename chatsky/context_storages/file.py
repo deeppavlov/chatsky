@@ -33,7 +33,7 @@ class SerializableStorage(BaseModel):
     One element of this class will be used to store all the contexts, read and written to file on every turn.
     """
 
-    main: Dict[str, ContextMainInfo] = Field(default_factory=dict)
+    main: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     turns: List[Tuple[str, str, int, Optional[bytes]]] = Field(default_factory=list)
 
 
