@@ -187,7 +187,7 @@ class DBContextStorage(ABC):
         logger.debug(f"Loading main info for {ctx_id}...")
         result = await self._load_main_info(ctx_id)
         logger.debug(f"Main info loaded for {ctx_id}")
-        return ContextMainInfo.model_validate(result)
+        return ContextMainInfo.model_validate(result) if result is not None else None
 
     @abstractmethod
     async def _update_context(
