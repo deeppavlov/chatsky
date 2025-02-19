@@ -391,6 +391,9 @@ class ContextDict(ABC, BaseModel):
                 instance._removed = value["removed"]
                 instance._ctx_id = value["ctx_id"]
                 instance._field_name = value["field_name"]
+            else:
+                instance._items = dict()
+                instance._keys = set()
             return instance
         else:
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}.")
