@@ -127,6 +127,7 @@ class Context(BaseModel):
     First request is stored at key ``1``.
     IDs go up by ``1`` after that.
     """
+
     responses: Dict[int, Message] = Field(default_factory=dict)
     """
     ``responses`` stores the history of all responses produced by the pipeline.

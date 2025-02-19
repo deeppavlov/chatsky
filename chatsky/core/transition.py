@@ -35,8 +35,6 @@ class Transition(BaseModel):
     """Destination node of the transition."""
     priority: AnyPriority = Field(default=None, validate_default=True)
     """Priority of the transition. Higher priority transitions are resolved first."""
-    passthrough: AnyCondition = Field(default=False, validate_default=True)
-    """Determines if transition is pass-through."""
 
     def __init__(
         self,
@@ -44,9 +42,8 @@ class Transition(BaseModel):
         cnd: Union[bool, BaseCondition] = True,
         dst: Union[NodeLabelInitTypes, BaseDestination],
         priority: Union[Optional[float], BasePriority] = None,
-        passthrough: Union[bool, BaseCondition] = False,
     ):
-        super().__init__(cnd=cnd, dst=dst, priority=priority, passthrough=passthrough)
+        super().__init__(cnd=cnd, dst=dst, priority=priority)
 
 
 async def get_next_label(
