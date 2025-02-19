@@ -180,7 +180,6 @@ def setup(_):
                     ("responses", "Responses"),
                 ],
             ),
-            ("tutorials.llm", "LLM Integration"),
             ("tutorials.slots", "Slots"),
             ("tutorials.stats", "Stats"),
         ]
@@ -195,9 +194,6 @@ def setup(_):
             ("chatsky.processing", "Processing"),
             ("chatsky.context_storages", "Context Storages"),
             ("chatsky.messengers", "Messenger Interfaces"),
-            ("chatsky.pipeline", "Pipeline"),
-            ("chatsky.script", "Script"),
-            ("chatsky.llm", "LLM Integration"),
             ("chatsky.slots", "Slots"),
             ("chatsky.stats", "Stats"),
             ("chatsky.utils.testing", "Testing Utils"),

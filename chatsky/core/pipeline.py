@@ -82,10 +82,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    models: Dict = Field(default_factory=dict)
-    """
-    LLM models.
-    """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
     A `MessengerInterface` instance for this pipeline.
@@ -133,7 +129,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         *,
         default_priority: float = None,
         slots: GroupSlot = None,
-        models: dict = None, 
         messenger_interface: MessengerInterface = None,
         context_storage: Union[DBContextStorage, dict] = None,
         pre_services: ServiceGroupInitTypes = None,
@@ -152,7 +147,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "fallback_label": fallback_label,
             "default_priority": default_priority,
             "slots": slots,
-            "models": models,
             "messenger_interface": messenger_interface,
             "context_storage": context_storage,
             "pre_services": pre_services,
