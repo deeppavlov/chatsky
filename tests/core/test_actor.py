@@ -9,7 +9,6 @@ from chatsky.core.message import Message, MessageInitTypes
 from chatsky.core.context import Context
 from chatsky.core.script import Script
 from chatsky.core import RESPONSE, TRANSITIONS, PRE_TRANSITION, PRE_RESPONSE
-from chatsky.core.utils import initialize_service_states
 
 
 class TestRequestProcessing:
@@ -25,44 +24,38 @@ class TestRequestProcessing:
             }
         )
 
-        ctx = Context.init(start_label=("flow", "node1"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node1"),
+            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
-        assert ctx.labels == {
+        assert ctx.labels._items == {
             0: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
             1: AbsoluteNodeLabel(flow_name="flow", node_name="node2"),
         }
-        assert ctx.responses == {1: Message(text="node2")}
+        assert ctx.responses._items == {1: Message(text="node2")}
 
     async def test_fallback_node(self):
         script = Script.model_validate({"flow": {"node": {}, "fallback": {RESPONSE: "fallback"}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node"),
+            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
-        assert ctx.labels == {
+        assert ctx.labels._items == {
             0: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             1: AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
         }
-        assert ctx.responses == {1: Message(text="fallback")}
+        assert ctx.responses._items == {1: Message(text="fallback")}
 
     @pytest.mark.parametrize(
         "default_priority,result",
@@ -84,18 +77,16 @@ class TestRequestProcessing:
             }
         )
 
-        ctx = Context.init(start_label=("flow", "node1"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
-            default_priority=default_priority,
             start_label=("flow", "node1"),
+            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
+            parallelize_processing=True,
+            default_priority=default_priority,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
+
         assert ctx.last_label.node_name == result
 
     async def test_transition_exception_handling(self, log_event_catcher):
@@ -107,17 +98,14 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {PRE_TRANSITION: {"": MyProcessing()}}, "fallback": {}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
             start_label=("flow", "node"),
+            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="fallback"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
         assert ctx.last_label.node_name == "fallback"
         assert log_list[0].msg == "Exception occurred during transition processing."
@@ -128,17 +116,13 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
         assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Node has empty response."
@@ -152,17 +136,13 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {RESPONSE: MyResponse()}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
         assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Response was not produced."
@@ -176,17 +156,13 @@ class TestRequestProcessing:
 
         script = Script.model_validate({"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}}}})
 
-        ctx = Context.init(start_label=("flow", "node"))
-        actor = Actor()
-        ctx.framework_data.pipeline = Pipeline(
-            parallelize_processing=True,
+        pipeline = Pipeline(
             script=script,
-            fallback_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"),
             start_label=("flow", "node"),
+            parallelize_processing=True,
         )
-        initialize_service_states(ctx, actor)
 
-        await actor(ctx)
+        ctx = await pipeline._run_pipeline(Message())
 
         assert ctx.responses == {1: Message()}
         assert log_list[0].msg == "Exception occurred during response processing."
@@ -207,7 +183,7 @@ async def test_pre_processing():
 
     procs = {"1": Proc1(), "2": Proc2()}
 
-    ctx = Context.init(start_label=("flow", "node"))
+    ctx = Context()
 
     ctx.framework_data.pipeline = Pipeline(parallelize_processing=True, script={"": {"": {}}}, start_label=("", ""))
     await Actor._run_processing(procs, ctx)

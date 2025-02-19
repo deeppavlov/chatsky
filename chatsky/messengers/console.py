@@ -43,7 +43,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
             usually it's a :py:meth:`~chatsky.core.pipeline.Pipeline._run_pipeline` function.
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
-        self._ctx_id = uuid4()
+        self._ctx_id = str(uuid4())
         if self._intro is not None:
             print(self._intro)
         await super().connect(pipeline_runner, **kwargs)

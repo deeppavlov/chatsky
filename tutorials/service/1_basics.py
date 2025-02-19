@@ -4,11 +4,11 @@
 
 This tutorial shows basics of using services.
 
-Here, %mddoclink(api,core.context,Context.misc)
+Here, %mddoclink(api,core.ctx_utils,ContextMainInfo.misc)
 dictionary of context is used for storing additional data.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging

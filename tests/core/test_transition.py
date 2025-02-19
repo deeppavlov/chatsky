@@ -53,8 +53,7 @@ class FalsePriority(BasePriority):
     ],
 )
 async def test_get_next_label(context_factory, transitions, default_priority, result):
-    ctx = context_factory()
-    ctx.add_label(("flow", "node1"))
+    ctx = context_factory(start_label=("flow", "node1"))
 
     next_label, _ = await get_next_label(ctx, transitions, default_priority)
 

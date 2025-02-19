@@ -6,7 +6,7 @@ This tutorial shows advanced options for slot extraction allowing
 to extract only some of the slots.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

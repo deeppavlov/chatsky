@@ -33,9 +33,11 @@ extracted_slots = {
 
 
 @pytest.fixture(scope="function")
-def context_with_request(context):
+def context_with_request(context_factory):
     def inner(request):
-        context.add_request(Message(request))
+        context = context_factory()
+        context.requests[context.current_turn_id] = Message(request)
+        context.current_turn_id += 1
         return context
 
     return inner

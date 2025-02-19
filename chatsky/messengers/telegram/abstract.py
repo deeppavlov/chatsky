@@ -598,7 +598,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 ),
                             ]
                         else:
-                            raise ValueError(f"Attachment {type(media).__name__} can not be sent in a media group!")
+                            raise ValueError(f"Attachment {type(media).__name__} can not be sent in a media group.")
                     await bot.send_media_group(
                         chat_id,
                         files,
@@ -615,7 +615,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         ),
                     )
                 else:
-                    raise ValueError(f"Attachment {type(attachment).__name__} is not supported!")
+                    raise ValueError(f"Attachment {type(attachment).__name__} is not supported.")
 
     async def _on_event(self, update: Update, _: Any, create_message: Callable[[Update], Message]) -> None:
         """
@@ -629,7 +629,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         if update.effective_chat is not None and data_available:
             message = create_message(update)
             message.origin = Origin.model_construct(message=update, interface=self.id)
-            resp = await self._pipeline_runner(message, update.effective_chat.id)
+            resp = await self._pipeline_runner(message, str(update.effective_chat.id))
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
                     self.application.bot, update.effective_chat.id, resp.last_response
