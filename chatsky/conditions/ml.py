@@ -5,17 +5,16 @@ Conditions
 This module provides condition functions for annotation processing.
 """
 
-from typing import Callable, Optional, List
-from functools import singledispatch
+from typing import Optional, List
 
 try:
-    #!!! remove sklearn, use something else instead
+    # !!! remove sklearn, use pure python instead
     from sklearn.metrics.pairwise import cosine_similarity
 
     sklearn_available = True
 except ImportError:
     sklearn_available = False
-from chatsky import Context, Pipeline
+from chatsky import Context
 from chatsky.conditions.standard import BaseCondition
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
@@ -46,9 +45,7 @@ class HasLabel(BaseCondition):
         if self.model.model_id not in ctx.framework_data.models_labels:
             return False
         if self.model.model_id is not None:
-            return (
-                ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
-            )
+            return ctx.framework_data.models_labels.get(self.model.model_id, {}).get(self.label, 0) >= self.threshold
         scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
         comparison_array = [item >= self.threshold for item in scores]
         return any(comparison_array)
@@ -85,4 +82,3 @@ class HasMatch(BaseCondition):
         max_pos_sim = max(positive_sims)
         max_neg_sim = 0 if len(negative_sims) == 0 else max(negative_sims)
         return bool(max_pos_sim > self.threshold > max_neg_sim)
-

@@ -6,7 +6,6 @@ The module allows you to use Google Dialogflow as a service
 to gain insights about user intents.
 """
 
-from typing import Optional
 import uuid
 import json
 from pathlib import Path
