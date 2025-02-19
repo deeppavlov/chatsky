@@ -20,7 +20,7 @@ from __future__ import annotations
 from asyncio import gather
 from uuid import uuid4
 from time import time_ns
-from typing import Any, Callable, Iterable, Optional, Dict, TYPE_CHECKING, Tuple, overload
+from typing import Any, Callable, Iterable, List, Optional, Dict, TYPE_CHECKING, Tuple, overload
 import logging
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, model_validator
@@ -350,17 +350,11 @@ class Context(ContextMainInfo):
 
         if self._storage is not None:
             logger.debug(f"Storing context: {self.id}...")
-            main_into = ContextMainInfo(
-                current_turn_id=self.current_turn_id,
-                created_at=self.created_at,
-                updated_at=time_ns(),
-                misc=self.misc,
-                framework_data=self.framework_data,
-            )
-            labels_data = self.labels.extract_sync()
-            requests_data = self.requests.extract_sync()
-            responses_data = self.responses.extract_sync()
-            await self._storage.update_context(self.id, main_into, [labels_data, requests_data, responses_data])
+            self._updated_at = time_ns()
+            labels_data = self.labels.extract_items()
+            requests_data = self.requests.extract_items()
+            responses_data = self.responses.extract_items()
+            await self._storage.update_context(self.id, self, [labels_data, requests_data, responses_data])
             logger.debug(f"Context stored: {self.id}")
         else:
             raise RuntimeError(f"{type(self).__name__} is not attached to any context storage.")
