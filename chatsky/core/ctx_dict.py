@@ -383,13 +383,14 @@ class ContextDict(ABC, BaseModel):
             return value
         elif isinstance(value, Dict):
             instance = handler(dict())
-            instance._items = value["items"]
-            instance._hashes = value["hashes"]
-            instance._keys = value["keys"]
-            instance._added = value["added"]
-            instance._removed = value["removed"]
-            instance._ctx_id = value["ctx_id"]
-            instance._field_name = value["field_name"]
+            if len(value) != 0:
+                instance._items = value["items"]
+                instance._hashes = value["hashes"]
+                instance._keys = value["keys"]
+                instance._added = value["added"]
+                instance._removed = value["removed"]
+                instance._ctx_id = value["ctx_id"]
+                instance._field_name = value["field_name"]
             return instance
         else:
             raise ValueError(f"Unknown type of ContextDict value: {type(value).__name__}.")
