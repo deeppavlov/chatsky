@@ -27,6 +27,7 @@ from chatsky.utils.devel import (
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+    from chatsky.messengers.telegram.abstract import TelegramMetadata
 
 
 class DataModel(JSONSerializableExtras):
@@ -257,6 +258,10 @@ class MediaGroup(Attachment):
     chatsky_attachment_type: Literal["media_group"] = "media_group"
 
 
+class Metadata(DataModel):
+    pass
+
+
 class Origin(BaseModel):
     """
     Denotes the origin of the message.
@@ -270,6 +275,10 @@ class Origin(BaseModel):
     interface: Optional[str] = None
     """
     Name of the interface that produced the message.
+    """
+    metadata: Union["TelegramMetadata", Metadata] = Field(default_factory=Metadata)
+    """
+    Metadata contained in the message.
     """
 
     @field_serializer("message", when_used="json")
@@ -330,6 +339,12 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
+
+    @property
+    def metadata(self):
+        return self.origin.metadata
+
+    # TODO: add error
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,

@@ -217,6 +217,7 @@ markers = [
     "needs_dependencies: marks tests as requiring any extra dependencies to run"
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 
 [tool.coverage.run]

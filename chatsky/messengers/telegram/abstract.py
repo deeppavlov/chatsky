@@ -6,7 +6,7 @@ Telegram API.
 """
 
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Literal
 
 from chatsky.utils.devel.extra_field_helpers import grab_extra_fields
 
@@ -21,7 +21,9 @@ from chatsky.core.message import (
     Image,
     Invoice,
     Location,
+    MediaGroup,
     Message,
+    Metadata,
     Origin,
     Poll,
     PollOption,
@@ -29,7 +31,6 @@ from chatsky.core.message import (
     Video,
     VideoMessage,
     VoiceMessage,
-    MediaGroup,
 )
 
 try:
@@ -52,6 +53,36 @@ except ImportError:
     TelegramMessage = Any
 
     telegram_available = False
+
+
+class TelegramMetadata(Metadata):
+    """
+    Keeps some metadata of the message
+    """
+
+    metadata_type: Literal["telegram"]
+    user_id: int
+    first_name: str
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    language_code: Optional[str] = None
+    chat_id: int
+    chat_type: Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"]
+    chat_title: Optional[str] = None
+
+    @classmethod
+    def from_update(cls, update: Update) -> "TelegramMetadata":
+        return cls(
+            metadata_type="telegram",
+            user_id=update.message.from_user.user_id,
+            first_name=update.message.from_user.first_name,
+            last_name=update.message.from_user.last_name,
+            username=update.message.from_user.username,
+            language_code=update.message.from_user.language_code,
+            chat_id=update.message.chat.chat_id,
+            chat_type=update.message.chat.chat_type,
+            chat_title=update.message.chat.chat_title,
+        )
 
 
 class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
@@ -627,8 +658,9 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
+            tg_metadata = TelegramMetadata.from_update(update)
             message = create_message(update)
-            message.origin = Origin.model_construct(message=update, interface=self.id)
+            message.origin = Origin.model_construct(message=update, interface=self.id, metadata=tg_metadata)
             resp = await self._pipeline_runner(message, str(update.effective_chat.id))
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
