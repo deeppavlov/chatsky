@@ -8,6 +8,7 @@ to use remotely hosted HuggingFace models via the HuggingFace inference API.
 
 import json
 import asyncio
+import logging
 from async_lru import alru_cache
 from typing import Optional
 from urllib.parse import urljoin
@@ -24,6 +25,7 @@ except ImportError:
 
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
+logger = logging.getLogger(__name__)
 
 class HFAPIModel(ExtrasBaseAPIModel):
     """
@@ -81,6 +83,7 @@ class HFAPIModel(ExtrasBaseAPIModel):
                 raise httpx.HTTPStatusError(str(response.status_code) + " " + response.text)
 
         json_response = response.json()
+        logger.info(f'HuggingFace API response: {json_response}')
         result = {}
         for label_score_pair in json_response[0]:
             result.update({label_score_pair["label"]: label_score_pair["score"]})

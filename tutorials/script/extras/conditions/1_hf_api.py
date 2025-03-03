@@ -32,6 +32,9 @@ from chatsky.messengers.console import CLIMessengerInterface
 #     run_interactive_mode,
 # )
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 # %% [markdown]
 """
@@ -46,7 +49,7 @@ to demonstrate, how custom classifiers can be easily adapted for use your script
 
 # %%
 api_model = HFAPIModel(
-    model="obsei-ai/sell-buy-intent-classifier-bert-mini",
+    model="SamLowe/roberta-base-go_emotions",
     api_key=os.getenv("HF_API_KEY") or input("Enter HF API key:"),
 )
 
@@ -58,11 +61,11 @@ script = {
             # We get to one of the dialog branches depending on the annotation
             Tr(
                 dst=("service", "buy"), priority=1.2, cnd=HasLabel(
-                label="LABEL_1", model_name="my_hf_model", threshold=0.95)
+                label="love", model_name="my_hf_model", threshold=0.95)
             ),
             Tr(
                 dst=("service", "sell"), priority=1.2, cnd=HasLabel(
-                label="LABEL_0", model_name="my_hf_model", threshold=0.95)
+                label="fear", model_name="my_hf_model", threshold=0.95)
             )
         ]
     },
