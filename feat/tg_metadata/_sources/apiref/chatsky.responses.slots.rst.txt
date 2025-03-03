@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/slots
+:doc_version: feat/tg_metadata/
+
+.. automodule:: chatsky.responses.slots
+   :members:
+   :undoc-members:
+   :show-inheritance:

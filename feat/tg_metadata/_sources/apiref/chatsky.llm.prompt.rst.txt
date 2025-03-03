@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/prompt
+:doc_version: feat/tg_metadata/
+
+.. automodule:: chatsky.llm.prompt
+   :members:
+   :undoc-members:
+   :show-inheritance:

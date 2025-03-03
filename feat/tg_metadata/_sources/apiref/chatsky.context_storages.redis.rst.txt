@@ -1,0 +1,7 @@
+:source_name: chatsky/context_storages/redis
+:doc_version: feat/tg_metadata/
+
+.. automodule:: chatsky.context_storages.redis
+   :members:
+   :undoc-members:
+   :show-inheritance:

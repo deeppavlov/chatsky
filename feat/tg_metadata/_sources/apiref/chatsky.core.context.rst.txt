@@ -1,0 +1,7 @@
+:source_name: chatsky/core/context
+:doc_version: feat/tg_metadata/
+
+.. automodule:: chatsky.core.context
+   :members:
+   :undoc-members:
+   :show-inheritance:
