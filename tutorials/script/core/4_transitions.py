@@ -81,6 +81,9 @@ Instances of this class can be initialized from a tuple of two strings
 (flow name and node name) or a single string (node name; relative flow name).
 This happens automatically for return values of `BaseDestination`
 and for the `dst` field of `Transition`.
+
+You may also use `timeout` field to set a timer in seconds that determines
+when the destination function activates and runs.
 """
 
 

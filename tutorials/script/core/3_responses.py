@@ -40,7 +40,9 @@ from chatsky.utils.testing.common import (
 # %% [markdown]
 """
 Response of a node is determined by
-%mddoclink(api,core.script_function,BaseResponse).
+%mddoclink(api,core.script_function,BaseResponse),
+allowing you to use the `timeout` field to set a timer in seconds 
+that determines when the response activates and runs.
 
 Response can be constant in which case it is an instance
 of %mddoclink(api,core.message,Message).
