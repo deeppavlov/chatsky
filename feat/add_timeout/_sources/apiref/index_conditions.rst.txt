@@ -8,7 +8,7 @@ Conditions
 .. autosummary::
    :toctree:
 
-   chatsky.conditions.standard
    chatsky.conditions.slots
+   chatsky.conditions.standard
    chatsky.conditions.service
    chatsky.conditions.llm
