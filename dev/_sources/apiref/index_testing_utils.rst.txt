@@ -9,5 +9,5 @@ Testing Utils
    :toctree:
 
    chatsky.utils.testing.toy_script
-   chatsky.utils.testing.cleanup_db
    chatsky.utils.testing.common
+   chatsky.utils.testing.cleanup_db
