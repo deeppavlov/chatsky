@@ -5,8 +5,9 @@ This module implements a base interface for interactions with the
 Telegram API.
 """
 
+from pydantic import BeforeValidator
 from pathlib import Path
-from typing import Any, Callable, Optional, Literal
+from typing import Any, Callable, Optional, Literal, Annotated
 
 from chatsky.utils.devel.extra_field_helpers import grab_extra_fields
 
@@ -67,21 +68,23 @@ class TelegramMetadata(Metadata):
     username: Optional[str] = None
     language_code: Optional[str] = None
     chat_id: int
-    chat_type: Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"]
+    chat_type: Annotated[
+        Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"], BeforeValidator(str), BeforeValidator(str.upper)
+    ]
     chat_title: Optional[str] = None
 
     @classmethod
     def from_update(cls, update: Update) -> "TelegramMetadata":
         return cls(
             metadata_type="telegram",
-            user_id=update.message.from_user.user_id,
-            first_name=update.message.from_user.first_name,
-            last_name=update.message.from_user.last_name,
-            username=update.message.from_user.username,
-            language_code=update.message.from_user.language_code,
-            chat_id=update.message.chat.chat_id,
-            chat_type=update.message.chat.chat_type,
-            chat_title=update.message.chat.chat_title,
+            user_id=update.effective_user.id,
+            first_name=update.effective_user.first_name,
+            last_name=update.effective_user.last_name,
+            username=update.effective_user.username,
+            language_code=update.effective_user.language_code,
+            chat_id=update.effective_chat.id,
+            chat_type=update.effective_chat.type,
+            chat_title=update.effective_chat.title,
         )
 
 
