@@ -133,6 +133,12 @@ class CallbackMessengerInterface(MessengerInterface):
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         self._pipeline_runner = pipeline_runner
 
+    async def _insert_request(self, request: Message, ctx: Context) -> None:
+        logger.warning(f"Method '_insert_request' is not implemented for interface of type {type(self).__name__}!")
+
+    async def _insert_response(self, response: Message, ctx: Context) -> None:
+        logger.warning(f"Method '_insert_request' is not implemented for interface of type {type(self).__name__}!")
+
     async def on_request_async(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:

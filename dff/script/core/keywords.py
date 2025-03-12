@@ -89,6 +89,7 @@ class Keywords(str, Enum):
     PRE_RESPONSE_PROCESSING = "pre_response_processing"
     PRE_TRANSITIONS_PROCESSING = "pre_transitions_processing"
     PROCESSING = "pre_transitions_processing"
+    FORWARD = "forward"
 
 
 # Redefine shortcuts
@@ -99,3 +100,4 @@ RESPONSE = Keywords.RESPONSE
 MISC = Keywords.MISC
 PRE_RESPONSE_PROCESSING = Keywords.PRE_RESPONSE_PROCESSING
 PRE_TRANSITIONS_PROCESSING = Keywords.PRE_TRANSITIONS_PROCESSING
+FORWARD = Keywords.FORWARD

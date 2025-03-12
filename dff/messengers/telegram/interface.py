@@ -6,6 +6,7 @@ that can be used to interact with the Telegram API.
 """
 
 import asyncio
+import logging
 from typing import Any, Optional, List, Tuple, Callable
 
 from telebot import types, apihelper
@@ -14,6 +15,8 @@ from dff.messengers.common import MessengerInterface, CallbackMessengerInterface
 from dff.pipeline.types import PipelineRunnerFunction
 from .messenger import TelegramMessenger
 from .message import TelegramMessage
+
+logger = logging.getLogger(__name__)
 
 try:
     from flask import Flask, request, abort
@@ -187,6 +190,7 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         endpoint: str = "/telegram-webhook",
         full_uri: Optional[str] = None,
         messenger: Optional[TelegramMessenger] = None,
+        operator_chat_id: Optional[str] = None,
         **wsgi_options,
     ):
         if not flask_imported:
@@ -201,6 +205,7 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         self.wsgi_options = wsgi_options
         self.endpoint = endpoint
         self.full_uri = full_uri if full_uri is not None else "".join([f"https://{host}:{port}", endpoint])
+        self.operator = operator_chat_id
 
         async def endpoint():
             if not request.headers.get("content-type") == "application/json":
@@ -223,3 +228,17 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         self.app.run(
             host=self.host, port=self.port, load_dotenv=self.load_dotenv, debug=self.debug, **self.wsgi_options
         )
+
+    async def _insert_request(self, request, ctx) -> None:
+        if self.operator is not None:
+            request.test = f"Request received from user {ctx.id}:\n\n{request.text}"
+            self.messenger.send_response(self.operator, request)
+        else:
+            logger.warning("Operator chat ID is not defined for the callback telegram interface!")
+
+    async def _insert_response(self, response, _) -> None:
+        if self.operator is not None:
+            response.test = f"Response received from operator {self.operator}:\n\n{response.text}"
+            self.messenger.send_response(self.operator, response)
+        else:
+            logger.warning("Operator chat ID is not defined for the callback telegram interface!")

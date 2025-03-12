@@ -20,8 +20,10 @@ from typing import Iterable, Union, List, Dict, Optional, Hashable, Callable
 from uuid import uuid4
 
 from dff.context_storages import DBContextStorage
+from dff.messengers.common.interface import CallbackMessengerInterface
 from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
+from dff.script.core.keywords import FORWARD
 from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.common import MessengerInterface, CLIMessengerInterface
@@ -363,6 +365,15 @@ class Pipeline:
 
         if asyncio.iscoroutine(result):
             await result
+
+        forward = self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(FORWARD)
+        if forward is not None:
+            forward_iface = self.messenger_interfaces.get(forward)
+            if not isinstance(forward_iface, CallbackMessengerInterface):
+                logger.error(f"Forwarding to the messenger interface '{forward}' (of type {type(forward).__name__}) is impossible!")
+            elif forward_iface is not None:
+                await forward_iface._insert_request(ctx.last_request, ctx)
+                await forward_iface._insert_response(ctx.last_response, ctx)
 
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
