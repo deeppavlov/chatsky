@@ -93,7 +93,7 @@ class Pipeline:
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        messenger_interfaces: Optional[Iterable[MessengerInterface]] = None,
+        messenger_interface: Optional[Union[MessengerInterface, Iterable[MessengerInterface]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
@@ -110,11 +110,17 @@ class Pipeline:
             timeout=timeout,
         )
 
-        if messenger_interfaces is None:
+        if messenger_interface is None:
             interface = CLIMessengerInterface()
             self.messenger_interfaces = {interface.name: interface}
+        elif isinstance(messenger_interface, MessengerInterface):
+            self.messenger_interfaces = {messenger_interface.name: interface}
         else:
-            self.messenger_interfaces = {iface.name: iface for iface in messenger_interfaces}
+            self.messenger_interfaces = dict()
+            for iface in messenger_interface:
+                if iface.name in self.messenger_interfaces.keys():
+                    logger.warning(f"Messenger interface name '{iface.name}' duplicated!")
+                self.messenger_interfaces.update({iface.name: iface})
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -377,7 +383,7 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline, id) for id, iface in self.messenger_interfaces.items()]))
+        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline) for iface in self.messenger_interfaces.values()]))
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

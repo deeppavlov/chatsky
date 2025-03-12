@@ -252,7 +252,7 @@ It can be:
 PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
-        "messenger_interfaces": NotRequired[Optional[Union["MessengerInterface", Iterable["MessengerInterface"], Dict[str, "MessengerInterface"]]]],
+        "messenger_interfaces": NotRequired[Optional[Union["MessengerInterface", Iterable["MessengerInterface"]]]],
         "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
