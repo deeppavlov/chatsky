@@ -25,6 +25,7 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
+
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.utils.testing.common import is_interactive_mode
 
@@ -105,3 +106,52 @@ if __name__ == "__main__":
     if is_interactive_mode():
         # prevent run during doc building
         pipeline.run()
+
+
+"""
+## Metadata access
+
+The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
+is designed for convenient access to user data from Telegram.  
+It provides easy access to public user information, including user_id, first_name,
+last_name, username, language_code, chat_id, chat_type, and chat_title (read further
+in [Telegram API documentation]
+(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))  
+and allows efficient integration into scripts.
+
+We can adjust the above-stated example with Telegram-provided metadata
+to make the script more personified.
+"""
+# %%
+from chatsky.core import message
+from chatsky.core.context import Context
+from chatsky.core.message import MessageInitTypes
+from chatsky.core.script_function import BaseResponse
+
+
+# %%
+class FirstnameGreeting(BaseResponse):
+    async def call(self, ctx: Context) -> MessageInitTypes:
+        return f"Hi, {message.metadata.first_name}!"
+
+
+# %%
+script = {
+    "greeting_flow": {
+        "start_node": {
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
+        },
+        "greeting_node": {
+            RESPONSE: FirstnameGreeting(),
+            TRANSITIONS: [Tr(dst=dst.Current())],
+        },
+        "fallback_node": {
+            RESPONSE: "Please, repeat the request",
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+            ],
+        },
+    }
+}
