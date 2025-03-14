@@ -344,8 +344,6 @@ class Message(DataModel):
     def metadata(self):
         return self.origin.metadata
 
-    # TODO: add error
-
     def __init__(  # this allows initializing Message with string as positional argument
         self,
         text: Optional[str] = None,
