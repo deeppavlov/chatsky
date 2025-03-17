@@ -641,8 +641,11 @@ Note: you may need to restart the kernel to use updated packages.
     <span class="n">destinations</span> <span class="k">as</span> <span class="n">dst</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">chatsky.core.message</span> <span class="kn">import</span> <span class="n">MessageInitTypes</span>
 <span class="kn">from</span> <span class="nn">chatsky.messengers.telegram</span> <span class="kn">import</span> <span class="n">LongpollingInterface</span>
 <span class="kn">from</span> <span class="nn">chatsky.utils.testing.common</span> <span class="kn">import</span> <span class="n">is_interactive_mode</span>
+<span class="kn">from</span> <span class="nn">chatsky.core.context</span> <span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">chatsky.core.script_function</span> <span class="kn">import</span> <span class="n">BaseResponse</span>
 </pre></div>
 </div>
 </div>
@@ -650,67 +653,26 @@ Note: you may need to restart the kernel to use updated packages.
 <a class="reference internal" href="../apiref/chatsky.messengers.telegram.interface.html#chatsky.messengers.telegram.interface.WebhookInterface"><span class="std std-ref">WebhookInterface</span></a>. The latter requires a webserver, so here we use long polling interface.</p>
 <p><a class="reference internal" href="../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract._AbstractTelegramInterface"><span class="std std-ref">_AbstractTelegramInterface</span></a> encapsulates the bot logic. The only required argument for a bot to run is a token. Some other parameters (such as host, port, interval, etc.) can be passed as keyword arguments (for their specs see <a class="reference internal" href="../apiref/chatsky.messengers.telegram.interface.html"><span class="doc">documentations of the child subclasses</span></a>.</p>
 <p>Either of the two interfaces connect the bot to Telegram. They can be passed directly to a Chatsky <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> instance.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You can also import <code class="docutils literal notranslate"><span class="pre">LongpollingInterface</span></code> under the alias of <code class="docutils literal notranslate"><span class="pre">TelegramInterface</span></code> from <code class="docutils literal notranslate"><span class="pre">chatsky.messengers</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">chatsky.messengers</span> <span class="kn">import</span> <span class="n">TelegramInterface</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;greeting_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;start_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;greeting_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;/start&quot;</span><span class="p">))</span>
-            <span class="p">],</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;greeting_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Hi&quot;</span><span class="p">,</span>
-            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">())],</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;fallback_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Please, repeat the request&quot;</span><span class="p">,</span>
-            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;greeting_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;/start&quot;</span><span class="p">))</span>
-            <span class="p">],</span>
-        <span class="p">},</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">LongpollingInterface</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TG_BOT_TOKEN&quot;</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
-    <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
-    <span class="n">start_label</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;start_node&quot;</span><span class="p">),</span>
-    <span class="n">fallback_label</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;fallback_node&quot;</span><span class="p">),</span>
-    <span class="n">messenger_interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
-    <span class="c1"># The interface can be passed as a pipeline argument.</span>
-<span class="p">)</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">is_interactive_mode</span><span class="p">():</span>
-        <span class="c1"># prevent run during doc building</span>
-        <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&lt;div class=&quot;alert alert-info&quot;&gt;</span>
+
+<span class="sd">Note</span>
+
+<span class="sd">You can also import `LongpollingInterface`</span>
+<span class="sd">under the alias of `TelegramInterface` from `chatsky.messengers`:</span>
+
+<span class="sd">```python</span>
+<span class="sd">from chatsky.messengers import TelegramInterface</span>
+<span class="sd">```</span>
+
+<span class="sd">&lt;/div&gt;</span>
+
 <span class="sd">## Metadata access</span>
 
 <span class="sd">The [TelegramMetadata](../apiref/chatsky.messengers.telegram.abstract.rst#chatsky.messengers.telegram.abstract.TelegramMetadata) class</span>
@@ -728,37 +690,26 @@ Note: you may need to restart the kernel to use updated packages.
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&#39;\n## Metadata access\n\nThe [TelegramMetadata](../apiref/chatsky.messengers.telegram.abstract.rst#chatsky.messengers.telegram.abstract.TelegramMetadata) class\nis designed for convenient access to user data from Telegram.  \nIt provides easy access to public user information, including user_id, first_name,\nlast_name, username, language_code, chat_id, chat_type, and chat_title (read further\nin [Telegram API documentation]\n(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))  \nand allows efficient integration into scripts.\n\nWe can adjust the above-stated example with Telegram-provided metadata\nto make the script more personified.\n&#39;
+&#39;\n&lt;div class=&#34;alert alert-info&#34;&gt;\n\nNote\n\nYou can also import `LongpollingInterface`\nunder the alias of `TelegramInterface` from `chatsky.messengers`:\n\n```python\nfrom chatsky.messengers import TelegramInterface\n```\n\n&lt;/div&gt;\n\n## Metadata access\n\nThe [TelegramMetadata](../apiref/chatsky.messengers.telegram.abstract.rst#chatsky.messengers.telegram.abstract.TelegramMetadata) class\nis designed for convenient access to user data from Telegram.  \nIt provides easy access to public user information, including user_id, first_name,\nlast_name, username, language_code, chat_id, chat_type, and chat_title (read further\nin [Telegram API documentation]\n(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))  \nand allows efficient integration into scripts.\n\nWe can adjust the above-stated example with Telegram-provided metadata\nto make the script more personified.\n&#39;
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">chatsky.core</span> <span class="kn">import</span> <span class="n">message</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.context</span> <span class="kn">import</span> <span class="n">Context</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.message</span> <span class="kn">import</span> <span class="n">MessageInitTypes</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.script_function</span> <span class="kn">import</span> <span class="n">BaseResponse</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FirstnameGreeting</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageInitTypes</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hi, </span><span class="si">{</span><span class="n">message</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2">!&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hi, </span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">last_response</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2">!&quot;</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="p">{</span>
@@ -780,6 +731,26 @@ Note: you may need to restart the kernel to use updated packages.
         <span class="p">},</span>
     <span class="p">}</span>
 <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+    <span class="n">script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
+    <span class="n">start_label</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;start_node&quot;</span><span class="p">),</span>
+    <span class="n">fallback_label</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;fallback_node&quot;</span><span class="p">),</span>
+    <span class="n">messenger_interface</span><span class="o">=</span><span class="n">interface</span><span class="p">,</span>
+    <span class="c1"># The interface can be passed as a pipeline argument.</span>
+<span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">is_interactive_mode</span><span class="p">():</span>
+        <span class="c1"># prevent run during doc building</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
