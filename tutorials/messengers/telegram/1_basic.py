@@ -73,11 +73,11 @@ from chatsky.messengers import TelegramInterface
 ## Metadata access
 
 The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
-is designed for convenient access to user data from Telegram.  
-It provides easy access to public user information, including user_id, first_name,
-last_name, username, language_code, chat_id, chat_type, and chat_title (read further
-in [Telegram API documentation]
-(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))  
+is designed for convenient access to user data from Telegram.
+It provides easy access to public user information, including user_id,
+first_name, last_name, username, language_code, chat_id, chat_type,
+and chat_title (read further in [Telegram API documentation]
+(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))
 and allows efficient integration into scripts.
 
 We can adjust the above-stated example with Telegram-provided metadata
