@@ -26,8 +26,11 @@ from chatsky import (
     destinations as dst,
 )
 
+from chatsky.core.message import MessageInitTypes
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.utils.testing.common import is_interactive_mode
+from chatsky.core.context import Context
+from chatsky.core.script_function import BaseResponse
 
 
 # %% [markdown]
@@ -49,8 +52,11 @@ argument for a bot to run is a token. Some other parameters
 
 Either of the two interfaces connect the bot to Telegram.
 They can be passed directly to a Chatsky `Pipeline` instance.
+"""
+# %%
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
-
+"""
 <div class="alert alert-info">
 
 Note
@@ -63,52 +69,7 @@ from chatsky.messengers import TelegramInterface
 ```
 
 </div>
-"""
 
-
-# %%
-script = {
-    "greeting_flow": {
-        "start_node": {
-            TRANSITIONS: [
-                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
-            ],
-        },
-        "greeting_node": {
-            RESPONSE: "Hi",
-            TRANSITIONS: [Tr(dst=dst.Current())],
-        },
-        "fallback_node": {
-            RESPONSE: "Please, repeat the request",
-            TRANSITIONS: [
-                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
-            ],
-        },
-    }
-}
-
-
-# %%
-interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
-
-
-# %%
-pipeline = Pipeline(
-    script=script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-    messenger_interface=interface,
-    # The interface can be passed as a pipeline argument.
-)
-
-
-if __name__ == "__main__":
-    if is_interactive_mode():
-        # prevent run during doc building
-        pipeline.run()
-
-
-"""
 ## Metadata access
 
 The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
@@ -122,17 +83,12 @@ and allows efficient integration into scripts.
 We can adjust the above-stated example with Telegram-provided metadata
 to make the script more personified.
 """
-# %%
-from chatsky.core import message
-from chatsky.core.context import Context
-from chatsky.core.message import MessageInitTypes
-from chatsky.core.script_function import BaseResponse
 
 
 # %%
 class FirstnameGreeting(BaseResponse):
     async def call(self, ctx: Context) -> MessageInitTypes:
-        return f"Hi, {message.metadata.first_name}!"
+        return f"Hi, {ctx.last_response.metadata.first_name}!"
 
 
 # %%
@@ -155,3 +111,19 @@ script = {
         },
     }
 }
+
+
+# %%
+pipeline = Pipeline(
+    script=script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument.
+)
+
+
+if __name__ == "__main__":
+    if is_interactive_mode():
+        # prevent run during doc building
+        pipeline.run()
