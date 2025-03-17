@@ -24,14 +24,14 @@
                 }
             },
             "response_message": {
-                "text": "Hi",
+                "text": "Hi, Test!",
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": null
             },
             "response_functions": [
-                "send_message(42, 'Hi', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
+                "send_message(42, 'Hi, Test!', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
             ]
         },
         {
@@ -58,14 +58,14 @@
                 }
             },
             "response_message": {
-                "text": "Hi",
+                "text": "Hi, Test!",
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": null
             },
             "response_functions": [
-                "send_message(42, 'Hi', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
+                "send_message(42, 'Hi, Test!', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
             ]
         }
     ],
