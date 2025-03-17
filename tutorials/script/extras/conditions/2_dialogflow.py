@@ -10,14 +10,20 @@ Tutorials for other models can be found in the same section.
 # %pip install dff[ext,dialogflow]
 
 # %%
-import os
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from chatsky import (
-    Message,
-    RESPONSE,
-    GLOBAL,
     TRANSITIONS,
-    Transition as Tr
+    RESPONSE,
+    Pipeline,
+    Transition as Tr,
+    conditions as cnd,
+    GLOBAL,
+    LOCAL,
+    Message,
+    # all the aliases used in tutorials are available for direct import
+    # e.g. you can do `from chatsky import Tr` instead
 )
 from chatsky import conditions as cnd
 
@@ -30,8 +36,7 @@ from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.utils.testing.common import (
     is_interactive_mode,
-    check_happy_path,
-    run_interactive_mode,
+    check_happy_path
 )
 
 
@@ -48,7 +53,7 @@ you can use them to construct the class.
 
 # %%
 gdf_model = GoogleDialogFlowModel.from_file(
-    filename="assistant-bot-test-436116-27bd0511c4ed.json"
+    filename="acc_data.json"
 )
 
 # %%
@@ -56,7 +61,7 @@ script = {
     GLOBAL: {
         # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: [
-            Tr(cnd=HasLabel("gdf_model", "input.welcome"), dst=("root", "finish"), priority=1.2 )
+            Tr(cnd=HasLabel(label="Default Welcome Intent", model_name="gdf_model"), dst=("root", "finish"), priority=1.2)
         ],
     },
     "root": {
@@ -86,4 +91,4 @@ pipeline = Pipeline(
 
 # %%
 if __name__ == "__main__":
-    run_interactive_mode(pipeline)
+    pipeline.run()

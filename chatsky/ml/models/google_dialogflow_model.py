@@ -6,6 +6,7 @@ The module allows you to use Google Dialogflow as a service
 to gain insights about user intents.
 """
 
+import logging
 import uuid
 import json
 from pathlib import Path
@@ -23,6 +24,7 @@ except ImportError:
     service_account = None
     dialogflow_available = False
 
+logger = logging.getLogger(__name__)
 
 class GoogleDialogFlowModel(ExtrasBaseAPIModel):
     """
@@ -79,6 +81,7 @@ class GoogleDialogFlowModel(ExtrasBaseAPIModel):
         request = dialogflow_v2.DetectIntentRequest(session=session_path, query_input=query_input)
         response = await session_client.detect_intent(request=request)
         result: dialogflow_v2.QueryResult = response.query_result
+        logger.info(f"Predicted result: {result}")
         if result.intent is not None:
             return {result.intent.display_name: result.intent_detection_confidence}
         return {}
