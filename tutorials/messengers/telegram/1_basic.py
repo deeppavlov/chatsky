@@ -57,7 +57,7 @@ They can be passed directly to a Chatsky `Pipeline` instance.
 interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 # %% [markdown]
-""" 
+"""
 <div class="alert alert-info">
 
 Note
@@ -84,10 +84,11 @@ User's metadata is saved with every request message, and can be
 obtained using `ctx.last_request.metadata`.
 
 We can adjust the above-stated example with Telegram-provided metadata
-to make the script more personified. 
+to make the script more personified.
 We wrote a custom `FirstnameGreeting` response class, for further
-information read [responses](%doclink(api,responses.standard))
+information read [responses](%doclink(api,responses.standard)).
 """
+
 
 # %%
 class FirstnameGreeting(BaseResponse):
