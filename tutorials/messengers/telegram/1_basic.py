@@ -56,7 +56,8 @@ They can be passed directly to a Chatsky `Pipeline` instance.
 # %%
 interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
-"""
+# %% [markdown]
+""" 
 <div class="alert alert-info">
 
 Note
@@ -79,16 +80,19 @@ first_name, last_name, username, language_code, chat_id, chat_type,
 and chat_title (read further in [Telegram API documentation]
 (https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))
 and allows efficient integration into scripts.
+User's metadata is saved with every request message, and can be
+obtained using `ctx.last_request.metadata`.
 
 We can adjust the above-stated example with Telegram-provided metadata
-to make the script more personified.
+to make the script more personified. 
+We wrote a custom `FirstnameGreeting` response class, for further
+information read [responses](%doclink(api,responses.standard))
 """
-
 
 # %%
 class FirstnameGreeting(BaseResponse):
     async def call(self, ctx: Context) -> MessageInitTypes:
-        return f"Hi, {ctx.last_response.metadata.first_name}!"
+        return f"Hi, {ctx.last_request.metadata.first_name}!"
 
 
 # %%
