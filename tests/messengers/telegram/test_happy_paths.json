@@ -313,7 +313,7 @@
                         "chatsky_attachment_type": "audio",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/c70b7774-a8e4-5186-a2eb-d07b9bdb7beb",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/c70b7774-a8e4-5186-a2eb-d07b9bdb7beb",
                         "id": null,
                         "caption": "Separation melody by William King",
                         "filename": "separation-william-king.mp3"
@@ -358,7 +358,7 @@
                         "chatsky_attachment_type": "video",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
                         "id": null,
                         "caption": "Epic Dota2 gameplay by Nkognit0",
                         "filename": "crownfall-lags-nkognit0.mp4"
@@ -403,7 +403,7 @@
                         "chatsky_attachment_type": "animation",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/hong-kong-simplyart4794.gif",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/e3026b12-0183-550b-9faa-7b7de6867b35",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/e3026b12-0183-550b-9faa-7b7de6867b35",
                         "id": null,
                         "caption": "Hong Kong skyscraper views by Simplyart4794",
                         "filename": "hong-kong-simplyart4794.gif"
@@ -448,7 +448,7 @@
                         "chatsky_attachment_type": "image",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
                         "id": null,
                         "caption": "DeepPavlov logo",
                         "filename": "deeppavlov.png"
@@ -493,7 +493,7 @@
                         "chatsky_attachment_type": "document",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/535a081c-32c6-512e-8171-4ba886ef0233",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/535a081c-32c6-512e-8171-4ba886ef0233",
                         "id": null,
                         "caption": "DeepPavlov article",
                         "filename": "deeppavlov-article.pdf"
@@ -538,7 +538,7 @@
                         "chatsky_attachment_type": "voice_message",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/c70b7774-a8e4-5186-a2eb-d07b9bdb7beb",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/c70b7774-a8e4-5186-a2eb-d07b9bdb7beb",
                         "id": null
                     }
                 ],
@@ -581,7 +581,7 @@
                         "chatsky_attachment_type": "video_message",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
                         "id": null
                     }
                 ],
@@ -627,7 +627,7 @@
                                 "chatsky_attachment_type": "image",
                                 "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                                 "use_cache": true,
-                                "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
+                                "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
                                 "id": null,
                                 "caption": "DeepPavlov logo",
                                 "filename": "deeppavlov.png"
@@ -636,7 +636,7 @@
                                 "chatsky_attachment_type": "video",
                                 "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                                 "use_cache": true,
-                                "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
+                                "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/675ab1ab-f481-547d-949d-0183f5dc6148",
                                 "id": null,
                                 "caption": "Epic Dota2 gameplay by Nkognit0",
                                 "filename": "crownfall-lags-nkognit0.mp4"
@@ -856,7 +856,7 @@
                         "chatsky_attachment_type": "image",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/dfb7bef2-5082-5739-bd2b-311712aa9d48",
                         "id": null,
                         "caption": "DeepPavlov logo",
                         "has_spoiler": true,
@@ -907,7 +907,7 @@
                         "chatsky_attachment_type": "document",
                         "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/535a081c-32c6-512e-8171-4ba886ef0233",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/535a081c-32c6-512e-8171-4ba886ef0233",
                         "id": null,
                         "caption": "DeepPavlov article",
                         "filename": "deeppavlov_article.pdf",
@@ -974,7 +974,7 @@
                         "chatsky_attachment_type": "sticker",
                         "source": null,
                         "use_cache": true,
-                        "cached_filename": "/var/folders/gr/qr7tlq216fb12jg0btch5qjr0000gp/T/chatsky-cache-LongpollingInterface/7733311b-05ed-5102-8885-67c2530e446e",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/7733311b-05ed-5102-8885-67c2530e446e",
                         "id": "CAACAgIAAxkBAAIEtGZOUac-j5GbuhH9xH-xsJ8QGWKHAAIsAgACRwZDBdGLCpfBS4KvNQQ",
                         "is_animated": false,
                         "is_video": false,
