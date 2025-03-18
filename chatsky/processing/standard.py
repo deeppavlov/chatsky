@@ -81,10 +81,10 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
 
         :return: Message to replace original response with modified due to fallback response.
         """
-        try:
-            return await original_response(ctx)
-        except Exception as e:
-            exception = self.exception_response.get(type(e), self.exception_response.get("Else"))
-            logger.exception(e)
-            ctx.framework_data.response_exception = str(e)
+        result = await original_response.wrapped_call(ctx)
+        if isinstance(result, Exception):
+            exception = self.exception_response.get(type(result), self.exception_response.get("Else"))
+            ctx.framework_data.response_exception = str(result)
             return await exception(ctx)
+        else:
+            return result
