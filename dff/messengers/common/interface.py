@@ -91,6 +91,7 @@ class PollingMessengerInterface(MessengerInterface):
         Method running the request - response cycle once.
         """
         user_updates = self._request()
+        user_updates.interface = self.name
         responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
         self._respond(responses)
         await asyncio.sleep(timeout)
@@ -133,12 +134,6 @@ class CallbackMessengerInterface(MessengerInterface):
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         self._pipeline_runner = pipeline_runner
 
-    async def _insert_request(self, request: Message, ctx: Context) -> None:
-        logger.warning(f"Method '_insert_request' is not implemented for interface of type {type(self).__name__}!")
-
-    async def _insert_response(self, response: Message, ctx: Context) -> None:
-        logger.warning(f"Method '_insert_request' is not implemented for interface of type {type(self).__name__}!")
-
     async def on_request_async(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
@@ -146,6 +141,7 @@ class CallbackMessengerInterface(MessengerInterface):
         Method that should be invoked on user input.
         This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
+        request.interface = self.name
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
     def on_request(

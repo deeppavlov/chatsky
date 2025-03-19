@@ -368,12 +368,11 @@ class Pipeline:
 
         forward = self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(FORWARD)
         if forward is not None:
-            forward_iface = self.messenger_interfaces.get(forward)
+            forward_iface = self.messenger_interfaces.get(forward)(ctx)
             if not isinstance(forward_iface, CallbackMessengerInterface):
-                logger.error(f"Forwarding to the messenger interface '{forward}' (of type {type(forward).__name__}) is impossible!")
+                logger.error(f"Forwarding to the messenger interface '{forward_iface.name}' (of type {type(forward_iface).__name__}) is impossible!")
             elif forward_iface is not None:
-                await forward_iface._insert_request(ctx.last_request, ctx)
-                await forward_iface._insert_response(ctx.last_response, ctx)
+                await forward_iface.on_request_async(ctx.last_request, ctx.id, {"forwarded_from": ctx.last_request.interface})
 
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
