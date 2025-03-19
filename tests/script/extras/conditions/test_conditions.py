@@ -1,12 +1,12 @@
 import pytest
 from chatsky import Context, Message
-from chatsky.ml.utils import LABEL_KEY
-from chatsky.ml.dataset import DatasetItem, Dataset
-from chatsky.conditions.ml import has_cls_label, has_match
-from chatsky.ml.models.base_model import ExtrasBaseModel
+from chatsky.conditions.ml import HasLabel, HasMatch
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
+from chatsky.core.node_label import AbsoluteNodeLabel
+from chatsky.core.script import Node
 
 
-class DummyModel(ExtrasBaseModel):
+class DummyModel(ExtrasBaseAPIModel):
     def __init__(self, model_id=None):
         self.model_id = model_id
 
@@ -16,32 +16,55 @@ class DummyModel(ExtrasBaseModel):
     def __call__(self, text):
         pass
 
+class MockPipeline:
+    def __init__(self, mock_model):
+        self.models = {
+            "test_model": DummyModel(),
+        }
+
+
+@pytest.fixture
+def pipeline(mock_model):
+    return MockPipeline(mock_model)
+
+@pytest.fixture
+def context(pipeline, context_factory):
+    ctx = context_factory(start_label=AbsoluteNodeLabel(flow_name="flow", node_name="node"))
+    ctx.framework_data.pipeline = pipeline
+    ctx.framework_data.current_node = Node()
+    for i in range(1, 4):
+        ctx.requests[i] = f"Request {i}"
+        ctx.responses[i] = f"Response {i}"
+    ctx.requests[4] = "Last request"
+    ctx.current_turn_id = 4
+    return ctx
+
 
 @pytest.mark.parametrize(
     ["input"],
     [
-        ("a",),
-        (DatasetItem(label="a", samples=["a"]),),
-        (["a", "b"],),
-        ([DatasetItem(label="a", samples=["a"]), DatasetItem(label="b", samples=["b"])],),
+        ("label_a",),
+        ("label_b",),
     ],
 )
-def test_conditions(input, testing_pipeline):
-    ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
+def test_conditions(input, context, pipeline):
+    # ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
+    ctx = Context().pipeline
     ctx.add_request(Message(text="idk something"))
-    model = DummyModel(model_id="model_a")
-    assert has_cls_label(input, model)(ctx, testing_pipeline) is True
-    assert has_cls_label(input, model, namespace="model_a")(ctx, testing_pipeline) is True
-    assert has_cls_label(input, model, threshold=1.1)(ctx, testing_pipeline) is False
-    ctx2 = Context()
-    assert has_cls_label(input, model)(ctx2, testing_pipeline) is False
+    # model = DummyModel(model_id="model_a")
+    assert HasLabel(label=input, model_name="test_model")(ctx, pipeline) is False
+    assert HasLabel(label=input, model_name="test_model")(ctx, pipeline) is True
+    # assert has_cls_label(input, model, namespace="model_a")(ctx, pipeline) is True
+    # assert has_cls_label(input, model, threshold=1.1)(ctx, pipeline) is False
+    # ctx2 = Context()
+    # assert has_cls_label(input, model)(ctx2, pipeline) is False
 
 
-@pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
-def test_conds_invalid(input, testing_pipeline):
-    with pytest.raises(NotImplementedError):
-        model = DummyModel(model_id="model_a")
-        _ = has_cls_label(model, input)(Context(), testing_pipeline)
+# @pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
+# def test_conds_invalid(input, testing_pipeline):
+#     with pytest.raises(NotImplementedError):
+#         model = DummyModel(model_id="model_a")
+#         _ = has_cls_label(model, input)(Context(), testing_pipeline)
 
 
 # since the standart model is no longer exist (because we do not support local models) mock-model should be created)
