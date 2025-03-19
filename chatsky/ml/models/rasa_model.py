@@ -25,8 +25,6 @@ except ImportError:
 from http import HTTPStatus
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
-LABEL_KEY = "labels"
-
 
 class RasaIntent(BaseModel):
     """Class for integration with Rasa NLU server HTTP API."""
