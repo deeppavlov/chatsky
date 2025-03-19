@@ -63,8 +63,8 @@ class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
     Attachments not in this list will be neglected.
     """
 
-    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
-        super().__init__()
+    def __init__(self, id: Optional[str] = None, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(id)
         tempdir = gettempdir()
         if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
             self.attachments_directory = attachments_directory
@@ -97,9 +97,6 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
-
-    def __init__(self, name: Optional[str] = None):
-        MessengerInterface.__init__(self, name)
 
     @abc.abstractmethod
     def _request(self) -> List[Tuple[Message, Hashable]]:
@@ -177,10 +174,9 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self, name: Optional[str] = None) -> None:
-        super().__init__()
+    def __init__(self, id: Optional[str] = None) -> None:
+        super().__init__(id)
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
-        MessengerInterface.__init__(self, name)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         self._pipeline_runner = pipeline_runner
@@ -192,7 +188,7 @@ class CallbackMessengerInterface(MessengerInterface):
         Method that should be invoked on user input.
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
         """
-        request.interface = self.name
+        request.origin.interface = self.id
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
     def on_request(

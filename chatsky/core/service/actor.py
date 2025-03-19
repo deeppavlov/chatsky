@@ -71,6 +71,7 @@ class Actor(PipelineComponent):
         ctx.labels[ctx.current_turn_id] = next_label
 
         response = Message()
+        response.origin.interface = ctx.last_request.origin.interface
 
         try:
             ctx.framework_data.current_node = ctx.pipeline.script.get_inherited_node(next_label)

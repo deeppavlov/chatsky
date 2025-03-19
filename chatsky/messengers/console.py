@@ -3,7 +3,7 @@ from uuid import uuid4
 from chatsky.messengers.common.interface import PollingMessengerInterface
 from chatsky.core.service.types import PipelineRunnerFunction
 from chatsky.core.context import Context
-from chatsky.core.message import Message
+from chatsky.core.message import Message, Origin
 
 
 class CLIMessengerInterface(PollingMessengerInterface):
@@ -17,12 +17,13 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
     def __init__(
         self,
+        id: Optional[str] = None,
         intro: Optional[str] = None,
         prompt_request: str = "request: ",
         prompt_response: str = "response: ",
         out_descriptor: Optional[TextIO] = None,
     ):
-        super().__init__()
+        super().__init__(id)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request
@@ -30,7 +31,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(text=input(self._prompt_request)), self._ctx_id)]
+        return [(Message(text=input(self._prompt_request), origin=Origin(interface=self.id)), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):
         print(f"{self._prompt_response}{responses[0].last_response}", file=self._descriptor)

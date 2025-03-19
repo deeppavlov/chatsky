@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, TYPE_CHECKING
+from typing import Iterable, Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.core.script import Script
@@ -20,6 +20,7 @@ from chatsky.core.context import Context
 from chatsky.core.message import Message
 
 from chatsky.context_storages import DBContextStorage, MemoryContextStorage
+from chatsky.messengers.common.interface import CallbackMessengerInterface
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
@@ -86,7 +87,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     LLM models to be made available in custom functions.
     """
-    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
+    messenger_interfaces: Dict[str, MessengerInterface] = Field(default_factory=lambda: {"default": CLIMessengerInterface})
     """
     A `MessengerInterface` instance for this pipeline.
 
@@ -125,7 +126,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         default_priority: float = None,
         slots: GroupSlot = None,
         models: dict = None,
-        messenger_interface: MessengerInterface = None,
+        messenger_interfaces: Union[MessengerInterface, Iterable[MessengerInterface], None] = None,
         context_storage: DBContextStorage = None,
         pre_services: ServiceGroupInitTypes = None,
         post_services: ServiceGroupInitTypes = None,
@@ -136,6 +137,17 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     ):
         if fallback_label is None:
             fallback_label = start_label
+        if messenger_interfaces is None:
+            interface = CLIMessengerInterface()
+            messenger_interfaces = {interface.id: interface}
+        elif isinstance(messenger_interfaces, MessengerInterface):
+            messenger_interfaces = {messenger_interfaces.id: messenger_interfaces}
+        else:
+            messenger_interfaces = dict()
+            for iface in messenger_interfaces:
+                if iface.id in messenger_interfaces.keys():
+                    logger.warning(f"Messenger interface id '{iface.id}' duplicated!")
+                messenger_interfaces.update({iface.id: iface})
         init_dict = {
             "script": script,
             "start_label": start_label,
@@ -143,7 +155,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "default_priority": default_priority,
             "slots": slots,
             "models": models,
-            "messenger_interface": messenger_interface,
+            "messenger_interfaces": messenger_interfaces,
             "context_storage": context_storage,
             "pre_services": pre_services,
             "post_services": post_services,
@@ -269,6 +281,15 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.requests[ctx.current_turn_id] = request
         await self.services_pipeline(ctx)
 
+        forward_id = ctx.framework_data.current_node.forward.get(ctx_id)
+        forward_iface = self.messenger_interfaces.get(forward_id)
+        if forward_iface is not None:
+            if not isinstance(forward_iface, CallbackMessengerInterface):
+                logger.error(f"Forwarding to the messenger interface '{forward_id}' of type {type(forward_iface).__name__} is impossible!")
+            else:
+                target_ctx = ctx.misc.get("forward", dict()).get(ctx.last_label, None)
+                await forward_iface.on_request_async(ctx.last_response.model_copy(), target_ctx)
+
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 
@@ -290,7 +311,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if not self.context_storage.connected:
             asyncio.run(self.context_storage.connect())
         logger.info("Pipeline is accepting requests.")
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline) for iface in self.messenger_interfaces.values()]))
 
     def __call__(
         self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
