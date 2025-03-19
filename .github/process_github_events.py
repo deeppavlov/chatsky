@@ -48,10 +48,11 @@ Here's a release checklist:
 - [ ] Update package version
 - [ ] Update `poetry.lock`
 - [ ] Change PR merge option
-- [ ] Test modules without automated testing:
-  - [ ] Requiring telegram `api_id` and `api_hash`
-  - [ ] Requiring `HF_API_KEY`
+- [ ] Update template repo
 - [ ] Search for objects to be deprecated
+- [ ] Test parts not covered with pytest:
+    - [ ] web_api tutorials
+    - [ ] Test integrations with external services (telegram; stats)
 """
 
 

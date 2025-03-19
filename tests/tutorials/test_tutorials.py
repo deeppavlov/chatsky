@@ -10,9 +10,8 @@ if TYPE_CHECKING:
 
 from docs.source.utils.notebook import InstallationCell
 
-
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
-DFF_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
+CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
@@ -30,19 +29,25 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 
     with open(tutorial_path, "w") as fd:
         fd.write(tutorial_source_code)
-
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        venv.run(f"python -m pip install {deps}".replace("dff", "."), check_rc=True, cd=os.getcwd())
+        venv.run(
+            InstallationCell.replace_versions(
+                f"python -m pip install {deps[0]}".replace("=={chatsky}", "").replace("chatsky", ".")
+            ),
+            check_rc=True,
+            cd=os.getcwd(),
+        )
 
     venv.run(f"python {tutorial_path}", check_rc=True)
 
 
-@pytest.mark.parametrize("dff_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
+@pytest.mark.parametrize("chatsky_tutorial_py_file", CHATSKY_TUTORIAL_PY_FILES)
 @pytest.mark.slow
 @pytest.mark.docker
 @pytest.mark.no_coverage
-def test_tutorials(dff_tutorial_py_file, virtualenv):
-    with open(dff_tutorial_py_file, "r", encoding="utf-8") as fd:
+@pytest.mark.needs_dependencies
+def test_tutorials(chatsky_tutorial_py_file, virtualenv):
+    with open(chatsky_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()
 
     check_tutorial_dependencies(

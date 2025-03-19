@@ -1,0 +1,15 @@
+{
+  "script": {
+    "flow": {
+      "node": {
+        "misc": {
+          "key": "custom.V"
+        }
+      }
+    }
+  },
+  "start_label": [
+    "flow",
+    "node"
+  ]
+}

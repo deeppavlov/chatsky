@@ -12,8 +12,7 @@ extractor functions. You can find API reference for default extractors
 
 It is a preferred practice to define extractors as asynchronous functions.
 Extractors need to have the following uniform signature:
-the expected arguments are always `Context`,
-`Pipeline`, and `ExtraHandlerRuntimeInfo`,
+the expected arguments are always `Context`, and `ExtraHandlerRuntimeInfo`,
 while the expected return value is an arbitrary `dict` or a `None`.
 The returned value gets persisted to Clickhouse as JSON
 which is why it can contain arbitrarily nested dictionaries,
@@ -27,7 +26,7 @@ in its turn batches and persists data to Clickhouse or other OLAP storages.
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
 during statistics collection.
-If you cloned the DFF repo, launch them using `docker compose`:
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```
@@ -41,23 +40,20 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 
 """
 
-# %pip install dff[stats]
+# %pip install chatsky[stats]=={chatsky}
 
 # %%
 import asyncio
 
-from dff.script import Context
-from dff.pipeline import (
-    Pipeline,
-    ACTOR,
-    Service,
+from chatsky.core.service import (
     ExtraHandlerRuntimeInfo,
+    ExtraHandlerType,
     to_service,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.stats import OtelInstrumentor, default_extractors
-from dff.utils.testing import is_interactive_mode, check_happy_path
-
+from chatsky import Context, Pipeline
+from chatsky.stats import OtelInstrumentor, default_extractors
+from chatsky.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_KWARGS, HAPPY_PATH
 
 # %% [markdown]
 """
@@ -84,14 +80,14 @@ by calling the `instrument` method.
 
 
 # %%
-dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
-dff_instrumentor.instrument()
+chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+chatsky_instrumentor.instrument()
 
 # %% [markdown]
 """
 The following cell shows a custom extractor function. The data obtained from
 the context and the runtime information gets shaped as a dict and returned
-from the function body. The `dff_instrumentor` decorator then ensures
+from the function body. The `chatsky_instrumentor` decorator then ensures
 that the output is logged by OpenTelemetry.
 
 """
@@ -99,11 +95,11 @@ that the output is logged by OpenTelemetry.
 
 # %%
 # decorated by an OTLP Instrumentor instance
-@dff_instrumentor
-async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+@chatsky_instrumentor
+async def get_service_state(ctx: Context, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {
-        "execution_state": info.component.execution_state,
+        "execution_state": info.component.get_state(ctx),
     }
     # return the state as an arbitrary dict for further logging
     return data
@@ -118,23 +114,12 @@ async def heavy_service(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_dict(
-    {
-        "script": TOY_SCRIPT,
-        "start_label": ("greeting_flow", "start_node"),
-        "fallback_label": ("greeting_flow", "fallback_node"),
-        "components": [
-            heavy_service,
-            Service(
-                handler=ACTOR,
-                after_handler=[default_extractors.get_current_label],
-            ),
-        ],
-    }
+pipeline = Pipeline(**TOY_SCRIPT_KWARGS, pre_services=[heavy_service])
+
+pipeline.actor.add_extra_handler(
+    ExtraHandlerType.BEFORE, default_extractors.get_current_label
 )
-
-
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH, printout=True)
     if is_interactive_mode():
         pipeline.run()

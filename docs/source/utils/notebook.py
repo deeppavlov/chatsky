@@ -1,8 +1,10 @@
 import re
 import abc
+from functools import cache
 from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
+from importlib import metadata
 
 try:
     from jupytext import jupytext
@@ -52,14 +54,39 @@ class InstallationCell(ReplacePattern):
     Uncomment `# %pip install {}`, add a "quiet" flag, add a comment explaining the cell.
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
+    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*?)([ ]*# noqa: E501)?\n")
+
+    @staticmethod
+    def replace_versions(cmd: str):
+        """
+        Replaces "{dependency}" with its "version" so that the cmd can install the right
+        dependency version required by tests or tutorials.
+
+        :param cmd: The installation command string to format.
+        :return: Formatted string.
+        """
+        versions_dict = InstallationCell.versions()
+        return cmd.format(**versions_dict)
+
+    @staticmethod
+    @cache
+    def versions() -> dict:
+        """
+        Return a dictionary containing information about all the distributions installed in the current venv.
+
+        :return: A dictionary, where distribution names are keys and their corresponding versions are values.
+        """
+        versions = {}
+        for dist in metadata.distributions():
+            versions[dist.name] = dist.version
+        return versions
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
         return f"""
 # %%
 # installing dependencies
-%pip install -q {matchobj.group(1)}
+%pip install -q {InstallationCell.replace_versions(matchobj.group(1))}
 """
 
 
@@ -79,9 +106,9 @@ class DocumentationLink(ReplacePattern):
 
     %doclink(api,index_pipeline)) -> ../apiref/index_pipeline.rst
 
-    %doclink(api,script.core.script) -> ../apiref/dff.script.core.script.rst
+    %doclink(api,script.core.script) -> ../apiref/chatsky.script.core.script.rst
 
-    %doclink(api,script.core.script,Node) -> ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
+    %doclink(api,script.core.script,Node) -> ../apiref/chatsky.script.core.script.rst#chatsky.script.core.script.Node
 
     %doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) ->
     ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
@@ -117,7 +144,7 @@ class DocumentationLink(ReplacePattern):
         :param page:
             Name of the page without the common prefix.
 
-            So, to link to keywords, pass "script.core.keywords" as page (omitting the "dff" prefix).
+            So, to link to keywords, pass "script.core.keywords" as page (omitting the "chatsky" prefix).
 
             To link to the basic script tutorial, pass "script.core.1_basics" (without the "tutorials" prefix).
 
@@ -137,7 +164,7 @@ class DocumentationLink(ReplacePattern):
             A link to the corresponding documentation part.
         """
         if page_type == "api":
-            prefix = "" if page.startswith("index") else "dff."
+            prefix = "" if page.startswith("index") else "chatsky."
             return f"../apiref/{prefix}{page}.rst" + (f"#{prefix}{page}.{anchor}" if anchor is not None else "")
         elif page_type == "tutorial":
             return f"../tutorials/tutorials.{page}.py" + (f"#{anchor}" if anchor is not None else "")
@@ -170,7 +197,7 @@ class MarkdownDocumentationLink(DocumentationLink):
     )
 
     %mddoclink(api,script.core.script,Node) -> [Node](
-        ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
+        ../apiref/chatsky.script.core.script.rst#chatsky.script.core.script.Node
     )
 
     %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat) -> [4_streamlit_chat](

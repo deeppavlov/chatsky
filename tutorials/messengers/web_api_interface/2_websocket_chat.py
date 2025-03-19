@@ -18,16 +18,15 @@ As mentioned in that tutorial,
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 is used to process requests.
 
-%mddoclink(api,script.core.message,Message) is used to represent text messages.
+%mddoclink(api,core.message,Message) is used to represent text messages.
 """
 
-# %pip install dff uvicorn fastapi
+# %pip install chatsky=={chatsky} uvicorn=={uvicorn} fastapi=={fastapi}
 
 # %%
-from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Message
-from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
+from chatsky.messengers.common.interface import CallbackMessengerInterface
+from chatsky import Message, Pipeline
+from chatsky.utils.testing import TOY_SCRIPT_KWARGS, is_interactive_mode
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -35,16 +34,17 @@ from fastapi.responses import HTMLResponse
 
 
 # %%
-messenger_interfaces = CallbackMessengerInterface()
-pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interfaces=[messenger_interfaces]
+messenger_interface = CallbackMessengerInterface()
+pipeline = Pipeline(
+    **TOY_SCRIPT_KWARGS, messenger_interface=messenger_interface
 )
 
 
 # %%
 app = FastAPI()
+PORT = 8000
 
-html = """
+html = f"""
 <!DOCTYPE html>
 <html>
     <head>
@@ -60,20 +60,20 @@ html = """
         </ul>
         <script>
             var client_id = Date.now();
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
-            ws.onmessage = function(event) {
+            var ws = new WebSocket(`ws://localhost:{PORT}/ws/${{client_id}}`);
+            ws.onmessage = function(event) {{
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
                 var content = document.createTextNode(event.data)
                 message.appendChild(content)
                 messages.appendChild(message)
-            };
-            function sendMessage(event) {
+            }};
+            function sendMessage(event) {{
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
                 input.value = ''
                 event.preventDefault()
-            }
+            }}
         </script>
     </body>
 </html>
@@ -93,7 +93,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
             request = Message(data)
-            context = await messenger_interfaces.on_request_async(
+            context = await pipeline.messenger_interfaces[messenger_interface.id].on_request_async(
                 request, client_id
             )
             response = context.last_response.text
@@ -112,5 +112,5 @@ if __name__ == "__main__":
         uvicorn.run(
             app,
             host="127.0.0.1",
-            port=8000,
+            port=PORT,
         )

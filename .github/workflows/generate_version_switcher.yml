@@ -1,0 +1,44 @@
+name: generate_version_switcher
+
+on:
+  workflow_run:
+    workflows: ["build_and_publish_docs"]
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: generate and update version switcher's json file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: install GitPython
+        run: python -m pip install GitPython
+
+      - name: generate version switcher
+        env:
+          VERSION_SWITCHER_STARTING_TAG: ${{ vars.VERSION_SWITCHER_STARTING_TAG }}
+          VERSION_SWITCHER_TAG_BLACKLIST: ${{ vars.VERSION_SWITCHER_TAG_BLACKLIST }}
+          VERSION_SWITCHER_TAG_WHITELIST: ${{ vars.VERSION_SWITCHER_TAG_WHITELIST }}
+        run: |
+          python ./scripts/switcher_gen.py
+
+      - name: copy version switcher for updating it
+        run: |
+          mkdir docs/source/switcher/
+          cp docs/source/_static/switcher.json docs/source/switcher/switcher.json
+
+      - name: update version switcher
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/source/switcher/
+          clean: False

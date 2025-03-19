@@ -1,25 +1,26 @@
 import os
 import sys
 import re
+import git
 import importlib.metadata
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-_distribution_metadata = importlib.metadata.metadata('dff')
+_distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
-copyright = "2023, DeepPavlov"
+copyright = "2022 - 2025, DeepPavlov"
 author = "DeepPavlov"
 release = _distribution_metadata["Version"]
 
+current_commit = git.Repo('../../').head.commit
+today = current_commit.committed_datetime
+today = today.strftime("%b %d, %Y")
 
 # -- General configuration ---------------------------------------------------
 
@@ -46,11 +47,12 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
 ]
 
-suppress_warnings = ["image.nonlocal_uri"]
+suppress_warnings = ["image.nonlocal_uri", "config.cache"]
+nbsphinx_allow_errors = os.getenv("NBSPHINX_ALLOW_ERRORS", "false").lower() in ("true", "1")
 source_suffix = ".rst"
 master_doc = "index"
 
-version = re.match(r"^\d\.\d.\d", release).group()
+version = re.match(r"^\d+\.\d+", release).group()
 language = "en"
 
 pygments_style = "default"
@@ -88,21 +90,29 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
+doc_version = os.getenv("DOC_VERSION", default="master")
+if doc_version != "":
+    doc_version = doc_version + '/'
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": py_percent_to_notebook}
-nbsphinx_prolog = """
-:tutorial_name: {{ env.docname }}
+nbsphinx_prolog = f"""
+:tutorial_name: {{{{ env.docname }}}}
+:doc_version: {doc_version}
 """
 
-html_logo = "_static/images/logo-simple.svg"
+extlinks = {
+    'github_source_link': (f"https://github.com/deeppavlov/chatsky/blob/{doc_version}%s", None),
+}
+
+html_logo = "_static/images/Chatsky-full-dark.svg"
 
 nbsphinx_thumbnails = {
-    "tutorials/*": "_static/images/logo-simple.svg",
+    "tutorials/*": "_static/images/Chatsky-min-light.svg",
 }
 
 html_context = {
     "github_user": "deeppavlov",
-    "github_repo": "dialog_flow_framework",
+    "github_repo": "chatsky",
     "github_version": "master",
     "doc_path": "docs/source",
 }
@@ -111,13 +121,13 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# Version switcher data
+version_data = os.getenv("DOC_VERSION", default="master")
+switcher_url = "https://deeppavlov.github.io/chatsky/switcher.json"
+
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
-    "logo": {
-        "alt_text": "DFF logo (simple and nice)",
-        "text": "Dialog Flow Framework",
-    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
@@ -133,17 +143,23 @@ html_theme_options = {
         },
         {
             "name": "GitHub",
-            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "url": "https://github.com/deeppavlov/chatsky",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
+    "switcher": {
+        "json_url": switcher_url,
+        "version_match": version_data,
+    },
+    "navbar_persistent": ["search-button.html", "theme-switcher.html"],
+    "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
 }
 
 
 favicons = [
-    {"href": "images/logo-dff.svg"},
+    {"href": "images/Chatsky-min-light.svg"},
 ]
 
 
@@ -151,51 +167,12 @@ autodoc_default_options = {
     "members": True,
     "undoc-members": False,
     "private-members": True,
+    "special-members": "__call__",
     "member-order": "bysource",
-    "exclude-members": "_abc_impl, model_fields",
+    "exclude-members": "_abc_impl, model_fields, model_computed_fields, model_config",
 }
 
 
 def setup(_):
-    link_misc_files(
-        [
-            "utils/db_benchmark/benchmark_schema.json",
-            "utils/db_benchmark/benchmark_streamlit.py",
-        ]
-    )
-    generate_tutorial_links_for_notebook_creation(
-        [
-            ("tutorials.context_storages", "Context Storages"),
-            (
-                "tutorials.messengers",
-                "Interfaces",
-                [
-                    ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API"),
-                ],
-            ),
-            ("tutorials.pipeline", "Pipeline"),
-            (
-                "tutorials.script",
-                "Script",
-                [
-                    ("core", "Core"),
-                    ("responses", "Responses"),
-                ],
-            ),
-            ("tutorials.utils", "Utils"),
-            ("tutorials.stats", "Stats"),
-        ]
-    )
-    regenerate_apiref(
-        [
-            ("dff.context_storages", "Context Storages"),
-            ("dff.messengers", "Messenger Interfaces"),
-            ("dff.pipeline", "Pipeline"),
-            ("dff.script", "Script"),
-            ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Testing Utils"),
-            ("dff.utils.turn_caching", "Caching"),
-            ("dff.utils.db_benchmark", "DB Benchmark"),
-        ]
-    )
+    from setup import setup
+    setup()

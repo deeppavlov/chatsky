@@ -1,7 +1,9 @@
 *.DS_Store*
 *.egg-info/
 dist/
+venv/
 build/
+dbs/
 docs/source/apiref
 docs/source/_misc
 docs/source/release_notes.rst
@@ -21,6 +23,7 @@ GlobalUserTableAccessor*
 memory_debugging*
 opening_database*
 _globals.py
+venv*
 .vscode
 .coverage
 .coverage.*

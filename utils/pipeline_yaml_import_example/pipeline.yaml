@@ -1,0 +1,112 @@
+script:
+  GLOBAL:
+    TRANSITIONS:
+      - dst: [tech_flow, start_node]
+        cnd:
+          chatsky.cnd.ExactMatch: /start
+        priority: 2
+  tech_flow:
+    start_node:
+      RESPONSE:
+        text:
+          "Hello.
+          We'd like to collect some data about you.
+          Do you agree? (yes/no)"
+      PRE_TRANSITION:
+        unset_all_slots:
+          chatsky.proc.UnsetAll:
+      TRANSITIONS:
+        - dst: [data_collection, start]
+          cnd:
+            chatsky.cnd.Regexp:
+              pattern: "yes"
+              flags: external:re.IGNORECASE
+    fallback_node:
+      RESPONSE:
+        "Dialog finished.
+        You can restart by typing /start."
+  data_collection:
+    LOCAL:
+      PRE_TRANSITION:
+        extract_slots:
+          chatsky.proc.Extract:
+            - person.name
+            - person.age
+      TRANSITIONS:
+        - dst: not_provided_slots
+          cnd:
+            chatsky.cnd.Negation:
+              chatsky.cnd.SlotsExtracted:
+                - person.name
+                - person.age
+          priority: 0.5
+        - dst: name_extracted
+          cnd:
+            chatsky.cnd.All:
+              - chatsky.cnd.HasText: My name
+              - chatsky.cnd.SlotsExtracted: person.name
+        - dst: age_extracted
+          cnd:
+            chatsky.cnd.All:
+              - chatsky.cnd.HasText: years old
+              - chatsky.cnd.SlotsExtracted: person.age
+        - dst: [final_flow, all_slots_extracted]
+          cnd:
+            chatsky.cnd.SlotsExtracted:
+              - person.name
+              - person.age
+          priority: 1.5
+    start:
+      RESPONSE:
+        text:
+          "Please provide us with the following data:
+          
+          Your *name* by sending message \"My name is X\"
+          
+          Your *age* by sending message \"I'm X years old\""
+        parse_mode: external:telegram.constants.ParseMode.MARKDOWN_V2
+    not_provided_slots:
+      RESPONSE:
+        custom.rsp.ListNotExtractedSlots:
+    name_extracted:
+      RESPONSE:
+        Got your name. Now provide your age.
+    age_extracted:
+      RESPONSE:
+        Got your age. Now provide your name.
+  final_flow:
+    all_slots_extracted:
+      RESPONSE:
+        chatsky.rsp.FilledTemplate:
+          chatsky.Message:
+            text:
+              "Thank you for providing us your data.
+              
+              Your name: {person.name};
+              Your age: {person.age}.
+              
+              Here's a cute sticker as a reward:"
+            attachments:
+              - chatsky.core.Sticker:
+                  id: CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE
+start_label:
+  - tech_flow
+  - start_node
+fallback_label:
+  - tech_flow
+  - fallback_node
+slots:
+  person:
+    name:
+      chatsky.slots.RegexpSlot:
+        regexp: "My name is (.+)"
+        match_group_idx: 1
+    age:
+      chatsky.slots.RegexpSlot:
+        regexp: "I'm ([0-9]+) years old"
+        match_group_idx: 1
+messenger_interface:
+  chatsky.messengers.TelegramInterface:
+    token:
+      external:os.getenv:
+        TG_BOT_TOKEN

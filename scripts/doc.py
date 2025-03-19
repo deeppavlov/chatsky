@@ -51,10 +51,22 @@ def docs(docker: Optional[DockerClient]):
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         _build_drawio(docker)
-        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
+        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
         exit(result)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
         exit(1)
+
+
+def docs_no_docker():
+    init()
+    clean_docs()
+    dotenv.load_dotenv(".env_file")
+    os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
+    os.environ["NBSPHINX_ALLOW_ERRORS"] = "true"
+    result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
+    result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
+    result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
+    exit(result)

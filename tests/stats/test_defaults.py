@@ -2,61 +2,37 @@ import importlib
 
 import pytest
 
-from dff.script import Context
-from dff.pipeline import Pipeline
-from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from chatsky.core.service import Service
+from chatsky.core.service.types import ExtraHandlerRuntimeInfo
 
 try:
-    from dff.stats import default_extractors
+    from chatsky.stats import default_extractors
 except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context,expected",
-    [
-        (Context(), {"flow": "greeting_flow", "label": "greeting_flow: start_node", "node": "start_node"}),
-        (Context(labels={0: ("a", "b")}), {"flow": "a", "node": "b", "label": "a: b"}),
-    ],
-)
-async def test_get_current_label(context: Context, expected: set):
-    pipeline = Pipeline.from_script(
-        {"greeting_flow": {"start_node": {}}}, ("greeting_flow", "start_node"), validation_stage=False
-    )
+async def test_get_current_label(context_factory):
+    context = context_factory(start_label=("a", "b"))
     runtime_info = ExtraHandlerRuntimeInfo(
-        func=lambda x: x,
         stage="BEFORE",
-        component=ServiceRuntimeInfo(
-            path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
-        ),
+        component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
     )
-    result = await default_extractors.get_current_label(context, pipeline, runtime_info)
-    assert result == expected
+    result = await default_extractors.get_current_label(context, runtime_info)
+    assert result == {"flow": "a", "node": "b", "label": "a: b"}
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "context",
-    [
-        Context(),
-        Context(labels={0: ("a", "b")}),
-    ],
-)
-async def test_otlp_integration(context, tracer_exporter_and_provider, log_exporter_and_provider):
+async def test_otlp_integration(tracer_exporter_and_provider, log_exporter_and_provider, context_factory):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
-    tutorial_module.dff_instrumentor.uninstrument()
-    tutorial_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    tutorial_module.chatsky_instrumentor.uninstrument()
+    tutorial_module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
-        func=lambda x: x,
         stage="BEFORE",
-        component=ServiceRuntimeInfo(
-            path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
-        ),
+        component=Service(handler=lambda ctx: None, path="-", name="-", timeout=None, concurrent=False),
     )
-    _ = await default_extractors.get_current_label(context, tutorial_module.pipeline, runtime_info)
+    ctx = context_factory(start_label=("a", "b"))
+    _ = await default_extractors.get_current_label(ctx, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0
