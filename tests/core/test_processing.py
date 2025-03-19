@@ -56,7 +56,7 @@ class TestAddFallbackResponses:
 
         exceptions = {OverflowError: "Overflow!", ValueError: self.ReturnException(), "Else": "Other exception occured"}
 
-        fallback_response = proc.AddFallbackResponses(exception_response=exceptions)
+        fallback_response = proc.AddFallbackResponses(exception_responses=exceptions)
         ctx.current_node.response = response_with_exception
         await fallback_response(ctx)
         assert await ctx.current_node.response(ctx) == Message(text=expected_response)
@@ -67,4 +67,4 @@ class TestAddFallbackResponses:
 
         exceptions = {}
         with pytest.raises(ValueError, match="Exceptions dict is empty"):
-            proc.AddFallbackResponses(exception_response=exceptions)
+            proc.AddFallbackResponses(exception_responses=exceptions)

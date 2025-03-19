@@ -53,28 +53,28 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
     ModifyResponse with pre-response processing to handle exceptions dynamically.
     """
 
-    exception_response: Dict[Union[Type[Exception], Literal["Else"]], AnyResponse]
+    exception_responses: Dict[Union[Type[Exception], Literal["Else"]], AnyResponse]
     """
     Dictionary mapping exception types to fallback responses.
     """
 
-    @field_validator("exception_response")
+    @field_validator("exception_responses")
     @classmethod
-    def validate_not_empty(cls, exception_response: dict) -> dict:
+    def validate_not_empty(cls, exception_responses: dict) -> dict:
         """
-        Validate that the `exception_response` dictionary is not empty.
+        Validate that the `exception_responses` dictionary is not empty.
 
-        :param exception_response: Dictionary mapping exception types to fallback responses.
-        :raises ValueError: If the `exception_response` dictionary is empty.
-        :return: Not empty dictionary of exception_response.
+        :param exception_responses: Dictionary mapping exception types to fallback responses.
+        :raises ValueError: If the `exception_responses` dictionary is empty.
+        :return: Not empty dictionary of exception_responses.
         """
-        if len(exception_response) == 0:
+        if len(exception_responses) == 0:
             raise ValueError("Exceptions dict is empty")
-        return exception_response
+        return exception_responses
 
     async def modified_response(self, original_response: BaseResponse, ctx: Context) -> MessageInitTypes:
         """
-        Catch response errors and process them based on `exception_response`.
+        Catch response errors and process them based on `exception_responses`.
 
         :param original_response: The original response of the current node.
         :param ctx: The current context.
@@ -83,7 +83,7 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
         """
         result = await original_response.wrapped_call(ctx)
         if isinstance(result, Exception):
-            exception = self.exception_response.get(type(result), self.exception_response.get("Else"))
+            exception = self.exception_responses.get(type(result), self.exception_responses.get("Else"))
             ctx.framework_data.response_exception = str(result)
             return await exception(ctx)
         else:
