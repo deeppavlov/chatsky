@@ -1,7 +1,6 @@
 import pytest
 
 from chatsky import Pipeline
-from chatsky.ml.dataset import Dataset
 from chatsky.utils.testing.toy_script import TOY_SCRIPT
 
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -13,11 +12,6 @@ def testing_pipeline():
         TOY_SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
     )
     yield pipeline
-
-
-@pytest.fixture(scope="session")
-def testing_dataset():
-    yield Dataset.parse_json(f"tutorials/{get_path_from_tests_to_current_dir(__file__)}/data/example.json")
 
 
 @pytest.fixture(scope="session")

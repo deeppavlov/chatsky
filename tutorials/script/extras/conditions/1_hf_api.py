@@ -26,11 +26,6 @@ from chatsky.ml.models.hf_api_model import HFAPIModel
 from chatsky.conditions.ml import HasLabel
 from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
-# from chatsky.utils.testing.common import (
-#     is_interactive_mode,
-#     check_happy_path,
-#     run_interactive_mode,
-# )
 
 import logging
 logging.basicConfig(level=logging.INFO)
