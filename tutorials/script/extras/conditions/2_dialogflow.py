@@ -18,26 +18,14 @@ from chatsky import (
     RESPONSE,
     Pipeline,
     Transition as Tr,
-    conditions as cnd,
     GLOBAL,
-    LOCAL,
-    Message,
-    # all the aliases used in tutorials are available for direct import
-    # e.g. you can do `from chatsky import Tr` instead
+    Message
 )
-from chatsky import conditions as cnd
-
 from chatsky.ml.models.google_dialogflow_model import (
     GoogleDialogFlowModel,
 )
-from chatsky import conditions as i_cnd
 from chatsky.conditions.ml import HasLabel
-from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.utils.testing.common import (
-    is_interactive_mode,
-    check_happy_path
-)
 
 
 # %% [markdown]
