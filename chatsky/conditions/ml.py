@@ -8,7 +8,7 @@ This module provides condition functions for annotation processing.
 from typing import Optional, List
 
 try:
-    # !!! remove sklearn, use pure python instead
+    # TODO: remove sklearn, use pure python instead
     from sklearn.metrics.pairwise import cosine_similarity
 
     sklearn_available = True
