@@ -28,6 +28,7 @@ from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -55,24 +56,32 @@ script = {
         TRANSITIONS: [
             # We get to one of the dialog branches depending on the annotation
             Tr(
-                dst=("service", "buy"), priority=1.2, cnd=HasLabel(
-                label="love", model_name="my_hf_model", threshold=0.95)
+                dst=("service", "buy"),
+                priority=1.2,
+                cnd=HasLabel(
+                    label="love", model_name="my_hf_model", threshold=0.95
+                ),
             ),
             Tr(
-                dst=("service", "sell"), priority=1.2, cnd=HasLabel(
-                label="fear", model_name="my_hf_model", threshold=0.95)
-            )
+                dst=("service", "sell"),
+                priority=1.2,
+                cnd=HasLabel(
+                    label="fear", model_name="my_hf_model", threshold=0.95
+                ),
+            ),
         ]
     },
     "root": {
-        LOCAL: {TRANSITIONS: [Tr(dst=("service", "offer"), priority=1.2, cnd=True)]},
+        LOCAL: {
+            TRANSITIONS: [Tr(dst=("service", "offer"), priority=1.2, cnd=True)]
+        },
         "start": {RESPONSE: Message(text="Hi!")},
         "fallback": {
             RESPONSE: Message(text="I can't quite get what you mean.")
         },
         "finish": {
             RESPONSE: Message(text="Ok, see you soon!"),
-            TRANSITIONS: [Tr(dst=("root", "start"), priority=1.3, cnd = True)],
+            TRANSITIONS: [Tr(dst=("root", "start"), priority=1.3, cnd=True)],
         },
     },
     "service": {
@@ -98,7 +107,7 @@ pipeline = Pipeline(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     messenger_interface=CLIMessengerInterface(intro="Starting Dff bot..."),
-    models={"my_hf_model": api_model}
+    models={"my_hf_model": api_model},
 )
 
 
@@ -140,4 +149,4 @@ if __name__ == "__main__":
     # # Run tutorial in interactive mode if not in IPython env
     # # and if `DISABLE_INTERACTIVE_MODE` is not set.
     pipeline.run()
-        # This runs tutorial in interactive mode.
+    # This runs tutorial in interactive mode.

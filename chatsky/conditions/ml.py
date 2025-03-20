@@ -32,13 +32,17 @@ class HasLabel(BaseCondition):
     """
 
     label: str
+    # TODO: rename to pipeline_model ??? same for the llm
     model_name: str
     threshold: float = 0.9
+    # TODO: consider adding history param
 
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.model_name]
         # Predict labels for the last request
         # and store them in framework_data with uuid of the model as a key
+        # TODO: only call model if there is no cached data for this request
+        # but the catch is that we do not store the request that labels belong to
         await model(ctx)
         if model.model_id not in ctx.framework_data.models_labels:
             return False
@@ -67,6 +71,7 @@ class HasMatch(BaseCondition):
     threshold: float = 0.9
 
     def __init__(self, *args, **kwargs):
+        raise NotImplementedError
         super().__init__(*args, **kwargs)
 
     async def call(self, ctx: Context) -> bool:

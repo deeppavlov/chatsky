@@ -5,27 +5,30 @@ from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.script import Node
 
+predict_counter = 0
+
 
 class DummyModel(ExtrasBaseAPIModel):
     def __init__(self, model_id=None):
         self.model_id = model_id
 
-    def predict(self, text):
+    async def predict(self, text):
+        global predict_counter
+        predict_counter += 1
         return {"label_a": 0.1, "label_b": 0.9}
 
-    def __call__(self, text):
-        pass
 
 class MockPipeline:
-    def __init__(self, mock_model):
+    def __init__(self):
         self.models = {
             "test_model": DummyModel(),
         }
 
 
 @pytest.fixture
-def pipeline(mock_model):
-    return MockPipeline(mock_model)
+def pipeline():
+    return MockPipeline()
+
 
 @pytest.fixture
 def context(pipeline, context_factory):
@@ -40,24 +43,13 @@ def context(pipeline, context_factory):
     return ctx
 
 
-@pytest.mark.parametrize(
-    ["input"],
-    [
-        ("label_a",),
-        ("label_b",),
-    ],
-)
-def test_conditions(input, context, pipeline):
-    # ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
-    ctx = Context().pipeline
-    ctx.add_request(Message(text="idk something"))
-    # model = DummyModel(model_id="model_a")
-    assert HasLabel(label=input, model_name="test_model")(ctx, pipeline) is False
-    assert HasLabel(label=input, model_name="test_model")(ctx, pipeline) is True
-    # assert has_cls_label(input, model, namespace="model_a")(ctx, pipeline) is True
-    # assert has_cls_label(input, model, threshold=1.1)(ctx, pipeline) is False
-    # ctx2 = Context()
-    # assert has_cls_label(input, model)(ctx2, pipeline) is False
+async def test_conditions(context, pipeline):
+    global predict_counter
+    predict_counter = 0
+    assert await HasLabel(label="label_a", model_name="test_model")(context) is False
+    assert await HasLabel(label="label_b", model_name="test_model")(context) is True
+    # TODO: check if predict was called only once
+    assert predict_counter == 1
 
 
 # @pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
@@ -65,31 +57,3 @@ def test_conditions(input, context, pipeline):
 #     with pytest.raises(NotImplementedError):
 #         model = DummyModel(model_id="model_a")
 #         _ = has_cls_label(model, input)(Context(), testing_pipeline)
-
-
-# since the standart model is no longer exist (because we do not support local models) mock-model should be created)
-# @pytest.mark.parametrize(
-#     ["_input", "last_request", "thresh"],
-#     [
-#         ({"positive_examples": ["like sweets", "like candy"], "negative_examples": ["other stuff"]}, "sweets", 0.7),
-#         (
-#             {
-#                 "positive_examples": ["good stuff", "brilliant stuff", "excellent stuff"],
-#                 "negative_examples": ["negative example"],
-#             },
-#             "excellent, brilliant",
-#             0.5,
-#         ),
-#     ],
-# )
-# def test_has_match(_input: dict, testing_pipeline, thresh, standard_model, last_request):
-#     ctx = Context()
-#     ctx.add_request(Message(text=last_request))
-#     # Per default, we assume that the model has already been fit.
-#     # For this test case we fit it manually.
-#     collection = Dataset(
-#         items=[DatasetItem.model_validate({"label": key, "samples": values}) for key, values in _input.items()]
-#     )
-#     standard_model.fit(collection)
-#     result = has_match(standard_model, threshold=thresh, **_input)(ctx, testing_pipeline)
-#     assert result

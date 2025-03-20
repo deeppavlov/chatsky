@@ -6,13 +6,6 @@ from chatsky.ml.models.hf_api_model import (
     hf_api_available,
 )
 
-# class MockHFAPIModel(HFAPIModel):
-#     def __init__(self, model: str, api_key: str):
-#         super().__init__(model=model, api_key=api_key)
-
-#     async def predict(self, text: str) -> dict:
-#         return {"mock_false_label": 0.0, "mock_true_label": 1.0}
-
 @pytest.fixture(scope="session")
 def testing_async_model(hf_model_name):
     if os.getenv("HF_API_KEY"):

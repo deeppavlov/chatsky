@@ -26,6 +26,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 class GoogleDialogFlowModel(ExtrasBaseAPIModel):
     """
     This class implements an asynchronous connection to Google Dialogflow for dialog annotation.

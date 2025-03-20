@@ -27,6 +27,7 @@ from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
 logger = logging.getLogger(__name__)
 
+
 class HFAPIModel(ExtrasBaseAPIModel):
     """
     This class implements an asynchronous connection to the Hugging Face API for dialog annotation.
@@ -65,7 +66,7 @@ class HFAPIModel(ExtrasBaseAPIModel):
         test_response = requests.get(self.url, headers=self.headers)  # assert that the model exists
         if not test_response.status_code == HTTPStatus.OK:
             raise requests.HTTPError(test_response.text)
-        
+
     # TODO: Add `transform` method
 
     @alru_cache(maxsize=10)
@@ -83,7 +84,7 @@ class HFAPIModel(ExtrasBaseAPIModel):
                 raise httpx.HTTPStatusError(str(response.status_code) + " " + response.text)
 
         json_response = response.json()
-        logger.info(f'HuggingFace API response: {json_response}')
+        logger.info(f"HuggingFace API response: {json_response}")
         result = {}
         for label_score_pair in json_response[0]:
             result.update({label_score_pair["label"]: label_score_pair["score"]})

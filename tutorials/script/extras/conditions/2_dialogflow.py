@@ -11,6 +11,7 @@ Tutorials for other models can be found in the same section.
 
 # %%
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 from chatsky import (
@@ -19,7 +20,7 @@ from chatsky import (
     Pipeline,
     Transition as Tr,
     GLOBAL,
-    Message
+    Message,
 )
 from chatsky.ml.models.google_dialogflow_model import (
     GoogleDialogFlowModel,
@@ -40,30 +41,32 @@ you can use them to construct the class.
 
 
 # %%
-gdf_model = GoogleDialogFlowModel.from_file(
-    filename="acc_data.json"
-)
+gdf_model = GoogleDialogFlowModel.from_file(filename="acc_data.json")
 
 # %%
 script = {
     GLOBAL: {
         # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: [
-            Tr(cnd=HasLabel(label="Default Welcome Intent", model_name="gdf_model"), dst=("root", "finish"), priority=1.2)
+            Tr(
+                cnd=HasLabel(
+                    label="Default Welcome Intent", model_name="gdf_model"
+                ),
+                dst=("root", "finish"),
+                priority=1.2,
+            )
         ],
     },
     "root": {
         "start": {
             RESPONSE: Message(text="Hi!"),
-            TRANSITIONS: [
-                Tr(cnd=True, dst="fallback")
-            ]
-            },
+            TRANSITIONS: [Tr(cnd=True, dst="fallback")],
+        },
         "fallback": {
             RESPONSE: Message(text="I can't quite get what you mean.")
         },
         "finish": {RESPONSE: Message(text="Ok, see you soon!")},
-    }
+    },
 }
 
 
@@ -73,7 +76,7 @@ pipeline = Pipeline(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     messenger_interface=CLIMessengerInterface(intro="Starting Dff bot..."),
-    models={"gdf_model": gdf_model}
+    models={"gdf_model": gdf_model},
 )
 
 
