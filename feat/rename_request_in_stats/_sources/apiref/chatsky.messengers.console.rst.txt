@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/console
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.messengers.console
+   :members:
+   :undoc-members:
+   :show-inheritance:

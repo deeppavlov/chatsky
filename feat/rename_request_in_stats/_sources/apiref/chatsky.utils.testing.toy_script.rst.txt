@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/toy_script
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.utils.testing.toy_script
+   :members:
+   :undoc-members:
+   :show-inheritance:

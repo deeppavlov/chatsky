@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/prompt
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.llm.prompt
+   :members:
+   :undoc-members:
+   :show-inheritance:

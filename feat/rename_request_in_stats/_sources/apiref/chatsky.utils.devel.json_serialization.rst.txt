@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/devel/json_serialization
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.utils.devel.json_serialization
+   :members:
+   :undoc-members:
+   :show-inheritance:

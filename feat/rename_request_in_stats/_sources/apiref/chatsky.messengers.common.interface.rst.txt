@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/common/interface
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.messengers.common.interface
+   :members:
+   :undoc-members:
+   :show-inheritance:

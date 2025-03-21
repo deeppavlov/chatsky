@@ -1,0 +1,7 @@
+:source_name: chatsky/context_storages/memory
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.context_storages.memory
+   :members:
+   :undoc-members:
+   :show-inheritance:

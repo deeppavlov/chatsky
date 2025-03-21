@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/filters
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.llm.filters
+   :members:
+   :undoc-members:
+   :show-inheritance:

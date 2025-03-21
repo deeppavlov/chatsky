@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/db_benchmark/basic_config
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.utils.db_benchmark.basic_config
+   :members:
+   :undoc-members:
+   :show-inheritance:

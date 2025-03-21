@@ -1,0 +1,7 @@
+:source_name: chatsky/slots/llm
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.slots.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

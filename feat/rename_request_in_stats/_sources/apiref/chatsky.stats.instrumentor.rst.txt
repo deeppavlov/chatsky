@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/instrumentor
+:doc_version: feat/rename_request_in_stats/
+
+.. automodule:: chatsky.stats.instrumentor
+   :members:
+   :undoc-members:
+   :show-inheritance:
