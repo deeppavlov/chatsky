@@ -281,15 +281,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.requests[ctx.current_turn_id] = request
         await self.services_pipeline(ctx)
 
-        forward_id = ctx.framework_data.current_node.forward.get(ctx_id)
-        forward_iface = self.messenger_interfaces.get(forward_id)
-        if forward_iface is not None:
-            if not isinstance(forward_iface, CallbackMessengerInterface):
-                logger.error(f"Forwarding to the messenger interface '{forward_id}' of type {type(forward_iface).__name__} is impossible!")
-            else:
-                target_ctx = ctx.misc.get("forward", dict()).get(ctx.last_label, None)
-                await forward_iface.on_request_async(ctx.last_response.model_copy(), target_ctx)
-
         ctx.framework_data.service_states.clear()
         ctx.framework_data.pipeline = None
 

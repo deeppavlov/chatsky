@@ -11,7 +11,7 @@ from __future__ import annotations
 from asyncio import Event
 from json import loads
 from time import time_ns
-from typing import Any, Optional, Dict, TYPE_CHECKING
+from typing import Any, Optional, Dict, TYPE_CHECKING, Tuple
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
@@ -64,6 +64,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+    last_forward_from: Optional[Tuple[str, str]] = Field(default=None)
 
 
 class ContextMainInfo(BaseModel):

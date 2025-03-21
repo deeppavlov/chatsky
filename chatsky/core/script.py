@@ -54,7 +54,6 @@ class Node(BaseModel, extra="forbid"):
 
     Can be accessed at runtime via :py:attr:`~chatsky.core.context.Context.current_node`.
     """
-    forward: dict = Field(validation_alias=AliasChoices("forward", "FORWARD"), default_factory=dict)
 
     def inherit_from_other(self, other: Node):
         """
@@ -200,4 +199,3 @@ PRE_RESPONSE = "PRE_RESPONSE"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_response`."""
 PRE_TRANSITION = "PRE_TRANSITION"
 """Key for :py:attr:`~chatsky.core.script.Node.pre_transition`."""
-FORWARD = "FORWARD"
