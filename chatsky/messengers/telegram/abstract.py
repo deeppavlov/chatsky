@@ -86,9 +86,7 @@ class TelegramMetadata(Metadata):
     """
     Unique identifier for this chat.
     """
-    chat_type: Annotated[
-        Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"], BeforeValidator(str), BeforeValidator(str.upper)
-    ]
+    chat_type: Annotated[Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"], BeforeValidator(str.upper)]
     """
     Type of chat, can be either PRIVATE, GROUP, SUPERGROUP or CHANNEL.
     """
