@@ -564,6 +564,7 @@
 
 
 
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
 
 
@@ -717,6 +718,7 @@
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
+
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
 
@@ -1247,6 +1249,13 @@ so you should send them separately by putting them directly in <a class="referen
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="chatsky.core.message.Metadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Metadata" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chatsky.core.message.DataModel" title="chatsky.core.message.DataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataModel</span></code></a></p>
+<p>Base class for metadata stored in <a class="reference internal" href="#chatsky.core.message.Origin" title="chatsky.core.message.Origin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Origin</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="chatsky.core.message.Origin">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Origin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
@@ -1262,6 +1271,12 @@ E.g. telegram update.</p>
 <dt class="sig sig-object py" id="chatsky.core.message.Origin.interface">
 <span class="sig-name descname"><span class="pre">interface</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#chatsky.core.message.Origin.interface" title="Link to this definition">#</a></dt>
 <dd><p>Name of the interface that produced the message.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.message.Origin.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union['TelegramMetadata',</span> <span class="pre">Metadata]</span></em><a class="headerlink" href="#chatsky.core.message.Origin.metadata" title="Link to this definition">#</a></dt>
+<dd><p>Various metadata of the message’s origin.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1314,6 +1329,12 @@ the update received from messenger interface API.</p>
 <dt class="sig sig-object py" id="chatsky.core.message.Message.origin">
 <span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Origin]</span></em><a class="headerlink" href="#chatsky.core.message.Message.origin" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="chatsky.core.message.Message.metadata">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#chatsky.core.message.Metadata" title="chatsky.core.message.Metadata"><span class="pre">Metadata</span></a></em><a class="headerlink" href="#chatsky.core.message.Message.metadata" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="#chatsky.core.message.Origin.metadata" title="chatsky.core.message.Origin.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Origin.metadata</span></code></a> of this message.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.core.message.Message.pickle_serialize_dicts">
@@ -1482,9 +1503,11 @@ Allows storing arbitrary data in misc/annotations when using context storages.</
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.MediaGroup.chatsky_attachment_type"><code class="docutils literal notranslate"><span class="pre">MediaGroup.chatsky_attachment_type</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin"><code class="docutils literal notranslate"><span class="pre">Origin</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.message"><code class="docutils literal notranslate"><span class="pre">Origin.message</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.interface"><code class="docutils literal notranslate"><span class="pre">Origin.interface</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.metadata"><code class="docutils literal notranslate"><span class="pre">Origin.metadata</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.pickle_serialize_message"><code class="docutils literal notranslate"><span class="pre">Origin.pickle_serialize_message()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.pickle_validate_message"><code class="docutils literal notranslate"><span class="pre">Origin.pickle_validate_message()</span></code></a></li>
 </ul>
@@ -1495,6 +1518,7 @@ Allows storing arbitrary data in misc/annotations when using context storages.</
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.annotations"><code class="docutils literal notranslate"><span class="pre">Message.annotations</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.misc"><code class="docutils literal notranslate"><span class="pre">Message.misc</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.origin"><code class="docutils literal notranslate"><span class="pre">Message.origin</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.metadata"><code class="docutils literal notranslate"><span class="pre">Message.metadata</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.pickle_serialize_dicts"><code class="docutils literal notranslate"><span class="pre">Message.pickle_serialize_dicts()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.pickle_validate_dicts"><code class="docutils literal notranslate"><span class="pre">Message.pickle_validate_dicts()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.validate_from_str"><code class="docutils literal notranslate"><span class="pre">Message.validate_from_str()</span></code></a></li>

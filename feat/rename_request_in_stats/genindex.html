@@ -1104,6 +1104,12 @@
 </li>
       <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract._AbstractTelegramInterface.cast_message_to_telegram_and_send">cast_message_to_telegram_and_send() (_AbstractTelegramInterface method)</a>
 </li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id">chat_id (TelegramMetadata attribute)</a>
+</li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title">chat_title (TelegramMetadata attribute)</a>
+</li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type">chat_type (TelegramMetadata attribute)</a>
+</li>
       <li>
     chatsky.conditions.llm
 
@@ -1377,6 +1383,8 @@
         <li><a href="apiref/chatsky.messengers.telegram.abstract.html#module-chatsky.messengers.telegram.abstract">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     chatsky.messengers.telegram.interface
 
@@ -1384,8 +1392,6 @@
         <li><a href="apiref/chatsky.messengers.telegram.interface.html#module-chatsky.messengers.telegram.interface">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     chatsky.processing.slots
 
@@ -1861,7 +1867,11 @@
       <li><a href="apiref/chatsky.core.ctx_utils.html#chatsky.core.ctx_utils.ServiceState.finished_event">finished_event (ServiceState attribute)</a>
 </li>
       <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.Contact.first_name">first_name (Contact attribute)</a>
+
+      <ul>
+        <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.first_name">(TelegramMetadata attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.Regexp.flags">flags (Regexp attribute)</a>
 </li>
       <li><a href="apiref/chatsky.core.script.html#chatsky.core.script.Flow">Flow (class in chatsky.core.script)</a>
@@ -1887,6 +1897,8 @@
       <li><a href="apiref/chatsky.utils.db_benchmark.basic_config.html#chatsky.utils.db_benchmark.basic_config.BasicBenchmarkConfig.from_dialog_len">from_dialog_len (BasicBenchmarkConfig attribute)</a>
 </li>
       <li><a href="apiref/chatsky.core.pipeline.html#chatsky.core.pipeline.Pipeline.from_file">from_file() (Pipeline class method)</a>
+</li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.from_update">from_update() (TelegramMetadata class method)</a>
 </li>
       <li><a href="apiref/chatsky.stats.instrumentor.html#chatsky.stats.instrumentor.OtelInstrumentor.from_url">from_url() (OtelInstrumentor class method)</a>
 </li>
@@ -2154,12 +2166,18 @@
         <li><a href="apiref/chatsky.core.context.html#chatsky.core.context.Context.labels">(Context attribute)</a>
 </li>
       </ul></li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.language_code">language_code (TelegramMetadata attribute)</a>
+</li>
       <li><a href="apiref/chatsky.core.context.html#chatsky.core.context.Context.last_label">last_label (Context property)</a>
 </li>
       <li><a href="apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.CheckLastLabels.last_n_indices">last_n_indices (CheckLastLabels attribute)</a>
 </li>
       <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.Contact.last_name">last_name (Contact attribute)</a>
+
+      <ul>
+        <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.last_name">(TelegramMetadata attribute)</a>
 </li>
+      </ul></li>
       <li><a href="apiref/chatsky.core.context.html#chatsky.core.context.Context.last_request">last_request (Context property)</a>
 </li>
       <li><a href="apiref/chatsky.core.context.html#chatsky.core.context.Context.last_response">last_response (Context property)</a>
@@ -2180,10 +2198,10 @@
         <li><a href="apiref/chatsky.slots.llm.html#chatsky.slots.llm.LLMSlot.llm_model_name">(LLMSlot attribute)</a>
 </li>
       </ul></li>
-      <li><a href="apiref/chatsky.conditions.llm.html#chatsky.conditions.llm.LLMCondition">LLMCondition (class in chatsky.conditions.llm)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apiref/chatsky.conditions.llm.html#chatsky.conditions.llm.LLMCondition">LLMCondition (class in chatsky.conditions.llm)</a>
+</li>
       <li><a href="apiref/chatsky.slots.llm.html#chatsky.slots.llm.LLMGroupSlot">LLMGroupSlot (class in chatsky.slots.llm)</a>
 </li>
       <li><a href="apiref/chatsky.responses.llm.html#chatsky.responses.llm.LLMResponse">LLMResponse (class in chatsky.responses.llm)</a>
@@ -2267,6 +2285,16 @@
       <li><a href="apiref/chatsky.messengers.common.interface.html#chatsky.messengers.common.interface.MessengerInterface">MessengerInterface (class in chatsky.messengers.common.interface)</a>
 </li>
       <li><a href="apiref/chatsky.messengers.common.interface.html#chatsky.messengers.common.interface.MessengerInterfaceWithAttachments">MessengerInterfaceWithAttachments (class in chatsky.messengers.common.interface)</a>
+</li>
+      <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.Metadata">Metadata (class in chatsky.core.message)</a>
+</li>
+      <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.Message.metadata">metadata (Message property)</a>
+
+      <ul>
+        <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.Origin.metadata">(Origin attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.metadata_type">metadata_type (TelegramMetadata attribute)</a>
 </li>
       <li><a href="apiref/chatsky.conditions.llm.html#chatsky.conditions.llm.LLMCondition.method">method (LLMCondition attribute)</a>
 </li>
@@ -2917,6 +2945,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apiref/chatsky.llm.methods.html#chatsky.llm.methods.LogProb.target_token">target_token (LogProb attribute)</a>
 </li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata">TelegramMetadata (class in chatsky.messengers.telegram.abstract)</a>
+</li>
       <li><a href="apiref/chatsky.responses.slots.html#chatsky.responses.slots.FilledTemplate.template">template (FilledTemplate attribute)</a>
 </li>
       <li><a href="apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.HasText.text">text (HasText attribute)</a>
@@ -3002,6 +3032,10 @@
       <li><a href="apiref/chatsky.utils.db_benchmark.benchmark.html#chatsky.utils.db_benchmark.benchmark.DBFactory.uri">uri (DBFactory attribute)</a>
 </li>
       <li><a href="apiref/chatsky.core.message.html#chatsky.core.message.DataAttachment.use_cache">use_cache (DataAttachment attribute)</a>
+</li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.user_id">user_id (TelegramMetadata attribute)</a>
+</li>
+      <li><a href="apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.username">username (TelegramMetadata attribute)</a>
 </li>
       <li><a href="apiref/chatsky.utils.db_benchmark.benchmark.html#chatsky.utils.db_benchmark.benchmark.BenchmarkCase.uuid">uuid (BenchmarkCase attribute)</a>
 </li>
