@@ -30,7 +30,7 @@ class ModifyResponse(BaseProcessing, abc.ABC):
         :param original_response: Response of the current node when :py:class:`.ModifyResponse` is called.
         :param ctx: Current context.
 
-        :return: Message to replace original response with modified.
+        :return: Message to replace original response with.
         """
         raise NotImplementedError
 
@@ -79,7 +79,7 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
         :param original_response: The original response of the current node.
         :param ctx: The current context.
 
-        :return: Message to replace original response with modified due to fallback response.
+        :return: Message to replace original response with.
         """
         result = await original_response.wrapped_call(ctx)
         if isinstance(result, Exception):
