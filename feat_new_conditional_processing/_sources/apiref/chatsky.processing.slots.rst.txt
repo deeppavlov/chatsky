@@ -1,0 +1,7 @@
+:source_name: chatsky/processing/slots
+:doc_version: feat_new_conditional_processing/
+
+.. automodule:: chatsky.processing.slots
+   :members:
+   :undoc-members:
+   :show-inheritance:
