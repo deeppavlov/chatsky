@@ -75,18 +75,31 @@ interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
 is designed for convenient access to user data from Telegram.
-It provides easy access to public user information, including user_id,
-first_name, last_name, username, language_code, chat_id, chat_type,
-and chat_title (read further in [Telegram API documentation]
-(https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html))
-and allows efficient integration into scripts.
-User's metadata is saved with every request message, and can be
-obtained using `ctx.last_request.metadata`.
 
-We can adjust the above-stated example with Telegram-provided metadata
-to make the script more personified.
-We wrote a custom `FirstnameGreeting` response class, for further
-information read [responses](%doclink(api,responses.standard)).
+It provides access to the following information:
+
+1. Information about [user](
+https://docs.python-telegram-bot.org/en/stable/telegram.user.html):
+    - user_id;
+    - first_name;
+    - last_name;
+    - username;
+    - language_code.
+2. Information about [chat](
+https://docs.python-telegram-bot.org/en/stable/telegram.chat.html):
+    - chat_id;
+    - chat_type;
+    - chat_title.
+
+User's metadata is saved with every request message.
+For example, metadata of the most recent request in the context can be
+accessed via `ctx.last_request.metadata`.
+
+In this tutorial we create a custom `FirstnameGreeting` response class, which
+references user's name in the response message.
+
+For more information about responses, see the
+%mddoclink(tutorial,script.core.3_responses) tutorial.
 """
 
 
