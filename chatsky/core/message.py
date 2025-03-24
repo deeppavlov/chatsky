@@ -24,6 +24,7 @@ from chatsky.utils.devel import (
     pickle_validator,
     JSONSerializableExtras,
 )
+from chatsky.core.ctx_utils import ContextError
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
@@ -342,6 +343,8 @@ class Message(DataModel):
 
     @property
     def metadata(self):
+        if self.origin is None:
+            raise ContextError("Cannot get metadata of message without `origin` field.")
         return self.origin.metadata
 
     def __init__(  # this allows initializing Message with string as positional argument
