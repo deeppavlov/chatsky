@@ -52,12 +52,7 @@ argument for a bot to run is a token. Some other parameters
 
 Either of the two interfaces connect the bot to Telegram.
 They can be passed directly to a Chatsky `Pipeline` instance.
-"""
-# %%
-interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
-# %% [markdown]
-"""
 <div class="alert alert-info">
 
 Note
@@ -70,7 +65,12 @@ from chatsky.messengers import TelegramInterface
 ```
 
 </div>
+"""
+# %%
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
+# %% [markdown]
+"""
 ## Metadata access
 
 The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
