@@ -58,7 +58,14 @@ except ImportError:
 
 class TelegramMetadata(Metadata):
     """
-    Keeps some metadata of the message
+    Metadata extracted from telegram updates.
+
+    Fields :py:attr:`user_id`, :py:attr:`first_name`, :py:attr:`last_name`, :py:attr:`username` and
+    :py:attr:`language_code` are extracted from the
+    `User object <https://docs.python-telegram-bot.org/en/stable/telegram.user.html>`__.
+
+    Fields :py:attr:`chat_id`, :py:attr:`chat_type` and :py:attr:`chat_title` are extracted from the
+    `Chat object <https://docs.python-telegram-bot.org/en/stable/telegram.chat.html>`__.
     """
 
     metadata_type: Literal["telegram"]
@@ -97,6 +104,9 @@ class TelegramMetadata(Metadata):
 
     @classmethod
     def from_update(cls, update: Update) -> "TelegramMetadata":
+        """
+        Extract metadata from telegram Update.
+        """
         return cls(
             metadata_type="telegram",
             user_id=update.effective_user.id,

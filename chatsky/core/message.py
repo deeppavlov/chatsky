@@ -260,6 +260,10 @@ class MediaGroup(Attachment):
 
 
 class Metadata(DataModel):
+    """
+    Base class for metadata stored in :py:class:`Origin`.
+    """
+
     pass
 
 
@@ -279,7 +283,7 @@ class Origin(BaseModel):
     """
     metadata: Union["TelegramMetadata", Metadata] = Field(default_factory=Metadata)
     """
-    Metadata contained in the message.
+    Various metadata of the message's origin.
     """
 
     @field_serializer("message", when_used="json")
@@ -342,7 +346,10 @@ class Message(DataModel):
     origin: Optional[Origin] = None
 
     @property
-    def metadata(self):
+    def metadata(self) -> Metadata:
+        """
+        :py:attr:`Origin.metadata` of this message.
+        """
         if self.origin is None:
             raise ContextError("Cannot get metadata of message without `origin` field.")
         return self.origin.metadata
