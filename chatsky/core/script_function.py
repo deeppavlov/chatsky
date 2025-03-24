@@ -203,8 +203,10 @@ class BaseProcessing(BaseScriptFunc, ABC):
 
     start_condition: AnyCondition = Field(default=True, validate_default=True)
     """
-    :py:data:`~.AnyCondition` is checked before __call__;
-    __call__ is initiated only if start_condition returns ``True``.
+    :py:data:`~AnyCondition` that determines if this processing function should run.
+    
+    If the result of this condition is `False` or it raises an exception,
+    :py:meth:`__call__` will complete without calling :py:meth:`call`.
     """
 
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = type(None)
