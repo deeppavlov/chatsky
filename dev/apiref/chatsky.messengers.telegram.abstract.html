@@ -564,6 +564,7 @@
 
 
 
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
 
 
@@ -717,6 +718,7 @@
 
 
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Telegram Base</a></li>
+
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
 
@@ -878,6 +880,82 @@
 <p>This module implements a base interface for interactions with the
 Telegram API.</p>
 </section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TelegramMetadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*,</span> <span class="pre">metadata_type:</span> <span class="pre">~typing.Literal['telegram'],</span> <span class="pre">user_id:</span> <span class="pre">int,</span> <span class="pre">first_name:</span> <span class="pre">str,</span> <span class="pre">last_name:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">username:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">language_code:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">chat_id:</span> <span class="pre">int,</span> <span class="pre">chat_type:</span> <span class="pre">~typing.Annotated[~typing.Literal['PRIVATE',</span> <span class="pre">'GROUP',</span> <span class="pre">'SUPERGROUP',</span> <span class="pre">'CHANNEL'],</span> <span class="pre">~pydantic.functional_validators.BeforeValidator(func=~.str.upper,</span> <span class="pre">json_schema_input_type=PydanticUndefined)],</span> <span class="pre">chat_title:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/messengers/telegram/abstract.html#TelegramMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Metadata" title="chatsky.core.message.Metadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metadata</span></code></a></p>
+<p>Metadata extracted from telegram updates.</p>
+<p>Fields <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.user_id" title="chatsky.messengers.telegram.abstract.TelegramMetadata.user_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">user_id</span></code></a>, <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.first_name" title="chatsky.messengers.telegram.abstract.TelegramMetadata.first_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">first_name</span></code></a>, <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.last_name" title="chatsky.messengers.telegram.abstract.TelegramMetadata.last_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_name</span></code></a>, <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.username" title="chatsky.messengers.telegram.abstract.TelegramMetadata.username"><code class="xref py py-attr docutils literal notranslate"><span class="pre">username</span></code></a> and
+<a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.language_code" title="chatsky.messengers.telegram.abstract.TelegramMetadata.language_code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">language_code</span></code></a> are extracted from the
+<a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.user.html">User object</a>.</p>
+<p>Fields <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id" title="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chat_id</span></code></a>, <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type" title="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chat_type</span></code></a> and <a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title" title="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chat_title</span></code></a> are extracted from the
+<a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.chat.html">Chat object</a>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.metadata_type">
+<span class="sig-name descname"><span class="pre">metadata_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'telegram'</span></code><span class="pre">]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.metadata_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.user_id" title="Link to this definition">#</a></dt>
+<dd><p>Unique identifier for this user or bot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.first_name">
+<span class="sig-name descname"><span class="pre">first_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.first_name" title="Link to this definition">#</a></dt>
+<dd><p>User’s or bot’s first name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.last_name">
+<span class="sig-name descname"><span class="pre">last_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.last_name" title="Link to this definition">#</a></dt>
+<dd><p>Optional. User’s or bot’s last name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.username">
+<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.username" title="Link to this definition">#</a></dt>
+<dd><p>Optional. User’s or bot’s username.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.language_code">
+<span class="sig-name descname"><span class="pre">language_code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.language_code" title="Link to this definition">#</a></dt>
+<dd><p>Optional. IETF language tag of the user’s language.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id">
+<span class="sig-name descname"><span class="pre">chat_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id" title="Link to this definition">#</a></dt>
+<dd><p>Unique identifier for this chat.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type">
+<span class="sig-name descname"><span class="pre">chat_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedAlias</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'PRIVATE'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'GROUP'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'SUPERGROUP'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'CHANNEL'</span></code><span class="pre">]]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type" title="Link to this definition">#</a></dt>
+<dd><p>Type of chat, can be either PRIVATE, GROUP, SUPERGROUP or CHANNEL.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title">
+<span class="sig-name descname"><span class="pre">chat_title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title" title="Link to this definition">#</a></dt>
+<dd><p>Optional. Title, for supergroups, channels and group chats.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract.TelegramMetadata.from_update">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">update</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/messengers/telegram/abstract.html#TelegramMetadata.from_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.from_update" title="Link to this definition">#</a></dt>
+<dd><p>Extract metadata from telegram Update.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#chatsky.messengers.telegram.abstract.TelegramMetadata" title="chatsky.messengers.telegram.abstract.TelegramMetadata"><code class="xref py py-class docutils literal notranslate"><span class="pre">TelegramMetadata</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.messengers.telegram.abstract._AbstractTelegramInterface">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_AbstractTelegramInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attachments_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/messengers/telegram/abstract.html#_AbstractTelegramInterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.messengers.telegram.abstract._AbstractTelegramInterface" title="Link to this definition">#</a></dt>
@@ -1067,6 +1145,19 @@ usually it’s a <a class="reference internal" href="chatsky.core.pipeline.html#
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Telegram Base</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.metadata_type"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.metadata_type</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.user_id"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.user_id</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.first_name"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.first_name</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.last_name"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.last_name</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.username"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.username</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.language_code"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.language_code</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_id"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.chat_id</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_type"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.chat_type</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.chat_title"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.chat_title</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract.TelegramMetadata.from_update"><code class="docutils literal notranslate"><span class="pre">TelegramMetadata.from_update()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract._AbstractTelegramInterface"><code class="docutils literal notranslate"><span class="pre">_AbstractTelegramInterface</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract._AbstractTelegramInterface.supported_request_attachment_types"><code class="docutils literal notranslate"><span class="pre">_AbstractTelegramInterface.supported_request_attachment_types</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.messengers.telegram.abstract._AbstractTelegramInterface.supported_response_attachment_types"><code class="docutils literal notranslate"><span class="pre">_AbstractTelegramInterface.supported_response_attachment_types</span></code></a></li>
