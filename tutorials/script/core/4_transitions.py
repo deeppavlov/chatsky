@@ -12,7 +12,7 @@ Some of the destination steps can be set using
 """
 
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import re

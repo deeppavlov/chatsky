@@ -92,7 +92,7 @@ full_slot_storage = ExtractedGroupSlot(
 @pytest.fixture(scope="function")
 def context_with_request(context):
     new_ctx = context.model_copy(deep=True)
-    new_ctx.add_request(Message(text="I am Bot. My email is bot@bot"))
+    new_ctx.requests[2] = Message(text="I am Bot. My email is bot@bot")
     return new_ctx
 
 

@@ -24,7 +24,7 @@ docker compose --profile stats up
 </div>
 """
 
-# %pip install chatsky[stats]
+# %pip install chatsky[stats]=={chatsky}
 
 # %%
 import asyncio

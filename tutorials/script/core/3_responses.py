@@ -8,7 +8,7 @@ Here, [responses](%doclink(api,responses.standard))
 that allow giving custom answers to users are shown.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import re

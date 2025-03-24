@@ -8,7 +8,7 @@ For more information, see
 [API ref](%doclink(api,core.service.service,Service)).
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging

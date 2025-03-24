@@ -129,6 +129,9 @@ poetry run poe quick_test
 
 _There's also quick_test_coverage for quick htmlcov generation, though it is very likely to be incomplete due to deselection of some tests._
 
+Both `quick_test_coverage` and `test_all` generate html coverage report.
+You can view it by opening the `htmlcov/index.html` file.
+
 To make sure that the code satisfies only the style requirements, run
 ```bash
 poetry run poe lint

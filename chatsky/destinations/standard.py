@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from chatsky.core.context import get_last_index, Context
+from chatsky.core.context import Context
 from chatsky.core.node_label import NodeLabelInitTypes, AbsoluteNodeLabel
 from chatsky.core.script_function import BaseDestination
 
@@ -33,15 +33,7 @@ class FromHistory(BaseDestination):
     """
 
     async def call(self, ctx: Context) -> NodeLabelInitTypes:
-        index = get_last_index(ctx.labels)
-        shifted_index = index + self.position + 1
-        result = ctx.labels.get(shifted_index)
-        if result is None:
-            raise KeyError(
-                f"No label with index {shifted_index!r}. "
-                f"Current label index: {index!r}; FromHistory.position: {self.position!r}."
-            )
-        return result
+        return await ctx.labels[ctx.labels.keys()[self.position]]
 
 
 class Current(FromHistory):

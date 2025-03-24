@@ -8,7 +8,7 @@ See %mddoclink(api,core.script,MISC)
 for more information.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

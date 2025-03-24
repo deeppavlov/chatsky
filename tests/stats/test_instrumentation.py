@@ -1,8 +1,8 @@
 import pytest
 
 from chatsky import Context
-from chatsky.core.service import Service, ExtraHandlerRuntimeInfo, ComponentExecutionState, ServiceGroup
-from tests.pipeline.utils import run_test_group
+from chatsky.core.service import Service, ExtraHandlerRuntimeInfo
+from chatsky.core.utils import initialize_service_states
 
 try:
     from chatsky.stats import default_extractors
@@ -43,7 +43,7 @@ def test_keyword_arguments():
     assert instrumentor._tracer_provider is not get_tracer_provider()
 
 
-async def test_failed_stats_collection(log_event_catcher):
+async def test_failed_stats_collection(log_event_catcher, context_factory):
     chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
     chatsky_instrumentor.instrument()
 
@@ -51,10 +51,13 @@ async def test_failed_stats_collection(log_event_catcher):
     async def bad_stats_collector(_: Context, __: ExtraHandlerRuntimeInfo):
         raise Exception
 
-    service = Service(handler=lambda _: None, before_handler=bad_stats_collector)
+    service = Service(handler=lambda _: None, before_handler=bad_stats_collector, path=".service")
 
     log_list = log_event_catcher(logger=instrumentor_logger, level="ERROR")
 
-    assert await run_test_group(ServiceGroup(components=[service])) == ComponentExecutionState.FINISHED
+    ctx = context_factory()
+    initialize_service_states(ctx, service)
+
+    await service(ctx)
 
     assert len(log_list) == 1

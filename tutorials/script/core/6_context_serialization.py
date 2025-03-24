@@ -3,7 +3,7 @@
 # Core: 6. Context serialization
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging

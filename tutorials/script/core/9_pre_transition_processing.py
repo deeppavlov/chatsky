@@ -7,7 +7,7 @@ is demonstrated which can be used for additional context
 processing before transitioning to the next step.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

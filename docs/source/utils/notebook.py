@@ -1,8 +1,10 @@
 import re
 import abc
+from functools import cache
 from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
+from importlib import metadata
 
 try:
     from jupytext import jupytext
@@ -52,14 +54,39 @@ class InstallationCell(ReplacePattern):
     Uncomment `# %pip install {}`, add a "quiet" flag, add a comment explaining the cell.
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
+    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*?)([ ]*# noqa: E501)?\n")
+
+    @staticmethod
+    def replace_versions(cmd: str):
+        """
+        Replaces "{dependency}" with its "version" so that the cmd can install the right
+        dependency version required by tests or tutorials.
+
+        :param cmd: The installation command string to format.
+        :return: Formatted string.
+        """
+        versions_dict = InstallationCell.versions()
+        return cmd.format(**versions_dict)
+
+    @staticmethod
+    @cache
+    def versions() -> dict:
+        """
+        Return a dictionary containing information about all the distributions installed in the current venv.
+
+        :return: A dictionary, where distribution names are keys and their corresponding versions are values.
+        """
+        versions = {}
+        for dist in metadata.distributions():
+            versions[dist.name] = dist.version
+        return versions
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
         return f"""
 # %%
 # installing dependencies
-%pip install -q {matchobj.group(1)}
+%pip install -q {InstallationCell.replace_versions(matchobj.group(1))}
 """
 
 

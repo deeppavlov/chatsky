@@ -14,7 +14,7 @@ libraries for asynchronous access to SQLite DB.
 Note that protocol separator for windows differs from one for linux.
 """
 
-# %pip install chatsky[sqlite]
+# %pip install chatsky[sqlite]=={chatsky}
 
 # %%
 import pathlib
