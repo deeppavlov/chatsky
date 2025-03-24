@@ -218,7 +218,6 @@ markers = [
 ]
 asyncio_mode = "auto"
 
-
 [tool.coverage.run]
 concurrency = [
     "thread",
