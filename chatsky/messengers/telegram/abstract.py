@@ -63,15 +63,39 @@ class TelegramMetadata(Metadata):
 
     metadata_type: Literal["telegram"]
     user_id: int
+    """
+    Unique identifier for this user or bot.
+    """
     first_name: str
+    """
+    User’s or bot’s first name.
+    """
     last_name: Optional[str] = None
+    """
+    Optional. User’s or bot’s last name.
+    """
     username: Optional[str] = None
+    """
+    Optional. User’s or bot’s username.
+    """
     language_code: Optional[str] = None
+    """
+    Optional. IETF language tag of the user’s language.
+    """
     chat_id: int
+    """
+    Unique identifier for this chat.
+    """
     chat_type: Annotated[
         Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"], BeforeValidator(str), BeforeValidator(str.upper)
     ]
+    """
+    Type of chat, can be either PRIVATE, GROUP, SUPERGROUP or CHANNEL.
+    """
     chat_title: Optional[str] = None
+    """
+    Optional. Title, for supergroups, channels and group chats.
+    """
 
     @classmethod
     def from_update(cls, update: Update) -> "TelegramMetadata":
