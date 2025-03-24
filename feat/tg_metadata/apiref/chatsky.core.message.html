@@ -1252,6 +1252,7 @@ so you should send them separately by putting them directly in <a class="referen
 <dt class="sig sig-object py" id="chatsky.core.message.Metadata">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Metadata" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#chatsky.core.message.DataModel" title="chatsky.core.message.DataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataModel</span></code></a></p>
+<p>Base class for metadata stored in <a class="reference internal" href="#chatsky.core.message.Origin" title="chatsky.core.message.Origin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Origin</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -1275,7 +1276,7 @@ E.g. telegram update.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.core.message.Origin.metadata">
 <span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union['TelegramMetadata',</span> <span class="pre">Metadata]</span></em><a class="headerlink" href="#chatsky.core.message.Origin.metadata" title="Link to this definition">#</a></dt>
-<dd><p>Metadata contained in the message.</p>
+<dd><p>Various metadata of the message’s origin.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1331,8 +1332,9 @@ the update received from messenger interface API.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="chatsky.core.message.Message.metadata">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#chatsky.core.message.Message.metadata" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#chatsky.core.message.Metadata" title="chatsky.core.message.Metadata"><span class="pre">Metadata</span></a></em><a class="headerlink" href="#chatsky.core.message.Message.metadata" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="#chatsky.core.message.Origin.metadata" title="chatsky.core.message.Origin.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Origin.metadata</span></code></a> of this message.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.core.message.Message.pickle_serialize_dicts">

@@ -653,6 +653,13 @@ Note: you may need to restart the kernel to use updated packages.
 <a class="reference internal" href="../apiref/chatsky.messengers.telegram.interface.html#chatsky.messengers.telegram.interface.WebhookInterface"><span class="std std-ref">WebhookInterface</span></a>. The latter requires a webserver, so here we use long polling interface.</p>
 <p><a class="reference internal" href="../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract._AbstractTelegramInterface"><span class="std std-ref">_AbstractTelegramInterface</span></a> encapsulates the bot logic. The only required argument for a bot to run is a token. Some other parameters (such as host, port, interval, etc.) can be passed as keyword arguments (for their specs see <a class="reference internal" href="../apiref/chatsky.messengers.telegram.interface.html"><span class="doc">documentations of the child subclasses</span></a>.</p>
 <p>Either of the two interfaces connect the bot to Telegram. They can be passed directly to a Chatsky <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> instance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can also import <code class="docutils literal notranslate"><span class="pre">LongpollingInterface</span></code> under the alias of <code class="docutils literal notranslate"><span class="pre">TelegramInterface</span></code> from <code class="docutils literal notranslate"><span class="pre">chatsky.messengers</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">chatsky.messengers</span> <span class="kn">import</span> <span class="n">TelegramInterface</span>
+</pre></div>
+</div>
+</div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -661,18 +668,31 @@ Note: you may need to restart the kernel to use updated packages.
 </pre></div>
 </div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You can also import <code class="docutils literal notranslate"><span class="pre">LongpollingInterface</span></code> under the alias of <code class="docutils literal notranslate"><span class="pre">TelegramInterface</span></code> from <code class="docutils literal notranslate"><span class="pre">chatsky.messengers</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">chatsky.messengers</span> <span class="kn">import</span> <span class="n">TelegramInterface</span>
-</pre></div>
-</div>
-</div>
 <section id="Metadata-access">
 <h2>Metadata access<a class="headerlink" href="#Metadata-access" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata"><span class="std std-ref">TelegramMetadata</span></a> class is designed for convenient access to user data from Telegram. It provides easy access to public user information, including user_id, first_name, last_name, username, language_code, chat_id, chat_type, and chat_title (read further in [Telegram API documentation] (<a class="reference external" href="https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html">https://docs.python-telegram-bot.org/en/v21.10/telegram.update.html</a>)) and allows efficient
-integration into scripts. User’s metadata is saved with every request message, and can be obtained using <code class="docutils literal notranslate"><span class="pre">ctx.last_request.metadata</span></code>.</p>
-<p>We can adjust the above-stated example with Telegram-provided metadata to make the script more personified. We wrote a custom <code class="docutils literal notranslate"><span class="pre">FirstnameGreeting</span></code> response class, for further information read <a class="reference internal" href="../apiref/chatsky.responses.standard.html"><span class="doc">responses</span></a>.</p>
+<p>The <a class="reference internal" href="../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata"><span class="std std-ref">TelegramMetadata</span></a> class is designed for convenient access to user data from Telegram.</p>
+<p>It provides access to the following information:</p>
+<ol class="arabic simple">
+<li><p>Information about <a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.user.html">user</a>:</p>
+<ul class="simple">
+<li><p>user_id;</p></li>
+<li><p>first_name;</p></li>
+<li><p>last_name;</p></li>
+<li><p>username;</p></li>
+<li><p>language_code.</p></li>
+</ul>
+</li>
+<li><p>Information about <a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.chat.html">chat</a>:</p>
+<ul class="simple">
+<li><p>chat_id;</p></li>
+<li><p>chat_type;</p></li>
+<li><p>chat_title.</p></li>
+</ul>
+</li>
+</ol>
+<p>User’s metadata is saved with every request message. For example, metadata of the most recent request in the context can be accessed via <code class="docutils literal notranslate"><span class="pre">ctx.last_request.metadata</span></code>.</p>
+<p>In this tutorial we create a custom <code class="docutils literal notranslate"><span class="pre">FirstnameGreeting</span></code> response class, which references user’s name in the response message.</p>
+<p>For more information about responses, see the <a class="reference internal" href="tutorials.script.core.3_responses.html"><span class="doc">3_responses</span></a> tutorial.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>

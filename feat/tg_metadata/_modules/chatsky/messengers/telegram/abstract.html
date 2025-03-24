@@ -586,25 +586,57 @@
 <a class="viewcode-back" href="../../../../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata">[docs]</a>
 <span class="k">class</span> <span class="nc">TelegramMetadata</span><span class="p">(</span><span class="n">Metadata</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Keeps some metadata of the message</span>
+<span class="sd">    Metadata extracted from telegram updates.</span>
+
+<span class="sd">    Fields :py:attr:`user_id`, :py:attr:`first_name`, :py:attr:`last_name`, :py:attr:`username` and</span>
+<span class="sd">    :py:attr:`language_code` are extracted from the</span>
+<span class="sd">    `User object &lt;https://docs.python-telegram-bot.org/en/stable/telegram.user.html&gt;`__.</span>
+
+<span class="sd">    Fields :py:attr:`chat_id`, :py:attr:`chat_type` and :py:attr:`chat_title` are extracted from the</span>
+<span class="sd">    `Chat object &lt;https://docs.python-telegram-bot.org/en/stable/telegram.chat.html&gt;`__.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">metadata_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;telegram&quot;</span><span class="p">]</span>
     <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unique identifier for this user or bot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">first_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    User’s or bot’s first name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">last_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optional. User’s or bot’s last name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optional. User’s or bot’s username.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">language_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optional. IETF language tag of the user’s language.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">chat_id</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">chat_type</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;PRIVATE&quot;</span><span class="p">,</span> <span class="s2">&quot;GROUP&quot;</span><span class="p">,</span> <span class="s2">&quot;SUPERGROUP&quot;</span><span class="p">,</span> <span class="s2">&quot;CHANNEL&quot;</span><span class="p">],</span> <span class="n">BeforeValidator</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span> <span class="n">BeforeValidator</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">upper</span><span class="p">)</span>
-    <span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unique identifier for this chat.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chat_type</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;PRIVATE&quot;</span><span class="p">,</span> <span class="s2">&quot;GROUP&quot;</span><span class="p">,</span> <span class="s2">&quot;SUPERGROUP&quot;</span><span class="p">,</span> <span class="s2">&quot;CHANNEL&quot;</span><span class="p">],</span> <span class="n">BeforeValidator</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">upper</span><span class="p">)]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Type of chat, can be either PRIVATE, GROUP, SUPERGROUP or CHANNEL.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">chat_title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Optional. Title, for supergroups, channels and group chats.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TelegramMetadata.from_update">
 <a class="viewcode-back" href="../../../../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata.from_update">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_update</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TelegramMetadata&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract metadata from telegram Update.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">metadata_type</span><span class="o">=</span><span class="s2">&quot;telegram&quot;</span><span class="p">,</span>
             <span class="n">user_id</span><span class="o">=</span><span class="n">update</span><span class="o">.</span><span class="n">effective_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>

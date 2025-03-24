@@ -550,6 +550,7 @@
     <span class="n">pickle_validator</span><span class="p">,</span>
     <span class="n">JSONSerializableExtras</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">chatsky.core.ctx_utils</span> <span class="kn">import</span> <span class="n">ContextError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">chatsky.messengers.common.interface</span> <span class="kn">import</span> <span class="n">MessengerInterfaceWithAttachments</span>
@@ -850,6 +851,10 @@
 <div class="viewcode-block" id="Metadata">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.message.html#chatsky.core.message.Metadata">[docs]</a>
 <span class="k">class</span> <span class="nc">Metadata</span><span class="p">(</span><span class="n">DataModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for metadata stored in :py:class:`Origin`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">pass</span></div>
 
 
@@ -872,7 +877,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;TelegramMetadata&quot;</span><span class="p">,</span> <span class="n">Metadata</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Metadata</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Metadata contained in the message.</span>
+<span class="sd">    Various metadata of the message&#39;s origin.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Origin.pickle_serialize_message">
@@ -944,7 +949,12 @@
     <span class="n">origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Origin</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metadata</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :py:attr:`Origin.metadata` of this message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ContextError</span><span class="p">(</span><span class="s2">&quot;Cannot get metadata of message without `origin` field.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">metadata</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># this allows initializing Message with string as positional argument</span>
