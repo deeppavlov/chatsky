@@ -1,19 +1,10 @@
 import os
 import pytest
 
-from chatsky.ml.models.remote_api.rasa_model import RasaModel, rasa_available
+from chatsky.ml.models.rasa_model import RasaModel, rasa_available
 from tests.context_storages.test_dbs import ping_localhost
 
 RASA_ACTIVE = ping_localhost(5005)
-
-
-@pytest.fixture(scope="session")
-def testing_model():
-    rasa_url, api_key = "http://localhost:5005", os.getenv("RASA_API_KEY")
-    if rasa_url and api_key:
-        yield RasaModel(model=rasa_url, api_key=api_key, namespace_key="rasa")
-    else:
-        yield None
 
 
 @pytest.fixture(scope="session")

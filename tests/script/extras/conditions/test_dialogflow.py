@@ -10,10 +10,10 @@ from chatsky.ml.models.google_dialogflow_model import (
 @pytest.fixture(scope="session")
 def testing_async_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
-    yield GoogleDialogFlowModel.from_file(filename='okay.json')
-    # if gdf_json:
-    # else:
-    #     yield None
+    if gdf_json:
+        yield GoogleDialogFlowModel.from_file(filename=gdf_json)
+    else:
+        yield None
 
 # @pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
 # @pytest.mark.skipif(

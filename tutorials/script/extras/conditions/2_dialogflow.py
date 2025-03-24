@@ -50,7 +50,7 @@ script = {
         TRANSITIONS: [
             Tr(
                 cnd=HasLabel(
-                    label="Default Welcome Intent", model_name="gdf_model"
+                    label="Default Welcome Intent", pipeline_model="gdf_model"
                 ),
                 dst=("root", "finish"),
                 priority=1.2,

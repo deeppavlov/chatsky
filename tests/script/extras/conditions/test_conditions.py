@@ -1,6 +1,6 @@
 import pytest
 from chatsky import Context, Message
-from chatsky.conditions.ml import HasLabel, HasMatch
+from chatsky.conditions.ml import HasLabel
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.core.node_label import AbsoluteNodeLabel
 from chatsky.core.script import Node
@@ -46,8 +46,8 @@ def context(pipeline, context_factory):
 async def test_conditions(context, pipeline):
     global predict_counter
     predict_counter = 0
-    assert await HasLabel(label="label_a", model_name="test_model")(context) is False
-    assert await HasLabel(label="label_b", model_name="test_model")(context) is True
+    assert await HasLabel(label="label_a", pipeline_model="test_model")(context) is False
+    assert await HasLabel(label="label_b", pipeline_model="test_model")(context) is True
     # TODO: check if predict was called only once
     assert predict_counter == 1
 

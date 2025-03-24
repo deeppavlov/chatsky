@@ -261,6 +261,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
+        
+        # reinit labels for ml models
+        ctx.framework_data.models_labels = {}
 
         ctx.framework_data.pipeline = self
         initialize_service_states(ctx, self.services_pipeline)
