@@ -6,7 +6,7 @@ The following tutorial shows basic usage of slots extraction
 module packaged with `chatsky`.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

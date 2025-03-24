@@ -12,7 +12,7 @@ that can be used for Pipeline testing is presented.
 Let's do all the necessary imports from Chatsky:
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 from chatsky import (

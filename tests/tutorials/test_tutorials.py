@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 
 from docs.source.utils.notebook import InstallationCell
 
-
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
@@ -30,9 +29,14 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 
     with open(tutorial_path, "w") as fd:
         fd.write(tutorial_source_code)
-
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        venv.run(f"python -m pip install {deps}".replace("chatsky", "."), check_rc=True, cd=os.getcwd())
+        venv.run(
+            InstallationCell.replace_versions(
+                f"python -m pip install {deps[0]}".replace("=={chatsky}", "").replace("chatsky", ".")
+            ),
+            check_rc=True,
+            cd=os.getcwd(),
+        )
 
     venv.run(f"python {tutorial_path}", check_rc=True)
 
@@ -41,6 +45,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 @pytest.mark.slow
 @pytest.mark.docker
 @pytest.mark.no_coverage
+@pytest.mark.needs_dependencies
 def test_tutorials(chatsky_tutorial_py_file, virtualenv):
     with open(chatsky_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()

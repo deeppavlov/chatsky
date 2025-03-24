@@ -36,7 +36,7 @@ from chatsky.slots.slots import (
     ],
 )
 async def test_regexp(user_request, regexp, expected, context):
-    context.add_request(user_request)
+    context.requests[1] = user_request
     slot = RegexpSlot(regexp=regexp)
     result = await slot.get_value(context)
     assert result == expected
@@ -58,7 +58,7 @@ async def test_regexp(user_request, regexp, expected, context):
     ],
 )
 async def test_function(user_request, func, expected, context):
-    context.add_request(user_request)
+    context.requests[1] = user_request
     slot = FunctionSlot(func=func)
     result = await slot.get_value(context)
     assert result == expected
@@ -125,7 +125,7 @@ async def test_function_exception(context):
     ],
 )
 async def test_group_slot_extraction(user_request, slot, expected, is_extracted, context):
-    context.add_request(user_request)
+    context.requests[1] = user_request
     result = await slot.get_value(context)
     assert result == expected
     assert result.__slot_extracted__ == is_extracted

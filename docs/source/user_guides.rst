@@ -9,6 +9,12 @@ those include but are not limited to: dialog graph creation, specifying start an
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
 
+:doc:`LLM Integration guide <./user_guides/llm_integration>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The LLM Integration guide covers functionality for incorporating LLMs into the script for
+generating responses and checking conditions.
+
 :doc:`Slot extraction <./user_guides/slot_extraction>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -48,6 +54,7 @@ objects -- from yaml or json files.
    :hidden:
 
    user_guides/basic_conceptions
+   user_guides/llm_integration
    user_guides/slot_extraction
    user_guides/context_guide
    user_guides/superset_guide

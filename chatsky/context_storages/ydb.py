@@ -10,231 +10,342 @@ with Yandex Cloud services using python. This allows Chatsky to easily integrate
 take advantage of the scalability and high-availability features provided by the service.
 """
 
-import asyncio
-import os
-from typing import Hashable
+from asyncio import gather
+from os.path import join
+from typing import Awaitable, Callable, Set, Tuple, List, Optional
 from urllib.parse import urlsplit
 
-
-from chatsky.core import Context
-
-from .database import DBContextStorage
-from .protocol import get_protocol_install_suggestion
-
 try:
-    import ydb
-    import ydb.aio
+    from ydb import (
+        SerializableReadWrite,
+        SchemeError,
+        TableDescription,
+        Column,
+        OptionalType,
+        PrimitiveType,
+    )
+    from ydb.aio import Driver, SessionPool
+    from ydb.table import Session
 
     ydb_available = True
 except ImportError:
     ydb_available = False
+
+from chatsky.core.ctx_utils import ContextMainInfo
+from .database import DBContextStorage, _SUBSCRIPT_DICT, NameConfig
+from .protocol import get_protocol_install_suggestion
 
 
 class YDBContextStorage(DBContextStorage):
     """
     Version of the :py:class:`.DBContextStorage` for YDB.
 
-    :param path: Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
-        instead of forward slashes '/' in the file path.
-    :param table_name: The name of the table to use.
+    `CONTEXT` table is represented by `contexts` table.
+    Columns of the table are: `id`, `current_turn_id`, `created_at` `updated_at`, `misc` and `framework_data`.
+
+    `TURNS` table is represented by `turns` table.
+    olumns of the table are: `id`, `key`, `label`, `request` and `response`.
+
+    :param path: Standard sqlalchemy URI string. One of `grpc` or `grpcs` can be chosen as a protocol.
+        Example: `grpc://localhost:2134/local`.
+        NB! Do not forget to provide credentials in environmental variables
+        or set `YDB_ANONYMOUS_CREDENTIALS` variable to `1`!
+    :param rewrite_existing: Whether `TURNS` modified locally should be updated in database or not.
+    :param partial_read_config: Dictionary of subscripts for all possible turn items.
+    :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
+    :param timeout: Waiting timeout for the database driver.
     """
 
-    def __init__(self, path: str, table_name: str = "contexts", timeout=5):
-        DBContextStorage.__init__(self, path)
+    _LIMIT_VAR = "limit"
+    _KEY_VAR = "key"
+
+    is_concurrent: bool = True
+
+    def __init__(
+        self,
+        path: str,
+        rewrite_existing: bool = False,
+        partial_read_config: Optional[_SUBSCRIPT_DICT] = None,
+        table_name_prefix: str = "chatsky_table",
+        timeout: int = 5,
+    ):
+        DBContextStorage.__init__(self, path, rewrite_existing, partial_read_config)
+
         protocol, netloc, self.database, _, _ = urlsplit(path)
-        self.endpoint = "{}://{}".format(protocol, netloc)
-        self.table_name = table_name
         if not ydb_available:
             install_suggestion = get_protocol_install_suggestion("grpc")
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
-        self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, self.table_name))
 
-    async def set_item_async(self, key: Hashable, value: Context):
-        value = Context.model_validate(value)
+        self.table_prefix = table_name_prefix
+        self._timeout = timeout
+        self._endpoint = f"{protocol}://{netloc}"
 
-        async def callee(session):
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Utf8;
-                DECLARE $queryContext AS Json;
-                UPSERT INTO {}
-                (
-                    id,
-                    context
+    async def _connect(self) -> None:
+        self._driver = Driver(endpoint=self._endpoint, database=self.database)
+        client_settings = self._driver.table_client._table_client_settings.with_allow_truncated_result(True)
+        self._driver.table_client._table_client_settings = client_settings
+        await self._driver.wait(fail_fast=True, timeout=self._timeout)
+
+        self.pool = SessionPool(self._driver, size=10)
+        self.main_table = f"{self.table_prefix}_{NameConfig._main_table}"
+        self.turns_table = f"{self.table_prefix}_{NameConfig._turns_table}"
+
+        if not await self._does_table_exist(self.main_table):
+            await self._create_main_table(self.main_table)
+        if not await self._does_table_exist(self.turns_table):
+            await self._create_turns_table(self.turns_table)
+
+    async def _does_table_exist(self, table_name: str) -> bool:
+        async def callee(session: Session) -> None:
+            await session.describe_table(join(self.database, table_name))
+
+        try:
+            await self.pool.retry_operation(callee)
+            return True
+        except SchemeError:
+            return False
+
+    async def _create_main_table(self, table_name: str) -> None:
+        async def callee(session: Session) -> None:
+            await session.create_table(
+                "/".join([self.database, table_name]),
+                TableDescription()
+                .with_column(Column(NameConfig._id_column, PrimitiveType.Utf8))
+                .with_column(Column(NameConfig._current_turn_id_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._created_at_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._updated_at_column, PrimitiveType.Uint64))
+                .with_column(Column(NameConfig._misc_column, PrimitiveType.String))
+                .with_column(Column(NameConfig._framework_data_column, PrimitiveType.String))
+                .with_primary_key(NameConfig._id_column),
+            )
+
+        await self.pool.retry_operation(callee)
+
+    async def _create_turns_table(self, table_name: str) -> None:
+        async def callee(session: Session) -> None:
+            await session.create_table(
+                "/".join([self.database, table_name]),
+                TableDescription()
+                .with_column(Column(NameConfig._id_column, PrimitiveType.Utf8))
+                .with_column(Column(NameConfig._key_column, PrimitiveType.Uint32))
+                .with_column(Column(NameConfig._labels_field, OptionalType(PrimitiveType.String)))
+                .with_column(Column(NameConfig._requests_field, OptionalType(PrimitiveType.String)))
+                .with_column(Column(NameConfig._responses_field, OptionalType(PrimitiveType.String)))
+                .with_primary_keys(NameConfig._id_column, NameConfig._key_column),
+            )
+
+        await self.pool.retry_operation(callee)
+
+    async def _load_main_info(self, ctx_id: str) -> Optional[ContextMainInfo]:
+        async def callee(session: Session) -> Optional[ContextMainInfo]:
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                SELECT {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column}
+                FROM {self.main_table}
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column};
+                """  # noqa: E501
+            result_sets = await session.transaction().execute(
+                await session.prepare(query),
+                {
+                    f"${NameConfig._id_column}": ctx_id,
+                },
+                commit_tx=True,
+            )
+            return (
+                ContextMainInfo.model_validate(
+                    {f: result_sets[0].rows[0][f] for f in NameConfig.get_context_main_fields}
                 )
-                VALUES
-                (
-                    $queryId,
-                    $queryContext
-                );
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
-
-            await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                {"$queryId": str(key), "$queryContext": value.model_dump_json()},
-                commit_tx=True,
+                if len(result_sets[0].rows) > 0
+                else None
             )
 
         return await self.pool.retry_operation(callee)
 
-    async def get_item_async(self, key: Hashable) -> Context:
-        async def callee(session):
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Utf8;
-                SELECT
-                    id,
-                    context
-                FROM {}
-                WHERE id = $queryId;
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
+    async def _update_context(
+        self,
+        ctx_id: str,
+        ctx_info: Optional[ContextMainInfo],
+        field_info: List[Tuple[str, List[Tuple[int, Optional[bytes]]]]],
+    ) -> None:
+        async def callee(session: Session) -> None:
+            transaction = await session.transaction(SerializableReadWrite()).begin()
+            if ctx_info is not None:
+                ctx_info_dump = ctx_info.model_dump(mode="python")
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${NameConfig._id_column} AS Utf8;
+                    DECLARE ${NameConfig._current_turn_id_column} AS Uint64;
+                    DECLARE ${NameConfig._created_at_column} AS Uint64;
+                    DECLARE ${NameConfig._updated_at_column} AS Uint64;
+                    DECLARE ${NameConfig._misc_column} AS String;
+                    DECLARE ${NameConfig._framework_data_column} AS String;
+                    UPSERT INTO {self.main_table} ({NameConfig._id_column}, {NameConfig._current_turn_id_column}, {NameConfig._created_at_column}, {NameConfig._updated_at_column}, {NameConfig._misc_column}, {NameConfig._framework_data_column})
+                    VALUES (${NameConfig._id_column}, ${NameConfig._current_turn_id_column}, ${NameConfig._created_at_column}, ${NameConfig._updated_at_column}, ${NameConfig._misc_column}, ${NameConfig._framework_data_column});
+                    """  # noqa: E501
+                await transaction.execute(
+                    await session.prepare(query),
+                    {
+                        f"${NameConfig._id_column}": ctx_id,
+                    }
+                    | {f"${f}": ctx_info_dump[f] for f in NameConfig.get_context_main_fields},
+                )
+            for field_name, items in field_info:
+                declare, prepare, values = list(), dict(), list()
+                for i, (k, v) in enumerate(items):
+                    declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
+                    prepare.update({f"${self._KEY_VAR}_{i}": k})
+                    if v is not None:
+                        declare += [f"DECLARE ${field_name}_{i} AS String;"]
+                        prepare.update({f"${field_name}_{i}": v})
+                        value_param = f"${field_name}_{i}"
+                    else:
+                        value_param = "NULL"
+                    values += [f"(${NameConfig._id_column}, ${self._KEY_VAR}_{i}, {value_param})"]
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${NameConfig._id_column} AS Utf8;
+                    {" ".join(declare)}
+                    UPSERT INTO {self.turns_table} ({NameConfig._id_column}, {NameConfig._key_column}, {field_name})
+                    VALUES {", ".join(values)};
+                    """  # noqa: E501
+                await transaction.execute(
+                    await session.prepare(query),
+                    {
+                        f"${NameConfig._id_column}": ctx_id,
+                        **prepare,
+                    },
+                )
+            await transaction.commit()
 
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                {
-                    "$queryId": str(key),
-                },
-                commit_tx=True,
-            )
-            if result_sets[0].rows:
-                return Context.model_validate_json(result_sets[0].rows[0].context)
-            else:
-                raise KeyError
+        await self.pool.retry_operation(callee)
 
-        return await self.pool.retry_operation(callee)
+    async def _delete_context(self, ctx_id: str) -> None:
+        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
+            async def callee(session: Session) -> None:
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${NameConfig._id_column} AS Utf8;
+                    DELETE FROM {table_name}
+                    WHERE {NameConfig._id_column} = ${NameConfig._id_column};
+                    """  # noqa: E501
+                await session.transaction().execute(
+                    await session.prepare(query),
+                    {
+                        f"${NameConfig._id_column}": ctx_id,
+                    },
+                    commit_tx=True,
+                )
 
-    async def del_item_async(self, key: Hashable):
-        async def callee(session):
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Utf8;
-                DELETE
-                FROM {}
-                WHERE
-                    id = $queryId
-                ;
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
+            return callee
 
-            await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                {"$queryId": str(key)},
-                commit_tx=True,
-            )
-
-        return await self.pool.retry_operation(callee)
-
-    async def contains_async(self, key: Hashable) -> bool:
-        async def callee(session):
-            # new transaction in serializable read write mode
-            # if query successfully completed you will get result sets.
-            # otherwise exception will be raised
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Utf8;
-                SELECT
-                    id,
-                    context
-                FROM {}
-                WHERE id = $queryId;
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
-
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                {
-                    "$queryId": str(key),
-                },
-                commit_tx=True,
-            )
-            return len(result_sets[0].rows) > 0
-
-        return await self.pool.retry_operation(callee)
-
-    async def len_async(self) -> int:
-        async def callee(session):
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                SELECT
-                    COUNT(*) as cnt
-                FROM {}
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
-
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                commit_tx=True,
-            )
-            return result_sets[0].rows[0].cnt
-
-        return await self.pool.retry_operation(callee)
-
-    async def clear_async(self):
-        async def callee(session):
-            query = """
-                PRAGMA TablePathPrefix("{}");
-                DECLARE $queryId AS Utf8;
-                DELETE
-                FROM {}
-                ;
-                """.format(
-                self.database, self.table_name
-            )
-            prepared_query = await session.prepare(query)
-
-            await session.transaction(ydb.SerializableReadWrite()).execute(
-                prepared_query,
-                {},
-                commit_tx=True,
-            )
-
-        return await self.pool.retry_operation(callee)
-
-
-async def _init_drive(timeout: int, endpoint: str, database: str, table_name: str):
-    driver = ydb.aio.Driver(endpoint=endpoint, database=database)
-    await driver.wait(fail_fast=True, timeout=timeout)
-
-    pool = ydb.aio.SessionPool(driver, size=10)
-
-    if not await _is_table_exists(pool, database, table_name):  # create table if it does not exist
-        await _create_table(pool, database, table_name)
-    return driver, pool
-
-
-async def _is_table_exists(pool, path, table_name) -> bool:
-    try:
-
-        async def callee(session):
-            await session.describe_table(os.path.join(path, table_name))
-
-        await pool.retry_operation(callee)
-        return True
-    except ydb.SchemeError:
-        return False
-
-
-async def _create_table(pool, path, table_name):
-    async def callee(session):
-        await session.create_table(
-            "/".join([path, table_name]),
-            ydb.TableDescription()
-            .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
-            .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
-            .with_primary_key("id"),
+        await gather(
+            self.pool.retry_operation(construct_callee(self.main_table)),
+            self.pool.retry_operation(construct_callee(self.turns_table)),
         )
 
-    return await pool.retry_operation(callee)
+    async def _load_field_latest(self, ctx_id: str, field_name: str) -> List[Tuple[int, bytes]]:
+        async def callee(session: Session) -> List[Tuple[int, bytes]]:
+            declare, prepare, limit, key = list(), dict(), "", ""
+            if isinstance(self._subscripts[field_name], int):
+                declare += [f"DECLARE ${self._LIMIT_VAR} AS Uint64;"]
+                prepare.update({f"${self._LIMIT_VAR}": self._subscripts[field_name]})
+                limit = f"LIMIT ${self._LIMIT_VAR}"
+            elif isinstance(self._subscripts[field_name], Set):
+                values = list()
+                for i, k in enumerate(self._subscripts[field_name]):
+                    declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
+                    prepare.update({f"${self._KEY_VAR}_{i}": k})
+                    values += [f"${self._KEY_VAR}_{i}"]
+                key = f"AND {NameConfig._key_column} IN ({', '.join(values)})"
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                {" ".join(declare)}
+                SELECT {NameConfig._key_column}, {field_name}
+                FROM {self.turns_table}
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL {key}
+                ORDER BY {NameConfig._key_column} DESC {limit};
+                """  # noqa: E501
+            result_sets = await session.transaction().execute(
+                await session.prepare(query),
+                {
+                    f"${NameConfig._id_column}": ctx_id,
+                    **prepare,
+                },
+                commit_tx=True,
+            )
+            return (
+                [(e[NameConfig._key_column], e[field_name]) for e in result_sets[0].rows]
+                if len(result_sets[0].rows) > 0
+                else list()
+            )
+
+        return await self.pool.retry_operation(callee)
+
+    async def _load_field_keys(self, ctx_id: str, field_name: str) -> List[int]:
+        async def callee(session: Session) -> List[int]:
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                SELECT {NameConfig._key_column}
+                FROM {self.turns_table}
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL;
+                """  # noqa: E501
+            result_sets = await session.transaction().execute(
+                await session.prepare(query),
+                {
+                    f"${NameConfig._id_column}": ctx_id,
+                },
+                commit_tx=True,
+            )
+            return [e[NameConfig._key_column] for e in result_sets[0].rows] if len(result_sets[0].rows) > 0 else list()
+
+        return await self.pool.retry_operation(callee)
+
+    async def _load_field_items(self, ctx_id: str, field_name: str, keys: List[int]) -> List[Tuple[int, bytes]]:
+        async def callee(session: Session) -> List[Tuple[int, bytes]]:
+            declare, prepare = list(), dict()
+            for i, k in enumerate(keys):
+                declare += [f"DECLARE ${self._KEY_VAR}_{i} AS Uint32;"]
+                prepare.update({f"${self._KEY_VAR}_{i}": k})
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                DECLARE ${NameConfig._id_column} AS Utf8;
+                {" ".join(declare)}
+                SELECT {NameConfig._key_column}, {field_name}
+                FROM {self.turns_table}
+                WHERE {NameConfig._id_column} = ${NameConfig._id_column} AND {field_name} IS NOT NULL
+                AND {NameConfig._key_column} IN ({", ".join(prepare.keys())});
+                """  # noqa: E501
+            result_sets = await session.transaction().execute(
+                await session.prepare(query),
+                {
+                    f"${NameConfig._id_column}": ctx_id,
+                    **prepare,
+                },
+                commit_tx=True,
+            )
+            return (
+                [(e[NameConfig._key_column], e[field_name]) for e in result_sets[0].rows]
+                if len(result_sets[0].rows) > 0
+                else list()
+            )
+
+        return await self.pool.retry_operation(callee)
+
+    async def _clear_all(self) -> None:
+        def construct_callee(table_name: str) -> Callable[[Session], Awaitable[None]]:
+            async def callee(session: Session) -> None:
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DELETE FROM {table_name};
+                    """  # noqa: E501
+                await session.transaction().execute(await session.prepare(query), dict(), commit_tx=True)
+
+            return callee
+
+        await gather(
+            self.pool.retry_operation(construct_callee(self.main_table)),
+            self.pool.retry_operation(construct_callee(self.turns_table)),
+        )

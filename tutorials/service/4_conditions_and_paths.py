@@ -8,7 +8,7 @@ and how to add a condition for component execution.
 [API ref for service conditions](%doclink(api,conditions.service))
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import logging
@@ -98,7 +98,7 @@ At any time each component has a certain status:
 * `FAILED` - Component execution failed.
 
 For more information, see
-%mddoclink(api,core.context,FrameworkData.service_states).
+%mddoclink(api,core.ctx_utils,FrameworkData.service_states).
 
 ### ServiceFinished condition
 

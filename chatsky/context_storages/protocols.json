@@ -1,18 +1,18 @@
 {
     "shelve": {
-        "module": "shelve",
+        "module": "file",
         "class": "ShelveContextStorage",
         "slug": "shelve",
         "uri_example": "shelve://path_to_the_file/file_name"
     },
     "json": {
-        "module": "json",
+        "module": "file",
         "class": "JSONContextStorage",
         "slug": "json",
         "uri_example": "json://path_to_the_file/file_name"
     },
     "pickle": {
-        "module": "pickle",
+        "module": "file",
         "class": "PickleContextStorage",
         "slug": "pickle",
         "uri_example": "pickle://path_to_the_file/file_name"

@@ -6,7 +6,7 @@ This tutorial shows how to use an API endpoint
 created in the FastAPI tutorial in load testing.
 """
 
-# %pip install chatsky locust
+# %pip install chatsky=={chatsky} locust=={locust}
 
 # %% [markdown]
 """

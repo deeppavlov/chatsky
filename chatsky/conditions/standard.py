@@ -202,7 +202,7 @@ class CheckLastLabels(BaseCondition):
         super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
 
     async def call(self, ctx: Context) -> bool:
-        labels = list(ctx.labels.values())[-self.last_n_indices :]  # noqa: E203
+        labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
         for label in labels:
             if label.flow_name in self.flow_labels or label in self.labels:
                 return True

@@ -12,7 +12,7 @@ library are used for accessing telegram API in polling mode.
 Telegram API token is required to access telegram API.
 """
 
-# %pip install chatsky[telegram]
+# %pip install chatsky[telegram]=={chatsky}
 
 # %%
 import os
@@ -25,8 +25,12 @@ from chatsky import (
     conditions as cnd,
     destinations as dst,
 )
+
+from chatsky.core.message import MessageInitTypes
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.utils.testing.common import is_interactive_mode
+from chatsky.core.context import Context
+from chatsky.core.script_function import BaseResponse
 
 
 # %% [markdown]
@@ -49,7 +53,6 @@ argument for a bot to run is a token. Some other parameters
 Either of the two interfaces connect the bot to Telegram.
 They can be passed directly to a Chatsky `Pipeline` instance.
 
-
 <div class="alert alert-info">
 
 Note
@@ -63,6 +66,47 @@ from chatsky.messengers import TelegramInterface
 
 </div>
 """
+# %%
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
+
+# %% [markdown]
+"""
+## Metadata access
+
+The %mddoclink(api,messengers.telegram.abstract,TelegramMetadata) class
+is designed for convenient access to user data from Telegram.
+
+It provides access to the following information:
+
+1. Information about [user](
+https://docs.python-telegram-bot.org/en/stable/telegram.user.html):
+    - user_id;
+    - first_name;
+    - last_name;
+    - username;
+    - language_code.
+2. Information about [chat](
+https://docs.python-telegram-bot.org/en/stable/telegram.chat.html):
+    - chat_id;
+    - chat_type;
+    - chat_title.
+
+User's metadata is saved with every request message.
+For example, metadata of the most recent request in the context can be
+accessed via `ctx.last_request.metadata`.
+
+In this tutorial we create a custom `FirstnameGreeting` response class, which
+references user's name in the response message.
+
+For more information about responses, see the
+%mddoclink(tutorial,script.core.3_responses) tutorial.
+"""
+
+
+# %%
+class FirstnameGreeting(BaseResponse):
+    async def call(self, ctx: Context) -> MessageInitTypes:
+        return f"Hi, {ctx.last_request.metadata.first_name}!"
 
 
 # %%
@@ -74,7 +118,7 @@ script = {
             ],
         },
         "greeting_node": {
-            RESPONSE: "Hi",
+            RESPONSE: FirstnameGreeting(),
             TRANSITIONS: [Tr(dst=dst.Current())],
         },
         "fallback_node": {
@@ -85,10 +129,6 @@ script = {
         },
     }
 }
-
-
-# %%
-interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%

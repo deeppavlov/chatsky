@@ -11,7 +11,7 @@ For API ref, see:
 * %mddoclink(api,core.service.extra,AfterHandler).
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import asyncio

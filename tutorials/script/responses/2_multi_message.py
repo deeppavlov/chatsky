@@ -7,7 +7,7 @@ This might be useful if you want Chatsky Pipeline to send `response` candidates
 to the messenger interface instead of a final response.
 """
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 

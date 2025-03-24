@@ -4,7 +4,7 @@
 """
 
 
-# %pip install chatsky
+# %pip install chatsky=={chatsky}
 
 # %%
 import re
