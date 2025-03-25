@@ -121,8 +121,8 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
                     else:
                         raise RuntimeError(f"Update {update} type unknown!")
 
-    def run_polling(self, poll_interval: float, timeout: int, allowed_updates: List[str]) -> None:
+    def run_polling(self, *_, **__) -> None:
         return self._run_bot()
 
-    def run_webhook(self, listen: str, port: str, allowed_updates: List[str]) -> None:
+    def run_webhook(self, *_, **__) -> None:
         return self._run_bot()
