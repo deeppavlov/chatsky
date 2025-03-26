@@ -8,12 +8,12 @@
 # %%
 import os
 
-from dff.messengers.common.interface import CLIMessengerInterface
-from dff.script import conditions as cnd
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import PollingTelegramInterface
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import is_interactive_mode
+from chatsky.messengers import CLIMessengerInterface
+from chatsky import conditions as cnd
+from chatsky.core import RESPONSE, TRANSITIONS, Message
+from chatsky.messengers import TelegramInterface
+from chatsky.core import Pipeline
+from chatsky.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
@@ -25,26 +25,26 @@ from dff.utils.testing.common import is_interactive_mode
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"greeting_node": cnd.ExactMatch(Message("/start"))},
         },
         "greeting_node": {
             RESPONSE: Message("Check out responses from different interfaces!"),
             TRANSITIONS: {
-                "console_node": cnd.from_interface(CLIMessengerInterface),
-                "telegram_node": cnd.from_interface(PollingTelegramInterface)
+                "console_node": cnd.FromInterface(CLIMessengerInterface),
+                "telegram_node": cnd.FromInterface(TelegramInterface)
             },
         },
         "console_node": {
             RESPONSE: Message("Hi from CLI!"),
-            TRANSITIONS: {"greeting_node": cnd.true()}
+            TRANSITIONS: {"greeting_node": True}
         },
         "telegram_node": {
             RESPONSE: Message("Hi from Telegram!"),
-            TRANSITIONS: {"greeting_node": cnd.true()}
+            TRANSITIONS: {"greeting_node": True}
         },
         "fallback_node": {
             RESPONSE: Message("Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"greeting_node": cnd.ExactMatch(Message("/start"))},
         },
     }
 }
@@ -58,7 +58,7 @@ happy_path = (
 
 
 # %%
-telegram_interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
+telegram_interface = TelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 console_interface = CLIMessengerInterface()
 

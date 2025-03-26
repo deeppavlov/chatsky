@@ -232,3 +232,14 @@ class HasCallbackQuery(BaseCondition):
                 if attachment.query_string == self.query_string:
                     return True
         return False
+
+
+class FromInterface(BaseCondition):
+
+    iface: str
+
+    def __init__(self, iface: str):
+        super().__init__(iface=iface)
+
+    async def call(self, ctx: Context) -> bool:
+        return ctx.last_request.origin.interface == self.iface

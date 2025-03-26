@@ -271,6 +271,7 @@ class Origin(BaseModel):
     """
     Name of the interface that produced the message.
     """
+    forwarded: Optional[str] = None
 
     @field_serializer("message", when_used="json")
     def pickle_serialize_message(self, value):

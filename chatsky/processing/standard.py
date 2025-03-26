@@ -63,14 +63,14 @@ class ForwardRequest(BaseProcessing, abc.ABC):
                 logger.error(f"Forwarding to the messenger interface '{forward_id}' of type {type(forward_iface).__name__} is impossible!")
             else:
                 forward_request = ctx.last_response.model_copy()
-                forward_request.misc["forwarded"] = ctx.id
+                forward_request.origin.forwarded = ctx.id
                 await forward_iface.on_request_async(forward_request, self.target_context_id(ctx))
 
 
 class SaveRequestInfo(BaseProcessing):
     async def call(self, ctx: Context) -> None:
         last_request = ctx.last_request
-        last_forwarded = last_request.misc.get("forward", None)
+        last_forwarded = last_request.origin.forwarded
         if last_forwarded is not None:
             ctx.framework_data.last_forward_from = (ctx.last_request.origin.interface, last_forwarded)
 

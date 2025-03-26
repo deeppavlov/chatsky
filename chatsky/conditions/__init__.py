@@ -8,6 +8,7 @@ from chatsky.conditions.standard import (
     CheckLastLabels,
     Not,
     HasCallbackQuery,
+    FromInterface,
 )
 from chatsky.conditions.slots import SlotsExtracted
 from chatsky.conditions.service import ServiceFinished
