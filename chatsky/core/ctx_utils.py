@@ -66,7 +66,14 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
     transition: Optional[Transition] = Field(default=None, exclude=True)
-    "Stores last transition's info."
+    """
+    Stores transition made during this turn.
+
+    Can be ``None`` if either is true:
+    
+    - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
+    - no valid transition has been found (i.e. transitioned to fallback node).
+    """
 
 
 class ContextMainInfo(BaseModel):
