@@ -70,7 +70,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     Stores transition made during this turn.
 
     Can be ``None`` if either is true:
-    
+
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
