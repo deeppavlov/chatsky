@@ -8,5 +8,5 @@ Processing
 .. autosummary::
    :toctree:
 
-   chatsky.processing.slots
    chatsky.processing.standard
+   chatsky.processing.slots

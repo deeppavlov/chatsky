@@ -62,8 +62,8 @@
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Utils" href="chatsky.core.utils.html" />
-    <link rel="prev" title="Context Dict" href="chatsky.core.ctx_dict.html" />
+    <link rel="next" title="Pipeline" href="chatsky.core.pipeline.html" />
+    <link rel="prev" title="Utils" href="chatsky.core.utils.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.10" />
@@ -485,6 +485,8 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_conditions.html">Conditions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.standard.html">Standard Conditions</a></li>
 
 
@@ -494,8 +496,6 @@
 
 
 
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.service.html">Service Conditions</a></li>
 
@@ -509,14 +509,14 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.ydb.html">Yandex DB</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.sql.html">SQL</a></li>
 
 
 
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.mongo.html">Mongo</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.file.html">File</a></li>
 
@@ -526,65 +526,19 @@
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.memory.html">Memory</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.ydb.html">Yandex DB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.mongo.html">Mongo</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.redis.html">Redis</a></li>
 
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index_core.html">Core</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.transition.html">Transition</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_utils.html">Context Utils</a></li>
 
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_function.html">Script Function</a></li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script.html">Script</a></li>
-
-
-
-
-
-
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
-
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.utils.html">Utils</a></li>
 
 
 
@@ -610,19 +564,74 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.utils.html">Utils</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.transition.html">Transition</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script.html">Script</a></li>
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_function.html">Script Function</a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
 
 
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_core.service.html">Core.Service</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.service.html">Service</a></li>
+
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.types.html">Types</a></li>
 
 
 
 
 
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.group.html">Service Group</a></li>
 
@@ -632,24 +641,16 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.service.html">Service</a></li>
-
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_db_benchmark.html">DB Benchmark</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.basic_config.html">Basic Config</a></li>
 
 
 
 
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.benchmark.html">Context storage benchmarking</a></li>
 
@@ -673,10 +674,6 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_development_utils.html">Development Utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.extra_field_helpers.html">Extra field helpers</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.json_serialization.html">Serialization</a></li>
 
 
@@ -686,18 +683,21 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.extra_field_helpers.html">Extra field helpers</a></li>
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_llm_integration.html">LLM Integration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM responses.</a></li>
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.methods.html">LLM methods</a></li>
 
 
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM responses.</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.filters.html">Filters</a></li>
 
@@ -706,47 +706,52 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
+
 
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_messenger_interfaces.html">Messenger Interfaces</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.console.html"><code class="docutils literal notranslate"><span class="pre">CLIMessengerInterface</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.interface.html">Telegram Interfaces</a></li>
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.interface.html">Message Interfaces</a></li>
 
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.console.html"><code class="docutils literal notranslate"><span class="pre">CLIMessengerInterface</span></code></a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_processing.html">Processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.processing.standard.html">Standard Processing</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.processing.slots.html">Slot Processing</a></li>
 
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.processing.standard.html">Standard Processing</a></li>
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_responses.html">Responses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.slots.html">Slot Responses</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.llm.html">LLM responses</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.standard.html">Standard Responses</a></li>
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.slots.html">Slot Responses</a></li>
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_slots.html">Slots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.slots.slots.html">Slots</a></li>
 
 
@@ -761,24 +766,10 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_stats.html">Stats</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.instrumentor.html">Instrumentor</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.stats.default_extractors.html">Default Extractors</a></li>
-
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
-
-
-
 
 
 
@@ -795,6 +786,17 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
+
+
+
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.instrumentor.html">Instrumentor</a></li>
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_testing_utils.html">Testing Utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -804,13 +806,13 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.common.html">Common</a></li>
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.cleanup_db.html">Cleanup DB</a></li>
 
 
 
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.common.html">Common</a></li>
 
 
 </ul>
@@ -1247,6 +1249,13 @@ so you should send them separately by putting them directly in <a class="referen
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="chatsky.core.message.Metadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Metadata" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chatsky.core.message.DataModel" title="chatsky.core.message.DataModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataModel</span></code></a></p>
+<p>Base class for metadata stored in <a class="reference internal" href="#chatsky.core.message.Origin" title="chatsky.core.message.Origin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Origin</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="chatsky.core.message.Origin">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Origin" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
@@ -1262,6 +1271,12 @@ E.g. telegram update.</p>
 <dt class="sig sig-object py" id="chatsky.core.message.Origin.interface">
 <span class="sig-name descname"><span class="pre">interface</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#chatsky.core.message.Origin.interface" title="Link to this definition">#</a></dt>
 <dd><p>Name of the interface that produced the message.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.message.Origin.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union['TelegramMetadata',</span> <span class="pre">Metadata]</span></em><a class="headerlink" href="#chatsky.core.message.Origin.metadata" title="Link to this definition">#</a></dt>
+<dd><p>Various metadata of the message’s origin.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1315,6 +1330,12 @@ the update received from messenger interface API.</p>
 <span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Origin]</span></em><a class="headerlink" href="#chatsky.core.message.Message.origin" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="chatsky.core.message.Message.metadata">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#chatsky.core.message.Metadata" title="chatsky.core.message.Metadata"><span class="pre">Metadata</span></a></em><a class="headerlink" href="#chatsky.core.message.Message.metadata" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference internal" href="#chatsky.core.message.Origin.metadata" title="chatsky.core.message.Origin.metadata"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Origin.metadata</span></code></a> of this message.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.core.message.Message.pickle_serialize_dicts">
 <span class="sig-name descname"><span class="pre">pickle_serialize_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/message.html#Message.pickle_serialize_dicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.message.Message.pickle_serialize_dicts" title="Link to this definition">#</a></dt>
@@ -1355,20 +1376,20 @@ Allows storing arbitrary data in misc/annotations when using context storages.</
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="chatsky.core.ctx_dict.html"
+       href="chatsky.core.utils.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Context Dict</p>
+        <p class="prev-next-title">Utils</p>
       </div>
     </a>
     <a class="right-next"
-       href="chatsky.core.utils.html"
+       href="chatsky.core.pipeline.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Utils</p>
+        <p class="prev-next-title">Pipeline</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1482,9 +1503,11 @@ Allows storing arbitrary data in misc/annotations when using context storages.</
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.MediaGroup.chatsky_attachment_type"><code class="docutils literal notranslate"><span class="pre">MediaGroup.chatsky_attachment_type</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin"><code class="docutils literal notranslate"><span class="pre">Origin</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.message"><code class="docutils literal notranslate"><span class="pre">Origin.message</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.interface"><code class="docutils literal notranslate"><span class="pre">Origin.interface</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.metadata"><code class="docutils literal notranslate"><span class="pre">Origin.metadata</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.pickle_serialize_message"><code class="docutils literal notranslate"><span class="pre">Origin.pickle_serialize_message()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Origin.pickle_validate_message"><code class="docutils literal notranslate"><span class="pre">Origin.pickle_validate_message()</span></code></a></li>
 </ul>
@@ -1495,6 +1518,7 @@ Allows storing arbitrary data in misc/annotations when using context storages.</
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.annotations"><code class="docutils literal notranslate"><span class="pre">Message.annotations</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.misc"><code class="docutils literal notranslate"><span class="pre">Message.misc</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.origin"><code class="docutils literal notranslate"><span class="pre">Message.origin</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.metadata"><code class="docutils literal notranslate"><span class="pre">Message.metadata</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.pickle_serialize_dicts"><code class="docutils literal notranslate"><span class="pre">Message.pickle_serialize_dicts()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.pickle_validate_dicts"><code class="docutils literal notranslate"><span class="pre">Message.pickle_validate_dicts()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.message.Message.validate_from_str"><code class="docutils literal notranslate"><span class="pre">Message.validate_from_str()</span></code></a></li>

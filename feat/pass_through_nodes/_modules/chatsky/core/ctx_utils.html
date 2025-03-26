@@ -600,7 +600,14 @@
     <span class="n">slot_manager</span><span class="p">:</span> <span class="n">SlotManager</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">SlotManager</span><span class="p">)</span>
     <span class="s2">&quot;Stores extracted slots.&quot;</span>
     <span class="n">transition</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Transition</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="s2">&quot;Stores last transition&#39;s info.&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores transition made during this turn.</span>
+
+<span class="sd">    Can be ``None`` if either is true:</span>
+
+<span class="sd">    - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);</span>
+<span class="sd">    - no valid transition has been found (i.e. transitioned to fallback node).</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
