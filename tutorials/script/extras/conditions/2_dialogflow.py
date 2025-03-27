@@ -7,7 +7,7 @@ The way of using the `GoogleDialogFlowModel` class is similar to that of other m
 Tutorials for other models can be found in the same section.
 """
 
-# %pip install dff[ext,dialogflow]
+# %pip install chatsky[dialogflow_conditions]
 
 # %%
 import logging

@@ -6,7 +6,7 @@ In this module, we show how you can get annotations from a RASA NLU server
 and reuse them in your script.
 """
 
-# %pip install dff[ext,async]
+# %pip install dff[extended_conditions]
 
 # %%
 import os
@@ -19,7 +19,7 @@ from chatsky import (
 )
 from chatsky import conditions as cnd
 
-from chatsky.ml.models.remote_api.rasa_model import RasaModel
+from chatsky.ml.models.rasa_model import RasaModel
 from chatsky.ml import conditions as i_cnd
 from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
@@ -91,13 +91,15 @@ script = {
         },
         "react_good": {
             RESPONSE: Message(
-                text="Now that's the right talk! You'd better stay happy and stuff."
+                text="Now that's the right talk!"
+                " You'd better stay happy and stuff."
             ),
             TRANSITIONS: {("root", "finish"): cnd.true()},
         },
         "react_bad": {
             RESPONSE: Message(
-                text="I feel you, fellow human. Watch a good movie, it might help."
+                text="I feel you, fellow human."
+                " Watch a good movie, it might help."
             ),
             TRANSITIONS: {("root", "finish"): cnd.true()},
         },
@@ -106,7 +108,7 @@ script = {
 
 
 # %%
-pipeline = Pipeline.from_script(
+pipeline = Pipeline(
     script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),

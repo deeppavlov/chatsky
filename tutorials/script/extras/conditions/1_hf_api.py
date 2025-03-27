@@ -18,8 +18,10 @@ to route conversations.
 
 ## Setup
 
-First, let's import the required modules and set up logging.
+First, let's import the required modules.
 """
+
+# %pip install chatsky[extended_conditions]
 
 # %%
 import os
