@@ -51,10 +51,11 @@ class ModifyResponse(BaseProcessing, abc.ABC):
 class AddFallbackResponses(ModifyResponse):
     """
     ModifyResponse with dynamical pre-response processing to handle
-    exceptions from user-provided exceptions dictionary
-    and keeping them in :py:attr:`ctx.framework_data.response_exception`.
+    exceptions from a user-provided exceptions dictionary
+    and storing them in :py:attr:`ctx.framework_data.response_exception`.
 
     Example:
+    
     .. code-block:: python
 
         class ReturnException(BaseResponse):
@@ -64,7 +65,7 @@ class AddFallbackResponses(ModifyResponse):
         # Define user-provided exceptions dictionary
         exceptions = {
             "OverflowError": "Overflow!",
-            "ValueError": self.ReturnException(),
+            "ValueError": ReturnException(),
             "Else": "Other exception occured",
         }
 
@@ -76,6 +77,7 @@ class AddFallbackResponses(ModifyResponse):
 
         # Get final response
         await ctx.current_node.response(ctx)
+
     """
 
     exception_responses: Dict[Union[str, Literal["Else"]], AnyResponse]
