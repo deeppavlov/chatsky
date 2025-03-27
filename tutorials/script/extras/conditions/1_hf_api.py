@@ -1,11 +1,25 @@
 # %% [markdown]
 """
-# 1. HF API
+# Using Hugging Face API Models in Chatsky
 
-This module explains, how to integrate web-hosted huggingface models in your conversational services.
+This tutorial demonstrates how to integrate web-hosted Hugging Face models
+into your conversational services using Chatsky.
+We'll build a simple customer service bot that uses intent classification
+to route conversations.
+
+## What you'll learn
+- How to set up and use Hugging Face API models
+- How to integrate ML models into your dialog flow
+- How to use intent-based routing conditions
+
+## Prerequisites
+- A Hugging Face API key (get one at https://huggingface.co/settings/tokens)
+- Basic understanding of Chatsky dialog scripts
+
+## Setup
+
+First, let's import the required modules and set up logging.
 """
-
-# %pip install dff[ext,async]
 
 # %%
 import os
@@ -14,38 +28,35 @@ from chatsky import (
     RESPONSE,
     Pipeline,
     Transition as Tr,
-    conditions as cnd,
     GLOBAL,
     LOCAL,
     Message,
-    # all the aliases used in tutorials are available for direct import
-    # e.g. you can do `from chatsky import Tr` instead
 )
-
-from chatsky.ml.models.hf_api_model import HFAPIModel
+from chatsky.utils.testing import (
+    is_interactive_mode,
+)
 from chatsky.conditions.ml import HasLabel
-from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
-
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
+from chatsky.ml.models.hf_api_model import HFAPIModel
 
 # %% [markdown]
 """
-The HuggingFace inference API allows you to use any model
-on HuggingFace hub that was made publicly available by its owners.
-Pass the model address and an API key to construct the class.
+## Setting up the Hugging Face Model
 
-We are using this open source model by Obsei-AI
-to demonstrate, how custom classifiers can be easily adapted for use your script.
+For this example, we'll use a model trained for sell/buy intent classification.
+We're using the 'obsei-ai/sell-buy-intent-classifier-bert-mini' model which is
+great for zero-shot classification.
+
+You can easily swap this model with any other classification model from HF Hub,
+but make sure you pass right models' labels.
+
+For our model there are
+LABEL_0 => "SELLING_INTENT" and LABEL_1 => "BUYING_INTENT".
 """
-
 
 # %%
 api_model = HFAPIModel(
-    model="SamLowe/roberta-base-go_emotions",
+    model="obsei-ai/sell-buy-intent-classifier-bert-mini",
     api_key=os.getenv("HF_API_KEY") or input("Enter HF API key:"),
 )
 
@@ -59,14 +70,14 @@ script = {
                 dst=("service", "buy"),
                 priority=1.2,
                 cnd=HasLabel(
-                    label="love", model_name="my_hf_model", threshold=0.95
+                    label="LABEL_1", model_name="my_hf_model", threshold=0.95
                 ),
             ),
             Tr(
                 dst=("service", "sell"),
                 priority=1.2,
                 cnd=HasLabel(
-                    label="fear", model_name="my_hf_model", threshold=0.95
+                    label="LABEL_0", model_name="my_hf_model", threshold=0.95
                 ),
             ),
         ]
@@ -87,7 +98,8 @@ script = {
     "service": {
         "offer": {
             RESPONSE: Message(
-                text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."
+                text="Welcome to the e-marketplace. Tell us,"
+                " what you would like to buy or sell."
             )
         },
         "buy": {
@@ -116,7 +128,8 @@ happy_path = [
     (
         Message(text="hi"),
         Message(
-            text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."
+            text="Welcome to the e-marketplace. Tell us, "
+            "what you would like to buy or sell."
         ),
     ),
     (
@@ -127,7 +140,8 @@ happy_path = [
     (
         Message(text="ok"),
         Message(
-            text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."
+            text="Welcome to the e-marketplace. Tell us, what you would like to"
+            " buy or sell."
         ),
     ),
     (
@@ -140,13 +154,5 @@ happy_path = [
 
 # %%
 if __name__ == "__main__":
-    # check_happy_path(
-    #     pipeline,
-    #     happy_path,
-    # )  # This is a function for automatic tutorial
-    # # running (testing tutorial) with `happy_path`.
-
-    # # Run tutorial in interactive mode if not in IPython env
-    # # and if `DISABLE_INTERACTIVE_MODE` is not set.
-    pipeline.run()
-    # This runs tutorial in interactive mode.
+    if is_interactive_mode():
+        pipeline.run()

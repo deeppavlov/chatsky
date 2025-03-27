@@ -15,11 +15,12 @@ def testing_async_model():
     else:
         yield None
 
-# @pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
-# @pytest.mark.skipif(
-#     not os.getenv("GDF_ACCOUNT_JSON") or not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")),
-#     reason="GDF_ACCOUNT_JSON missing.",
-# )
+
+@pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
+@pytest.mark.skipif(
+    not os.getenv("GDF_ACCOUNT_JSON") or not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")),
+    reason="GDF_ACCOUNT_JSON missing.",
+)
 @pytest.mark.dialogflow
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: GoogleDialogFlowModel):

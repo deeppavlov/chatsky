@@ -4,9 +4,9 @@ import importlib
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from chatsky.ml.models.remote_api.google_dialogflow_model import dialogflow_available
-from chatsky.ml.models.remote_api.rasa_model import rasa_available
-from chatsky.ml.models.remote_api.hf_api_model import hf_api_available
+from chatsky.ml.models.google_dialogflow_model import dialogflow_available
+from chatsky.ml.models.rasa_model import rasa_available
+from chatsky.ml.models.hf_api_model import hf_api_available
 
 from chatsky.utils.testing.common import check_happy_path
 from tests.context_storages.test_dbs import ping_localhost

@@ -3,8 +3,6 @@ import pytest
 from chatsky import Pipeline
 from chatsky.utils.testing.toy_script import TOY_SCRIPT
 
-from tests.test_utils import get_path_from_tests_to_current_dir
-
 
 @pytest.fixture(scope="session")
 def testing_pipeline():

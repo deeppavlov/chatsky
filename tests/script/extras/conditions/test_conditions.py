@@ -1,5 +1,4 @@
 import pytest
-from chatsky import Context, Message
 from chatsky.conditions.ml import HasLabel
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.core.node_label import AbsoluteNodeLabel

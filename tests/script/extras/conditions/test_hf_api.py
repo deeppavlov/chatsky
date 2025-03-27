@@ -6,6 +6,7 @@ from chatsky.ml.models.hf_api_model import (
     hf_api_available,
 )
 
+
 @pytest.fixture(scope="session")
 def testing_async_model(hf_model_name):
     if os.getenv("HF_API_KEY"):

@@ -41,7 +41,7 @@ you can use them to construct the class.
 
 
 # %%
-gdf_model = GoogleDialogFlowModel.from_file(filename="acc_data.json")
+gdf_model = GoogleDialogFlowModel.from_file(filename="gdf_account.json")
 
 # %%
 script = {
