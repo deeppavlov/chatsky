@@ -8,7 +8,7 @@ This module provides basic processing functions.
 
 import abc
 import logging
-from typing import Literal, Type, Union, Dict
+from typing import Literal, Union, Dict
 from pydantic import field_validator
 
 from chatsky.core import BaseProcessing, BaseResponse, Context, MessageInitTypes, AnyResponse
@@ -55,7 +55,7 @@ class AddFallbackResponses(ModifyResponse):
     and storing them in :py:attr:`ctx.framework_data.response_exception`.
 
     Example:
-    
+
     .. code-block:: python
 
         class ReturnException(BaseResponse):
