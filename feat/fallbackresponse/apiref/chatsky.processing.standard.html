@@ -926,10 +926,34 @@
 <dt class="sig sig-object py" id="chatsky.processing.standard.AddFallbackResponses">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AddFallbackResponses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/processing/standard.html#AddFallbackResponses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.processing.standard.AddFallbackResponses" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#chatsky.processing.standard.ModifyResponse" title="chatsky.processing.standard.ModifyResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModifyResponse</span></code></a></p>
-<p>ModifyResponse with pre-response processing to handle exceptions dynamically.</p>
+<p>ModifyResponse with dynamical pre-response processing to handle
+exceptions from a user-provided exceptions dictionary
+and storing them in <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.framework_data.response_exception</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReturnException</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">framework_data</span><span class="o">.</span><span class="n">response_exception</span>
+
+<span class="c1"># Define user-provided exceptions dictionary</span>
+<span class="n">exceptions</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;OverflowError&quot;</span><span class="p">:</span> <span class="s2">&quot;Overflow!&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ValueError&quot;</span><span class="p">:</span> <span class="n">ReturnException</span><span class="p">(),</span>
+    <span class="s2">&quot;Else&quot;</span><span class="p">:</span> <span class="s2">&quot;Other exception occured&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># AddFallbackResponses class initialization</span>
+<span class="n">fallback_response</span> <span class="o">=</span> <span class="n">AddFallbackResponses</span><span class="p">(</span><span class="n">exception_responses</span><span class="o">=</span><span class="n">exceptions</span><span class="p">)</span>
+
+<span class="c1"># Apply fallback response pre-processing</span>
+<span class="k">await</span> <span class="n">fallback_response</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+<span class="c1"># Get final response</span>
+<span class="k">await</span> <span class="n">ctx</span><span class="o">.</span><span class="n">current_node</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.processing.standard.AddFallbackResponses.exception_responses">
-<span class="sig-name descname"><span class="pre">exception_responses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code><span class="pre">],</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'Else'</span></code><span class="pre">]],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedAlias</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.ConstResponse" title="chatsky.core.script_function.ConstResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstResponse</span></code></a><span class="pre">,</span> <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a><span class="pre">]]]</span></em><a class="headerlink" href="#chatsky.processing.standard.AddFallbackResponses.exception_responses" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">exception_responses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'Else'</span></code><span class="pre">]],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedAlias</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.ConstResponse" title="chatsky.core.script_function.ConstResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstResponse</span></code></a><span class="pre">,</span> <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a><span class="pre">]]]</span></em><a class="headerlink" href="#chatsky.processing.standard.AddFallbackResponses.exception_responses" title="Link to this definition">#</a></dt>
 <dd><p>Dictionary mapping exception types to fallback responses.</p>
 </dd></dl>
 
@@ -956,7 +980,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.processing.standard.AddFallbackResponses.modified_response">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modified_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/processing/standard.html#AddFallbackResponses.modified_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.processing.standard.AddFallbackResponses.modified_response" title="Link to this definition">#</a></dt>
-<dd><p>Catch response errors and process them based on <cite>exception_responses</cite>.</p>
+<dd><p>Catch response errors and process them based on <cite>exception_responses</cite> dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

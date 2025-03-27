@@ -585,12 +585,39 @@
 
 <div class="viewcode-block" id="AddFallbackResponses">
 <a class="viewcode-back" href="../../../apiref/chatsky.processing.standard.html#chatsky.processing.standard.AddFallbackResponses">[docs]</a>
-<span class="k">class</span> <span class="nc">AddFallbackResponses</span><span class="p">(</span><span class="n">ModifyResponse</span><span class="p">,</span> <span class="n">arbitrary_types_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">AddFallbackResponses</span><span class="p">(</span><span class="n">ModifyResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ModifyResponse with pre-response processing to handle exceptions dynamically.</span>
+<span class="sd">    ModifyResponse with dynamical pre-response processing to handle</span>
+<span class="sd">    exceptions from a user-provided exceptions dictionary</span>
+<span class="sd">    and storing them in :py:attr:`ctx.framework_data.response_exception`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    </span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        class ReturnException(BaseResponse):</span>
+<span class="sd">            async def call(self, ctx: Context):</span>
+<span class="sd">                return ctx.framework_data.response_exception</span>
+
+<span class="sd">        # Define user-provided exceptions dictionary</span>
+<span class="sd">        exceptions = {</span>
+<span class="sd">            &quot;OverflowError&quot;: &quot;Overflow!&quot;,</span>
+<span class="sd">            &quot;ValueError&quot;: ReturnException(),</span>
+<span class="sd">            &quot;Else&quot;: &quot;Other exception occured&quot;,</span>
+<span class="sd">        }</span>
+
+<span class="sd">        # AddFallbackResponses class initialization</span>
+<span class="sd">        fallback_response = AddFallbackResponses(exception_responses=exceptions)</span>
+
+<span class="sd">        # Apply fallback response pre-processing</span>
+<span class="sd">        await fallback_response(ctx)</span>
+
+<span class="sd">        # Get final response</span>
+<span class="sd">        await ctx.current_node.response(ctx)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">exception_responses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="ne">Exception</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Else&quot;</span><span class="p">]],</span> <span class="n">AnyResponse</span><span class="p">]</span>
+    <span class="n">exception_responses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Else&quot;</span><span class="p">]],</span> <span class="n">AnyResponse</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dictionary mapping exception types to fallback responses.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -616,7 +643,7 @@
 <a class="viewcode-back" href="../../../apiref/chatsky.processing.standard.html#chatsky.processing.standard.AddFallbackResponses.modified_response">[docs]</a>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">modified_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original_response</span><span class="p">:</span> <span class="n">BaseResponse</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageInitTypes</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Catch response errors and process them based on `exception_responses`.</span>
+<span class="sd">        Catch response errors and process them based on `exception_responses` dictionary.</span>
 
 <span class="sd">        :param original_response: The original response of the current node.</span>
 <span class="sd">        :param ctx: The current context.</span>
@@ -625,9 +652,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">original_response</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
-            <span class="n">exception</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Else&quot;</span><span class="p">))</span>
-            <span class="n">ctx</span><span class="o">.</span><span class="n">framework_data</span><span class="o">.</span><span class="n">response_exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="n">exception</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+            <span class="n">exception_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Else&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">framework_data</span><span class="o">.</span><span class="n">response_exception</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exception_response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">result</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">exception_response</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">result</span></div>
 </div>
