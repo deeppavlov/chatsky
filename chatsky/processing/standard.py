@@ -48,12 +48,37 @@ class ModifyResponse(BaseProcessing, abc.ABC):
         ctx.current_node.response = ModifiedResponse()
 
 
-class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
+class AddFallbackResponses(ModifyResponse):
     """
-    ModifyResponse with pre-response processing to handle exceptions dynamically.
+    ModifyResponse with dynamical pre-response processing to handle
+    exceptions from user-provided exceptions dictionary
+    and keeping them in :py:attr:`ctx.framework_data.response_exception`.
+
+    Example:
+    .. code-block:: python
+
+        class ReturnException(BaseResponse):
+            async def call(self, ctx: Context):
+                return ctx.framework_data.response_exception
+
+        # Define user-provided exceptions dictionary
+        exceptions = {
+            "OverflowError": "Overflow!",
+            "ValueError": self.ReturnException(),
+            "Else": "Other exception occured",
+        }
+
+        # AddFallbackResponses class initialization
+        fallback_response = AddFallbackResponses(exception_responses=exceptions)
+
+        # Apply fallback response pre-processing
+        await fallback_response(ctx)
+
+        # Get final response
+        await ctx.current_node.response(ctx)
     """
 
-    exception_responses: Dict[Union[Type[Exception], Literal["Else"]], AnyResponse]
+    exception_responses: Dict[Union[str, Literal["Else"]], AnyResponse]
     """
     Dictionary mapping exception types to fallback responses.
     """
@@ -74,7 +99,7 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
 
     async def modified_response(self, original_response: BaseResponse, ctx: Context) -> MessageInitTypes:
         """
-        Catch response errors and process them based on `exception_responses`.
+        Catch response errors and process them based on `exception_responses` dictionary.
 
         :param original_response: The original response of the current node.
         :param ctx: The current context.
@@ -83,8 +108,12 @@ class AddFallbackResponses(ModifyResponse, arbitrary_types_allowed=True):
         """
         result = await original_response.wrapped_call(ctx)
         if isinstance(result, Exception):
-            exception = self.exception_responses.get(type(result), self.exception_responses.get("Else"))
-            ctx.framework_data.response_exception = str(result)
-            return await exception(ctx)
+            exception_response = self.exception_responses.get(
+                type(result).__name__, self.exception_responses.get("Else")
+            )
+            ctx.framework_data.response_exception = repr(result)
+            if exception_response is None:
+                raise result
+            return await exception_response(ctx)
         else:
             return result

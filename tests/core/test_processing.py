@@ -46,7 +46,7 @@ class TestAddFallbackResponses:
         [
             (RaiseException(exception=OverflowError()), "Overflow!"),
             (RaiseException(exception=KeyError()), "Other exception occured"),
-            (RaiseException(exception=ValueError("some text")), "some text"),
+            (RaiseException(exception=ValueError("some text")), "ValueError('some text')"),
         ],
     )
     @pytest.mark.asyncio
@@ -54,7 +54,11 @@ class TestAddFallbackResponses:
         ctx = Context()
         ctx.framework_data.current_node = Node()
 
-        exceptions = {OverflowError: "Overflow!", ValueError: self.ReturnException(), "Else": "Other exception occured"}
+        exceptions = {
+            "OverflowError": "Overflow!",
+            "ValueError": self.ReturnException(),
+            "Else": "Other exception occured",
+        }
 
         fallback_response = proc.AddFallbackResponses(exception_responses=exceptions)
         ctx.current_node.response = response_with_exception
