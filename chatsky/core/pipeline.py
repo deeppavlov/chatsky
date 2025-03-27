@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, TYPE_CHECKING
+from typing import Union, List, Dict, Optional, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.core.script import Script
@@ -115,6 +115,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
+    context_lock: Optional[Any] = None
+    """
+    """
 
     def __init__(
         self,
@@ -160,6 +163,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 empty_fields.add(k)
         for field in empty_fields:
             del init_dict[field]
+        self.context_lock = {} #ContextLock()
         super().__init__(**init_dict)
         self.services_pipeline  # cache services
 
@@ -263,6 +267,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         ctx.framework_data.pipeline = self
         initialize_service_states(ctx, self.services_pipeline)
+
+        async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
+            await asyncio.wait_for(
+                self._process_request(ctx_id, update, pipeline_runner),
+                timeout=worker_timeout,
+            )
 
         ctx.current_turn_id = ctx.current_turn_id + 1
 
