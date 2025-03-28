@@ -78,7 +78,6 @@ pyyaml = { version = "*", optional = true }
 langchain = { version = "*", optional = true }
 google-cloud-dialogflow = { version = "*", optional = true }
 joblib = { version = "*", optional = true }
-scikit-learn = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -93,7 +92,7 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 yaml = ["pyyaml"]
-extended_conditions = ["pyyaml", "requests", "scikit-learn", "joblib"]
+extended_conditions = ["httpx", "pyyaml", "requests", "scikit-learn", "joblib"]
 dialogflow_conditions = ["google-cloud-dialogflow", "pyyaml", "requests", "scikit-learn", "joblib"]
 async =["httpx"]
 llm = ["langchain"]
