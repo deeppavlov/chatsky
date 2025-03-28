@@ -201,10 +201,10 @@ class BaseProcessing(BaseScriptFunc, ABC):
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
 
-    start_condition: AnyCondition = Field(default=True, validate_default=True)
+    start_condition: Optional[AnyCondition] = None
     """
     :py:data:`~AnyCondition` that determines if this processing function should run.
-    
+
     If the result of this condition is `False` or it raises an exception,
     :py:meth:`__call__` will complete without calling :py:meth:`call`.
     """
@@ -219,10 +219,11 @@ class BaseProcessing(BaseScriptFunc, ABC):
         return await super().wrapped_call(ctx, info=info)
 
     async def __call__(self, ctx: Context) -> None:
-        if await self.start_condition.is_true(ctx):
-            return await super().__call__(ctx)
-        else:
-            return logger.debug(f"{self.__class__.__name__} not called: self.start_condition = {self.start_condition}")
+        if self.start_condition is not None:
+            if not await self.start_condition.is_true(ctx):
+                logger.debug(f"{self.__class__.__name__} not called: start_condition = {self.start_condition}")
+                return None
+        return await super().__call__(ctx)
 
 
 class BasePriority(BaseScriptFunc, ABC):

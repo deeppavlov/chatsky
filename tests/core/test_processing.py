@@ -54,3 +54,19 @@ class TestConditionalResponce:
 
         await SomeProcessing(start_condition=False).wrapped_call(ctx)
         assert some_list == []
+
+    async def test_callable_start_condition(self):
+        # check logger length (?)
+        ctx = Context()
+        ctx.framework_data.current_node = Node()
+        some_list = []
+
+        class SomeProcessing(BaseProcessing):
+            async def call(self, ctx: Context):
+                some_list.append("called")
+
+        await SomeProcessing(start_condition=False)(ctx)
+        assert some_list == []
+
+        await SomeProcessing(start_condition=True)(ctx)
+        assert some_list == ["called"]
