@@ -175,6 +175,25 @@ services:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
 
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chroma
+    profiles:
+      - vector-store  
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  
+    volumes:
+      - chroma-data:/chroma/data  
+    environment:
+      - CHROMA_DB_PATH=/chroma/data 
+    healthcheck:
+      test: curl --silent --fail http://localhost:8000/health || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 volumes:
   ch-data:
   dashboard-data:
@@ -184,3 +203,4 @@ volumes:
   mongo-data:
   ydb-data:
   ydb-certs:
+  chroma-data:
