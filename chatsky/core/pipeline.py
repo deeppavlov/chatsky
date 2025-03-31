@@ -24,12 +24,17 @@ from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
-from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
+from chatsky.core.service.extra import (
+    ComponentExtraHandlerInitTypes,
+    BeforeHandler,
+    AfterHandler,
+)
 from .service import Service
 from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
+from chatsky.core.vector_store import VectorStoreService, RetrieverService
 
 if TYPE_CHECKING:
     from chatsky.llm.llm_api import LLM_API
@@ -86,7 +91,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     LLM models to be made available in custom functions.
     """
-    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
+    messenger_interface: MessengerInterface = Field(
+        default_factory=CLIMessengerInterface
+    )
     """
     A `MessengerInterface` instance for this pipeline.
 
@@ -115,6 +122,16 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
+    vector_store: Optional[VectorStoreService] = Field(default=None, exclude=True)
+    """
+    Vector store service for document retrieval.
+    Initialized separately from main services pipeline.
+    """
+
+    retriever: Optional[RetrieverService] = Field(default=None, exclude=True)
+    """
+    Document retriever service that uses the vector store.
+    """
 
     def __init__(
         self,
@@ -133,6 +150,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
         parallelize_processing: bool = None,
+        vector_store: Optional[VectorStoreService] = None,
+        retriever: Optional[RetrieverService] = None,
     ):
         if fallback_label is None:
             fallback_label = start_label
@@ -155,9 +174,12 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         empty_fields = set()
         for k, v in init_dict.items():
             if k not in self.model_fields:
-                raise NotImplementedError("Init method contains a field not in model fields.")
+                raise NotImplementedError(
+                    "Init method contains a field not in model fields."
+                )
             if v is None:
                 empty_fields.add(k)
+        #TODO add vectorservice and retriever into pre_sevices
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
@@ -233,7 +255,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
+        self,
+        request: Message,
+        ctx_id: Optional[str] = None,
+        update_ctx_misc: Optional[dict] = None,
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -293,7 +318,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
+        self,
+        request: Message,
+        ctx_id: Optional[str] = None,
+        update_ctx_misc: Optional[dict] = None,
     ) -> Context:
         """
         Method that executes pipeline once.
