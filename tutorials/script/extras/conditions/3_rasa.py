@@ -159,5 +159,5 @@ if __name__ == "__main__":
     # Run tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set.
     if is_interactive_mode():
-        run_interactive_mode(pipeline)
+        pipeline.run()
         # This runs tutorial in interactive mode.
