@@ -1,8 +1,8 @@
 """
-Conditions
+ML Conditions
 ------------
 
-This module provides condition functions for annotation processing.
+This module provides condition functions for ML annotations.
 """
 
 from chatsky import Context
