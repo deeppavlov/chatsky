@@ -143,9 +143,6 @@ class Negation(BaseCondition):
     Condition to negate.
     """
 
-    def __init__(self, condition: BaseCondition):
-        super().__init__(condition=condition)
-
     async def call(self, ctx: Context) -> bool:
         return not await self.condition.is_true(ctx)
 

@@ -154,7 +154,9 @@ class NeverRunningService(Service):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
     start_condition: AnyCondition = Not(
-        ServiceFinished(".post.named_group.running_service", wait=True)
+        condition=ServiceFinished(
+            ".post.named_group.running_service", wait=True
+        )
     )
 
 

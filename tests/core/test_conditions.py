@@ -91,9 +91,9 @@ async def test_all(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.Not(cnd.HasText(text="text")), False),
-        (cnd.Not(cnd.HasText(text="text1")), True),
-        (cnd.Not(FaultyCondition()), True),
+        (cnd.Not(condition=cnd.HasText(text="text")), False),
+        (cnd.Not(condition=cnd.HasText(text="text1")), True),
+        (cnd.Not(condition=FaultyCondition()), True),
     ],
 )
 async def test_neg(request_based_ctx, condition, result):
