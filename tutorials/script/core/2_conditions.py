@@ -104,7 +104,7 @@ customized_condition = ComplexUserAnswer(value={"some_key": "some_value"})
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -142,7 +142,7 @@ toy_script = {
                     dst="node1",
                     cnd=cnd.Any(
                         HiLowerCase(),
-                        cnd.ExactMatch("hello"),
+                        cnd.ExactMatch(match="hello"),
                     ),
                 )
             ],

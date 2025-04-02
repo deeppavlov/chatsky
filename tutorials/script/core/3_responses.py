@@ -126,7 +126,7 @@ the %mddoclink(api,responses.standard) module:
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
         "node1": {
             RESPONSE: rsp.RandomChoice(
@@ -135,26 +135,34 @@ toy_script = {
             ),
             # Random choice from candidate list.
             TRANSITIONS: [
-                Tr(dst="node2", cnd=cnd.ExactMatch("I'm fine, how are you?"))
+                Tr(
+                    dst="node2",
+                    cnd=cnd.ExactMatch(match="I'm fine, how are you?"),
+                )
             ],
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: [
-                Tr(dst="node3", cnd=cnd.ExactMatch("Let's talk about music."))
+                Tr(
+                    dst="node3",
+                    cnd=cnd.ExactMatch(match="Let's talk about music."),
+                )
             ],
         },
         "node3": {
             RESPONSE: CannotTalkAboutTopic(),
-            TRANSITIONS: [Tr(dst="node4", cnd=cnd.ExactMatch("Ok, goodbye."))],
+            TRANSITIONS: [
+                Tr(dst="node4", cnd=cnd.ExactMatch(match="Ok, goodbye."))
+            ],
         },
         "node4": {
             RESPONSE: UpperCase("bye"),
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
         "fallback_node": {
             RESPONSE: FallbackTrace(),
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
     }
 }

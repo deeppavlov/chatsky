@@ -111,8 +111,8 @@ SLOTS = {
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("main", "start"), cnd=cnd.ExactMatch("/start")),
-            Tr(dst=("main", "reset"), cnd=cnd.ExactMatch("/reset")),
+            Tr(dst=("main", "start"), cnd=cnd.ExactMatch(match="/start")),
+            Tr(dst=("main", "reset"), cnd=cnd.ExactMatch(match="/reset")),
             Tr(dst=("main", "print"), priority=0.5),
         ]
     },

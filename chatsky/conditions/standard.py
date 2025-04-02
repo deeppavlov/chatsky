@@ -30,7 +30,7 @@ class ExactMatch(BaseCondition):
     If :py:attr:`.skip_none`, will not compare ``None`` fields of :py:attr:`.match`.
     """
 
-    match: Message
+    match: MessageInitTypes
     """
     Message to compare last request with.
 
@@ -41,17 +41,18 @@ class ExactMatch(BaseCondition):
     Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
     """
 
-    def __init__(self, match: MessageInitTypes, *, skip_none=True):
-        super().__init__(match=match, skip_none=skip_none)
+    @cached_property
+    def typecast_match(self) -> Message:
+        return Message.model_validate(self.match)
 
     async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
-        for field in self.match.model_fields:
-            match_value = self.match.__getattribute__(field)
+        for field in self.typecast_match.model_fields:
+            match_value = self.typecast_match.__getattribute__(field)
             if self.skip_none and match_value is None:
                 continue
             if field in request.model_fields.keys():
-                if request.__getattribute__(field) != self.match.__getattribute__(field):
+                if request.__getattribute__(field) != self.typecast_match.__getattribute__(field):
                     return False
             else:
                 return False

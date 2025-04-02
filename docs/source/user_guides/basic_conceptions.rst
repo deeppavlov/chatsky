@@ -89,7 +89,7 @@ Example flow & script
     ping_pong_script = {
         "greeting_flow": {
             "start_node": {
-                TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))]
+                TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch(match="/start"))]
                 # start node handles the initial handshake (command /start)
             },
             "greeting_node": {
@@ -97,7 +97,7 @@ Example flow & script
                 TRANSITIONS: [
                     Tr(
                         dst=("ping_pong_flow", "game_start_node"),
-                        cnd=cnd.ExactMatch("Hello!")
+                        cnd=cnd.ExactMatch(match="Hello!")
                     )
                 ]
             },
@@ -110,11 +110,11 @@ Example flow & script
         "ping_pong_flow": {
             "game_start_node": {
                 RESPONSE: "Let's play ping-pong!",
-                TRANSITIONS: [Tr(dst="response_node", cnd=cnd.ExactMatch("Ping!"))],
+                TRANSITIONS: [Tr(dst="response_node", cnd=cnd.ExactMatch(match="Ping!"))],
             },
             "response_node": {
                 RESPONSE: "Pong!",
-                TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.ExactMatch("Ping!"))],
+                TRANSITIONS: [Tr(dst=dst.Current(), cnd=cnd.ExactMatch(match="Ping!"))],
             },
         },
     }

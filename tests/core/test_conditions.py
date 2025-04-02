@@ -24,15 +24,15 @@ def request_based_ctx(context_factory):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.ExactMatch(Message(text="text", misc={"key": "value"})), True),
-        (cnd.ExactMatch(Message(text="text"), skip_none=True), True),
-        (cnd.ExactMatch(Message(text="text"), skip_none=False), False),
-        (cnd.ExactMatch("text", skip_none=True), True),
-        (cnd.ExactMatch(Message(text="")), False),
-        (cnd.ExactMatch(Message(text="text", misc={"key": None})), False),
-        (cnd.ExactMatch(Message(), skip_none=True), True),
-        (cnd.ExactMatch({}, skip_none=True), True),
-        (cnd.ExactMatch(SubclassMessage(text="text", misc={"key": "value"}, additional_field="")), False),
+        (cnd.ExactMatch(match=Message(text="text", misc={"key": "value"})), True),
+        (cnd.ExactMatch(match=Message(text="text"), skip_none=True), True),
+        (cnd.ExactMatch(match=Message(text="text"), skip_none=False), False),
+        (cnd.ExactMatch(match="text", skip_none=True), True),
+        (cnd.ExactMatch(match=Message(text="")), False),
+        (cnd.ExactMatch(match=Message(text="text", misc={"key": None})), False),
+        (cnd.ExactMatch(match=Message(), skip_none=True), True),
+        (cnd.ExactMatch(match={}, skip_none=True), True),
+        (cnd.ExactMatch(match=SubclassMessage(text="text", misc={"key": "value"}, additional_field="")), False),
     ],
 )
 async def test_exact_match(request_based_ctx, condition, result):

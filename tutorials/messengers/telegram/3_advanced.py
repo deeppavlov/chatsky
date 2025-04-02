@@ -146,7 +146,7 @@ script = {
     "main_flow": {
         LOCAL: {
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("/start")),
+                Tr(dst="main_node", cnd=cnd.ExactMatch(match="/start")),
                 Tr(dst="formatted_node", cnd=cnd.HasCallbackQuery("formatted")),
                 Tr(
                     dst="attachments_node",

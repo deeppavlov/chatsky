@@ -70,7 +70,7 @@ script = {
     "greeting_flow": {
         "start_node": {
             TRANSITIONS: [
-                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch(match="/start"))
             ],
         },
         "greeting_node": {
@@ -80,7 +80,7 @@ script = {
         "fallback_node": {
             RESPONSE: "Please, repeat the request",
             TRANSITIONS: [
-                Tr(dst="greeting_node", cnd=cnd.ExactMatch("/start"))
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch(match="/start"))
             ],
         },
     }

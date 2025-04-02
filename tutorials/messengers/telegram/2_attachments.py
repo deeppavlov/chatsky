@@ -154,7 +154,9 @@ script = {
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="intro_node", cnd=cnd.ExactMatch("/start"))],
+            TRANSITIONS: [
+                Tr(dst="intro_node", cnd=cnd.ExactMatch(match="/start"))
+            ],
         },
         "intro_node": {
             RESPONSE: f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'
