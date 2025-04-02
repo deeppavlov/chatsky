@@ -147,7 +147,7 @@ script = {
         TRANSITIONS: [
             Tr(
                 dst=("main_flow", f"{attachment}_node"),
-                cnd=cnd.ExactMatch(attachment),
+                cnd=cnd.ExactMatch(match=attachment),
             )
             for attachment in ATTACHMENTS
         ]
