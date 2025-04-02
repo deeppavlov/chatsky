@@ -2,7 +2,8 @@
 """
 # Google Dialogflow Integration Tutorial
 
-This tutorial demonstrates how to integrate Google Dialogflow with Chatsky to create more sophisticated 
+This tutorial demonstrates how to integrate Google Dialogflow with Chatsky to
+create more sophisticated
 dialog management systems. We'll show how to:
 
 1. Set up Dialogflow integration
@@ -23,10 +24,7 @@ First, install the required dependencies:
 # %pip install chatsky google-cloud-dialogflow
 
 # %%
-import logging
 from typing import Dict, Any
-
-logging.basicConfig(level=logging.INFO)
 
 from chatsky import (
     TRANSITIONS,
@@ -51,7 +49,8 @@ Before using Dialogflow with Chatsky, you'll need to:
 3. Create a service account and download credentials (JSON file)
 4. Set up intents in Dialogflow console
 
-For detailed setup instructions, visit the [Dialogflow documentation](https://cloud.google.com/dialogflow/docs).
+For detailed setup instructions, visit the
+[Dialogflow documentation](https://cloud.google.com/dialogflow/docs).
 
 Let's initialize our Dialogflow model:
 """
@@ -77,13 +76,17 @@ script: Dict[str, Any] = {
         TRANSITIONS: [
             # Handle welcome intents globally
             Tr(
-                cnd=HasLabel(label="Default Welcome Intent", pipeline_model="gdf_model"),
+                cnd=HasLabel(
+                    label="Default Welcome Intent", pipeline_model="gdf_model"
+                ),
                 dst=("root", "welcome"),
                 priority=1.2,
             ),
             # Handle goodbye intents
             Tr(
-                cnd=HasLabel(label="Default Goodbye Intent", pipeline_model="gdf_model"),
+                cnd=HasLabel(
+                    label="Default Goodbye Intent", pipeline_model="gdf_model"
+                ),
                 dst=("root", "goodbye"),
                 priority=1.1,
             ),
@@ -101,7 +104,9 @@ script: Dict[str, Any] = {
             TRANSITIONS: [Tr(cnd=True, dst="waiting_input")],
         },
         "welcome": {
-            RESPONSE: Message(text="Welcome! I'm your assistant. Feel free to ask questions!"),
+            RESPONSE: Message(
+                text="Welcome! I'm your assistant. Feel free to ask questions!"
+            ),
             TRANSITIONS: [Tr(cnd=True, dst="waiting_input")],
         },
         "waiting_input": {
@@ -119,7 +124,8 @@ script: Dict[str, Any] = {
         },
         "fallback": {
             RESPONSE: Message(
-                text="I'm not sure I understand. Could you rephrase that or ask for help?"
+                text="I'm not sure I understand. "
+                "Could you rephrase that or ask for help?"
             ),
             TRANSITIONS: [Tr(cnd=True, dst="waiting_input")],
         },

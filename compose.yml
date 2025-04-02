@@ -180,7 +180,7 @@ services:
     profiles:
       - ext
     build:
-      context: ./dff/utils/docker
+      context: ./chatsky/utils/docker
       dockerfile: dockerfile_extended_conditions
     ports:
       - "5005:5005"

@@ -147,7 +147,7 @@ Tests are configured via [`.env_file`](.env_file).
 Chatsky uses docker images for two purposes:
 1. Database images for integration testing.
 2. Images for statistics collection.
-3. Setting up Rasa framework for working with extended conditions.
+3. Setting up Rasa framework for working with ML conditions.
 
 The first group can be launched via
 

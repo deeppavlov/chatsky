@@ -21,7 +21,7 @@ to route conversations.
 First, let's import the required modules.
 """
 
-# %pip install chatsky[extended_conditions]
+# %pip install chatsky[ml]
 
 # %%
 import os
@@ -72,14 +72,18 @@ script = {
                 dst=("service", "buy"),
                 priority=1.2,
                 cnd=HasLabel(
-                    label="LABEL_1", model_name="my_hf_model", threshold=0.95
+                    label="LABEL_1",
+                    pipeline_model="my_hf_model",
+                    threshold=0.95,
                 ),
             ),
             Tr(
                 dst=("service", "sell"),
                 priority=1.2,
                 cnd=HasLabel(
-                    label="LABEL_0", model_name="my_hf_model", threshold=0.95
+                    label="LABEL_0",
+                    pipeline_model="my_hf_model",
+                    threshold=0.95,
                 ),
             ),
         ]

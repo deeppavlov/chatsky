@@ -76,8 +76,6 @@ sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
 pyyaml = { version = "*", optional = true }
 langchain = { version = "*", optional = true }
-google-cloud-dialogflow = { version = "*", optional = true }
-joblib = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -92,7 +90,7 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 yaml = ["pyyaml"]
-extended_conditions = ["httpx", "pyyaml", "requests", "joblib"]
+ml = ["httpx", "pyyaml", "requests"]
 async =["httpx"]
 llm = ["langchain"]
 
@@ -220,10 +218,10 @@ markers = [
     "none: reserved by allow-skip",
     "needs_dependencies: marks tests as requiring any extra dependencies to run",
     "huggingface: marks tests as requiring huggingface API token to run",
-    "dialogflow: marks tests as requiring dialogflow API token to run"
+    "dialogflow: marks tests as requiring dialogflow API token to run",
+    "rasa: marks tests as requiring rasa server to run"
 ]
 asyncio_mode = "auto"
-
 
 [tool.coverage.run]
 concurrency = [
