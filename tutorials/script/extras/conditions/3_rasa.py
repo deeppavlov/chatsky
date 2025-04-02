@@ -116,7 +116,7 @@ script = {
         TRANSITIONS: [
             Tr(
                 cnd=HasLabel(
-                label="pattern_chitchat", pipeline_model="rasa_model"
+                label="greet", pipeline_model="rasa_model"
                 ),
                 dst=("root", "hello"),
                 priority=1.2,

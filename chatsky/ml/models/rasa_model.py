@@ -31,7 +31,7 @@ class RasaIntent(BaseModel):
     """Class for integration with Rasa NLU server HTTP API."""
 
     confidence: float
-    name: str
+    name: Optional[str]
 
 
 class RasaEntity(BaseModel):

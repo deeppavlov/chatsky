@@ -11,7 +11,7 @@ RASA_ACTIVE = ping_localhost(5005)
 def testing_async_model():
     rasa_url, api_key = "http://localhost:5005", os.getenv("RASA_API_KEY")
     if rasa_url and api_key:
-        yield RasaModel(model=rasa_url, api_key=api_key, namespace_key="rasa_async")
+        yield RasaModel(model=rasa_url, api_key=api_key)
     else:
         yield None
 
