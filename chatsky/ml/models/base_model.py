@@ -16,9 +16,6 @@ class ExtrasBaseAPIModel(ABC):
     Predicted scores for labels are stored in :py:class:`~chatsky.script.Context.framework_data`.
     """
 
-    def __init__(self) -> None:
-        self.model_id = uuid.uuid4()
-
     def __deepcopy__(self, *args, **kwargs):
         return copy(self)
 

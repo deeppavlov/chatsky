@@ -43,8 +43,5 @@ class HasLabel(BaseCondition):
         # Store the labels in the framework_data
         ctx.framework_data.models_labels[self.pipeline_model] = labels
 
-        # label_score = labels.get(self.label, 0)
-
-        scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
-        comparison_array = [item >= self.threshold for item in scores]
-        return any(comparison_array)
+        label_score = labels.get(self.label, 0)
+        return label_score >= self.threshold
