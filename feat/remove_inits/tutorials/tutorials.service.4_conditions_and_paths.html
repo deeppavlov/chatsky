@@ -731,7 +731,9 @@ Note: you may need to restart the kernel to use updated packages.
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Oh no! The &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; service is running!&quot;</span><span class="p">)</span>
 
     <span class="n">start_condition</span><span class="p">:</span> <span class="n">AnyCondition</span> <span class="o">=</span> <span class="n">Not</span><span class="p">(</span>
-        <span class="n">ServiceFinished</span><span class="p">(</span><span class="s2">&quot;.post.named_group.running_service&quot;</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">condition</span><span class="o">=</span><span class="n">ServiceFinished</span><span class="p">(</span>
+            <span class="s2">&quot;.post.named_group.running_service&quot;</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 
 
@@ -763,8 +765,10 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">components</span><span class="o">=</span><span class="p">[</span>
                 <span class="n">SimpleService</span><span class="p">(</span>
                     <span class="n">start_condition</span><span class="o">=</span><span class="n">All</span><span class="p">(</span>
-                        <span class="n">ServiceFinished</span><span class="p">(</span><span class="s2">&quot;.pre.SimpleService#0&quot;</span><span class="p">),</span>
-                        <span class="n">ServiceFinished</span><span class="p">(</span><span class="s2">&quot;.pre.SimpleService#1&quot;</span><span class="p">),</span>
+                        <span class="n">conditions</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">ServiceFinished</span><span class="p">(</span><span class="s2">&quot;.pre.SimpleService#0&quot;</span><span class="p">),</span>
+                            <span class="n">ServiceFinished</span><span class="p">(</span><span class="s2">&quot;.pre.SimpleService#1&quot;</span><span class="p">),</span>
+                        <span class="p">]</span>
                     <span class="p">),</span>
                     <span class="c1"># Alternative:</span>
                     <span class="c1"># ServiceFinished(&quot;.pre&quot;)</span>

@@ -125,8 +125,10 @@ toy_script = {
                 Tr(
                     dst="node3",
                     cnd=cnd.All(
-                        cnd.Regexp(pattern=r"talk"),
-                        cnd.Regexp(pattern=r"about.*music"),
+                        conditions=[
+                            cnd.Regexp(pattern=r"talk"),
+                            cnd.Regexp(pattern=r"about.*music"),
+                        ]
                     ),
                 )
             ],

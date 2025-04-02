@@ -735,8 +735,10 @@ Note: you may need to restart the kernel to use updated packages.
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;node3&quot;</span><span class="p">,</span>
                     <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">All</span><span class="p">(</span>
-                        <span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk&quot;</span><span class="p">),</span>
-                        <span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;about.*music&quot;</span><span class="p">),</span>
+                        <span class="n">conditions</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk&quot;</span><span class="p">),</span>
+                            <span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;about.*music&quot;</span><span class="p">),</span>
+                        <span class="p">]</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">],</span>
