@@ -20,13 +20,12 @@ from chatsky import (
 from chatsky import conditions as cnd
 
 from chatsky.ml.models.rasa_model import RasaModel
-from chatsky.ml import conditions as i_cnd
+from chatsky.conditions.ml import HasLabel
 from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.utils.testing.common import (
     is_interactive_mode,
-    check_happy_path,
-    run_interactive_mode,
+    check_happy_path
 )
 
 
@@ -51,7 +50,7 @@ script = {
     GLOBAL: {
         # Use the obtained intents in your conditions.
         TRANSITIONS: {
-            ("root", "finish", 1.2): i_cnd.has_cls_label(rasa_model, "goodbye")
+            ("root", "finish", 1.2): HasLabel(label="goodbye", pipeline_model="rasa_model"),
         },
     },
     "root": {
@@ -67,11 +66,11 @@ script = {
             RESPONSE: Message(text="How do you feel today?"),
             # You can get to different branches depending on the intent values.
             TRANSITIONS: {
-                ("mood", "react_good"): i_cnd.has_cls_label(
-                    rasa_model, "mood_great", threshold=0.95
+                ("mood", "react_good"): HasLabel(
+                    label="mood_great", pipeline_model="rasa_model", threshold=0.95
                 ),
-                ("mood", "react_bad"): i_cnd.has_cls_label(
-                    rasa_model, "mood_unhappy", threshold=0.99
+                ("mood", "react_bad"): HasLabel(
+                    label="mood_unhappy", pipeline_model="rasa_model", threshold=0.99
                 ),
                 ("mood", "assert"): cnd.true(),
             },
@@ -81,10 +80,10 @@ script = {
                 text="What you mean is you're feeling down, isn't it?"
             ),
             TRANSITIONS: {
-                ("mood", "react_good"): i_cnd.has_cls_label(
-                    rasa_model, "deny", threshold=0.95
+                ("mood", "react_good"): HasLabel(
+                    label="deny", pipeline_model="rasa_model", threshold=0.95
                 ),
-                ("mood", "react_bad"): i_cnd.has_cls_label(
+                ("mood", "react_bad"): HasLabel(
                     rasa_model, "affirm"
                 ),
             },
@@ -113,6 +112,7 @@ pipeline = Pipeline(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     messenger_interface=CLIMessengerInterface(intro="Starting Dff bot..."),
+    models={"rasa_model": rasa_model},
 )
 
 
