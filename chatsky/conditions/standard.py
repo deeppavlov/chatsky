@@ -92,9 +92,6 @@ class Regexp(BaseCondition):
     Flags to pass to ``re.compile``.
     """
 
-    # def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):
-    #     super().__init__(pattern=pattern, flags=flags)
-
     @computed_field
     @cached_property
     def re_object(self) -> Pattern:
@@ -117,9 +114,6 @@ class Any(BaseCondition):
     """
     List of conditions.
     """
-
-    def __init__(self, *conditions: BaseCondition):
-        super().__init__(conditions=list(conditions))
 
     async def call(self, ctx: Context) -> bool:
         return any(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))

@@ -147,8 +147,10 @@ toy_script = {
                 Tr(
                     dst="node1",
                     cnd=cnd.Any(
-                        HiLowerCase(),
-                        cnd.ExactMatch(match="hello"),
+                        conditions=[
+                            HiLowerCase(),
+                            cnd.ExactMatch(match="hello"),
+                        ]
                     ),
                 )
             ],
