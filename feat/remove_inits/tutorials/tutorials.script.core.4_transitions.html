@@ -697,13 +697,13 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;music_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node1&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
                     <span class="c1"># this condition is checked first.</span>
                     <span class="c1"># if it fails, pipeline will try the next transition</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node1&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;fallback_node&quot;</span><span class="p">,</span>
@@ -717,15 +717,15 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;music_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node1&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node1&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Previous</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">(),</span>  <span class="c1"># this goes to the current node</span>
@@ -743,7 +743,7 @@ Note: you may need to restart the kernel to use updated packages.
                     <span class="n">priority</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
                 <span class="p">),</span>  <span class="c1"># due to low priority (default priority is 1)</span>
                 <span class="c1"># this transition will be made if the next one fails</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;node2&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;how are you&quot;</span><span class="p">)),</span>
+                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;node2&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;how are you&quot;</span><span class="p">)),</span>
             <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;node2&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -759,29 +759,31 @@ Note: you may need to restart the kernel to use updated packages.
                 <span class="c1"># Here, this transition exists for demonstration purposes.</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span>  <span class="c1"># i.e. &quot;node3&quot; of this flow</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;talk about&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk about&quot;</span><span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
                 <span class="p">),</span>  <span class="c1"># this transition is the third candidate</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;music_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node1&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;talk about music&quot;</span><span class="p">),</span>
                 <span class="p">),</span>  <span class="c1"># this transition is the first candidate</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Previous</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;previous&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>  <span class="c1"># this transition is the second candidate</span>
             <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;node3&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Sorry, I can not talk about that now.&quot;</span><span class="p">,</span>
-            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;bye&quot;</span><span class="p">))],</span>
+            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
+                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;bye&quot;</span><span class="p">))</span>
+            <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;node4&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Bye&quot;</span><span class="p">,</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;node1&quot;</span><span class="p">,</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;hi|hello&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">],</span>
         <span class="p">},</span>
@@ -793,7 +795,7 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;yes|yep|ok&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;yes|yep|ok&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">],</span>
         <span class="p">},</span>
@@ -803,11 +805,11 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;repeat&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;repeat&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
             <span class="p">],</span>
         <span class="p">},</span>
@@ -817,15 +819,15 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Forward</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Backward</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;back&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;back&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;repeat&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;repeat&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
             <span class="p">],</span>
         <span class="p">},</span>
@@ -834,11 +836,11 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="n">GreetingFlowNode2</span><span class="p">(),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;node4&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;next time&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;next time&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                 <span class="p">),</span>  <span class="c1"># &quot;next&quot; is contained in &quot;next_time&quot; so we need higher</span>
                 <span class="c1"># priority here.</span>

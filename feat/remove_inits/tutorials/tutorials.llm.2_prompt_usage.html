@@ -817,7 +817,10 @@ Note: you may need to restart the kernel to use updated packages.
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;greeting_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;greeting_node&quot;</span><span class="p">),</span>
                     <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;/end&quot;</span><span class="p">),</span>
                 <span class="p">),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;cook_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\bcook\b&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;cook_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;\bcook\b&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">),</span>
+                <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">()),</span>
             <span class="p">],</span>
         <span class="p">},</span>

@@ -706,7 +706,10 @@ Group 2: friend.first_name, friend.last_name
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">GLOBAL</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
-            <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[sS]tart&quot;</span><span class="p">))</span>
+            <span class="n">Tr</span><span class="p">(</span>
+                <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
+                <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;^[sS]tart&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">},</span>
     <span class="s2">&quot;username_flow&quot;</span><span class="p">:</span> <span class="p">{</span>

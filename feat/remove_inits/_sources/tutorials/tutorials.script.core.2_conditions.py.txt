@@ -112,7 +112,9 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst="node2",
-                    cnd=cnd.Regexp(r".*how are you", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(
+                        pattern=r".*how are you", flags=re.IGNORECASE
+                    ),
                 )
             ],
             # pattern matching
@@ -123,7 +125,8 @@ toy_script = {
                 Tr(
                     dst="node3",
                     cnd=cnd.All(
-                        cnd.Regexp(r"talk"), cnd.Regexp(r"about.*music")
+                        cnd.Regexp(pattern=r"talk"),
+                        cnd.Regexp(pattern=r"about.*music"),
                     ),
                 )
             ],
@@ -132,7 +135,10 @@ toy_script = {
         "node3": {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: [
-                Tr(dst="node4", cnd=cnd.Regexp(re.compile(r"Ok, goodbye.")))
+                Tr(
+                    dst="node4",
+                    cnd=cnd.Regexp(pattern=re.compile(r"Ok, goodbye.")),
+                )
             ],
         },
         "node4": {

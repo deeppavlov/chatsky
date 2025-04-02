@@ -70,18 +70,18 @@ toy_script = {
         TRANSITIONS: [
             Tr(
                 dst=("greeting_flow", "node1"),
-                cnd=cnd.Regexp(r"\b(hi|hello)\b", flags=re.I),
+                cnd=cnd.Regexp(pattern=r"\b(hi|hello)\b", flags=re.I),
                 priority=1.1,
             ),
             Tr(
                 dst=("music_flow", "node1"),
-                cnd=cnd.Regexp(r"talk about music"),
+                cnd=cnd.Regexp(pattern=r"talk about music"),
                 priority=1.1,
             ),
             Tr(
                 dst=dst.Forward(),
                 cnd=cnd.All(
-                    cnd.Regexp(r"next\b"),
+                    cnd.Regexp(pattern=r"next\b"),
                     cnd.CheckLastLabels(
                         labels=[("music_flow", i) for i in ["node2", "node3"]]
                     ),  # this checks if the current node is
@@ -91,7 +91,7 @@ toy_script = {
             Tr(
                 dst=dst.Current(),
                 cnd=cnd.All(
-                    cnd.Regexp(r"repeat", flags=re.I),
+                    cnd.Regexp(pattern=r"repeat", flags=re.I),
                     cnd.Negation(
                         cnd.CheckLastLabels(flow_labels=["global_flow"])
                     ),
@@ -107,7 +107,7 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Previous(),
-                    cnd=cnd.Regexp(r"previous", flags=re.I),
+                    cnd=cnd.Regexp(pattern=r"previous", flags=re.I),
                 )
             ],
         },
@@ -115,25 +115,29 @@ toy_script = {
     "greeting_flow": {
         "node1": {
             RESPONSE: "Hi, how are you?",
-            TRANSITIONS: [Tr(dst="node2", cnd=cnd.Regexp(r"how are you"))],
+            TRANSITIONS: [
+                Tr(dst="node2", cnd=cnd.Regexp(pattern=r"how are you"))
+            ],
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: [
                 Tr(
                     dst=dst.Forward(),
-                    cnd=cnd.Regexp(r"talk about"),
+                    cnd=cnd.Regexp(pattern=r"talk about"),
                     priority=0.5,
                 ),
                 Tr(
                     dst=dst.Previous(),
-                    cnd=cnd.Regexp(r"previous", flags=re.I),
+                    cnd=cnd.Regexp(pattern=r"previous", flags=re.I),
                 ),
             ],
         },
         "node3": {
             RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: [Tr(dst=dst.Forward(), cnd=cnd.Regexp(r"bye"))],
+            TRANSITIONS: [
+                Tr(dst=dst.Forward(), cnd=cnd.Regexp(pattern=r"bye"))
+            ],
         },
         "node4": {RESPONSE: "bye"},
         # This node does not define its own transitions.
@@ -146,7 +150,7 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Forward(),
-                    cnd=cnd.Regexp(r"yes|yep|ok", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"yes|yep|ok", flags=re.IGNORECASE),
                 )
             ],
         },
@@ -160,7 +164,7 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Backward(),
-                    cnd=cnd.Regexp(r"back", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"back", flags=re.IGNORECASE),
                 ),
             ],
         },
@@ -169,11 +173,11 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=("greeting_flow", "node4"),
-                    cnd=cnd.Regexp(r"next time", flags=re.I),
+                    cnd=cnd.Regexp(pattern=r"next time", flags=re.I),
                 ),
                 Tr(
                     dst=("greeting_flow", "node2"),
-                    cnd=cnd.Regexp(r"next", flags=re.I),
+                    cnd=cnd.Regexp(pattern=r"next", flags=re.I),
                 ),
             ],
         },

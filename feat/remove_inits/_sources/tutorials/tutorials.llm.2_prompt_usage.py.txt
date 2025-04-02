@@ -216,7 +216,10 @@ toy_script = {
                     dst=("greeting_flow", "greeting_node"),
                     cnd=cnd.ExactMatch(match="/end"),
                 ),
-                Tr(dst="cook_node", cnd=cnd.Regexp(r"\bcook\b", flags=re.I)),
+                Tr(
+                    dst="cook_node",
+                    cnd=cnd.Regexp(pattern=r"\bcook\b", flags=re.I),
+                ),
                 Tr(dst=dst.Current()),
             ],
         },

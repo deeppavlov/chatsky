@@ -632,8 +632,8 @@
 <span class="sd">    Flags to pass to ``re.compile``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Pattern</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">RegexFlag</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="n">pattern</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">)</span>
+    <span class="c1"># def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):</span>
+    <span class="c1">#     super().__init__(pattern=pattern, flags=flags)</span>
 
     <span class="nd">@computed_field</span>
     <span class="nd">@cached_property</span>
