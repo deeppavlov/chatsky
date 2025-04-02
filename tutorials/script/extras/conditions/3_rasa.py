@@ -6,7 +6,7 @@ In this module, we show how you can get annotations from a RASA NLU server
 and reuse them in your script.
 """
 
-# %pip install dff[extended_conditions]
+# %pip install chatsky[extended_conditions]
 
 # %%
 import os
