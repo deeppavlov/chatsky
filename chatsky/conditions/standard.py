@@ -70,9 +70,6 @@ class HasText(BaseCondition):
     Text to search for in the last request.
     """
 
-    def __init__(self, text: str):
-        super().__init__(text=text)
-
     async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
         if request.text is None:

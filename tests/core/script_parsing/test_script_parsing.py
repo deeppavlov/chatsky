@@ -147,7 +147,7 @@ class TestImportPipelineFile:
         start_node = pipeline.script.get_node(pipeline.start_label)
         assert start_node.response.root == chatsky.Message("hi", misc={"key": 1})
         assert start_node.transitions[0].dst == chatsky.dst.Previous()
-        assert start_node.transitions[0].cnd == chatsky.cnd.HasText("t")
+        assert start_node.transitions[0].cnd == chatsky.cnd.HasText(text="t")
 
         assert pipeline.slots.person.likes == chatsky.slots.RegexpSlot(regexp="I like (.+)", match_group_idx=1)
         assert pipeline.slots.person.age == chatsky.slots.RegexpSlot(regexp="I'm ([0-9]+) years old", match_group_idx=1)

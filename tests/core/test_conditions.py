@@ -42,9 +42,9 @@ async def test_exact_match(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.HasText("text"), True),
-        (cnd.HasText("te"), True),
-        (cnd.HasText("text1"), False),
+        (cnd.HasText(text="text"), True),
+        (cnd.HasText(text="te"), True),
+        (cnd.HasText(text="text1"), False),
     ],
 )
 async def test_has_text(request_based_ctx, condition, result):
@@ -91,8 +91,8 @@ async def test_all(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.Not(cnd.HasText("text")), False),
-        (cnd.Not(cnd.HasText("text1")), True),
+        (cnd.Not(cnd.HasText(text="text")), False),
+        (cnd.Not(cnd.HasText(text="text1")), True),
         (cnd.Not(FaultyCondition()), True),
     ],
 )
@@ -129,7 +129,7 @@ async def test_has_callback_query(context_factory):
     assert await cnd.HasCallbackQuery("text1")(ctx) is True
 
 
-@pytest.mark.parametrize("cnd", [cnd.HasText(""), cnd.Regexp(""), cnd.HasCallbackQuery("")])
+@pytest.mark.parametrize("cnd", [cnd.HasText(text=""), cnd.Regexp(""), cnd.HasCallbackQuery("")])
 async def test_empty_text(context_factory, cnd):
     ctx = context_factory()
     ctx.requests[1] = Message()
