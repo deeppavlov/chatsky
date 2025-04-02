@@ -81,7 +81,10 @@ script = {
                 dst=("movie_flow", "create"),
                 cnd=cnd.ExactMatch(match="/create"),
             ),
-            Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review .*")),
+            Tr(
+                dst=("movie_flow", "review"),
+                cnd=cnd.Regexp(pattern="/review .*"),
+            ),
         ]
     },
     "greeting_flow": {

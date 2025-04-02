@@ -92,8 +92,8 @@ class Regexp(BaseCondition):
     Flags to pass to ``re.compile``.
     """
 
-    def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):
-        super().__init__(pattern=pattern, flags=flags)
+    # def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):
+    #     super().__init__(pattern=pattern, flags=flags)
 
     @computed_field
     @cached_property

@@ -98,7 +98,10 @@ The usage of all the above functions is shown in the following script:
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+            Tr(
+                dst=("username_flow", "ask"),
+                cnd=cnd.Regexp(pattern=r"^[sS]tart"),
+            )
         ]
     },
     "username_flow": {

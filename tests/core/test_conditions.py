@@ -54,8 +54,8 @@ async def test_has_text(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.Regexp("t.*t"), True),
-        (cnd.Regexp("t.*t1"), False),
+        (cnd.Regexp(pattern="t.*t"), True),
+        (cnd.Regexp(pattern="t.*t1"), False),
     ],
 )
 async def test_regexp(request_based_ctx, condition, result):
@@ -65,11 +65,11 @@ async def test_regexp(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.Any(cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
-        (cnd.Any(FaultyCondition(), cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
+        (cnd.Any(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), True),
+        (cnd.Any(FaultyCondition(), cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), True),
         (cnd.Any(FaultyCondition()), False),
-        (cnd.Any(cnd.Regexp("t.*"), cnd.Regexp(".*t1")), True),
-        (cnd.Any(cnd.Regexp("1t.*"), cnd.Regexp(".*t1")), False),
+        (cnd.Any(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t1")), True),
+        (cnd.Any(cnd.Regexp(pattern="1t.*"), cnd.Regexp(pattern=".*t1")), False),
     ],
 )
 async def test_any(request_based_ctx, condition, result):
@@ -79,9 +79,9 @@ async def test_any(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.All(cnd.Regexp("t.*"), cnd.Regexp(".*t")), True),
-        (cnd.All(FaultyCondition(), cnd.Regexp("t.*"), cnd.Regexp(".*t")), False),
-        (cnd.All(cnd.Regexp("t.*"), cnd.Regexp(".*t1")), False),
+        (cnd.All(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), True),
+        (cnd.All(FaultyCondition(), cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), False),
+        (cnd.All(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t1")), False),
     ],
 )
 async def test_all(request_based_ctx, condition, result):
@@ -129,7 +129,7 @@ async def test_has_callback_query(context_factory):
     assert await cnd.HasCallbackQuery("text1")(ctx) is True
 
 
-@pytest.mark.parametrize("cnd", [cnd.HasText(text=""), cnd.Regexp(""), cnd.HasCallbackQuery("")])
+@pytest.mark.parametrize("cnd", [cnd.HasText(text=""), cnd.Regexp(pattern=""), cnd.HasCallbackQuery("")])
 async def test_empty_text(context_factory, cnd):
     ctx = context_factory()
     ctx.requests[1] = Message()
