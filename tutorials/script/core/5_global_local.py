@@ -99,7 +99,9 @@ toy_script = {
                     conditions=[
                         cnd.Regexp(pattern=r"repeat", flags=re.I),
                         cnd.Negation(
-                            cnd.CheckLastLabels(flow_labels=["global_flow"])
+                            condition=cnd.CheckLastLabels(
+                                flow_labels=["global_flow"]
+                            )
                         ),
                     ],
                 ),

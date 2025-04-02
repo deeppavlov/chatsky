@@ -3,7 +3,8 @@ script:
     TRANSITIONS:
       - dst: [tech_flow, start_node]
         cnd:
-          chatsky.cnd.ExactMatch: /start
+          chatsky.cnd.ExactMatch: 
+            match: /start
         priority: 2
   tech_flow:
     start_node:
@@ -36,20 +37,25 @@ script:
         - dst: not_provided_slots
           cnd:
             chatsky.cnd.Negation:
-              chatsky.cnd.SlotsExtracted:
-                - person.name
-                - person.age
+              condition:
+                chatsky.cnd.SlotsExtracted:
+                  - person.name
+                  - person.age
           priority: 0.5
         - dst: name_extracted
           cnd:
             chatsky.cnd.All:
-              - chatsky.cnd.HasText: My name
-              - chatsky.cnd.SlotsExtracted: person.name
+              conditions:
+                - chatsky.cnd.HasText: 
+                    text: My name
+                - chatsky.cnd.SlotsExtracted: person.name
         - dst: age_extracted
           cnd:
             chatsky.cnd.All:
-              - chatsky.cnd.HasText: years old
-              - chatsky.cnd.SlotsExtracted: person.age
+              conditions:
+                - chatsky.cnd.HasText: 
+                    text: years old
+                - chatsky.cnd.SlotsExtracted: person.age
         - dst: [final_flow, all_slots_extracted]
           cnd:
             chatsky.cnd.SlotsExtracted:
