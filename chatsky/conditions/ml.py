@@ -32,11 +32,19 @@ class HasLabel(BaseCondition):
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.pipeline_model]
         # Predict labels for the last request
-        # and store them in framework_data with uuid of the model as a key
-        if model.model_id not in ctx.framework_data.models_labels:
-            await model(ctx)
-        if model.model_id is not None:
-            return ctx.framework_data.models_labels.get(model.model_id, {}).get(self.label, 0) >= self.threshold
+        # and store them in framework_data with the pipeline_model as a key
+        labels = dict()        
+        if ctx.framework_data.models_labels.get(self.pipeline_model, {}) != {}:
+            # If the labels are already present, use them
+            labels = ctx.framework_data.models_labels[self.pipeline_model]
+        else:
+            if ctx.last_request and ctx.last_request.text:
+                labels = await model.predict(ctx.last_request.text)
+                # Store the labels in the framework_data
+                ctx.framework_data.models_labels[self.pipeline_model] = labels
+
+        # label_score = labels.get(self.label, 0)
+
         scores = [item.get(self.label, 0) for item in ctx.framework_data.models_labels.values()]
         comparison_array = [item >= self.threshold for item in scores]
         return any(comparison_array)

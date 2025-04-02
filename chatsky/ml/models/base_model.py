@@ -41,18 +41,3 @@ class ExtrasBaseAPIModel(ABC):
         :param request: Target request string.
         """
         raise NotImplementedError
-
-    async def __call__(self, ctx: Context):
-        """
-        Saves the retrieved labels to a subspace inside the `framework_states` field of the context.
-        Creates the missing namespaces, if necessary.
-        """
-
-        if ctx.last_request and ctx.last_request.text:
-            labels: dict = await self.predict(ctx.last_request.text)
-        else:
-            labels = dict()
-
-        ctx.framework_data.models_labels[self.model_id] = labels
-
-        return ctx
