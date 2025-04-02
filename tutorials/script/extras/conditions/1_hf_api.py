@@ -21,7 +21,7 @@ to route conversations.
 First, let's import the required modules.
 """
 
-# %pip install chatsky[extended_conditions]
+# %pip install chatsky[ml]
 
 # %%
 import os
