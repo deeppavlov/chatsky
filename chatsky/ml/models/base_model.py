@@ -7,9 +7,6 @@ When defining custom label-scoring models, always inherit from this class.
 
 from copy import copy
 from abc import ABC, abstractmethod
-
-from chatsky import Context
-
 import uuid
 
 

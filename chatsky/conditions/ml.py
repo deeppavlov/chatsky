@@ -33,15 +33,15 @@ class HasLabel(BaseCondition):
         model = ctx.pipeline.models[self.pipeline_model]
         # Predict labels for the last request
         # and store them in framework_data with the pipeline_model as a key
-        labels = dict()        
+        labels = dict()
         if ctx.framework_data.models_labels.get(self.pipeline_model, {}) != {}:
             # If the labels are already present, use them
             labels = ctx.framework_data.models_labels[self.pipeline_model]
         else:
             if ctx.last_request and ctx.last_request.text:
                 labels = await model.predict(ctx.last_request.text)
-                # Store the labels in the framework_data
-                ctx.framework_data.models_labels[self.pipeline_model] = labels
+        # Store the labels in the framework_data
+        ctx.framework_data.models_labels[self.pipeline_model] = labels
 
         # label_score = labels.get(self.label, 0)
 

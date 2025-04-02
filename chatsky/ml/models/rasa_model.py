@@ -5,6 +5,7 @@ Rasa Model
 This module provides an annotator model
 that queries an external RASA NLU Server for utterance classification.
 """
+
 import logging
 import asyncio
 from async_lru import alru_cache
@@ -26,6 +27,7 @@ from http import HTTPStatus
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
 logger = logging.getLogger(__name__)
+
 
 class RasaIntent(BaseModel):
     """Class for integration with Rasa NLU server HTTP API."""
@@ -110,7 +112,7 @@ class RasaModel(ExtrasBaseAPIModel):
 
         json_response = response.json()
         logger.debug(f"Rasa response: {json_response}")
-        
+
         parsed = RasaResponse.model_validate(json_response)
         result = {item.name: item.confidence for item in parsed.intent_ranking} if parsed.intent_ranking else dict()
 

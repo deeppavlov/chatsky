@@ -12,6 +12,7 @@ and reuse them in your script.
 import logging
 import os
 import dotenv
+
 dotenv.load_dotenv()
 from chatsky import (
     Message,
@@ -115,9 +116,7 @@ script = {
         # Use the obtained intents in your conditions.
         TRANSITIONS: [
             Tr(
-                cnd=HasLabel(
-                label="greet", pipeline_model="rasa_model"
-                ),
+                cnd=HasLabel(label="greet", pipeline_model="rasa_model"),
                 dst=("root", "hello"),
                 priority=1.2,
             ),
@@ -127,7 +126,7 @@ script = {
                 ),
                 dst=("root", "money"),
                 priority=1.2,
-            )
+            ),
         ]
     },
     "root": {
@@ -150,7 +149,7 @@ script = {
                 Tr(cnd=True, dst=("root", "start")),
             ],
         },
-    }
+    },
 }
 
 
