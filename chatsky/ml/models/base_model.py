@@ -1,7 +1,7 @@
 """
 Base Model
 -----------
-This module defines an abstract interface for label-scoring models, :py:class:`~ExtrasBaseModel`.
+This module defines an abstract interface for label-scoring models, :py:class:`~ExtrasBaseAPIModel`.
 When defining custom label-scoring models, always inherit from this class.
 """
 

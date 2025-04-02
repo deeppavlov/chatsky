@@ -11,7 +11,6 @@ from chatsky.core.ctx_utils import ServiceState, FrameworkData, ContextMainInfo
 from chatsky.core.service import PipelineComponent
 from chatsky.llm import LLM_API
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
-from chatsky.ml.models.hf_api_model import HFAPIModel
 
 ContextMainInfo.model_rebuild()
 ContextDict.model_rebuild()
