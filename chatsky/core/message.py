@@ -24,9 +24,11 @@ from chatsky.utils.devel import (
     pickle_validator,
     JSONSerializableExtras,
 )
+from chatsky.core.ctx_utils import ContextError
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+    from chatsky.messengers.telegram.abstract import TelegramMetadata
 
 
 class DataModel(JSONSerializableExtras):
@@ -257,6 +259,14 @@ class MediaGroup(Attachment):
     chatsky_attachment_type: Literal["media_group"] = "media_group"
 
 
+class Metadata(DataModel):
+    """
+    Base class for metadata stored in :py:class:`Origin`.
+    """
+
+    pass
+
+
 class Origin(BaseModel):
     """
     Denotes the origin of the message.
@@ -270,6 +280,10 @@ class Origin(BaseModel):
     interface: Optional[str] = None
     """
     Name of the interface that produced the message.
+    """
+    metadata: Union["TelegramMetadata", Metadata] = Field(default_factory=Metadata)
+    """
+    Various metadata of the message's origin.
     """
 
     @field_serializer("message", when_used="json")
@@ -330,6 +344,15 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
+
+    @property
+    def metadata(self) -> Metadata:
+        """
+        :py:attr:`Origin.metadata` of this message.
+        """
+        if self.origin is None:
+            raise ContextError("Cannot get metadata of message without `origin` field.")
+        return self.origin.metadata
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,

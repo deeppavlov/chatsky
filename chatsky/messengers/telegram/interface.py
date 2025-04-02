@@ -42,7 +42,10 @@ class LongpollingInterface(_AbstractTelegramInterface):
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         await super().connect(pipeline_runner, *args, **kwargs)
         self.application.run_polling(
-            poll_interval=self.interval, timeout=self.timeout, allowed_updates=Update.ALL_TYPES
+            poll_interval=self.interval,
+            timeout=self.timeout,
+            allowed_updates=Update.ALL_TYPES,
+            close_loop=False,
         )
 
 
@@ -70,4 +73,9 @@ class WebhookInterface(_AbstractTelegramInterface):
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         await super().connect(pipeline_runner, *args, **kwargs)
-        self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
+        self.application.run_webhook(
+            listen=self.listen,
+            port=self.port,
+            allowed_updates=Update.ALL_TYPES,
+            close_loop=False,
+        )
