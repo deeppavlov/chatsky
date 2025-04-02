@@ -23,10 +23,7 @@ from chatsky.ml.models.rasa_model import RasaModel
 from chatsky.conditions.ml import HasLabel
 from chatsky import Pipeline
 from chatsky.messengers.console import CLIMessengerInterface
-from chatsky.utils.testing.common import (
-    is_interactive_mode,
-    check_happy_path
-)
+from chatsky.utils.testing.common import is_interactive_mode, check_happy_path
 
 
 # %% [markdown]
@@ -50,7 +47,9 @@ script = {
     GLOBAL: {
         # Use the obtained intents in your conditions.
         TRANSITIONS: {
-            ("root", "finish", 1.2): HasLabel(label="goodbye", pipeline_model="rasa_model"),
+            ("root", "finish", 1.2): HasLabel(
+                label="goodbye", pipeline_model="rasa_model"
+            ),
         },
     },
     "root": {
@@ -67,10 +66,14 @@ script = {
             # You can get to different branches depending on the intent values.
             TRANSITIONS: {
                 ("mood", "react_good"): HasLabel(
-                    label="mood_great", pipeline_model="rasa_model", threshold=0.95
+                    label="mood_great",
+                    pipeline_model="rasa_model",
+                    threshold=0.95,
                 ),
                 ("mood", "react_bad"): HasLabel(
-                    label="mood_unhappy", pipeline_model="rasa_model", threshold=0.99
+                    label="mood_unhappy",
+                    pipeline_model="rasa_model",
+                    threshold=0.99,
                 ),
                 ("mood", "assert"): cnd.true(),
             },
@@ -83,9 +86,7 @@ script = {
                 ("mood", "react_good"): HasLabel(
                     label="deny", pipeline_model="rasa_model", threshold=0.95
                 ),
-                ("mood", "react_bad"): HasLabel(
-                    rasa_model, "affirm"
-                ),
+                ("mood", "react_bad"): HasLabel(rasa_model, "affirm"),
             },
         },
         "react_good": {
