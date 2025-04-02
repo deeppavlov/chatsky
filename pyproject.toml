@@ -220,7 +220,8 @@ markers = [
     "none: reserved by allow-skip",
     "needs_dependencies: marks tests as requiring any extra dependencies to run",
     "huggingface: marks tests as requiring huggingface API token to run",
-    "dialogflow: marks tests as requiring dialogflow API token to run"
+    "dialogflow: marks tests as requiring dialogflow API token to run",
+    "rasa: marks tests as requiring rasa server to run"
 ]
 asyncio_mode = "auto"
 

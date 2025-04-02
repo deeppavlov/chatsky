@@ -19,13 +19,13 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.parametrize(
     ["example_module_name", "skip_condition"],
     [
-        ("7_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available or not RASA_ACTIVE),
+        ("3_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available or not RASA_ACTIVE),
         (
-            "5_dialogflow",
+            "2_dialogflow",
             not (os.getenv("GDF_ACCOUNT_JSON") and os.path.exists(os.getenv("GDF_ACCOUNT_JSON")))
             or not dialogflow_available,
         ),
-        ("6_hf_api", os.getenv("HF_API_KEY") is None or not hf_api_available),
+        ("1_hf_api", os.getenv("HF_API_KEY") is None or not hf_api_available),
     ],
 )
 @pytest.mark.rasa
