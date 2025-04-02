@@ -13,17 +13,20 @@ class HasLabel(BaseCondition):
     """
     Use this condition, when you need to check, whether the probability
     of a particular label for the last annotated user utterance surpasses the threshold.
-
-    :param label: String name or a reference to a DatasetItem object, or a collection thereof.
-    :param namespace: Namespace key of a particular model that should detect the dataset_item.
-        If not set, all namespaces will be searched for the required dataset_item.
-    :param threshold: The minimal label probability that triggers a positive response
-        from the function.
     """
 
     label: str
+    """
+    The name of the label to check.
+    """
     pipeline_model: str
+    """
+    The name of the model in Pipeline to use for label checking.
+    """
     threshold: float = 0.9
+    """
+    The minimal label probability that triggers a positive response.
+    """
     # TODO: consider adding history param
 
     async def call(self, ctx: Context) -> bool:
