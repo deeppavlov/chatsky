@@ -182,8 +182,10 @@ pipeline = Pipeline(
             components=[
                 SimpleService(
                     start_condition=All(
-                        ServiceFinished(".pre.SimpleService#0"),
-                        ServiceFinished(".pre.SimpleService#1"),
+                        conditions=[
+                            ServiceFinished(".pre.SimpleService#0"),
+                            ServiceFinished(".pre.SimpleService#1"),
+                        ]
                     ),
                     # Alternative:
                     # ServiceFinished(".pre")

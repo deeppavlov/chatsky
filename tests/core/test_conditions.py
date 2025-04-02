@@ -79,9 +79,9 @@ async def test_any(request_based_ctx, condition, result):
 @pytest.mark.parametrize(
     "condition,result",
     [
-        (cnd.All(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), True),
-        (cnd.All(FaultyCondition(), cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")), False),
-        (cnd.All(cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t1")), False),
+        (cnd.All(conditions=[cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")]), True),
+        (cnd.All(conditions=[FaultyCondition(), cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t")]), False),
+        (cnd.All(conditions=[cnd.Regexp(pattern="t.*"), cnd.Regexp(pattern=".*t1")]), False),
     ],
 )
 async def test_all(request_based_ctx, condition, result):

@@ -81,20 +81,27 @@ toy_script = {
             Tr(
                 dst=dst.Forward(),
                 cnd=cnd.All(
-                    cnd.Regexp(pattern=r"next\b"),
-                    cnd.CheckLastLabels(
-                        labels=[("music_flow", i) for i in ["node2", "node3"]]
-                    ),  # this checks if the current node is
+                    conditions=[
+                        cnd.Regexp(pattern=r"next\b"),
+                        cnd.CheckLastLabels(
+                            labels=[
+                                ("music_flow", i) for i in ["node2", "node3"]
+                            ]
+                        ),
+                    ],
+                    # this checks if the current node is
                     # music_flow.node2 or music_flow.node3
                 ),
             ),
             Tr(
                 dst=dst.Current(),
                 cnd=cnd.All(
-                    cnd.Regexp(pattern=r"repeat", flags=re.I),
-                    cnd.Negation(
-                        cnd.CheckLastLabels(flow_labels=["global_flow"])
-                    ),
+                    conditions=[
+                        cnd.Regexp(pattern=r"repeat", flags=re.I),
+                        cnd.Negation(
+                            cnd.CheckLastLabels(flow_labels=["global_flow"])
+                        ),
+                    ],
                 ),
                 priority=0.2,
             ),

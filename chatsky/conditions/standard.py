@@ -129,9 +129,6 @@ class All(BaseCondition):
     List of conditions.
     """
 
-    def __init__(self, *conditions: BaseCondition):
-        super().__init__(conditions=list(conditions))
-
     async def call(self, ctx: Context) -> bool:
         return all(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
