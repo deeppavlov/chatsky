@@ -206,9 +206,6 @@ class HasCallbackQuery(BaseCondition):
     Query string to find in last request's attachments.
     """
 
-    def __init__(self, query_string: str):
-        super().__init__(query_string=query_string)
-
     async def call(self, ctx: Context) -> bool:
         last_request = ctx.last_request
         if last_request.attachments is None:

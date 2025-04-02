@@ -124,12 +124,12 @@ async def test_has_callback_query(context_factory):
         attachments=[CallbackQuery(query_string="text", extra="extra"), CallbackQuery(query_string="text1")]
     )
 
-    assert await cnd.HasCallbackQuery("text")(ctx) is True
-    assert await cnd.HasCallbackQuery("t")(ctx) is False
-    assert await cnd.HasCallbackQuery("text1")(ctx) is True
+    assert await cnd.HasCallbackQuery(query_string="text")(ctx) is True
+    assert await cnd.HasCallbackQuery(query_string="t")(ctx) is False
+    assert await cnd.HasCallbackQuery(query_string="text1")(ctx) is True
 
 
-@pytest.mark.parametrize("cnd", [cnd.HasText(text=""), cnd.Regexp(pattern=""), cnd.HasCallbackQuery("")])
+@pytest.mark.parametrize("cnd", [cnd.HasText(text=""), cnd.Regexp(pattern=""), cnd.HasCallbackQuery(query_string="")])
 async def test_empty_text(context_factory, cnd):
     ctx = context_factory()
     ctx.requests[1] = Message()
