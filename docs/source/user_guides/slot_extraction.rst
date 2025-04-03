@@ -122,7 +122,7 @@ You can pass any number of names of the slots that you want to extract to this f
 
     from chatsky import proc
 
-    PRE_TRANSITION: {"extract_first_name": proc.Extract("name", "email")}
+    PRE_TRANSITION: {"extract_first_name": proc.Extract(slots=["name", "email"])}
 
 The `conditions` submodule provides a function for checking if specific slots have been extracted.
 

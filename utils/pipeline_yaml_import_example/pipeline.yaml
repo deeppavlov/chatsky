@@ -31,15 +31,14 @@ script:
       PRE_TRANSITION:
         extract_slots:
           chatsky.proc.Extract:
-            - person.name
-            - person.age
+            slots: [person.name, person.age]
       TRANSITIONS:
         - dst: not_provided_slots
           cnd:
             chatsky.cnd.Negation:
               condition:
                 chatsky.cnd.SlotsExtracted:
-                  slots:[person.name, person.age]
+                  slots: [person.name, person.age]
           priority: 0.5
         - dst: name_extracted
           cnd:

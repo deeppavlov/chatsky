@@ -106,7 +106,9 @@ script = {
     },
     "username_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.username")},
+            PRE_TRANSITION: {
+                "get_slot": proc.Extract(slots=["person.username"])
+            },
             TRANSITIONS: [
                 Tr(
                     dst=("email_flow", "ask"),
@@ -125,7 +127,7 @@ script = {
     },
     "email_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.email")},
+            PRE_TRANSITION: {"get_slot": proc.Extract(slots=["person.email"])},
             TRANSITIONS: [
                 Tr(
                     dst=("friend_flow", "ask"),
@@ -146,7 +148,7 @@ script = {
     },
     "friend_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("friend")},
+            PRE_TRANSITION: {"get_slots": proc.Extract(slots=["friend"])},
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter"),
