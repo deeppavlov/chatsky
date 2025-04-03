@@ -110,7 +110,7 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("email_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username"),
+                    cnd=cnd.SlotsExtracted(slots=["person.username"]),
                     priority=1.2,
                 ),
                 Tr(dst=("username_flow", "repeat_question"), priority=0.8),
@@ -129,7 +129,9 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("friend_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username", "person.email"),
+                    cnd=cnd.SlotsExtracted(
+                        slots=["person.username", "person.email"]
+                    ),
                     priority=1.2,
                 ),
                 Tr(dst=("email_flow", "repeat_question"), priority=0.8),
@@ -149,7 +151,8 @@ script = {
                 Tr(
                     dst=("root", "utter"),
                     cnd=cnd.SlotsExtracted(
-                        "friend.first_name", "friend.last_name", mode="any"
+                        slots=["friend.first_name", "friend.last_name"],
+                        mode="any",
                     ),
                     priority=1.2,
                 ),

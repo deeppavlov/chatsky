@@ -39,8 +39,7 @@ script:
             chatsky.cnd.Negation:
               condition:
                 chatsky.cnd.SlotsExtracted:
-                  - person.name
-                  - person.age
+                  slots:[person.name, person.age]
           priority: 0.5
         - dst: name_extracted
           cnd:
@@ -48,19 +47,20 @@ script:
               conditions:
                 - chatsky.cnd.HasText: 
                     text: My name
-                - chatsky.cnd.SlotsExtracted: person.name
+                - chatsky.cnd.SlotsExtracted: 
+                    slots: [person.name]
         - dst: age_extracted
           cnd:
             chatsky.cnd.All:
               conditions:
                 - chatsky.cnd.HasText: 
                     text: years old
-                - chatsky.cnd.SlotsExtracted: person.age
+                - chatsky.cnd.SlotsExtracted: 
+                    slots: [person.age]
         - dst: [final_flow, all_slots_extracted]
           cnd:
             chatsky.cnd.SlotsExtracted:
-              - person.name
-              - person.age
+              slots: [person.name, person.age]
           priority: 1.5
     start:
       RESPONSE:

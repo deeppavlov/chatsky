@@ -74,9 +74,9 @@ async def test_basic_functions(context, manager, log_event_catcher):
     assert len(proc_logs) == 1
     assert len(slot_logs) == 1
 
-    assert await cnd.SlotsExtracted("0", "1", mode="any").wrapped_call(context) is True
-    assert await cnd.SlotsExtracted("0", "1", mode="all").wrapped_call(context) is False
-    assert await cnd.SlotsExtracted("0", mode="all").wrapped_call(context) is True
+    assert await cnd.SlotsExtracted(slots=["0", "1"], mode="any").wrapped_call(context) is True
+    assert await cnd.SlotsExtracted(slots=["0", "1"], mode="all").wrapped_call(context) is False
+    assert await cnd.SlotsExtracted(slots=["0"], mode="all").wrapped_call(context) is True
 
     await proc.Unset("2", "0", "1").wrapped_call(context)
     assert manager.is_slot_extracted("0") is False
@@ -85,7 +85,7 @@ async def test_basic_functions(context, manager, log_event_catcher):
 
     assert len(proc_logs) == 2
 
-    assert await cnd.SlotsExtracted("0", "1", mode="any").wrapped_call(context) is False
+    assert await cnd.SlotsExtracted(slots=["0", "1"], mode="any").wrapped_call(context) is False
 
 
 async def test_unset_all(context, manager, monkeypatch, call_logger_factory):
