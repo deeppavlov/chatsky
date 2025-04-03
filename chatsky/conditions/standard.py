@@ -14,7 +14,7 @@ import logging
 import re
 from functools import cached_property
 
-from pydantic import Field, computed_field, field_validator
+from pydantic import computed_field, field_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -41,7 +41,7 @@ class ExactMatch(BaseCondition):
     Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
     """
 
-    @field_validator('match', mode='before')
+    @field_validator("match", mode="before")
     def validate_match(obj):
         return Message.model_validate(obj)
 

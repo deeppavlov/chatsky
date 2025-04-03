@@ -147,15 +147,30 @@ script = {
         LOCAL: {
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch(match="/start")),
-                Tr(dst="formatted_node", cnd=cnd.HasCallbackQuery(query_string="formatted")),
+                Tr(
+                    dst="formatted_node",
+                    cnd=cnd.HasCallbackQuery(query_string="formatted"),
+                ),
                 Tr(
                     dst="attachments_node",
                     cnd=cnd.HasCallbackQuery(query_string="attachments"),
                 ),
-                Tr(dst="secret_node", cnd=cnd.HasCallbackQuery(query_string="secret")),
-                Tr(dst="thumbnail_node", cnd=cnd.HasCallbackQuery(query_string="thumbnail")),
-                Tr(dst="hash_init_node", cnd=cnd.HasCallbackQuery(query_string="hash")),
-                Tr(dst="main_node", cnd=cnd.HasCallbackQuery(query_string="restart")),
+                Tr(
+                    dst="secret_node",
+                    cnd=cnd.HasCallbackQuery(query_string="secret"),
+                ),
+                Tr(
+                    dst="thumbnail_node",
+                    cnd=cnd.HasCallbackQuery(query_string="thumbnail"),
+                ),
+                Tr(
+                    dst="hash_init_node",
+                    cnd=cnd.HasCallbackQuery(query_string="hash"),
+                ),
+                Tr(
+                    dst="main_node",
+                    cnd=cnd.HasCallbackQuery(query_string="restart"),
+                ),
             ]
         },
         "start_node": {},
