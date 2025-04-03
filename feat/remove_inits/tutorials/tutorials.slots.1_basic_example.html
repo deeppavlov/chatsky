@@ -718,7 +718,7 @@ Group 2: friend.first_name, friend.last_name
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;email_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="s2">&quot;person.username&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.username&quot;</span><span class="p">]),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_question&quot;</span><span class="p">),</span> <span class="n">priority</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
@@ -737,7 +737,9 @@ Group 2: friend.first_name, friend.last_name
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;friend_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="s2">&quot;person.username&quot;</span><span class="p">,</span> <span class="s2">&quot;person.email&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span>
+                        <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.username&quot;</span><span class="p">,</span> <span class="s2">&quot;person.email&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;email_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_question&quot;</span><span class="p">),</span> <span class="n">priority</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
@@ -757,7 +759,8 @@ Group 2: friend.first_name, friend.last_name
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="s2">&quot;utter&quot;</span><span class="p">),</span>
                     <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span>
-                        <span class="s2">&quot;friend.first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;friend.last_name&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;any&quot;</span>
+                        <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;friend.first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;friend.last_name&quot;</span><span class="p">],</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>

@@ -130,8 +130,8 @@ The `conditions` submodule provides a function for checking if specific slots ha
     
     from chatsky import cnd
 
-    TRANSITIONS: [Tr(dst="all_information", cnd=cnd.SlotsExtracted("name", "email", mode="all"))]
-    TRANSITIONS: [Tr(dst="partial_information", cnd=cnd.SlotsExtracted("name", "email", mode="any"))]
+    TRANSITIONS: [Tr(dst="all_information", cnd=cnd.SlotsExtracted(slots=["name", "email"], mode="all"))]
+    TRANSITIONS: [Tr(dst="partial_information", cnd=cnd.SlotsExtracted(slots=["name", "email"], mode="any"))]
 
 .. note::
 
