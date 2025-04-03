@@ -111,46 +111,52 @@ async def get_langchain_context(
     history = await context_to_history(ctx, **history_args)
     logger.debug(f"Position config: {position_config}")
     prompts: list[tuple[list[Union[HumanMessage, AIMessage, SystemMessage]], float]] = []
+    
+    # Add system prompt
     if system_prompt.text != "":
-        prompts.append(
-            ([await message_to_langchain(system_prompt, ctx, source="system")], position_config.system_prompt)
-        )
+        system_prompt_obj = Prompt(message=system_prompt)
+        system_messages = await system_prompt_obj.to_langchain_messages(ctx, source="system", position_config=position_config)
+        prompts.append((system_messages, position_config.system_prompt))
+    
+    # Add history
     prompts.append((history, position_config.history))
-
     logger.debug(f"System prompt: {prompts[0]}")
 
+    # Add miscellaneous prompts
     for element_name, element in ctx.current_node.misc.items():
         if re.compile(prompt_misc_filter).match(element_name):
-
             prompt = Prompt.model_validate(element)
-            prompt_langchain_message = await message_to_langchain(await prompt.message(ctx), ctx, source="human")
-
+            prompt_messages = await prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
             prompts.append(
                 (
-                    [prompt_langchain_message],
+                    prompt_messages,
                     prompt.position if prompt.position is not None else position_config.misc_prompt,
                 )
             )
 
-    call_prompt_text = await call_prompt.message(ctx)
-    if call_prompt_text.text != "":
-        call_prompt_message = await message_to_langchain(call_prompt_text, ctx, source="human")
+    # Add call prompt
+    call_messages = await call_prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
+    if call_messages:  # Only add if there are messages (non-empty text)
         prompts.append(
             (
-                [call_prompt_message],
+                call_messages,
                 call_prompt.position if call_prompt.position is not None else position_config.call_prompt,
             )
         )
 
+    # Add last turn messages
     last_turn_request = await ctx.requests.get(ctx.current_turn_id)
     last_turn_response = await ctx.responses.get(ctx.current_turn_id)
 
     if last_turn_request:
-        prompts.append(
-            ([await message_to_langchain(last_turn_request, ctx, source="human")], position_config.last_turn)
-        )
+        request_prompt = Prompt(message=last_turn_request)
+        request_messages = await request_prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
+        prompts.append((request_messages, position_config.last_turn))
+    
     if last_turn_response:
-        prompts.append(([await message_to_langchain(last_turn_response, ctx, source="ai")], position_config.last_turn))
+        response_prompt = Prompt(message=last_turn_response)
+        response_messages = await response_prompt.to_langchain_messages(ctx, source="ai", position_config=position_config)
+        prompts.append((response_messages, position_config.last_turn))
 
     logger.debug(f"Prompts: {prompts}")
     prompts = sorted(prompts, key=lambda x: x[1])
