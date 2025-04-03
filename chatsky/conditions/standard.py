@@ -14,7 +14,7 @@ import logging
 import re
 from functools import cached_property
 
-from pydantic import Field, computed_field
+from pydantic import Field, computed_field, field_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -41,18 +41,20 @@ class ExactMatch(BaseCondition):
     Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
     """
 
-    @cached_property
-    def typecast_match(self) -> Message:
-        return Message.model_validate(self.match)
+    @field_validator('match', mode='before')
+    def validate_match(obj):
+        return Message.model_validate(obj)
 
     async def call(self, ctx: Context) -> bool:
+        match: Message = self.match
+
         request = ctx.last_request
-        for field in self.typecast_match.model_fields:
-            match_value = self.typecast_match.__getattribute__(field)
+        for field in match.model_fields:
+            match_value = match.__getattribute__(field)
             if self.skip_none and match_value is None:
                 continue
             if field in request.model_fields.keys():
-                if request.__getattribute__(field) != self.typecast_match.__getattribute__(field):
+                if request.__getattribute__(field) != match.__getattribute__(field):
                     return False
             else:
                 return False
@@ -159,38 +161,35 @@ class CheckLastLabels(BaseCondition):
     :py:attr:`.labels` or if its :py:attr:`~.AbsoluteNodeLabel.flow_name` is in :py:attr:`.flow_labels`.
     """
 
-    flow_labels: List[str] = Field(default_factory=list)
+    flow_labels: Optional[List[str]] = None
     """
     List of flow names to find in the last labels.
     """
-    labels: List[AbsoluteNodeLabel] = Field(default_factory=list)
+    labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None
     """
     List of labels to find in the last labels.
 
     Is initialized according to :py:data:`~.AbsoluteNodeLabelInitTypes`.
     """
-    last_n_indices: int = Field(default=1, ge=1)
+    last_n_indices: int = 1
     """
     Number of labels to check.
     """
 
-    def __init__(
-        self,
-        *,
-        flow_labels: Optional[List[str]] = None,
-        labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None,
-        last_n_indices: int = 1
-    ):
-        if flow_labels is None:
-            flow_labels = []
-        if labels is None:
-            labels = []
-        super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
+    @field_validator("labels", mode="before")
+    def validate_match(obj):
+        if obj is None:
+            return None
+        return [AbsoluteNodeLabel.model_validate(label) for label in obj]
 
     async def call(self, ctx: Context) -> bool:
+        self_labels: List[AbsoluteNodeLabel] = self.labels or []
+        self_flow_labels: List[str] = self.flow_labels or []
+
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
+
         for label in labels:
-            if label.flow_name in self.flow_labels or label in self.labels:
+            if label.flow_name in self_flow_labels or label in self_labels:
                 return True
         return False
 
