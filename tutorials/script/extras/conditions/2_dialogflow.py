@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Google Dialogflow Integration Tutorial
+# ML Conditions: 2. Google Dialogflow
 
 This tutorial demonstrates how to integrate Google Dialogflow with Chatsky to
 create more sophisticated

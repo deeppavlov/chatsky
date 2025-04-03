@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Using Hugging Face API Models in Chatsky
+# ML Conditions: 1. Hugging Face API
 
 This tutorial demonstrates how to integrate web-hosted Hugging Face models
 into your conversational services using Chatsky.
@@ -59,7 +59,7 @@ LABEL_0 => "SELLING_INTENT" and LABEL_1 => "BUYING_INTENT".
 # %%
 api_model = HFAPIModel(
     model="obsei-ai/sell-buy-intent-classifier-bert-mini",
-    api_key=os.getenv("HF_API_KEY") or input("Enter HF API key:"),
+    api_key=os.getenv("HF_API_KEY", "api_key"),
 )
 
 
