@@ -718,19 +718,23 @@ Note: you may need to restart the kernel to use updated packages.
         <span class="p">},</span>
         <span class="s2">&quot;print&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">PRE_RESPONSE</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;partial_extraction&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="s2">&quot;partial_extraction&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;partial_extraction&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span>
+                    <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;partial_extraction&quot;</span><span class="p">]</span>
+                <span class="p">),</span>
                 <span class="c1"># partial extraction is always successful;</span>
                 <span class="c1"># success_only doesn&#39;t matter</span>
                 <span class="s2">&quot;success_only_extraction&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span>
-                    <span class="s2">&quot;success_only_extraction&quot;</span><span class="p">,</span> <span class="n">success_only</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;success_only_extraction&quot;</span><span class="p">],</span> <span class="n">success_only</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">),</span>
                 <span class="c1"># success_only is True by default</span>
                 <span class="s2">&quot;success_only_false&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span>
-                    <span class="s2">&quot;success_only_false&quot;</span><span class="p">,</span> <span class="n">success_only</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;success_only_false&quot;</span><span class="p">],</span> <span class="n">success_only</span><span class="o">=</span><span class="kc">False</span>
                 <span class="p">),</span>
                 <span class="s2">&quot;sub_slot_success_only_extraction&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span>
-                    <span class="s2">&quot;sub_slot_success_only_extraction.email&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;sub_slot_success_only_extraction.date&quot;</span><span class="p">,</span>
+                    <span class="n">slots</span><span class="o">=</span><span class="p">[</span>
+                        <span class="s2">&quot;sub_slot_success_only_extraction.email&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;sub_slot_success_only_extraction.date&quot;</span><span class="p">,</span>
+                    <span class="p">],</span>
                     <span class="n">success_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">},</span>

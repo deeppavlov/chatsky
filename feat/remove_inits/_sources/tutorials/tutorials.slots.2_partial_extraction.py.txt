@@ -124,19 +124,23 @@ script = {
         },
         "print": {
             PRE_RESPONSE: {
-                "partial_extraction": proc.Extract("partial_extraction"),
+                "partial_extraction": proc.Extract(
+                    slots=["partial_extraction"]
+                ),
                 # partial extraction is always successful;
                 # success_only doesn't matter
                 "success_only_extraction": proc.Extract(
-                    "success_only_extraction", success_only=True
+                    slots=["success_only_extraction"], success_only=True
                 ),
                 # success_only is True by default
                 "success_only_false": proc.Extract(
-                    "success_only_false", success_only=False
+                    slots=["success_only_false"], success_only=False
                 ),
                 "sub_slot_success_only_extraction": proc.Extract(
-                    "sub_slot_success_only_extraction.email",
-                    "sub_slot_success_only_extraction.date",
+                    slots=[
+                        "sub_slot_success_only_extraction.email",
+                        "sub_slot_success_only_extraction.date",
+                    ],
                     success_only=True,
                 ),
             },
