@@ -46,9 +46,6 @@ class Unset(BaseProcessing):
     slots: List[SlotName]
     """A list of slot names to extract."""
 
-    def __init__(self, *slots: SlotName):
-        super().__init__(slots=slots)
-
     async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         for slot in self.slots:

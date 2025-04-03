@@ -78,7 +78,7 @@ async def test_basic_functions(context, manager, log_event_catcher):
     assert await cnd.SlotsExtracted(slots=["0", "1"], mode="all").wrapped_call(context) is False
     assert await cnd.SlotsExtracted(slots=["0"], mode="all").wrapped_call(context) is True
 
-    await proc.Unset("2", "0", "1").wrapped_call(context)
+    await proc.Unset(slots=["2", "0", "1"]).wrapped_call(context)
     assert manager.is_slot_extracted("0") is False
     assert manager.is_slot_extracted("1") is False
     assert isinstance(manager.get_extracted_slot("err").extracted_value, RuntimeError)
