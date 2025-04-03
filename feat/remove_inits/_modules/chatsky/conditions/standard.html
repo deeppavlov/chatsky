@@ -540,7 +540,7 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">computed_field</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">computed_field</span><span class="p">,</span> <span class="n">field_validator</span>
 
 <span class="kn">from</span> <span class="nn">chatsky.core</span> <span class="kn">import</span> <span class="n">BaseCondition</span><span class="p">,</span> <span class="n">Context</span>
 <span class="kn">from</span> <span class="nn">chatsky.core.message</span> <span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">MessageInitTypes</span><span class="p">,</span> <span class="n">CallbackQuery</span>
@@ -569,20 +569,25 @@
 <span class="sd">    Whether fields set to ``None`` in :py:attr:`.match` should not be compared.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">typecast_match</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Message</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="p">)</span>
+<div class="viewcode-block" id="ExactMatch.validate_match">
+<a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.ExactMatch.validate_match">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;match&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">validate_match</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Message</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="ExactMatch.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.ExactMatch.call">[docs]</a>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">match</span><span class="p">:</span> <span class="n">Message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">match</span>
+
         <span class="n">request</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">last_request</span>
-        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">typecast_match</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
-            <span class="n">match_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">typecast_match</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">match</span><span class="o">.</span><span class="n">model_fields</span><span class="p">:</span>
+            <span class="n">match_value</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_none</span> <span class="ow">and</span> <span class="n">match_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">typecast_match</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">!=</span> <span class="n">match</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
                     <span class="k">return</span> <span class="kc">False</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
@@ -723,40 +728,40 @@
 <span class="sd">    :py:attr:`.labels` or if its :py:attr:`~.AbsoluteNodeLabel.flow_name` is in :py:attr:`.flow_labels`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">flow_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">flow_labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List of flow names to find in the last labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AbsoluteNodeLabelInitTypes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List of labels to find in the last labels.</span>
 
 <span class="sd">    Is initialized according to :py:data:`~.AbsoluteNodeLabelInitTypes`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">last_n_indices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">last_n_indices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Number of labels to check.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="o">*</span><span class="p">,</span>
-        <span class="n">flow_labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AbsoluteNodeLabelInitTypes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">last_n_indices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="p">):</span>
-        <span class="k">if</span> <span class="n">flow_labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">flow_labels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">flow_labels</span><span class="o">=</span><span class="n">flow_labels</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">last_n_indices</span><span class="o">=</span><span class="n">last_n_indices</span><span class="p">)</span>
+<div class="viewcode-block" id="CheckLastLabels.validate_match">
+<a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.CheckLastLabels.validate_match">[docs]</a>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">validate_match</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span></div>
+
 
 <div class="viewcode-block" id="CheckLastLabels.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.CheckLastLabels.call">[docs]</a>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">self_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">self_flow_labels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_labels</span> <span class="ow">or</span> <span class="p">[]</span>
+
         <span class="n">labels</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ctx</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">labels</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">last_n_indices</span> <span class="p">:])</span>  <span class="c1"># noqa: E203</span>
+
         <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">label</span><span class="o">.</span><span class="n">flow_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow_labels</span> <span class="ow">or</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">label</span><span class="o">.</span><span class="n">flow_name</span> <span class="ow">in</span> <span class="n">self_flow_labels</span> <span class="ow">or</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">self_labels</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 </div>
@@ -775,9 +780,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query string to find in last request&#39;s attachments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="n">query_string</span><span class="p">)</span>
 
 <div class="viewcode-block" id="HasCallbackQuery.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.HasCallbackQuery.call">[docs]</a>
