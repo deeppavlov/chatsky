@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
+from collections import defaultdict
 from typing import Union, List, Dict, Optional, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
@@ -115,9 +116,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    context_lock: Optional[Any] = None
-    """
-    """
 
     def __init__(
         self,
@@ -163,7 +161,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 empty_fields.add(k)
         for field in empty_fields:
             del init_dict[field]
-        self.context_lock = {} #ContextLock()
+        self.context_lock = defaultdict(asyncio.Lock)
         super().__init__(**init_dict)
         self.services_pipeline  # cache services
 
@@ -257,32 +255,28 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         """
         logger.info(f"Running pipeline for context {ctx_id}.")
         logger.debug(f"Received request: {request}.")
-        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
-        if update_ctx_misc is not None:
-            ctx.misc.update(update_ctx_misc)
+        async with self.context_lock[ctx_id]:
+            ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
-        if self.slots is not None:
-            ctx.framework_data.slot_manager.set_root_slot(self.slots)
+            if update_ctx_misc is not None:
+                ctx.misc.update(update_ctx_misc)
 
-        ctx.framework_data.pipeline = self
-        initialize_service_states(ctx, self.services_pipeline)
+            if self.slots is not None:
+                ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
-        async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
-            await asyncio.wait_for(
-                self._process_request(ctx_id, update, pipeline_runner),
-                timeout=worker_timeout,
-            )
+            ctx.framework_data.pipeline = self
+            initialize_service_states(ctx, self.services_pipeline)
 
-        ctx.current_turn_id = ctx.current_turn_id + 1
+            ctx.current_turn_id = ctx.current_turn_id + 1
 
-        ctx.requests[ctx.current_turn_id] = request
-        await self.services_pipeline(ctx)
+            ctx.requests[ctx.current_turn_id] = request
+            await self.services_pipeline(ctx)
 
-        ctx.framework_data.service_states.clear()
-        ctx.framework_data.pipeline = None
+            ctx.framework_data.service_states.clear()
+            ctx.framework_data.pipeline = None
 
-        await ctx.store()
+            await ctx.store()
 
         return ctx
 
