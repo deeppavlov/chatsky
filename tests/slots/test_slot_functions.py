@@ -105,19 +105,19 @@ class TestTemplateFilling:
                 raise RuntimeError()
 
         with pytest.raises(RuntimeError):
-            await rsp.FilledTemplate(MyResponse())(context)
+            await rsp.FilledTemplate(template=MyResponse())(context)
 
     async def test_missing_text(self, context, log_event_catcher):
         logs = log_event_catcher(rsp_logger, level=logging.WARN)
 
-        assert await rsp.FilledTemplate({}).wrapped_call(context) == Message()
+        assert await rsp.FilledTemplate(template={}).wrapped_call(context) == Message()
         assert len(logs) == 1
 
     async def test_normal_execution(self, context, manager):
         await manager.extract_all(context)
 
         template_message = Message(text="{0} {1}")
-        assert await rsp.FilledTemplate(template_message).wrapped_call(context) == Message(text="4 5")
+        assert await rsp.FilledTemplate(template=template_message).wrapped_call(context) == Message(text="4 5")
         assert template_message.text == "{0} {1}"
 
     @pytest.mark.parametrize(
@@ -126,7 +126,9 @@ class TestTemplateFilling:
     async def test_on_exception(self, context, manager, on_exception, result):
         await manager.extract_all(context)
 
-        assert await rsp.FilledTemplate("{0} {1} {2}", on_exception=on_exception).wrapped_call(context) == result
+        assert (
+            await rsp.FilledTemplate(template="{0} {1} {2}", on_exception=on_exception).wrapped_call(context) == result
+        )
 
     async def test_fill_template_proc_empty(self, context):
         context.framework_data.current_node = Node()

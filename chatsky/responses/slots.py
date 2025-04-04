@@ -7,9 +7,11 @@ Slot-related responses.
 from typing import Union, Literal
 import logging
 
+from pydantic import TypeAdapter, field_validator
+
 from chatsky.core import Context, Message, BaseResponse
-from chatsky.core.script_function import AnyResponse
 from chatsky.core.message import MessageInitTypes
+from chatsky.core.script_function import AnyResponse
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ class FilledTemplate(BaseResponse):
     "Your username is admin".
     """
 
-    template: AnyResponse
+    template: Union[MessageInitTypes, BaseResponse]
     """A response to use as a template."""
     on_exception: Literal["keep_template", "return_none"] = "return_none"
     """
@@ -36,16 +38,15 @@ class FilledTemplate(BaseResponse):
     - "return_none": an empty message is returned.
     """
 
-    def __init__(
-        self,
-        template: Union[MessageInitTypes, BaseResponse],
-        on_exception: Literal["keep_template", "return_none"] = "return_none",
-    ):
-        super().__init__(template=template, on_exception=on_exception)
+    @field_validator("template", mode="before")
+    def validate_template(obj) -> AnyResponse:
+        return TypeAdapter(AnyResponse).validate_python(obj)
 
     async def call(self, ctx: Context) -> MessageInitTypes:
-        result = await self.template(ctx)
+        template = self.template
 
+        result = await template(ctx)
+        print(result)
         if result.text is not None:
             filled = ctx.framework_data.slot_manager.fill_template(result.text)
             if isinstance(filled, str):

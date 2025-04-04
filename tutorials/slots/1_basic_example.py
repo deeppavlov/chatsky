@@ -176,7 +176,7 @@ script = {
         },
         "utter": {
             RESPONSE: rsp.FilledTemplate(
-                "Your friend is {friend.first_name} {friend.last_name}"
+                template="Your friend is {friend.first_name} {friend.last_name}"
             ),
             TRANSITIONS: [Tr(dst=("root", "utter_alternative"))],
         },

@@ -130,8 +130,10 @@ toy_script = {
         },
         "node1": {
             RESPONSE: rsp.RandomChoice(
-                "Hi, what is up?",
-                "Hello, how are you?",
+                responses=(
+                    "Hi, what is up?",
+                    "Hello, how are you?",
+                )
             ),
             # Random choice from candidate list.
             TRANSITIONS: [
