@@ -116,7 +116,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    context_lock: defaultdict = Field(default_factory=defaultdict, validate_default=True)
+    context_lock: dict[str, asyncio.Lock] = Field(default_factory=dict, validate_default=True)
     """
     A :py:class:`~.defaultdict` instance for this pipeline
     to prevent new requests interrupting existing :py:class:`~.Context` updates.
@@ -258,14 +258,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         :return: Modified context ``ctx_id``.
         """
-        logger.info(f"Running pipeline for context {ctx_id}.")
-        logger.debug(f"Received request: {request}.")
 
-        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
         if ctx_id is None:
+            ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
             ctx_id = ctx.id
+        else:
+            ctx = None
 
         async with self.context_lock[ctx_id]:
+            logger.info(f"Running pipeline for context {ctx_id}.")
+            logger.debug(f"Received request: {request}.")
+            if ctx is None:
+                ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
             if update_ctx_misc is not None:
                 ctx.misc.update(update_ctx_misc)
