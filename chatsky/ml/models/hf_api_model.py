@@ -9,7 +9,6 @@ to use remotely hosted HuggingFace models via the HuggingFace inference API.
 import json
 import asyncio
 import logging
-from async_lru import alru_cache
 from typing import Optional
 from urllib.parse import urljoin
 from http import HTTPStatus
@@ -69,7 +68,6 @@ class HFAPIModel(ExtrasBaseAPIModel):
 
     # TODO: Add `transform` method
 
-    @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
         client = httpx.AsyncClient()
         retries = 0

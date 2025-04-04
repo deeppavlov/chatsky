@@ -8,7 +8,6 @@ that queries an external RASA NLU Server for utterance classification.
 
 import logging
 import asyncio
-from async_lru import alru_cache
 import json
 from urllib.parse import urljoin
 from typing import Optional, List
@@ -95,7 +94,6 @@ class RasaModel(ExtrasBaseAPIModel):
             self.headers["Authorization"] = "Bearer " + jwt_token
         self.retries = retries
 
-    @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
         client = httpx.AsyncClient()
         message = {"text": request}

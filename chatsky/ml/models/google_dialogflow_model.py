@@ -10,7 +10,6 @@ import logging
 import uuid
 import json
 from pathlib import Path
-from async_lru import alru_cache
 
 from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 
@@ -73,7 +72,6 @@ class GoogleDialogFlowModel(ExtrasBaseAPIModel):
             info = json.load(file)
         return cls(model=info, language=language)
 
-    @alru_cache(maxsize=10)
     async def predict(self, request: str) -> dict:
         session_id = uuid.uuid4()
         session_client = dialogflow_v2.SessionsAsyncClient(credentials=self._credentials)
