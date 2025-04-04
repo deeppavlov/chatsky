@@ -10,7 +10,6 @@ including :py:class:`.Actor`.
 
 from __future__ import annotations
 import asyncio
-from asyncio.locks import Lock
 import logging
 from functools import cached_property
 from collections import defaultdict
@@ -117,7 +116,10 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    context_lock: Dict = Field(default_factory=dict)
+    context_lock: Dict[str, asyncio.Lock] = Field(default_factory=lambda: defaultdict(asyncio.Lock))
+    """
+    Dictionary of asyncio locks for context synchronization.
+    """
 
     def __init__(
         self,
@@ -136,7 +138,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
         parallelize_processing: bool = None,
-        context_lock: dict = {}
+        context_lock: dict = None,
     ):
         if fallback_label is None:
             fallback_label = start_label
@@ -155,7 +157,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "after_handler": after_handler,
             "timeout": timeout,
             "parallelize_processing": parallelize_processing,
-            "context_lock": context_lock
+            "context_lock": context_lock,
         }
         empty_fields = set()
         for k, v in init_dict.items():
@@ -165,7 +167,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 empty_fields.add(k)
         for field in empty_fields:
             del init_dict[field]
-        self.context_lock = defaultdict(asyncio.Lock)
         super().__init__(**init_dict)
         self.services_pipeline  # cache services
 
