@@ -116,7 +116,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-
+    context_lock: defaultdict = Field(default_factory=defaultdict, validate_default=True)
+    """
+    A :py:class:`~.defaultdict` instance for this pipeline
+    to prevent new requests interrupting existing :py:class:`~.Context` updates.
+    """
     def __init__(
         self,
         script: Union[Script, dict],
