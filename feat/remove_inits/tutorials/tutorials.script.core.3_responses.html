@@ -727,8 +727,10 @@ Note: you may need to restart the kernel to use updated packages.
         <span class="p">},</span>
         <span class="s2">&quot;node1&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">RESPONSE</span><span class="p">:</span> <span class="n">rsp</span><span class="o">.</span><span class="n">RandomChoice</span><span class="p">(</span>
-                <span class="s2">&quot;Hi, what is up?&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Hello, how are you?&quot;</span><span class="p">,</span>
+                <span class="n">responses</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">&quot;Hi, what is up?&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Hello, how are you?&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">),</span>
             <span class="c1"># Random choice from candidate list.</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>

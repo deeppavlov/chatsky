@@ -154,7 +154,7 @@ extracted slot values.
     RESPONSE: "Your first name: {name}"
 
 
-    RESPONSE: rsp.FilledTemplate("Your first name: {name}")
+    RESPONSE: rsp.FilledTemplate(template="Your first name: {name}")
 
 An example of script utilizing slot extraction can be found in the
 `tutorials section <../tutorials/tutorials.slots.1_basic_example.html>`_.

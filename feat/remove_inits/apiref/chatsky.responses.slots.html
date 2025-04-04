@@ -881,7 +881,7 @@
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.responses.slots.FilledTemplate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FilledTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_exception</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'return_none'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/slots.html#FilledTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.slots.FilledTemplate" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FilledTemplate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/slots.html#FilledTemplate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.slots.FilledTemplate" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a></p>
 <p>Fill template with slot values.
 The <cite>text</cite> attribute of the template message should be a format-string:
@@ -891,7 +891,7 @@ it would return a copy of the message with the following text:
 “Your username is admin”.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.responses.slots.FilledTemplate.template">
-<span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedAlias</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.ConstResponse" title="chatsky.core.script_function.ConstResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstResponse</span></code></a><span class="pre">,</span> <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#chatsky.responses.slots.FilledTemplate.template" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">],</span> <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#chatsky.responses.slots.FilledTemplate.template" title="Link to this definition">#</a></dt>
 <dd><p>A response to use as a template.</p>
 </dd></dl>
 
@@ -903,6 +903,16 @@ it would return a copy of the message with the following text:
 <li><p>“keep_template”: <a class="reference internal" href="#chatsky.responses.slots.FilledTemplate.template" title="chatsky.responses.slots.FilledTemplate.template"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template</span></code></a> is returned, unfilled.</p></li>
 <li><p>“return_none”: an empty message is returned.</p></li>
 </ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.responses.slots.FilledTemplate.validate_template">
+<span class="sig-name descname"><span class="pre">validate_template</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/slots.html#FilledTemplate.validate_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.slots.FilledTemplate.validate_template" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.ConstResponse" title="chatsky.core.script_function.ConstResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstResponse</span></code></a>, <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -970,6 +980,7 @@ it would return a copy of the message with the following text:
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.slots.FilledTemplate"><code class="docutils literal notranslate"><span class="pre">FilledTemplate</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.slots.FilledTemplate.template"><code class="docutils literal notranslate"><span class="pre">FilledTemplate.template</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.slots.FilledTemplate.on_exception"><code class="docutils literal notranslate"><span class="pre">FilledTemplate.on_exception</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.slots.FilledTemplate.validate_template"><code class="docutils literal notranslate"><span class="pre">FilledTemplate.validate_template()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.slots.FilledTemplate.call"><code class="docutils literal notranslate"><span class="pre">FilledTemplate.call()</span></code></a></li>
 </ul>
 </li>

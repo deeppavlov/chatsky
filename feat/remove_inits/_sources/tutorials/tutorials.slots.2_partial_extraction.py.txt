@@ -145,7 +145,7 @@ script = {
                 ),
             },
             RESPONSE: rsp.FilledTemplate(
-                "Extracted slots:\n"
+                template="Extracted slots:\n"
                 "  Group with partial extraction:\n"
                 "    {partial_extraction}\n"
                 "  Group with success_only:\n"

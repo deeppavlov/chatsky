@@ -881,14 +881,19 @@
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.responses.standard.RandomChoice">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RandomChoice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">responses</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/standard.html#RandomChoice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.standard.RandomChoice" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RandomChoice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/standard.html#RandomChoice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.standard.RandomChoice" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a></p>
 <p>Return a random message from <a class="reference internal" href="#chatsky.responses.standard.RandomChoice.responses" title="chatsky.responses.standard.RandomChoice.responses"><code class="xref py py-attr docutils literal notranslate"><span class="pre">responses</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.responses.standard.RandomChoice.responses">
-<span class="sig-name descname"><span class="pre">responses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#chatsky.responses.standard.RandomChoice.responses" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">responses</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]]]</span></em><a class="headerlink" href="#chatsky.responses.standard.RandomChoice.responses" title="Link to this definition">#</a></dt>
 <dd><p>A list of messages to choose from.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.responses.standard.RandomChoice.validate_responses">
+<span class="sig-name descname"><span class="pre">validate_responses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/standard.html#RandomChoice.validate_responses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.standard.RandomChoice.validate_responses" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.responses.standard.RandomChoice.call">
@@ -954,6 +959,7 @@
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Standard Responses</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.standard.RandomChoice"><code class="docutils literal notranslate"><span class="pre">RandomChoice</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.standard.RandomChoice.responses"><code class="docutils literal notranslate"><span class="pre">RandomChoice.responses</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.standard.RandomChoice.validate_responses"><code class="docutils literal notranslate"><span class="pre">RandomChoice.validate_responses()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.standard.RandomChoice.call"><code class="docutils literal notranslate"><span class="pre">RandomChoice.call()</span></code></a></li>
 </ul>
 </li>
