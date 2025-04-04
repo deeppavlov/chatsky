@@ -161,8 +161,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 empty_fields.add(k)
         for field in empty_fields:
             del init_dict[field]
-        self.context_lock = defaultdict(asyncio.Lock)
         super().__init__(**init_dict)
+        self.context_lock = defaultdict(asyncio.Lock)
         self.services_pipeline  # cache services
 
     @classmethod
