@@ -116,11 +116,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    context_lock: dict[str, asyncio.Lock] = Field(default_factory=dict, validate_default=True)
-    """
-    A :py:class:`~.defaultdict` instance for this pipeline
-    to prevent new requests interrupting existing :py:class:`~.Context` updates.
-    """
 
     def __init__(
         self,
