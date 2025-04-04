@@ -155,6 +155,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "after_handler": after_handler,
             "timeout": timeout,
             "parallelize_processing": parallelize_processing,
+            "context_lock": context_lock
         }
         empty_fields = set()
         for k, v in init_dict.items():
