@@ -7,7 +7,6 @@ When defining custom label-scoring models, always inherit from this class.
 
 from copy import copy
 from abc import ABC, abstractmethod
-import uuid
 
 
 class ExtrasBaseAPIModel(ABC):
