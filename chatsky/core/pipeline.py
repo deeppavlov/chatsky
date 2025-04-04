@@ -121,6 +121,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     A :py:class:`~.defaultdict` instance for this pipeline
     to prevent new requests interrupting existing :py:class:`~.Context` updates.
     """
+
     def __init__(
         self,
         script: Union[Script, dict],
