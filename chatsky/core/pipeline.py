@@ -13,7 +13,7 @@ import asyncio
 import logging
 from functools import cached_property
 from collections import defaultdict
-from typing import Union, List, Dict, Optional, Any, TYPE_CHECKING
+from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.core.script import Script
