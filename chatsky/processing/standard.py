@@ -50,33 +50,26 @@ class ModifyResponse(BaseProcessing, abc.ABC):
 
 class AddFallbackResponses(ModifyResponse):
     """
-    ModifyResponse with dynamical pre-response processing to handle
-    exceptions from a user-provided exceptions dictionary
-    and storing them in :py:attr:`ctx.framework_data.response_exception`.
+    ModifyResponse to handlie exceptions dynamically using a user-provided
+    dictionary of exception-to-response mappings.
+    When an exception occurs, its string representation is stored in
+    :py:attr:`ctx.framework_data.response_exception`, and a corresponding
+    fallback response is used.
 
     Example:
 
     .. code-block:: python
+        # Usage example
 
-        class ReturnException(BaseResponse):
-            async def call(self, ctx: Context):
-                return ctx.framework_data.response_exception
-
-        # Define user-provided exceptions dictionary
-        exceptions = {
-            "OverflowError": "Overflow!",
-            "ValueError": ReturnException(),
-            "Else": "Other exception occured",
+        PRE_RESPONSE: {
+            "add_fallback_responses": AddFallbackResponses(
+                exception_responses={
+                    "OverflowError": "Overflow!",
+                    "ValueError": MyResponse(),
+                    "Else": "Other exception occured",
+                }
+            )
         }
-
-        # AddFallbackResponses class initialization
-        fallback_response = AddFallbackResponses(exception_responses=exceptions)
-
-        # Apply fallback response pre-processing
-        await fallback_response(ctx)
-
-        # Get final response
-        await ctx.current_node.response(ctx)
 
     """
 
