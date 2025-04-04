@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/telegram/abstract
+:doc_version: feat/context_lock/
+
+.. automodule:: chatsky.messengers.telegram.abstract
+   :members:
+   :undoc-members:
+   :show-inheritance:
