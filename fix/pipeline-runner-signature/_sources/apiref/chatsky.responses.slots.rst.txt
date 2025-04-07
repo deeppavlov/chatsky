@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/slots
+:doc_version: fix/pipeline-runner-signature/
+
+.. automodule:: chatsky.responses.slots
+   :members:
+   :undoc-members:
+   :show-inheritance:

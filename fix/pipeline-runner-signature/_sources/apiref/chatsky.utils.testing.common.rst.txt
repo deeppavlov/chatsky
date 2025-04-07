@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/common
+:doc_version: fix/pipeline-runner-signature/
+
+.. automodule:: chatsky.utils.testing.common
+   :members:
+   :undoc-members:
+   :show-inheritance:

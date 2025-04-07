@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/instrumentor
+:doc_version: fix/pipeline-runner-signature/
+
+.. automodule:: chatsky.stats.instrumentor
+   :members:
+   :undoc-members:
+   :show-inheritance:

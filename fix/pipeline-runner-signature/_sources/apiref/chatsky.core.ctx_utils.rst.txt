@@ -1,0 +1,7 @@
+:source_name: chatsky/core/ctx_utils
+:doc_version: fix/pipeline-runner-signature/
+
+.. automodule:: chatsky.core.ctx_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
