@@ -233,7 +233,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -293,7 +293,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that executes pipeline once.

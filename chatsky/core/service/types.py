@@ -9,7 +9,7 @@ data structures, and other types that are defined for type hinting.
 
 from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Optional, Any, Protocol, Hashable, TYPE_CHECKING
+from typing import Callable, Union, Awaitable, Optional, Any, Protocol, TYPE_CHECKING
 from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
@@ -25,13 +25,13 @@ class PipelineRunnerFunction(Protocol):
     """
 
     def __call__(
-        self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, message: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Awaitable[Context]:
         """
         :param message: User request for pipeline to process.
         :param ctx_id:
             ID of the context that the new request belongs to.
-            Optional, None by default.
+            Optional.
             If set to `None`, a new context will be created with `message` being the first request.
         :param update_ctx_misc:
             Dictionary to be passed as an argument to `ctx.misc.update`.

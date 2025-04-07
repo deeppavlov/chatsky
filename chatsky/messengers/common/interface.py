@@ -11,7 +11,7 @@ import asyncio
 import logging
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
+from typing import Optional, Any, List, Tuple, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -99,7 +99,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Message, Hashable]]:
+    def _request(self) -> List[Tuple[Message, str]]:
         """
         Method used for sending users request for their input.
 
@@ -181,7 +181,7 @@ class CallbackMessengerInterface(MessengerInterface):
         self._pipeline_runner = pipeline_runner
 
     async def on_request_async(
-        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -190,7 +190,7 @@ class CallbackMessengerInterface(MessengerInterface):
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
     def on_request(
-        self, request: Any, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Any, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
