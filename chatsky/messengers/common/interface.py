@@ -189,9 +189,7 @@ class CallbackMessengerInterface(MessengerInterface):
         """
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
-    def on_request(
-        self, request: Any, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
-    ) -> Context:
+    def on_request(self, request: Any, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None) -> Context:
         """
         Method that should be invoked on user input.
         This method has the same signature as :py:class:`~chatsky.core.service.types.PipelineRunnerFunction`.
