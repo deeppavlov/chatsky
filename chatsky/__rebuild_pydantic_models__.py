@@ -11,6 +11,7 @@ from chatsky.core.ctx_dict import ContextDict
 from chatsky.core.ctx_utils import ServiceState, FrameworkData, ContextMainInfo
 from chatsky.core.service import PipelineComponent
 from chatsky.llm import LLM_API
+from chatsky.ml.models.base_model import ExtrasBaseAPIModel
 from chatsky.messengers.telegram.abstract import TelegramMetadata
 
 ContextMainInfo.model_rebuild()

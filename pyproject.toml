@@ -90,6 +90,8 @@ telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 yaml = ["pyyaml"]
+ml = ["httpx", "pyyaml", "requests"]
+async =["httpx"]
 llm = ["langchain"]
 
 [tool.poetry.group.lint]
@@ -214,7 +216,10 @@ markers = [
     "no_coverage: tests that either cannot run inside the `coverage` workflow or do not affect coverage stats",
     "all: reserved by allow-skip",
     "none: reserved by allow-skip",
-    "needs_dependencies: marks tests as requiring any extra dependencies to run"
+    "needs_dependencies: marks tests as requiring any extra dependencies to run",
+    "huggingface: marks tests as requiring huggingface API token to run",
+    "dialogflow: marks tests as requiring dialogflow API token to run",
+    "rasa: marks tests as requiring rasa server to run"
 ]
 asyncio_mode = "auto"
 

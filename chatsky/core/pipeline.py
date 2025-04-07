@@ -32,6 +32,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitType
 from chatsky.core.script_parsing import JSONImporter, Path
 
 if TYPE_CHECKING:
+    from chatsky.ml.models.base_model import ExtrasBaseAPIModel
     from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
@@ -82,7 +83,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    models: Dict[str, LLM_API] = Field(default_factory=dict)
+    models: Dict[str, Union[LLM_API, ExtrasBaseAPIModel]] = Field(default_factory=dict)
     """
     LLM models to be made available in custom functions.
     """
@@ -260,6 +261,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         if self.slots is not None:
             ctx.framework_data.slot_manager.set_root_slot(self.slots)
+
+        # reinit labels for ml models
+        ctx.framework_data.models_labels = {}
 
         ctx.framework_data.pipeline = self
         initialize_service_states(ctx, self.services_pipeline)

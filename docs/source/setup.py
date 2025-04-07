@@ -28,6 +28,7 @@ def setup():
                 [
                     ("core", "Core"),
                     ("responses", "Responses"),
+                    ("extras.conditions", "Extras conditions"),
                 ],
             ),
             ("tutorials.llm", "LLM Integration"),
