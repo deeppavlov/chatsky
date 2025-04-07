@@ -34,7 +34,7 @@ async def test_pipeline_component_order():
         pre_services=[MyProcessing(wait=0.02, text="A")],
         post_services=[MyProcessing(wait=0, text="C")],
     )
-    await pipeline._run_pipeline(Message(""))
+    await pipeline._run_pipeline(Message(""), ctx_id="0")
     assert logs == ["A", "B", "C"]
 
 

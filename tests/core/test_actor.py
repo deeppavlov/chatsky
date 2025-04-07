@@ -31,7 +31,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.labels._items == {
             0: AbsoluteNodeLabel(flow_name="flow", node_name="node1"),
@@ -49,7 +49,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.labels._items == {
             0: AbsoluteNodeLabel(flow_name="flow", node_name="node"),
@@ -85,7 +85,7 @@ class TestRequestProcessing:
             default_priority=default_priority,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.last_label.node_name == result
 
@@ -105,7 +105,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.last_label.node_name == "fallback"
         assert log_list[0].msg == "Exception occurred during transition processing."
@@ -122,7 +122,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Node has empty response."
@@ -142,7 +142,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.responses == {1: Message()}
         assert log_list[-1].msg == "Response was not produced."
@@ -162,7 +162,7 @@ class TestRequestProcessing:
             parallelize_processing=True,
         )
 
-        ctx = await pipeline._run_pipeline(Message())
+        ctx = await pipeline._run_pipeline(Message(), ctx_id="0")
 
         assert ctx.responses == {1: Message()}
         assert log_list[0].msg == "Exception occurred during response processing."
