@@ -894,7 +894,6 @@ data structures, and other types that are defined for type hinting.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a></span>) – User request for pipeline to process.</p></li>
 <li><p><strong>ctx_id</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – ID of the context that the new request belongs to.
-Optional.
 If set to <cite>None</cite>, a new context will be created with <cite>message</cite> being the first request.</p></li>
 <li><p><strong>update_ctx_misc</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]</span>) – Dictionary to be passed as an argument to <cite>ctx.misc.update</cite>.
 This argument can be used to store values in the <cite>misc</cite> dictionary before anything else runs.
