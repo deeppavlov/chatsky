@@ -31,7 +31,6 @@ class PipelineRunnerFunction(Protocol):
         :param message: User request for pipeline to process.
         :param ctx_id:
             ID of the context that the new request belongs to.
-            Optional.
             If set to `None`, a new context will be created with `message` being the first request.
         :param update_ctx_misc:
             Dictionary to be passed as an argument to `ctx.misc.update`.
