@@ -2,7 +2,7 @@ from asyncio import get_event_loop
 from contextlib import contextmanager
 from importlib import import_module
 from hashlib import sha256
-from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 from telegram import InputFile, InputMedia, Update
@@ -90,7 +90,7 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         original_pipeline_runner = self.interface._pipeline_runner
 
         async def wrapped_pipeline_runner(
-            message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+            message: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
         ) -> Context:
             self.latest_ctx = await original_pipeline_runner(message, ctx_id, update_ctx_misc)
             return self.latest_ctx

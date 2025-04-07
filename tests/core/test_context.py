@@ -125,7 +125,7 @@ async def test_pipeline_available():
             return ctx.pipeline.start_label.node_name
 
     pipeline = Pipeline(script={"flow": {"node": {RESPONSE: MyResponse()}}}, start_label=("flow", "node"))
-    ctx = await pipeline._run_pipeline(Message(text=""))
+    ctx = await pipeline._run_pipeline(Message(text=""), ctx_id="0")
 
     assert ctx.last_response == Message(text="node")
 
@@ -145,7 +145,7 @@ async def test_current_node_available():
         script={"flow": {"node": {PRE_RESPONSE: {"": MyProcessing()}, PRE_TRANSITION: {"": MyProcessing()}}}},
         start_label=("flow", "node"),
     )
-    ctx = await pipeline._run_pipeline(Message(text=""))
+    ctx = await pipeline._run_pipeline(Message(text=""), ctx_id="0")
     assert len(log) == 2
 
     ctx.framework_data.current_node = None
