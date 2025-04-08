@@ -5,7 +5,7 @@ Provides slot-related conditions.
 """
 
 from __future__ import annotations
-from typing import Literal, List
+from typing import Iterable, Literal
 
 from chatsky.core import Context, BaseCondition
 from chatsky.slots.slots import SlotName
@@ -18,7 +18,7 @@ class SlotsExtracted(BaseCondition):
     :param mode: Whether to check if all slots are extracted or any slot is extracted.
     """
 
-    slots: List[SlotName]
+    slots: Iterable[SlotName]
     """
     Names of the slots that need to be checked.
     """

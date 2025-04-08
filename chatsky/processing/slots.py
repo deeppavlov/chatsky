@@ -7,7 +7,7 @@ subclasses.
 
 import asyncio
 import logging
-from typing import List
+from typing import Iterable
 
 from chatsky.slots.slots import SlotName
 from chatsky.core import Context, BaseProcessing
@@ -22,7 +22,7 @@ class Extract(BaseProcessing):
     This will override all slots even if they are already extracted.
     """
 
-    slots: List[SlotName]
+    slots: Iterable[SlotName]
     """A list of slot names to extract."""
     success_only: bool = True
     """If set, only successfully extracted values will be stored in the slot storage."""
@@ -43,7 +43,7 @@ class Unset(BaseProcessing):
     Mark specified slots as not extracted and clear extracted values.
     """
 
-    slots: List[SlotName]
+    slots: Iterable[SlotName]
     """A list of slot names to extract."""
 
     async def call(self, ctx: Context):

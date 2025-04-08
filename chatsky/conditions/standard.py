@@ -9,7 +9,7 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Pattern, Union, List, Optional
+from typing import Iterable, Pattern, Union, List, Optional, cast
 import logging
 import re
 from functools import cached_property
@@ -46,7 +46,7 @@ class ExactMatch(BaseCondition):
         return Message.model_validate(obj)
 
     async def call(self, ctx: Context) -> bool:
-        match: Message = self.match
+        match: Message = cast(Message, self.match)
 
         request = ctx.last_request
         for field in match.model_fields:
@@ -112,7 +112,7 @@ class Any(BaseCondition):
     Check if any condition from the :py:attr:`.conditions` list is True.
     """
 
-    conditions: List[BaseCondition]
+    conditions: Iterable[BaseCondition]
     """
     List of conditions.
     """
@@ -126,7 +126,7 @@ class All(BaseCondition):
     Check if all conditions from the :py:attr:`.conditions` list is True.
     """
 
-    conditions: List[BaseCondition]
+    conditions: Iterable[BaseCondition]
     """
     List of conditions.
     """
@@ -183,8 +183,10 @@ class CheckLastLabels(BaseCondition):
         return [AbsoluteNodeLabel.model_validate(label) for label in obj]
 
     async def call(self, ctx: Context) -> bool:
-        self_labels: List[AbsoluteNodeLabel] = self.labels or []
-        self_flow_labels: List[str] = self.flow_labels or []
+        self_labels: List[AbsoluteNodeLabel] = cast(
+            List[AbsoluteNodeLabel], self.labels if self.labels is not None else []
+        )
+        self_flow_labels: List[str] = cast(List[str], self.flow_labels if self.flow_labels is not None else [])
 
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
 
