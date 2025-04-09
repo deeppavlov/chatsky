@@ -37,9 +37,12 @@ async def test_update_ctx_misc():
 
 async def test_context_order():
 
+    logs = []
+
     class LongResponse(BaseResponse):
         async def call(self, ctx: Context):
             await asyncio.sleep(float(ctx.last_request.text))
+            logs.append(Message(text=ctx.last_request.text))
             return Message(text=ctx.last_request.text)
 
     toy_script = {
@@ -51,11 +54,11 @@ async def test_context_order():
     }
 
     pipeline = Pipeline(script=toy_script, start_label=("root", "start"), fallback_label=("root", "failure"))
-    res = await asyncio.gather(
+    await asyncio.gather(
         pipeline._run_pipeline(Message("0.03"), ctx_id=0),
         pipeline._run_pipeline(Message("0.01"), ctx_id=1),
         pipeline._run_pipeline(Message("0.02"), ctx_id=0),
     )
-    assert res[0].last_response == Message(text="0.01")
-    assert res[1].last_response == Message(text="0.03")
-    assert res[2].last_response == Message(text="0.02")
+    assert logs[0] == Message(text="0.01")
+    assert logs[1] == Message(text="0.03")
+    assert logs[2] == Message(text="0.02")
