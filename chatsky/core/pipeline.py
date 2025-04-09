@@ -116,10 +116,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    context_lock: Dict[str, asyncio.Lock] = Field(default_factory=lambda: defaultdict(asyncio.Lock))
-    """
-    Dictionary of asyncio locks for context synchronization.
-    """
 
     def __init__(
         self,
@@ -138,7 +134,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
         parallelize_processing: bool = None,
-        context_lock: dict = None,
     ):
         if fallback_label is None:
             fallback_label = start_label
@@ -157,7 +152,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "after_handler": after_handler,
             "timeout": timeout,
             "parallelize_processing": parallelize_processing,
-            "context_lock": context_lock,
         }
         empty_fields = set()
         for k, v in init_dict.items():
@@ -168,6 +162,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
+        self._context_lock = defaultdict(asyncio.Lock)
         self.services_pipeline  # cache services
 
     @classmethod
@@ -265,7 +260,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         else:
             ctx = None
 
-        async with self.context_lock[ctx_id]:
+        async with self._context_lock[ctx_id]:
             logger.info(f"Running pipeline for context {ctx_id}.")
             logger.debug(f"Received request: {request}.")
             if ctx is None:
