@@ -286,7 +286,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
             await ctx.store()
 
-        return ctx
+            return ctx
 
     def run(self):
         """
