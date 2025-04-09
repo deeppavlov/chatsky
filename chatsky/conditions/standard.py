@@ -14,7 +14,7 @@ import logging
 import re
 from functools import cached_property
 
-from pydantic import computed_field, field_validator
+from pydantic import Field, computed_field, field_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -126,12 +126,13 @@ class All(BaseCondition):
     Check if all conditions from the :py:attr:`.conditions` list is True.
     """
 
-    conditions: Iterable[BaseCondition]
+    conditions: List[BaseCondition]
     """
     List of conditions.
     """
 
     async def call(self, ctx: Context) -> bool:
+        logger.debug(list(self.conditions))
         return all(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
 
@@ -146,6 +147,7 @@ class Negation(BaseCondition):
     """
 
     async def call(self, ctx: Context) -> bool:
+        logger.info("calling negation")
         return not await self.condition.is_true(ctx)
 
 
@@ -161,11 +163,11 @@ class CheckLastLabels(BaseCondition):
     :py:attr:`.labels` or if its :py:attr:`~.AbsoluteNodeLabel.flow_name` is in :py:attr:`.flow_labels`.
     """
 
-    flow_labels: Optional[List[str]] = None
+    flow_labels: List[str] = Field(default_factory=list)
     """
     List of flow names to find in the last labels.
     """
-    labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None
+    labels: List[AbsoluteNodeLabelInitTypes] = Field(default_factory=list)
     """
     List of labels to find in the last labels.
 
@@ -183,10 +185,8 @@ class CheckLastLabels(BaseCondition):
         return [AbsoluteNodeLabel.model_validate(label) for label in obj]
 
     async def call(self, ctx: Context) -> bool:
-        self_labels: List[AbsoluteNodeLabel] = cast(
-            List[AbsoluteNodeLabel], self.labels if self.labels is not None else []
-        )
-        self_flow_labels: List[str] = cast(List[str], self.flow_labels if self.flow_labels is not None else [])
+        self_labels: List[AbsoluteNodeLabel] = cast(List[AbsoluteNodeLabel], self.labels)
+        self_flow_labels: List[str] = cast(List[str], self.flow_labels)
 
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
 
