@@ -162,7 +162,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
-        self._context_lock = defaultdict(asyncio.Lock)
+        self._context_lock: Dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
+        """
+        Dictionary mapping context ids to asyncio locks.
+        Is used to forbid concurrent execution for the same context id.
+        """
         self.services_pipeline  # cache services
 
     @classmethod
@@ -243,14 +247,17 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         This method does:
 
-        1. Retrieve from :py:attr:`context_storage` or initialize context ``ctx_id``.
-        2. Ensure that last request for this ``ctx_id`` is processed.
-        3. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.
-        4. Set up :py:attr:`.Context.framework_data` fields.
-        5. Add ``request`` to the context.
-        6. Execute :py:attr:`services_pipeline`.
-           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information).
-        7. Save context in the :py:attr:`context_storage`.
+        1. Create new context with a random ID if ``ctx_id`` is ``None``;
+        2. Acquire :py:class:`asyncio.Lock` from :py:attr:`_context_lock` to prevent concurrent execution
+           on this ``ctx_id``;
+        3. If ``ctx_id`` is not ``None`` either retrieve it from the :py:attr:`context_storage`
+           or create a new one with that id;
+        4. Update :py:attr:`.Context.misc` with ``update_ctx_misc``;
+        5. Set up :py:attr:`.Context.framework_data` fields;
+        6. Add ``request`` to the context;
+        7. Execute :py:attr:`services_pipeline`.
+           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information);
+        8. Save context in the :py:attr:`context_storage`.
 
         :return: Modified context ``ctx_id``.
         """
