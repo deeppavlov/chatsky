@@ -1,7 +1,8 @@
 import asyncio
 import pytest
-from chatsky import Context, GLOBAL, conditions, destinations as dst
+from chatsky import Context
 from chatsky.core import Message, RESPONSE, TRANSITIONS, Pipeline, Transition as Tr, BaseCondition, BaseResponse
+
 
 @pytest.mark.asyncio
 async def test_update_ctx_misc():
