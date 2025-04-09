@@ -34,15 +34,18 @@ async def test_update_ctx_misc():
     assert ctx.last_response.text == "failure"
 
 
-async def test_context_order():
-
+async def test_context_lock():
+    """Test execution blocking for same context ids."""
     logs = []
 
     class LongResponse(BaseResponse):
         async def call(self, ctx: Context):
-            await asyncio.sleep(float(ctx.last_request.text))
-            logs.append(Message(text=ctx.last_request.text))
-            return Message(text=ctx.last_request.text)
+            sleep_time = float(ctx.last_request.text)
+
+            logs.append(f"pre_{sleep_time}")
+            await asyncio.sleep(sleep_time)
+            logs.append(f"post_{sleep_time}")
+            return Message(text=str(sleep_time))
 
     toy_script = {
         "root": {
@@ -54,10 +57,13 @@ async def test_context_order():
 
     pipeline = Pipeline(script=toy_script, start_label=("root", "start"), fallback_label=("root", "failure"))
     await asyncio.gather(
-        pipeline._run_pipeline(Message("0.03"), ctx_id=0),
-        pipeline._run_pipeline(Message("0.01"), ctx_id=1),
-        pipeline._run_pipeline(Message("0.02"), ctx_id=0),
+        pipeline._run_pipeline(Message("0.03"), ctx_id="0"),
+        pipeline._run_pipeline(Message("0.01"), ctx_id="1"),
+        pipeline._run_pipeline(Message("0.02"), ctx_id="0"),
     )
-    assert logs[0] == Message(text="0.01")
-    assert logs[1] == Message(text="0.03")
-    assert logs[2] == Message(text="0.02")
+    assert logs == ["pre_0.03", "pre_0.01", "post_0.01", "post_0.03", "pre_0.02", "post_0.02"]
+    assert list(pipeline._context_lock.keys()) == ["0", "1"]
+
+    ctx = await pipeline._run_pipeline(Message("0.01"), ctx_id=None)
+
+    assert list(pipeline._context_lock.keys()) == ["0", "1", ctx.id]
