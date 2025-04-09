@@ -9,9 +9,12 @@ that can easily extract requested information from an unstructured user's reques
 
 from __future__ import annotations
 
+import json
+
 from typing import Union, Dict, TYPE_CHECKING
 import logging
 
+from chatsky.core.message import Message
 from pydantic import BaseModel, Field, create_model
 
 from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
@@ -49,10 +52,13 @@ class LLMSlot(ValueSlot, frozen=True):
         class DynamicModel(BaseModel):
             value: self.return_type = Field(description=self.caption)
 
-        structured_model = model_instance.with_structured_output(DynamicModel)
+        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None).respond(
+            history=[request_text],
+            message_schema=DynamicModel
+        )
+        result_json = json.loads(result.text)
 
-        result = await structured_model.ainvoke(request_text)
-        return result.value
+        return result.get("value", "")
 
 
 class LLMGroupSlot(GroupSlot):
@@ -78,10 +84,14 @@ class LLMGroupSlot(GroupSlot):
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
 
-        model_instance = ctx.pipeline.models[self.llm_model_name].model
-        structured_model = model_instance.with_structured_output(DynamicGroupModel)
-        result = await structured_model.ainvoke(request_text)
-        result_json = result.model_dump()
+        # model_instance = ctx.pipeline.models[self.llm_model_name].model
+        # structured_model = model_instance.with_structured_output(DynamicGroupModel)
+        # result = await structured_model.ainvoke(request_text)
+        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None).respond(
+            history=[request_text],
+            message_schema=DynamicGroupModel
+        )
+        result_json = json.loads(result.text)
         logger.debug(f"Result JSON: {result_json}")
 
         # Convert flat dict to nested structure
