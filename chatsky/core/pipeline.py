@@ -244,12 +244,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         This method does:
 
         1. Retrieve from :py:attr:`context_storage` or initialize context ``ctx_id``.
-        2. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.
-        3. Set up :py:attr:`.Context.framework_data` fields.
-        4. Add ``request`` to the context.
-        5. Execute :py:attr:`services_pipeline`.
+        2. Ensure that last request for this ``ctx_id`` is processed.
+        3. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.
+        4. Set up :py:attr:`.Context.framework_data` fields.
+        5. Add ``request`` to the context.
+        6. Execute :py:attr:`services_pipeline`.
            This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information).
-        6. Save context in the :py:attr:`context_storage`.
+        7. Save context in the :py:attr:`context_storage`.
 
         :return: Modified context ``ctx_id``.
         """
