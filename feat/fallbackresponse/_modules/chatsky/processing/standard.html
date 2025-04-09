@@ -587,33 +587,27 @@
 <a class="viewcode-back" href="../../../apiref/chatsky.processing.standard.html#chatsky.processing.standard.AddFallbackResponses">[docs]</a>
 <span class="k">class</span> <span class="nc">AddFallbackResponses</span><span class="p">(</span><span class="n">ModifyResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ModifyResponse with dynamical pre-response processing to handle</span>
-<span class="sd">    exceptions from a user-provided exceptions dictionary</span>
-<span class="sd">    and storing them in :py:attr:`ctx.framework_data.response_exception`.</span>
+<span class="sd">    ModifyResponse to handlie exceptions dynamically using a user-provided</span>
+<span class="sd">    dictionary of exception-to-response mappings.</span>
+<span class="sd">    When an exception occurs, its string representation is stored in</span>
+<span class="sd">    :py:attr:`ctx.framework_data.response_exception`, and a corresponding</span>
+<span class="sd">    fallback response is used.</span>
 
 <span class="sd">    Example:</span>
 
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        class ReturnException(BaseResponse):</span>
-<span class="sd">            async def call(self, ctx: Context):</span>
-<span class="sd">                return ctx.framework_data.response_exception</span>
+<span class="sd">        # Usage example</span>
 
-<span class="sd">        # Define user-provided exceptions dictionary</span>
-<span class="sd">        exceptions = {</span>
-<span class="sd">            &quot;OverflowError&quot;: &quot;Overflow!&quot;,</span>
-<span class="sd">            &quot;ValueError&quot;: ReturnException(),</span>
-<span class="sd">            &quot;Else&quot;: &quot;Other exception occured&quot;,</span>
+<span class="sd">        PRE_RESPONSE: {</span>
+<span class="sd">            &quot;add_fallback_responses&quot;: AddFallbackResponses(</span>
+<span class="sd">                exception_responses={</span>
+<span class="sd">                    &quot;OverflowError&quot;: &quot;Overflow!&quot;,</span>
+<span class="sd">                    &quot;ValueError&quot;: MyResponse(),</span>
+<span class="sd">                    &quot;Else&quot;: &quot;Other exception occured&quot;,</span>
+<span class="sd">                }</span>
+<span class="sd">            )</span>
 <span class="sd">        }</span>
-
-<span class="sd">        # AddFallbackResponses class initialization</span>
-<span class="sd">        fallback_response = AddFallbackResponses(exception_responses=exceptions)</span>
-
-<span class="sd">        # Apply fallback response pre-processing</span>
-<span class="sd">        await fallback_response(ctx)</span>
-
-<span class="sd">        # Get final response</span>
-<span class="sd">        await ctx.current_node.response(ctx)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
