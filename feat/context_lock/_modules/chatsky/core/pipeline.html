@@ -693,7 +693,11 @@
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">empty_fields</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">init_dict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">init_dict</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_context_lock</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_context_lock</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dictionary mapping context ids to asyncio locks.</span>
+<span class="sd">        Is used to forbid concurrent execution for the same context id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">services_pipeline</span>  <span class="c1"># cache services</span>
 
 <div class="viewcode-block" id="Pipeline.from_file">
@@ -785,14 +789,17 @@
 
 <span class="sd">        This method does:</span>
 
-<span class="sd">        1. Retrieve from :py:attr:`context_storage` or initialize context ``ctx_id``.</span>
-<span class="sd">        2. Ensure that last request for this ``ctx_id`` is processed.</span>
-<span class="sd">        3. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.</span>
-<span class="sd">        4. Set up :py:attr:`.Context.framework_data` fields.</span>
-<span class="sd">        5. Add ``request`` to the context.</span>
-<span class="sd">        6. Execute :py:attr:`services_pipeline`.</span>
-<span class="sd">           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information).</span>
-<span class="sd">        7. Save context in the :py:attr:`context_storage`.</span>
+<span class="sd">        1. Create new context with a random ID if ``ctx_id`` is ``None``;</span>
+<span class="sd">        2. Acquire :py:class:`asyncio.Lock` from :py:attr:`_context_lock` to prevent concurrent execution</span>
+<span class="sd">           on this ``ctx_id``;</span>
+<span class="sd">        3. If ``ctx_id`` is not ``None`` either retrieve it from the :py:attr:`context_storage`</span>
+<span class="sd">           or create a new one with that id;</span>
+<span class="sd">        4. Update :py:attr:`.Context.misc` with ``update_ctx_misc``;</span>
+<span class="sd">        5. Set up :py:attr:`.Context.framework_data` fields;</span>
+<span class="sd">        6. Add ``request`` to the context;</span>
+<span class="sd">        7. Execute :py:attr:`services_pipeline`.</span>
+<span class="sd">           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information);</span>
+<span class="sd">        8. Save context in the :py:attr:`context_storage`.</span>
 
 <span class="sd">        :return: Modified context ``ctx_id``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -828,7 +835,7 @@
 
             <span class="k">await</span> <span class="n">ctx</span><span class="o">.</span><span class="n">store</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">ctx</span></div>
+            <span class="k">return</span> <span class="n">ctx</span></div>
 
 
 <div class="viewcode-block" id="Pipeline.run">
