@@ -991,6 +991,13 @@ defined in the <code class="docutils literal notranslate"><span class="pre">PRE_
 of the script should be parallelized over respective groups.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.pipeline.Pipeline._context_lock">
+<span class="sig-name descname"><span class="pre">_context_lock</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict[str,</span> <span class="pre">asyncio.Lock]</span></em><a class="headerlink" href="#chatsky.core.pipeline.Pipeline._context_lock" title="Link to this definition">#</a></dt>
+<dd><p>Dictionary mapping context ids to asyncio locks.
+Is used to forbid concurrent execution for the same context id.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.core.pipeline.Pipeline.from_file">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'custom'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">overrides</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/core/pipeline.html#Pipeline.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.core.pipeline.Pipeline.from_file" title="Link to this definition">#</a></dt>
@@ -1046,12 +1053,16 @@ It has <a class="reference internal" href="#chatsky.core.pipeline.Pipeline.befor
 This method has the same signature as <a class="reference internal" href="chatsky.core.service.types.html#chatsky.core.service.types.PipelineRunnerFunction" title="chatsky.core.service.types.PipelineRunnerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineRunnerFunction</span></code></a>.</p>
 <p>This method does:</p>
 <ol class="arabic simple">
-<li><p>Retrieve from <a class="reference internal" href="#chatsky.core.pipeline.Pipeline.context_storage" title="chatsky.core.pipeline.Pipeline.context_storage"><code class="xref py py-attr docutils literal notranslate"><span class="pre">context_storage</span></code></a> or initialize context <code class="docutils literal notranslate"><span class="pre">ctx_id</span></code>.</p></li>
-<li><p>Update <code class="xref py py-attr docutils literal notranslate"><span class="pre">Context.misc</span></code> with <code class="docutils literal notranslate"><span class="pre">update_ctx_misc</span></code>.</p></li>
-<li><p>Set up <code class="xref py py-attr docutils literal notranslate"><span class="pre">Context.framework_data</span></code> fields.</p></li>
-<li><p>Add <code class="docutils literal notranslate"><span class="pre">request</span></code> to the context.</p></li>
+<li><p>Create new context with a random ID if <code class="docutils literal notranslate"><span class="pre">ctx_id</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>;</p></li>
+<li><p>Acquire <code class="xref py py-class docutils literal notranslate"><span class="pre">asyncio.Lock</span></code> from <a class="reference internal" href="#chatsky.core.pipeline.Pipeline._context_lock" title="chatsky.core.pipeline.Pipeline._context_lock"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_context_lock</span></code></a> to prevent concurrent execution
+on this <code class="docutils literal notranslate"><span class="pre">ctx_id</span></code>;</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">ctx_id</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code> either retrieve it from the <a class="reference internal" href="#chatsky.core.pipeline.Pipeline.context_storage" title="chatsky.core.pipeline.Pipeline.context_storage"><code class="xref py py-attr docutils literal notranslate"><span class="pre">context_storage</span></code></a>
+or create a new one with that id;</p></li>
+<li><p>Update <code class="xref py py-attr docutils literal notranslate"><span class="pre">Context.misc</span></code> with <code class="docutils literal notranslate"><span class="pre">update_ctx_misc</span></code>;</p></li>
+<li><p>Set up <code class="xref py py-attr docutils literal notranslate"><span class="pre">Context.framework_data</span></code> fields;</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">request</span></code> to the context;</p></li>
 <li><p>Execute <a class="reference internal" href="#chatsky.core.pipeline.Pipeline.services_pipeline" title="chatsky.core.pipeline.Pipeline.services_pipeline"><code class="xref py py-attr docutils literal notranslate"><span class="pre">services_pipeline</span></code></a>.
-This includes <a class="reference internal" href="chatsky.core.service.actor.html#chatsky.core.service.actor.Actor" title="chatsky.core.service.actor.Actor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Actor</span></code></a> (read <a class="reference internal" href="chatsky.core.service.actor.html#chatsky.core.service.actor.Actor.run_component" title="chatsky.core.service.actor.Actor.run_component"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Actor.run_component()</span></code></a> for more information).</p></li>
+This includes <a class="reference internal" href="chatsky.core.service.actor.html#chatsky.core.service.actor.Actor" title="chatsky.core.service.actor.Actor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Actor</span></code></a> (read <a class="reference internal" href="chatsky.core.service.actor.html#chatsky.core.service.actor.Actor.run_component" title="chatsky.core.service.actor.Actor.run_component"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Actor.run_component()</span></code></a> for more information);</p></li>
 <li><p>Save context in the <a class="reference internal" href="#chatsky.core.pipeline.Pipeline.context_storage" title="chatsky.core.pipeline.Pipeline.context_storage"><code class="xref py py-attr docutils literal notranslate"><span class="pre">context_storage</span></code></a>.</p></li>
 </ol>
 <dl class="field-list simple">
@@ -1160,6 +1171,7 @@ Still, it connects to the <a class="reference internal" href="#chatsky.core.pipe
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.after_handler"><code class="docutils literal notranslate"><span class="pre">Pipeline.after_handler</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.timeout"><code class="docutils literal notranslate"><span class="pre">Pipeline.timeout</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.parallelize_processing"><code class="docutils literal notranslate"><span class="pre">Pipeline.parallelize_processing</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline._context_lock"><code class="docutils literal notranslate"><span class="pre">Pipeline._context_lock</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.from_file"><code class="docutils literal notranslate"><span class="pre">Pipeline.from_file()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.actor"><code class="docutils literal notranslate"><span class="pre">Pipeline.actor</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.pipeline.Pipeline.services_pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline.services_pipeline</span></code></a></li>
