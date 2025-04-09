@@ -38,7 +38,7 @@ async def test_context_order():
 
     class LongResponse(BaseResponse):
         async def call(self, ctx: Context):
-            await asyncio.sleep(int(ctx.last_request.text))
+            await asyncio.sleep(float(ctx.last_request.text))
             return Message(text=ctx.last_request.text)
 
     toy_script = {
