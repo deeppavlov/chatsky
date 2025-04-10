@@ -4,9 +4,9 @@ Example selection.
 This module provides support for example guided generation.
 """
 
-from typing import List, Dict
+from typing import List, Dict, Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from langchain_core.example_selectors.base import BaseExampleSelector
 from langchain_core.messages import HumanMessage, AIMessage
@@ -15,103 +15,206 @@ from langchain_core.messages import HumanMessage, AIMessage
 class Example(BaseModel):
     '''How to answer a user.'''
 
-    example_input: str = Field(description="An example of the user's query.")
+    input : str | BaseModel = Field(description="An example of the user's query.")
 
-    example_output: str = Field(description="A desired answer example")
+    output: str | BaseModel = Field(description="A desired answer example")
 
 
-class ExampleSelector(BaseModel, arbitrary_types_allowed=True):
-    '''Class for example selection'''
+class StaticExampleSelector(BaseExampleSelector, RootModel):
+		
+        root: List[Example]
 
-    examples: List[Dict[str, str] | Example] 
+        def add_example(self, example: Example) -> Any:
+            self.root.append(Example(input=example["input"], output=example["output"]))
 
-    example_selector: BaseExampleSelector
+        def select_examples(self) -> List[Dict]:
+            sample = []
+            for example in self.root:
+                tmp = {}
+                tmp["input"] = example.input
+                tmp["output"] = str(example.output.model_dump_json()) if isinstance(example.output, BaseModel) else example.output
+                sample.append(tmp)
+            return sample
 
-    @staticmethod
-    def to_langchain_context(examples: List[Dict[str, str] | Example]):
-        """
-        Convert list of examples to list of lanchain messages.
+        def to_langchain_context(self) -> None:
 
-        :param examples: list of dictionaries in format {"example_input" : "...", "example_output" : "..."} or
-        instances of :py:class:`~chatsky.llm.example_selector.Example`
+            result = []
+            for example in self.root:
+                result.append(HumanMessage(content=example.input))
+                
+                if isinstance(example.output, BaseModel):
+                    result.append(AIMessage(content=str(example.output.model_dump_json())))
+                    continue
+                result.append(AIMessage(content=example.output))
 
-        :return: List of Langchain message objects.
-        """
-
-        result = []
-        if len(examples) > 0:
-            if isinstance(examples[0], Example):
-                result = ExampleSelector.example_to_langchain_context(examples)
-            else:
-                result = ExampleSelector.dict_to_langchain_context(examples)
-        
-        return result
-    
-    @staticmethod
-    def dict_to_langchain_context(examples : List[Dict[str, str]]):
-        """
-        Convert list of examples to list of lanchain messages.
-
-        :param examples: list of dictionaries in format {"example_input" : "...", "example_output" : "..."}
-
-        :return: List of Langchain message objects.
-        """
-
-        result = []
-        for example in examples:
-            result.append(HumanMessage(content=example["example_input"]))
-            result.append(AIMessage(content=example["example_output"]))
-        return result
-
-    @staticmethod
-    def example_to_langchain_context(examples: List[Example]):
-        """
-        Convert list of examples to list of lanchain messages.
-
-        :param examples: list of instances of :py:class:`~chatsky.llm.example_selector.Example`
-
-        :return: List of Langchain message objects.
-        """
-        
-        result = []
-        for example in examples:
-            result.append(HumanMessage(content=example.example_input))
-            result.append(AIMessage(content=example.example_output))
-        return result
+            return result
 
 
 if __name__ == "__main__":
+
+    ###### TEST IMPORTS ###########
+    from pprint import pprint
+    from chatsky import RESPONSE, MISC
+    from chatsky.responses.llm import LLMResponse
+
+    ###### Placeholder ExamplePrompt Class ###########
+
+    class ExamplePrompt(BaseModel, arbitrary_types_allowed=True):
+        examples: StaticExampleSelector | BaseExampleSelector
+
+        async def __call__(self):
+            examples: list[dict[str, str]] = await self.examples.select_examples({"input": ctx.last_request.text})
     
-    START = 1
-    END = 10
+    ##### "Simple" examples (Support for structured output) ################
+
+    print("Simple examples      <------------")
+    print()
+    
+    node = {
+    RESPONSE: LLMResponse(
+        llm_model_name="my_model",
+        prompt="Add numbers and return an answer."
+    ),
+    MISC: ExamplePrompt(examples=[
+            {"input": "3, 4", "output": "7"},
+            {"input": "5, 6", "output": "11"}
+        ])
+    }
+
+    pprint(node['MISC'].examples.to_langchain_context()) # check that to_langchain_context() works as intended
+    print()
+
+    node['MISC'].examples.add_example({"input": "-1, 2", "output": "1"}) # check that we can add example via add_example method
+    pprint(node['MISC'].examples.to_langchain_context())
+    print()
+
+    pprint(node['MISC'].examples.select_examples())
+    print()
+
+
+   ##### Custom examples (Support for structured output) ################
+    
+    class MyResponseModel(BaseModel):
+        sum: float = Field(description="Sum of the numbers.")
+        prod: float = Field(description="Product of the numbers")
+    
+    node = {
+        RESPONSE: LLMResponse(
+            llm_model_name="my_model",
+            prompt="Do mathematical operations and return result in json similar to examples.",
+            message_schema=MyResponseModel
+        ),
+        MISC: ExamplePrompt(examples=[
+            {"input": "3, 4", "output": MyResponseModel(sum=7, prod=12)}
+        ])
+    }
+
+    
+    print("Custom examples      <------------")
+    print()
+    
+    pprint(node['MISC'].examples.to_langchain_context()) # check that to_langchain_context() works as intended
+    print()
+    
+    node['MISC'].examples.add_example({"input": "-1, 2", "output": MyResponseModel(sum=1, prod=-2)}) # check that we can add example via add_example method
+    pprint(node['MISC'].examples.to_langchain_context())
+    print()
+
+    pprint(node['MISC'].examples.select_examples())
+    print()
+    
+    
+    
+
+    ##### Same "tests", but now we have a custom Selector deived from BaseExampleSelector
+
     import numpy as np
 
-    class RandomSelector(BaseExampleSelector):
+    class RandomSelector(BaseExampleSelector, BaseModel):
         '''
         Custom Selector class just for testing purposes
         '''
+        examples: List[Example]
+        k: int = 1
+        replace: bool = False
 
-        def add_example(self, example: dict[str, str]) -> None:
-            pass
+        def add_example(self, example: Example) -> None:
+            self.examples.append(Example(input=example["input"], output=example["output"]))
         
-        def select_examples(self, examples, k=3, replace=False) -> list[dict[str, str] | Example]:
-            return np.random.choice(examples, size=k, replace=False)
-            
+        def select_examples(self, k=k, replace=replace) -> List[Dict[str, str]]:
+            subset = np.random.choice(self.examples, size=k, replace=replace)
+            sample = []
+            for example in subset:
+                tmp = {}
+                tmp["input"] = example.input
+                tmp["output"] = str(example.output.model_dump_json()) if isinstance(example.output, BaseModel) else example.output
+                sample.append(tmp)
+            return sample
 
-    # Dict-like примеры
+        def to_langchain_context(self) -> None:
 
-    dict_like = [{"example_input" : str(i), "example_output" : str(i+1)} for i in range(START, END + 1, 2)]
-    dict_example_selector = ExampleSelector(examples=dict_like, example_selector=RandomSelector())
+            result = []
+            for example in self.select_examples():
+                result.append(HumanMessage(content=example["input"]))
+                
+                if isinstance(example["output"], BaseModel):
+                    result.append(AIMessage(content=str(example.output.model_dump(mode="json"))))
+                    continue
+                result.append(AIMessage(content=example["output"]))
+
+            return result
+
+     ##### "Simple" examples (Support for structured output) ################
+
+    print("Simple examples * Custom Selector      <------------")
+    print()
     
-    dict_examples = dict_example_selector.example_selector.select_examples(dict_example_selector.examples, 3)
+    node = {
+    RESPONSE: LLMResponse(
+        llm_model_name="my_model",
+        prompt="Add numbers and return an answer."
+    ),
+    MISC: ExamplePrompt(examples=RandomSelector(examples=[
+            {"input": "3, 4", "output": "7"},
+            {"input": "5, 6", "output": "11"}
+        ]))
+    }
     
-    print(ExampleSelector.to_langchain_context(dict_examples))
+    print(node['MISC'].examples)
 
-    # Pydantic-like примеры
+    pprint(node['MISC'].examples.to_langchain_context()) # check that to_langchain_context() works as intended
+    print()
 
-    pydantic_like = [Example(example_input=str(i), example_output=str(i+1)) for i in range(START, END + 1, 2)]
-    pydantic_example_selector = ExampleSelector(examples=pydantic_like, example_selector=RandomSelector())
+    node['MISC'].examples.add_example({"input": "-1, 2", "output": "1"}) # check that we can add example via add_example method
+    pprint(node['MISC'].examples.to_langchain_context())
+    print()
 
-    pydantic_examples = pydantic_example_selector.example_selector.select_examples(pydantic_example_selector.examples, 3)
+    pprint(node['MISC'].examples.select_examples())
+    print()
+
+    print("Custom examples * Custom Selector      <------------")
+    print()
+
+    node = {
+        RESPONSE: LLMResponse(
+            llm_model_name="my_model",
+            prompt="Do mathematical operations and return result in json similar to examples.",
+            message_schema=MyResponseModel
+        ),
+        MISC: ExamplePrompt(examples=RandomSelector(examples=[
+            {"input": "3, 4", "output": MyResponseModel(sum=7, prod=12)}
+        ]))
+    }
     
-    print(ExampleSelector.to_langchain_context(pydantic_examples))
+    pprint(node['MISC'].examples.to_langchain_context()) # check that to_langchain_context() works as intended
+    print()
+    
+    node['MISC'].examples.add_example({"input": "-1, 2", "output": MyResponseModel(sum=1, prod=-2)}) # check that we can add example via add_example method
+    pprint(node['MISC'].examples.to_langchain_context())
+    print()
+
+    pprint(node['MISC'].examples.select_examples())
+    print()
+
+    # StaticExampleSelector(root=[{"input": "3, 4", "output": "7"}]
+    #print(node['MISC'].examples)
