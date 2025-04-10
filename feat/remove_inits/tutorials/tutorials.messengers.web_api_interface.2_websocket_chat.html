@@ -714,7 +714,7 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="k">await</span> <span class="n">websocket</span><span class="o">.</span><span class="n">send_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">request</span> <span class="o">=</span> <span class="n">Message</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">context</span> <span class="o">=</span> <span class="k">await</span> <span class="n">messenger_interface</span><span class="o">.</span><span class="n">on_request_async</span><span class="p">(</span>
-                <span class="n">request</span><span class="p">,</span> <span class="n">client_id</span>
+                <span class="n">request</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">last_response</span><span class="o">.</span><span class="n">text</span>
             <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

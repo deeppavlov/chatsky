@@ -94,7 +94,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             await websocket.send_text(f"User: {data}")
             request = Message(data)
             context = await messenger_interface.on_request_async(
-                request, client_id
+                request, str(client_id)
             )
             response = context.last_response.text
             if response is not None:
