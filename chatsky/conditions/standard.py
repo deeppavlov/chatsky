@@ -9,7 +9,7 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Iterable, Pattern, Union, List, Optional, cast
+from typing import Pattern, Union, List, Optional
 import logging
 import re
 from functools import cached_property
@@ -46,7 +46,7 @@ class ExactMatch(BaseCondition):
         return Message.model_validate(obj)
 
     async def call(self, ctx: Context) -> bool:
-        match: Message = cast(Message, self.match)
+        match: Message = self.match
 
         request = ctx.last_request
         for field in match.model_fields:
@@ -112,7 +112,7 @@ class Any(BaseCondition):
     Check if any condition from the :py:attr:`.conditions` list is True.
     """
 
-    conditions: Iterable[BaseCondition]
+    conditions: List[BaseCondition]
     """
     List of conditions.
     """
@@ -126,6 +126,7 @@ class All(BaseCondition):
     Check if all conditions from the :py:attr:`.conditions` list is True.
     """
 
+    conditions: List[BaseCondition]
     conditions: List[BaseCondition]
     """
     List of conditions.

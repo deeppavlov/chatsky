@@ -5,7 +5,7 @@ This module provides basic responses.
 """
 
 import random
-from typing import List, cast
+from typing import List
 
 from pydantic import field_validator
 
@@ -26,5 +26,5 @@ class RandomChoice(BaseResponse):
         return [Message.model_validate(message) for message in obj]
 
     async def call(self, ctx: Context) -> MessageInitTypes:
-        responses: Message = cast(Message, self.responses)
+        responses: Message = self.responses
         return random.choice(responses)
