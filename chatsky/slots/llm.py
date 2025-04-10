@@ -9,18 +9,18 @@ that can easily extract requested information from an unstructured user's reques
 
 from __future__ import annotations
 
-import json
-
 from typing import Union, Dict, TYPE_CHECKING
 import logging
 
-from chatsky.core.message import Message
 from pydantic import BaseModel, Field, create_model
 
+from chatsky.llm.langchain_context import context_to_history, message_to_langchain
+from chatsky.llm.filters import FromModel
 from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
 
 if TYPE_CHECKING:
     from chatsky.core import Context
+    from chatsky.core.message import Message
 
 
 logger = logging.getLogger(__name__)
@@ -32,33 +32,35 @@ class LLMSlot(ValueSlot, frozen=True):
     `caption` parameter using LLM.
     """
 
-    # TODO:
-    # add history (and overall update the class)
-
     caption: str
     return_type: type = str
     llm_model_name: str = ""
+    history: int = 0
 
-    def __init__(self, caption, llm_model_name=""):
-        super().__init__(caption=caption, llm_model_name=llm_model_name)
+    def __init__(self, caption, return_type, llm_model_name="", history=0):
+        super().__init__(caption=caption, return_type=return_type, llm_model_name=llm_model_name, history=history)
 
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         if request_text == "":
             return SlotNotExtracted()
-        model_instance = ctx.pipeline.models[self.llm_model_name].model
 
-        # Dynamically create a Pydantic model based on the caption
-        class DynamicModel(BaseModel):
-            value: self.return_type = Field(description=self.caption)
-
-        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None).respond(
-            history=[request_text],
-            message_schema=DynamicModel
+        history_messages = context_to_history(
+            ctx, self.history, filter_func=FromModel(), llm_model_name=self.llm_model_name, max_size=1000
         )
-        result_json = json.loads(result.text)
+        if history_messages == []:
+            history_messages = [message_to_langchain(ctx.last_request, ctx)]
+        # Dynamically create a Pydantic model based on the caption
+        return_type = self.return_type
 
-        return result.get("value", "")
+        class DynamicModel(BaseModel):
+            value: return_type = Field(description=self.caption)
+
+        result: DynamicModel = await ctx.pipeline.models[self.llm_model_name]._ainvoke(
+            history=history_messages, message_schema=DynamicModel
+        )
+
+        return result.value
 
 
 class LLMGroupSlot(GroupSlot):
@@ -84,14 +86,16 @@ class LLMGroupSlot(GroupSlot):
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
 
-        # model_instance = ctx.pipeline.models[self.llm_model_name].model
-        # structured_model = model_instance.with_structured_output(DynamicGroupModel)
-        # result = await structured_model.ainvoke(request_text)
-        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None).respond(
-            history=[request_text],
-            message_schema=DynamicGroupModel
+        history_messages = context_to_history(
+            ctx, self.history, filter_func=FromModel(), llm_model_name=self.llm_model_name, max_size=1000
         )
-        result_json = json.loads(result.text)
+        if history_messages == []:
+            history_messages = [message_to_langchain(ctx.last_request, ctx)]
+
+        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None)._ainvoke(
+            history=history_messages, message_schema=DynamicGroupModel
+        )
+        result_json = result.model_dump()
         logger.debug(f"Result JSON: {result_json}")
 
         # Convert flat dict to nested structure
