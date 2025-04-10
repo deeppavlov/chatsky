@@ -9,7 +9,7 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Pattern, Union, List, Optional
+from typing import Pattern, Union, List, cast
 import logging
 import re
 from functools import cached_property
@@ -46,7 +46,7 @@ class ExactMatch(BaseCondition):
         return Message.model_validate(obj)
 
     async def call(self, ctx: Context) -> bool:
-        match: Message = self.match
+        match: Message = cast(Message, self.match)
 
         request = ctx.last_request
         for field in match.model_fields:
@@ -127,13 +127,11 @@ class All(BaseCondition):
     """
 
     conditions: List[BaseCondition]
-    conditions: List[BaseCondition]
     """
     List of conditions.
     """
 
     async def call(self, ctx: Context) -> bool:
-        logger.debug(list(self.conditions))
         return all(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
 
@@ -148,7 +146,6 @@ class Negation(BaseCondition):
     """
 
     async def call(self, ctx: Context) -> bool:
-        logger.info("calling negation")
         return not await self.condition.is_true(ctx)
 
 
@@ -181,8 +178,6 @@ class CheckLastLabels(BaseCondition):
 
     @field_validator("labels", mode="before")
     def validate_match(obj):
-        if obj is None:
-            return None
         return [AbsoluteNodeLabel.model_validate(label) for label in obj]
 
     async def call(self, ctx: Context) -> bool:
