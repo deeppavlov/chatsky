@@ -181,13 +181,10 @@ class CheckLastLabels(BaseCondition):
         return [AbsoluteNodeLabel.model_validate(label) for label in obj]
 
     async def call(self, ctx: Context) -> bool:
-        self_labels: List[AbsoluteNodeLabel] = cast(List[AbsoluteNodeLabel], self.labels)
-        self_flow_labels: List[str] = cast(List[str], self.flow_labels)
-
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
 
         for label in labels:
-            if label.flow_name in self_flow_labels or label in self_labels:
+            if label.flow_name in self.flow_labels or label in self.labels:
                 return True
         return False
 
