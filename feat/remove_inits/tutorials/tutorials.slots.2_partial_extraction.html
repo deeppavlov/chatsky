@@ -851,15 +851,6 @@ Note: you may need to restart the kernel to use updated packages.
 USER: text=&#39;/start&#39;
 BOT : text=&#39;Hi! Send me email and date.&#39;
 USER: text=&#39;Only email: email@email.com&#39;
-text=&#39;Extracted slots:
-  Group with partial extraction:
-    {partial_extraction}
-  Group with success_only:
-    {success_only_extraction}
-  Group without success_only:
-    {success_only_false}
-  Extracting sub-slots with success_only:
-    {sub_slot_success_only_extraction}&#39;
 BOT : text=&#39;Extracted slots:
   Group with partial extraction:
     {&#39;date&#39;: &#39;None&#39;, &#39;email&#39;: &#39;email@email.com&#39;}
@@ -870,15 +861,6 @@ BOT : text=&#39;Extracted slots:
   Extracting sub-slots with success_only:
     {&#39;date&#39;: &#39;None&#39;, &#39;email&#39;: &#39;email@email.com&#39;}&#39;
 USER: text=&#39;Only date: 01.01.2024&#39;
-text=&#39;Extracted slots:
-  Group with partial extraction:
-    {partial_extraction}
-  Group with success_only:
-    {success_only_extraction}
-  Group without success_only:
-    {success_only_false}
-  Extracting sub-slots with success_only:
-    {sub_slot_success_only_extraction}&#39;
 BOT : text=&#39;Extracted slots:
   Group with partial extraction:
     {&#39;date&#39;: &#39;01.01.2024&#39;, &#39;email&#39;: &#39;email@email.com&#39;}
@@ -889,15 +871,6 @@ BOT : text=&#39;Extracted slots:
   Extracting sub-slots with success_only:
     {&#39;date&#39;: &#39;01.01.2024&#39;, &#39;email&#39;: &#39;email@email.com&#39;}&#39;
 USER: text=&#39;Both email and date: another_email@email.com; 02.01.2024&#39;
-text=&#39;Extracted slots:
-  Group with partial extraction:
-    {partial_extraction}
-  Group with success_only:
-    {success_only_extraction}
-  Group without success_only:
-    {success_only_false}
-  Extracting sub-slots with success_only:
-    {sub_slot_success_only_extraction}&#39;
 BOT : text=&#39;Extracted slots:
   Group with partial extraction:
     {&#39;date&#39;: &#39;02.01.2024&#39;, &#39;email&#39;: &#39;another_email@email.com&#39;}
@@ -908,15 +881,6 @@ BOT : text=&#39;Extracted slots:
   Extracting sub-slots with success_only:
     {&#39;date&#39;: &#39;02.01.2024&#39;, &#39;email&#39;: &#39;another_email@email.com&#39;}&#39;
 USER: text=&#39;Partial update (date only): 03.01.2024&#39;
-text=&#39;Extracted slots:
-  Group with partial extraction:
-    {partial_extraction}
-  Group with success_only:
-    {success_only_extraction}
-  Group without success_only:
-    {success_only_false}
-  Extracting sub-slots with success_only:
-    {sub_slot_success_only_extraction}&#39;
 BOT : text=&#39;Extracted slots:
   Group with partial extraction:
     {&#39;date&#39;: &#39;03.01.2024&#39;, &#39;email&#39;: &#39;another_email@email.com&#39;}
@@ -927,15 +891,6 @@ BOT : text=&#39;Extracted slots:
   Extracting sub-slots with success_only:
     {&#39;date&#39;: &#39;03.01.2024&#39;, &#39;email&#39;: &#39;another_email@email.com&#39;}&#39;
 USER: text=&#39;No slots here but `Extract` will still be called.&#39;
-text=&#39;Extracted slots:
-  Group with partial extraction:
-    {partial_extraction}
-  Group with success_only:
-    {success_only_extraction}
-  Group without success_only:
-    {success_only_false}
-  Extracting sub-slots with success_only:
-    {sub_slot_success_only_extraction}&#39;
 BOT : text=&#39;Extracted slots:
   Group with partial extraction:
     {&#39;date&#39;: &#39;03.01.2024&#39;, &#39;email&#39;: &#39;another_email@email.com&#39;}

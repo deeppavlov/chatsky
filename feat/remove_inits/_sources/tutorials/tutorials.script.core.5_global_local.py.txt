@@ -23,10 +23,6 @@ from chatsky.utils.testing.common import (
     is_interactive_mode,
 )
 
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-
 # %% [markdown]
 """
 Keywords `GLOBAL` and `LOCAL` are used to define global and local nodes
