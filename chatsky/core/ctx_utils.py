@@ -64,6 +64,11 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     "Enables complex stats collection across multiple turns."
     slot_manager: SlotManager = Field(default_factory=SlotManager)
     "Stores extracted slots."
+    response_exception: Optional[str] = Field(default=None, exclude=True)
+    """
+    Stores exception messages raised from response functions wrapped in
+    :py:class:`~chatsky.processing.standard.AddFallbackResponses`.
+    """
 
 
 class ContextMainInfo(BaseModel):
