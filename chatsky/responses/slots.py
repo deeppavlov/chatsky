@@ -4,7 +4,7 @@ Slot Responses
 Slot-related responses.
 """
 
-from typing import Union, Literal
+from typing import Union, Literal, cast
 import logging
 
 from pydantic import TypeAdapter, field_validator
@@ -43,10 +43,8 @@ class FilledTemplate(BaseResponse):
         return TypeAdapter(AnyResponse).validate_python(obj)
 
     async def call(self, ctx: Context) -> MessageInitTypes:
-        template = self.template
+        result = await cast(AnyResponse, self.template)(ctx)
 
-        result = await template(ctx)
-        print(result)
         if result.text is not None:
             filled = ctx.framework_data.slot_manager.fill_template(result.text)
             if isinstance(filled, str):
