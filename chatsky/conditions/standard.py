@@ -42,8 +42,9 @@ class ExactMatch(BaseCondition):
     """
 
     @field_validator("match", mode="before")
-    def validate_match(obj):
-        return Message.model_validate(obj)
+    @classmethod
+    def validate_match(cls, value):
+        return Message.model_validate(value)
 
     async def call(self, ctx: Context) -> bool:
         match: Message = cast(Message, self.match)
@@ -177,8 +178,9 @@ class CheckLastLabels(BaseCondition):
     """
 
     @field_validator("labels", mode="before")
-    def validate_match(obj):
-        return [AbsoluteNodeLabel.model_validate(label) for label in obj]
+    @classmethod
+    def validate_match(cls, labels):
+        return [AbsoluteNodeLabel.model_validate(label) for label in labels]
 
     async def call(self, ctx: Context) -> bool:
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203

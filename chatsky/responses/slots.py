@@ -39,8 +39,9 @@ class FilledTemplate(BaseResponse):
     """
 
     @field_validator("template", mode="before")
-    def validate_template(obj) -> AnyResponse:
-        return TypeAdapter(AnyResponse).validate_python(obj)
+    @classmethod
+    def validate_template(cls, template) -> AnyResponse:
+        return TypeAdapter(AnyResponse).validate_python(template)
 
     async def call(self, ctx: Context) -> MessageInitTypes:
         result = await cast(AnyResponse, self.template)(ctx)

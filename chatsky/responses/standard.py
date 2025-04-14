@@ -22,8 +22,9 @@ class RandomChoice(BaseResponse):
     """A list of messages to choose from."""
 
     @field_validator("responses", mode="before")
-    def validate_responses(obj):
-        return [Message.model_validate(message) for message in obj]
+    @classmethod
+    def validate_responses(cls, responses):
+        return [Message.model_validate(message) for message in responses]
 
     async def call(self, ctx: Context) -> MessageInitTypes:
         return random.choice(self.responses)
