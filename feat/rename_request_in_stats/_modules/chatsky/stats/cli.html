@@ -588,7 +588,7 @@
 <span class="n">CHATSKY_NODE_STATS_STATEMENT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">WITH main AS (</span>
 <span class="s2">    SELECT DISTINCT </span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;context_id&#39;] as context_id,</span>
-<span class="s2">    toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;current_turn_id&#39;]) as current_turn_id,</span>
+<span class="s2">    toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;turn_id&#39;]) as turn_id,</span>
 <span class="s2">    toDateTime(otel_traces.Timestamp) as start_time,</span>
 <span class="s2">    otel_traces.SpanName as data_key,</span>
 <span class="s2">    </span><span class="si">{table}</span><span class="s2">.Body as data,</span>
@@ -598,9 +598,9 @@
 <span class="s2">    </span><span class="si">{table}</span><span class="s2">.TraceId as trace_id,</span>
 <span class="s2">    otel_traces.TraceId</span><span class="se">\n</span><span class="s2">FROM </span><span class="si">{table}</span><span class="s2">, otel_traces</span>
 <span class="s2">    WHERE </span><span class="si">{table}</span><span class="s2">.TraceId = otel_traces.TraceId and data_key = &#39;get_current_label&#39;</span>
-<span class="s2">    ORDER BY context_id, current_turn_id</span>
+<span class="s2">    ORDER BY context_id, turn_id</span>
 <span class="s2">) SELECT context_id,</span>
-<span class="s2">    current_turn_id,</span>
+<span class="s2">    turn_id,</span>
 <span class="s2">    start_time,</span>
 <span class="s2">    data_key,</span>
 <span class="s2">    data,</span>
@@ -614,7 +614,7 @@
 <span class="n">CHATSKY_STATS_STATEMENT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">WITH main AS (</span>
 <span class="s2">    SELECT DISTINCT </span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;context_id&#39;] as context_id,</span>
-<span class="s2">    toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;current_turn_id&#39;]) as current_turn_id,</span>
+<span class="s2">    toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;turn_id&#39;]) as turn_id,</span>
 <span class="s2">    toDateTime(otel_traces.Timestamp) as start_time,</span>
 <span class="s2">    otel_traces.SpanName as data_key,</span>
 <span class="s2">    </span><span class="si">{table}</span><span class="s2">.Body as data,</span>
@@ -624,9 +624,9 @@
 <span class="s2">    </span><span class="si">{table}</span><span class="s2">.TraceId as trace_id,</span>
 <span class="s2">    otel_traces.TraceId</span><span class="se">\n</span><span class="s2">FROM </span><span class="si">{table}</span><span class="s2">, otel_traces</span>
 <span class="s2">    WHERE </span><span class="si">{table}</span><span class="s2">.TraceId = otel_traces.TraceId</span>
-<span class="s2">    ORDER BY data_key, context_id, current_turn_id</span>
+<span class="s2">    ORDER BY data_key, context_id, turn_id</span>
 <span class="s2">) SELECT context_id,</span>
-<span class="s2">    current_turn_id,</span>
+<span class="s2">    turn_id,</span>
 <span class="s2">    start_time,</span>
 <span class="s2">    data_key,</span>
 <span class="s2">    data,</span>
@@ -640,11 +640,11 @@
 <span class="n">CHATSKY_FINAL_NODES_STATEMENT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">WITH main AS (</span>
 <span class="s2">    SELECT LogAttributes[&#39;context_id&#39;] AS context_id,</span>
-<span class="s2">    max(toUInt64OrNull(LogAttributes[&#39;current_turn_id&#39;])) AS max_history</span>
+<span class="s2">    max(toUInt64OrNull(LogAttributes[&#39;turn_id&#39;])) AS max_history</span>
 <span class="s2">    FROM </span><span class="si">{table}</span><span class="se">\n</span><span class="s2">GROUP BY context_id</span>
 <span class="s2">)</span>
 <span class="s2">SELECT DISTINCT LogAttributes[&#39;context_id&#39;] AS context_id,</span>
-<span class="s2">toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;current_turn_id&#39;]) AS current_turn_id,</span>
+<span class="s2">toUInt64OrNull(</span><span class="si">{table}</span><span class="s2">.LogAttributes[&#39;turn_id&#39;]) AS turn_id,</span>
 <span class="s2">toDateTime(otel_traces.Timestamp) AS start_time,</span>
 <span class="si">{lblfield}</span><span class="s2"> AS label,</span>
 <span class="si">{flowfield}</span><span class="s2"> AS flow_label,</span>
@@ -652,7 +652,7 @@
 <span class="s2">FROM </span><span class="si">{table}</span>
 <span class="s2">INNER JOIN main</span>
 <span class="s2">ON context_id  = main.context_id</span>
-<span class="s2">AND current_turn_id = main.max_history</span>
+<span class="s2">AND turn_id = main.max_history</span>
 <span class="s2">INNER JOIN otel_traces</span>
 <span class="s2">ON </span><span class="si">{table}</span><span class="s2">.TraceId = otel_traces.TraceId</span>
 <span class="s2">WHERE otel_traces.SpanName = &#39;get_current_label&#39;</span>
@@ -731,10 +731,10 @@
         <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">table</span><span class="o">=</span><span class="s2">&quot;$</span><span class="si">{db.table}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">label_lag</span><span class="o">=</span><span class="s2">&quot;lagInFrame(label) OVER &quot;</span>
-            <span class="s2">&quot;(PARTITION BY context_id ORDER BY current_turn_id ASC &quot;</span>
+            <span class="s2">&quot;(PARTITION BY context_id ORDER BY turn_id ASC &quot;</span>
             <span class="s2">&quot;ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)&quot;</span><span class="p">,</span>
             <span class="n">flow_lag</span><span class="o">=</span><span class="s2">&quot;lagInFrame(flow_label) OVER &quot;</span>
-            <span class="s2">&quot;(PARTITION BY context_id ORDER BY current_turn_id ASC &quot;</span>
+            <span class="s2">&quot;(PARTITION BY context_id ORDER BY turn_id ASC &quot;</span>
             <span class="s2">&quot;ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)&quot;</span><span class="p">,</span>
             <span class="n">texttype</span><span class="o">=</span><span class="s2">&quot;String&quot;</span><span class="p">,</span>
             <span class="n">lblfield</span><span class="o">=</span><span class="s2">&quot;JSON_VALUE($</span><span class="si">{db.table}</span><span class="s2">.Body, &#39;$.label&#39;)&quot;</span><span class="p">,</span>
