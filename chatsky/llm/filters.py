@@ -7,12 +7,13 @@ This module contains a collection of basic functions for history filtering to av
 import abc
 from enum import Enum
 from logging import Logger
-from typing import Union, Optional
+from typing import Union, Optional, TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from chatsky.core.message import Message
-from chatsky.core.context import Context
+if TYPE_CHECKING:
+    from chatsky.core import Context
+    from chatsky.core.message import Message
 
 
 logger = Logger(name=__name__)
