@@ -569,8 +569,9 @@
 <div class="viewcode-block" id="FilledTemplate.validate_template">
 <a class="viewcode-back" href="../../../apiref/chatsky.responses.slots.html#chatsky.responses.slots.FilledTemplate.validate_template">[docs]</a>
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;template&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">validate_template</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyResponse</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">AnyResponse</span><span class="p">)</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">validate_template</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyResponse</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">AnyResponse</span><span class="p">)</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FilledTemplate.call">
