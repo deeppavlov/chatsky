@@ -4,6 +4,8 @@ Filters
 This module contains a collection of basic functions for history filtering to avoid cluttering LLMs context window.
 """
 
+from __future__ import annotations
+
 import abc
 from enum import Enum
 from logging import Logger
