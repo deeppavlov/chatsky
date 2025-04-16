@@ -129,7 +129,7 @@ class LLMGroupSlot(GroupSlot):
             current[final] = ExtractedValueSlot.model_construct(
                 is_slot_extracted=value is not None, extracted_value=value
             )
-        
+
         # Combine extracted_items with the nested result
         for key, value in extracted_items.items():
             if isinstance(value, ExtractedValueSlot):
@@ -149,7 +149,9 @@ class LLMGroupSlot(GroupSlot):
             return d
         return ExtractedGroupSlot(**{k: self._dict_to_extracted_slots(v) for k, v in d.items()})
 
-    def _flatten_llm_group_slot(self, slot, parent_key="") -> Tuple[Dict[str, LLMSlot], list[Union[LLMSlot, LLMGroupSlot]]]:
+    def _flatten_llm_group_slot(
+        self, slot, parent_key=""
+    ) -> Tuple[Dict[str, LLMSlot], list[Union[LLMSlot, LLMGroupSlot]]]:
         """
         Convert potentially nested group slot into a dictionary with
         flat keys.
