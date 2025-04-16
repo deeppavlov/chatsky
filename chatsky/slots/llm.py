@@ -9,7 +9,7 @@ that can easily extract requested information from an unstructured user's reques
 
 from __future__ import annotations
 
-from typing import Union, Dict, TYPE_CHECKING
+from typing import Union, Dict, TYPE_CHECKING, Tuple
 import logging
 
 from pydantic import BaseModel, Field, create_model
@@ -77,7 +77,8 @@ class LLMGroupSlot(GroupSlot):
         request_text = ctx.last_request.text
         if request_text == "":
             return ExtractedGroupSlot()
-        flat_items = self._flatten_llm_group_slot(self)
+
+        flat_items, items_with_models = self._flatten_llm_group_slot(self)
         captions = {}
         for child_name, slot_item in flat_items.items():
             captions[child_name] = (slot_item.return_type, Field(description=slot_item.caption, default=None))
@@ -91,6 +92,16 @@ class LLMGroupSlot(GroupSlot):
         )
         if history_messages == []:
             history_messages = [message_to_langchain(ctx.last_request, ctx)]
+
+        extracted_items = {}
+        for key, item in items_with_models.items():
+            if isinstance(item, LLMSlot):
+                res = await item.extract_value(ctx)
+            elif isinstance(item, LLMGroupSlot):
+                res = await item.get_value(ctx)
+            else:
+                res = SlotNotExtracted
+            extracted_items[key] = res
 
         result: Message = await ctx.pipeline.models.get(self.llm_model_name, None)._ainvoke(
             history=history_messages, message_schema=DynamicGroupModel
@@ -118,6 +129,15 @@ class LLMGroupSlot(GroupSlot):
             current[final] = ExtractedValueSlot.model_construct(
                 is_slot_extracted=value is not None, extracted_value=value
             )
+        
+        # Combine extracted_items with the nested result
+        for key, value in extracted_items.items():
+            if isinstance(value, ExtractedValueSlot):
+                nested_result[key] = value
+            elif isinstance(value, ExtractedGroupSlot):
+                nested_result[key] = self._dict_to_extracted_slots(value)
+            else:
+                nested_result[key] = SlotNotExtracted
 
         return self._dict_to_extracted_slots(nested_result)
 
@@ -129,7 +149,7 @@ class LLMGroupSlot(GroupSlot):
             return d
         return ExtractedGroupSlot(**{k: self._dict_to_extracted_slots(v) for k, v in d.items()})
 
-    def _flatten_llm_group_slot(self, slot, parent_key="") -> Dict[str, LLMSlot]:
+    def _flatten_llm_group_slot(self, slot, parent_key="") -> Tuple[Dict[str, LLMSlot], list[Union[LLMSlot, LLMGroupSlot]]]:
         """
         Convert potentially nested group slot into a dictionary with
         flat keys.
@@ -138,10 +158,16 @@ class LLMGroupSlot(GroupSlot):
         As such, values in the returned dictionary are only of type :py:class:`LLMSlot`.
         """
         items = {}
+        items_with_models = {}
+        # filter out items with `llm_model_name` specified
+        # to a separate list. Other should go to the flattening list
         for key, value in slot.__pydantic_extra__.items():
             new_key = f"{parent_key}.{key}" if parent_key else key
+            if value.llm_model_name:
+                items_with_models[new_key] = value
+                continue
             if isinstance(value, LLMGroupSlot):
                 items.update(self._flatten_llm_group_slot(value, new_key))
             else:
                 items[new_key] = value
-        return items
+        return items, items_with_models
