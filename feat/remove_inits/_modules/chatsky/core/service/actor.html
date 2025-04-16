@@ -590,9 +590,12 @@
 
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Running transitions&quot;</span><span class="p">)</span>
 
-            <span class="n">destination_result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_next_label</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">current_node</span><span class="o">.</span><span class="n">transitions</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">default_priority</span><span class="p">)</span>
+            <span class="n">destination_result</span><span class="p">,</span> <span class="n">transition</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_next_label</span><span class="p">(</span>
+                <span class="n">ctx</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">current_node</span><span class="o">.</span><span class="n">transitions</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">default_priority</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">destination_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">next_label</span> <span class="o">=</span> <span class="n">destination_result</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">framework_data</span><span class="o">.</span><span class="n">transition</span> <span class="o">=</span> <span class="n">transition</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception occurred during transition processing.&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
 

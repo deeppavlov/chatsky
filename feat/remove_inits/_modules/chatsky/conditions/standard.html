@@ -744,11 +744,11 @@
 <span class="sd">    Number of labels to check.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CheckLastLabels.validate_match">
-<a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.CheckLastLabels.validate_match">[docs]</a>
+<div class="viewcode-block" id="CheckLastLabels.validate_labels">
+<a class="viewcode-back" href="../../../apiref/chatsky.conditions.standard.html#chatsky.conditions.standard.CheckLastLabels.validate_labels">[docs]</a>
     <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">validate_match</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">validate_labels</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span></div>
 
 

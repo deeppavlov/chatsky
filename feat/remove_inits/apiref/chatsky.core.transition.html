@@ -928,10 +928,15 @@ Order of <code class="docutils literal notranslate"><span class="pre">transition
 produces an exception, the corresponding transition is filtered out.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabel" title="chatsky.core.node_label.AbsoluteNodeLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteNodeLabel</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabel" title="chatsky.core.node_label.AbsoluteNodeLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteNodeLabel</span></code></a>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="#chatsky.core.transition.Transition" title="chatsky.core.transition.Transition"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transition</span></code></a>]]</span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Label of the next node or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no transition is left by the end of the process.</p>
+<dd class="field-even"><p><p>Tuple of:</p>
+<ol class="arabic simple">
+<li><p>Label of the next node or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no transition is left by the end of the process;</p></li>
+<li><p>The transition which lead to the next node or <code class="docutils literal notranslate"><span class="pre">None</span></code> if no transition is left by the end of the process.</p></li>
+</ol>
+</p>
 </dd>
 </dl>
 </dd></dl>
