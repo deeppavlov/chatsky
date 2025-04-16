@@ -179,7 +179,7 @@ class CheckLastLabels(BaseCondition):
 
     @field_validator("labels", mode="before")
     @classmethod
-    def validate_match(cls, labels):
+    def validate_labels(cls, labels):
         return [AbsoluteNodeLabel.model_validate(label) for label in labels]
 
     async def call(self, ctx: Context) -> bool:
