@@ -172,7 +172,7 @@ class CheckLastLabels(BaseCondition):
 
     Is initialized according to :py:data:`~.AbsoluteNodeLabelInitTypes`.
     """
-    last_n_indices: int = 1
+    last_n_indices: int = Field(default=1, ge=1)
     """
     Number of labels to check.
     """
