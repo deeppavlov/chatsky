@@ -684,7 +684,7 @@ i.e. nodes that terminate the dialog.</p>
 <p><cite>chatsky-nodes-stats</cite> uses the following variables to store the data:</p>
 <ul class="simple">
 <li><p>The <cite>context_id</cite> field can be used to distinguish dialog contexts from each other and serves as a user identifier.</p></li>
-<li><p><cite>request_id</cite> is the number of the dialog turn at which the data record was emitted. The data points can be aggregated over this field, showing the distribution of a variable over the dialog history.</p></li>
+<li><p><cite>turn_id</cite> is the number of the dialog turn at which the data record was emitted. The data points can be aggregated over this field, showing the distribution of a variable over the dialog history.</p></li>
 <li><p>The <cite>data_key</cite> field contains the name of the extractor function that emitted the given record. Since in most cases you will only need the output of one extractor, you can filter out all the other records using filters.</p></li>
 <li><p>Finally, the <cite>data</cite> field is a set of JSON-encoded key-value pairs. The keys and values differ depending on the extractor function that emitted the data (you can essentially save arbitrary data under arbitrary keys), which makes filtering the data rows by their <cite>data_key</cite> all the more important. The JSON format implies that individual values need to be extracted using the Superset SQL functions (see below).</p></li>
 </ul>
