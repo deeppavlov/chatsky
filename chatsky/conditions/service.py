@@ -28,9 +28,6 @@ class ServiceFinished(BaseCondition):
     This eliminates possible service states ``NOT_RUN`` and ``RUNNING``.
     """
 
-    def __init__(self, path: str, *, wait: bool = False):
-        super().__init__(path=path, wait=wait)
-
     async def call(self, ctx: Context) -> bool:
         if self.wait:
             await ctx.framework_data.service_states[self.path].finished_event.wait()

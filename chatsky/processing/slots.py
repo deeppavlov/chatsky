@@ -27,9 +27,6 @@ class Extract(BaseProcessing):
     success_only: bool = True
     """If set, only successfully extracted values will be stored in the slot storage."""
 
-    def __init__(self, *slots: SlotName, success_only: bool = True):
-        super().__init__(slots=slots, success_only=success_only)
-
     async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager
         results = await asyncio.gather(
@@ -48,9 +45,6 @@ class Unset(BaseProcessing):
 
     slots: List[SlotName]
     """A list of slot names to extract."""
-
-    def __init__(self, *slots: SlotName):
-        super().__init__(slots=slots)
 
     async def call(self, ctx: Context):
         manager = ctx.framework_data.slot_manager

@@ -9,12 +9,12 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Pattern, Union, List, Optional
+from typing import Pattern, Union, List, cast
 import logging
 import re
 from functools import cached_property
 
-from pydantic import Field, computed_field
+from pydantic import Field, computed_field, field_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -30,7 +30,7 @@ class ExactMatch(BaseCondition):
     If :py:attr:`.skip_none`, will not compare ``None`` fields of :py:attr:`.match`.
     """
 
-    match: Message
+    match: MessageInitTypes
     """
     Message to compare last request with.
 
@@ -41,17 +41,21 @@ class ExactMatch(BaseCondition):
     Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
     """
 
-    def __init__(self, match: MessageInitTypes, *, skip_none=True):
-        super().__init__(match=match, skip_none=skip_none)
+    @field_validator("match", mode="before")
+    @classmethod
+    def validate_match(cls, value):
+        return Message.model_validate(value)
 
     async def call(self, ctx: Context) -> bool:
+        match: Message = cast(Message, self.match)
+
         request = ctx.last_request
-        for field in self.match.model_fields:
-            match_value = self.match.__getattribute__(field)
+        for field in match.model_fields:
+            match_value = match.__getattribute__(field)
             if self.skip_none and match_value is None:
                 continue
             if field in request.model_fields.keys():
-                if request.__getattribute__(field) != self.match.__getattribute__(field):
+                if request.__getattribute__(field) != match.__getattribute__(field):
                     return False
             else:
                 return False
@@ -68,9 +72,6 @@ class HasText(BaseCondition):
     """
     Text to search for in the last request.
     """
-
-    def __init__(self, text: str):
-        super().__init__(text=text)
 
     async def call(self, ctx: Context) -> bool:
         request = ctx.last_request
@@ -93,9 +94,6 @@ class Regexp(BaseCondition):
     """
     Flags to pass to ``re.compile``.
     """
-
-    def __init__(self, pattern: Union[str, Pattern], *, flags: Union[int, re.RegexFlag] = 0):
-        super().__init__(pattern=pattern, flags=flags)
 
     @computed_field
     @cached_property
@@ -120,9 +118,6 @@ class Any(BaseCondition):
     List of conditions.
     """
 
-    def __init__(self, *conditions: BaseCondition):
-        super().__init__(conditions=list(conditions))
-
     async def call(self, ctx: Context) -> bool:
         return any(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
@@ -137,9 +132,6 @@ class All(BaseCondition):
     List of conditions.
     """
 
-    def __init__(self, *conditions: BaseCondition):
-        super().__init__(conditions=list(conditions))
-
     async def call(self, ctx: Context) -> bool:
         return all(await asyncio.gather(*(cnd.is_true(ctx) for cnd in self.conditions)))
 
@@ -153,9 +145,6 @@ class Negation(BaseCondition):
     """
     Condition to negate.
     """
-
-    def __init__(self, condition: BaseCondition):
-        super().__init__(condition=condition)
 
     async def call(self, ctx: Context) -> bool:
         return not await self.condition.is_true(ctx)
@@ -177,7 +166,7 @@ class CheckLastLabels(BaseCondition):
     """
     List of flow names to find in the last labels.
     """
-    labels: List[AbsoluteNodeLabel] = Field(default_factory=list)
+    labels: List[AbsoluteNodeLabelInitTypes] = Field(default_factory=list)
     """
     List of labels to find in the last labels.
 
@@ -188,21 +177,14 @@ class CheckLastLabels(BaseCondition):
     Number of labels to check.
     """
 
-    def __init__(
-        self,
-        *,
-        flow_labels: Optional[List[str]] = None,
-        labels: Optional[List[AbsoluteNodeLabelInitTypes]] = None,
-        last_n_indices: int = 1
-    ):
-        if flow_labels is None:
-            flow_labels = []
-        if labels is None:
-            labels = []
-        super().__init__(flow_labels=flow_labels, labels=labels, last_n_indices=last_n_indices)
+    @field_validator("labels", mode="before")
+    @classmethod
+    def validate_labels(cls, labels):
+        return [AbsoluteNodeLabel.model_validate(label) for label in labels]
 
     async def call(self, ctx: Context) -> bool:
         labels = await ctx.labels.get(ctx.labels.keys()[-self.last_n_indices :])  # noqa: E203
+
         for label in labels:
             if label.flow_name in self.flow_labels or label in self.labels:
                 return True
@@ -219,9 +201,6 @@ class HasCallbackQuery(BaseCondition):
     """
     Query string to find in last request's attachments.
     """
-
-    def __init__(self, query_string: str):
-        super().__init__(query_string=query_string)
 
     async def call(self, ctx: Context) -> bool:
         last_request = ctx.last_request

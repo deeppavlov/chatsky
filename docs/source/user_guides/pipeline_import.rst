@@ -162,13 +162,14 @@ Call is made with the arguments passed as a value of the dictionary:
     * - .. code-block:: yaml
 
             chatsky.proc.Extract:
-                - person.name
-                - person.age
+                slots: [person.name, person.age]
       - .. code-block:: python
 
             chatsky.proc.Extract(
-                "person.name",
-                "person.age"
+                slots=[
+                    "person.name",
+                    "person.age"
+                ]
             )
       - The value is a list; it is passed as args.
 
