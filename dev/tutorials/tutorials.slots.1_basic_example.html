@@ -706,16 +706,21 @@ Group 2: friend.first_name, friend.last_name
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">GLOBAL</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
-            <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[sS]tart&quot;</span><span class="p">))</span>
+            <span class="n">Tr</span><span class="p">(</span>
+                <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
+                <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">Regexp</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;^[sS]tart&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">},</span>
     <span class="s2">&quot;username_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">LOCAL</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;get_slot&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="s2">&quot;person.username&quot;</span><span class="p">)},</span>
+            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;get_slot&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.username&quot;</span><span class="p">])</span>
+            <span class="p">},</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;email_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="s2">&quot;person.username&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.username&quot;</span><span class="p">]),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;username_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_question&quot;</span><span class="p">),</span> <span class="n">priority</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
@@ -730,11 +735,13 @@ Group 2: friend.first_name, friend.last_name
     <span class="p">},</span>
     <span class="s2">&quot;email_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">LOCAL</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;get_slot&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="s2">&quot;person.email&quot;</span><span class="p">)},</span>
+            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;get_slot&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.email&quot;</span><span class="p">])},</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;friend_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">),</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span><span class="s2">&quot;person.username&quot;</span><span class="p">,</span> <span class="s2">&quot;person.email&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span>
+                        <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;person.username&quot;</span><span class="p">,</span> <span class="s2">&quot;person.email&quot;</span><span class="p">]</span>
+                    <span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;email_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_question&quot;</span><span class="p">),</span> <span class="n">priority</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
@@ -749,12 +756,13 @@ Group 2: friend.first_name, friend.last_name
     <span class="p">},</span>
     <span class="s2">&quot;friend_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">LOCAL</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;get_slots&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="s2">&quot;friend&quot;</span><span class="p">)},</span>
+            <span class="n">PRE_TRANSITION</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;get_slots&quot;</span><span class="p">:</span> <span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;friend&quot;</span><span class="p">])},</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="s2">&quot;utter&quot;</span><span class="p">),</span>
                     <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">SlotsExtracted</span><span class="p">(</span>
-                        <span class="s2">&quot;friend.first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;friend.last_name&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;any&quot;</span>
+                        <span class="n">slots</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;friend.first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;friend.last_name&quot;</span><span class="p">],</span>
+                        <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;any&quot;</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="n">priority</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
                 <span class="p">),</span>
@@ -776,7 +784,7 @@ Group 2: friend.first_name, friend.last_name
         <span class="p">},</span>
         <span class="s2">&quot;utter&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">RESPONSE</span><span class="p">:</span> <span class="n">rsp</span><span class="o">.</span><span class="n">FilledTemplate</span><span class="p">(</span>
-                <span class="s2">&quot;Your friend is </span><span class="si">{friend.first_name}</span><span class="s2"> </span><span class="si">{friend.last_name}</span><span class="s2">&quot;</span>
+                <span class="n">template</span><span class="o">=</span><span class="s2">&quot;Your friend is </span><span class="si">{friend.first_name}</span><span class="s2"> </span><span class="si">{friend.last_name}</span><span class="s2">&quot;</span>
             <span class="p">),</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="s2">&quot;utter_alternative&quot;</span><span class="p">))],</span>
         <span class="p">},</span>

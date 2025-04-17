@@ -754,16 +754,31 @@ Note: you may need to restart the kernel to use updated packages.
     <span class="s2">&quot;main_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="n">LOCAL</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;/start&quot;</span><span class="p">)),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;formatted_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;formatted&quot;</span><span class="p">)),</span>
+                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;/start&quot;</span><span class="p">)),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;formatted_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;formatted&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
                 <span class="n">Tr</span><span class="p">(</span>
                     <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;attachments_node&quot;</span><span class="p">,</span>
-                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;attachments&quot;</span><span class="p">),</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;attachments&quot;</span><span class="p">),</span>
                 <span class="p">),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;secret_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;secret&quot;</span><span class="p">)),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;thumbnail_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;thumbnail&quot;</span><span class="p">)),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;hash_init_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;hash&quot;</span><span class="p">)),</span>
-                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="s2">&quot;restart&quot;</span><span class="p">)),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;secret_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;thumbnail_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;thumbnail&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;hash_init_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;hash&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">Tr</span><span class="p">(</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">,</span>
+                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">HasCallbackQuery</span><span class="p">(</span><span class="n">query_string</span><span class="o">=</span><span class="s2">&quot;restart&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
             <span class="p">]</span>
         <span class="p">},</span>
         <span class="s2">&quot;start_node&quot;</span><span class="p">:</span> <span class="p">{},</span>

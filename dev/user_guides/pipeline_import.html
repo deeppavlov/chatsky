@@ -697,14 +697,15 @@ will be replaced with a call result of the object referenced by the key.</p>
 This also showcases that replacement is recursive <code class="docutils literal notranslate"><span class="pre">external:re.I</span></code> is replaced as well.</p></td>
 </tr>
 <tr class="row-even"><td><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chatsky.proc.Extract</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">person.name</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">person.age</span>
+<span class="w">    </span><span class="nt">slots</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">person.name</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">person.age</span><span class="p p-Indicator">]</span>
 </pre></div>
 </div>
 </td>
 <td><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">chatsky</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">Extract</span><span class="p">(</span>
-    <span class="s2">&quot;person.name&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;person.age&quot;</span>
+    <span class="n">slots</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;person.name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;person.age&quot;</span>
+    <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>

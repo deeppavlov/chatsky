@@ -75,10 +75,16 @@ script = {
         TRANSITIONS: [
             Tr(
                 dst=("greeting_flow", "start_node"),
-                cnd=cnd.ExactMatch("/start"),
+                cnd=cnd.ExactMatch(match="/start"),
             ),
-            Tr(dst=("movie_flow", "create"), cnd=cnd.ExactMatch("/create")),
-            Tr(dst=("movie_flow", "review"), cnd=cnd.Regexp("/review .*")),
+            Tr(
+                dst=("movie_flow", "create"),
+                cnd=cnd.ExactMatch(match="/create"),
+            ),
+            Tr(
+                dst=("movie_flow", "review"),
+                cnd=cnd.Regexp(pattern="/review .*"),
+            ),
         ]
     },
     "greeting_flow": {

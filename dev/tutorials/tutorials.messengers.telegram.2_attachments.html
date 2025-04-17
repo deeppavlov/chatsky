@@ -756,14 +756,16 @@ Note: you may need to restart the kernel to use updated packages.
         <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
             <span class="n">Tr</span><span class="p">(</span>
                 <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;main_flow&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attachment</span><span class="si">}</span><span class="s2">_node&quot;</span><span class="p">),</span>
-                <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">attachment</span><span class="p">),</span>
+                <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="n">attachment</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">attachment</span> <span class="ow">in</span> <span class="n">ATTACHMENTS</span>
         <span class="p">]</span>
     <span class="p">},</span>
     <span class="s2">&quot;main_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;start_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;intro_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;/start&quot;</span><span class="p">))],</span>
+            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
+                <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;intro_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;/start&quot;</span><span class="p">))</span>
+            <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;intro_node&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="n">RESPONSE</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Type </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">QUOTED_ATTACHMENTS</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span>
