@@ -101,7 +101,7 @@ class ConstScriptFunc(BaseScriptFunc):
     def validate_value(cls, data):
         """Allow instantiating this class from its root value."""
         return {"root": data}
-
+    
 
 class BaseCondition(BaseScriptFunc, ABC):
     """
