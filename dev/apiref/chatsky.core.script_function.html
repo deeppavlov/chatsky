@@ -887,6 +887,14 @@
 <p>Base class for any script function.</p>
 <p>Defines <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.wrapped_call" title="chatsky.core.script_function.BaseScriptFunc.wrapped_call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">wrapped_call()</span></code></a> that wraps <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.call" title="chatsky.core.script_function.BaseScriptFunc.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> and handles exceptions and types conversions.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.script_function.BaseScriptFunc.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[float]</span></em><a class="headerlink" href="#chatsky.core.script_function.BaseScriptFunc.timeout" title="Link to this definition">#</a></dt>
+<dd><p>Timeout in seconds for script function execution.
+Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>, i.e. no timeout.</p>
+<p>If timeout occurs, it is treated like any other exception raised in script functions.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.core.script_function.BaseScriptFunc.return_type">
 <span class="sig-name descname"><span class="pre">return_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[Union[type,</span> <span class="pre">Tuple[type,</span> <span class="pre">...]]]</span></em><a class="headerlink" href="#chatsky.core.script_function.BaseScriptFunc.return_type" title="Link to this definition">#</a></dt>
 <dd><p>Return type of the script function.</p>
@@ -923,7 +931,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-odd"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.return_type" title="chatsky.core.script_function.BaseScriptFunc.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.call" title="chatsky.core.script_function.BaseScriptFunc.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.call" title="chatsky.core.script_function.BaseScriptFunc.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseScriptFunc.timeout" title="chatsky.core.script_function.BaseScriptFunc.timeout"><code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code></a> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1009,7 +1020,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-even"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BaseCondition.return_type" title="chatsky.core.script_function.BaseCondition.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseCondition.call" title="chatsky.core.script_function.BaseCondition.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseCondition.call" title="chatsky.core.script_function.BaseCondition.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1101,7 +1115,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-even"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BaseResponse.return_type" title="chatsky.core.script_function.BaseResponse.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseResponse.call" title="chatsky.core.script_function.BaseResponse.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseResponse.call" title="chatsky.core.script_function.BaseResponse.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1182,7 +1199,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-even"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BaseDestination.return_type" title="chatsky.core.script_function.BaseDestination.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseDestination.call" title="chatsky.core.script_function.BaseDestination.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseDestination.call" title="chatsky.core.script_function.BaseDestination.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1264,7 +1284,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-even"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BaseProcessing.return_type" title="chatsky.core.script_function.BaseProcessing.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseProcessing.call" title="chatsky.core.script_function.BaseProcessing.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BaseProcessing.call" title="chatsky.core.script_function.BaseProcessing.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1331,7 +1354,10 @@ Otherwise, an <code class="docutils literal notranslate"><span class="pre">Excep
 <dd class="field-even"><p>An instance of <a class="reference internal" href="#chatsky.core.script_function.BasePriority.return_type" title="chatsky.core.script_function.BasePriority.return_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">return_type</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BasePriority.call" title="chatsky.core.script_function.BasePriority.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If <a class="reference internal" href="#chatsky.core.script_function.BasePriority.call" title="chatsky.core.script_function.BasePriority.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> returned value of incorrect type.</p></li>
+<li><p><strong>TimeoutError</strong> – If <code class="xref py py-attr docutils literal notranslate"><span class="pre">timeout</span></code> is exceeded.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1408,6 +1434,7 @@ while validating <a class="reference internal" href="#chatsky.core.script_functi
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Script Function</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.script_function.BaseScriptFunc"><code class="docutils literal notranslate"><span class="pre">BaseScriptFunc</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.script_function.BaseScriptFunc.timeout"><code class="docutils literal notranslate"><span class="pre">BaseScriptFunc.timeout</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.script_function.BaseScriptFunc.return_type"><code class="docutils literal notranslate"><span class="pre">BaseScriptFunc.return_type</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.script_function.BaseScriptFunc.call"><code class="docutils literal notranslate"><span class="pre">BaseScriptFunc.call()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.script_function.BaseScriptFunc.wrapped_call"><code class="docutils literal notranslate"><span class="pre">BaseScriptFunc.wrapped_call()</span></code></a></li>
