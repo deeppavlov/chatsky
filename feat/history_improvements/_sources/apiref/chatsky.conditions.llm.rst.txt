@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/llm
+:doc_version: feat/history_improvements/
+
+.. automodule:: chatsky.conditions.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

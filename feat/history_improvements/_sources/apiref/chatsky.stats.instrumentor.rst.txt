@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/instrumentor
+:doc_version: feat/history_improvements/
+
+.. automodule:: chatsky.stats.instrumentor
+   :members:
+   :undoc-members:
+   :show-inheritance:

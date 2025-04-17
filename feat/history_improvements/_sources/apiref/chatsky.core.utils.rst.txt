@@ -1,0 +1,7 @@
+:source_name: chatsky/core/utils
+:doc_version: feat/history_improvements/
+
+.. automodule:: chatsky.core.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
