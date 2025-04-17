@@ -19,9 +19,9 @@ class PositionConfig(BaseModel):
     """
 
     system_prompt: float = 0
-    history: float = 1
-    misc_prompt: float = 2
-    call_prompt: float = 3
+    misc_prompt: float = 1
+    call_prompt: float = 2
+    history: float = 3
     last_turn: float = 4
 
 
