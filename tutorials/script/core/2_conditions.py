@@ -75,8 +75,8 @@ class HiLowerCase(BaseCondition):
 # %% [markdown]
 """
 Conditions are subclasses of `pydantic.BaseModel`,
-allowing you to use the `timeout` field to set a timer in seconds
-that determines when the condition activates and runs.
+allowing you to use the `timeout` field to set a timer in seconds that determines
+when the condition activates and runs.
 """
 
 """
