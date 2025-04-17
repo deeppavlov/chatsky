@@ -30,9 +30,9 @@ class LLMResponse(BaseResponse):
     """
     Response prompt.
     """
-    history: int = 5
+    context_window: int = 5
     """
-    Number of dialogue turns aside from the current one to keep in history. `-1` for full history.
+    Number of dialogue turns aside from the current one to keep in history. `-1` to put all messages into the context.
     """
     filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
     """
@@ -68,7 +68,7 @@ class LLMResponse(BaseResponse):
                 call_prompt=self.prompt,
                 prompt_misc_filter=self.prompt_misc_filter,
                 position_config=self.position_config or model.position_config,
-                length=self.history,
+                length=self.context_window,
                 filter_func=self.filter_func,
                 llm_model_name=self.llm_model_name,
                 max_size=self.max_size,
