@@ -33,7 +33,12 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
     """
 
     timeout: Optional[float] = None
-    """Sets timeout time in seconds for __call__"""
+    """
+    Timeout in seconds for script function execution.
+    Defaults to ``None``, i.e. no timeout.
+
+    If timeout occurs, it is treated like any other exception raised in script functions.
+    """
 
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
     """Return type of the script function."""
@@ -67,7 +72,7 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
 
         :return: An instance of :py:attr:`return_type`.
         :raises TypeError: If :py:meth:`call` returned value of incorrect type.
-        :raises TimeoutError: If :py:attr:`timeout` occurs.
+        :raises TimeoutError: If :py:attr:`timeout` is exceeded.
         """
         result = await asyncio.wait_for(wrap_sync_function_in_async(self.call, ctx), timeout=self.timeout)
         if not isinstance(self.return_type, tuple) and issubclass(self.return_type, BaseModel):
