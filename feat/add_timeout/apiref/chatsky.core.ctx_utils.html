@@ -564,6 +564,7 @@
 
 
 
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
 
 
@@ -717,6 +718,7 @@
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
+
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
 
@@ -944,6 +946,17 @@ Can be used to obtain run configuration such as script or fallback label.</p>
 <dd><p>Stores extracted slots.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.ctx_utils.FrameworkData.transition">
+<span class="sig-name descname"><span class="pre">transition</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Transition]</span></em><a class="headerlink" href="#chatsky.core.ctx_utils.FrameworkData.transition" title="Link to this definition">#</a></dt>
+<dd><p>Stores transition made during this turn.</p>
+<p>Can be <code class="docutils literal notranslate"><span class="pre">None</span></code> if either is true:</p>
+<ul class="simple">
+<li><p>no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);</p></li>
+<li><p>no valid transition has been found (i.e. transitioned to fallback node).</p></li>
+</ul>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -961,13 +974,6 @@ For memory context storage, it won’t be serialized at all.</p>
 that is also the last turn available in <cite>labels</cite>, <cite>requests</cite>, and <cite>responses</cite>.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.core.ctx_utils.ContextMainInfo.created_at">
-<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#chatsky.core.ctx_utils.ContextMainInfo.created_at" title="Link to this definition">#</a></dt>
-<dd><p>Timestamp when the context was <strong>first time saved to database</strong>.
-It is set (and managed) by <code class="xref py py-class docutils literal notranslate"><span class="pre">DBContextStorage</span></code>.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.core.ctx_utils.ContextMainInfo.model_post_init">
 <span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chatsky.core.ctx_utils.ContextMainInfo.model_post_init" title="Link to this definition">#</a></dt>
@@ -983,6 +989,13 @@ It is set (and managed) by <code class="xref py py-class docutils literal notran
 context: The context.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.core.ctx_utils.ContextMainInfo.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#chatsky.core.ctx_utils.ContextMainInfo.created_at" title="Link to this definition">#</a></dt>
+<dd><p>Timestamp when the context was <strong>first time saved to database</strong>.
+It is set (and managed) by <code class="xref py py-class docutils literal notranslate"><span class="pre">DBContextStorage</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1116,12 +1129,13 @@ It is meant to be used by the framework only. Accessing it may result in pipelin
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.FrameworkData.pipeline"><code class="docutils literal notranslate"><span class="pre">FrameworkData.pipeline</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.FrameworkData.stats"><code class="docutils literal notranslate"><span class="pre">FrameworkData.stats</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.FrameworkData.slot_manager"><code class="docutils literal notranslate"><span class="pre">FrameworkData.slot_manager</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.FrameworkData.transition"><code class="docutils literal notranslate"><span class="pre">FrameworkData.transition</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.current_turn_id"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.current_turn_id</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.created_at"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.created_at</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.model_post_init"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.model_post_init()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.created_at"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.created_at</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.updated_at"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.updated_at</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.misc"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.misc</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.core.ctx_utils.ContextMainInfo.framework_data"><code class="docutils literal notranslate"><span class="pre">ContextMainInfo.framework_data</span></code></a></li>

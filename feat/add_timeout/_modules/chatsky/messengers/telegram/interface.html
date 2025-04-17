@@ -572,7 +572,10 @@
     <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_runner</span><span class="p">:</span> <span class="n">PipelineRunnerFunction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pipeline_runner</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">run_polling</span><span class="p">(</span>
-            <span class="n">poll_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span> <span class="n">allowed_updates</span><span class="o">=</span><span class="n">Update</span><span class="o">.</span><span class="n">ALL_TYPES</span>
+            <span class="n">poll_interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">allowed_updates</span><span class="o">=</span><span class="n">Update</span><span class="o">.</span><span class="n">ALL_TYPES</span><span class="p">,</span>
+            <span class="n">close_loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 
@@ -606,7 +609,12 @@
 <a class="viewcode-back" href="../../../../apiref/chatsky.messengers.telegram.interface.html#chatsky.messengers.telegram.interface.WebhookInterface.connect">[docs]</a>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipeline_runner</span><span class="p">:</span> <span class="n">PipelineRunnerFunction</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">pipeline_runner</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">run_webhook</span><span class="p">(</span><span class="n">listen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">listen</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">allowed_updates</span><span class="o">=</span><span class="n">Update</span><span class="o">.</span><span class="n">ALL_TYPES</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">run_webhook</span><span class="p">(</span>
+            <span class="n">listen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">listen</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">allowed_updates</span><span class="o">=</span><span class="n">Update</span><span class="o">.</span><span class="n">ALL_TYPES</span><span class="p">,</span>
+            <span class="n">close_loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

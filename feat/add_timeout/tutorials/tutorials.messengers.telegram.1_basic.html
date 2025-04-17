@@ -640,8 +640,12 @@ Note: you may need to restart the kernel to use updated packages.
     <span class="n">conditions</span> <span class="k">as</span> <span class="n">cnd</span><span class="p">,</span>
     <span class="n">destinations</span> <span class="k">as</span> <span class="n">dst</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">chatsky.core.message</span> <span class="kn">import</span> <span class="n">MessageInitTypes</span>
 <span class="kn">from</span> <span class="nn">chatsky.messengers.telegram</span> <span class="kn">import</span> <span class="n">LongpollingInterface</span>
 <span class="kn">from</span> <span class="nn">chatsky.utils.testing.common</span> <span class="kn">import</span> <span class="n">is_interactive_mode</span>
+<span class="kn">from</span> <span class="nn">chatsky.core.context</span> <span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span> <span class="nn">chatsky.core.script_function</span> <span class="kn">import</span> <span class="n">BaseResponse</span>
 </pre></div>
 </div>
 </div>
@@ -660,6 +664,49 @@ Note: you may need to restart the kernel to use updated packages.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">LongpollingInterface</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TG_BOT_TOKEN&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<section id="Metadata-access">
+<h2>Metadata access<a class="headerlink" href="#Metadata-access" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="../apiref/chatsky.messengers.telegram.abstract.html#chatsky.messengers.telegram.abstract.TelegramMetadata"><span class="std std-ref">TelegramMetadata</span></a> class is designed for convenient access to user data from Telegram.</p>
+<p>It provides access to the following information:</p>
+<ol class="arabic simple">
+<li><p>Information about <a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.user.html">user</a>:</p>
+<ul class="simple">
+<li><p>user_id;</p></li>
+<li><p>first_name;</p></li>
+<li><p>last_name;</p></li>
+<li><p>username;</p></li>
+<li><p>language_code.</p></li>
+</ul>
+</li>
+<li><p>Information about <a class="reference external" href="https://docs.python-telegram-bot.org/en/stable/telegram.chat.html">chat</a>:</p>
+<ul class="simple">
+<li><p>chat_id;</p></li>
+<li><p>chat_type;</p></li>
+<li><p>chat_title.</p></li>
+</ul>
+</li>
+</ol>
+<p>User’s metadata is saved with every request message. For example, metadata of the most recent request in the context can be accessed via <code class="docutils literal notranslate"><span class="pre">ctx.last_request.metadata</span></code>.</p>
+<p>In this tutorial we create a custom <code class="docutils literal notranslate"><span class="pre">FirstnameGreeting</span></code> response class, which references user’s name in the response message.</p>
+<p>For more information about responses, see the <a class="reference internal" href="tutorials.script.core.3_responses.html"><span class="doc">3_responses</span></a> tutorial.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FirstnameGreeting</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageInitTypes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hi, </span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">last_request</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2">!&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">script</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;greeting_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;start_node&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -668,7 +715,7 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;greeting_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Hi&quot;</span><span class="p">,</span>
+            <span class="n">RESPONSE</span><span class="p">:</span> <span class="n">FirstnameGreeting</span><span class="p">(),</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">())],</span>
         <span class="p">},</span>
         <span class="s2">&quot;fallback_node&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -683,15 +730,7 @@ Note: you may need to restart the kernel to use updated packages.
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">interface</span> <span class="o">=</span> <span class="n">LongpollingInterface</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TG_BOT_TOKEN&quot;</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
@@ -710,6 +749,7 @@ Note: you may need to restart the kernel to use updated packages.
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 
 
@@ -750,6 +790,18 @@ Note: you may need to restart the kernel to use updated packages.
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Metadata-access">Metadata access</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
     

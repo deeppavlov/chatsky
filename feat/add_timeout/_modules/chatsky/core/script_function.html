@@ -561,7 +561,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets timeout time in seconds for __call__&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Timeout in seconds for script function execution.</span>
+<span class="sd">    Defaults to ``None``, i.e. no timeout.</span>
+
+<span class="sd">    If timeout occurs, it is treated like any other exception raised in script functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">return_type</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return type of the script function.&quot;&quot;&quot;</span>
@@ -603,7 +608,7 @@
 
 <span class="sd">        :return: An instance of :py:attr:`return_type`.</span>
 <span class="sd">        :raises TypeError: If :py:meth:`call` returned value of incorrect type.</span>
-<span class="sd">        :raises TimeoutError: If :py:attr:`timeout` occurs.</span>
+<span class="sd">        :raises TimeoutError: If :py:attr:`timeout` is exceeded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">wrap_sync_function_in_async</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">,</span> <span class="n">ctx</span><span class="p">),</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_type</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
