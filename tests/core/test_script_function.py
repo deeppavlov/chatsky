@@ -143,5 +143,9 @@ class TestTimeout:
 
     async def test_timeout(self):
         ctx = Context()
-        sleep_func = self.SleepingFunc(timeout=0.1, sleeping=0.05)
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.01)
         assert await sleep_func.wrapped_call(ctx) is None
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.06)
+        assert "TimeoutError" in repr(await sleep_func.wrapped_call(ctx))
