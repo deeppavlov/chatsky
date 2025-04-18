@@ -10,7 +10,7 @@ from typing import Optional
 from chatsky.core import BaseCondition, Context
 from chatsky.core.script_function import AnyResponse
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.langchain_context import get_langchain_context
+from chatsky.llm.prompt import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import PositionConfig, Prompt
 

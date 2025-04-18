@@ -7,7 +7,8 @@ from chatsky.responses.llm import LLMResponse
 from chatsky.conditions.llm import LLMCondition
 from chatsky.slots.llm import LLMSlot, LLMGroupSlot
 from chatsky.slots.slots import SlotNotExtracted, ExtractedGroupSlot
-from chatsky.llm.langchain_context import message_to_langchain, context_to_history, get_langchain_context
+from chatsky.llm.langchain_context import message_to_langchain, context_to_history
+from chatsky.llm.prompt import get_langchain_context
 from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.llm.filters import IsImportant, FromModel, Return, DefaultFilter
 from chatsky.llm.methods import Contains, LogProb, BaseMethod

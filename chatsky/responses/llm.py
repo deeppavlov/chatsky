@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from chatsky.core.message import Message
 from chatsky.core.context import Context
-from chatsky.llm.langchain_context import get_langchain_context
+from chatsky.llm.prompt import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.prompt import Prompt, PositionConfig
 from chatsky.core.script_function import BaseResponse
