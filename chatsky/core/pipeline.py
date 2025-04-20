@@ -14,6 +14,8 @@ import logging
 from functools import cached_property
 from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
+from langchain_core.retrievers import BaseRetriever
+from langchain_core.vectorstores import VectorStore
 
 from chatsky.core.script import Script
 from chatsky.core.context import Context
@@ -34,7 +36,6 @@ from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
-from chatsky.core.vector_store import VectorStoreService, RetrieverService
 
 if TYPE_CHECKING:
     from chatsky.llm.llm_api import LLM_API
@@ -122,15 +123,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
     of the script should be parallelized over respective groups.
     """
-    vector_store: Optional[VectorStoreService] = Field(default=None, exclude=True)
+    doc_retrievers: Dict[str, Union[BaseRetriever, VectorStore]] = Field(default_factory=dict)
     """
-    Vector store service for document retrieval.
-    Initialized separately from main services pipeline.
-    """
-
-    retriever: Optional[RetrieverService] = Field(default=None, exclude=True)
-    """
-    Document retriever service that uses the vector store.
+    Document retrievers.
     """
 
     def __init__(
@@ -150,8 +145,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
         parallelize_processing: bool = None,
-        vector_store: Optional[VectorStoreService] = None,
-        retriever: Optional[RetrieverService] = None,
+        doc_retrievers: dict = None,  # Chroma, Qdrant, ElastickSearch, TF-IFD, BM25 from https://python.langchain.com/docs/concepts/retrievers/, https://python.langchain.com/docs/integrations/vectorstores/
     ):
         if fallback_label is None:
             fallback_label = start_label
@@ -170,6 +164,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             "after_handler": after_handler,
             "timeout": timeout,
             "parallelize_processing": parallelize_processing,
+            "doc_retrievers": doc_retrievers,
         }
         empty_fields = set()
         for k, v in init_dict.items():
@@ -179,7 +174,6 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
                 )
             if v is None:
                 empty_fields.add(k)
-        #TODO add vectorservice and retriever into pre_sevices
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
