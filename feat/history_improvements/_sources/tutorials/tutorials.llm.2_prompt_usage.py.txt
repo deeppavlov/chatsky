@@ -160,7 +160,7 @@ toy_script = {
             ],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(llm_model_name="bank_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="bank_model", dialog_turns=0),
             TRANSITIONS: [
                 Tr(
                     dst=("loan_flow", "start_node"),

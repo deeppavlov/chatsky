@@ -713,7 +713,7 @@ Note: you may need to restart the kernel to use updated packages.
             <span class="p">],</span>
         <span class="p">},</span>
         <span class="s2">&quot;greeting_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="n">RESPONSE</span><span class="p">:</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">llm_model_name</span><span class="o">=</span><span class="s2">&quot;note_model&quot;</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">RESPONSE</span><span class="p">:</span> <span class="n">LLMResponse</span><span class="p">(</span><span class="n">llm_model_name</span><span class="o">=</span><span class="s2">&quot;note_model&quot;</span><span class="p">,</span> <span class="n">dialog_turns</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;Who are you?&quot;</span><span class="p">))</span>
             <span class="p">],</span>
@@ -735,7 +735,7 @@ Note: you may need to restart the kernel to use updated packages.
                 <span class="n">llm_model_name</span><span class="o">=</span><span class="s2">&quot;note_model&quot;</span><span class="p">,</span>
                 <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;Create a bullet list from all the previous &quot;</span>
                 <span class="s2">&quot;messages tagged with #important.&quot;</span><span class="p">,</span>
-                <span class="n">history</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                <span class="n">dialog_turns</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
                 <span class="n">filter_func</span><span class="o">=</span><span class="n">FilterImportant</span><span class="p">(),</span>
             <span class="p">),</span>
             <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;main_node&quot;</span><span class="p">)],</span>
