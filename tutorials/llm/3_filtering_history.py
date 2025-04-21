@@ -114,7 +114,7 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(llm_model_name="note_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="note_model", dialog_turns=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
@@ -136,7 +136,7 @@ toy_script = {
                 llm_model_name="note_model",
                 prompt="Create a bullet list from all the previous "
                 "messages tagged with #important.",
-                history=15,
+                dialog_turns=15,
                 filter_func=FilterImportant(),
             ),
             TRANSITIONS: [Tr(dst="main_node")],

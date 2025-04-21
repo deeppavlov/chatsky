@@ -84,7 +84,7 @@ toy_script = {
             TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(llm_model_name="barista_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="barista_model", dialog_turns=0),
             TRANSITIONS: [
                 Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
             ],
