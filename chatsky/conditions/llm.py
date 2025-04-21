@@ -29,7 +29,7 @@ class LLMCondition(BaseCondition):
     """
     Condition prompt.
     """
-    dialog_turns: int = 1
+    dialog_turns: int = 0
     """
     Number of dialogue turns aside from the current one to keep in history. `-1` to put all messages into the context.
     """
