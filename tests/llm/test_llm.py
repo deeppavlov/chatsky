@@ -232,7 +232,7 @@ class TestHistory:
         ],
     )
     async def test_history(self, context, pipeline, hist, expected):
-        res = await LLMResponse(llm_model_name="test_model", history=hist)(context)
+        res = await LLMResponse(llm_model_name="test_model", dialog_turns=hist)(context)
         assert res == Message(expected, annotations={"__generated_by_model__": "test_model"})
 
 
