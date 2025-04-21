@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/llm
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.conditions.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

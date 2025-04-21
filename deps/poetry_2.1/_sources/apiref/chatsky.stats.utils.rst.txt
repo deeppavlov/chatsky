@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/utils
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.stats.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

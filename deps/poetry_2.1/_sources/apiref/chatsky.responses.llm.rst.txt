@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/llm
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.responses.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

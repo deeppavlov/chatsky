@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/telegram/interface
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.messengers.telegram.interface
+   :members:
+   :undoc-members:
+   :show-inheritance:

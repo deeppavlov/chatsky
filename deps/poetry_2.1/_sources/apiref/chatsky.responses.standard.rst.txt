@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/standard
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.responses.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:

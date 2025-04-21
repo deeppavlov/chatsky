@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/standard
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.conditions.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:

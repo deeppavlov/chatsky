@@ -1,0 +1,7 @@
+:source_name: chatsky/core/service/component
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.core.service.component
+   :members:
+   :undoc-members:
+   :show-inheritance:

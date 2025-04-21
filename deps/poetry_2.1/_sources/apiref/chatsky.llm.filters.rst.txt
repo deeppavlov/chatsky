@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/filters
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.llm.filters
+   :members:
+   :undoc-members:
+   :show-inheritance:

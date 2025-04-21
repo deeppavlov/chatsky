@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/slots
+:doc_version: deps/poetry_2.1/
+
+.. automodule:: chatsky.conditions.slots
+   :members:
+   :undoc-members:
+   :show-inheritance:
