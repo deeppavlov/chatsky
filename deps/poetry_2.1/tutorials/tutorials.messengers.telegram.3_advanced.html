@@ -642,7 +642,6 @@ Note: you may need to restart the kernel to use updated packages.
 <span class="kn">from</span><span class="w"> </span><span class="nn">hashlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">sha256</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlopen</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpUrl</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">telegram</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineKeyboardButton</span><span class="p">,</span> <span class="n">InlineKeyboardMarkup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">telegram.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParseMode</span>
 
@@ -694,7 +693,7 @@ Note: you may need to restart the kernel to use updated packages.
     <span class="s2">&quot;https://github.com/deeppavlov/chatsky/wiki/example_attachments&quot;</span>
 <span class="p">)</span>
 
-<span class="n">image_url</span> <span class="o">=</span> <span class="n">HttpUrl</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov.png&quot;</span><span class="p">)</span>
+<span class="n">image_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov.png&quot;</span>
 
 <span class="n">formatted_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">Visit [this link](https://core.telegram.org/bots/api#formatting-options)</span>
@@ -720,7 +719,7 @@ Note: you may need to restart the kernel to use updated packages.
 <span class="c1"># telegram.Bot.send_photo method</span>
 
 <span class="n">document_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov-article.pdf&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov-article.pdf&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;DeepPavlov article&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;deeppavlov_article.pdf&quot;</span><span class="p">,</span>
     <span class="s2">&quot;thumbnail&quot;</span><span class="p">:</span> <span class="n">urlopen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">image_url</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>

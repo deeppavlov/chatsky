@@ -640,8 +640,6 @@ Note: you may need to restart the kernel to use updated packages.
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">HttpUrl</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GLOBAL</span><span class="p">,</span>
     <span class="n">RESPONSE</span><span class="p">,</span>
@@ -697,39 +695,33 @@ Note: you may need to restart the kernel to use updated packages.
 <span class="p">}</span>
 
 <span class="n">audio_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/separation-william-king.mp3&quot;</span>
-    <span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/separation-william-king.mp3&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;Separation melody by William King&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;separation-william-king.mp3&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">video_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/crownfall-lags-nkognit0.mp4&quot;</span>
-    <span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/crownfall-lags-nkognit0.mp4&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;Epic Dota2 gameplay by Nkognit0&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;crownfall-lags-nkognit0.mp4&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">animation_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1"># For some reason, if we don&#39;t define filename explicitly,</span>
-    <span class="c1"># animation is sent as file.</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/hong-kong-simplyart4794.gif&quot;</span>
-    <span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/hong-kong-simplyart4794.gif&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;Hong Kong skyscraper views by Simplyart4794&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;hong-kong-simplyart4794.gif&quot;</span><span class="p">,</span>
+    <span class="c1"># if we don&#39;t define filename explicitly,</span>
+    <span class="c1"># animation is sent as file instead.</span>
 <span class="p">}</span>
 
 <span class="n">image_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov.png&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov.png&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;DeepPavlov logo&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;deeppavlov.png&quot;</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">document_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">HttpUrl</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov-article.pdf&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">EXAMPLE_ATTACHMENT_SOURCE</span><span class="si">}</span><span class="s2">/deeppavlov-article.pdf&quot;</span><span class="p">,</span>
     <span class="s2">&quot;caption&quot;</span><span class="p">:</span> <span class="s2">&quot;DeepPavlov article&quot;</span><span class="p">,</span>
     <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;deeppavlov-article.pdf&quot;</span><span class="p">,</span>
 <span class="p">}</span>
