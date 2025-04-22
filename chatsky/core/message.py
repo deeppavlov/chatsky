@@ -126,7 +126,7 @@ class DataAttachment(Attachment):
     This attachment can also be optionally cached for future use.
     """
 
-    source: Optional[Union[AnyUrl, FilePath]] = None
+    source: Optional[Union[FilePath, AnyUrl]] = Field(default=None, union_mode="left_to_right")
     """Attachment source -- either a URL to a file or a local filepath."""
     use_cache: bool = True
     """
