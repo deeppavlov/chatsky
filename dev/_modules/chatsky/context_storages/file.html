@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=b77b6cac" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
@@ -54,10 +54,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/chatsky/context_storages/file';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://deeppavlov.github.io/chatsky/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -180,7 +181,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -475,9 +478,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -531,20 +539,20 @@
 <span class="sd">such as json, pickle and shelve.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">pickle</span> <span class="kn">import</span> <span class="n">loads</span><span class="p">,</span> <span class="n">dumps</span>
-<span class="kn">from</span> <span class="nn">shelve</span> <span class="kn">import</span> <span class="n">DbfilenameShelf</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pickle</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span><span class="p">,</span> <span class="n">dumps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shelve</span><span class="w"> </span><span class="kn">import</span> <span class="n">DbfilenameShelf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
 
-<span class="kn">from</span> <span class="nn">chatsky.core.ctx_utils</span> <span class="kn">import</span> <span class="n">ContextMainInfo</span>
-<span class="kn">from</span> <span class="nn">.database</span> <span class="kn">import</span> <span class="n">DBContextStorage</span><span class="p">,</span> <span class="n">_SUBSCRIPT_DICT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core.ctx_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextMainInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">DBContextStorage</span><span class="p">,</span> <span class="n">_SUBSCRIPT_DICT</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">aiofiles</span> <span class="kn">import</span> <span class="nb">open</span>
-    <span class="kn">from</span> <span class="nn">aiofiles.os</span> <span class="kn">import</span> <span class="n">stat</span><span class="p">,</span> <span class="n">makedirs</span>
-    <span class="kn">from</span> <span class="nn">aiofiles.ospath</span> <span class="kn">import</span> <span class="n">isfile</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aiofiles</span><span class="w"> </span><span class="kn">import</span> <span class="nb">open</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aiofiles.os</span><span class="w"> </span><span class="kn">import</span> <span class="n">stat</span><span class="p">,</span> <span class="n">makedirs</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">aiofiles.ospath</span><span class="w"> </span><span class="kn">import</span> <span class="n">isfile</span>
 
     <span class="n">json_available</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">pickle_available</span> <span class="o">=</span> <span class="kc">True</span>
@@ -555,7 +563,7 @@
 
 <div class="viewcode-block" id="SerializableStorage">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.SerializableStorage">[docs]</a>
-<span class="k">class</span> <span class="nc">SerializableStorage</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SerializableStorage</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A special serializable database implementation.</span>
 <span class="sd">    One element of this class will be used to store all the contexts, read and written to file on every turn.</span>
@@ -568,7 +576,7 @@
 
 <div class="viewcode-block" id="FileContextStorage">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage">[docs]</a>
-<span class="k">class</span> <span class="nc">FileContextStorage</span><span class="p">(</span><span class="n">DBContextStorage</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FileContextStorage</span><span class="p">(</span><span class="n">DBContextStorage</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements :py:class:`.DBContextStorage` with any file-based storage format.</span>
 
@@ -579,7 +587,7 @@
 
     <span class="n">is_concurrent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">rewrite_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -590,32 +598,32 @@
 <div class="viewcode-block" id="FileContextStorage._save">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._save">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="FileContextStorage._load">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._load">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="FileContextStorage._connect">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._connect">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="FileContextStorage._load_main_info">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._load_main_info">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load_main_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ContextMainInfo</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load_main_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ContextMainInfo</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">())</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ctx_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FileContextStorage._update_context">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._update_context">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_update_context</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_update_context</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">ctx_info</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ContextMainInfo</span><span class="p">],</span>
@@ -638,7 +646,7 @@
 
 <div class="viewcode-block" id="FileContextStorage._delete_context">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._delete_context">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_delete_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_delete_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
         <span class="n">storage</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ctx_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">storage</span><span class="o">.</span><span class="n">turns</span> <span class="o">=</span> <span class="p">[(</span><span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">storage</span><span class="o">.</span><span class="n">turns</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">ctx_id</span><span class="p">]</span>
@@ -647,7 +655,7 @@
 
 <div class="viewcode-block" id="FileContextStorage._load_field_latest">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._load_field_latest">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load_field_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load_field_latest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]:</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
         <span class="n">select</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">storage</span><span class="o">.</span><span class="n">turns</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="n">ctx_id</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="n">field_name</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">],</span>
@@ -663,13 +671,13 @@
 
 <div class="viewcode-block" id="FileContextStorage._load_field_keys">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._load_field_keys">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load_field_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load_field_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">())</span><span class="o">.</span><span class="n">turns</span> <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="n">ctx_id</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="n">field_name</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="FileContextStorage._load_field_items">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._load_field_items">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load_field_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load_field_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]:</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">())</span><span class="o">.</span><span class="n">turns</span>
@@ -679,7 +687,7 @@
 
 <div class="viewcode-block" id="FileContextStorage._clear_all">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.FileContextStorage._clear_all">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_clear_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_clear_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">SerializableStorage</span><span class="p">())</span></div>
 </div>
 
@@ -687,7 +695,7 @@
 
 <div class="viewcode-block" id="JSONContextStorage">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.JSONContextStorage">[docs]</a>
-<span class="k">class</span> <span class="nc">JSONContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JSONContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements :py:class:`.DBContextStorage` with `json` as the storage format.</span>
 
@@ -698,7 +706,7 @@
 
 <div class="viewcode-block" id="JSONContextStorage._save">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.JSONContextStorage._save">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="k">await</span> <span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">async</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_stream</span><span class="p">:</span>
@@ -707,7 +715,7 @@
 
 <div class="viewcode-block" id="JSONContextStorage._load">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.JSONContextStorage._load">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="k">await</span> <span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">storage</span> <span class="o">=</span> <span class="n">SerializableStorage</span><span class="p">()</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
@@ -721,7 +729,7 @@
 
 <div class="viewcode-block" id="PickleContextStorage">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.PickleContextStorage">[docs]</a>
-<span class="k">class</span> <span class="nc">PickleContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PickleContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements :py:class:`.DBContextStorage` with `pickle` as the storage format.</span>
 
@@ -732,7 +740,7 @@
 
 <div class="viewcode-block" id="PickleContextStorage._save">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.PickleContextStorage._save">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="k">await</span> <span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">async</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_stream</span><span class="p">:</span>
@@ -741,7 +749,7 @@
 
 <div class="viewcode-block" id="PickleContextStorage._load">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.PickleContextStorage._load">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="k">await</span> <span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">storage</span> <span class="o">=</span> <span class="n">SerializableStorage</span><span class="p">()</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
@@ -755,7 +763,7 @@
 
 <div class="viewcode-block" id="ShelveContextStorage">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.ShelveContextStorage">[docs]</a>
-<span class="k">class</span> <span class="nc">ShelveContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShelveContextStorage</span><span class="p">(</span><span class="n">FileContextStorage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implements :py:class:`.DBContextStorage` with `shelve` as the storage format.</span>
 
@@ -766,7 +774,7 @@
 
     <span class="n">_SHELVE_ROOT</span> <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">rewrite_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -777,13 +785,13 @@
 
 <div class="viewcode-block" id="ShelveContextStorage._save">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.ShelveContextStorage._save">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SerializableStorage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_SHELVE_ROOT</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ShelveContextStorage._load">
 <a class="viewcode-back" href="../../../apiref/chatsky.context_storages.file.html#chatsky.context_storages.file.ShelveContextStorage._load">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SerializableStorage</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">SerializableStorage</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">DbfilenameShelf</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()),</span> <span class="n">writeback</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -822,8 +830,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -856,7 +864,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
