@@ -542,7 +542,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.context_storages</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">JSONContextStorage</span><span class="p">,</span>
     <span class="n">MongoContextStorage</span><span class="p">,</span>
     <span class="n">RedisContextStorage</span><span class="p">,</span>
     <span class="n">SQLContextStorage</span><span class="p">,</span>
@@ -554,17 +553,20 @@
     <span class="n">mysql_available</span><span class="p">,</span>
     <span class="n">ydb_available</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.context_storages.file</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileContextStorage</span><span class="p">,</span> <span class="n">ShelveContextStorage</span>
 
 
 <div class="viewcode-block" id="delete_file">
 <a class="viewcode-back" href="../../../../apiref/chatsky.utils.testing.cleanup_db.html#chatsky.utils.testing.cleanup_db.delete_file">[docs]</a>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_file</span><span class="p">(</span><span class="n">storage</span><span class="p">:</span> <span class="n">JSONContextStorage</span><span class="p">):</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_file</span><span class="p">(</span><span class="n">storage</span><span class="p">:</span> <span class="n">FileContextStorage</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Delete all data from a JSON context storage.</span>
+<span class="sd">    Delete all data from a file context storage.</span>
 
-<span class="sd">    :param storage: A JSONContextStorage object.</span>
+<span class="sd">    :param storage: A FileContextStorage object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">storage</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">ShelveContextStorage</span><span class="p">):</span>
+            <span class="n">storage</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">storage</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span></div>
 
 
