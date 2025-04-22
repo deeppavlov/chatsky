@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/methods
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.llm.methods
+   :members:
+   :undoc-members:
+   :show-inheritance:

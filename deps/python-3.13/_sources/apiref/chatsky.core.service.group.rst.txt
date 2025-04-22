@@ -1,0 +1,7 @@
+:source_name: chatsky/core/service/group
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.core.service.group
+   :members:
+   :undoc-members:
+   :show-inheritance:

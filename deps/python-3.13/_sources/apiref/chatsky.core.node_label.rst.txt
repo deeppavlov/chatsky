@@ -1,0 +1,7 @@
+:source_name: chatsky/core/node_label
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.core.node_label
+   :members:
+   :undoc-members:
+   :show-inheritance:

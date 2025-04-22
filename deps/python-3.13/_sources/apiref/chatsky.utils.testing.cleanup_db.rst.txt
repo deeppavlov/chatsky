@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/cleanup_db
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.utils.testing.cleanup_db
+   :members:
+   :undoc-members:
+   :show-inheritance:

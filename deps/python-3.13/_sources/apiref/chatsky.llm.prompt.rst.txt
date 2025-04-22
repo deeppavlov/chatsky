@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/prompt
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.llm.prompt
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+:source_name: chatsky/context_storages/protocol
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.context_storages.protocol
+   :members:
+   :undoc-members:
+   :show-inheritance:

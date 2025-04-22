@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/llm
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.conditions.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

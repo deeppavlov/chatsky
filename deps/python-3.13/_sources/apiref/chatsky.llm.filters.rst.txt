@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/filters
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.llm.filters
+   :members:
+   :undoc-members:
+   :show-inheritance:

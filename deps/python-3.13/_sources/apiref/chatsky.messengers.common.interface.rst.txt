@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/common/interface
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.messengers.common.interface
+   :members:
+   :undoc-members:
+   :show-inheritance:

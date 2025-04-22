@@ -1,0 +1,7 @@
+:source_name: chatsky/processing/standard
+:doc_version: deps/python-3.13/
+
+.. automodule:: chatsky.processing.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:
