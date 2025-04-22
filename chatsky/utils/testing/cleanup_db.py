@@ -8,7 +8,6 @@ including JSON, MongoDB, Pickle, Redis, Shelve, SQL, and YDB databases.
 from typing import Any
 
 from chatsky.context_storages import (
-    JSONContextStorage,
     MongoContextStorage,
     RedisContextStorage,
     SQLContextStorage,
@@ -20,15 +19,18 @@ from chatsky.context_storages import (
     mysql_available,
     ydb_available,
 )
+from chatsky.context_storages.file import FileContextStorage, ShelveContextStorage
 
 
-async def delete_file(storage: JSONContextStorage):
+async def delete_file(storage: FileContextStorage):
     """
-    Delete all data from a JSON context storage.
+    Delete all data from a file context storage.
 
-    :param storage: A JSONContextStorage object.
+    :param storage: A FileContextStorage object.
     """
     if storage.path.exists():
+        if isinstance(storage, ShelveContextStorage):
+            storage._storage.close()
         storage.path.unlink()
 
 
