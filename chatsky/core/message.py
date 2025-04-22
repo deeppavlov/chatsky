@@ -14,8 +14,7 @@ from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import BaseModel, Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
-from pydantic_core import Url
+from pydantic import BaseModel, Field, FilePath, model_validator, field_validator, field_serializer, AnyUrl
 
 from chatsky.utils.devel import (
     json_pickle_validator,
@@ -127,7 +126,7 @@ class DataAttachment(Attachment):
     This attachment can also be optionally cached for future use.
     """
 
-    source: Optional[Union[HttpUrl, FilePath]] = None
+    source: Optional[Union[FilePath, AnyUrl]] = Field(default=None, union_mode="left_to_right")
     """Attachment source -- either a URL to a file or a local filepath."""
     use_cache: bool = True
     """
@@ -178,7 +177,7 @@ class DataAttachment(Attachment):
         elif self.use_cache and self.cached_filename is not None and self.cached_filename.exists():
             with open(self.cached_filename, "rb") as file:
                 return file.read()
-        elif isinstance(self.source, Url):
+        elif isinstance(self.source, AnyUrl):
             with urlopen(self.source.unicode_string()) as url:
                 attachment_data = url.read()
         else:

@@ -16,6 +16,7 @@ PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
 def cast_dict_to_happy_step(dictionary: Dict, update_only: bool = False) -> Union[List["PathStep"]]:
     imports = globals().copy()
+    imports["datetime"] = import_module("datetime")
     imports.update(import_module("telegram").__dict__)
     imports.update(import_module("telegram.ext").__dict__)
     imports.update(import_module("telegram.constants").__dict__)

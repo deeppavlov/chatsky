@@ -22,7 +22,7 @@ We ask that you adhere to the following
 ## Managing your workflow
 We use `poetry` and `poethepoet` as handy automation tools, which reads `pyproject.toml` to get specification for commands.
 `poetry` is a tool for command running automatization. Usage signature of the `poetry` is `poetry run poe COMMAND`.
-If your environment does not support `poetry`, it can be installed as a regular python package with `pip install poetry`.
+If your environment does not support `poetry`, it can be installed as a regular python package with `pip install poetry~=2.0`.
 `poethepoet` will be automatically installed upon installation of `devel` dependency group.
 
 ### Platforms
