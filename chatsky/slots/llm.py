@@ -78,40 +78,47 @@ class LLMGroupSlot(GroupSlot):
         if request_text == "":
             return ExtractedGroupSlot()
 
-        flat_items, items_with_models = self._flatten_llm_group_slot(self)
-        captions = {}
-        for child_name, slot_item in flat_items.items():
-            captions[child_name] = (slot_item.return_type, Field(description=slot_item.caption, default=None))
+        # Get all slots grouped by their model names
+        model_groups = self._group_slots_by_model(self)
+        
+        # Process each model group separately
+        all_results = {}
+        for model_name, slots in model_groups.items():
+            if not slots:
+                continue
+                
+            # Create dynamic model for this group
+            captions = {}
+            for child_name, slot_item in slots.items():
+                captions[child_name] = (slot_item.return_type, Field(description=slot_item.caption, default=None))
 
-        logger.debug(f"Flattened group slot: {flat_items}")
-        DynamicGroupModel = create_model("DynamicGroupModel", **captions)
-        logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
+            DynamicGroupModel = create_model("DynamicGroupModel", **captions)
+            logger.debug(f"DynamicGroupModel for {model_name}: {DynamicGroupModel}")
 
-        history_messages = context_to_history(
-            ctx, self.history, filter_func=FromModel(), llm_model_name=self.llm_model_name, max_size=1000
-        )
-        if history_messages == []:
-            history_messages = [message_to_langchain(ctx.last_request, ctx)]
+            history_messages = context_to_history(
+                ctx, self.history, filter_func=FromModel(), llm_model_name=model_name, max_size=1000
+            )
+            if history_messages == []:
+                history_messages = [message_to_langchain(ctx.last_request, ctx)]
 
-        extracted_items = {}
-        for key, item in items_with_models.items():
-            if isinstance(item, LLMSlot):
-                res = await item.extract_value(ctx)
-            elif isinstance(item, LLMGroupSlot):
-                res = await item.get_value(ctx)
-            else:
-                res = SlotNotExtracted
-            extracted_items[key] = res
+            # Get model and process request
+            model = ctx.pipeline.models.get(model_name)
+            if model is None:
+                logger.warning(f"Model {model_name} not found in pipeline.models")
+                continue
 
-        result: Message = await ctx.pipeline.models.get(self.llm_model_name, None)._ainvoke(
-            history=history_messages, message_schema=DynamicGroupModel
-        )
-        result_json = result.model_dump()
-        logger.debug(f"Result JSON: {result_json}")
+            result: Message = await model._ainvoke(
+                history=history_messages, message_schema=DynamicGroupModel
+            )
+            result_json = result.model_dump()
+            logger.debug(f"Result JSON for {model_name}: {result_json}")
+            
+            # Add results to all_results
+            all_results.update(result_json)
 
         # Convert flat dict to nested structure
         nested_result = {}
-        for key, value in result_json.items():
+        for key, value in all_results.items():
             if value is None and self.allow_partial_extraction:
                 continue
 
@@ -130,16 +137,34 @@ class LLMGroupSlot(GroupSlot):
                 is_slot_extracted=value is not None, extracted_value=value
             )
 
-        # Combine extracted_items with the nested result
-        for key, value in extracted_items.items():
-            if isinstance(value, ExtractedValueSlot):
-                nested_result[key] = value
-            elif isinstance(value, ExtractedGroupSlot):
-                nested_result[key] = self._dict_to_extracted_slots(value)
-            else:
-                nested_result[key] = SlotNotExtracted
-
         return self._dict_to_extracted_slots(nested_result)
+
+    def _group_slots_by_model(self, slot, parent_key="") -> Dict[str, Dict[str, LLMSlot]]:
+        """
+        Group slots by their llm_model_name.
+        Returns a dictionary where keys are model names and values are dictionaries
+        of slot paths to slot objects.
+        """
+        model_groups = {}
+        
+        for key, value in slot.__pydantic_extra__.items():
+            new_key = f"{parent_key}.{key}" if parent_key else key
+            
+            if isinstance(value, LLMGroupSlot):
+                # Recursively process nested group slots
+                nested_groups = self._group_slots_by_model(value, new_key)
+                for model_name, slots in nested_groups.items():
+                    if model_name not in model_groups:
+                        model_groups[model_name] = {}
+                    model_groups[model_name].update(slots)
+            else:
+                # Use the slot's model name or fall back to the group's model name
+                model_name = value.llm_model_name or self.llm_model_name
+                if model_name not in model_groups:
+                    model_groups[model_name] = {}
+                model_groups[model_name][new_key] = value
+                
+        return model_groups
 
     def _dict_to_extracted_slots(self, d):
         """
@@ -148,28 +173,3 @@ class LLMGroupSlot(GroupSlot):
         if not isinstance(d, dict):
             return d
         return ExtractedGroupSlot(**{k: self._dict_to_extracted_slots(v) for k, v in d.items()})
-
-    def _flatten_llm_group_slot(
-        self, slot, parent_key=""
-    ) -> Tuple[Dict[str, LLMSlot], list[Union[LLMSlot, LLMGroupSlot]]]:
-        """
-        Convert potentially nested group slot into a dictionary with
-        flat keys.
-        Nested keys are flattened as concatenations via ".".
-
-        As such, values in the returned dictionary are only of type :py:class:`LLMSlot`.
-        """
-        items = {}
-        items_with_models = {}
-        # filter out items with `llm_model_name` specified
-        # to a separate list. Other should go to the flattening list
-        for key, value in slot.__pydantic_extra__.items():
-            new_key = f"{parent_key}.{key}" if parent_key else key
-            if value.llm_model_name:
-                items_with_models[new_key] = value
-                continue
-            if isinstance(value, LLMGroupSlot):
-                items.update(self._flatten_llm_group_slot(value, new_key))
-            else:
-                items[new_key] = value
-        return items, items_with_models
