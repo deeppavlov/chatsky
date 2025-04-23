@@ -217,8 +217,8 @@ class TestHistory:
         [
             (
                 2,
-                "Mock response with history: ['Request 2', 'Response 2', "
-                "'Request 3', 'Response 3', 'prompt', 'Last request', 'last prompt']",
+                "Mock response with history: ['prompt', 'Request 2', 'Response 2', "
+                "'Request 3', 'Response 3', 'Last request', 'last prompt']",
             ),
             (
                 0,
@@ -226,8 +226,8 @@ class TestHistory:
             ),
             (
                 4,
-                "Mock response with history: ['Request 1', 'Response 1', "
-                "'Request 2', 'Response 2', 'Request 3', 'Response 3', 'prompt', 'Last request', 'last prompt']",
+                "Mock response with history: ['prompt', 'Request 1', 'Response 1', "
+                "'Request 2', 'Response 2', 'Request 3', 'Response 3', 'Last request', 'last prompt']",
             ),
         ],
     )
@@ -280,14 +280,14 @@ class TestGetLangchainContext:
                 PositionConfig(),
                 [
                     SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+                    HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
                     HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
                     AIMessage(content=[{"type": "text", "text": "Response 1"}]),
                     HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
                     AIMessage(content=[{"type": "text", "text": "Response 2"}]),
                     HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
                     AIMessage(content=[{"type": "text", "text": "Response 3"}]),
-                    HumanMessage(content=[{"type": "text", "text": "prompt"}]),
-                    HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
                     HumanMessage(content=[{"type": "text", "text": "Last request"}]),
                     HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
                 ],
@@ -369,14 +369,14 @@ class TestGetLangchainContext:
 
         expected = [
             SystemMessage(content=[{"type": "text", "text": "system prompt"}]),
+            HumanMessage(content=[{"type": "text", "text": "prompt"}]),
+            HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
             HumanMessage(content=[{"type": "text", "text": "Request 1"}]),
             AIMessage(content=[{"type": "text", "text": "Response 1"}]),
             HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
             AIMessage(content=[{"type": "text", "text": "Response 2"}]),
             HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
             AIMessage(content=[{"type": "text", "text": "Response 3"}]),
-            HumanMessage(content=[{"type": "text", "text": "prompt"}]),
-            HumanMessage(content=[{"type": "text", "text": "call prompt"}]),
             HumanMessage(content=[{"type": "text", "text": "Last request"}]),
             AIMessage(content=[{"type": "text", "text": "Last response"}]),
             HumanMessage(content=[{"type": "text", "text": "last prompt"}]),
