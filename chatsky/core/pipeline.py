@@ -237,14 +237,16 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
 
-    @field_validator("llm")
-    def validate_llm(self, llm):
+    @field_validator("llm", mode="before")
+    @classmethod
+    def validate_llm(llm):
         if isinstance(llm, LLM_API):
             return ToolDict({"default": llm})
         return llm
 
-    @field_validator("ml")
-    def validate_ml(self, ml):
+    @field_validator("ml", mode="before")
+    @classmethod
+    def validate_ml(ml):
         if isinstance(ml, LLM_API):
             return ToolDict({"default": ml})
         return ml
