@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,10 +26,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
@@ -37,10 +37,10 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=b77b6cac" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=82662543"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
@@ -54,10 +54,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/chatsky/core/script_function';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://deeppavlov.github.io/chatsky/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'feat/history_improvements';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -180,7 +181,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -475,9 +478,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -532,20 +540,20 @@
 <span class="sd">These functions allow dynamic script configuration and are essential to the scripting process.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">ABC</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">model_validator</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">model_validator</span><span class="p">,</span> <span class="n">Field</span>
 
-<span class="kn">from</span> <span class="nn">chatsky.utils.devel</span> <span class="kn">import</span> <span class="n">wrap_sync_function_in_async</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.context</span> <span class="kn">import</span> <span class="n">Context</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.message</span> <span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">MessageInitTypes</span>
-<span class="kn">from</span> <span class="nn">chatsky.core.node_label</span> <span class="kn">import</span> <span class="n">NodeLabel</span><span class="p">,</span> <span class="n">NodeLabelInitTypes</span><span class="p">,</span> <span class="n">AbsoluteNodeLabel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.utils.devel</span><span class="w"> </span><span class="kn">import</span> <span class="n">wrap_sync_function_in_async</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core.message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span><span class="p">,</span> <span class="n">MessageInitTypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core.node_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">NodeLabel</span><span class="p">,</span> <span class="n">NodeLabelInitTypes</span><span class="p">,</span> <span class="n">AbsoluteNodeLabel</span>
 
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
@@ -553,7 +561,7 @@
 
 <div class="viewcode-block" id="BaseScriptFunc">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseScriptFunc">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseScriptFunc</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># generic doesn&#39;t work well with sphinx autosummary</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseScriptFunc</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># generic doesn&#39;t work well with sphinx autosummary</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for any script function.</span>
 
@@ -574,14 +582,14 @@
 <div class="viewcode-block" id="BaseScriptFunc.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseScriptFunc.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Implement this to create a custom function.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="BaseScriptFunc.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseScriptFunc.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Exception-safe wrapper for :py:meth:`__call__`.</span>
 
@@ -599,7 +607,7 @@
 
 <div class="viewcode-block" id="BaseScriptFunc.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseScriptFunc.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Handle :py:meth:`call`:</span>
 
@@ -625,7 +633,7 @@
 
 <div class="viewcode-block" id="ConstScriptFunc">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstScriptFunc">[docs]</a>
-<span class="k">class</span> <span class="nc">ConstScriptFunc</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstScriptFunc</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for script functions that return a constant value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -635,7 +643,7 @@
 
 <div class="viewcode-block" id="ConstScriptFunc.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstScriptFunc.call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span></div>
 
 
@@ -643,7 +651,7 @@
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstScriptFunc.validate_value">[docs]</a>
     <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow instantiating this class from its root value.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">}</span></div>
 </div>
@@ -652,7 +660,7 @@
 
 <div class="viewcode-block" id="BaseCondition">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseCondition</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseCondition</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for condition functions.</span>
 
@@ -664,25 +672,25 @@
 <div class="viewcode-block" id="BaseCondition.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BaseCondition.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseCondition.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseCondition.is_true">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition.is_true">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">is_true</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">is_true</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Same as :py:meth:`wrapped_call` but instead of exceptions return ``False``.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
@@ -694,7 +702,7 @@
 
 <div class="viewcode-block" id="ConstCondition">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstCondition">[docs]</a>
-<span class="k">class</span> <span class="nc">ConstCondition</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseCondition</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstCondition</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseCondition</span><span class="p">):</span>
     <span class="n">root</span><span class="p">:</span> <span class="nb">bool</span></div>
 
 
@@ -708,7 +716,7 @@
 
 <div class="viewcode-block" id="BaseResponse">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseResponse</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseResponse</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for response functions.</span>
 
@@ -720,19 +728,19 @@
 <div class="viewcode-block" id="BaseResponse.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageInitTypes</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MessageInitTypes</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BaseResponse.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Message</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Message</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseResponse.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
 </div>
 
@@ -740,7 +748,7 @@
 
 <div class="viewcode-block" id="ConstResponse">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstResponse">[docs]</a>
-<span class="k">class</span> <span class="nc">ConstResponse</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseResponse</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstResponse</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseResponse</span><span class="p">):</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">Message</span></div>
 
 
@@ -754,7 +762,7 @@
 
 <div class="viewcode-block" id="BaseDestination">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseDestination">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseDestination</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseDestination</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for destination functions.</span>
 
@@ -766,19 +774,19 @@
 <div class="viewcode-block" id="BaseDestination.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseDestination.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NodeLabelInitTypes</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NodeLabelInitTypes</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BaseDestination.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseDestination.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">AbsoluteNodeLabel</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseDestination.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseDestination.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbsoluteNodeLabel</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbsoluteNodeLabel</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
 </div>
 
@@ -786,7 +794,7 @@
 
 <div class="viewcode-block" id="ConstDestination">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstDestination">[docs]</a>
-<span class="k">class</span> <span class="nc">ConstDestination</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseDestination</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstDestination</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BaseDestination</span><span class="p">):</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">NodeLabel</span></div>
 
 
@@ -800,7 +808,7 @@
 
 <div class="viewcode-block" id="BaseProcessing">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseProcessing">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseProcessing</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseProcessing</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for processing functions.</span>
 
@@ -813,19 +821,19 @@
 <div class="viewcode-block" id="BaseProcessing.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseProcessing.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BaseProcessing.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseProcessing.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BaseProcessing.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BaseProcessing.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
 </div>
 
@@ -833,7 +841,7 @@
 
 <div class="viewcode-block" id="BasePriority">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BasePriority">[docs]</a>
-<span class="k">class</span> <span class="nc">BasePriority</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BasePriority</span><span class="p">(</span><span class="n">BaseScriptFunc</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for priority functions.</span>
 
@@ -851,19 +859,19 @@
 <div class="viewcode-block" id="BasePriority.call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BasePriority.call">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
 <div class="viewcode-block" id="BasePriority.wrapped_call">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BasePriority.wrapped_call">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">wrapped_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">wrapped_call</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="BasePriority.__call__">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.BasePriority.__call__">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
 </div>
 
@@ -871,7 +879,7 @@
 
 <div class="viewcode-block" id="ConstPriority">
 <a class="viewcode-back" href="../../../apiref/chatsky.core.script_function.html#chatsky.core.script_function.ConstPriority">[docs]</a>
-<span class="k">class</span> <span class="nc">ConstPriority</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BasePriority</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConstPriority</span><span class="p">(</span><span class="n">ConstScriptFunc</span><span class="p">,</span> <span class="n">BasePriority</span><span class="p">):</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span></div>
 
 
@@ -910,8 +918,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -944,7 +952,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
