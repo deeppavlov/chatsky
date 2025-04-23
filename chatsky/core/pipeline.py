@@ -12,8 +12,8 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
-from typing import Union, List, Dict, Optional, TYPE_CHECKING
-from pydantic import BaseModel, Field, model_validator, computed_field
+from typing import Union, List, Optional, TYPE_CHECKING
+from pydantic import BaseModel, Field, model_validator, computed_field, field_validator
 
 from chatsky.core.script import Script
 from chatsky.core.context import Context
@@ -30,6 +30,7 @@ from .utils import finalize_service_group, initialize_service_states
 from chatsky.core.service.actor import Actor
 from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitTypes
 from chatsky.core.script_parsing import JSONImporter, Path
+from chatsky.core.tools import ToolDict
 
 if TYPE_CHECKING:
     from chatsky.llm.llm_api import LLM_API
@@ -82,9 +83,13 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    models: Dict[str, LLM_API] = Field(default_factory=dict)
+    llm: ToolDict = Field(default_factory=dict)
     """
     LLM models to be made available in custom functions.
+    """
+    ml: ToolDict = Field(default_factory=dict)
+    """
+    ML models to be made available in custom functions.
     """
     messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
@@ -231,6 +236,18 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         if self.script.get_node(self.fallback_label) is None:
             raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         return self
+
+    @field_validator("llm")
+    def validate_llm(self, llm):
+        if isinstance(llm, LLM_API):
+            return ToolDict({"default": llm})
+        return llm
+
+    @field_validator("ml")
+    def validate_ml(self, ml):
+        if isinstance(ml, LLM_API):
+            return ToolDict({"default": ml})
+        return ml
 
     async def _run_pipeline(
         self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
