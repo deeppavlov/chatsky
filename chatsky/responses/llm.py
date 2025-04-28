@@ -22,7 +22,7 @@ class LLMResponse(BaseResponse):
     Uses prompt to produce result from model.
     """
 
-    llm_model_name: str
+    llm_model_name: str = Field(default="_default")
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
     """
@@ -58,7 +58,9 @@ class LLMResponse(BaseResponse):
     """
 
     async def call(self, ctx: Context) -> Message:
-        model = ctx.pipeline.models[self.llm_model_name]
+        if self.llm_model_name not in ctx.pipeline.llm:
+            self.llm_model_name = "_default"
+        model = ctx.pipeline.llm[self.llm_model_name]
         history_messages = []
 
         history_messages.extend(

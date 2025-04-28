@@ -241,14 +241,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     @classmethod
     def validate_llm(llm):
         if isinstance(llm, LLM_API):
-            return ToolDict({"default": llm})
+            return ToolDict({"_default": llm})
         return llm
 
     @field_validator("ml", mode="before")
     @classmethod
     def validate_ml(ml):
         if isinstance(ml, LLM_API):
-            return ToolDict({"default": ml})
+            return ToolDict({"_default": ml})
         return ml
 
     async def _run_pipeline(
