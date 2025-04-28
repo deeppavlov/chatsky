@@ -59,7 +59,7 @@ class LLMResponse(BaseResponse):
 
     async def call(self, ctx: Context) -> Message:
         if self.llm_model_name not in ctx.pipeline.llm:
-            self.llm_model_name = "_default"
+            self.llm_model_name = "default"
         model = ctx.pipeline.llm[self.llm_model_name]
         history_messages = []
 

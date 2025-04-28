@@ -83,11 +83,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Slots configuration.
     """
-    llm: ToolDict = Field(default_factory=dict)
+    llm: ToolDict[LLM_API] = Field(default_factory=dict)
     """
     LLM models to be made available in custom functions.
     """
-    ml: ToolDict = Field(default_factory=dict)
+    ml: ToolDict[LLM_API] = Field(default_factory=dict)
     """
     ML models to be made available in custom functions.
     """
@@ -239,16 +239,16 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     @field_validator("llm", mode="before")
     @classmethod
-    def validate_llm(llm):
+    def validate_llm(cls, llm):
         if isinstance(llm, LLM_API):
-            return ToolDict({"_default": llm})
+            return ToolDict({"default": llm})
         return llm
 
     @field_validator("ml", mode="before")
     @classmethod
-    def validate_ml(ml):
+    def validate_ml(cls, ml):
         if isinstance(ml, LLM_API):
-            return ToolDict({"_default": ml})
+            return ToolDict({"default": ml})
         return ml
 
     async def _run_pipeline(

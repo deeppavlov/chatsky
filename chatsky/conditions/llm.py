@@ -58,7 +58,7 @@ class LLMCondition(BaseCondition):
 
     async def call(self, ctx: Context) -> bool:
         if self.llm_model_name not in ctx.pipeline.llm:
-            self.llm_model_name = "_default"
+            self.llm_model_name = "default"
         model = ctx.pipeline.models[self.llm_model_name]
 
         history_messages = []
