@@ -216,11 +216,9 @@ If you want to connect context storage directly to Superset, make the following 
 #. Choose *PostgreSQL*;
 #. Scroll to the bottom and click *Connect this database with a SQLAlchemy URI string instead*;
 #. Set *Display Name* to Context Storage;
-#. Set *SQLAlchemy URI* to:
-.. code-block:: shell
-
-    postgresql://postgres:pass@context-storage/context-db
+#. Set *SQLAlchemy URI* to: ``postgresql://postgres:pass@context-storage/context-db``
 #. Click *Connect*.
+
 5. Create a dashboard
 
 #. Click *Create a dashboard*;
@@ -228,6 +226,7 @@ If you want to connect context storage directly to Superset, make the following 
 #. Select your database, set schema to public and choose the desired table;
 #. Click *Create dataset*;
 #. Choose chart type and click *Create new chart*.
+
 .. hint:: 
 
     To display textual data from fields such as requests, responses, labels, etc., 
