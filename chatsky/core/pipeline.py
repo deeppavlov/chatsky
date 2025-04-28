@@ -22,7 +22,7 @@ from chatsky.core.message import Message
 from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
-from chatsky.slots.slots import GroupSlot
+# to TYPE_CHECKING
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler
 from .service import Service
@@ -32,6 +32,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel, AbsoluteNodeLabelInitType
 from chatsky.core.script_parsing import JSONImporter, Path
 
 if TYPE_CHECKING:
+    from chatsky.slots.slots import GroupSlot
     from chatsky.llm.llm_api import LLM_API
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     Defaults to ``1.0``.
     """
-    slots: GroupSlot = Field(default_factory=GroupSlot)
+    slots: GroupSlot = Field(default_factory=dict, validate_default=True)
     """
     Slots configuration.
     """

@@ -37,7 +37,7 @@ class LLMSlot(ValueSlot, frozen=True):
     llm_model_name: str = ""
     history: int = 0
 
-    def __init__(self, caption, return_type, llm_model_name="", history=0):
+    def __init__(self, caption, return_type=str, llm_model_name="", history=0):
         super().__init__(caption=caption, return_type=return_type, llm_model_name=llm_model_name, history=history)
 
     async def extract_value(self, ctx: Context) -> Union[str, SlotNotExtracted]:

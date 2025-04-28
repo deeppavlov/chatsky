@@ -15,9 +15,9 @@ from typing import Any, Optional, Dict, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
-from chatsky.slots.slots import SlotManager
 
 if TYPE_CHECKING:
+    from chatsky.slots.slots import SlotManager
     from chatsky.core.service import ComponentExecutionState
     from chatsky.core.script import Node
     from chatsky.core.pipeline import Pipeline
@@ -62,7 +62,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
     stats: Dict[str, Any] = Field(default_factory=dict)
     "Enables complex stats collection across multiple turns."
-    slot_manager: SlotManager = Field(default_factory=SlotManager)
+    slot_manager: SlotManager = Field(default_factory=dict, validate_default=True)
     "Stores extracted slots."
 
 
