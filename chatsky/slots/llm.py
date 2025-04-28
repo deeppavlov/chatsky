@@ -9,7 +9,7 @@ that can easily extract requested information from an unstructured user's reques
 
 from __future__ import annotations
 
-from typing import Union, Dict, TYPE_CHECKING, Tuple
+from typing import Union, Dict, TYPE_CHECKING
 import logging
 
 from pydantic import BaseModel, Field, create_model

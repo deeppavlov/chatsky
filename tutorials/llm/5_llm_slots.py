@@ -60,10 +60,15 @@ slot_model = LLM_API(
     ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key, temperature=0)
 )
 
+another_slot_model = LLM_API(
+    ChatOpenAI(model="gpt-4.1-nano", api_key=openai_api_key, temperature=0)
+)
+
 SLOTS = {
     "person": LLMGroupSlot(
         username=LLMSlot(caption="User's username in uppercase"),
-        job=LLMSlot(caption="User's occupation, job, profession"),
+        job=LLMSlot(llm_model_name="another_slot_model",
+                    caption="User's occupation, job, profession"),
         age=LLMSlot(caption="User's age", return_type=int),
         model="slot_model",
         allow_partial_extraction=True,
@@ -112,7 +117,7 @@ pipeline = Pipeline(
     start_label=("user_flow", "start"),
     fallback_label=("user_flow", "repeat_question"),
     slots=SLOTS,
-    models={"slot_model": slot_model},
+    models={"slot_model": slot_model, "another_slot_model": another_slot_model},
 )
 
 

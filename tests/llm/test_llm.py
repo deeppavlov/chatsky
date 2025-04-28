@@ -459,6 +459,14 @@ class TestSlots:
         result = await slot.extract_value(context)
         assert isinstance(result, str)
 
+        # Test request with history
+        slot = LLMSlot(caption="test_caption", llm_model_name="test_model", history=2)
+        context.requests[5] = "test request with history"
+        result = await slot.extract_value(context)
+        print(f"Extracted result: {result}")
+        assert isinstance(result, str)
+
+
     async def test_llm_group_slot(self, pipeline, context):
         slot = LLMGroupSlot(
             llm_model_name="test_model",

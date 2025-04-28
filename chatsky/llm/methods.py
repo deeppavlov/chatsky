@@ -5,12 +5,17 @@ This module provides basic methods to support LLM conditions.
 These methods return bool values based on LLM result.
 """
 
+from __future__ import annotations
+
 import abc
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from chatsky.core.context import Context
 from chatsky.llm._langchain_imports import LLMResult
+
+if TYPE_CHECKING:
+    from chatsky.core.context import Context
 
 
 class BaseMethod(BaseModel, abc.ABC):
