@@ -1,0 +1,7 @@
+:source_name: chatsky/core/service/types
+:doc_version: feat/context_storage_and_dashboard/
+
+.. automodule:: chatsky.core.service.types
+   :members:
+   :undoc-members:
+   :show-inheritance:

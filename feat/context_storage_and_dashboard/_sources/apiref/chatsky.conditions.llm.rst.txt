@@ -1,0 +1,7 @@
+:source_name: chatsky/conditions/llm
+:doc_version: feat/context_storage_and_dashboard/
+
+.. automodule:: chatsky.conditions.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:

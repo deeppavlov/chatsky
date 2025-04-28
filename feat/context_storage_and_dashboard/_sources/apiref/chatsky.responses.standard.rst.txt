@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/standard
+:doc_version: feat/context_storage_and_dashboard/
+
+.. automodule:: chatsky.responses.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:

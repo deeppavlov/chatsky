@@ -1,0 +1,7 @@
+:source_name: chatsky/slots/llm
+:doc_version: feat/context_storage_and_dashboard/
+
+.. automodule:: chatsky.slots.llm
+   :members:
+   :undoc-members:
+   :show-inheritance:
