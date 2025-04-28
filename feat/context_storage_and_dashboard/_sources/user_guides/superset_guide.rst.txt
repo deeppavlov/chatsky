@@ -190,42 +190,42 @@ Log in to Superset, open the `Dashboards` tab and press the import button on the
 You will be prompted for the database password. If the database credentials match,
 the updated dashboard will appear in the dashboard list.
 
-**Connecting Storage to Superset**
+Connecting Storage to Superset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to connect context storage directly to Superset, make the following steps:
 1. Install additional dependencies (if required)
-.. code-block:: shell
 
-    poetry install --extras postgresql
+   .. code-block:: python
+        
+        poetry install --extras postgresql
 
-2. Create database 
-.. code-block:: shell
-    
-    docker-compose up psql
+2. Create database
 
-3. Populate the database with data, e.g.
-.. code-block:: shell
+   .. code-block:: python
+        
+        docker-compose up psql
 
-    poetry run python tutorials/context_storages/2_postgresql.py
+3. Populate the database with data, e.g. ``poetry run python tutorials/context_storages/2_postgresql.py``
 
 4. Connect Superset to the context storage
 
-#. Hover over *Settings* in the top right;
-#. Click *Database Connections* from the dropdown menu;
-#. Click *+DATABASE* in the top right;
-#. Choose *PostgreSQL*;
-#. Scroll to the bottom and click *Connect this database with a SQLAlchemy URI string instead*;
-#. Set *Display Name* to Context Storage;
-#. Set *SQLAlchemy URI* to: ``postgresql://postgres:pass@context-storage/context-db``
-#. Click *Connect*.
+    1. Hover over *Settings* in the top right;
+    2. Click *Database Connections* from the dropdown menu;
+    3. Click *+DATABASE* in the top right;
+    4. Choose *PostgreSQL*;
+    5. Scroll to the bottom and click *Connect this database with a SQLAlchemy URI string instead*;
+    6. Set *Display Name* to Context Storage;
+    7. Set *SQLAlchemy URI* to: ``postgresql://postgres:pass@context-storage/context-db``
+    8. Click *Connect*.
 
 5. Create a dashboard
 
-#. Click *Create a dashboard*;
-#. Click *Choose a dataset*, then click *Add a dataset*;
-#. Select your database, set schema to public and choose the desired table;
-#. Click *Create dataset*;
-#. Choose chart type and click *Create new chart*.
+    1. Click *Create a dashboard*;
+    2. Click *Choose a dataset*, then click *Add a dataset*;
+    3. Select your database, set schema to public and choose the desired table;
+    4. Click *Create dataset*;
+    5. Choose chart type and click *Create new chart*.
 
 .. hint:: 
 

@@ -729,25 +729,26 @@ that has been saved in the manner described below.</p>
 <p>Log in to Superset, open the <cite>Dashboards</cite> tab and press the import button on the right of the screen.
 You will be prompted for the database password. If the database credentials match,
 the updated dashboard will appear in the dashboard list.</p>
-<p><strong>Connecting Storage to Superset</strong></p>
+</section>
+<section id="connecting-storage-to-superset">
+<h2>Connecting Storage to Superset<a class="headerlink" href="#connecting-storage-to-superset" title="Link to this heading">#</a></h2>
 <p>If you want to connect context storage directly to Superset, make the following steps:
-1. Install additional dependencies (if required)
-.. code-block:: shell</p>
+1. Install additional dependencies (if required)</p>
 <blockquote>
-<div><p>poetry install –extras postgresql</p>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">poetry</span> <span class="n">install</span> <span class="o">--</span><span class="n">extras</span> <span class="n">postgresql</span>
+</pre></div>
+</div>
 </div></blockquote>
-<p>2. Create database
-.. code-block:: shell</p>
+<ol class="arabic" start="2">
+<li><p>Create database</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="n">psql</span>
+</pre></div>
+</div>
+</li>
+<li><p>Populate the database with data, e.g. <code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">tutorials/context_storages/2_postgresql.py</span></code></p></li>
+<li><p>Connect Superset to the context storage</p>
 <blockquote>
-<div><p>docker-compose up psql</p>
-</div></blockquote>
-<p>3. Populate the database with data, e.g.
-.. code-block:: shell</p>
-<blockquote>
-<div><p>poetry run python tutorials/context_storages/2_postgresql.py</p>
-</div></blockquote>
-<ol class="arabic simple" start="4">
-<li><p>Connect Superset to the context storage</p></li>
+<div><ol class="arabic simple">
 <li><p>Hover over <em>Settings</em> in the top right;</p></li>
 <li><p>Click <em>Database Connections</em> from the dropdown menu;</p></li>
 <li><p>Click <em>+DATABASE</em> in the top right;</p></li>
@@ -757,13 +758,19 @@ the updated dashboard will appear in the dashboard list.</p>
 <li><p>Set <em>SQLAlchemy URI</em> to: <code class="docutils literal notranslate"><span class="pre">postgresql://postgres:pass&#64;context-storage/context-db</span></code></p></li>
 <li><p>Click <em>Connect</em>.</p></li>
 </ol>
-<ol class="arabic simple" start="5">
-<li><p>Create a dashboard</p></li>
+</div></blockquote>
+</li>
+<li><p>Create a dashboard</p>
+<blockquote>
+<div><ol class="arabic simple">
 <li><p>Click <em>Create a dashboard</em>;</p></li>
 <li><p>Click <em>Choose a dataset</em>, then click <em>Add a dataset</em>;</p></li>
 <li><p>Select your database, set schema to public and choose the desired table;</p></li>
 <li><p>Click <em>Create dataset</em>;</p></li>
 <li><p>Choose chart type and click <em>Create new chart</em>.</p></li>
+</ol>
+</div></blockquote>
+</li>
 </ol>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -829,6 +836,7 @@ click to <em>Custom SQL</em> and use
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#displaying-the-data">Displaying the data</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#using-superset">Using Superset</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#customizing-the-dashboard">Customizing the dashboard</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#connecting-storage-to-superset">Connecting Storage to Superset</a></li>
 </ul>
   </nav></div>
 
