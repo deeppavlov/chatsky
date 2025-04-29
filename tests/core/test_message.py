@@ -8,6 +8,7 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
+from chatsky.core.script import Node
 from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.core.message import (
@@ -137,3 +138,12 @@ class TestMessage:
         with pytest.raises(ValidationError) as e:
             _ = DataAttachment(source=FilePath("/etc/missing_file"))
         assert e
+
+    def test_timestamps(self):
+        node = Node(response=Message(text="timer check 1"))
+        time_1 = node.response.root.timestamp
+
+        node.response = Message(text="timer check 2")
+        time_2 = node.response.timestamp
+
+        assert time_1 != time_2

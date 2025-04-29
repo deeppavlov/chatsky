@@ -7,6 +7,7 @@ It only contains types and properties that are compatible with most messaging se
 """
 
 from __future__ import annotations
+from datetime import datetime
 from typing import Literal, Optional, List, Union, Dict, Any, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
@@ -330,6 +331,7 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
+    timestamp: Optional[datetime] = None
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,
@@ -358,14 +360,18 @@ class Message(DataModel):
         annotations: Optional[Dict[str, Any]] = None,
         misc: Optional[Dict[str, Any]] = None,
         origin: Optional[Origin] = None,
+        timestamp: Optional[datetime] = None,
         **kwargs,
     ):
+        if timestamp is None:
+            timestamp = datetime.now()
         super().__init__(
             text=text,
             attachments=attachments,
             annotations=annotations,
             misc=misc,
             origin=origin,
+            timestamp=timestamp,
             **kwargs,
         )
 
