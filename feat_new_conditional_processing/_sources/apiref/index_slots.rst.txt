@@ -8,5 +8,5 @@ Slots
 .. autosummary::
    :toctree:
 
-   chatsky.slots.llm
    chatsky.slots.slots
+   chatsky.slots.llm

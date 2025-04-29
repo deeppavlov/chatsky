@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b77b6cac" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=82662543"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
@@ -55,10 +55,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'user_guides/basic_conceptions';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://deeppavlov.github.io/chatsky/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'feat_new_conditional_processing';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -183,7 +184,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -498,9 +501,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -612,14 +620,14 @@ each part of the graph available under the code snippet.</p>
 </section>
 <section id="example-flow-script">
 <h3>Example flow &amp; script<a class="headerlink" href="#example-flow-script" title="Link to this heading">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">chatsky</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">TRANSITIONS</span><span class="p">,</span> <span class="n">RESPONSE</span><span class="p">,</span> <span class="n">Transition</span> <span class="k">as</span> <span class="n">Tr</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">chatsky.conditions</span> <span class="k">as</span> <span class="nn">cnd</span>
-<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">chatsky.destinations</span> <span class="k">as</span> <span class="nn">dst</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">chatsky</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">TRANSITIONS</span><span class="p">,</span> <span class="n">RESPONSE</span><span class="p">,</span> <span class="n">Transition</span> <span class="k">as</span> <span class="n">Tr</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">chatsky.conditions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cnd</span>
+<span class="linenos"> 3</span><span class="kn">import</span><span class="w"> </span><span class="nn">chatsky.destinations</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dst</span>
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="n">ping_pong_script</span> <span class="o">=</span> <span class="p">{</span>
 <span class="linenos"> 6</span>    <span class="s2">&quot;greeting_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
 <span class="linenos"> 7</span>        <span class="s2">&quot;start_node&quot;</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos"> 8</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;greeting_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;/start&quot;</span><span class="p">))]</span>
+<span class="linenos"> 8</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;greeting_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;/start&quot;</span><span class="p">))]</span>
 <span class="linenos"> 9</span>            <span class="c1"># start node handles the initial handshake (command /start)</span>
 <span class="linenos">10</span>        <span class="p">},</span>
 <span class="linenos">11</span>        <span class="s2">&quot;greeting_node&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -627,7 +635,7 @@ each part of the graph available under the code snippet.</p>
 <span class="linenos">13</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span>
 <span class="linenos">14</span>                <span class="n">Tr</span><span class="p">(</span>
 <span class="linenos">15</span>                    <span class="n">dst</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ping_pong_flow&quot;</span><span class="p">,</span> <span class="s2">&quot;game_start_node&quot;</span><span class="p">),</span>
-<span class="linenos">16</span>                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;Hello!&quot;</span><span class="p">)</span>
+<span class="linenos">16</span>                    <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;Hello!&quot;</span><span class="p">)</span>
 <span class="linenos">17</span>                <span class="p">)</span>
 <span class="linenos">18</span>            <span class="p">]</span>
 <span class="linenos">19</span>        <span class="p">},</span>
@@ -640,11 +648,11 @@ each part of the graph available under the code snippet.</p>
 <span class="linenos">26</span>    <span class="s2">&quot;ping_pong_flow&quot;</span><span class="p">:</span> <span class="p">{</span>
 <span class="linenos">27</span>        <span class="s2">&quot;game_start_node&quot;</span><span class="p">:</span> <span class="p">{</span>
 <span class="linenos">28</span>            <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Let&#39;s play ping-pong!&quot;</span><span class="p">,</span>
-<span class="linenos">29</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;response_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;Ping!&quot;</span><span class="p">))],</span>
+<span class="linenos">29</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="s2">&quot;response_node&quot;</span><span class="p">,</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;Ping!&quot;</span><span class="p">))],</span>
 <span class="linenos">30</span>        <span class="p">},</span>
 <span class="linenos">31</span>        <span class="s2">&quot;response_node&quot;</span><span class="p">:</span> <span class="p">{</span>
 <span class="linenos">32</span>            <span class="n">RESPONSE</span><span class="p">:</span> <span class="s2">&quot;Pong!&quot;</span><span class="p">,</span>
-<span class="linenos">33</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">(),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="s2">&quot;Ping!&quot;</span><span class="p">))],</span>
+<span class="linenos">33</span>            <span class="n">TRANSITIONS</span><span class="p">:</span> <span class="p">[</span><span class="n">Tr</span><span class="p">(</span><span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="o">.</span><span class="n">Current</span><span class="p">(),</span> <span class="n">cnd</span><span class="o">=</span><span class="n">cnd</span><span class="o">.</span><span class="n">ExactMatch</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s2">&quot;Ping!&quot;</span><span class="p">))],</span>
 <span class="linenos">34</span>        <span class="p">},</span>
 <span class="linenos">35</span>    <span class="p">},</span>
 <span class="linenos">36</span><span class="p">}</span>
@@ -732,11 +740,11 @@ This is done by passing callbacks to a special <code class="docutils literal not
 </ul>
 <p>Depending on the requirements of your bot and the dialog goal, you may need to interact with external databases or APIs to retrieve data.
 For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">from</span> <span class="nn">chatsky</span> <span class="kn">import</span> <span class="n">BaseProcessing</span><span class="p">,</span> <span class="n">PRE_TRANSITION</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseProcessing</span><span class="p">,</span> <span class="n">PRE_TRANSITION</span>
 <span class="o">...</span>
-<span class="k">class</span> <span class="nc">UseAPI</span><span class="p">(</span><span class="n">BaseProcessing</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UseAPI</span><span class="p">(</span><span class="n">BaseProcessing</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
         <span class="c1"># save to the context field for custom info</span>
         <span class="n">ctx</span><span class="o">.</span><span class="n">misc</span><span class="p">[</span><span class="s2">&quot;api_call_results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;http://schedule.api/day1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 <span class="o">...</span>
@@ -765,8 +773,8 @@ The latter allows you to customize the response based on the specific scenario a
 <p><code class="docutils literal notranslate"><span class="pre">Message</span></code> object can be instantiated from a string (filling its <code class="docutils literal notranslate"><span class="pre">text</span></code> field).
 We’ve used this feature for <code class="docutils literal notranslate"><span class="pre">RESPONSE</span></code> and will use it now.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">misc</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;vegan&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Here is a list of vegan cafes.&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;Here is a list of cafes.&quot;</span>
@@ -784,11 +792,11 @@ when no adequate transition has been found.</p>
 which gives you a lot of freedom in creating situationally appropriate error messages.
 Create friendly error messages and, if possible, suggest alternative options.
 This ensures a smoother user experience even when the bot encounters unexpected inputs.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a special fallback response depending on the situation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">last_label</span> <span class="o">==</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">start_label</span> <span class="ow">and</span> <span class="n">ctx</span><span class="o">.</span><span class="n">last_request</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;/start&quot;</span><span class="p">:</span>
             <span class="c1"># start_label can be obtained from the pipeline instance stored inside context</span>
             <span class="k">return</span> <span class="s2">&quot;You should&#39;ve started the dialog with &#39;/start&#39;&quot;</span>
@@ -819,7 +827,7 @@ conversational service.</p>
 </div>
 <p>A special function is then used to ascertain complete identity of the messages taken from
 the happy path and the pipeline. The function will play out a dialog with the pipeline acting as a user while checking returned messages.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">chatsky.utils.testing.common</span> <span class="kn">import</span> <span class="n">check_happy_path</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.utils.testing.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_happy_path</span>
 
 <span class="n">check_happy_path</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">happy_path</span><span class="p">)</span>
 </pre></div>
@@ -864,7 +872,7 @@ As a result, it offers the basic level of data protection making it impossible t
 Document how different parts of the script work and how the bot covers the expected interaction scenarios.
 It is especially important to document the purpose and functionality of callback functions and pipeline services
 that you may have in your project, using Python docstrings.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FavCuisineResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FavCuisineResponse</span><span class="p">(</span><span class="n">BaseResponse</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function returns a user-targeted response depending on the value</span>
 <span class="sd">    of the &#39;cuisine preference&#39; slot.</span>
@@ -984,8 +992,8 @@ how you can adapt the application to a high load environment.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1018,7 +1026,8 @@ how you can adapt the application to a high load environment.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

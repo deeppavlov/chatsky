@@ -8,8 +8,8 @@ LLM Integration
 .. autosummary::
    :toctree:
 
-   chatsky.llm.llm_api
-   chatsky.llm.prompt
    chatsky.llm.methods
-   chatsky.llm.filters
    chatsky.llm.langchain_context
+   chatsky.llm.prompt
+   chatsky.llm.llm_api
+   chatsky.llm.filters

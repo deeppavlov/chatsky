@@ -122,7 +122,7 @@ You can pass any number of names of the slots that you want to extract to this f
 
     from chatsky import proc
 
-    PRE_TRANSITION: {"extract_first_name": proc.Extract("name", "email")}
+    PRE_TRANSITION: {"extract_first_name": proc.Extract(slots=["name", "email"])}
 
 The `conditions` submodule provides a function for checking if specific slots have been extracted.
 
@@ -130,8 +130,8 @@ The `conditions` submodule provides a function for checking if specific slots ha
     
     from chatsky import cnd
 
-    TRANSITIONS: [Tr(dst="all_information", cnd=cnd.SlotsExtracted("name", "email", mode="all"))]
-    TRANSITIONS: [Tr(dst="partial_information", cnd=cnd.SlotsExtracted("name", "email", mode="any"))]
+    TRANSITIONS: [Tr(dst="all_information", cnd=cnd.SlotsExtracted(slots=["name", "email"], mode="all"))]
+    TRANSITIONS: [Tr(dst="partial_information", cnd=cnd.SlotsExtracted(slots=["name", "email"], mode="any"))]
 
 .. note::
 
@@ -154,7 +154,7 @@ extracted slot values.
     RESPONSE: "Your first name: {name}"
 
 
-    RESPONSE: rsp.FilledTemplate("Your first name: {name}")
+    RESPONSE: rsp.FilledTemplate(template="Your first name: {name}")
 
 An example of script utilizing slot extraction can be found in the
 `tutorials section <../tutorials/tutorials.slots.1_basic_example.html>`_.

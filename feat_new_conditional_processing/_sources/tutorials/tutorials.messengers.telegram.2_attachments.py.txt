@@ -17,8 +17,6 @@ Telegram API token is required to access telegram API.
 # %%
 import os
 
-from pydantic import HttpUrl
-
 from chatsky import (
     GLOBAL,
     RESPONSE,
@@ -78,39 +76,33 @@ sticker_data = {
 }
 
 audio_data = {
-    "source": HttpUrl(
-        f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
-    ),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3",
     "caption": "Separation melody by William King",
     "filename": "separation-william-king.mp3",
 }
 
 video_data = {
-    "source": HttpUrl(
-        f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4"
-    ),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4",
     "caption": "Epic Dota2 gameplay by Nkognit0",
     "filename": "crownfall-lags-nkognit0.mp4",
 }
 
 animation_data = {
-    # For some reason, if we don't define filename explicitly,
-    # animation is sent as file.
-    "source": HttpUrl(
-        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
-    ),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif",
     "caption": "Hong Kong skyscraper views by Simplyart4794",
     "filename": "hong-kong-simplyart4794.gif",
+    # if we don't define filename explicitly,
+    # animation is sent as file instead.
 }
 
 image_data = {
-    "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png",
     "caption": "DeepPavlov logo",
     "filename": "deeppavlov.png",
 }
 
 document_data = {
-    "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf",
     "caption": "DeepPavlov article",
     "filename": "deeppavlov-article.pdf",
 }
@@ -147,14 +139,16 @@ script = {
         TRANSITIONS: [
             Tr(
                 dst=("main_flow", f"{attachment}_node"),
-                cnd=cnd.ExactMatch(attachment),
+                cnd=cnd.ExactMatch(match=attachment),
             )
             for attachment in ATTACHMENTS
         ]
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="intro_node", cnd=cnd.ExactMatch("/start"))],
+            TRANSITIONS: [
+                Tr(dst="intro_node", cnd=cnd.ExactMatch(match="/start"))
+            ],
         },
         "intro_node": {
             RESPONSE: f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'

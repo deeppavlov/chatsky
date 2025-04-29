@@ -154,7 +154,9 @@ class NeverRunningService(Service):
         raise Exception(f"Oh no! The '{self.name}' service is running!")
 
     start_condition: AnyCondition = Not(
-        ServiceFinished(".post.named_group.running_service", wait=True)
+        condition=ServiceFinished(
+            path=".post.named_group.running_service", wait=True
+        )
     )
 
 
@@ -182,11 +184,13 @@ pipeline = Pipeline(
             components=[
                 SimpleService(
                     start_condition=All(
-                        ServiceFinished(".pre.SimpleService#0"),
-                        ServiceFinished(".pre.SimpleService#1"),
+                        conditions=[
+                            ServiceFinished(path=".pre.SimpleService#0"),
+                            ServiceFinished(path=".pre.SimpleService#1"),
+                        ]
                     ),
                     # Alternative:
-                    # ServiceFinished(".pre")
+                    # ServiceFinished(path=".pre")
                     name="running_service",
                 ),
                 # This simple service is named "running_service"

@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
@@ -38,10 +38,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=b77b6cac" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=82662543"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
@@ -55,15 +55,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'apiref/chatsky.conditions.standard';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://deeppavlov.github.io/chatsky/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'feat_new_conditional_processing';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Service Conditions" href="chatsky.conditions.service.html" />
-    <link rel="prev" title="Slot Conditions" href="chatsky.conditions.slots.html" />
+    <link rel="next" title="LLM Conditions" href="chatsky.conditions.llm.html" />
+    <link rel="prev" title="Service Conditions" href="chatsky.conditions.service.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.10" />
@@ -183,7 +184,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -485,7 +488,7 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index_conditions.html">Conditions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.service.html">Service Conditions</a></li>
 
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Standard Conditions</a></li>
 
@@ -497,23 +500,20 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.service.html">Service Conditions</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.llm.html">LLM Conditions</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_context_storages.html">Context Storages</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.database.html">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.memory.html">Memory</a></li>
 
-
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.mongo.html">Mongo</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.ydb.html">Yandex DB</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.sql.html">SQL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.database.html">Database</a></li>
 
 
 
@@ -524,21 +524,44 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.memory.html">Memory</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.mongo.html">Mongo</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.redis.html">Redis</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.sql.html">SQL</a></li>
+
+
+
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_core.html">Core</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_utils.html">Context Utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.utils.html">Utils</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_utils.html">Context Utils</a></li>
+
 
 
 
@@ -565,15 +588,6 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
-
-
-
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.transition.html">Transition</a></li>
 
 
@@ -587,8 +601,6 @@
 
 
 
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_function.html">Script Function</a></li>
 
@@ -606,18 +618,16 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
-
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_core.service.html">Core.Service</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.group.html">Service Group</a></li>
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.service.html">Service</a></li>
 
 
@@ -629,13 +639,6 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.group.html">Service Group</a></li>
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.extra.html">Extra Handler</a></li>
 
 
@@ -644,8 +647,6 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_db_benchmark.html">DB Benchmark</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.basic_config.html">Basic Config</a></li>
 
 
@@ -658,6 +659,8 @@
 
 
 
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
 
 </ul>
 </details></li>
@@ -683,21 +686,25 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.extra_field_helpers.html">Extra field helpers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_llm_integration.html">LLM Integration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM responses.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.methods.html">LLM methods</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
+
+
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.methods.html">LLM methods</a></li>
-
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM responses.</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.filters.html">Filters</a></li>
 
@@ -706,17 +713,13 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
-
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_messenger_interfaces.html">Messenger Interfaces</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.console.html"><code class="docutils literal notranslate"><span class="pre">CLIMessengerInterface</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.interface.html">Telegram Interfaces</a></li>
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.console.html"><code class="docutils literal notranslate"><span class="pre">CLIMessengerInterface</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
 
 
@@ -740,18 +743,15 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_responses.html">Responses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.llm.html">LLM responses</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.standard.html">Standard Responses</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.llm.html">LLM responses</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.slots.html">Slot Responses</a></li>
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_slots.html">Slots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.slots.slots.html">Slots</a></li>
 
 
@@ -766,10 +766,16 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
+
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_stats.html">Stats</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.default_extractors.html">Default Extractors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
+
+
+
 
 
 
@@ -786,16 +792,13 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
-
-
-
-
-
-
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.stats.instrumentor.html">Instrumentor</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.default_extractors.html">Default Extractors</a></li>
+
+
+
+
 
 </ul>
 </details></li>
@@ -824,9 +827,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -886,13 +894,13 @@
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.ExactMatch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExactMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">match</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_none</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#ExactMatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExactMatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#ExactMatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if <a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context.last_request" title="chatsky.core.context.Context.last_request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_request</span></code></a> matches <a class="reference internal" href="#chatsky.conditions.standard.ExactMatch.match" title="chatsky.conditions.standard.ExactMatch.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">match</span></code></a>.</p>
 <p>If <a class="reference internal" href="#chatsky.conditions.standard.ExactMatch.skip_none" title="chatsky.conditions.standard.ExactMatch.skip_none"><code class="xref py py-attr docutils literal notranslate"><span class="pre">skip_none</span></code></a>, will not compare <code class="docutils literal notranslate"><span class="pre">None</span></code> fields of <a class="reference internal" href="#chatsky.conditions.standard.ExactMatch.match" title="chatsky.conditions.standard.ExactMatch.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">match</span></code></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.ExactMatch.match">
-<span class="sig-name descname"><span class="pre">match</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a></em><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch.match" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">match</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]]</span></em><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch.match" title="Link to this definition">#</a></dt>
 <dd><p>Message to compare last request with.</p>
 <p>Is initialized according to <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.MessageInitTypes" title="chatsky.core.message.MessageInitTypes"><code class="xref py py-data docutils literal notranslate"><span class="pre">MessageInitTypes</span></code></a>.</p>
 </dd></dl>
@@ -902,6 +910,11 @@
 <span class="sig-name descname"><span class="pre">skip_none</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch.skip_none" title="Link to this definition">#</a></dt>
 <dd><p>Whether fields set to <code class="docutils literal notranslate"><span class="pre">None</span></code> in <a class="reference internal" href="#chatsky.conditions.standard.ExactMatch.match" title="chatsky.conditions.standard.ExactMatch.match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">match</span></code></a> should not be compared.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.conditions.standard.ExactMatch.validate_match">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#ExactMatch.validate_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.ExactMatch.validate_match" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.ExactMatch.call">
@@ -918,7 +931,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.HasText">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#HasText"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.HasText" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasText</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#HasText"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.HasText" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if the <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message.text" title="chatsky.core.message.Message.text"><code class="xref py py-attr docutils literal notranslate"><span class="pre">text</span></code></a> attribute of <a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context.last_request" title="chatsky.core.context.Context.last_request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_request</span></code></a>
 contains <a class="reference internal" href="#chatsky.conditions.standard.HasText.text" title="chatsky.conditions.standard.HasText.text"><code class="xref py py-attr docutils literal notranslate"><span class="pre">text</span></code></a>.</p>
@@ -943,7 +956,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.HasTex
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.Regexp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Regexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Regexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Regexp" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Regexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Regexp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Regexp" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if the <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message.text" title="chatsky.core.message.Message.text"><code class="xref py py-attr docutils literal notranslate"><span class="pre">text</span></code></a> attribute of <a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context.last_request" title="chatsky.core.context.Context.last_request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_request</span></code></a>
 contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp.pattern" title="chatsky.conditions.standard.Regexp.pattern"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pattern</span></code></a>.</p>
@@ -980,7 +993,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.Any">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Any" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Any"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Any" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if any condition from the <a class="reference internal" href="#chatsky.conditions.standard.Any.conditions" title="chatsky.conditions.standard.Any.conditions"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conditions</span></code></a> list is True.</p>
 <dl class="py attribute">
@@ -1004,7 +1017,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.All">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">All</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#All"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.All" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">All</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#All"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.All" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if all conditions from the <a class="reference internal" href="#chatsky.conditions.standard.All.conditions" title="chatsky.conditions.standard.All.conditions"><code class="xref py py-attr docutils literal notranslate"><span class="pre">conditions</span></code></a> list is True.</p>
 <dl class="py attribute">
@@ -1028,7 +1041,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.Negation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Negation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Negation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Negation" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Negation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#Negation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.Negation" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Return the negation of the result of <a class="reference internal" href="#chatsky.conditions.standard.Negation.condition" title="chatsky.conditions.standard.Negation.condition"><code class="xref py py-attr docutils literal notranslate"><span class="pre">condition</span></code></a>.</p>
 <dl class="py attribute">
@@ -1058,7 +1071,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.CheckLastLabels">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CheckLastLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_n_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#CheckLastLabels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CheckLastLabels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#CheckLastLabels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if any label in the last <a class="reference internal" href="#chatsky.conditions.standard.CheckLastLabels.last_n_indices" title="chatsky.conditions.standard.CheckLastLabels.last_n_indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_n_indices</span></code></a> of <a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context.labels" title="chatsky.core.context.Context.labels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Context.labels</span></code></a> is in
 <a class="reference internal" href="#chatsky.conditions.standard.CheckLastLabels.labels" title="chatsky.conditions.standard.CheckLastLabels.labels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">labels</span></code></a> or if its <a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabel.flow_name" title="chatsky.core.node_label.AbsoluteNodeLabel.flow_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flow_name</span></code></a> is in <a class="reference internal" href="#chatsky.conditions.standard.CheckLastLabels.flow_labels" title="chatsky.conditions.standard.CheckLastLabels.flow_labels"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flow_labels</span></code></a>.</p>
@@ -1070,7 +1083,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.CheckLastLabels.labels">
-<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabel" title="chatsky.core.node_label.AbsoluteNodeLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteNodeLabel</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels.labels" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabel" title="chatsky.core.node_label.AbsoluteNodeLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteNodeLabel</span></code></a><span class="pre">,</span> <a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.NodeLabel" title="chatsky.core.node_label.NodeLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NodeLabel</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">]]]</span></em><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels.labels" title="Link to this definition">#</a></dt>
 <dd><p>List of labels to find in the last labels.</p>
 <p>Is initialized according to <a class="reference internal" href="chatsky.core.node_label.html#chatsky.core.node_label.AbsoluteNodeLabelInitTypes" title="chatsky.core.node_label.AbsoluteNodeLabelInitTypes"><code class="xref py py-data docutils literal notranslate"><span class="pre">AbsoluteNodeLabelInitTypes</span></code></a>.</p>
 </dd></dl>
@@ -1080,6 +1093,11 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 <span class="sig-name descname"><span class="pre">last_n_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels.last_n_indices" title="Link to this definition">#</a></dt>
 <dd><p>Number of labels to check.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.conditions.standard.CheckLastLabels.validate_labels">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#CheckLastLabels.validate_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.CheckLastLabels.validate_labels" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.CheckLastLabels.call">
@@ -1096,7 +1114,7 @@ contains <a class="reference internal" href="#chatsky.conditions.standard.Regexp
 
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.conditions.standard.HasCallbackQuery">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasCallbackQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#HasCallbackQuery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.HasCallbackQuery" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HasCallbackQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/standard.html#HasCallbackQuery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.standard.HasCallbackQuery" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseCondition" title="chatsky.core.script_function.BaseCondition"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCondition</span></code></a></p>
 <p>Check if <a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context.last_request" title="chatsky.core.context.Context.last_request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">last_request</span></code></a> contains a <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.CallbackQuery" title="chatsky.core.message.CallbackQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallbackQuery</span></code></a> attachment
 with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.CallbackQuery.query_string" title="chatsky.core.message.CallbackQuery.query_string"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CallbackQuery.query_string</span></code></a> matching <a class="reference internal" href="#chatsky.conditions.standard.HasCallbackQuery.query_string" title="chatsky.conditions.standard.HasCallbackQuery.query_string"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HasCallbackQuery.query_string</span></code></a>.</p>
@@ -1131,20 +1149,20 @@ with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="chatsky.conditions.slots.html"
+       href="chatsky.conditions.service.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Slot Conditions</p>
+        <p class="prev-next-title">Service Conditions</p>
       </div>
     </a>
     <a class="right-next"
-       href="chatsky.conditions.service.html"
+       href="chatsky.conditions.llm.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Service Conditions</p>
+        <p class="prev-next-title">LLM Conditions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1171,6 +1189,7 @@ with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.ExactMatch"><code class="docutils literal notranslate"><span class="pre">ExactMatch</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.ExactMatch.match"><code class="docutils literal notranslate"><span class="pre">ExactMatch.match</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.ExactMatch.skip_none"><code class="docutils literal notranslate"><span class="pre">ExactMatch.skip_none</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.ExactMatch.validate_match"><code class="docutils literal notranslate"><span class="pre">ExactMatch.validate_match()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.ExactMatch.call"><code class="docutils literal notranslate"><span class="pre">ExactMatch.call()</span></code></a></li>
 </ul>
 </li>
@@ -1206,6 +1225,7 @@ with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.CheckLastLabels.flow_labels"><code class="docutils literal notranslate"><span class="pre">CheckLastLabels.flow_labels</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.CheckLastLabels.labels"><code class="docutils literal notranslate"><span class="pre">CheckLastLabels.labels</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.CheckLastLabels.last_n_indices"><code class="docutils literal notranslate"><span class="pre">CheckLastLabels.last_n_indices</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.CheckLastLabels.validate_labels"><code class="docutils literal notranslate"><span class="pre">CheckLastLabels.validate_labels()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.standard.CheckLastLabels.call"><code class="docutils literal notranslate"><span class="pre">CheckLastLabels.call()</span></code></a></li>
 </ul>
 </li>
@@ -1244,8 +1264,8 @@ with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1278,7 +1298,8 @@ with <a class="reference internal" href="chatsky.core.message.html#chatsky.core.
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
