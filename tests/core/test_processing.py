@@ -1,4 +1,5 @@
 from chatsky import proc, Context, BaseResponse, MessageInitTypes, Message, BaseProcessing
+from chatsky.conditions.standard import ExactMatch
 from chatsky.core.script import Node
 
 
@@ -56,7 +57,6 @@ class TestConditionalResponce:
         assert some_list == []
 
     async def test_callable_start_condition(self):
-        # check logger length (?)
         ctx = Context()
         ctx.framework_data.current_node = Node()
         some_list = []
@@ -70,3 +70,21 @@ class TestConditionalResponce:
 
         await SomeProcessing(start_condition=True)(ctx)
         assert some_list == ["called"]
+
+    async def test_match_condition(self):
+        ctx = Context()
+        ctx.framework_data.current_node = Node()
+
+        class SomeProcessing(BaseProcessing):
+            async def call(self, ctx: Context):
+                ctx.responses[-1] = Message(text="processed")
+
+        processing = SomeProcessing(start_condition=ExactMatch(match=Message(text="expected text")))
+
+        ctx.requests[-1] = Message(text="wrong text")
+        await processing(ctx)
+        assert ctx.last_response is None
+
+        ctx.requests[-1] = Message(text="expected text")
+        await processing(ctx)
+        assert ctx.last_response.text == "processed"
