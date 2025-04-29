@@ -194,6 +194,7 @@ Connecting Storage to Superset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to connect context storage directly to Superset, make the following steps:
+
 1. Install additional dependencies (if required)
 
    .. code-block:: python
@@ -206,7 +207,11 @@ If you want to connect context storage directly to Superset, make the following 
         
         docker-compose up psql
 
-3. Populate the database with data, e.g. ``poetry run python tutorials/context_storages/2_postgresql.py``
+3. Populate the database with data, e.g.
+
+   .. code-block:: python
+
+        poetry run python tutorials/context_storages/2_postgresql.py
 
 4. Connect Superset to the context storage
 
@@ -216,21 +221,27 @@ If you want to connect context storage directly to Superset, make the following 
     4. Choose *PostgreSQL*;
     5. Scroll to the bottom and click *Connect this database with a SQLAlchemy URI string instead*;
     6. Set *Display Name* to Context Storage;
-    7. Set *SQLAlchemy URI* to: ``postgresql://postgres:pass@context-storage/context-db``
+    7. Set *SQLAlchemy URI* to:
+
+       .. code-block:: python
+
+            postgresql://postgres:pass@context-storage/context-db
+
     8. Click *Connect*.
 
 5. Create a dashboard
 
     1. Click *Create a dashboard*;
     2. Click *Choose a dataset*, then click *Add a dataset*;
-    3. Select your database, set schema to public and choose the desired table;
+    3. Select your database, set schema to **public** and choose the desired table;
     4. Click *Create dataset*;
     5. Choose chart type and click *Create new chart*.
 
-.. hint:: 
+       .. hint:: 
+        
+        To display textual data from fields such as requests, responses, labels, etc., 
+        click to *Custom SQL* and use
 
-    To display textual data from fields such as requests, responses, labels, etc., 
-    click to *Custom SQL* and use 
-    .. code-block:: SQL
+        .. code-block:: SQL
 
-        encode(<column_name>, 'escape')::jsonb->'text'
+            encode(<column_name>, 'escape')::jsonb->'text'
