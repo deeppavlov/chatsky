@@ -242,16 +242,16 @@ If you want to connect context storage directly to Superset, make the following 
     #. Click *Choose a dataset*, then click *Add a dataset*;
 
     #. Select your database, set schema to **public** and choose the desired table;
-    
+
     #. Click *Create dataset*;
 
     #. Choose chart type and click *Create new chart*.
 
-       .. hint:: 
+       .. note:: 
         
-        To display textual data from fields such as requests, responses, labels, etc., 
-        click to *Custom SQL* and use
+          To display textual data from fields such as requests, responses, labels, etc., 
+          click to *Custom SQL* and use
 
-        .. code-block:: SQL
-
-            encode(<column_name>, 'escape')::jsonb->'text'
+          .. code-block:: SQL
+             
+             encode(<column_name>, 'escape')::jsonb->'text'
