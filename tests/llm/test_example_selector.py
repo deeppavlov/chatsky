@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Dict, List
 
 import numpy as np
@@ -75,7 +76,7 @@ class TestStaticExampleSelector:
         ]
         assert self.node["MISC"].examples.select_examples(input_variables={}) == ground_truth
 
-    def test_to_langchain_context(self):
+    async def test_to_langchain_context(self):
         ground_truth = [
             HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
             AIMessage(content='{"sum":7.0,"prod":12.0}', additional_kwargs={}, response_metadata={}),
@@ -86,7 +87,7 @@ class TestStaticExampleSelector:
             HumanMessage(content='{"operand_1":-1.0,"operand_2":-2.0}', additional_kwargs={}, response_metadata={}),
             AIMessage(content='{"sum":-3.0,"prod":2.0}', additional_kwargs={}, response_metadata={}),
         ]
-        assert to_langchain_context(self.node["MISC"].examples, input_variables={}) == ground_truth
+        assert await to_langchain_context(self.node["MISC"].examples, input_variables={}) == ground_truth
 
 
 class TestCustomExampleSelector:
@@ -116,7 +117,7 @@ class TestCustomExampleSelector:
             {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
         ]
         cnt = 0
-        input_variables={"size" : 3, "replace" : False}
+        input_variables = {"size": 3, "replace": False}
         for example in self.node["MISC"].examples.select_examples(input_variables=input_variables):
             for true_example in ground_truth:
                 if example == true_example:
@@ -125,7 +126,7 @@ class TestCustomExampleSelector:
 
         assert cnt == input_variables["size"]
 
-    def test_to_langchain_context(self):
+    async def test_to_langchain_context(self):
         ground_truth = [
             HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
             AIMessage(content='{"sum":7.0,"prod":12.0}', additional_kwargs={}, response_metadata={}),
@@ -138,8 +139,8 @@ class TestCustomExampleSelector:
         ]
 
         cnt = 0
-        input_variables={"size" : 3, "replace" : False}
-        selected_examples = to_langchain_context(self.node["MISC"].examples, input_variables=input_variables)
+        input_variables = {"size": 3, "replace": False}
+        selected_examples = await to_langchain_context(self.node["MISC"].examples, input_variables=input_variables)
         for i in range(0, len(selected_examples), 2):
             for j in range(0, len(ground_truth), 2):
                 if selected_examples[i] == ground_truth[j] and selected_examples[i + 1] == ground_truth[j + 1]:

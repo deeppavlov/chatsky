@@ -4,6 +4,7 @@ Example selection.
 This module provides support for example guided generation.
 """
 
+import asyncio
 from typing import Any, Dict, List
 
 from langchain_core.example_selectors.base import BaseExampleSelector
@@ -20,10 +21,10 @@ class Example(BaseModel):
     """output may be in form of a string or a custom pydantic model derived from the BaseModel"""
 
 
-def to_langchain_context(example_selector: BaseExampleSelector, input_variables: Dict[str, str]) -> None:
+async def to_langchain_context(example_selector: BaseExampleSelector, input_variables: Dict[str, str]) -> None:
 
     result = []
-    for example in example_selector.select_examples(input_variables):
+    for example in await example_selector.aselect_examples(input_variables):
 
         result.append(HumanMessage(content=example["input"]))
         result.append(AIMessage(content=example["output"]))
