@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 from langchain_core.example_selectors.base import BaseExampleSelector
 from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages.base import BaseMessage
 from pydantic import BaseModel, Field, RootModel
 
 
@@ -21,7 +22,9 @@ class Example(BaseModel):
     """output may be in form of a string or a custom pydantic model derived from the BaseModel"""
 
 
-async def to_langchain_context(example_selector: BaseExampleSelector, input_variables: Dict[str, str]) -> None:
+async def to_langchain_context(
+    example_selector: BaseExampleSelector, input_variables: Dict[str, str]
+) -> List[BaseMessage]:
 
     result = []
     for example in await example_selector.aselect_examples(input_variables):

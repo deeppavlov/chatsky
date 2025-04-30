@@ -3,15 +3,10 @@ from typing import Any, Dict, List
 
 import numpy as np
 from langchain_core.example_selectors.base import BaseExampleSelector
-from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field, RootModel
 
 from chatsky import MISC, RESPONSE
-from chatsky.llm.example_selector import (
-    Example,
-    StaticExampleSelector,
-    to_langchain_context,
-)
+from chatsky.llm.example_selector import Example, StaticExampleSelector
 from chatsky.responses.llm import LLMResponse
 
 
@@ -76,19 +71,6 @@ class TestStaticExampleSelector:
         ]
         assert self.node["MISC"].examples.select_examples(input_variables={}) == ground_truth
 
-    async def test_to_langchain_context(self):
-        ground_truth = [
-            HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":7.0,"prod":12.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":5.0,"operand_2":6.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":11.0,"prod":30.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":0.0,"operand_2":8.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":8.0,"prod":0.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":-1.0,"operand_2":-2.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":-3.0,"prod":2.0}', additional_kwargs={}, response_metadata={}),
-        ]
-        assert await to_langchain_context(self.node["MISC"].examples, input_variables={}) == ground_truth
-
 
 class TestCustomExampleSelector:
 
@@ -121,29 +103,6 @@ class TestCustomExampleSelector:
         for example in self.node["MISC"].examples.select_examples(input_variables=input_variables):
             for true_example in ground_truth:
                 if example == true_example:
-                    cnt += 1
-                    break
-
-        assert cnt == input_variables["size"]
-
-    async def test_to_langchain_context(self):
-        ground_truth = [
-            HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":7.0,"prod":12.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":5.0,"operand_2":6.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":11.0,"prod":30.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":0.0,"operand_2":8.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":8.0,"prod":0.0}', additional_kwargs={}, response_metadata={}),
-            HumanMessage(content='{"operand_1":-1.0,"operand_2":-2.0}', additional_kwargs={}, response_metadata={}),
-            AIMessage(content='{"sum":-3.0,"prod":2.0}', additional_kwargs={}, response_metadata={}),
-        ]
-
-        cnt = 0
-        input_variables = {"size": 3, "replace": False}
-        selected_examples = await to_langchain_context(self.node["MISC"].examples, input_variables=input_variables)
-        for i in range(0, len(selected_examples), 2):
-            for j in range(0, len(ground_truth), 2):
-                if selected_examples[i] == ground_truth[j] and selected_examples[i + 1] == ground_truth[j + 1]:
                     cnt += 1
                     break
 
