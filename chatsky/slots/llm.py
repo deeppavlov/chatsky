@@ -45,11 +45,11 @@ class LLMSlot(ValueSlot, frozen=True):
         if request_text == "":
             return SlotNotExtracted()
 
-        history_messages = context_to_history(
+        history_messages = await context_to_history(
             ctx, self.history, filter_func=FromModel(), llm_model_name=self.llm_model_name, max_size=1000
         )
         if history_messages == []:
-            history_messages = [message_to_langchain(ctx.last_request, ctx)]
+            history_messages = [await message_to_langchain(ctx.last_request, ctx)]
         # Dynamically create a Pydantic model based on the caption
         return_type = self.return_type
 
@@ -72,6 +72,7 @@ class LLMGroupSlot(GroupSlot):
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
     llm_model_name: str
+    history: int = 0
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
         request_text = ctx.last_request.text
@@ -80,13 +81,13 @@ class LLMGroupSlot(GroupSlot):
 
         # Get all slots grouped by their model names
         model_groups = self._group_slots_by_model(self)
-        
+
         # Process each model group separately
         all_results = {}
         for model_name, slots in model_groups.items():
             if not slots:
                 continue
-                
+
             # Create dynamic model for this group
             captions = {}
             for child_name, slot_item in slots.items():
@@ -95,11 +96,11 @@ class LLMGroupSlot(GroupSlot):
             DynamicGroupModel = create_model("DynamicGroupModel", **captions)
             logger.debug(f"DynamicGroupModel for {model_name}: {DynamicGroupModel}")
 
-            history_messages = context_to_history(
+            history_messages = await context_to_history(
                 ctx, self.history, filter_func=FromModel(), llm_model_name=model_name, max_size=1000
             )
             if history_messages == []:
-                history_messages = [message_to_langchain(ctx.last_request, ctx)]
+                history_messages = [await message_to_langchain(ctx.last_request, ctx)]
 
             # Get model and process request
             model = ctx.pipeline.models.get(model_name)
@@ -107,12 +108,10 @@ class LLMGroupSlot(GroupSlot):
                 logger.warning(f"Model {model_name} not found in pipeline.models")
                 continue
 
-            result: Message = await model._ainvoke(
-                history=history_messages, message_schema=DynamicGroupModel
-            )
+            result: Message = await model._ainvoke(history=history_messages, message_schema=DynamicGroupModel)
             result_json = result.model_dump()
             logger.debug(f"Result JSON for {model_name}: {result_json}")
-            
+
             # Add results to all_results
             all_results.update(result_json)
 
@@ -146,10 +145,10 @@ class LLMGroupSlot(GroupSlot):
         of slot paths to slot objects.
         """
         model_groups = {}
-        
+
         for key, value in slot.__pydantic_extra__.items():
             new_key = f"{parent_key}.{key}" if parent_key else key
-            
+
             if isinstance(value, LLMGroupSlot):
                 # Recursively process nested group slots
                 nested_groups = self._group_slots_by_model(value, new_key)
@@ -163,7 +162,7 @@ class LLMGroupSlot(GroupSlot):
                 if model_name not in model_groups:
                     model_groups[model_name] = {}
                 model_groups[model_name][new_key] = value
-                
+
         return model_groups
 
     def _dict_to_extracted_slots(self, d):

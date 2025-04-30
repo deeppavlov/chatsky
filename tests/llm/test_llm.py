@@ -466,7 +466,6 @@ class TestSlots:
         print(f"Extracted result: {result}")
         assert isinstance(result, str)
 
-
     async def test_llm_group_slot(self, pipeline, context):
         slot = LLMGroupSlot(
             llm_model_name="test_model",

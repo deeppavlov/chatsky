@@ -22,6 +22,7 @@ from chatsky.core.message import Message
 from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
+
 # to TYPE_CHECKING
 from chatsky.core.service.group import ServiceGroup, ServiceGroupInitTypes
 from chatsky.core.service.extra import ComponentExtraHandlerInitTypes, BeforeHandler, AfterHandler

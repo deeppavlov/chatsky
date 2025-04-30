@@ -67,10 +67,12 @@ another_slot_model = LLM_API(
 SLOTS = {
     "person": LLMGroupSlot(
         username=LLMSlot(caption="User's username in uppercase"),
-        job=LLMSlot(llm_model_name="another_slot_model",
-                    caption="User's occupation, job, profession"),
+        job=LLMSlot(
+            llm_model_name="another_slot_model",
+            caption="User's occupation, job, profession",
+        ),
         age=LLMSlot(caption="User's age", return_type=int),
-        model="slot_model",
+        llm_model_name="slot_model",
         allow_partial_extraction=True,
     )
 }
