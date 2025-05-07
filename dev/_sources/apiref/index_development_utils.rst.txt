@@ -9,5 +9,5 @@ Development Utils
    :toctree:
 
    chatsky.utils.devel.json_serialization
-   chatsky.utils.devel.async_helpers
    chatsky.utils.devel.extra_field_helpers
+   chatsky.utils.devel.async_helpers

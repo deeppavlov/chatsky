@@ -9,5 +9,5 @@ DB Benchmark
    :toctree:
 
    chatsky.utils.db_benchmark.report
-   chatsky.utils.db_benchmark.basic_config
    chatsky.utils.db_benchmark.benchmark
+   chatsky.utils.db_benchmark.basic_config
