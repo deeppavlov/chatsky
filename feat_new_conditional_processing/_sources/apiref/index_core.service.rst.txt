@@ -8,9 +8,9 @@ Core.Service
 .. autosummary::
    :toctree:
 
-   chatsky.core.service.actor
-   chatsky.core.service.component
-   chatsky.core.service.group
+   chatsky.core.service.extra
    chatsky.core.service.service
    chatsky.core.service.types
-   chatsky.core.service.extra
+   chatsky.core.service.component
+   chatsky.core.service.actor
+   chatsky.core.service.group

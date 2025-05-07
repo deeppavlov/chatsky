@@ -8,11 +8,11 @@ Context Storages
 .. autosummary::
    :toctree:
 
-   chatsky.context_storages.memory
-   chatsky.context_storages.mongo
-   chatsky.context_storages.ydb
-   chatsky.context_storages.database
-   chatsky.context_storages.file
-   chatsky.context_storages.redis
    chatsky.context_storages.protocol
+   chatsky.context_storages.database
+   chatsky.context_storages.mongo
+   chatsky.context_storages.redis
+   chatsky.context_storages.ydb
    chatsky.context_storages.sql
+   chatsky.context_storages.file
+   chatsky.context_storages.memory

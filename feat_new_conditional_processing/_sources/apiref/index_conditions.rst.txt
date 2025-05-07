@@ -10,5 +10,5 @@ Conditions
 
    chatsky.conditions.service
    chatsky.conditions.standard
-   chatsky.conditions.llm
    chatsky.conditions.slots
+   chatsky.conditions.llm
