@@ -77,14 +77,14 @@ class TestConditionalResponce:
 
         class SomeProcessing(BaseProcessing):
             async def call(self, ctx: Context):
-                ctx.responses[-1] = Message(text="processed")
+                ctx.responses[0] = Message(text="processed")
 
         processing = SomeProcessing(start_condition=ExactMatch(match=Message(text="expected text")))
 
-        ctx.requests[-1] = Message(text="wrong text")
+        ctx.requests[0] = Message(text="wrong text")
         await processing(ctx)
         assert ctx.last_response is None
 
-        ctx.requests[-1] = Message(text="expected text")
+        ctx.requests[0] = Message(text="expected text")
         await processing(ctx)
         assert ctx.last_response.text == "processed"
