@@ -3,10 +3,11 @@ from typing import Any, Dict, List
 
 import numpy as np
 from langchain_core.example_selectors.base import BaseExampleSelector
+from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field, RootModel
 
 from chatsky import MISC, RESPONSE
-from chatsky.llm.example_selector import Example, StaticExampleSelector
+from chatsky.llm.example_selector import Example, StaticExampleSelector, to_langchain_context
 from chatsky.responses.llm import LLMResponse
 
 
@@ -48,7 +49,7 @@ class MockCustomExampleSelector(BaseExampleSelector, RootModel):
 ### Tests
 
 
-class TestStaticExampleSelector:
+class TestIntegrationStaticExampleSelector:
     node = {
         RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer."),
         MISC: ExamplePrompt(
@@ -72,7 +73,7 @@ class TestStaticExampleSelector:
         assert self.node["MISC"].examples.select_examples(input_variables={}) == ground_truth
 
 
-class TestCustomExampleSelector:
+class TestIntegrationCustomExampleSelector:
 
     node = {
         RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer."),
@@ -107,3 +108,73 @@ class TestCustomExampleSelector:
                     break
 
         assert cnt == input_variables["size"]
+
+class TestStaticExampleSelector:
+
+    selector = StaticExampleSelector([])
+
+    def test_add_example(self):
+
+        ground_truth = [Example(input='{"operand_1":0.0,"operand_2":8.0}', output=ResponseModel(sum=8.0, prod=0.0))]
+
+        self.selector.add_example(
+            {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}
+        )
+
+        assert self.selector.root == ground_truth
+
+    def test_select_examples(self):
+
+        ground_truth = [
+            {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
+        ]
+
+        result = self.selector.select_examples(input_variables={})
+        assert result == ground_truth
+
+    async def test_aadd_example(self):
+
+        ground_truth = [
+            Example(input='{"operand_1":0.0,"operand_2":8.0}', output=ResponseModel(sum=8.0, prod=0.0)),
+            Example(input=RequestModel(operand_1=-1.0, operand_2=-2.0), output=ResponseModel(sum=-3.0, prod=2.0)),
+        ]
+
+        await self.selector.aadd_example(
+            {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)}
+        )
+
+        assert self.selector.root == ground_truth
+
+    async def test_aselect_examples(self):
+
+        ground_truth = [
+            {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
+            {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
+        ]
+        result = await self.selector.aselect_examples(input_variables={})
+
+        assert result == ground_truth
+
+class TestToLangchainContext:
+
+    example_selector = StaticExampleSelector([])
+
+    async def test_empty_selector(self):
+        messages = await to_langchain_context(example_selector=self.example_selector, input_variables={})
+        assert messages == []
+
+    async def test_selector_with_content(self):
+
+        self.example_selector.add_example({"input": "7, 6", "output": "13"})
+        self.example_selector.add_example({"input": "8, -9", "output": "-1"})
+
+        ground_truth = [
+            HumanMessage(content="7, 6", additional_kwargs={}, response_metadata={}),
+            AIMessage(content="13", additional_kwargs={}, response_metadata={}),
+            HumanMessage(content="8, -9", additional_kwargs={}, response_metadata={}),
+            AIMessage(content="-1", additional_kwargs={}, response_metadata={}),
+        ]
+
+        messages = await to_langchain_context(example_selector=self.example_selector, input_variables={})
+        assert messages == ground_truth
+
