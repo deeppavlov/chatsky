@@ -42,7 +42,8 @@ class StaticExampleSelector(BaseExampleSelector, RootModel):
     def add_example(self, example: Dict[str, str]) -> Any:
         self.root.append(Example.model_validate(example))
 
-    def unpack_model(self, example_part: str | BaseModel) -> str:
+    @staticmethod
+    def unpack_model(example_part: str | BaseModel) -> str:
         return str(example_part.model_dump_json()) if isinstance(example_part, BaseModel) else example_part
 
     def select_examples(self, input_variables: Dict[str, str]) -> List[dict]:
