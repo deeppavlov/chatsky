@@ -1,6 +1,7 @@
 import asyncio
 from typing import Any, Dict, List
 
+import pytest
 import numpy as np
 from langchain_core.example_selectors.base import BaseExampleSelector
 from langchain_core.messages import AIMessage, HumanMessage
@@ -11,6 +12,7 @@ from chatsky.llm.example_selector import Example, StaticExampleSelector, to_lang
 from chatsky.responses.llm import LLMResponse
 
 np.random.seed(0)
+
 
 class ExamplePrompt(BaseModel, arbitrary_types_allowed=True):
     examples: StaticExampleSelector | BaseExampleSelector
@@ -50,20 +52,38 @@ class MockCustomExampleSelector(BaseExampleSelector, RootModel):
 ### Tests
 
 
-class TestIntegrationStaticExampleSelector:
-    node = {
-        RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer."),
-        MISC: ExamplePrompt(
-            examples=[
-                {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
-                {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
-                {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
-                {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)},
-            ]
-        ),
-    }
+@pytest.fixture()
+def static_selector_fixture(scope="function"):
+    def static_selector(examples: List[Example]):
+        return StaticExampleSelector(examples)
 
-    def test_select_examples(self):
+    return static_selector
+
+
+@pytest.fixture()
+def node_fixture(scope="function"):
+    def setted_node(use_static_selector: bool):
+        node = {RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer.")}
+        test_examples = [
+            {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
+            {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
+            {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
+            {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)},
+        ]
+
+        if use_static_selector == True:
+            node[MISC] = ExamplePrompt(examples=test_examples)
+        else:
+            node[MISC] = ExamplePrompt(examples=MockCustomExampleSelector(test_examples))
+        return node
+
+    return setted_node
+
+
+class TestIntegrationStaticExampleSelector:
+    def test_select_examples(self, node_fixture):
+
+        node = node_fixture(use_static_selector=True)
 
         ground_truth = [
             {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
@@ -71,97 +91,96 @@ class TestIntegrationStaticExampleSelector:
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
             {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
         ]
-        assert self.node["MISC"].examples.select_examples(input_variables={}) == ground_truth
+        assert node["MISC"].examples.select_examples(input_variables={}) == ground_truth
 
 
 class TestIntegrationCustomExampleSelector:
 
-    node = {
-        RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer."),
-        MISC: ExamplePrompt(
-            examples=MockCustomExampleSelector(
-                [
-                    {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
-                    {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
-                    {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
-                    {
-                        "input": RequestModel(operand_1=-1.0, operand_2=-2.0),
-                        "output": ResponseModel(sum=-3.0, prod=2.0),
-                    },
-                ]
-            )
-        ),
-    }
+    def test_select_examples(self, node_fixture):
 
-    def test_select_examples(self):
-        
+        node = node_fixture(use_static_selector=False)
+
         ground_truth = [
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
             {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
             {"input": '{"operand_1":5.0,"operand_2":6.0}', "output": '{"sum":11.0,"prod":30.0}'},
         ]
-        
-        assert ground_truth == self.node["MISC"].examples.select_examples(input_variables={"size": 3, "replace": False})
+
+        assert ground_truth == node["MISC"].examples.select_examples(input_variables={"size": 3, "replace": False})
 
 
 class TestStaticExampleSelector:
 
-    selector = StaticExampleSelector([])
+    def test_add_example(self, static_selector_fixture):
 
-    def test_add_example(self):
+        selector = static_selector_fixture([])
 
         ground_truth = [Example(input='{"operand_1":0.0,"operand_2":8.0}', output=ResponseModel(sum=8.0, prod=0.0))]
 
-        self.selector.add_example(
-            {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}
+        selector.add_example({"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)})
+
+        assert selector.root == ground_truth
+
+    def test_select_examples(self, static_selector_fixture):
+
+        selector = static_selector_fixture(
+            [{"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}]
         )
-
-        assert self.selector.root == ground_truth
-
-    def test_select_examples(self):
 
         ground_truth = [
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
         ]
 
-        result = self.selector.select_examples(input_variables={})
+        result = selector.select_examples(input_variables={})
         assert result == ground_truth
 
-    async def test_aadd_example(self):
+    async def test_aadd_example(self, static_selector_fixture):
+
+        selector = static_selector_fixture(
+            [{"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}]
+        )
 
         ground_truth = [
             Example(input='{"operand_1":0.0,"operand_2":8.0}', output=ResponseModel(sum=8.0, prod=0.0)),
             Example(input=RequestModel(operand_1=-1.0, operand_2=-2.0), output=ResponseModel(sum=-3.0, prod=2.0)),
         ]
 
-        await self.selector.aadd_example(
+        await selector.aadd_example(
             {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)}
         )
 
-        assert self.selector.root == ground_truth
+        assert selector.root == ground_truth
 
-    async def test_aselect_examples(self):
+    async def test_aselect_examples(self, static_selector_fixture):
+
+        selector = static_selector_fixture(
+            [
+                {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
+                {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)},
+            ]
+        )
 
         ground_truth = [
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
             {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
         ]
-        result = await self.selector.aselect_examples(input_variables={})
+        result = await selector.aselect_examples(input_variables={})
 
         assert result == ground_truth
 
+
 class TestToLangchainContext:
 
-    example_selector = StaticExampleSelector([])
+    async def test_empty_selector(self, static_selector_fixture):
 
-    async def test_empty_selector(self):
-        messages = await to_langchain_context(example_selector=self.example_selector, input_variables={})
+        selector = static_selector_fixture([])
+
+        messages = await to_langchain_context(example_selector=selector, input_variables={})
         assert messages == []
 
-    async def test_selector_with_content(self):
+    async def test_selector_with_content(self, static_selector_fixture):
 
-        self.example_selector.add_example({"input": "7, 6", "output": "13"})
-        self.example_selector.add_example({"input": "8, -9", "output": "-1"})
+        selector = static_selector_fixture([{"input": "7, 6", "output": "13"}, {"input": "8, -9", "output": "-1"}])
 
         ground_truth = [
             HumanMessage(content="7, 6", additional_kwargs={}, response_metadata={}),
@@ -170,16 +189,18 @@ class TestToLangchainContext:
             AIMessage(content="-1", additional_kwargs={}, response_metadata={}),
         ]
 
-        messages = await to_langchain_context(example_selector=self.example_selector, input_variables={})
+        messages = await to_langchain_context(example_selector=selector, input_variables={})
         assert messages == ground_truth
-    
+
     async def test_selector_with_content(self):
-        
-        selector = MockCustomExampleSelector([
-                    {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
-                    {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
-                    {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
-                ])
+
+        selector = MockCustomExampleSelector(
+            [
+                {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
+                {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
+                {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
+            ]
+        )
 
         ground_truth = [
             HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
