@@ -10,6 +10,7 @@ from chatsky import MISC, RESPONSE
 from chatsky.llm.example_selector import Example, StaticExampleSelector, to_langchain_context
 from chatsky.responses.llm import LLMResponse
 
+np.random.seed(0)
 
 class ExamplePrompt(BaseModel, arbitrary_types_allowed=True):
     examples: StaticExampleSelector | BaseExampleSelector
@@ -93,21 +94,15 @@ class TestIntegrationCustomExampleSelector:
     }
 
     def test_select_examples(self):
+        
         ground_truth = [
-            {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
-            {"input": '{"operand_1":5.0,"operand_2":6.0}', "output": '{"sum":11.0,"prod":30.0}'},
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
             {"input": '{"operand_1":-1.0,"operand_2":-2.0}', "output": '{"sum":-3.0,"prod":2.0}'},
+            {"input": '{"operand_1":5.0,"operand_2":6.0}', "output": '{"sum":11.0,"prod":30.0}'},
         ]
-        cnt = 0
-        input_variables = {"size": 3, "replace": False}
-        for example in self.node["MISC"].examples.select_examples(input_variables=input_variables):
-            for true_example in ground_truth:
-                if example == true_example:
-                    cnt += 1
-                    break
+        
+        assert ground_truth == self.node["MISC"].examples.select_examples(input_variables={"size": 3, "replace": False})
 
-        assert cnt == input_variables["size"]
 
 class TestStaticExampleSelector:
 
@@ -177,4 +172,20 @@ class TestToLangchainContext:
 
         messages = await to_langchain_context(example_selector=self.example_selector, input_variables={})
         assert messages == ground_truth
+    
+    async def test_selector_with_content(self):
+        
+        selector = MockCustomExampleSelector([
+                    {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
+                    {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
+                    {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
+                ])
 
+        ground_truth = [
+            HumanMessage(content='{"operand_1":3.0,"operand_2":4.0}', additional_kwargs={}, response_metadata={}),
+            AIMessage(content='{"sum":7.0,"prod":12.0}', additional_kwargs={}, response_metadata={}),
+            HumanMessage(content='{"operand_1":0.0,"operand_2":8.0}', additional_kwargs={}, response_metadata={}),
+            AIMessage(content='{"sum":8.0,"prod":0.0}', additional_kwargs={}, response_metadata={}),
+        ]
+
+        assert await to_langchain_context(selector, input_variables={"size": 2, "replace": False}) == ground_truth
