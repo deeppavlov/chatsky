@@ -1,6 +1,6 @@
 """
-Example selection.
-----------
+Example selection
+-------------------
 This module provides support for example guided generation.
 """
 
@@ -25,6 +25,15 @@ class Example(BaseModel):
 async def to_langchain_context(
     example_selector: BaseExampleSelector, input_variables: Dict[str, str]
 ) -> List[BaseMessage]:
+    """
+    Function that selects examples and returns them in the format of a list with langchain messages.
+
+    :param example_selector: selector object that implements selection logic.
+    :param input_variables:  this parameter will be passed to example_selector to provide a way to change its behavior in run-time.
+
+    :return: List of Langchain message objects.
+    
+    """
 
     result = []
     for example in await example_selector.aselect_examples(input_variables):
@@ -36,17 +45,40 @@ async def to_langchain_context(
 
 
 class StaticExampleSelector(BaseExampleSelector, RootModel):
-
+    """Example selector class that selects all examples it holds in root"""
+    
     root: List[Example]
+    """Examples that StaticExampleSelector holds"""
 
     def add_example(self, example: Dict[str, str]) -> Any:
+        """
+        Function that provides support for adding single example to root.
+
+        :param example: example that will be added to the root.
+        """
         self.root.append(Example.model_validate(example))
 
     @staticmethod
     def unpack_model(example_part: str | BaseModel) -> str:
+        """
+        Utility function that helps to handle nested pydantic models.
+
+        :param example_part: either input or output part of example that may be a nested model.
+
+        :return: description of a model in a JSON-like string
+        """
         return str(example_part.model_dump_json()) if isinstance(example_part, BaseModel) else example_part
 
     def select_examples(self, input_variables: Dict[str, str]) -> List[dict]:
+
+        """
+        Function that selects all examples in the root.
+
+        :param input_variables: unused parameter to mantain API (enables async version of this function).
+
+        :return: list of examples packed in dict with format {"input": ..., "output": ...}
+        """
+
         return [
             {"input": self.unpack_model(example.input), "output": self.unpack_model(example.output)}
             for example in self.root
