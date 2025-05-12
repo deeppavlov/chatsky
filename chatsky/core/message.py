@@ -363,8 +363,6 @@ class Message(DataModel):
         timestamp: Optional[datetime] = None,
         **kwargs,
     ):
-        if timestamp is None:
-            timestamp = datetime.now()
         super().__init__(
             text=text,
             attachments=attachments,
