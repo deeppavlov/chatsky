@@ -4,6 +4,8 @@ from typing import Any, Dict, List
 import pytest
 import numpy as np
 from langchain_core.example_selectors.base import BaseExampleSelector
+from langchain_core.example_selectors import LengthBasedExampleSelector
+from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field, RootModel
 
@@ -192,14 +194,18 @@ class TestToLangchainContext:
         messages = await to_langchain_context(example_selector=selector, input_variables={})
         assert messages == ground_truth
 
-    async def test_selector_with_content(self):
+    async def test_langchain_selector(self):
 
-        selector = MockCustomExampleSelector(
-            [
+        example_prompt = PromptTemplate(input_variables=["input", "output"], template="Input: {input}\nOutput: {output}")
+
+        selector = LengthBasedExampleSelector(
+            examples =  [
                 {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
-                {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
-                {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
-            ]
+                {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
+                {"input": '{"operand_1":5.0,"operand_2":6.0}', "output": '{"sum":11.0,"prod":30.0}'},
+            ],
+            example_prompt = example_prompt,
+            max_length= 11
         )
 
         ground_truth = [
@@ -209,4 +215,4 @@ class TestToLangchainContext:
             AIMessage(content='{"sum":8.0,"prod":0.0}', additional_kwargs={}, response_metadata={}),
         ]
 
-        assert await to_langchain_context(selector, input_variables={"size": 2, "replace": False}) == ground_truth
+        assert await to_langchain_context(selector, input_variables={"key_1": "value_1", "key_2" : "value_2", "key_3": "value_3"}) == ground_truth
