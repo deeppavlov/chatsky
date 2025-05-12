@@ -72,7 +72,10 @@ class MockedStructuredModel:
 
     async def ainvoke(self, history):
         if isinstance(history, list):
-            inst = self.root(history=history)
+            fields = {}
+            for field in self.root.model_fields:
+                fields[field] = f"history: {len(history)}"
+            inst = self.root(**fields)
         else:
             # For LLMSlot
             fields = {}
@@ -457,13 +460,14 @@ class TestSlots:
         # Test normal request
         context.requests[5] = "test request"
         result = await slot.extract_value(context)
+        print(f"Extracted normal request result: {result}")
         assert isinstance(result, str)
 
         # Test request with history
         slot = LLMSlot(caption="test_caption", llm_model_name="test_model", history=2)
         context.requests[5] = "test request with history"
         result = await slot.extract_value(context)
-        print(f"Extracted result: {result}")
+        print(f"Extracted request with history result: {result}")
         assert isinstance(result, str)
 
     async def test_llm_group_slot(self, pipeline, context):
@@ -482,6 +486,6 @@ class TestSlots:
 
         print(f"Extracted result: {result}")
 
-        assert result.name.extracted_value == "test_data"
-        assert result.age.extracted_value == "test_data"
-        assert result.nested.city.extracted_value == "test_data"
+        assert result.name.extracted_value == "history: 1"
+        assert result.age.extracted_value == "history: 1"
+        assert result.nested.city.extracted_value == "history: 1"
