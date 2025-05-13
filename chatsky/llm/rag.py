@@ -14,9 +14,7 @@ async def get_documents(
 ) -> List[Document]:
 
     if not pipeline.doc_retrievers:
-        raise TypeError(
-            "pipeline() missing 1 required positional argument: doc_retrievers"
-        )
+        raise TypeError("pipeline() missing 1 required positional argument: doc_retrievers")
 
     elif retriever_name not in pipeline.doc_retrievers:
         raise NameError("doc_retriever with the specified name does not exist")
@@ -30,9 +28,7 @@ async def get_documents(
 
     elif isinstance(doc_retriever, BaseRetriever):
         if threshold:
-            raise NotImplementedError(
-                "Threshold filtering is not implemented for BaseRetriever."
-            )
+            raise NotImplementedError("Threshold filtering is not implemented for BaseRetriever.")
         doc_retriever.k = k
         results = doc_retriever.invoke(query)
 

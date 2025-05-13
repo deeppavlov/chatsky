@@ -92,9 +92,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     LLM models to be made available in custom functions.
     """
-    messenger_interface: MessengerInterface = Field(
-        default_factory=CLIMessengerInterface
-    )
+    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     """
     A `MessengerInterface` instance for this pipeline.
 
@@ -169,9 +167,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         empty_fields = set()
         for k, v in init_dict.items():
             if k not in self.model_fields:
-                raise NotImplementedError(
-                    "Init method contains a field not in model fields."
-                )
+                raise NotImplementedError("Init method contains a field not in model fields.")
             if v is None:
                 empty_fields.add(k)
         for field in empty_fields:

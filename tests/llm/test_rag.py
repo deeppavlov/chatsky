@@ -12,12 +12,8 @@ from chatsky.utils.testing import TOY_SCRIPT
 
 @pytest.fixture
 def pipeline_with_retrievers():
-    high_score_test_doc = Document(
-        id="1", metadata={}, page_content="High score test doc"
-    )
-    low_score_test_doc = Document(
-        id="2", metadata={}, page_content="Low score test doc"
-    )
+    high_score_test_doc = Document(id="1", metadata={}, page_content="High score test doc")
+    low_score_test_doc = Document(id="2", metadata={}, page_content="Low score test doc")
     vec_store = Mock(spec=InMemoryVectorStore)
     vec_store.asimilarity_search_with_score = AsyncMock(
         return_value=[(high_score_test_doc, 0.9), (low_score_test_doc, 0.2)]
@@ -64,9 +60,7 @@ async def test_get_documents_store(pipeline_with_retrievers, threshold, expected
         (0.3, False),
     ],
 )
-async def test_get_documents_retriever(
-    pipeline_with_retrievers, threshold, expected_docs
-):
+async def test_get_documents_retriever(pipeline_with_retrievers, threshold, expected_docs):
 
     if threshold:
         with pytest.raises(
@@ -92,9 +86,7 @@ async def test_get_documents_retriever(
 
 @pytest.mark.asyncio
 async def test_raise_nameerror(pipeline_with_retrievers):
-    with pytest.raises(
-        NameError, match="doc_retriever with the specified name does not exist"
-    ):
+    with pytest.raises(NameError, match="doc_retriever with the specified name does not exist"):
         await get_documents(
             pipeline_with_retrievers,
             retriever_name="some_other_retriever",
@@ -118,9 +110,7 @@ async def test_raise_missing_doc_retrievers():
 
     with pytest.raises(
         TypeError,
-        match=re.escape(
-            "pipeline() missing 1 required positional argument: doc_retrievers"
-        ),
+        match=re.escape("pipeline() missing 1 required positional argument: doc_retrievers"),
     ):
         await get_documents(
             pipeline,

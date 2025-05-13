@@ -15,11 +15,7 @@ class RAGPromptBuilder(BaseResponse):
             context = ctx["cached_rag_context"]
         else:
             query_embedding = self.retriever.encode(user_query)
-            results = self.vector_store.search(
-                collection_name="docs",
-                query_vector=query_embedding,
-                limit=3
-            )
+            results = self.vector_store.search(collection_name="docs", query_vector=query_embedding, limit=3)
             context = "\n".join([hit.payload["text"] for hit in results])
             ctx["cached_rag_context"] = context
 
