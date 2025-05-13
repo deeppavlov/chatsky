@@ -36,7 +36,8 @@ class BasePrompt(BaseModel, ABC):
     async def to_langchain_messages(
         self, 
         ctx: Context, 
-        source: str = "human"
+        source: str = "human",
+        position_config: Optional[PositionConfig] = None
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         """
         Convert this prompt to a list of Langchain messages.
@@ -60,7 +61,8 @@ class Prompt(BasePrompt):
     async def to_langchain_messages(
         self,
         ctx: Context,
-        source: str = "human"
+        source: str = "human",
+        position_config: Optional[PositionConfig] = None
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         from chatsky.llm.langchain_context import message_to_langchain
         if isinstance(self.message, BaseResponse):
@@ -88,7 +90,8 @@ class FewShotExamplePrompt(BasePrompt):
     async def to_langchain_messages(
         self,
         ctx: Context,
-        source: str = "human"
+        source: str = "human",
+        position_config: Optional[PositionConfig] = None
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
 
         from chatsky.llm.langchain_context import message_to_langchain
