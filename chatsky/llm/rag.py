@@ -12,7 +12,13 @@ async def get_documents(
     threshold: Optional[float] = None,
     k: int = 4,
 ) -> List[Document]:
-    if not pipeline.doc_retrievers[retriever_name]:
+
+    if not pipeline.doc_retrievers:
+        raise TypeError(
+            "pipeline() missing 1 required positional argument: doc_retrievers"
+        )
+
+    elif retriever_name not in pipeline.doc_retrievers:
         raise NameError("doc_retriever with the specified name does not exist")
 
     doc_retriever = pipeline.doc_retrievers[retriever_name]
