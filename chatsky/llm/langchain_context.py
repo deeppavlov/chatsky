@@ -12,10 +12,18 @@ import asyncio
 from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, Return
-from chatsky.llm.prompt import Prompt, PositionConfig
+from chatsky.llm.prompt import Prompt, BasePrompt, PositionConfig
 
 
 logger = logging.getLogger(__name__)
+
+def to_prompt_or_passthrough(obj) -> BasePrompt:
+    """
+    Convert any object into BasePrompt.
+    """
+    if isinstance(obj, BasePrompt):
+        return obj
+    return Prompt(message=obj)
 
 
 async def message_to_langchain(
@@ -86,7 +94,7 @@ async def context_to_history(
 async def get_langchain_context(
     system_prompt: Message,
     ctx: Context,
-    call_prompt: Prompt,
+    call_prompt: BasePrompt,
     prompt_misc_filter: str = r"prompt",  # r"prompt" -> extract misc prompts
     position_config: PositionConfig = PositionConfig(),
     **history_args,
@@ -95,7 +103,7 @@ async def get_langchain_context(
     Get a list of Langchain messages using the context and prompts.
     :param system_prompt: System message to be included in the context.
     :param ctx: Current dialog context.
-    :param call_prompt: Prompt to be used for the current call.
+    :param call_prompt: BasePrompt to be used for the current call.
     :param prompt_misc_filter: Regex pattern to filter miscellaneous prompts from context.
         Defaults to r"prompt".
     :param position_config: Configuration for positioning different parts of the context.
@@ -112,7 +120,7 @@ async def get_langchain_context(
 
     # Add system prompt
     if system_prompt.text != "":
-        system_prompt_obj = Prompt(message=system_prompt)
+        system_prompt_obj = to_prompt_or_passthrough(system_prompt)
         system_messages = await system_prompt_obj.to_langchain_messages(ctx, source="system", position_config=position_config)
         prompts.append((system_messages, position_config.system_prompt))
 
@@ -123,7 +131,7 @@ async def get_langchain_context(
     # Add miscellaneous prompts
     for element_name, element in ctx.current_node.misc.items():
         if re.compile(prompt_misc_filter).match(element_name):
-            prompt = Prompt.model_validate(element)
+            prompt = to_prompt_or_passthrough(element)
             prompt_messages = await prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
             prompts.append(
                 (
@@ -147,12 +155,12 @@ async def get_langchain_context(
     last_turn_response = await ctx.responses.get(ctx.current_turn_id)
 
     if last_turn_request:
-        request_prompt = Prompt(message=last_turn_request)
+        request_prompt = to_prompt_or_passthrough(last_turn_request)
         request_messages = await request_prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
         prompts.append((request_messages, position_config.last_turn))
 
     if last_turn_response:
-        response_prompt = Prompt(message=last_turn_response)
+        response_prompt = to_prompt_or_passthrough(last_turn_response)
         response_messages = await response_prompt.to_langchain_messages(ctx, source="ai", position_config=position_config)
         prompts.append((response_messages, position_config.last_turn))
 
