@@ -12,6 +12,27 @@ async def get_documents(
     threshold: Optional[float] = None,
     k: int = 4,
 ) -> List[Document]:
+    """This function searches for relevant documents using a retriever specified in :py:attr:`Pipeline.doc_retrievers`.
+    Supports vector-based retrievers (e.g., FAISS, Chroma) and standard retrievers from LangChain.
+
+    :param pipeline: :py:class:`Pipeline` instance containing registered retrievers.
+    :type pipeline: Pipeline
+    :param retriever_name: The name of the retriever specified in :py:attr:`Pipeline.doc_retrievers`.
+    :type retriever_name: str
+    :param query: The query string to search for documents in retriever.
+    :type query: str
+    :param threshold: Optional similarity score threshold (applied only to VectorStore retrievers), defaults to None
+    :type threshold: Optional[float], optional
+    :param k: The number of top documents to retrieve, defaults to 4
+    :type k: int, optional
+    
+    :raises TypeError: If :py:attr:`Pipeline.doc_retrievers` is empty or retriever type is unsupported.
+    :raises NameError: If the specified retriever name does not exist in :py:attr:`Pipeline.doc_retrievers`.
+    :raises NotImplementedError: If threshold filtering is requested for non-vector retrievers.
+    
+    :return: A list of LangChain :py:class:`Document` objects representing the retrieved results.
+    :rtype: List[Document]
+    """
 
     if not pipeline.doc_retrievers:
         raise TypeError("pipeline() missing 1 required positional argument: doc_retrievers")

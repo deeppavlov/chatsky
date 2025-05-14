@@ -123,7 +123,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     doc_retrievers: Dict[str, Union[BaseRetriever, VectorStore]] = Field(default_factory=dict)
     """
-    Document retrievers.
+    Dictionary with document retrievers to add RAG to pipeline.
     """
 
     def __init__(
@@ -143,7 +143,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         after_handler: ComponentExtraHandlerInitTypes = None,
         timeout: float = None,
         parallelize_processing: bool = None,
-        doc_retrievers: dict = None,  # Chroma, Qdrant, ElastickSearch, TF-IFD, BM25 from https://python.langchain.com/docs/concepts/retrievers/, https://python.langchain.com/docs/integrations/vectorstores/
+        doc_retrievers: dict = None,
     ):
         if fallback_label is None:
             fallback_label = start_label
