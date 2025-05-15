@@ -84,3 +84,41 @@ class LLM_API:
         """
         result = await method(history, await self.model.agenerate([history], logprobs=True, top_logprobs=10))
         return result
+
+
+
+class BaseLLMScriptFunction(BaseModel):
+    llm_model_name: str
+    """
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    """
+    prompt: AnyResponse = Field(default="", validate_default=True)
+    """
+    Condition prompt.
+    """
+    history: int = 1
+    """
+    Number of dialogue turns aside from the current one to keep in history. `-1` for full history.
+    """
+    filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
+    """
+    Filter function to filter messages in history.
+    """
+    prompt_misc_filter: str = Field(default=r"prompt")
+    """
+    Regular expression to find prompts by key names in MISC dictionary.
+    """
+    position_config: Optional[PositionConfig] = None
+    """
+    Config for positions of prompts and messages in history.
+    """
+    max_size: int = 5000
+    """
+    Maximum size of any message in chat in symbols.
+    If a message exceeds the limit it will not be sent to the LLM and a warning
+    will be produced.
+    """
+    # TODO: add _get_langchain_context method
+
+    def _get_langchain_context(self):
+        ...
