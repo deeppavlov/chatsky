@@ -17,9 +17,6 @@ from chatsky.responses.llm import LLMResponse
 class ExamplePrompt(BaseModel, arbitrary_types_allowed=True):
     examples: StaticExampleSelector | BaseExampleSelector
 
-    async def __call__(self):
-        examples: list[dict[str, str]] = await self.examples.select_examples({"input": ctx.last_request.text})
-
 
 class ResponseModel(BaseModel):
     sum: float = Field(description="Sum of the numbers")
