@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/standard
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.responses.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:

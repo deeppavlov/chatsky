@@ -1,0 +1,7 @@
+:source_name: chatsky/core/service/component
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.core.service.component
+   :members:
+   :undoc-members:
+   :show-inheritance:

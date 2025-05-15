@@ -1,0 +1,7 @@
+:source_name: chatsky/messengers/common/types
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.messengers.common.types
+   :members:
+   :undoc-members:
+   :show-inheritance:

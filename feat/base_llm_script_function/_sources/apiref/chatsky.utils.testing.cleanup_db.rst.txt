@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/cleanup_db
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.utils.testing.cleanup_db
+   :members:
+   :undoc-members:
+   :show-inheritance:

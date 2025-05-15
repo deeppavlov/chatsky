@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/langchain_context
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.llm.langchain_context
+   :members:
+   :undoc-members:
+   :show-inheritance:

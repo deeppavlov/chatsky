@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/instrumentor
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.stats.instrumentor
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+:source_name: chatsky/llm/llm_api
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.llm.llm_api
+   :members:
+   :undoc-members:
+   :show-inheritance:

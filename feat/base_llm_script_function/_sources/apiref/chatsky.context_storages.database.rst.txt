@@ -1,0 +1,7 @@
+:source_name: chatsky/context_storages/database
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.context_storages.database
+   :members:
+   :undoc-members:
+   :show-inheritance:

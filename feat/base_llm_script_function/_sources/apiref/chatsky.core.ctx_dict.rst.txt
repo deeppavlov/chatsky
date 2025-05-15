@@ -1,0 +1,7 @@
+:source_name: chatsky/core/ctx_dict
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.core.ctx_dict
+   :members:
+   :undoc-members:
+   :show-inheritance:

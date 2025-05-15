@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/db_benchmark/basic_config
+:doc_version: feat/base_llm_script_function/
+
+.. automodule:: chatsky.utils.db_benchmark.basic_config
+   :members:
+   :undoc-members:
+   :show-inheritance:
