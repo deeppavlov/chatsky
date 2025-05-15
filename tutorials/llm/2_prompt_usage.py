@@ -48,9 +48,9 @@ Chatsky's %mddoclink(api,llm.prompt,PositionConfig) controls how different
 prompt types are ordered in the conversation history. The default hierarchy is:
 
 1. `system_prompt` - Core instructions for the model
-2. `history` - Conversation context
-3. `misc_prompt` - Additional prompts from nodes/flows
-4. `call_prompt` - Direct response prompts
+2. `misc_prompt` - Additional prompts from nodes/flows
+3. `call_prompt` - Direct response prompts
+4. `history` - Conversation context
 5. `last_turn` - Request and response from the current turn
     (if response has not yet been generated during current turn,
     only request is included)
@@ -160,7 +160,7 @@ toy_script = {
             ],
         },
         "greeting_node": {
-            RESPONSE: LLMResponse(llm_model_name="bank_model", history=0),
+            RESPONSE: LLMResponse(llm_model_name="bank_model", dialog_turns=0),
             TRANSITIONS: [
                 Tr(
                     dst=("loan_flow", "start_node"),
