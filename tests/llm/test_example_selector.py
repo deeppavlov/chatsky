@@ -13,8 +13,6 @@ from chatsky import MISC, RESPONSE
 from chatsky.llm.example_selector import Example, StaticExampleSelector, to_langchain_context
 from chatsky.responses.llm import LLMResponse
 
-np.random.seed(0)
-
 
 class ExamplePrompt(BaseModel, arbitrary_types_allowed=True):
     examples: StaticExampleSelector | BaseExampleSelector
@@ -65,6 +63,8 @@ def static_selector_fixture(scope="function"):
 @pytest.fixture()
 def node_fixture(scope="function"):
     def setted_node(use_static_selector: bool):
+
+        np.random.seed(0)
         node = {RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer.")}
         test_examples = [
             {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
