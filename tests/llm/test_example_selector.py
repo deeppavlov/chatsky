@@ -50,7 +50,7 @@ class MockCustomExampleSelector(BaseExampleSelector, RootModel):
 
 
 @pytest.fixture(scope="function")
-def static_selector_fixture():
+def static_selector_factory():
     def static_selector(examples: List[Example]):
         return StaticExampleSelector(examples)
 
@@ -58,7 +58,7 @@ def static_selector_fixture():
 
 
 @pytest.fixture(scope="function")
-def node_fixture():
+def node_factory():
     def setted_node(use_static_selector: bool):
 
         np.random.seed(0)
@@ -80,9 +80,9 @@ def node_fixture():
 
 
 class TestIntegrationStaticExampleSelector:
-    def test_select_examples(self, node_fixture):
+    def test_select_examples(self, node_factory):
 
-        node = node_fixture(use_static_selector=True)
+        node = node_factory(use_static_selector=True)
 
         ground_truth = [
             {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
@@ -95,9 +95,9 @@ class TestIntegrationStaticExampleSelector:
 
 class TestIntegrationCustomExampleSelector:
 
-    def test_select_examples(self, node_fixture):
+    def test_select_examples(self, node_factory):
 
-        node = node_fixture(use_static_selector=False)
+        node = node_factory(use_static_selector=False)
 
         ground_truth = [
             {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
@@ -110,9 +110,9 @@ class TestIntegrationCustomExampleSelector:
 
 class TestStaticExampleSelector:
 
-    def test_add_example(self, static_selector_fixture):
+    def test_add_example(self, static_selector_factory):
 
-        selector = static_selector_fixture([])
+        selector = static_selector_factory([])
 
         ground_truth = [Example(input='{"operand_1":0.0,"operand_2":8.0}', output=ResponseModel(sum=8.0, prod=0.0))]
 
@@ -120,9 +120,9 @@ class TestStaticExampleSelector:
 
         assert selector.root == ground_truth
 
-    def test_select_examples(self, static_selector_fixture):
+    def test_select_examples(self, static_selector_factory):
 
-        selector = static_selector_fixture(
+        selector = static_selector_factory(
             [{"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}]
         )
 
@@ -133,9 +133,9 @@ class TestStaticExampleSelector:
         result = selector.select_examples(input_variables={})
         assert result == ground_truth
 
-    async def test_aadd_example(self, static_selector_fixture):
+    async def test_aadd_example(self, static_selector_factory):
 
-        selector = static_selector_fixture(
+        selector = static_selector_factory(
             [{"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)}]
         )
 
@@ -150,9 +150,9 @@ class TestStaticExampleSelector:
 
         assert selector.root == ground_truth
 
-    async def test_aselect_examples(self, static_selector_fixture):
+    async def test_aselect_examples(self, static_selector_factory):
 
-        selector = static_selector_fixture(
+        selector = static_selector_factory(
             [
                 {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": ResponseModel(sum=8.0, prod=0.0)},
                 {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)},
@@ -170,16 +170,16 @@ class TestStaticExampleSelector:
 
 class TestToLangchainContext:
 
-    async def test_empty_selector(self, static_selector_fixture):
+    async def test_empty_selector(self, static_selector_factory):
 
-        selector = static_selector_fixture([])
+        selector = static_selector_factory([])
 
         messages = await to_langchain_context(example_selector=selector, input_variables={})
         assert messages == []
 
-    async def test_selector_with_content(self, static_selector_fixture):
+    async def test_selector_with_content(self, static_selector_factory):
 
-        selector = static_selector_fixture([{"input": "7, 6", "output": "13"}, {"input": "8, -9", "output": "-1"}])
+        selector = static_selector_factory([{"input": "7, 6", "output": "13"}, {"input": "8, -9", "output": "-1"}])
 
         ground_truth = [
             HumanMessage(content="7, 6", additional_kwargs={}, response_metadata={}),
