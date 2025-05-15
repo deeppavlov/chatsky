@@ -122,12 +122,17 @@ class BaseLLMScriptFunction(BaseModel):
     """
     # TODO: add _get_langchain_context method
 
-    async def _get_langchain_context(self, ctx: Context, history_args) -> list[BaseMessage]:
+    async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
         return await get_langchain_context(
             system_prompt=await ctx.pipeline.models[self.llm_model_name].system_prompt(ctx),
             ctx=ctx,
             call_prompt=self.prompt,
             prompt_misc_filter=self.prompt_misc_filter,
             position_config=self.position_config,
-            **history_args,
+            history_args={
+                "length": self.history,
+                "filter_func": self.filter_func,
+                "llm_model_name": self.llm_model_name,
+                "max_size": self.max_size,
+            },
         )
