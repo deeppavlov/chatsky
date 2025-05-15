@@ -17,7 +17,7 @@ from chatsky.core.node_label import AbsoluteNodeLabel
 
 if not langchain_available:
     pytest.skip(allow_module_level=True, reason="Langchain not available.")
-from chatsky.llm._langchain_imports import AIMessage, LLMResult, HumanMessage, SystemMessage
+from chatsky.llm._langchain_imports import AIMessage, LLMResult, HumanMessage, SystemMessage, BaseMessage
 from langchain_core.outputs.chat_generation import ChatGeneration
 
 
@@ -71,25 +71,22 @@ class MockedStructuredModel:
         self.root = root_model
 
     async def ainvoke(self, history):
-        if isinstance(history, list):
-            fields = {}
-            for field in self.root.model_fields:
-                fields[field] = f"history: {len(history)}"
-            inst = self.root(**fields)
-        else:
-            # For LLMSlot
-            fields = {}
-            for field in self.root.model_fields:
-                fields[field] = "test_data"
-            inst = self.root(**fields)
+        fields = {}
+        print(f"Root model fields: {self.root}")
+        print(f"History: {history}")
+        for field in self.root.model_fields:
+            if field == "history":
+                fields[field] = history
+            elif self.root.model_fields[field].annotation is int:
+                fields[field] = len(history)
+            elif self.root.model_fields[field].annotation is str:
+                fields[field] = str(history)
+        inst = self.root(**fields)
         return inst
-
-    def with_structured_output(self, message_schema):
-        return message_schema
 
 
 class MessageSchema(BaseModel):
-    history: list[str]
+    history: list[BaseMessage]
 
     def __call__(self):
         return self.model_dump()
@@ -131,13 +128,17 @@ class TestStructuredOutput:
         llm_api = LLM_API(MockChatOpenAI())
 
         # Test data
-        history = ["message1", "message2"]
+        history = [HumanMessage("message1"), AIMessage("message2")]
 
         # Call the respond method
         result = await llm_api.respond(message_schema=MessageSchema, history=history)
 
+        print(f"Result: {result}")
+
         # Assert the result
-        expected_result = Message(text='{"history":["message1","message2"]}')
+        expected_result = Message(
+            text='{"history":[{"content":"message1","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":null},{"content":"message2","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":null}]}'
+        )
         assert result == expected_result
 
 
@@ -257,6 +258,17 @@ class TestContextToHistory:
             ctx=context, length=1, filter_func=DefaultFilter(), llm_model_name="test_model", max_size=100
         )
         expected = [
+            HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 3"}]),
+        ]
+        assert res == expected
+
+        res = await context_to_history(
+            ctx=context, length=2, filter_func=DefaultFilter(), llm_model_name="test_model", max_size=100
+        )
+        expected = [
+            HumanMessage(content=[{"type": "text", "text": "Request 2"}]),
+            AIMessage(content=[{"type": "text", "text": "Response 2"}]),
             HumanMessage(content=[{"type": "text", "text": "Request 3"}]),
             AIMessage(content=[{"type": "text", "text": "Response 3"}]),
         ]
@@ -457,11 +469,15 @@ class TestSlots:
         context.requests[5] = ""
         assert isinstance(await slot.extract_value(context), SlotNotExtracted)
 
+        print("------Test with history=1-------")
+
         # Test normal request
         context.requests[5] = "test request"
         result = await slot.extract_value(context)
         print(f"Extracted normal request result: {result}")
         assert isinstance(result, str)
+
+        print("------Test with history=2-------")
 
         # Test request with history
         slot = LLMSlot(caption="test_caption", llm_model_name="test_model", history=2)
@@ -469,6 +485,14 @@ class TestSlots:
         result = await slot.extract_value(context)
         print(f"Extracted request with history result: {result}")
         assert isinstance(result, str)
+
+        print("------Test with history=2 and return_type=int-------")
+
+        slot = LLMSlot(caption="test_caption", return_type=int, llm_model_name="test_model", history=2)
+        context.requests[5] = "test request with history"
+        result = await slot.extract_value(context)
+        print(f"Extracted request with history result: {result}")
+        assert result == 5
 
     async def test_llm_group_slot(self, pipeline, context):
         slot = LLMGroupSlot(

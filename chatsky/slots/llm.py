@@ -14,9 +14,10 @@ import logging
 
 from pydantic import BaseModel, Field, create_model
 
-from chatsky.llm.langchain_context import context_to_history, message_to_langchain
-from chatsky.llm.filters import FromModel
+from chatsky.llm.langchain_context import context_to_history, message_to_langchain, get_langchain_context
+from chatsky.llm.filters import DefaultFilter
 from chatsky.slots.slots import ValueSlot, SlotNotExtracted, GroupSlot, ExtractedGroupSlot, ExtractedValueSlot
+from chatsky.llm.prompt import Prompt
 
 if TYPE_CHECKING:
     from chatsky.core import Context
@@ -35,7 +36,13 @@ class LLMSlot(ValueSlot, frozen=True):
     caption: str
     return_type: type = str
     llm_model_name: str = ""
-    history: int = 0
+    prompt: Prompt = Field(
+        default="You are an expert extraction algorithm. "
+        "Only extract relevant information from the text. "
+        "If you do not know the value of an attribute asked to extract, "
+        "return null for the attribute's value.",
+        validate_default=True,
+    )
 
     def __init__(self, caption, return_type=str, llm_model_name="", history=0):
         super().__init__(caption=caption, return_type=return_type, llm_model_name=llm_model_name, history=history)
@@ -45,16 +52,25 @@ class LLMSlot(ValueSlot, frozen=True):
         if request_text == "":
             return SlotNotExtracted()
 
-        history_messages = await context_to_history(
-            ctx, self.history, filter_func=FromModel(), llm_model_name=self.llm_model_name, max_size=1000
+        history_messages = await get_langchain_context(
+            system_prompt=ctx.pipeline.models[self.llm_model_name].system_prompt,
+            call_prompt=self.prompt,
+            ctx=ctx,
+            length=self.history,
+            filter_func=DefaultFilter(),
+            llm_model_name=self.llm_model_name,
+            max_size=1000,
         )
         if history_messages == []:
+            print("No history messages found, using last request")
             history_messages = [await message_to_langchain(ctx.last_request, ctx)]
         # Dynamically create a Pydantic model based on the caption
         return_type = self.return_type
 
         class DynamicModel(BaseModel):
             value: return_type = Field(description=self.caption)
+
+        print(f"History messages: {history_messages}")
 
         result: DynamicModel = await ctx.pipeline.models[self.llm_model_name]._ainvoke(
             history=history_messages, message_schema=DynamicModel
@@ -97,7 +113,7 @@ class LLMGroupSlot(GroupSlot):
             logger.debug(f"DynamicGroupModel for {model_name}: {DynamicGroupModel}")
 
             history_messages = await context_to_history(
-                ctx, self.history, filter_func=FromModel(), llm_model_name=model_name, max_size=1000
+                ctx, self.history, filter_func=DefaultFilter(), llm_model_name=model_name, max_size=1000
             )
             if history_messages == []:
                 history_messages = [await message_to_langchain(ctx.last_request, ctx)]
