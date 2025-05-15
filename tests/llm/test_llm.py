@@ -137,7 +137,10 @@ class TestStructuredOutput:
 
         # Assert the result
         expected_result = Message(
-            text='{"history":[{"content":"message1","additional_kwargs":{},"response_metadata":{},"type":"human","name":null,"id":null},{"content":"message2","additional_kwargs":{},"response_metadata":{},"type":"ai","name":null,"id":null}]}'
+            text='{"history":[{"content":"message1","additional_kwargs":{},'
+            '"response_metadata":{},"type":"human","name":null,"id":null},'
+            '{"content":"message2","additional_kwargs":{},'
+            '"response_metadata":{},"type":"ai","name":null,"id":null}]}'
         )
         assert result == expected_result
 
@@ -462,23 +465,22 @@ class TestLogProbMethod:
 
 
 class TestSlots:
-    async def test_llm_slot(self, pipeline, context):
+    async def test_empty_llm_slot(self, context):
+        # Test empty request
         slot = LLMSlot(caption="test_caption", llm_model_name="test_model")
         context.current_turn_id = 5
-        # Test empty request
         context.requests[5] = ""
         assert isinstance(await slot.extract_value(context), SlotNotExtracted)
 
-        print("------Test with history=1-------")
-
+    async def test_llm_slot(self, context):
         # Test normal request
+        slot = LLMSlot(caption="test_caption", llm_model_name="test_model")
         context.requests[5] = "test request"
         result = await slot.extract_value(context)
         print(f"Extracted normal request result: {result}")
         assert isinstance(result, str)
 
-        print("------Test with history=2-------")
-
+    async def test_llm_slot_with_history(self, context):
         # Test request with history
         slot = LLMSlot(caption="test_caption", llm_model_name="test_model", history=2)
         context.requests[5] = "test request with history"
@@ -486,15 +488,14 @@ class TestSlots:
         print(f"Extracted request with history result: {result}")
         assert isinstance(result, str)
 
-        print("------Test with history=2 and return_type=int-------")
-
+    async def test_int_llm_slot(self, context):
         slot = LLMSlot(caption="test_caption", return_type=int, llm_model_name="test_model", history=2)
         context.requests[5] = "test request with history"
         result = await slot.extract_value(context)
         print(f"Extracted request with history result: {result}")
-        assert result == 5
+        assert result == 8
 
-    async def test_llm_group_slot(self, pipeline, context):
+    async def test_llm_group_slot(self, context):
         slot = LLMGroupSlot(
             llm_model_name="test_model",
             name=LLMSlot(caption="Extract person's name"),
@@ -510,6 +511,18 @@ class TestSlots:
 
         print(f"Extracted result: {result}")
 
-        assert result.name.extracted_value == "history: 1"
-        assert result.age.extracted_value == "history: 1"
-        assert result.nested.city.extracted_value == "history: 1"
+        assert (
+            result.name.extracted_value == "[HumanMessage(content=[{'type': 'text', "
+            "'text': 'John is 25 years old and lives in New York'}], "
+            "additional_kwargs={}, response_metadata={})]"
+        )
+        assert (
+            result.age.extracted_value == "[HumanMessage(content=[{'type': 'text', 'text': "
+            "'John is 25 years old and lives in New York'}], "
+            "additional_kwargs={}, response_metadata={})]"
+        )
+        assert (
+            result.nested.city.extracted_value == "[HumanMessage(content=[{'type': 'text', 'text': '"
+            "John is 25 years old and lives in New York'}], "
+            "additional_kwargs={}, response_metadata={})]"
+        )

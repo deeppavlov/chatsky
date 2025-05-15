@@ -43,6 +43,7 @@ class LLMSlot(ValueSlot, frozen=True):
         "return null for the attribute's value.",
         validate_default=True,
     )
+    history: int = 0
 
     def __init__(self, caption, return_type=str, llm_model_name="", history=0):
         super().__init__(caption=caption, return_type=return_type, llm_model_name=llm_model_name, history=history)
@@ -53,7 +54,7 @@ class LLMSlot(ValueSlot, frozen=True):
             return SlotNotExtracted()
 
         history_messages = await get_langchain_context(
-            system_prompt=ctx.pipeline.models[self.llm_model_name].system_prompt,
+            system_prompt=await ctx.pipeline.models[self.llm_model_name].system_prompt(ctx),
             call_prompt=self.prompt,
             ctx=ctx,
             length=self.history,
