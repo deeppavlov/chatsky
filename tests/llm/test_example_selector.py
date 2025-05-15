@@ -49,16 +49,16 @@ class MockCustomExampleSelector(BaseExampleSelector, RootModel):
 ### Tests
 
 
-@pytest.fixture()
-def static_selector_fixture(scope="function"):
+@pytest.fixture(scope="function")
+def static_selector_fixture():
     def static_selector(examples: List[Example]):
         return StaticExampleSelector(examples)
 
     return static_selector
 
 
-@pytest.fixture()
-def node_fixture(scope="function"):
+@pytest.fixture(scope="function")
+def node_fixture():
     def setted_node(use_static_selector: bool):
 
         np.random.seed(0)
