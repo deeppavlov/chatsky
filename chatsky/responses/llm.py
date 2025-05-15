@@ -12,7 +12,7 @@ from chatsky.core.message import Message
 from chatsky.core.context import Context
 from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
-from chatsky.llm.prompt import Prompt, PositionConfig
+from chatsky.llm.prompt import Prompt, PositionConfig, BasePrompt
 from chatsky.core.script_function import BaseResponse
 
 
@@ -26,7 +26,7 @@ class LLMResponse(BaseResponse):
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
     """
-    prompt: Prompt = Field(default="", validate_default=True)
+    prompt: BasePrompt = Field(default_factory=lambda: Prompt(message=""), validate_default=True)
     """
     Response prompt.
     """
