@@ -133,18 +133,19 @@ async def test_const_object_immutability():
 
     assert message.text == "text1"
 
-async def test_timestamps(self, context_factory):
+async def test_timestamps(context_factory):
         """
             1. call response, check type of timestamp
             2. call the same response for the second time and check wheither it's different
         """
-        node = Node(response=Message(text="timer check 1"))
+        fixed_response = Message(text="timer check")
+        node = Node(response=fixed_response)
 
         ctx = context_factory()
-        time_1 = await node.response(ctx)
-        assert isinstance(time_1.timestamp, datetime)
+        message_1 = await node.response(ctx)
+        assert isinstance(message_1.timestamp, datetime)
 
-        node.response = Message(text="timer check 2")
-        time_2 = node.response.timestamp
+        message_2 = await node.response(ctx)
 
-        assert time_1 != time_2
+        assert message_1 == message_2
+        assert message_1.timestamp != message_2.timestamp

@@ -372,6 +372,19 @@ class Message(DataModel):
             timestamp=timestamp,
             **kwargs,
         )
+    
+    def __eq__(self, other):
+        if not isinstance(other, Message):
+            return NotImplementedError
+        timestamp = self.timestamp
+        other_timestamp = other.timestamp
+        try:
+            self.timestamp = None
+            other.timestamp = None
+            return super().__eq__(other)
+        finally:
+            self.timestamp = timestamp
+            other.timestamp = other_timestamp
 
     @field_serializer("annotations", "misc", when_used="json")
     def pickle_serialize_dicts(self, value):
