@@ -4,15 +4,16 @@ LLM responses.
 Wrapper around langchain.
 """
 
-from typing import Union, Type
+from typing import Union, Type, Optional
 import logging
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, TypeAdapter, Field
 
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.prompt import PositionConfig
 from chatsky.core import AnyResponse, MessageInitTypes
+from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
