@@ -11,7 +11,8 @@ from pydantic import BaseModel, model_validator, Field
 from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from chatsky.core import BaseResponse, AnyResponse, MessageInitTypes, Message, Context
 from chatsky.llm._langchain_imports import HumanMessage, AIMessage, SystemMessage
-
+from langchain_core.example_selectors.base import BaseExampleSelector
+from chatsky.llm.example_selector import to_langchain_context
 
 class PositionConfig(BaseModel):
     """
@@ -35,9 +36,8 @@ class BasePrompt(BaseModel, ABC):
     @abstractmethod
     async def to_langchain_messages(
         self, 
-        ctx: Context, 
-        source: str = "human",
-        position_config: Optional[PositionConfig] = None
+        ctx: Context,
+        **kwargs
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         """
         Convert this prompt to a list of Langchain messages.
@@ -46,7 +46,7 @@ class BasePrompt(BaseModel, ABC):
 
 class Prompt(BasePrompt):
     """
-    Zero‑shot prompt: wraps a string, Message or BaseResponse
+    Prompt wrapper: wraps a string, Message or BaseResponse.
     """
     message: AnyResponse
     def __init__(self, message: Union[MessageInitTypes, BaseResponse], position: Optional[float] = None):
@@ -61,18 +61,14 @@ class Prompt(BasePrompt):
     async def to_langchain_messages(
         self,
         ctx: Context,
-        source: str = "human",
-        position_config: Optional[PositionConfig] = None
+        **kwargs
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         from chatsky.llm.langchain_context import message_to_langchain
-        if isinstance(self.message, BaseResponse):
-            msg = await self.message(ctx)
-        elif isinstance(self.message, Message):
-            msg = self.message
-        else:
-            msg = Message(text=str(self.message))
+        msg = await self.message(ctx) if callable(self.message) else self.message
+        if not isinstance(msg, Message):
+            msg = Message(text=str(msg))
 
-        langchain_msg = await message_to_langchain(msg, ctx, source=source)
+        langchain_msg = await message_to_langchain(msg, ctx)
         return [langchain_msg]
 
 
@@ -81,36 +77,54 @@ class FewShotExamplePrompt(BasePrompt):
     Prompt class that supports few-shot examples with templates.
     Uses Langchain's example selectors and prompt templates for few-shot learning.
     """
-    template: str = Field(...)
+    template: Optional[str] = Field(None)
     examples: List[Dict[str, Any]] = Field(default_factory=list)
-    example_selector: Optional[Any] = Field(None)
+    example_selector: Optional[BaseExampleSelector] = None
     prefix: Optional[str] = Field(None)
     suffix: Optional[str] = Field(None)
+
+    # for unstandart type
+    model_config = {"arbitrary_types_allowed": True}
 
     async def to_langchain_messages(
         self,
         ctx: Context,
-        source: str = "human",
-        position_config: Optional[PositionConfig] = None
+        **kwargs
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
-
         from chatsky.llm.langchain_context import message_to_langchain
-        example_prompt = PromptTemplate(
-            input_variables=["input", "output"],
-            template=self.template
-        )
-        prompt_template = FewShotPromptTemplate(
-            examples=self.examples,
-            example_selector=self.example_selector,
-            example_prompt=example_prompt,
-            prefix=self.prefix,
-            suffix=self.suffix,
-        )
 
         last_req = await ctx.requests.get(ctx.current_turn_id)
         user_input = last_req.text if (last_req and last_req.text) else ""
-        text = prompt_template.format(input=user_input, output="")
+        messages: List[Union[HumanMessage, AIMessage, SystemMessage]]
 
-        msg = Message(text=text)
-        langchain_msg = await message_to_langchain(msg, ctx, source=source)
-        return [langchain_msg]
+        if self.template is not None:
+            raw_examples = self.examples
+            if self.example_selector is not None:
+                raw_examples = await self.example_selector.aselect_examples({"input": user_input})
+
+            example_prompt = PromptTemplate(
+                input_variables=["input", "output"],
+                template=self.template
+            )
+            prompt_template = FewShotPromptTemplate(
+                examples=raw_examples,
+                example_prompt=example_prompt,
+                prefix=self.prefix,
+                suffix=self.suffix,
+            )
+            text = prompt_template.format(input=user_input, output="")
+            msg = Message(text=text)
+            return [await message_to_langchain(msg, ctx, source="system")]
+
+        if self.example_selector is not None:
+            return await to_langchain_context(self.example_selector, {"input": user_input})
+
+        messages = []
+        for ex in self.examples:
+            input_content = ex["input"].model_dump_json() if isinstance(ex["input"], BaseModel) else str(ex["input"])
+            output_content = ex["output"].model_dump_json() if isinstance(ex["output"], BaseModel) else str(ex["output"])
+
+            messages.append(HumanMessage(content=input_content))
+            messages.append(AIMessage(content=output_content))
+
+        return messages
