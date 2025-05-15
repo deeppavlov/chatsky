@@ -193,16 +193,18 @@ class TestToLangchainContext:
 
     async def test_langchain_selector(self):
 
-        example_prompt = PromptTemplate(input_variables=["input", "output"], template="Input: {input}\nOutput: {output}")
+        example_prompt = PromptTemplate(
+            input_variables=["input", "output"], template="Input: {input}\nOutput: {output}"
+        )
 
         selector = LengthBasedExampleSelector(
-            examples =  [
+            examples=[
                 {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
                 {"input": '{"operand_1":0.0,"operand_2":8.0}', "output": '{"sum":8.0,"prod":0.0}'},
                 {"input": '{"operand_1":5.0,"operand_2":6.0}', "output": '{"sum":11.0,"prod":30.0}'},
             ],
-            example_prompt = example_prompt,
-            max_length= 11
+            example_prompt=example_prompt,
+            max_length=11,
         )
 
         ground_truth = [
@@ -212,4 +214,9 @@ class TestToLangchainContext:
             AIMessage(content='{"sum":8.0,"prod":0.0}', additional_kwargs={}, response_metadata={}),
         ]
 
-        assert await to_langchain_context(selector, input_variables={"key_1": "value_1", "key_2" : "value_2", "key_3": "value_3"}) == ground_truth
+        assert (
+            await to_langchain_context(
+                selector, input_variables={"key_1": "value_1", "key_2": "value_2", "key_3": "value_3"}
+            )
+            == ground_truth
+        )
