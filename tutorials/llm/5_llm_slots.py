@@ -80,7 +80,7 @@ SLOTS = {
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+            Tr(dst=("user_flow", "ask"), cnd=cnd.Regexp(pattern=r"^[sS]tart"))
         ]
     },
     "user_flow": {
