@@ -9,11 +9,13 @@ import logging
 
 from pydantic import BaseModel, TypeAdapter, Field
 
+from chatsky import Context
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
 from chatsky.llm.prompt import PositionConfig
 from chatsky.core import AnyResponse, MessageInitTypes
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
+from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
@@ -87,7 +89,6 @@ class LLM_API:
         return result
 
 
-
 class BaseLLMScriptFunction(BaseModel):
     llm_model_name: str
     """
@@ -95,7 +96,7 @@ class BaseLLMScriptFunction(BaseModel):
     """
     prompt: AnyResponse = Field(default="", validate_default=True)
     """
-    Condition prompt.
+    Script function prompt.
     """
     history: int = 1
     """
@@ -121,5 +122,12 @@ class BaseLLMScriptFunction(BaseModel):
     """
     # TODO: add _get_langchain_context method
 
-    def _get_langchain_context(self):
-        ...
+    async def _get_langchain_context(self, ctx: Context, history_args) -> list[BaseMessage]:
+        return await get_langchain_context(
+            system_prompt=await ctx.pipeline.models[self.llm_model_name].system_prompt(ctx),
+            ctx=ctx,
+            call_prompt=self.prompt,
+            prompt_misc_filter=self.prompt_misc_filter,
+            position_config=self.position_config,
+            **history_args,
+        )
