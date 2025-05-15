@@ -17,16 +17,16 @@ class Example(BaseModel):
     """Class that holds an example"""
 
     input: str | BaseModel
-    """input may be in form of a string or a custom pydantic model derived from the BaseModel"""
+    """:obj:`input` may be in form of a string or a custom pydantic model derived from the BaseModel"""
     output: str | BaseModel
-    """output may be in form of a string or a custom pydantic model derived from the BaseModel"""
-    
+    """:obj:`output` may be in form of a string or a custom pydantic model derived from the BaseModel"""
+
     @staticmethod
     def unpack_model(example_part: str | BaseModel) -> str:
         """
         Utility function that helps to handle nested pydantic models.
 
-        :param example_part: either input or output part of example that may be a nested model.
+        :param example_part: either :obj:`input` or :obj:`output` part of example that may be a nested model.
 
         :return: description of a model in a JSON-like string
         """
@@ -35,11 +35,11 @@ class Example(BaseModel):
     def to_dict(self) -> Dict[str, str]:
         """
         This function converts example to a dict
-        
+
         :return: Returns example held by the class in format {"input": str, "output": str}
-        if input/output was a pydantic model, then str will be JSON-like
+        if :obj:`input`/:obj:`output` was a pydantic model, then str will be JSON-like
         """
-        return {"input" : self.unpack_model(self.input), "output" : self.unpack_model(self.output)}
+        return {"input": self.unpack_model(self.input), "output": self.unpack_model(self.output)}
 
 
 async def to_langchain_context(
@@ -52,7 +52,7 @@ async def to_langchain_context(
     :param input_variables:  this parameter will be passed to example_selector to provide a way to change its behavior in run-time.
 
     :return: List of Langchain message objects.
-    
+
     """
 
     result = []
@@ -65,28 +65,26 @@ async def to_langchain_context(
 
 
 class StaticExampleSelector(BaseExampleSelector, RootModel):
-    """Example selector class that selects all examples it holds in root"""
-    
+    """Example selector class that selects all examples it holds in :obj:`root`"""
+
     root: List[Example]
-    """Examples that StaticExampleSelector holds"""
+    """:obj:`root` Examples that StaticExampleSelector holds"""
 
     def add_example(self, example: Dict[str, str]) -> Any:
         """
-        Function that provides support for adding single example to root.
+        Function that provides support for adding single example to :obj:`root`.
 
-        :param example: example that will be added to the root.
+        :param example: example that will be added to the :obj:`root`.
         """
         self.root.append(Example.model_validate(example))
 
-
     def select_examples(self, input_variables: Dict[str, str]) -> List[dict]:
-
         """
-        Function that selects all examples in the root.
+        Function that selects all examples in the :obj:`root`.
 
         :param input_variables: unused parameter to mantain API (enables async version of this function).
 
         :return: list of examples packed in dict with format {"input": ..., "output": ...}
         """
 
-        return [ example.to_dict() for example in self.root ]
+        return [example.to_dict() for example in self.root]
