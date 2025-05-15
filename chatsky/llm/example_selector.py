@@ -37,7 +37,7 @@ class Example(BaseModel):
         This function converts example to a dict
 
         :return: Returns example held by the class in format {"input": str, "output": str}
-        if :obj:`input`/:obj:`output` was a pydantic model, then str will be JSON-like
+            if :obj:`input`/:obj:`output` was a pydantic model, then str will be JSON-like
         """
         return {"input": self.unpack_model(self.input), "output": self.unpack_model(self.output)}
 

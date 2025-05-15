@@ -55,28 +55,29 @@ class RequestModel(BaseModel):
 As you can see below these two ways of representing an example are equivalent in terms of what an LLM receives.
 """
 # %% 
-Example(
-    input='{"operand_1":3.0,"operand_2":4.0}', output='{"sum":7.0,"prod":12.0}'
+example = Example(
+    input='{"operand_1":3.0,"operand_2":4.0}', 
+    output='{"sum":7.0,"prod":12.0}'
 )
-
+example.to_dict()
 # %%
-Example(
+example = Example(
     input=RequestModel(operand_1=3.0, operand_2=4.0),
     output=ResponseModel(sum=7.0, prod=12.0),
 )
-
+example.to_dict()
 # %%
-Example(
+example = Example(
     input='{"operand_1":3.0,"operand_2":4.0}',
     output=ResponseModel(sum=7.0, prod=12.0),
 )
-
+example.to_dict()
 # %%
 example = Example(
     input=RequestModel(operand_1=3.0, operand_2=4.0),
     output='{"sum":7.0,"prod":12.0}',
 )
-
+example.to_dict()
 # %% [markdown]
 """
 ## Custom Example Selectors
