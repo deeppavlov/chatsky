@@ -64,9 +64,7 @@ class Prompt(BasePrompt):
         **kwargs
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         from chatsky.llm.langchain_context import message_to_langchain
-        msg = await self.message(ctx) if callable(self.message) else self.message
-        if not isinstance(msg, Message):
-            msg = Message(text=str(msg))
+        msg = await self.message(ctx)
 
         langchain_msg = await message_to_langchain(msg, ctx)
         return [langchain_msg]
