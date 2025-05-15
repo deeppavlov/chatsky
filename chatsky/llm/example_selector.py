@@ -20,6 +20,26 @@ class Example(BaseModel):
     """input may be in form of a string or a custom pydantic model derived from the BaseModel"""
     output: str | BaseModel
     """output may be in form of a string or a custom pydantic model derived from the BaseModel"""
+    
+    @staticmethod
+    def unpack_model(example_part: str | BaseModel) -> str:
+        """
+        Utility function that helps to handle nested pydantic models.
+
+        :param example_part: either input or output part of example that may be a nested model.
+
+        :return: description of a model in a JSON-like string
+        """
+        return str(example_part.model_dump_json()) if isinstance(example_part, BaseModel) else example_part
+
+    def to_dict(self) -> Dict[str, str]:
+        """
+        This function converts example to a dict
+        
+        :return: Returns example held by the class in format {"input": str, "output": str}
+        if input/output was a pydantic model, then str will be JSON-like
+        """
+        return {"input" : self.unpack_model(self.input), "output" : self.unpack_model(self.output)}
 
 
 async def to_langchain_context(
@@ -58,16 +78,6 @@ class StaticExampleSelector(BaseExampleSelector, RootModel):
         """
         self.root.append(Example.model_validate(example))
 
-    @staticmethod
-    def unpack_model(example_part: str | BaseModel) -> str:
-        """
-        Utility function that helps to handle nested pydantic models.
-
-        :param example_part: either input or output part of example that may be a nested model.
-
-        :return: description of a model in a JSON-like string
-        """
-        return str(example_part.model_dump_json()) if isinstance(example_part, BaseModel) else example_part
 
     def select_examples(self, input_variables: Dict[str, str]) -> List[dict]:
 
@@ -79,7 +89,4 @@ class StaticExampleSelector(BaseExampleSelector, RootModel):
         :return: list of examples packed in dict with format {"input": ..., "output": ...}
         """
 
-        return [
-            {"input": self.unpack_model(example.input), "output": self.unpack_model(example.output)}
-            for example in self.root
-        ]
+        return [ example.to_dict() for example in self.root ]
