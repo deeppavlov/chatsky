@@ -71,7 +71,8 @@ SLOTS = {
         username=LLMSlot(
             caption="User's username in uppercase",
             prompt="You are an expert extraction algorithm."
-            "Extract the user's full name that can be scattered troughout the text.",
+            "Extract the user's full name that can be "
+            "scattered troughout the text.",
         ),
         job=LLMSlot(
             llm_model_name="another_slot_model",
