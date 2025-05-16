@@ -64,7 +64,7 @@ another_slot_model = LLM_API(
     ChatOpenAI(model="gpt-4.1-nano", api_key=openai_api_key, temperature=0)
 )
 
-# You can pass additional prompts to the LLMSlot and LLMGroupSlot
+# You can pass additional prompts to the LLMSlot
 # using the `prompt` parameter to fine-tune the extraction process.
 SLOTS = {
     "person": LLMGroupSlot(
