@@ -8,7 +8,7 @@ These functions allow dynamic script configuration and are essential to the scri
 
 from __future__ import annotations
 
-from datetime import datetime
+from time import time_ns
 import asyncio
 from typing import Union, Tuple, ClassVar, Optional
 from typing_extensions import Annotated
@@ -160,7 +160,7 @@ class BaseResponse(BaseScriptFunc, ABC):
 
     async def __call__(self, ctx: Context) -> Message:
         msg = await super().__call__(ctx)
-        msg.timestamp = datetime.now()
+        msg.timestamp = time_ns()
         return msg
 
 class ConstResponse(ConstScriptFunc, BaseResponse):

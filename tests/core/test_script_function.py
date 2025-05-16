@@ -1,4 +1,4 @@
-from datetime import datetime
+from time import time_ns
 import asyncio
 import pytest
 
@@ -137,14 +137,14 @@ async def test_const_object_immutability():
 async def test_timestamps(context_factory):
         """
             1. call response, check type of timestamp
-            2. call the same response for the second time and check wheither it's different
+            2. call the same response for the second time and check whether it's different
         """
         fixed_response = Message(text="timer check")
         node = Node(response=fixed_response)
 
         ctx = context_factory()
         message_1 = await node.response(ctx)
-        assert isinstance(message_1.timestamp, datetime)
+        assert isinstance(message_1.timestamp, type(time_ns()))
 
         message_2 = await node.response(ctx)
 
