@@ -64,9 +64,15 @@ another_slot_model = LLM_API(
     ChatOpenAI(model="gpt-4.1-nano", api_key=openai_api_key, temperature=0)
 )
 
+# You can pass additional prompts to the LLMSlot and LLMGroupSlot
+# using the `prompt` parameter to fine-tune the extraction process.
 SLOTS = {
     "person": LLMGroupSlot(
-        username=LLMSlot(caption="User's username in uppercase"),
+        username=LLMSlot(
+            caption="User's username in uppercase",
+            prompt="You are an expert extraction algorithm."
+            "Extract the user's full name that can be scattered troughout the text.",
+        ),
         job=LLMSlot(
             llm_model_name="another_slot_model",
             caption="User's occupation, job, profession",
@@ -85,7 +91,7 @@ script = {
     },
     "user_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person")},
+            PRE_TRANSITION: {"get_slot": proc.Extract(slots="person")},
             TRANSITIONS: [
                 Tr(
                     dst=("user_flow", "tell"),
