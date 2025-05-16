@@ -12,18 +12,10 @@ import asyncio
 from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, Return
-from chatsky.llm.prompt import Prompt, BasePrompt, PositionConfig
+from chatsky.llm.prompt import BasePrompt, PositionConfig
 
 
 logger = logging.getLogger(__name__)
-
-def to_prompt_or_passthrough(obj) -> BasePrompt:
-    """
-    Convert any object into BasePrompt.
-    """
-    if isinstance(obj, BasePrompt):
-        return obj
-    return Prompt(message=obj)
 
 
 async def message_to_langchain(
@@ -120,8 +112,7 @@ async def get_langchain_context(
 
     # Add system prompt
     if system_prompt.text != "":
-        system_prompt_obj = to_prompt_or_passthrough(system_prompt)
-        system_messages = await system_prompt_obj.to_langchain_messages(ctx, source="system", position_config=position_config)
+        system_messages = [await message_to_langchain(system_prompt, ctx, source="system")]
         prompts.append((system_messages, position_config.system_prompt))
 
     # Add history
@@ -131,17 +122,16 @@ async def get_langchain_context(
     # Add miscellaneous prompts
     for element_name, element in ctx.current_node.misc.items():
         if re.compile(prompt_misc_filter).match(element_name):
-            prompt = to_prompt_or_passthrough(element)
-            prompt_messages = await prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
+            prompt_messages = await element.to_langchain_messages(ctx)
             prompts.append(
                 (
                     prompt_messages,
-                    prompt.position if prompt.position is not None else position_config.misc_prompt,
+                    element.position if element.position is not None else position_config.misc_prompt,
                 )
             )
 
     # Add call prompt
-    call_messages = await call_prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
+    call_messages = await call_prompt.to_langchain_messages(ctx)
     if call_messages:  # Only add if there are messages (non-empty text)
         prompts.append(
             (
@@ -155,14 +145,12 @@ async def get_langchain_context(
     last_turn_response = await ctx.responses.get(ctx.current_turn_id)
 
     if last_turn_request:
-        request_prompt = to_prompt_or_passthrough(last_turn_request)
-        request_messages = await request_prompt.to_langchain_messages(ctx, source="human", position_config=position_config)
+        request_messages = [await message_to_langchain(last_turn_request, ctx, source="human")]
         prompts.append((request_messages, position_config.last_turn))
 
     if last_turn_response:
-        response_prompt = to_prompt_or_passthrough(last_turn_response)
-        response_messages = await response_prompt.to_langchain_messages(ctx, source="ai", position_config=position_config)
-        prompts.append((response_messages, position_config.last_turn))
+        request_messages = [await message_to_langchain(last_turn_response, ctx, source="ai")]
+        prompts.append((request_messages, position_config.last_turn))
 
     logger.debug(f"Prompts: {prompts}")
     prompts = sorted(prompts, key=lambda x: x[1])
