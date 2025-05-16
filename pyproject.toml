@@ -1,18 +1,20 @@
-[tool.poetry]
+[project]
 name = "chatsky"
 version = "0.10.0"
 description = "Chatsky is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
 license = "Apache-2.0"
 authors = [
-    "Denis Kuznetsov <kuznetsov.den.p@gmail.com>",
-    "Roman Zlobin <RLKRo@proton.me>",
-    "Aleksandr Sergeev <shveitsar215@gmail.com>",
-    "Daniil Ignatiev <ruthenian8@gmail.com>",
+    { name = "Denis Kuznetsov", email = "kuznetsov.den.p@gmail.com" },
+    { name = "Roman Zlobin", email = "RLKRo@proton.me" },
+    { name = "Aleksandr Sergeev", email = "shveitsar215@gmail.com" },
+    { name = "Daniil Ignatiev", email = "ruthenian8@gmail.com" },
 ]
-
+maintainers = [
+    { name = "Roman Zlobin", email = "RLKRo@proton.me" },
+    { name = "Andrey Chirkin" },
+    { name = "Alexandra Dolidze" },
+]
 readme = "README.md"
-homepage = "https://github.com/deeppavlov/chatsky"
-documentation = "https://deeppavlov.github.io/chatsky/"
 keywords = ["chatbots"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -25,10 +27,27 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
 ]
 
+requires-python = "^3.9,!=3.9.7"  # `streamlit` package does not support python 3.9.7
+dependencies = [
+    "pydantic>=2.0",
+    "nest-asyncio",
+    "typing-extensions",
+    "eval_type_backport",
+    "wrapt",
+    "colorama",
+]
 
+[project.urls]
+
+homepage = "https://github.com/deeppavlov/chatsky"
+documentation = "https://deeppavlov.github.io/chatsky/"
+"Project Template" = "https://github.com/deeppavlov/chatsky-template"
+
+[tool.poetry]
 
 include = [
     { path = "CONTRIBUTING.md" },
@@ -39,58 +58,26 @@ exclude = [
     { path = "scripts" },
 ]
 
-
-
-[tool.poetry.urls]
-"Project Template" = "https://github.com/deeppavlov/chatsky-template"
-
-
-
-[tool.poetry.dependencies]
-python = "^3.9,!=3.9.7"  # `streamlit` package does not support python 3.9.7
-pydantic = ">=2.0"  # `pydantic` version more than 2 required
-nest-asyncio = "*"
-typing-extensions = "*"
-eval_type_backport = "*"
-wrapt = "*"
-colorama = "*"
-ydb = { version = "*", optional = true }
-six = { version = "*", optional = true }
-tqdm = { version = "*", optional = true }
-motor = { version = "*", optional = true }
-redis = { version = "*", optional = true }
-pandas = { version = "*", optional = true }
-altair = { version = "*", optional = true }
-asyncmy = { version = "*", optional = true }
-asyncpg = { version = "*", optional = true }
-pympler = { version = "*", optional = true }
-aiofiles = { version = "*", optional = true }
-humanize = { version = "*", optional = true }
-aiosqlite = { version = "*", optional = true }
-omegaconf = { version = "*", optional = true }
-cryptography = { version = "*", optional = true }
-requests = { version = "*", optional = true }
-python-telegram-bot = { version = "~=21.3", extras = ["all"], optional = true }
-opentelemetry-instrumentation = { version = "*", optional = true }
-sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
-opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
-pyyaml = { version = "*", optional = true }
-langchain = { version = "*", optional = true }
-
-[tool.poetry.extras]
-json = ["aiofiles"]
-pickle = ["aiofiles"]
-sqlite = ["sqlalchemy", "aiosqlite"]
-redis = ["redis"]
-mongodb = ["motor"]
-mysql = ["sqlalchemy", "asyncmy", "cryptography"]
-postgresql = ["sqlalchemy", "asyncpg"]
-ydb = ["ydb", "six"]
-telegram = ["python-telegram-bot"]
-stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
-benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
-yaml = ["pyyaml"]
-llm = ["langchain"]
+[project.optional-dependencies]
+json = [ "aiofiles" ]
+pickle = [ "aiofiles" ]
+sqlite = [ "sqlalchemy[asyncio]", "aiosqlite" ]
+redis = [ "redis" ]
+mongodb = [ "motor" ]
+mysql = [ "sqlalchemy[asyncio]", "asyncmy", "cryptography" ]
+postgresql = [ "sqlalchemy[asyncio]", "asyncpg" ]
+ydb = [ "ydb", "six" ]
+telegram = [ "python-telegram-bot[all]~=21.3" ]
+stats = [
+    "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
+    "opentelemetry-instrumentation",
+    "requests",
+    "tqdm",
+    "omegaconf",
+]
+benchmark = [ "pympler", "humanize", "pandas", "altair", "tqdm" ]
+yaml = [ "pyyaml" ]
+llm = [ "langchain" ]
 
 [tool.poetry.group.lint]
 optional = true
@@ -168,9 +155,8 @@ jupytext = "*"
 jupyter = "*"
 
 
-[tool.poetry.scripts]
-"chatsky.stats" = { callable = "chatsky.stats.__main__:main", extras = ["stats"] }
-
+[project.scripts]
+"chatsky.stats" = "chatsky.stats.__main__:main"
 
 
 [tool.poe]
@@ -217,7 +203,6 @@ markers = [
     "needs_dependencies: marks tests as requiring any extra dependencies to run"
 ]
 asyncio_mode = "auto"
-
 
 [tool.coverage.run]
 concurrency = [

@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from functools import cached_property
+from collections import defaultdict
 from typing import Union, List, Dict, Optional, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, computed_field
 
@@ -161,6 +162,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         for field in empty_fields:
             del init_dict[field]
         super().__init__(**init_dict)
+        self._context_lock: Dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
+        """
+        Dictionary mapping context ids to asyncio locks.
+        Is used to forbid concurrent execution for the same context id.
+        """
         self.services_pipeline  # cache services
 
     @classmethod
@@ -233,7 +239,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         return self
 
     async def _run_pipeline(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -241,40 +247,53 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
         This method does:
 
-        1. Retrieve from :py:attr:`context_storage` or initialize context ``ctx_id``.
-        2. Update :py:attr:`.Context.misc` with ``update_ctx_misc``.
-        3. Set up :py:attr:`.Context.framework_data` fields.
-        4. Add ``request`` to the context.
-        5. Execute :py:attr:`services_pipeline`.
-           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information).
-        6. Save context in the :py:attr:`context_storage`.
+        1. Create new context with a random ID if ``ctx_id`` is ``None``;
+        2. Acquire :py:class:`asyncio.Lock` from :py:attr:`_context_lock` to prevent concurrent execution
+           on this ``ctx_id``;
+        3. If ``ctx_id`` is not ``None`` either retrieve it from the :py:attr:`context_storage`
+           or create a new one with that id;
+        4. Update :py:attr:`.Context.misc` with ``update_ctx_misc``;
+        5. Set up :py:attr:`.Context.framework_data` fields;
+        6. Add ``request`` to the context;
+        7. Execute :py:attr:`services_pipeline`.
+           This includes :py:class:`.Actor` (read :py:meth:`.Actor.run_component` for more information);
+        8. Save context in the :py:attr:`context_storage`.
 
         :return: Modified context ``ctx_id``.
         """
-        logger.info(f"Running pipeline for context {ctx_id}.")
-        logger.debug(f"Received request: {request}.")
-        ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
-        if update_ctx_misc is not None:
-            ctx.misc.update(update_ctx_misc)
+        if ctx_id is None:
+            ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
+            ctx_id = ctx.id
+        else:
+            ctx = None
 
-        if self.slots is not None:
-            ctx.framework_data.slot_manager.set_root_slot(self.slots)
+        async with self._context_lock[ctx_id]:
+            logger.info(f"Running pipeline for context {ctx_id}.")
+            logger.debug(f"Received request: {request}.")
+            if ctx is None:
+                ctx = await Context.connected(self.context_storage, self.start_label, ctx_id)
 
-        ctx.framework_data.pipeline = self
-        initialize_service_states(ctx, self.services_pipeline)
+            if update_ctx_misc is not None:
+                ctx.misc.update(update_ctx_misc)
 
-        ctx.current_turn_id = ctx.current_turn_id + 1
+            if self.slots is not None:
+                ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
-        ctx.requests[ctx.current_turn_id] = request
-        await self.services_pipeline(ctx)
+            ctx.framework_data.pipeline = self
+            initialize_service_states(ctx, self.services_pipeline)
 
-        ctx.framework_data.service_states.clear()
-        ctx.framework_data.pipeline = None
+            ctx.current_turn_id = ctx.current_turn_id + 1
 
-        await ctx.store()
+            ctx.requests[ctx.current_turn_id] = request
+            await self.services_pipeline(ctx)
 
-        return ctx
+            ctx.framework_data.service_states.clear()
+            ctx.framework_data.pipeline = None
+
+            await ctx.store()
+
+            return ctx
 
     def run(self):
         """
@@ -292,9 +311,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         logger.info("Pipeline is accepting requests.")
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
-    def __call__(
-        self, request: Message, ctx_id: Optional[str] = None, update_ctx_misc: Optional[dict] = None
-    ) -> Context:
+    def __call__(self, request: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for :py:meth:`_run_pipeline`.

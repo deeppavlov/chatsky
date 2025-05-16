@@ -150,3 +150,19 @@ async def test_timestamps(context_factory):
 
         assert message_1 == message_2
         assert message_1.timestamp != message_2.timestamp
+
+class TestTimeout:
+    class SleepingFunc(BaseProcessing):
+        sleeping: float
+
+        async def call(self, ctx: Context):
+            await asyncio.sleep(self.sleeping)
+
+    async def test_timeout(self):
+        ctx = Context()
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.01)
+        assert await sleep_func.wrapped_call(ctx) is None
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.06)
+        assert "TimeoutError" in repr(await sleep_func.wrapped_call(ctx))

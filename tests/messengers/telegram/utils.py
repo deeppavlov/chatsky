@@ -2,7 +2,7 @@ from asyncio import get_event_loop
 from contextlib import contextmanager
 from importlib import import_module
 from hashlib import sha256
-from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 from telegram import InputFile, InputMedia, Update
@@ -16,6 +16,7 @@ PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
 def cast_dict_to_happy_step(dictionary: Dict, update_only: bool = False) -> Union[List["PathStep"]]:
     imports = globals().copy()
+    imports["datetime"] = import_module("datetime")
     imports.update(import_module("telegram").__dict__)
     imports.update(import_module("telegram.ext").__dict__)
     imports.update(import_module("telegram.constants").__dict__)
@@ -90,7 +91,7 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         original_pipeline_runner = self.interface._pipeline_runner
 
         async def wrapped_pipeline_runner(
-            message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+            message: Message, ctx_id: Optional[str], update_ctx_misc: Optional[dict] = None
         ) -> Context:
             self.latest_ctx = await original_pipeline_runner(message, ctx_id, update_ctx_misc)
             return self.latest_ctx
@@ -121,8 +122,8 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
                     else:
                         raise RuntimeError(f"Update {update} type unknown!")
 
-    def run_polling(self, poll_interval: float, timeout: int, allowed_updates: List[str]) -> None:
+    def run_polling(self, *_, **__) -> None:
         return self._run_bot()
 
-    def run_webhook(self, listen: str, port: str, allowed_updates: List[str]) -> None:
+    def run_webhook(self, *_, **__) -> None:
         return self._run_bot()

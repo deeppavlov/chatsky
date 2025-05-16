@@ -113,13 +113,13 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=("music_flow", "node1"),
-                    cnd=cnd.Regexp(r"talk about music"),
+                    cnd=cnd.Regexp(pattern=r"talk about music"),
                     # this condition is checked first.
                     # if it fails, pipeline will try the next transition
                 ),
                 Tr(
                     dst=("greeting_flow", "node1"),
-                    cnd=cnd.Regexp(r"hi|hello", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"hi|hello", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst="fallback_node",
@@ -133,15 +133,15 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=("music_flow", "node1"),
-                    cnd=cnd.Regexp(r"talk about music"),
+                    cnd=cnd.Regexp(pattern=r"talk about music"),
                 ),
                 Tr(
                     dst=("greeting_flow", "node1"),
-                    cnd=cnd.Regexp(r"hi|hello", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"hi|hello", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=dst.Previous(),
-                    cnd=cnd.Regexp(r"previous", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"previous", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=dst.Current(),  # this goes to the current node
@@ -159,7 +159,7 @@ toy_script = {
                     priority=0.1,
                 ),  # due to low priority (default priority is 1)
                 # this transition will be made if the next one fails
-                Tr(dst="node2", cnd=cnd.Regexp(r"how are you")),
+                Tr(dst="node2", cnd=cnd.Regexp(pattern=r"how are you")),
             ],
         },
         "node2": {
@@ -175,29 +175,31 @@ toy_script = {
                 # Here, this transition exists for demonstration purposes.
                 Tr(
                     dst=dst.Forward(),  # i.e. "node3" of this flow
-                    cnd=cnd.Regexp(r"talk about"),
+                    cnd=cnd.Regexp(pattern=r"talk about"),
                     priority=0.5,
                 ),  # this transition is the third candidate
                 Tr(
                     dst=("music_flow", "node1"),
-                    cnd=cnd.Regexp(r"talk about music"),
+                    cnd=cnd.Regexp(pattern=r"talk about music"),
                 ),  # this transition is the first candidate
                 Tr(
                     dst=dst.Previous(),
-                    cnd=cnd.Regexp(r"previous", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"previous", flags=re.IGNORECASE),
                 ),  # this transition is the second candidate
             ],
         },
         "node3": {
             RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: [Tr(dst=dst.Forward(), cnd=cnd.Regexp(r"bye"))],
+            TRANSITIONS: [
+                Tr(dst=dst.Forward(), cnd=cnd.Regexp(pattern=r"bye"))
+            ],
         },
         "node4": {
             RESPONSE: "Bye",
             TRANSITIONS: [
                 Tr(
                     dst="node1",
-                    cnd=cnd.Regexp(r"hi|hello", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"hi|hello", flags=re.IGNORECASE),
                 )
             ],
         },
@@ -209,7 +211,7 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Forward(),
-                    cnd=cnd.Regexp(r"yes|yep|ok", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"yes|yep|ok", flags=re.IGNORECASE),
                 )
             ],
         },
@@ -219,11 +221,11 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Forward(),
-                    cnd=cnd.Regexp(r"next", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"next", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=dst.Current(),
-                    cnd=cnd.Regexp(r"repeat", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"repeat", flags=re.IGNORECASE),
                 ),
             ],
         },
@@ -233,15 +235,15 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=dst.Forward(),
-                    cnd=cnd.Regexp(r"next", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"next", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=dst.Backward(),
-                    cnd=cnd.Regexp(r"back", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"back", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=dst.Current(),
-                    cnd=cnd.Regexp(r"repeat", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"repeat", flags=re.IGNORECASE),
                 ),
             ],
         },
@@ -250,11 +252,11 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=GreetingFlowNode2(),
-                    cnd=cnd.Regexp(r"next", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"next", flags=re.IGNORECASE),
                 ),
                 Tr(
                     dst=("greeting_flow", "node4"),
-                    cnd=cnd.Regexp(r"next time", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(pattern=r"next time", flags=re.IGNORECASE),
                     priority=2,
                 ),  # "next" is contained in "next_time" so we need higher
                 # priority here.

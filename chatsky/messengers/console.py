@@ -1,4 +1,4 @@
-from typing import Any, Hashable, List, Optional, TextIO, Tuple
+from typing import Any, List, Optional, TextIO, Tuple
 from uuid import uuid4
 from chatsky.messengers.common.interface import PollingMessengerInterface
 from chatsky.core.service.types import PipelineRunnerFunction
@@ -23,7 +23,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         out_descriptor: Optional[TextIO] = None,
     ):
         super().__init__()
-        self._ctx_id: Optional[Hashable] = None
+        self._ctx_id: Optional[str] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request
         self._prompt_response: str = prompt_response
