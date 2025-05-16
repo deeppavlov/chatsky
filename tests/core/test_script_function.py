@@ -1,4 +1,5 @@
 from datetime import datetime
+import asyncio
 import pytest
 
 from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
