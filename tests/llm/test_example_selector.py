@@ -58,7 +58,7 @@ def node_factory():
     def setted_node(use_static_selector: bool):
 
         np.random.seed(0)
-        node = {RESPONSE: LLMResponse(llm_model_name="my_model", prompt="Add numbers and return an answer.")}
+        node = {RESPONSE: LLMResponse(llm_model_name="my_model")}
         test_examples = [
             {"input": '{"operand_1":3.0,"operand_2":4.0}', "output": '{"sum":7.0,"prod":12.0}'},
             {"input": RequestModel(operand_1=5.0, operand_2=6.0), "output": '{"sum":11.0,"prod":30.0}'},
