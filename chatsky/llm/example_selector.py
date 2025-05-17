@@ -3,14 +3,12 @@ Example selection
 -------------------
 This module provides support for example guided generation.
 """
-
-import asyncio
 from typing import Any, Dict, List
 
 from langchain_core.example_selectors.base import BaseExampleSelector
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.messages.base import BaseMessage
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, RootModel
 
 
 class Example(BaseModel):
@@ -49,7 +47,8 @@ async def to_langchain_context(
     Function that selects examples and returns them in the format of a list with langchain messages.
 
     :param example_selector: selector object that implements selection logic.
-    :param input_variables:  this parameter will be passed to example_selector to provide a way to change its behavior in run-time.
+    :param input_variables:  this parameter will be passed to example_selector
+         to provide a way to change its behavior in run-time.
 
     :return: List of Langchain message objects.
 

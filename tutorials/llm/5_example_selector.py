@@ -3,8 +3,19 @@
 # LLM: 5. Example Selector
 
 If you want to provide example-guided generation for your LLM
-You might be interested in writing your own or using Chatskiy's example selector.
+You might be interested in writing your own or using Chatskiy's
+     example selector.
 """
+# %%
+from typing import List, Dict, Any
+
+import numpy as np
+from pydantic import BaseModel, Field, RootModel
+from langchain_core.example_selectors.base import BaseExampleSelector
+
+from chatsky.llm.example_selector import Example
+from chatsky.llm.example_selector import to_langchain_context
+from chatsky.llm.example_selector import StaticExampleSelector
 # %% [markdown]
 """
 ## Basic example selection
@@ -15,8 +26,6 @@ This object will select all examples it holds, as shown in a code sample.
 You can also add an example in run-time.
 """
 # %%
-
-from chatsky.llm.example_selector import StaticExampleSelector
 
 examples = [
     {"input": "hi", "output": "ciao"},
@@ -33,12 +42,11 @@ selector.select_examples({"input": "okay"})
 """
 ## How are examples being stored?
 
-Examples are stored in a special class `Example` that has two fields: input and output.
+Examples are stored in a special class `Example` that has two fields:
+     input and output.
 Both of these fields can be either a `string` or a `pydantic.BaseModel`.
 """
 # %%
-from pydantic import BaseModel, Field
-from chatsky.llm.example_selector import Example
 
 
 class ResponseModel(BaseModel):
@@ -50,13 +58,15 @@ class RequestModel(BaseModel):
     operand_1: float = Field(description="The first operand")
     operand_2: float = Field(description="The second operand")
 
+
 # %% [markdown]
 """
-As you can see below these two ways of representing an example are equivalent in terms of what an LLM receives.
+As you can see below these two ways of representing an
+     example are equivalent in terms of what an LLM receives.
 """
-# %% 
+# %%
 example = Example(
-    input='{"operand_1":3.0,"operand_2":4.0}', 
+    input='{"operand_1":3.0,"operand_2":4.0}',
     output='{"sum":7.0,"prod":12.0}'
 )
 example.to_dict()
@@ -85,18 +95,14 @@ example.to_dict()
 If you want to add custom example selection logic, you just need to
 
 1. Inherit from `langchain_core.example_selectors.base.BaseExampleSelector`.
-2. Write your own implementation of `add_example` and  `select_examples` maintaining API in 
-order to have async copies of these methods.
-3. Add parameter values for selection in `input_variables` if your selector is parametrized.
+2. Write your own implementation of `add_example` and  `select_examples`
+     maintaining API in order to have async copies of these methods.
+3. Add parameter values for selection in `input_variables`
+     if your selector is parametrized.
 
 All three steps are shown below:
 """
 # %%
-
-import numpy as np
-from pydantic import RootModel
-from typing import List, Dict, Any
-from langchain_core.example_selectors.base import BaseExampleSelector
 
 
 class CustomExampleSelector(BaseExampleSelector, RootModel):
@@ -129,15 +135,17 @@ selector.select_examples({"input": "okay", "size": 2, "replace": True})
 """
 ## Convert message to LangChain context format
 
-Chatsky also supports selection of examples that are immediately cast to the LangChain message format
+Chatsky also supports selection of examples that are immediately
+     cast to the LangChain message format
 
-All you have to do is to pass your selector in `to_langchain_context` along with `input_variables`
+All you have to do is to pass your selector in `to_langchain_context`
+     along with `input_variables`
 
 """
 
 
 # %%
-from chatsky.llm.example_selector import to_langchain_context
+
 
 examples = [
     {"input": "hi", "output": "ciao"},
@@ -147,6 +155,6 @@ examples = [
 
 selector = CustomExampleSelector(examples)
 
-await to_langchain_context(
+to_langchain_context(
     selector, input_variables={"input": "okay", "size": 2, "replace": True}
 )

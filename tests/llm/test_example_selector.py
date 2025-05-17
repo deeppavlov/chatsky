@@ -1,11 +1,10 @@
-import asyncio
 from typing import Any, Dict, List
 
 import pytest
 import numpy as np
 from langchain_core.example_selectors.base import BaseExampleSelector
 from langchain_core.example_selectors import LengthBasedExampleSelector
-from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field, RootModel
 
@@ -46,9 +45,6 @@ class MockCustomExampleSelector(BaseExampleSelector, RootModel):
         ]
 
 
-### Tests
-
-
 @pytest.fixture(scope="function")
 def static_selector_factory():
     def static_selector(examples: List[Example]):
@@ -70,7 +66,7 @@ def node_factory():
             {"input": RequestModel(operand_1=-1.0, operand_2=-2.0), "output": ResponseModel(sum=-3.0, prod=2.0)},
         ]
 
-        if use_static_selector == True:
+        if use_static_selector is True:
             node[MISC] = ExamplePrompt(examples=test_examples)
         else:
             node[MISC] = ExamplePrompt(examples=MockCustomExampleSelector(test_examples))
