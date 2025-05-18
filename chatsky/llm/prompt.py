@@ -34,9 +34,10 @@ class BasePrompt(BaseModel, ABC):
     Provides common interface for getting Langchain messages.
     """
     position: Optional[float] = None
+
     @abstractmethod
     async def to_langchain_messages(
-        self, 
+        self,
         ctx: Context
     ) -> List[Union[HumanMessage, SystemMessage, AIMessage]]:
         """
@@ -44,13 +45,16 @@ class BasePrompt(BaseModel, ABC):
         """
         raise NotImplementedError
 
+
 class Prompt(BasePrompt):
     """
     Prompt wrapper: wraps a string, Message or BaseResponse.
     """
     message: AnyResponse
+
     def __init__(self, message: Union[MessageInitTypes, BaseResponse], position: Optional[float] = None):
         super().__init__(message=message, position=position)
+
     @model_validator(mode="before")
     @classmethod
     def validate_from_message(cls, data):
