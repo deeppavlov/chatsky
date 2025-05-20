@@ -7,6 +7,7 @@ You might be interested in writing your own or using Chatskiy's
      example selector.
 """
 # %%
+import asyncio
 from typing import List, Dict, Any
 
 import numpy as np
@@ -145,8 +146,6 @@ All you have to do is to pass your selector in `to_langchain_context`
 
 
 # %%
-
-
 examples = [
     {"input": "hi", "output": "ciao"},
     {"input": "bye", "output": "arrivaderci"},
@@ -155,6 +154,6 @@ examples = [
 
 selector = CustomExampleSelector(examples)
 
-to_langchain_context(
+asyncio.run(to_langchain_context(
     selector, input_variables={"input": "okay", "size": 2, "replace": True}
-)
+))
