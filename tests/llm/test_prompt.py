@@ -26,6 +26,12 @@ class BrokenPrompt(BasePrompt):
         raise NotImplementedError
 
 
+class DummyResponse(BaseResponse):
+    model_config = {"arbitrary_types_allowed": True}
+
+    async def call(self, ctx: Context) -> Message:
+        return Message("generated text")
+
 @pytest.fixture
 def book_context(context_factory):
     ctx = context_factory(
@@ -70,6 +76,7 @@ class TestBasePrompt:
         [
             (Message("hello"), "hello"),
             ("hi there!", "hi there!"),
+            (DummyResponse(), "generated text"),  # ← здесь проверка BaseResponse
         ],
     )
     async def test_init_prompt_message(self, ctx, init_value, expected_text):
@@ -115,28 +122,6 @@ class TestPrompt:
         ]
         assert captured["msg"].text == "What is the capital of France?"
         assert captured["ctx"] is ctx
-
-    @pytest.mark.asyncio
-    async def test_prompt_with_base_response(self, ctx, monkeypatch):
-        mock_response = AsyncMock(spec=BaseResponse)
-        mock_response.return_value = Message(
-            text="Summarize the text: 'The sun rises in the east.'"
-        )
-
-        async def fake_message_to_langchain(msg, ctx_arg, **kwargs):
-            assert msg.text.startswith("Summarize the text")
-            return HumanMessage(content=[{"type": "text", "text": msg.text.upper()}])
-
-        monkeypatch.setattr(
-            "chatsky.llm.langchain_context.message_to_langchain",
-            fake_message_to_langchain,
-        )
-
-        prompt = Prompt(message=mock_response)
-        result = await prompt.to_langchain_messages(ctx)
-
-        assert isinstance(result[0], HumanMessage)
-        assert "SUMMARIZE" in result[0].content[0]["text"]
 
 
 class TestFewShotExamplePrompt:
