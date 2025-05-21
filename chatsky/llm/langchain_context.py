@@ -12,7 +12,7 @@ import asyncio
 from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, Return
-from chatsky.llm.prompt import BasePrompt, PositionConfig
+from chatsky.llm.prompt import Prompt, BasePrompt, PositionConfig
 
 
 logger = logging.getLogger(__name__)
@@ -122,11 +122,12 @@ async def get_langchain_context(
     # Add miscellaneous prompts
     for element_name, element in ctx.current_node.misc.items():
         if re.compile(prompt_misc_filter).match(element_name):
-            prompt_messages = await element.to_langchain_messages(ctx)
+            prompt = Prompt.model_validate(element)
+            prompt_messages = await prompt.to_langchain_messages(ctx)
             prompts.append(
                 (
                     prompt_messages,
-                    element.position if element.position is not None else position_config.misc_prompt,
+                    prompt.position if prompt.position is not None else position_config.misc_prompt,
                 )
             )
 
