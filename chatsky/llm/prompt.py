@@ -4,16 +4,16 @@ Prompt position
 This module provides utils for changing the default prompt positions.
 """
 
-from typing import Optional, Union, List
 from abc import ABC, abstractmethod
+from typing import Optional, Union, List
 
-from pydantic import BaseModel, model_validator, Field
-from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
-from chatsky.core import BaseResponse, AnyResponse, MessageInitTypes, Message, Context
-from chatsky.llm._langchain_imports import HumanMessage, AIMessage, SystemMessage
+from pydantic import BaseModel, Field, model_validator
 from langchain_core.example_selectors.base import BaseExampleSelector
-from chatsky.llm.example_selector import to_langchain_context
+from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 
+from chatsky.core import AnyResponse, BaseResponse, Context, Message, MessageInitTypes
+from chatsky.llm._langchain_imports import AIMessage, HumanMessage, SystemMessage
+from chatsky.llm.example_selector import to_langchain_context
 
 class PositionConfig(BaseModel):
     """
@@ -109,7 +109,7 @@ class FewShotExamplePrompt(BasePrompt):
                 prefix=self.prefix,
                 suffix=self.suffix,
             )
-            text = prompt_template.format(input=user_input, output="")
+            text = prompt_template.format(input=user_input)
             msg = Message(text=text)
             return [await message_to_langchain(msg, ctx, source="system")]
 
