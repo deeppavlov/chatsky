@@ -150,10 +150,16 @@ class TestFewShotExamplePrompt:
 
         result = await prompt.to_langchain_messages(ctx)
 
-        assert isinstance(result[0], SystemMessage)
-        assert "Query: 2 + 2" in result[0].content[0]["text"]
-        assert "Answer: 4" in result[0].content[0]["text"]
-        assert "Answer the following:" in result[0].content[0]["text"]
+        expected_text = (
+            "Answer the following:\n\n"
+            "Query: 2 + 2\nAnswer: 4\n\n"
+            "Query: 3 + 3\nAnswer: 6\n\n"
+            "Let's begin!"
+        )
+
+        assert result == [
+            SystemMessage(content=[{"type": "text", "text": expected_text}])
+        ]
 
     @pytest.mark.asyncio
     async def test_examples_only(self, ctx):
