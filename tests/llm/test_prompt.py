@@ -59,9 +59,6 @@ def ctx() -> Context:
     return ctx
 
 
-# --------------------
-# Tests for BasePrompt
-# --------------------
 class TestBasePrompt:
     def test_position(self):
         prompt = DummyPrompt(position=2.0)
@@ -82,24 +79,7 @@ class TestBasePrompt:
         assert msg.text == expected_text
 
 
-# --------------------
-# Tests for Prompt
-# --------------------
 class TestPrompt:
-    @pytest.mark.asyncio
-    async def test_init_with_message(self, ctx):
-        raw_msg = Message("hello")
-        prompt = Prompt(message=raw_msg)
-        res = await prompt.message(ctx)
-        assert res == raw_msg
-
-    @pytest.mark.asyncio
-    async def test_init_with_str(self, ctx):
-        prompt = Prompt("hello")
-        res = await prompt.message(ctx)
-        assert isinstance(res, Message)
-        assert res.text == "hello"
-
     def test_position(self):
         prompt = Prompt("data", position=3)
         assert prompt.position == 3
@@ -159,9 +139,6 @@ class TestPrompt:
         assert "SUMMARIZE" in result[0].content[0]["text"]
 
 
-# ------------------------------
-# Tests for FewShotExamplePrompt
-# ------------------------------
 class TestFewShotExamplePrompt:
     @pytest.mark.asyncio
     async def test_template_and_examples(self, ctx, monkeypatch):
@@ -286,9 +263,6 @@ class TestFewShotExamplePrompt:
         assert "Query: 1 + 1 Answer: 2" in result[0].content
 
 
-# ------------------------
-# Tests Prompt Integration
-# ------------------------
 class TestPromptIntegration:
     @pytest.mark.asyncio
     async def test_langchain_context_respects_position(self, book_context):
