@@ -13,7 +13,7 @@ from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 
 from chatsky.core import AnyResponse, BaseResponse, Context, Message, MessageInitTypes
 from chatsky.llm._langchain_imports import AIMessage, HumanMessage, SystemMessage
-from chatsky.llm.example_selector import to_langchain_context
+from chatsky.llm.example_selector import to_langchain_context, StaticExampleSelector
 
 class PositionConfig(BaseModel):
     """
@@ -79,12 +79,21 @@ class FewShotExamplePrompt(BasePrompt):
     Uses Langchain's example selectors and prompt templates for few-shot learning.
     """
     template: Optional[str] = Field(None)
-    examples: Optional[BaseExampleSelector] = None
+    examples: Optional[Union[List[dict], BaseExampleSelector]] = None
     prefix: Optional[str] = Field(None)
     suffix: Optional[str] = Field(None)
 
     # for unstandart type
     model_config = {"arbitrary_types_allowed": True}
+
+    # convert examples to StaticExampleSelector
+    @model_validator(mode="before")
+    @classmethod
+    def _convert_examples_to_selector(cls, data):
+        examples = data.get("examples")
+        if isinstance(examples, list):
+            data["examples"] = StaticExampleSelector(examples=examples)
+        return data
 
     async def to_langchain_messages(
         self,
@@ -109,7 +118,7 @@ class FewShotExamplePrompt(BasePrompt):
                 prefix=self.prefix,
                 suffix=self.suffix,
             )
-            text = prompt_template.format(input=user_input)
+            text = prompt_template.format(input="", output="")
             msg = Message(text=text)
             return [await message_to_langchain(msg, ctx, source="system")]
 
