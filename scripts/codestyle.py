@@ -33,9 +33,9 @@ def _run_flake():
     exit(lint_result)
 
 
-def _run_black(modify: bool):
-    report = black.Report(check=not modify, quiet=False)
-    write = black.WriteBack.YES if modify else black.WriteBack.CHECK
+def _run_black(no_modify: bool):
+    report = black.Report(check=no_modify, quiet=False)
+    write = black.WriteBack.YES if not no_modify else black.WriteBack.CHECK
     for path in _get_paths(_STANDARD_PATHS):
         mode = black.Mode(line_length=_STANDARD_PATHS_LEN)
         black.reformat_one(path, False, write, mode, report)

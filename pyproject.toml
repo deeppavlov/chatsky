@@ -179,11 +179,17 @@ default_task_type = "script"
 [tool.poe.tasks]
 info = "scripts.misc:info"
 
-flake = "scripts.codestyle:_run_flake"
-black = "scripts.codestyle:_run_black(modify=False)"
-lint.sequence = ["flake", "black"]
-lint.ignore_fail = "return_non_zero"
-format = "scripts.codestyle:_run_black(modify=True)"
+[tool.poe.tasks.flake]
+script = "scripts.codestyle:_run_flake"
+
+[tool.poe.tasks.black]
+script = "scripts.codestyle:_run_black"
+args =[{name = "no-modify", type = "boolean", default = false}]
+
+[tool.poe.tasks.lint]
+sequence = ["black ${no_modify}", "flake"]
+args =[{name = "no-modify", type = "boolean", default = false}]
+ignore_fail = "return_non_zero"
 
 clean_docs = "scripts.clean:clean_docs"
 clean = "scripts.clean:clean"

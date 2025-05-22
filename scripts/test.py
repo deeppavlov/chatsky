@@ -20,6 +20,7 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
     :param quick: Deselect 'slow' and 'docker' marked tests
     :param use_docker: Enable tests marked as 'docker'
     """
+    docker: Optional[DockerClient]
 
     test_coverage_threshold = 90
 
@@ -60,10 +61,9 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
             ]
     if quick and use_docker:
         raise ValueError()
-    if use_docker:
-        with docker_client() as docker:
-            print("Run with docker")
-    return pytest.main(args)
+    with docker_client(use_docker) as docker:
+        return pytest.main(args)
+
 
 def run_tests(quick, coverage, no_skip, use_docker):
     result = _test(coverage = coverage, no_skip = no_skip, quick = quick, use_docker = use_docker)
