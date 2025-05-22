@@ -92,7 +92,7 @@ script = {
     },
     "user_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract(slots="person")},
+            PRE_TRANSITION: {"get_slot": proc.Extract(slots=["person"])},
             TRANSITIONS: [
                 Tr(
                     dst=("user_flow", "tell"),

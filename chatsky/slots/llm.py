@@ -86,6 +86,13 @@ class LLMGroupSlot(GroupSlot):
 
     __pydantic_extra__: Dict[str, Union[LLMSlot, "LLMGroupSlot"]]
     llm_model_name: str
+    prompt: Prompt = Field(
+        default="You are an expert extraction algorithm. "
+        "Only extract relevant information from the text. "
+        "If you do not know the value of an attribute asked to extract, "
+        "return null for the attribute's value.",
+        validate_default=True,
+    )
     history: int = 0
 
     async def get_value(self, ctx: Context) -> ExtractedGroupSlot:
@@ -110,6 +117,7 @@ class LLMGroupSlot(GroupSlot):
             DynamicGroupModel = create_model("DynamicGroupModel", **captions)
             logger.debug(f"DynamicGroupModel for {model_name}: {DynamicGroupModel}")
 
+            # swith to get_langchain_context
             history_messages = await context_to_history(
                 ctx, self.history, filter_func=DefaultFilter(), llm_model_name=model_name, max_size=1000
             )
