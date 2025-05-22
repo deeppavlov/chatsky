@@ -6,8 +6,7 @@ from python_on_whales import DockerClient
 
 from .utils import docker_client
 
-
-def _test(coverage: bool = False, dependencies: bool = False, quick: bool = False) -> int:
+def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, use_docker: bool = False) -> int:
     """
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
     Please keep in mind that:
@@ -17,48 +16,16 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
     2. Coverage requires all dependencies and docker (will have no effect otherwise).
 
     :param coverage: Enable coverage calculation
-    :param dependencies: Disallow skipping tests
+    :param no_skip: Disallow skipping tests
     :param quick: Deselect 'slow' and 'docker' marked tests
+    :param use_docker: Enable tests marked as 'docker'
     """
+
     test_coverage_threshold = 90
 
     dotenv.load_dotenv(".env_file")
     args = ["tests/"]
 
-    if quick:
-        args = [
-            "-m",
-            "not docker",
-            "-m",
-            "not slow",
-            *args,
-        ]
-
-    if dependencies and coverage:
-        args = [
-            "-m",
-            "not no_coverage",
-            *args,
-        ]
-    elif dependencies:
-        args = [
-            "--allow-skip=docker",
-            *args,
-        ]
-    else:
-        args = [
-            "-m",
-            "not needs_dependencies",
-            "--allow-skip=all",
-            *args,
-        ]
-
-    if "linux" not in sys.platform:
-        args = [
-            "-m",
-            "not docker",
-            *args,
-        ]
     if coverage:
         args = [
             f"--cov-fail-under={test_coverage_threshold}",
@@ -67,39 +34,37 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
             "--cov-report",
             "term",
             "--cov=chatsky",
+            "-m",
+            "not no_coverage",
             *args,
-        ]
-    else:
+            ]
+    if no_skip and use_docker:
+        None
+    if no_skip and not use_docker:
         args = [
-            "--tb=long",
-            "-vv",
-            "--cache-clear",
+            "--allow-skip=docker",
             *args,
-        ]
-
+            ]
+    if not no_skip:
+        args = [
+            "--allow-skip=all",
+            *args,
+            ]
+    if quick:
+        args = [
+            "-m",
+            "not docker",
+            "-m",
+            "not slow",
+            *args,
+            ]
+    if quick and use_docker:
+        raise ValueError()
+    if use_docker:
+        with docker_client() as docker:
+            print("Run with docker")
     return pytest.main(args)
 
-
-def quick_test():
-    exit(_test(quick=True))
-
-
-def quick_test_coverage():
-    exit(_test(coverage=True, quick=True))
-
-
-@docker_client
-def test_no_cov(docker: Optional[DockerClient]):
-    result = _test(False, docker is not None)
-    exit(result)
-
-
-@docker_client
-def test_no_deps(_: Optional[DockerClient]):
-    exit(_test(False, False))
-
-
-@docker_client
-def test_all(docker: Optional[DockerClient]):
-    result = _test(True, docker is not None)
+def run_tests(quick, coverage, no_skip, use_docker):
+    result = _test(coverage = coverage, no_skip = no_skip, quick = quick, use_docker = use_docker)
     exit(result)
