@@ -96,7 +96,7 @@ script = {
             TRANSITIONS: [
                 Tr(
                     dst=("user_flow", "tell"),
-                    cnd=cnd.SlotsExtracted("person"),
+                    cnd=cnd.SlotsExtracted(slots=["person"]),
                     priority=1.2,
                 ),
                 Tr(dst=("user_flow", "repeat_question"), priority=0.8),
@@ -110,7 +110,7 @@ script = {
         },
         "tell": {
             RESPONSE: rsp.FilledTemplate(
-                "So you are {person.username}, {person.age} and your "
+                template="So you are {person.username}, {person.age} and your "
                 "occupation is {person.job}, right?"
             ),
             TRANSITIONS: [Tr(dst=("user_flow", "ask"))],
