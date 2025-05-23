@@ -111,8 +111,8 @@ SLOTS = {
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("main", "start"), cnd=cnd.ExactMatch("/start")),
-            Tr(dst=("main", "reset"), cnd=cnd.ExactMatch("/reset")),
+            Tr(dst=("main", "start"), cnd=cnd.ExactMatch(match="/start")),
+            Tr(dst=("main", "reset"), cnd=cnd.ExactMatch(match="/reset")),
             Tr(dst=("main", "print"), priority=0.5),
         ]
     },
@@ -124,24 +124,28 @@ script = {
         },
         "print": {
             PRE_RESPONSE: {
-                "partial_extraction": proc.Extract("partial_extraction"),
+                "partial_extraction": proc.Extract(
+                    slots=["partial_extraction"]
+                ),
                 # partial extraction is always successful;
                 # success_only doesn't matter
                 "success_only_extraction": proc.Extract(
-                    "success_only_extraction", success_only=True
+                    slots=["success_only_extraction"], success_only=True
                 ),
                 # success_only is True by default
                 "success_only_false": proc.Extract(
-                    "success_only_false", success_only=False
+                    slots=["success_only_false"], success_only=False
                 ),
                 "sub_slot_success_only_extraction": proc.Extract(
-                    "sub_slot_success_only_extraction.email",
-                    "sub_slot_success_only_extraction.date",
+                    slots=[
+                        "sub_slot_success_only_extraction.email",
+                        "sub_slot_success_only_extraction.date",
+                    ],
                     success_only=True,
                 ),
             },
             RESPONSE: rsp.FilledTemplate(
-                "Extracted slots:\n"
+                template="Extracted slots:\n"
                 "  Group with partial extraction:\n"
                 "    {partial_extraction}\n"
                 "  Group with success_only:\n"

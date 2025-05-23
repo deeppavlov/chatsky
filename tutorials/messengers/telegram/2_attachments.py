@@ -147,14 +147,16 @@ script = {
         TRANSITIONS: [
             Tr(
                 dst=("main_flow", f"{attachment}_node"),
-                cnd=cnd.ExactMatch(attachment),
+                cnd=cnd.ExactMatch(match=attachment),
             )
             for attachment in ATTACHMENTS
         ]
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="intro_node", cnd=cnd.ExactMatch("/start"))],
+            TRANSITIONS: [
+                Tr(dst="intro_node", cnd=cnd.ExactMatch(match="/start"))
+            ],
         },
         "intro_node": {
             RESPONSE: f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'

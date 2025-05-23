@@ -94,7 +94,7 @@ script = {
         TRANSITIONS: [
             Tr(
                 dst=("flow", "node_hi"),
-                cnd=cnd.ExactMatch("Hi"),
+                cnd=cnd.ExactMatch(match="Hi"),
             ),
             Tr(
                 dst=("flow", "node_ok")

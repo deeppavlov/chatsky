@@ -1175,7 +1175,7 @@ metadata:
     filterType: filter_range
     targets:
     - column:
-        name: request_id
+        name: turn_id
       datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
     defaultDataMask:
       extraFormData: {}

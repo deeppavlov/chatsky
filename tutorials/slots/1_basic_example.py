@@ -98,16 +98,21 @@ The usage of all the above functions is shown in the following script:
 script = {
     GLOBAL: {
         TRANSITIONS: [
-            Tr(dst=("username_flow", "ask"), cnd=cnd.Regexp(r"^[sS]tart"))
+            Tr(
+                dst=("username_flow", "ask"),
+                cnd=cnd.Regexp(pattern=r"^[sS]tart"),
+            )
         ]
     },
     "username_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.username")},
+            PRE_TRANSITION: {
+                "get_slot": proc.Extract(slots=["person.username"])
+            },
             TRANSITIONS: [
                 Tr(
                     dst=("email_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username"),
+                    cnd=cnd.SlotsExtracted(slots=["person.username"]),
                     priority=1.2,
                 ),
                 Tr(dst=("username_flow", "repeat_question"), priority=0.8),
@@ -122,11 +127,13 @@ script = {
     },
     "email_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slot": proc.Extract("person.email")},
+            PRE_TRANSITION: {"get_slot": proc.Extract(slots=["person.email"])},
             TRANSITIONS: [
                 Tr(
                     dst=("friend_flow", "ask"),
-                    cnd=cnd.SlotsExtracted("person.username", "person.email"),
+                    cnd=cnd.SlotsExtracted(
+                        slots=["person.username", "person.email"]
+                    ),
                     priority=1.2,
                 ),
                 Tr(dst=("email_flow", "repeat_question"), priority=0.8),
@@ -141,12 +148,13 @@ script = {
     },
     "friend_flow": {
         LOCAL: {
-            PRE_TRANSITION: {"get_slots": proc.Extract("friend")},
+            PRE_TRANSITION: {"get_slots": proc.Extract(slots=["friend"])},
             TRANSITIONS: [
                 Tr(
                     dst=("root", "utter"),
                     cnd=cnd.SlotsExtracted(
-                        "friend.first_name", "friend.last_name", mode="any"
+                        slots=["friend.first_name", "friend.last_name"],
+                        mode="any",
                     ),
                     priority=1.2,
                 ),
@@ -168,7 +176,7 @@ script = {
         },
         "utter": {
             RESPONSE: rsp.FilledTemplate(
-                "Your friend is {friend.first_name} {friend.last_name}"
+                template="Your friend is {friend.first_name} {friend.last_name}"
             ),
             TRANSITIONS: [Tr(dst=("root", "utter_alternative"))],
         },

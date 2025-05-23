@@ -50,11 +50,11 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst=("pics", "send_one"),
-                    cnd=cnd.Regexp(r"^http.+\.png$"),
+                    cnd=cnd.Regexp(pattern=r"^http.+\.png$"),
                 ),
                 Tr(
                     dst=("pics", "send_many"),
-                    cnd=cnd.Regexp(f"{img_url} repeat 10 times"),
+                    cnd=cnd.Regexp(pattern=f"{img_url} repeat 10 times"),
                 ),
                 Tr(
                     dst=dst.Current(),
