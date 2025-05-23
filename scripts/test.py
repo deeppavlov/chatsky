@@ -1,4 +1,3 @@
-import sys
 from typing import Optional
 import pytest
 import dotenv

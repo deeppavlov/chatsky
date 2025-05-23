@@ -199,7 +199,7 @@ script = "scripts.codestyle:_run_black"
 args =[{name = "no-modify", type = "boolean", default = false}]
 
 [tool.poe.tasks.lint]
-sequence = ["black ${no_modify}", "flake"]
+sequence = ["black", "flake"]
 args =[{name = "no-modify", type = "boolean", default = false}]
 ignore_fail = "return_non_zero"
 
