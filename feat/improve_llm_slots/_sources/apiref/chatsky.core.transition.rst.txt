@@ -1,0 +1,7 @@
+:source_name: chatsky/core/transition
+:doc_version: feat/improve_llm_slots/
+
+.. automodule:: chatsky.core.transition
+   :members:
+   :undoc-members:
+   :show-inheritance:

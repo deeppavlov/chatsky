@@ -1,0 +1,7 @@
+:source_name: chatsky/core/message
+:doc_version: feat/improve_llm_slots/
+
+.. automodule:: chatsky.core.message
+   :members:
+   :undoc-members:
+   :show-inheritance:

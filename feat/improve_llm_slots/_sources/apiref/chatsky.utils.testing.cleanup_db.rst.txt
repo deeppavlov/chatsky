@@ -1,0 +1,7 @@
+:source_name: chatsky/utils/testing/cleanup_db
+:doc_version: feat/improve_llm_slots/
+
+.. automodule:: chatsky.utils.testing.cleanup_db
+   :members:
+   :undoc-members:
+   :show-inheritance:

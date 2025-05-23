@@ -1,0 +1,7 @@
+:source_name: chatsky/stats/default_extractors
+:doc_version: feat/improve_llm_slots/
+
+.. automodule:: chatsky.stats.default_extractors
+   :members:
+   :undoc-members:
+   :show-inheritance:

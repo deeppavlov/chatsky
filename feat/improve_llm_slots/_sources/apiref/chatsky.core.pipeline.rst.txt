@@ -1,0 +1,7 @@
+:source_name: chatsky/core/pipeline
+:doc_version: feat/improve_llm_slots/
+
+.. automodule:: chatsky.core.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
