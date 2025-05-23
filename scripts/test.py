@@ -6,6 +6,7 @@ from python_on_whales import DockerClient
 
 from .utils import docker_client
 
+
 def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, use_docker: bool = False) -> int:
     """
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
@@ -38,19 +39,19 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
             "-m",
             "not no_coverage",
             *args,
-            ]
+        ]
     if no_skip and use_docker:
         None
     if no_skip and not use_docker:
         args = [
             "--allow-skip=docker",
             *args,
-            ]
+        ]
     if not no_skip:
         args = [
             "--allow-skip=all",
             *args,
-            ]
+        ]
     if quick:
         args = [
             "-m",
@@ -58,7 +59,7 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
             "-m",
             "not slow",
             *args,
-            ]
+        ]
     if quick and use_docker:
         raise ValueError()
     with docker_client(use_docker) as docker:
@@ -66,5 +67,5 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
 
 
 def run_tests(quick, coverage, no_skip, use_docker):
-    result = _test(coverage = coverage, no_skip = no_skip, quick = quick, use_docker = use_docker)
+    result = _test(coverage=coverage, no_skip=no_skip, quick=quick, use_docker=use_docker)
     exit(result)

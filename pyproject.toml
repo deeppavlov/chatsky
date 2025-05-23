@@ -179,6 +179,18 @@ default_task_type = "script"
 [tool.poe.tasks]
 info = "scripts.misc:info"
 
+[tool.poe.tasks.clean_docs]
+script = "scripts.clean:clean_docs"
+
+[tool.poe.tasks.clean]
+script = "scripts.clean:clean"
+
+[tool.poe.tasks.docs]
+script = "scripts.doc:docs"
+
+[tool.poe.tasks.docs_no_docker]
+script = "scripts.doc:docs_no_docker"
+
 [tool.poe.tasks.flake]
 script = "scripts.codestyle:_run_flake"
 
@@ -191,10 +203,6 @@ sequence = ["black ${no_modify}", "flake"]
 args =[{name = "no-modify", type = "boolean", default = false}]
 ignore_fail = "return_non_zero"
 
-clean_docs = "scripts.clean:clean_docs"
-clean = "scripts.clean:clean"
-docs = "scripts.doc:docs"
-docs_no_docker = "scripts.doc:docs_no_docker"
 [tool.poe.tasks.test]
 help = "Tests setup"
 script = "scripts.test:run_tests"
