@@ -90,6 +90,9 @@ class LLM_API:
 
 
 class BaseLLMScriptFunction(BaseModel):
+    """
+    Base class for script functions that use an LLM model.
+    """
     llm_model_name: str
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
