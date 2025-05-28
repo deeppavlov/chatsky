@@ -1,7 +1,5 @@
-from typing import Optional
 import pytest
 import dotenv
-from python_on_whales import DockerClient
 
 from .utils import docker_client
 
