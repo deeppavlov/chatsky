@@ -20,8 +20,6 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
     :param quick: Deselect 'slow' and 'docker' marked tests
     :param use_docker: Enable tests marked as 'docker'
     """
-    docker: Optional[DockerClient]
-
     test_coverage_threshold = 90
 
     dotenv.load_dotenv(".env_file")
@@ -61,7 +59,7 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
         ]
     if quick and use_docker:
         raise ValueError()
-    with docker_client(use_docker) as docker:
+    with docker_client(use_docker):
         return pytest.main(args)
 
 
