@@ -3,7 +3,8 @@ script:
     TRANSITIONS:
       - dst: [tech_flow, start_node]
         cnd:
-          chatsky.cnd.ExactMatch: /start
+          chatsky.cnd.ExactMatch: 
+            match: /start
         priority: 2
   tech_flow:
     start_node:
@@ -30,31 +31,35 @@ script:
       PRE_TRANSITION:
         extract_slots:
           chatsky.proc.Extract:
-            - person.name
-            - person.age
+            slots: [person.name, person.age]
       TRANSITIONS:
         - dst: not_provided_slots
           cnd:
             chatsky.cnd.Negation:
-              chatsky.cnd.SlotsExtracted:
-                - person.name
-                - person.age
+              condition:
+                chatsky.cnd.SlotsExtracted:
+                  slots: [person.name, person.age]
           priority: 0.5
         - dst: name_extracted
           cnd:
             chatsky.cnd.All:
-              - chatsky.cnd.HasText: My name
-              - chatsky.cnd.SlotsExtracted: person.name
+              conditions:
+                - chatsky.cnd.HasText: 
+                    text: My name
+                - chatsky.cnd.SlotsExtracted: 
+                    slots: [person.name]
         - dst: age_extracted
           cnd:
             chatsky.cnd.All:
-              - chatsky.cnd.HasText: years old
-              - chatsky.cnd.SlotsExtracted: person.age
+              conditions:
+                - chatsky.cnd.HasText: 
+                    text: years old
+                - chatsky.cnd.SlotsExtracted: 
+                    slots: [person.age]
         - dst: [final_flow, all_slots_extracted]
           cnd:
             chatsky.cnd.SlotsExtracted:
-              - person.name
-              - person.age
+              slots: [person.name, person.age]
           priority: 1.5
     start:
       RESPONSE:
@@ -78,17 +83,18 @@ script:
     all_slots_extracted:
       RESPONSE:
         chatsky.rsp.FilledTemplate:
-          chatsky.Message:
-            text:
-              "Thank you for providing us your data.
-              
-              Your name: {person.name};
-              Your age: {person.age}.
-              
-              Here's a cute sticker as a reward:"
-            attachments:
-              - chatsky.core.Sticker:
-                  id: CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE
+          template:
+            chatsky.Message:
+              text:
+                "Thank you for providing us your data.
+                
+                Your name: {person.name};
+                Your age: {person.age}.
+                
+                Here's a cute sticker as a reward:"
+              attachments:
+                - chatsky.core.Sticker:
+                    id: CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE
 start_label:
   - tech_flow
   - start_node

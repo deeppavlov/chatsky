@@ -111,12 +111,14 @@ toy_script = {
     "main_flow": {
         "start_node": {
             RESPONSE: Message(""),
-            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch(match="Hi"))
+            ],
         },
         "greeting_node": {
             RESPONSE: LLMResponse(llm_model_name="note_model", history=0),
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
+                Tr(dst="main_node", cnd=cnd.ExactMatch(match="Who are you?"))
             ],
         },
         "main_node": {
@@ -127,7 +129,7 @@ toy_script = {
                 "a summary of your #important notes."
             ),
             TRANSITIONS: [
-                Tr(dst="remind_node", cnd=cnd.ExactMatch("/remind")),
+                Tr(dst="remind_node", cnd=cnd.ExactMatch(match="/remind")),
                 Tr(dst=dst.Current()),
             ],
         },

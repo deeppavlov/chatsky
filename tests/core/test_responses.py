@@ -15,9 +15,11 @@ async def test_random_choice(ctx):
     random.seed(0)
 
     rsp = RandomChoice(
-        Message(text="1"),
-        Message(text="2"),
-        Message(text="3"),
+        responses=[
+            Message(text="1"),
+            Message(text="2"),
+            Message(text="3"),
+        ]
     )
 
     assert (await rsp(ctx)).text == "2"
