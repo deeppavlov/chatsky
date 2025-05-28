@@ -23,7 +23,7 @@ class LLMCondition(BaseCondition):
 
     llm_model_name: str = Field(default="default")
     """
-    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.llm` dictionary.
     """
     prompt: AnyResponse = Field(default="", validate_default=True)
     """
