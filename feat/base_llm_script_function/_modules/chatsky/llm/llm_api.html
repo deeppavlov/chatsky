@@ -546,7 +546,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core.message</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.llm.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.llm.prompt</span><span class="w"> </span><span class="kn">import</span> <span class="n">PositionConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.llm.prompt</span><span class="w"> </span><span class="kn">import</span> <span class="n">PositionConfig</span><span class="p">,</span> <span class="n">Prompt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnyResponse</span><span class="p">,</span> <span class="n">MessageInitTypes</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.llm.filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseHistoryFilter</span><span class="p">,</span> <span class="n">DefaultFilter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">chatsky.llm.langchain_context</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_langchain_context</span>
@@ -568,7 +568,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">BaseChatModel</span><span class="p">,</span>
         <span class="n">system_prompt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AnyResponse</span><span class="p">,</span> <span class="n">MessageInitTypes</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">position_config</span><span class="p">:</span> <span class="n">PositionConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">position_config</span><span class="p">:</span> <span class="n">PositionConfig</span> <span class="o">=</span> <span class="n">PositionConfig</span><span class="p">(),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param model: Model object</span>
@@ -578,7 +578,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span> <span class="n">BaseChatModel</span> <span class="o">=</span> <span class="n">model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">StrOutputParser</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_prompt</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">AnyResponse</span><span class="p">)</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">position_config</span> <span class="o">=</span> <span class="n">position_config</span> <span class="ow">or</span> <span class="n">PositionConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_config</span> <span class="o">=</span> <span class="n">position_config</span>
 
 <div class="viewcode-block" id="LLM_API.respond">
 <a class="viewcode-back" href="../../../apiref/chatsky.llm.llm_api.html#chatsky.llm.llm_api.LLM_API.respond">[docs]</a>
@@ -639,7 +639,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">prompt</span><span class="p">:</span> <span class="n">AnyResponse</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">prompt</span><span class="p">:</span> <span class="n">Prompt</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Script function prompt.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -655,7 +655,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Regular expression to find prompts by key names in MISC dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">position_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PositionConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">position_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PositionConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">PositionConfig</span><span class="p">())</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Config for positions of prompts and messages in history.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -665,7 +665,6 @@
 <span class="sd">    If a message exceeds the limit it will not be sent to the LLM and a warning</span>
 <span class="sd">    will be produced.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: add _get_langchain_context method</span>
 
 <div class="viewcode-block" id="BaseLLMScriptFunction._get_langchain_context">
 <a class="viewcode-back" href="../../../apiref/chatsky.llm.llm_api.html#chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context">[docs]</a>
@@ -676,12 +675,10 @@
             <span class="n">call_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
             <span class="n">prompt_misc_filter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_misc_filter</span><span class="p">,</span>
             <span class="n">position_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position_config</span><span class="p">,</span>
-            <span class="n">history_args</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
-                <span class="s2">&quot;filter_func&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_func</span><span class="p">,</span>
-                <span class="s2">&quot;llm_model_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">llm_model_name</span><span class="p">,</span>
-                <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">,</span>
-            <span class="p">},</span>
+            <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
+            <span class="n">filter_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_func</span><span class="p">,</span>
+            <span class="n">llm_model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_model_name</span><span class="p">,</span>
+            <span class="n">max_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

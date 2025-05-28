@@ -891,57 +891,13 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLMResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/responses/llm.html#LLMResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.responses.llm.LLMResponse" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="chatsky.core.script_function.html#chatsky.core.script_function.BaseResponse" title="chatsky.core.script_function.BaseResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseResponse</span></code></a>, <a class="reference internal" href="chatsky.llm.llm_api.html#chatsky.llm.llm_api.BaseLLMScriptFunction" title="chatsky.llm.llm_api.BaseLLMScriptFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMScriptFunction</span></code></a></p>
 <p>Basic function for receiving LLM responses.
 Uses prompt to produce result from model.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.llm_model_name">
-<span class="sig-name descname"><span class="pre">llm_model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.llm_model_name" title="Link to this definition">#</a></dt>
-<dd><p>Key of the model in the <a class="reference internal" href="chatsky.core.pipeline.html#chatsky.core.pipeline.Pipeline.models" title="chatsky.core.pipeline.Pipeline.models"><code class="xref py py-attr docutils literal notranslate"><span class="pre">models</span></code></a> dictionary.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.prompt">
-<span class="sig-name descname"><span class="pre">prompt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="chatsky.llm.prompt.html#chatsky.llm.prompt.Prompt" title="chatsky.llm.prompt.Prompt"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prompt</span></code></a></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.prompt" title="Link to this definition">#</a></dt>
-<dd><p>Response prompt.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.history">
-<span class="sig-name descname"><span class="pre">history</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.history" title="Link to this definition">#</a></dt>
-<dd><p>Number of dialogue turns aside from the current one to keep in history. <cite>-1</cite> for full history.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.filter_func">
-<span class="sig-name descname"><span class="pre">filter_func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="chatsky.llm.filters.html#chatsky.llm.filters.BaseHistoryFilter" title="chatsky.llm.filters.BaseHistoryFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHistoryFilter</span></code></a></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.filter_func" title="Link to this definition">#</a></dt>
-<dd><p>Filter function to filter messages in history.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.prompt_misc_filter">
-<span class="sig-name descname"><span class="pre">prompt_misc_filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.prompt_misc_filter" title="Link to this definition">#</a></dt>
-<dd><p>Regular expression to find prompts by key names in MISC dictionary.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.position_config">
-<span class="sig-name descname"><span class="pre">position_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.llm.prompt.html#chatsky.llm.prompt.PositionConfig" title="chatsky.llm.prompt.PositionConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositionConfig</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.position_config" title="Link to this definition">#</a></dt>
-<dd><p>Config for positions of prompts and messages in history.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.message_schema">
 <span class="sig-name descname"><span class="pre">message_schema</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.core.message.html#chatsky.core.message.Message" title="chatsky.core.message.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a><span class="pre">],</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code><span class="pre">]]</span></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.message_schema" title="Link to this definition">#</a></dt>
 <dd><p>Schema for model output validation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="chatsky.responses.llm.LLMResponse.max_size">
-<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.responses.llm.LLMResponse.max_size" title="Link to this definition">#</a></dt>
-<dd><p>Maximum size of any message in chat in symbols.
-If a message exceeds the limit it will not be sent to the LLM and a warning
-will be produced.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1007,14 +963,7 @@ will be produced.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM responses</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse"><code class="docutils literal notranslate"><span class="pre">LLMResponse</span></code></a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.llm_model_name"><code class="docutils literal notranslate"><span class="pre">LLMResponse.llm_model_name</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.prompt"><code class="docutils literal notranslate"><span class="pre">LLMResponse.prompt</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.history"><code class="docutils literal notranslate"><span class="pre">LLMResponse.history</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.filter_func"><code class="docutils literal notranslate"><span class="pre">LLMResponse.filter_func</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.prompt_misc_filter"><code class="docutils literal notranslate"><span class="pre">LLMResponse.prompt_misc_filter</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.position_config"><code class="docutils literal notranslate"><span class="pre">LLMResponse.position_config</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.message_schema"><code class="docutils literal notranslate"><span class="pre">LLMResponse.message_schema</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.max_size"><code class="docutils literal notranslate"><span class="pre">LLMResponse.max_size</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.responses.llm.LLMResponse.call"><code class="docutils literal notranslate"><span class="pre">LLMResponse.call()</span></code></a></li>
 </ul>
 </li>
