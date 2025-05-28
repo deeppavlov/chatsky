@@ -134,22 +134,24 @@ async def test_const_object_immutability():
 
     assert message.text == "text1"
 
+
 async def test_timestamps(context_factory):
-        """
-            1. call response, check type of timestamp
-            2. call the same response for the second time and check whether it's different
-        """
-        fixed_response = Message(text="timer check")
-        node = Node(response=fixed_response)
+    """
+    1. call response, check type of timestamp
+    2. call the same response for the second time and check whether it's different
+    """
+    fixed_response = Message(text="timer check")
+    node = Node(response=fixed_response)
 
-        ctx = context_factory()
-        message_1 = await node.response(ctx)
-        assert isinstance(message_1.timestamp, type(time_ns()))
+    ctx = context_factory()
+    message_1 = await node.response(ctx)
+    assert isinstance(message_1.timestamp, type(time_ns()))
 
-        message_2 = await node.response(ctx)
+    message_2 = await node.response(ctx)
 
-        assert message_1 == message_2
-        assert message_1.timestamp != message_2.timestamp
+    assert message_1 == message_2
+    assert message_1.timestamp != message_2.timestamp
+
 
 class TestTimeout:
     class SleepingFunc(BaseProcessing):

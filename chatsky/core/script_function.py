@@ -163,6 +163,7 @@ class BaseResponse(BaseScriptFunc, ABC):
         msg.timestamp = time_ns()
         return msg
 
+
 class ConstResponse(ConstScriptFunc, BaseResponse):
     root: Message
 

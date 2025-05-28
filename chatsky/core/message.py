@@ -7,7 +7,6 @@ It only contains types and properties that are compatible with most messaging se
 """
 
 from __future__ import annotations
-from time import time_ns
 from typing import Literal, Optional, List, Union, Dict, Any, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
@@ -382,7 +381,7 @@ class Message(DataModel):
         annotations: Optional[Dict[str, Any]] = None,
         misc: Optional[Dict[str, Any]] = None,
         origin: Optional[Origin] = None,
-        timestamp: Optional[datetime] = None,
+        timestamp: Optional[int] = None,
         **kwargs,
     ):
         super().__init__(
@@ -394,7 +393,7 @@ class Message(DataModel):
             timestamp=timestamp,
             **kwargs,
         )
-    
+
     def __eq__(self, other):
         if not isinstance(other, Message):
             return NotImplementedError
