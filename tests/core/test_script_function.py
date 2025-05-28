@@ -144,10 +144,12 @@ async def test_timestamps(context_factory):
     node = Node(response=fixed_response)
 
     ctx = context_factory()
-    message_1 = await node.response(ctx)
+    message_1 = await node.response.wrapped_call(ctx)
     assert isinstance(message_1.timestamp, type(time_ns()))
 
-    message_2 = await node.response(ctx)
+    await asyncio.sleep(0.001)
+
+    message_2 = await node.response.wrapped_call(ctx)
 
     assert message_1 == message_2
     assert message_1.timestamp != message_2.timestamp
