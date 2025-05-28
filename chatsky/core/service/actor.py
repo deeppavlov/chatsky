@@ -56,6 +56,7 @@ class Actor(PipelineComponent):
             ctx.framework_data.current_node = ctx.pipeline.script.get_inherited_node(ctx.last_label)
 
             logger.debug("Running pre_transition")
+            ctx.framework_data.current_stage = "PRE_TRANSITION"
             await self._run_processing(ctx.current_node.pre_transition, ctx)
 
             logger.debug("Running transitions")
@@ -76,6 +77,7 @@ class Actor(PipelineComponent):
             ctx.framework_data.current_node = ctx.pipeline.script.get_inherited_node(next_label)
 
             logger.debug("Running pre_response")
+            ctx.framework_data.current_stage = "PRE_RESPONSE"
             await self._run_processing(ctx.current_node.pre_response, ctx)
 
             node_response = ctx.current_node.response
@@ -84,6 +86,7 @@ class Actor(PipelineComponent):
                 if isinstance(response_result, Message):
                     response = response_result
                     logger.debug(f"Produced response {response}.")
+                    ctx.framework_data.current_stage = "RESPONSE"
                 else:
                     logger.debug("Response was not produced.")
             else:
@@ -92,6 +95,7 @@ class Actor(PipelineComponent):
             logger.exception("Exception occurred during response processing.", exc_info=exc)
 
         ctx.responses[ctx.current_turn_id] = response
+        ctx.framework_data.current_stage = "POST_SERVICE"
 
     @staticmethod
     async def _run_processing_parallel(processing: Dict[str, BaseProcessing], ctx: Context) -> None:

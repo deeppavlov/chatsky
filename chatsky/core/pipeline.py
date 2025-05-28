@@ -267,9 +267,11 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         ctx.current_turn_id = ctx.current_turn_id + 1
 
         ctx.requests[ctx.current_turn_id] = request
+        ctx.framework_data.current_stage = "PRE_SERVICE"
         await self.services_pipeline(ctx)
 
         ctx.framework_data.service_states.clear()
+        ctx.framework_data.current_stage = None
         ctx.framework_data.pipeline = None
 
         await ctx.store()
