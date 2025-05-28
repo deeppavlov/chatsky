@@ -12,7 +12,7 @@ from pydantic import BaseModel, TypeAdapter, Field
 from chatsky import Context
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.prompt import PositionConfig
+from chatsky.llm.prompt import PositionConfig, Prompt
 from chatsky.core import AnyResponse, MessageInitTypes
 from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
 from chatsky.llm.langchain_context import get_langchain_context
@@ -32,7 +32,7 @@ class LLM_API:
         self,
         model: BaseChatModel,
         system_prompt: Union[AnyResponse, MessageInitTypes] = "",
-        position_config: PositionConfig = None,
+        position_config: PositionConfig = PositionConfig(),
     ) -> None:
         """
         :param model: Model object
@@ -42,7 +42,7 @@ class LLM_API:
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
         self.system_prompt = TypeAdapter(AnyResponse).validate_python(system_prompt)
-        self.position_config = position_config or PositionConfig()
+        self.position_config = position_config
 
     async def respond(
         self,
@@ -94,7 +94,7 @@ class BaseLLMScriptFunction(BaseModel):
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
     """
-    prompt: AnyResponse = Field(default="", validate_default=True)
+    prompt: Prompt = Field(default="", validate_default=True)
     """
     Script function prompt.
     """
@@ -110,7 +110,7 @@ class BaseLLMScriptFunction(BaseModel):
     """
     Regular expression to find prompts by key names in MISC dictionary.
     """
-    position_config: Optional[PositionConfig] = None
+    position_config: Optional[PositionConfig] = Field(default=PositionConfig())
     """
     Config for positions of prompts and messages in history.
     """
@@ -120,7 +120,6 @@ class BaseLLMScriptFunction(BaseModel):
     If a message exceeds the limit it will not be sent to the LLM and a warning
     will be produced.
     """
-    # TODO: add _get_langchain_context method
 
     async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
         return await get_langchain_context(
@@ -129,10 +128,8 @@ class BaseLLMScriptFunction(BaseModel):
             call_prompt=self.prompt,
             prompt_misc_filter=self.prompt_misc_filter,
             position_config=self.position_config,
-            history_args={
-                "length": self.history,
-                "filter_func": self.filter_func,
-                "llm_model_name": self.llm_model_name,
-                "max_size": self.max_size,
-            },
+            length=self.history,
+            filter_func=self.filter_func,
+            llm_model_name=self.llm_model_name,
+            max_size=self.max_size,
         )
