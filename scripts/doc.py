@@ -1,13 +1,12 @@
 import os
 from pathlib import Path
 import shutil
-from typing import Optional
 
 import dotenv
 import scripts.patch_sphinx  # noqa: F401
 import sphinx.ext.apidoc as apidoc
 import sphinx.cmd.build as build
-from colorama import init, Fore, Style
+from colorama import init
 from python_on_whales import DockerClient
 
 from .utils import docker_client
@@ -43,30 +42,27 @@ def _build_drawio(docker: DockerClient):
         print(f"Drawio images built from {path.parent} to {target}")
 
 
-@docker_client
-def docs(docker: Optional[DockerClient]):
-    init()
-    if docker is not None:
+def docs(use_docker: bool = False):
+    with docker_client(use_docker):
+        init()
         clean_docs()
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-        _build_drawio(docker)
+        if use_docker is True:
+            _build_drawio(docker_client)
         result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
         exit(result)
-    else:
-        print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
-        exit(1)
 
 
-def docs_no_docker():
-    init()
-    clean_docs()
-    dotenv.load_dotenv(".env_file")
-    os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-    os.environ["NBSPHINX_ALLOW_ERRORS"] = "true"
-    result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
-    result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
-    result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
-    exit(result)
+# def docs_no_docker():
+#     init()
+#     clean_docs()
+#     dotenv.load_dotenv(".env_file")
+#     os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
+#     os.environ["NBSPHINX_ALLOW_ERRORS"] = "true"
+#     result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
+#     result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
+#     result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
+#     exit(result)

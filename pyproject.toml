@@ -186,10 +186,14 @@ script = "scripts.clean:clean_docs"
 script = "scripts.clean:clean"
 
 [tool.poe.tasks.docs]
+help = "Config docs"
 script = "scripts.doc:docs"
-
-[tool.poe.tasks.docs_no_docker]
-script = "scripts.doc:docs_no_docker"
+    [tool.poe.tasks.docs.args.use_docker]
+    options = ["-d", "--docker", "--use-docker"]
+    help = "Allow docker usage"
+    default = false
+    required = false
+    type = "boolean"
 
 [tool.poe.tasks.flake]
 script = "scripts.codestyle:_run_flake"
@@ -220,16 +224,16 @@ script = "scripts.test:run_tests"
     required = false
     type = "boolean"
 
-    [tool.poe.tasks.test.args.no_skip]
-    options = ["--no-skip"]
-    help = "Allow skipping tests with dependencies"
+    [tool.poe.tasks.test.args.use_docker]
+    options = ["-d", "--docker", "--use-docker"]
+    help = "Allow docker usage"
     default = false
     required = false
     type = "boolean"
 
-    [tool.poe.tasks.test.args.use_docker]
-    options = ["-d", "--docker", "--use-docker"]
-    help = "Allow docker usage"
+    [tool.poe.tasks.test.args.no_skip]
+    options = ["--no-skip"]
+    help = "Allow skipping tests with dependencies"
     default = false
     required = false
     type = "boolean"
