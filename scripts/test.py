@@ -4,7 +4,9 @@ import dotenv
 from .utils import docker_client
 
 
-def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, use_docker: bool = False) -> int:
+def _test(
+    coverage: bool = False, no_skip: bool = False, quick: bool = False, use_docker: bool = False, path: str = "tests/"
+) -> int:
     """
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
     Please keep in mind that:
@@ -21,7 +23,7 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
     test_coverage_threshold = 90
 
     dotenv.load_dotenv(".env_file")
-    args = ["tests/"]
+    args = [path]
 
     if coverage:
         args = [
@@ -61,6 +63,6 @@ def _test(coverage: bool = False, no_skip: bool = False, quick: bool = False, us
         return pytest.main(args)
 
 
-def run_tests(quick, coverage, no_skip, use_docker):
-    result = _test(coverage=coverage, no_skip=no_skip, quick=quick, use_docker=use_docker)
+def run_tests(quick, coverage, no_skip, use_docker, path):
+    result = _test(coverage=coverage, no_skip=no_skip, quick=quick, use_docker=use_docker, path=path)
     exit(result)

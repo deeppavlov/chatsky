@@ -234,6 +234,14 @@ script = "scripts.test:run_tests"
     required = false
     type = "boolean"
 
+    [tool.poe.tasks.test.args.path]
+    help = "Path to file or folder to test"
+    positional = true
+    required = false
+    type = "string"
+    default = "tests/"
+
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
