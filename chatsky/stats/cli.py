@@ -62,7 +62,7 @@ Mapping of standard sql column types to Clickhouse native types.
 CHATSKY_NODE_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
+    toUInt64OrNull({table}.LogAttributes['turn_id']) as turn_id,
     toDateTime(otel_traces.Timestamp) as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,
@@ -72,9 +72,9 @@ WITH main AS (
     {table}.TraceId as trace_id,
     otel_traces.TraceId\nFROM {table}, otel_traces
     WHERE {table}.TraceId = otel_traces.TraceId and data_key = 'get_current_label'
-    ORDER BY context_id, request_id
+    ORDER BY context_id, turn_id
 ) SELECT context_id,
-    request_id,
+    turn_id,
     start_time,
     data_key,
     data,
@@ -88,7 +88,7 @@ FROM main
 CHATSKY_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
+    toUInt64OrNull({table}.LogAttributes['turn_id']) as turn_id,
     toDateTime(otel_traces.Timestamp) as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,
@@ -98,9 +98,9 @@ WITH main AS (
     {table}.TraceId as trace_id,
     otel_traces.TraceId\nFROM {table}, otel_traces
     WHERE {table}.TraceId = otel_traces.TraceId
-    ORDER BY data_key, context_id, request_id
+    ORDER BY data_key, context_id, turn_id
 ) SELECT context_id,
-    request_id,
+    turn_id,
     start_time,
     data_key,
     data,
@@ -114,11 +114,11 @@ FROM main
 CHATSKY_FINAL_NODES_STATEMENT = """
 WITH main AS (
     SELECT LogAttributes['context_id'] AS context_id,
-    max(toUInt64OrNull(LogAttributes['request_id'])) AS max_history
+    max(toUInt64OrNull(LogAttributes['turn_id'])) AS max_history
     FROM {table}\nGROUP BY context_id
 )
 SELECT DISTINCT LogAttributes['context_id'] AS context_id,
-toUInt64OrNull({table}.LogAttributes['request_id']) AS request_id,
+toUInt64OrNull({table}.LogAttributes['turn_id']) AS turn_id,
 toDateTime(otel_traces.Timestamp) AS start_time,
 {lblfield} AS label,
 {flowfield} AS flow_label,
@@ -126,7 +126,7 @@ toDateTime(otel_traces.Timestamp) AS start_time,
 FROM {table}
 INNER JOIN main
 ON context_id  = main.context_id
-AND request_id = main.max_history
+AND turn_id = main.max_history
 INNER JOIN otel_traces
 ON {table}.TraceId = otel_traces.TraceId
 WHERE otel_traces.SpanName = 'get_current_label'
@@ -200,10 +200,10 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
         params = dict(
             table="${db.table}",
             label_lag="lagInFrame(label) OVER "
-            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "(PARTITION BY context_id ORDER BY turn_id ASC "
             "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
             flow_lag="lagInFrame(flow_label) OVER "
-            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "(PARTITION BY context_id ORDER BY turn_id ASC "
             "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
             texttype="String",
             lblfield="JSON_VALUE(${db.table}.Body, '$.label')",

@@ -5,8 +5,9 @@ This module implements a base interface for interactions with the
 Telegram API.
 """
 
+from pydantic import BeforeValidator
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Literal, Annotated
 
 from chatsky.utils.devel.extra_field_helpers import grab_extra_fields
 
@@ -21,7 +22,9 @@ from chatsky.core.message import (
     Image,
     Invoice,
     Location,
+    MediaGroup,
     Message,
+    Metadata,
     Origin,
     Poll,
     PollOption,
@@ -29,7 +32,6 @@ from chatsky.core.message import (
     Video,
     VideoMessage,
     VoiceMessage,
-    MediaGroup,
 )
 
 try:
@@ -52,6 +54,70 @@ except ImportError:
     TelegramMessage = Any
 
     telegram_available = False
+
+
+class TelegramMetadata(Metadata):
+    """
+    Metadata extracted from telegram updates.
+
+    Fields :py:attr:`user_id`, :py:attr:`first_name`, :py:attr:`last_name`, :py:attr:`username` and
+    :py:attr:`language_code` are extracted from the
+    `User object <https://docs.python-telegram-bot.org/en/stable/telegram.user.html>`__.
+
+    Fields :py:attr:`chat_id`, :py:attr:`chat_type` and :py:attr:`chat_title` are extracted from the
+    `Chat object <https://docs.python-telegram-bot.org/en/stable/telegram.chat.html>`__.
+    """
+
+    metadata_type: Literal["telegram"]
+    user_id: int
+    """
+    Unique identifier for this user or bot.
+    """
+    first_name: str
+    """
+    User’s or bot’s first name.
+    """
+    last_name: Optional[str] = None
+    """
+    Optional. User’s or bot’s last name.
+    """
+    username: Optional[str] = None
+    """
+    Optional. User’s or bot’s username.
+    """
+    language_code: Optional[str] = None
+    """
+    Optional. IETF language tag of the user’s language.
+    """
+    chat_id: int
+    """
+    Unique identifier for this chat.
+    """
+    chat_type: Annotated[Literal["PRIVATE", "GROUP", "SUPERGROUP", "CHANNEL"], BeforeValidator(str.upper)]
+    """
+    Type of chat, can be either PRIVATE, GROUP, SUPERGROUP or CHANNEL.
+    """
+    chat_title: Optional[str] = None
+    """
+    Optional. Title, for supergroups, channels and group chats.
+    """
+
+    @classmethod
+    def from_update(cls, update: Update) -> "TelegramMetadata":
+        """
+        Extract metadata from telegram Update.
+        """
+        return cls(
+            metadata_type="telegram",
+            user_id=update.effective_user.id,
+            first_name=update.effective_user.first_name,
+            last_name=update.effective_user.last_name,
+            username=update.effective_user.username,
+            language_code=update.effective_user.language_code,
+            chat_id=update.effective_chat.id,
+            chat_type=update.effective_chat.type,
+            chat_title=update.effective_chat.title,
+        )
 
 
 class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
@@ -627,8 +693,9 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
+            tg_metadata = TelegramMetadata.from_update(update)
             message = create_message(update)
-            message.origin = Origin.model_construct(message=update, interface=self.id)
+            message.origin = Origin.model_construct(message=update, interface=self.id, metadata=tg_metadata)
             resp = await self._pipeline_runner(message, str(update.effective_chat.id))
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(

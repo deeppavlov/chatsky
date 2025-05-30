@@ -27,9 +27,6 @@ class SlotsExtracted(BaseCondition):
     Whether to check if all slots are extracted or any slot is extracted.
     """
 
-    def __init__(self, *slots: SlotName, mode: Literal["any", "all"] = "all"):
-        super().__init__(slots=slots, mode=mode)
-
     async def call(self, ctx: Context) -> bool:
         manager = ctx.framework_data.slot_manager
         if self.mode == "all":

@@ -14,8 +14,7 @@ from urllib.request import urlopen
 import uuid
 import abc
 
-from pydantic import BaseModel, Field, FilePath, HttpUrl, model_validator, field_validator, field_serializer
-from pydantic_core import Url
+from pydantic import BaseModel, Field, FilePath, model_validator, field_validator, field_serializer, AnyUrl
 
 from chatsky.utils.devel import (
     json_pickle_validator,
@@ -24,9 +23,11 @@ from chatsky.utils.devel import (
     pickle_validator,
     JSONSerializableExtras,
 )
+from chatsky.core.ctx_utils import ContextError
 
 if TYPE_CHECKING:
     from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+    from chatsky.messengers.telegram.abstract import TelegramMetadata
 
 
 class DataModel(JSONSerializableExtras):
@@ -125,7 +126,7 @@ class DataAttachment(Attachment):
     This attachment can also be optionally cached for future use.
     """
 
-    source: Optional[Union[HttpUrl, FilePath]] = None
+    source: Optional[Union[FilePath, AnyUrl]] = Field(default=None, union_mode="left_to_right")
     """Attachment source -- either a URL to a file or a local filepath."""
     use_cache: bool = True
     """
@@ -176,7 +177,7 @@ class DataAttachment(Attachment):
         elif self.use_cache and self.cached_filename is not None and self.cached_filename.exists():
             with open(self.cached_filename, "rb") as file:
                 return file.read()
-        elif isinstance(self.source, Url):
+        elif isinstance(self.source, AnyUrl):
             with urlopen(self.source.unicode_string()) as url:
                 attachment_data = url.read()
         else:
@@ -257,6 +258,14 @@ class MediaGroup(Attachment):
     chatsky_attachment_type: Literal["media_group"] = "media_group"
 
 
+class Metadata(DataModel):
+    """
+    Base class for metadata stored in :py:class:`Origin`.
+    """
+
+    pass
+
+
 class Origin(BaseModel):
     """
     Denotes the origin of the message.
@@ -270,6 +279,10 @@ class Origin(BaseModel):
     interface: Optional[str] = None
     """
     Name of the interface that produced the message.
+    """
+    metadata: Union["TelegramMetadata", Metadata] = Field(default_factory=Metadata)
+    """
+    Various metadata of the message's origin.
     """
 
     @field_serializer("message", when_used="json")
@@ -330,6 +343,15 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
+
+    @property
+    def metadata(self) -> Metadata:
+        """
+        :py:attr:`Origin.metadata` of this message.
+        """
+        if self.origin is None:
+            raise ContextError("Cannot get metadata of message without `origin` field.")
+        return self.origin.metadata
 
     def __init__(  # this allows initializing Message with string as positional argument
         self,

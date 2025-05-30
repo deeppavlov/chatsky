@@ -104,7 +104,7 @@ customized_condition = ComplexUserAnswer(value={"some_key": "some_value"})
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -112,7 +112,9 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst="node2",
-                    cnd=cnd.Regexp(r".*how are you", flags=re.IGNORECASE),
+                    cnd=cnd.Regexp(
+                        pattern=r".*how are you", flags=re.IGNORECASE
+                    ),
                 )
             ],
             # pattern matching
@@ -123,7 +125,10 @@ toy_script = {
                 Tr(
                     dst="node3",
                     cnd=cnd.All(
-                        cnd.Regexp(r"talk"), cnd.Regexp(r"about.*music")
+                        conditions=[
+                            cnd.Regexp(pattern=r"talk"),
+                            cnd.Regexp(pattern=r"about.*music"),
+                        ]
                     ),
                 )
             ],
@@ -132,7 +137,10 @@ toy_script = {
         "node3": {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: [
-                Tr(dst="node4", cnd=cnd.Regexp(re.compile(r"Ok, goodbye.")))
+                Tr(
+                    dst="node4",
+                    cnd=cnd.Regexp(pattern=re.compile(r"Ok, goodbye.")),
+                )
             ],
         },
         "node4": {
@@ -141,8 +149,10 @@ toy_script = {
                 Tr(
                     dst="node1",
                     cnd=cnd.Any(
-                        HiLowerCase(),
-                        cnd.ExactMatch("hello"),
+                        conditions=[
+                            HiLowerCase(),
+                            cnd.ExactMatch(match="hello"),
+                        ]
                     ),
                 )
             ],

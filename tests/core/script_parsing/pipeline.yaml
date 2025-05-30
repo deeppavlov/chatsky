@@ -9,7 +9,8 @@ script:
         - dst:
             chatsky.dst.Previous:
           cnd:
-            chatsky.cnd.HasText: t
+            chatsky.cnd.HasText: 
+              text: t
 start_label:
   - flow
   - node

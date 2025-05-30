@@ -29,7 +29,7 @@ from chatsky.utils.testing.common import (
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
         "node1": {
             RESPONSE: Message(
@@ -46,26 +46,34 @@ toy_script = {
                 }
             ),
             TRANSITIONS: [
-                Tr(dst="node2", cnd=cnd.ExactMatch("I'm fine, how are you?"))
+                Tr(
+                    dst="node2",
+                    cnd=cnd.ExactMatch(match="I'm fine, how are you?"),
+                )
             ],
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: [
-                Tr(dst="node3", cnd=cnd.ExactMatch("Let's talk about music."))
+                Tr(
+                    dst="node3",
+                    cnd=cnd.ExactMatch(match="Let's talk about music."),
+                )
             ],
         },
         "node3": {
             RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: [Tr(dst="node4", cnd=cnd.ExactMatch("Ok, goodbye."))],
+            TRANSITIONS: [
+                Tr(dst="node4", cnd=cnd.ExactMatch(match="Ok, goodbye."))
+            ],
         },
         "node4": {
             RESPONSE: "bye",
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
         "fallback_node": {
             RESPONSE: "Ooops",
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Hi"))],
         },
     }
 }

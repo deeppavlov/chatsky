@@ -81,12 +81,14 @@ toy_script = {
     "main_flow": {
         "start_node": {
             RESPONSE: "",
-            TRANSITIONS: [Tr(dst="greeting_node", cnd=cnd.ExactMatch("Hi"))],
+            TRANSITIONS: [
+                Tr(dst="greeting_node", cnd=cnd.ExactMatch(match="Hi"))
+            ],
         },
         "greeting_node": {
             RESPONSE: LLMResponse(llm_model_name="barista_model", history=0),
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("Who are you?"))
+                Tr(dst="main_node", cnd=cnd.ExactMatch(match="Who are you?"))
             ],
         },
         "main_node": {
@@ -94,7 +96,9 @@ toy_script = {
             TRANSITIONS: [
                 Tr(
                     dst="latte_art_node",
-                    cnd=cnd.ExactMatch("I want to tell you about latte art."),
+                    cnd=cnd.ExactMatch(
+                        match="I want to tell you about latte art."
+                    ),
                 ),
                 Tr(
                     dst="boss_node",
@@ -123,7 +127,7 @@ toy_script = {
                 "Instead ask a person about it.",
             ),
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("Ok, goodbye.")),
+                Tr(dst="main_node", cnd=cnd.ExactMatch(match="Ok, goodbye.")),
                 Tr(dst=dst.Current()),
             ],
         },

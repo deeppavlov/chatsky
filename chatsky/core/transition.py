@@ -48,7 +48,7 @@ class Transition(BaseModel):
 
 async def get_next_label(
     ctx: Context, transitions: List[Transition], default_priority: float
-) -> Optional[AbsoluteNodeLabel]:
+) -> Tuple[Optional[AbsoluteNodeLabel], Optional[Transition]]:
     """
     Determine the next node based on ``transitions`` and ``ctx``.
 
@@ -70,7 +70,10 @@ async def get_next_label(
     If at any point any :py:class:`.BaseCondition`, :py:class:`.BaseDestination` or :py:class:`.BasePriority`
     produces an exception, the corresponding transition is filtered out.
 
-    :return: Label of the next node or ``None`` if no transition is left by the end of the process.
+    :return: Tuple of:
+
+        1. Label of the next node or ``None`` if no transition is left by the end of the process;
+        2. The transition which lead to the next node or ``None`` if no transition is left by the end of the process.
     """
     filtered_transitions: List[Transition] = transitions.copy()
     ctx.framework_data.current_stage = "CONDITION"
@@ -94,11 +97,11 @@ async def get_next_label(
 
     transitions_with_priorities = sorted(transitions_with_priorities, key=lambda x: x[1], reverse=True)
     ctx.framework_data.current_stage = "DESTINATION"
-    destination_results = await asyncio.gather(
+    destination_results: List[Union[AbsoluteNodeLabel, Exception]] = await asyncio.gather(
         *[transition.dst.wrapped_call(ctx) for transition, _ in transitions_with_priorities]
     )
 
-    for destination in destination_results:
+    for destination, transition_with_priority in zip(destination_results, transitions_with_priorities):
         if isinstance(destination, AbsoluteNodeLabel):
-            return destination
-    return None
+            return destination, transition_with_priority[0]
+    return (None, None)
