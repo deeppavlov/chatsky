@@ -18,7 +18,6 @@ import os
 from hashlib import sha256
 from urllib.request import urlopen
 
-from pydantic import HttpUrl
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 
@@ -86,7 +85,7 @@ EXAMPLE_ATTACHMENT_SOURCE = (
     "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 )
 
-image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
+image_url = f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"
 
 formatted_text = """
 Visit [this link](https://core.telegram.org/bots/api#formatting-options)
@@ -112,7 +111,7 @@ image_data = {
 # telegram.Bot.send_photo method
 
 document_data = {
-    "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
+    "source": f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf",
     "caption": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
     "thumbnail": urlopen(str(image_url)).read(),
@@ -146,16 +145,31 @@ script = {
     "main_flow": {
         LOCAL: {
             TRANSITIONS: [
-                Tr(dst="main_node", cnd=cnd.ExactMatch("/start")),
-                Tr(dst="formatted_node", cnd=cnd.HasCallbackQuery("formatted")),
+                Tr(dst="main_node", cnd=cnd.ExactMatch(match="/start")),
+                Tr(
+                    dst="formatted_node",
+                    cnd=cnd.HasCallbackQuery(query_string="formatted"),
+                ),
                 Tr(
                     dst="attachments_node",
-                    cnd=cnd.HasCallbackQuery("attachments"),
+                    cnd=cnd.HasCallbackQuery(query_string="attachments"),
                 ),
-                Tr(dst="secret_node", cnd=cnd.HasCallbackQuery("secret")),
-                Tr(dst="thumbnail_node", cnd=cnd.HasCallbackQuery("thumbnail")),
-                Tr(dst="hash_init_node", cnd=cnd.HasCallbackQuery("hash")),
-                Tr(dst="main_node", cnd=cnd.HasCallbackQuery("restart")),
+                Tr(
+                    dst="secret_node",
+                    cnd=cnd.HasCallbackQuery(query_string="secret"),
+                ),
+                Tr(
+                    dst="thumbnail_node",
+                    cnd=cnd.HasCallbackQuery(query_string="thumbnail"),
+                ),
+                Tr(
+                    dst="hash_init_node",
+                    cnd=cnd.HasCallbackQuery(query_string="hash"),
+                ),
+                Tr(
+                    dst="main_node",
+                    cnd=cnd.HasCallbackQuery(query_string="restart"),
+                ),
             ]
         },
         "start_node": {},

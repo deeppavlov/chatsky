@@ -116,7 +116,9 @@ def test_replace_resolvable_objects(obj, replaced):
 def test_nested_replacement():
     json_importer = JSONImporter(custom_dir=current_dir / "none")
 
-    obj = json_importer.replace_resolvable_objects({"chatsky.cnd.Negation": {"chatsky.cnd.HasText": {"text": "text"}}})
+    obj = json_importer.replace_resolvable_objects(
+        {"chatsky.cnd.Negation": {"condition": {"chatsky.cnd.HasText": {"text": "text"}}}}
+    )
 
     assert isinstance(obj, chatsky.cnd.Negation)
     assert isinstance(obj.condition, chatsky.cnd.HasText)
@@ -127,7 +129,7 @@ def test_no_recursion():
     json_importer = JSONImporter(custom_dir=current_dir / "custom")
 
     obj = json_importer.replace_resolvable_objects(
-        {"chatsky.cnd.Negation": {"chatsky.cnd.HasText": {"text": "custom.recurse"}}}
+        {"chatsky.cnd.Negation": {"condition": {"chatsky.cnd.HasText": {"text": "custom.recurse"}}}}
     )
 
     assert obj.condition.text == "custom.V"
@@ -147,7 +149,7 @@ class TestImportPipelineFile:
         start_node = pipeline.script.get_node(pipeline.start_label)
         assert start_node.response.root == chatsky.Message("hi", misc={"key": 1})
         assert start_node.transitions[0].dst == chatsky.dst.Previous()
-        assert start_node.transitions[0].cnd == chatsky.cnd.HasText("t")
+        assert start_node.transitions[0].cnd == chatsky.cnd.HasText(text="t")
 
         assert pipeline.slots.person.likes == chatsky.slots.RegexpSlot(regexp="I like (.+)", match_group_idx=1)
         assert pipeline.slots.person.age == chatsky.slots.RegexpSlot(regexp="I'm ([0-9]+) years old", match_group_idx=1)

@@ -6,7 +6,7 @@ from pydantic import BaseModel, field_validator
 T = TypeVar("T")
 
 
-class ToolDict(BaseModel, Generic[T]):
+class ToolDict(BaseModel, Generic[T], arbitrary_types_allowed=True):
     """
     TODO: Add docstrings
     """

@@ -8,6 +8,7 @@ These functions allow dynamic script configuration and are essential to the scri
 
 from __future__ import annotations
 
+import asyncio
 from typing import Union, Tuple, ClassVar, Optional
 from typing_extensions import Annotated
 from abc import abstractmethod, ABC
@@ -29,6 +30,14 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
     Base class for any script function.
 
     Defines :py:meth:`wrapped_call` that wraps :py:meth:`call` and handles exceptions and types conversions.
+    """
+
+    timeout: Optional[float] = None
+    """
+    Timeout in seconds for script function execution.
+    Defaults to ``None``, i.e. no timeout.
+
+    If timeout occurs, it is treated like any other exception raised in script functions.
     """
 
     return_type: ClassVar[Union[type, Tuple[type, ...]]]
@@ -63,8 +72,9 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
 
         :return: An instance of :py:attr:`return_type`.
         :raises TypeError: If :py:meth:`call` returned value of incorrect type.
+        :raises TimeoutError: If :py:attr:`timeout` is exceeded.
         """
-        result = await wrap_sync_function_in_async(self.call, ctx)
+        result = await asyncio.wait_for(wrap_sync_function_in_async(self.call, ctx), timeout=self.timeout)
         if not isinstance(self.return_type, tuple) and issubclass(self.return_type, BaseModel):
             result = self.return_type.model_validate(result, context={"ctx": ctx}).model_copy(deep=True)
         if not isinstance(result, self.return_type):
@@ -201,6 +211,14 @@ class BaseProcessing(BaseScriptFunc, ABC):
     and :py:attr:`chatsky.core.script.Node.pre_response`.
     """
 
+    start_condition: Optional[AnyCondition] = None
+    """
+    :py:data:`~AnyCondition` that determines if this processing function should run.
+
+    If the result of this condition is `False` or it raises an exception,
+    :py:meth:`__call__` will complete without calling :py:meth:`call`.
+    """
+
     return_type: ClassVar[Union[type, Tuple[type, ...]]] = type(None)
 
     @abstractmethod
@@ -211,6 +229,10 @@ class BaseProcessing(BaseScriptFunc, ABC):
         return await super().wrapped_call(ctx, info=info)
 
     async def __call__(self, ctx: Context) -> None:
+        if self.start_condition is not None:
+            if not await self.start_condition.is_true(ctx):
+                logger.debug(f"{self.__class__.__name__} not called: start_condition = {self.start_condition}")
+                return None
         return await super().__call__(ctx)
 
 
