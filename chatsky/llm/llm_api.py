@@ -126,14 +126,15 @@ class BaseLLMScriptFunction(BaseModel):
     """
 
     async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
+        if self.position_config is None:
+            llm_position_config = await self._get_api(ctx=ctx)
+            position_config = llm_position_config.position_config
         return await get_langchain_context(
             system_prompt=await ctx.pipeline.models[self.llm_model_name].system_prompt(ctx),
             ctx=ctx,
             call_prompt=self.prompt,
             prompt_misc_filter=self.prompt_misc_filter,
-            position_config=(
-                self.position_config if self.position_config else await self._get_api(ctx=ctx).position_config
-            ),
+            position_config=position_config,
             length=self.history,
             filter_func=self.filter_func,
             llm_model_name=self.llm_model_name,
