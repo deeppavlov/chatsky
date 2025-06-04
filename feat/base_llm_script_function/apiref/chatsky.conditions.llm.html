@@ -900,6 +900,12 @@ Uses prompt to produce result from model and evaluates the result using given me
 <dd><p>Method that takes model’s output and returns boolean.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.conditions.llm.LLMCondition.history">
+<span class="sig-name descname"><span class="pre">history</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.conditions.llm.LLMCondition.history" title="Link to this definition">#</a></dt>
+<dd><p>Number of dialogue turns aside from the current one to keep in history. <cite>-1</cite> for full history.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.conditions.llm.LLMCondition.call">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/conditions/llm.html#LLMCondition.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.conditions.llm.LLMCondition.call" title="Link to this definition">#</a></dt>
@@ -964,6 +970,7 @@ Uses prompt to produce result from model and evaluates the result using given me
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM Conditions</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.llm.LLMCondition"><code class="docutils literal notranslate"><span class="pre">LLMCondition</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.llm.LLMCondition.method"><code class="docutils literal notranslate"><span class="pre">LLMCondition.method</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.llm.LLMCondition.history"><code class="docutils literal notranslate"><span class="pre">LLMCondition.history</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.conditions.llm.LLMCondition.call"><code class="docutils literal notranslate"><span class="pre">LLMCondition.call()</span></code></a></li>
 </ul>
 </li>
