@@ -64,7 +64,8 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
+        :param llm_model_name: Name of the model that calls this filter in the
+            :py:attr:`~chatsky.core.pipeline.Pipeline.llm` dictionary.
 
         :return: Instance of Return enum or a corresponding int value.
         """
@@ -79,7 +80,8 @@ class BaseHistoryFilter(BaseModel, abc.ABC):
         :param ctx: Context object.
         :param request: Request message.
         :param response: Response message.
-        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
+        :param llm_model_name: Name of the model that calls this filter in the
+            :py:attr:`~chatsky.core.pipeline.Pipeline.llm` dictionary.
 
         :return: Instance of Return enum.
         """
@@ -109,7 +111,8 @@ class MessageFilter(BaseHistoryFilter):
 
         :param ctx: Context object.
         :param message: Either request or response message.
-        :param llm_model_name: Name of the model that calls this filter in the Pipeline.models.
+        :param llm_model_name: Name of the model that calls this filter in the
+            :py:attr:`~chatsky.core.pipeline.Pipeline.llm` dictionary.
 
         :return: Whether the `message` should be included in history.
         """

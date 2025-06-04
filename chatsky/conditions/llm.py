@@ -21,9 +21,9 @@ class LLMCondition(BaseCondition):
     Uses prompt to produce result from model and evaluates the result using given method.
     """
 
-    llm_model_name: str
+    llm_model_name: str = Field(default="default")
     """
-    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.llm` dictionary.
     """
     prompt: AnyResponse = Field(default="", validate_default=True)
     """
@@ -57,7 +57,7 @@ class LLMCondition(BaseCondition):
     """
 
     async def call(self, ctx: Context) -> bool:
-        model = ctx.pipeline.models[self.llm_model_name]
+        model = ctx.pipeline.llm.get(self.llm_model_name)
 
         history_messages = []
         history_messages.extend(

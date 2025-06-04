@@ -242,7 +242,7 @@ pipeline = Pipeline(
     toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    models={"bank_model": model},
+    llm={"bank_model": model},
 )
 
 if __name__ == "__main__":

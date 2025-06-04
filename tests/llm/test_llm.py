@@ -145,7 +145,7 @@ def mock_model():
 
 class MockPipeline:
     def __init__(self, mock_model):
-        self.models = {
+        self.llm = {
             "test_model": LLM_API(mock_model),
         }
         # self.models = {"test_model": LLM_API(mock_model)}

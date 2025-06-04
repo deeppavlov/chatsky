@@ -145,7 +145,7 @@ pipeline = Pipeline(
     toy_script,
     start_label=("main_flow", "start_node"),
     fallback_label=("main_flow", "fallback_node"),
-    models={"barista_model": model},
+    llm={"barista_model": model},
 )
 
 if __name__ == "__main__":
