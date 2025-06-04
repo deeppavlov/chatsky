@@ -22,7 +22,7 @@ class ToolDict(BaseModel, Generic[T], arbitrary_types_allowed=True):
                 raise ValueError("Default key cannot be 'default'.")
         return value
 
-    def get(self, key: str) -> T:
+    def __getitem__(self, key: str) -> T:
         if key == "default":
             if self.default is None:
                 raise ValueError('Default tool is not set. Add model under "default" key in the Pipeline tool dict.')
