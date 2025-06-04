@@ -92,12 +92,10 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     def log_exception(self, exc: Exception):
         stage_exceptions: List[Exception] = getattr(self.exception_info, self.current_stage)
         stage_exceptions.append(exc)
+        return 0 
 
-    def get_last_exception(self)-> Optional[Tuple[Literal, ExceptionInfo]]:
-        stages_order: List[Literal] = [
-            "PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY",
-            "DESTINATION", "TRANSITION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"
-        ]
+    def get_last_exception(self)-> Optional[Tuple[str, ExceptionInfo]]:
+        stages_order: List[str] = ["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "TRANSITION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]
         #TODO: старт с текущего, а не последнего
         for stage in reversed(stages_order):
             exception_list = getattr(self.exception_info, stage, [])
