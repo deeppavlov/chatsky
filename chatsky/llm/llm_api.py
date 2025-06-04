@@ -93,6 +93,7 @@ class BaseLLMScriptFunction(BaseModel):
     """
     Base class for script functions that use an LLM model.
     """
+
     llm_model_name: str
     """
     Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
@@ -113,7 +114,7 @@ class BaseLLMScriptFunction(BaseModel):
     """
     Regular expression to find prompts by key names in MISC dictionary.
     """
-    position_config: Optional[PositionConfig] = Field(default=PositionConfig())
+    position_config: Optional[PositionConfig] = None
     """
     Config for positions of prompts and messages in history.
     """
@@ -130,9 +131,21 @@ class BaseLLMScriptFunction(BaseModel):
             ctx=ctx,
             call_prompt=self.prompt,
             prompt_misc_filter=self.prompt_misc_filter,
-            position_config=self.position_config,
+            position_config=(
+                self.position_config if self.position_config else await self._get_api(ctx=ctx).position_config
+            ),
             length=self.history,
             filter_func=self.filter_func,
             llm_model_name=self.llm_model_name,
             max_size=self.max_size,
         )
+
+    async def _get_api(self, ctx: Context) -> LLM_API:
+        """
+        Get LLM_API instance for the current model.
+
+        :param ctx: Context object
+        :return: LLM_API instance
+        """
+        model = ctx.pipeline.models[self.llm_model_name]
+        return model
