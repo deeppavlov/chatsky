@@ -19,6 +19,7 @@ class LLMCondition(BaseCondition, BaseLLMScriptFunction):
     """
     Method that takes model's output and returns boolean.
     """
+    history: int = 0
 
     async def call(self, ctx: Context) -> bool:
         model = ctx.pipeline.models[self.llm_model_name]

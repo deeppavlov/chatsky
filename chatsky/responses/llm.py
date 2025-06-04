@@ -25,9 +25,6 @@ class LLMResponse(BaseResponse, BaseLLMScriptFunction):
     Schema for model output validation.
     """
     history: int = 5
-    """
-    Number of dialogue turns aside from the current one to keep in history. `-1` for full history.
-    """
 
     async def call(self, ctx: Context) -> Message:
         model = ctx.pipeline.models[self.llm_model_name]
