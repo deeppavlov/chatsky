@@ -638,6 +638,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base class for script functions that use an LLM model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">llm_model_name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.</span>
@@ -658,7 +659,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Regular expression to find prompts by key names in MISC dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">position_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PositionConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">PositionConfig</span><span class="p">())</span>
+    <span class="n">position_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PositionConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Config for positions of prompts and messages in history.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -677,12 +678,27 @@
             <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span>
             <span class="n">call_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt</span><span class="p">,</span>
             <span class="n">prompt_misc_filter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prompt_misc_filter</span><span class="p">,</span>
-            <span class="n">position_config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">position_config</span><span class="p">,</span>
+            <span class="n">position_config</span><span class="o">=</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">position_config</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_config</span> <span class="k">else</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_api</span><span class="p">(</span><span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span><span class="o">.</span><span class="n">position_config</span>
+            <span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">,</span>
             <span class="n">filter_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_func</span><span class="p">,</span>
             <span class="n">llm_model_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_model_name</span><span class="p">,</span>
             <span class="n">max_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseLLMScriptFunction._get_api">
+<a class="viewcode-back" href="../../../apiref/chatsky.llm.llm_api.html#chatsky.llm.llm_api.BaseLLMScriptFunction._get_api">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_api</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LLM_API</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get LLM_API instance for the current model.</span>
+
+<span class="sd">        :param ctx: Context object</span>
+<span class="sd">        :return: LLM_API instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">llm_model_name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">model</span></div>
 </div>
 
 </pre></div>

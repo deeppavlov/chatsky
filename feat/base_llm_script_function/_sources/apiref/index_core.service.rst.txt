@@ -9,8 +9,8 @@ Core.Service
    :toctree:
 
    chatsky.core.service.component
-   chatsky.core.service.actor
    chatsky.core.service.group
+   chatsky.core.service.service
+   chatsky.core.service.actor
    chatsky.core.service.extra
    chatsky.core.service.types
-   chatsky.core.service.service
