@@ -11,7 +11,7 @@ from __future__ import annotations
 from asyncio import Event
 from json import loads
 from time import time_ns
-from typing import Any, Optional, Dict, Literal, TYPE_CHECKING
+from typing import Any, List, Optional, Dict, Literal, TYPE_CHECKING, Tuple
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
@@ -40,6 +40,16 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     Cleared at the end of every turn.
     """
 
+class ExceptionInfo:
+    PRE_SERVICE: List[Exception] = []
+    PRE_TRANSITION: List[Exception] = []
+    CONDITION: List[Exception] = []
+    PRIORITY: List[Exception] = []
+    DESTINATION: List[Exception] = []
+    TRANSITION: List[Exception] = []
+    PRE_RESPONSE: List[Exception] = []
+    RESPONSE: List[Exception] = []
+    POST_SERVICE: List[Exception] = []
 
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
@@ -74,8 +84,25 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
-    current_stage: Optional[Literal["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]] = None 
+    current_stage: Optional[Literal["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]] = Field(default=None, exclude=True) 
     "Stores current processing stage"
+    exception_info: Optional[ExceptionInfo] = Field(default=None, exclude=True)
+    "Stores exceptions raised at different stages"
+
+    def log_exception(self, exc: Exception):
+        stage_exceptions: List[Exception] = getattr(self.exception_info, self.current_stage)
+        stage_exceptions.append(exc)
+
+    def get_last_exception(self)-> Optional[Tuple[Literal, ExceptionInfo]]:
+        stages_order: List[Literal] = [
+            "PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY",
+            "DESTINATION", "TRANSITION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"
+        ]
+        #TODO: старт с текущего, а не последнего
+        for stage in reversed(stages_order):
+            exception_list = getattr(self.exception_info, stage, [])
+            if exception_list:
+                return stage, exception_list[-1]
 
 
 class ContextMainInfo(BaseModel):

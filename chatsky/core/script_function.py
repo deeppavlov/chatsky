@@ -61,6 +61,7 @@ class BaseScriptFunc(BaseModel, ABC, frozen=True):  # generic doesn't work well 
             return result
         except Exception as exc:
             logger.error(f"An exception occurred in {self.__class__.__name__}. {info}", exc_info=exc)
+            ctx.framework_data.exception_info[ctx.framework_data.current_stage].append(exc)
             return exc
 
     async def __call__(self, ctx: Context):
