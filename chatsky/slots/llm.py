@@ -43,7 +43,7 @@ class LLMSlot(ValueSlot, frozen=True):
         request_text = ctx.last_request.text
         if request_text == "":
             return SlotNotExtracted()
-        model_instance = ctx.pipeline.models[self.llm_model_name].model
+        model_instance = ctx.pipeline.llm.get(self.llm_model_name).model
 
         # Dynamically create a Pydantic model based on the caption
         class DynamicModel(BaseModel):
@@ -78,7 +78,7 @@ class LLMGroupSlot(GroupSlot):
         DynamicGroupModel = create_model("DynamicGroupModel", **captions)
         logger.debug(f"DynamicGroupModel: {DynamicGroupModel}")
 
-        model_instance = ctx.pipeline.models[self.llm_model_name].model
+        model_instance = ctx.pipeline.llm.get(self.llm_model_name).model
         structured_model = model_instance.with_structured_output(DynamicGroupModel)
         result = await structured_model.ainvoke(request_text)
         result_json = result.model_dump()
