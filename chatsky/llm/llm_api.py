@@ -32,7 +32,7 @@ class LLM_API:
         self,
         model: BaseChatModel,
         system_prompt: Union[AnyResponse, MessageInitTypes] = "",
-        position_config: PositionConfig = PositionConfig(),
+        position_config: PositionConfig = None,
     ) -> None:
         """
         :param model: Model object
@@ -42,7 +42,7 @@ class LLM_API:
         self.model: BaseChatModel = model
         self.parser = StrOutputParser()
         self.system_prompt = TypeAdapter(AnyResponse).validate_python(system_prompt)
-        self.position_config = position_config
+        self.position_config = position_config or PositionConfig()
 
     async def respond(
         self,
