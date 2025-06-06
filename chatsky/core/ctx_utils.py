@@ -40,7 +40,18 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     Cleared at the end of every turn.
     """
 
-STAGES = ["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]
+
+STAGES = [
+    "PRE_SERVICE",
+    "PRE_TRANSITION",
+    "CONDITION",
+    "PRIORITY",
+    "DESTINATION",
+    "PRE_RESPONSE",
+    "RESPONSE",
+    "POST_SERVICE",
+]
+
 
 class ExceptionInfo(BaseModel, arbitrary_types_allowed=True):
     PRE_SERVICE: List[Exception] = Field(default_factory=list)
@@ -52,6 +63,7 @@ class ExceptionInfo(BaseModel, arbitrary_types_allowed=True):
     PRE_RESPONSE: List[Exception] = Field(default_factory=list)
     RESPONSE: List[Exception] = Field(default_factory=list)
     POST_SERVICE: List[Exception] = Field(default_factory=list)
+
 
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
@@ -86,7 +98,7 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
-    current_stage: Optional[Literal[*STAGES]] = Field(default=None, exclude=True)    
+    current_stage: Optional[Literal[*STAGES]] = Field(default=None, exclude=True)
     "Stores current processing stage"
     exception_info: Optional[ExceptionInfo] = Field(default=None, exclude=True)
     "Stores exceptions raised at different stages"
