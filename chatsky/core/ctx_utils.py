@@ -40,16 +40,18 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     Cleared at the end of every turn.
     """
 
-class ExceptionInfo:
-    PRE_SERVICE: List[Exception] = []
-    PRE_TRANSITION: List[Exception] = []
-    CONDITION: List[Exception] = []
-    PRIORITY: List[Exception] = []
-    DESTINATION: List[Exception] = []
-    TRANSITION: List[Exception] = []
-    PRE_RESPONSE: List[Exception] = []
-    RESPONSE: List[Exception] = []
-    POST_SERVICE: List[Exception] = []
+STAGES = ["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]
+
+class ExceptionInfo(BaseModel, arbitrary_types_allowed=True):
+    PRE_SERVICE: List[Exception] = Field(default_factory=list)
+    PRE_TRANSITION: List[Exception] = Field(default_factory=list)
+    CONDITION: List[Exception] = Field(default_factory=list)
+    PRIORITY: List[Exception] = Field(default_factory=list)
+    DESTINATION: List[Exception] = Field(default_factory=list)
+    TRANSITION: List[Exception] = Field(default_factory=list)
+    PRE_RESPONSE: List[Exception] = Field(default_factory=list)
+    RESPONSE: List[Exception] = Field(default_factory=list)
+    POST_SERVICE: List[Exception] = Field(default_factory=list)
 
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     """
@@ -84,23 +86,19 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
-    current_stage: Optional[Literal["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]] = Field(default=None, exclude=True) 
+    current_stage: Optional[Literal[*STAGES]] = Field(default=None, exclude=True)    
     "Stores current processing stage"
     exception_info: Optional[ExceptionInfo] = Field(default=None, exclude=True)
     "Stores exceptions raised at different stages"
 
-    def log_exception(self, exc: Exception):
-        stage_exceptions: List[Exception] = getattr(self.exception_info, self.current_stage)
-        stage_exceptions.append(exc)
-        return 0 
-
-    def get_last_exception(self)-> Optional[Tuple[str, ExceptionInfo]]:
-        stages_order: List[str] = ["PRE_SERVICE", "PRE_TRANSITION", "CONDITION", "PRIORITY", "DESTINATION", "TRANSITION", "PRE_RESPONSE", "RESPONSE", "POST_SERVICE"]
-        #TODO: старт с текущего, а не последнего
-        for stage in reversed(stages_order):
-            exception_list = getattr(self.exception_info, stage, [])
-            if exception_list:
-                return stage, exception_list[-1]
+    def get_exception(self, stage: Optional[Literal[*STAGES]]) -> Optional[Tuple[str, ExceptionInfo]]:
+        if stage is None:
+            for stage in reversed(STAGES):
+                exception_list = getattr(self.exception_info, stage, [])
+                if exception_list:
+                    return stage, exception_list[-1]
+        else:
+            return getattr(self.exception_info, stage, [])
 
 
 class ContextMainInfo(BaseModel):
