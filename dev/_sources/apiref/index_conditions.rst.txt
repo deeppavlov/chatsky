@@ -9,6 +9,6 @@ Conditions
    :toctree:
 
    chatsky.conditions.service
-   chatsky.conditions.standard
-   chatsky.conditions.slots
    chatsky.conditions.llm
+   chatsky.conditions.slots
+   chatsky.conditions.standard

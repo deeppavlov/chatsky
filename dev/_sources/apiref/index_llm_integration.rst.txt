@@ -9,7 +9,7 @@ LLM Integration
    :toctree:
 
    chatsky.llm.filters
-   chatsky.llm.langchain_context
    chatsky.llm.methods
    chatsky.llm.prompt
    chatsky.llm.llm_api
+   chatsky.llm.langchain_context

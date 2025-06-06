@@ -8,6 +8,6 @@ Responses
 .. autosummary::
    :toctree:
 
+   chatsky.responses.slots
    chatsky.responses.standard
    chatsky.responses.llm
-   chatsky.responses.slots

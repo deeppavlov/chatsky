@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="../_static/images/Chatsky-min-light.svg" rel="icon" type="image/svg+xml">
-    <title>LLM responses. &#8212; chatsky 0.10.0 documentation</title>
+    <title>LLM API &#8212; chatsky 0.10.0 documentation</title>
   
   
   
@@ -63,7 +63,7 @@
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Messenger Interfaces" href="index_messenger_interfaces.html" />
+    <link rel="next" title="Langchain Context" href="chatsky.llm.langchain_context.html" />
     <link rel="prev" title="Prompt position" href="chatsky.llm.prompt.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -490,6 +490,10 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_conditions.html">Conditions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.service.html">Service Conditions</a></li>
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.llm.html">LLM Conditions</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.standard.html">Standard Conditions</a></li>
 
 
@@ -500,30 +504,28 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.slots.html">Slot Conditions</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.conditions.llm.html">LLM Conditions</a></li>
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_context_storages.html">Context Storages</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.redis.html">Redis</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.database.html">Database</a></li>
 
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.ydb.html">Yandex DB</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.mongo.html">Mongo</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.redis.html">Redis</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.ydb.html">Yandex DB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.protocol.html">Protocol</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.sql.html">SQL</a></li>
 
 
 
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.memory.html">Memory</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.file.html">File</a></li>
 
@@ -531,11 +533,15 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.context_storages.memory.html">Memory</a></li>
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_core.html">Core</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.transition.html">Transition</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_function.html">Script Function</a></li>
 
 
@@ -552,6 +558,23 @@
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
+
+
+
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.script.html">Script</a></li>
 
 
@@ -559,6 +582,11 @@
 
 
 
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_utils.html">Context Utils</a></li>
 
 
 
@@ -586,47 +614,26 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.pipeline.html">Pipeline</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.transition.html">Transition</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.script_parsing.html">Pipeline File Import</a></li>
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_utils.html">Context Utils</a></li>
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.node_label.html">Node Label</a></li>
-
-
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.context.html">Context</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.utils.html">Utils</a></li>
-
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.ctx_dict.html">Context Dict</a></li>
-
 
 
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_core.service.html">Core.Service</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.extra.html">Extra Handler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
 
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.group.html">Service Group</a></li>
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.service.html">Service</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.extra.html">Extra Handler</a></li>
+
 
 
 
@@ -637,17 +644,14 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.component.html">Component</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.actor.html">Actor</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.core.service.group.html">Service Group</a></li>
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_db_benchmark.html">DB Benchmark</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.basic_config.html">Basic Config</a></li>
+
+
+
+
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.benchmark.html">Context storage benchmarking</a></li>
 
@@ -656,11 +660,7 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.basic_config.html">Basic Config</a></li>
-
-
-
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.db_benchmark.report.html">Report</a></li>
 
 </ul>
 </details></li>
@@ -677,6 +677,8 @@
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_development_utils.html">Development Utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.json_serialization.html">Serialization</a></li>
 
 
@@ -688,8 +690,6 @@
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.extra_field_helpers.html">Extra field helpers</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.devel.async_helpers.html">Async Helpers</a></li>
-
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index_llm_integration.html">LLM Integration</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -700,10 +700,6 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
-
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.methods.html">LLM methods</a></li>
 
 
@@ -711,47 +707,55 @@
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
 
 
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">LLM responses.</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">LLM API</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">Langchain Context</a></li>
+
+
 
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_messenger_interfaces.html">Messenger Interfaces</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
-
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.interface.html">Telegram Interfaces</a></li>
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.interface.html">Message Interfaces</a></li>
 
 
 
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.console.html"><code class="docutils literal notranslate"><span class="pre">CLIMessengerInterface</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.interface.html">Telegram Interfaces</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.telegram.abstract.html">Telegram Base</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.messengers.common.types.html">Types</a></li>
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_processing.html">Processing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.processing.standard.html">Standard Processing</a></li>
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.processing.slots.html">Slot Processing</a></li>
 
 
 
 
+<li class="toctree-l2"><a class="reference internal" href="chatsky.processing.standard.html">Standard Processing</a></li>
+
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_responses.html">Responses</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.slots.html">Slot Responses</a></li>
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.standard.html">Standard Responses</a></li>
 
 <li class="toctree-l2"><a class="reference internal" href="chatsky.responses.llm.html">LLM responses</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.responses.slots.html">Slot Responses</a></li>
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_slots.html">Slots</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
+
+
 <li class="toctree-l2"><a class="reference internal" href="chatsky.slots.slots.html">Slots</a></li>
 
 
@@ -766,15 +770,10 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.slots.llm.html">LLM Slots</a></li>
-
-
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="index_stats.html">Stats</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.utils.html">Utils</a></li>
-
-
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
 
 
 
@@ -791,7 +790,9 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.cli.html">Command Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.stats.utils.html">Utils</a></li>
+
+
 
 
 
@@ -809,13 +810,13 @@
 
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.common.html">Common</a></li>
-
-
 <li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.toy_script.html">Toy script</a></li>
 
 
 
+
+
+<li class="toctree-l2"><a class="reference internal" href="chatsky.utils.testing.common.html">Common</a></li>
 
 
 </ul>
@@ -866,7 +867,7 @@
     
     <li class="breadcrumb-item"><a href="index_llm_integration.html" class="nav-link">LLM Integration</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LLM responses.</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LLM API</span></li>
   </ul>
 </nav>
 </div>
@@ -883,8 +884,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="llm-responses">
-<span id="module-chatsky.llm.llm_api"></span><h1>LLM responses.<a class="headerlink" href="#llm-responses" title="Link to this heading">#</a></h1>
+  <section id="llm-api">
+<span id="module-chatsky.llm.llm_api"></span><h1>LLM API<a class="headerlink" href="#llm-api" title="Link to this heading">#</a></h1>
 <p>Wrapper around langchain.</p>
 </section>
 <dl class="py class">
@@ -938,6 +939,99 @@ and handles message exchange between remote model and chatsky classes.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BaseLLMScriptFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Base class for script functions that use an LLM model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name">
+<span class="sig-name descname"><span class="pre">llm_model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name" title="Link to this definition">#</a></dt>
+<dd><p>Key of the model in the <a class="reference internal" href="chatsky.core.pipeline.html#chatsky.core.pipeline.Pipeline.models" title="chatsky.core.pipeline.Pipeline.models"><code class="xref py py-attr docutils literal notranslate"><span class="pre">models</span></code></a> dictionary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.prompt">
+<span class="sig-name descname"><span class="pre">prompt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="chatsky.llm.prompt.html#chatsky.llm.prompt.Prompt" title="chatsky.llm.prompt.Prompt"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prompt</span></code></a></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.prompt" title="Link to this definition">#</a></dt>
+<dd><p>Script function prompt.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.history">
+<span class="sig-name descname"><span class="pre">history</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.history" title="Link to this definition">#</a></dt>
+<dd><p>Number of dialogue turns aside from the current one to keep in history. <cite>-1</cite> for full history.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.filter_func">
+<span class="sig-name descname"><span class="pre">filter_func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="chatsky.llm.filters.html#chatsky.llm.filters.BaseHistoryFilter" title="chatsky.llm.filters.BaseHistoryFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHistoryFilter</span></code></a></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.filter_func" title="Link to this definition">#</a></dt>
+<dd><p>Filter function to filter messages in history.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.prompt_misc_filter">
+<span class="sig-name descname"><span class="pre">prompt_misc_filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.prompt_misc_filter" title="Link to this definition">#</a></dt>
+<dd><p>Regular expression to find prompts by key names in MISC dictionary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.position_config">
+<span class="sig-name descname"><span class="pre">position_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><a class="reference internal" href="chatsky.llm.prompt.html#chatsky.llm.prompt.PositionConfig" title="chatsky.llm.prompt.PositionConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositionConfig</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.position_config" title="Link to this definition">#</a></dt>
+<dd><p>Config for positions of prompts and messages in history.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction.max_size">
+<span class="sig-name descname"><span class="pre">max_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.max_size" title="Link to this definition">#</a></dt>
+<dd><p>Maximum size of any message in chat in symbols.
+If a message exceeds the limit it will not be sent to the LLM and a warning
+will be produced.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_langchain_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction._get_langchain_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context" title="Link to this definition">#</a></dt>
+<dd><p>Convert <code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code> to langchain messages using <a class="reference internal" href="chatsky.llm.langchain_context.html#chatsky.llm.langchain_context.get_langchain_context" title="chatsky.llm.langchain_context.get_langchain_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_langchain_context()</span></code></a>.</p>
+<p>Arguments to the function are passed from attributes of this class and from
+the <a class="reference internal" href="#chatsky.llm.llm_api.LLM_API" title="chatsky.llm.llm_api.LLM_API"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLM_API</span></code></a> model stored in pipeline:</p>
+<ol class="arabic simple">
+<li><p>Model is retrieved from pipeline using <a class="reference internal" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name" title="chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">llm_model_name</span></code></a>;</p></li>
+<li><p>Model’s <code class="docutils literal notranslate"><span class="pre">system_prompt</span></code> is executed and passed to <a class="reference internal" href="chatsky.llm.langchain_context.html#chatsky.llm.langchain_context.get_langchain_context" title="chatsky.llm.langchain_context.get_langchain_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_langchain_context()</span></code></a> as <code class="docutils literal notranslate"><span class="pre">system_prompt</span></code>;</p></li>
+<li><p>If <a class="reference internal" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.position_config" title="chatsky.llm.llm_api.BaseLLMScriptFunction.position_config"><code class="xref py py-attr docutils literal notranslate"><span class="pre">position_config</span></code></a> is <cite>None</cite>, model’s <code class="docutils literal notranslate"><span class="pre">position_config</span></code> is used instead;</p></li>
+<li><p>The rest of the arguments are passed as is.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ctx</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context" title="chatsky.core.context.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a></span>) – Context object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMessage</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of LangChain messages.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction._get_api">
+<span class="sig-name descname"><span class="pre">_get_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction._get_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_api" title="Link to this definition">#</a></dt>
+<dd><p>Get LLM_API instance for the current model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ctx</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context" title="chatsky.core.context.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a></span>) – Context object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#chatsky.llm.llm_api.LLM_API" title="chatsky.llm.llm_api.LLM_API"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLM_API</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>LLM_API instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 
 
                 </article>
@@ -959,11 +1053,11 @@ and handles message exchange between remote model and chatsky classes.</p>
       </div>
     </a>
     <a class="right-next"
-       href="index_messenger_interfaces.html"
+       href="chatsky.llm.langchain_context.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Messenger Interfaces</p>
+        <p class="prev-next-title">Langchain Context</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -986,10 +1080,22 @@ and handles message exchange between remote model and chatsky classes.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM responses.</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM API</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API"><code class="docutils literal notranslate"><span class="pre">LLM_API</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API.respond"><code class="docutils literal notranslate"><span class="pre">LLM_API.respond()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API.condition"><code class="docutils literal notranslate"><span class="pre">LLM_API.condition()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.llm_model_name</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.prompt"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.prompt</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.history"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.history</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.filter_func"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.filter_func</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.prompt_misc_filter"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.prompt_misc_filter</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.position_config"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.position_config</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.max_size"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction.max_size</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction._get_langchain_context()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_api"><code class="docutils literal notranslate"><span class="pre">BaseLLMScriptFunction._get_api()</span></code></a></li>
 </ul>
 </li>
 </ul>
