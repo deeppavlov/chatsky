@@ -126,6 +126,20 @@ class BaseLLMScriptFunction(BaseModel):
     """
 
     async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
+        """
+        Convert :py:class:`Context` to langchain messages using :py:func:`.get_langchain_context`.
+
+        Arguments to the function are passed from attributes of this class and from
+        the :py:class:`.LLM_API` model stored in pipeline:
+
+        1. Model is retrieved from pipeline using :py:attr:`llm_model_name`;
+        2. Model's ``system_prompt`` is executed and passed to :py:func:`.get_langchain_context` as ``system_prompt``;
+        3. If :py:attr:`position_config` is `None`, model's ``position_config`` is used instead;
+        4. The rest of the arguments are passed as is.
+
+        :param ctx: Context object.
+        :return: A list of LangChain messages.
+        """
         model = self._get_api(ctx=ctx)
 
         return await get_langchain_context(
