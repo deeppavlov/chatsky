@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="../_static/images/Chatsky-min-light.svg" rel="icon" type="image/svg+xml">
-    <title>LLM Utils. &#8212; chatsky 0.10.0 documentation</title>
+    <title>Langchain Context &#8212; chatsky 0.10.0 documentation</title>
   
   
   
@@ -64,7 +64,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Messenger Interfaces" href="index_messenger_interfaces.html" />
-    <link rel="prev" title="LLM responses." href="chatsky.llm.llm_api.html" />
+    <link rel="prev" title="LLM API" href="chatsky.llm.llm_api.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.10" />
@@ -707,10 +707,10 @@
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM responses.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.llm_api.html">LLM API</a></li>
 
 
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">LLM Utils.</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Langchain Context</a></li>
 
 
 
@@ -867,7 +867,7 @@
     
     <li class="breadcrumb-item"><a href="index_llm_integration.html" class="nav-link">LLM Integration</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LLM Utils.</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Langchain Context</span></li>
   </ul>
 </nav>
 </div>
@@ -884,9 +884,9 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="llm-utils">
-<span id="module-chatsky.llm.langchain_context"></span><h1>LLM Utils.<a class="headerlink" href="#llm-utils" title="Link to this heading">#</a></h1>
-<p>The Utils module contains functions for converting Chatsky’s objects to an LLM_API and langchain compatible versions.</p>
+  <section id="langchain-context">
+<span id="module-chatsky.llm.langchain_context"></span><h1>Langchain Context<a class="headerlink" href="#langchain-context" title="Link to this heading">#</a></h1>
+<p>This module contains functions for converting Chatsky’s Message and Context to Langchain messages.</p>
 </section>
 <dl class="py function">
 <dt class="sig sig-object py" id="chatsky.llm.langchain_context.message_to_langchain">
@@ -975,7 +975,7 @@ Defaults to default PositionConfig().</p></li>
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">LLM responses.</p>
+        <p class="prev-next-title">LLM API</p>
       </div>
     </a>
     <a class="right-next"
@@ -1006,7 +1006,7 @@ Defaults to default PositionConfig().</p></li>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM Utils.</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Langchain Context</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.langchain_context.message_to_langchain"><code class="docutils literal notranslate"><span class="pre">message_to_langchain()</span></code></a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.langchain_context.context_to_history"><code class="docutils literal notranslate"><span class="pre">context_to_history()</span></code></a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.langchain_context.get_langchain_context"><code class="docutils literal notranslate"><span class="pre">get_langchain_context()</span></code></a></li>

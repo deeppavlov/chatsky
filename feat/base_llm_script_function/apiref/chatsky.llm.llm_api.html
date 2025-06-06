@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="../_static/images/Chatsky-min-light.svg" rel="icon" type="image/svg+xml">
-    <title>LLM responses. &#8212; chatsky 0.10.0 documentation</title>
+    <title>LLM API &#8212; chatsky 0.10.0 documentation</title>
   
   
   
@@ -63,7 +63,7 @@
         </script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="LLM Utils." href="chatsky.llm.langchain_context.html" />
+    <link rel="next" title="Langchain Context" href="chatsky.llm.langchain_context.html" />
     <link rel="prev" title="Prompt position" href="chatsky.llm.prompt.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -707,10 +707,10 @@
 <li class="toctree-l2"><a class="reference internal" href="chatsky.llm.prompt.html">Prompt position</a></li>
 
 
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">LLM responses.</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">LLM API</a></li>
 
 
-<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">LLM Utils.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chatsky.llm.langchain_context.html">Langchain Context</a></li>
 
 
 
@@ -867,7 +867,7 @@
     
     <li class="breadcrumb-item"><a href="index_llm_integration.html" class="nav-link">LLM Integration</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LLM responses.</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">LLM API</span></li>
   </ul>
 </nav>
 </div>
@@ -884,13 +884,13 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="llm-responses">
-<span id="module-chatsky.llm.llm_api"></span><h1>LLM responses.<a class="headerlink" href="#llm-responses" title="Link to this heading">#</a></h1>
+  <section id="llm-api">
+<span id="module-chatsky.llm.llm_api"></span><h1>LLM API<a class="headerlink" href="#llm-api" title="Link to this heading">#</a></h1>
 <p>Wrapper around langchain.</p>
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="chatsky.llm.llm_api.LLM_API">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLM_API</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_prompt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PositionConfig(system_prompt=0,</span> <span class="pre">history=1,</span> <span class="pre">misc_prompt=2,</span> <span class="pre">call_prompt=3,</span> <span class="pre">last_turn=4)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#LLM_API"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.LLM_API" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LLM_API</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_prompt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#LLM_API"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.LLM_API" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class acts as a wrapper for all LLMs from langchain
 and handles message exchange between remote model and chatsky classes.</p>
@@ -991,16 +991,31 @@ will be produced.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_langchain_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction._get_langchain_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_langchain_context" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMessage</span></code>]</span></p>
+<dd><p>Convert <code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code> to langchain messages using <a class="reference internal" href="chatsky.llm.langchain_context.html#chatsky.llm.langchain_context.get_langchain_context" title="chatsky.llm.langchain_context.get_langchain_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_langchain_context()</span></code></a>.</p>
+<p>Arguments to the function are passed from attributes of this class and from
+the <a class="reference internal" href="#chatsky.llm.llm_api.LLM_API" title="chatsky.llm.llm_api.LLM_API"><code class="xref py py-class docutils literal notranslate"><span class="pre">LLM_API</span></code></a> model stored in pipeline:</p>
+<ol class="arabic simple">
+<li><p>Model is retrieved from pipeline using <a class="reference internal" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name" title="chatsky.llm.llm_api.BaseLLMScriptFunction.llm_model_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">llm_model_name</span></code></a>;</p></li>
+<li><p>Model’s <code class="docutils literal notranslate"><span class="pre">system_prompt</span></code> is executed and passed to <a class="reference internal" href="chatsky.llm.langchain_context.html#chatsky.llm.langchain_context.get_langchain_context" title="chatsky.llm.langchain_context.get_langchain_context"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_langchain_context()</span></code></a> as <code class="docutils literal notranslate"><span class="pre">system_prompt</span></code>;</p></li>
+<li><p>If <a class="reference internal" href="#chatsky.llm.llm_api.BaseLLMScriptFunction.position_config" title="chatsky.llm.llm_api.BaseLLMScriptFunction.position_config"><code class="xref py py-attr docutils literal notranslate"><span class="pre">position_config</span></code></a> is <cite>None</cite>, model’s <code class="docutils literal notranslate"><span class="pre">position_config</span></code> is used instead;</p></li>
+<li><p>The rest of the arguments are passed as is.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ctx</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="chatsky.core.context.html#chatsky.core.context.Context" title="chatsky.core.context.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a></span>) – Context object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMessage</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of LangChain messages.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="chatsky.llm.llm_api.BaseLLMScriptFunction._get_api">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction._get_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_api" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_get_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/chatsky/llm/llm_api.html#BaseLLMScriptFunction._get_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#chatsky.llm.llm_api.BaseLLMScriptFunction._get_api" title="Link to this definition">#</a></dt>
 <dd><p>Get LLM_API instance for the current model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1042,7 +1057,7 @@ will be produced.</p>
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">LLM Utils.</p>
+        <p class="prev-next-title">Langchain Context</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1065,7 +1080,7 @@ will be produced.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM responses.</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">LLM API</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API"><code class="docutils literal notranslate"><span class="pre">LLM_API</span></code></a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API.respond"><code class="docutils literal notranslate"><span class="pre">LLM_API.respond()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#chatsky.llm.llm_api.LLM_API.condition"><code class="docutils literal notranslate"><span class="pre">LLM_API.condition()</span></code></a></li>
