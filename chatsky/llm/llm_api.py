@@ -127,7 +127,7 @@ class BaseLLMScriptFunction(BaseModel):
 
     async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
         if self.position_config is None:
-            llm_position_config = await self._get_api(ctx=ctx)
+            llm_position_config = self._get_api(ctx=ctx)
             position_config = llm_position_config.position_config
         return await get_langchain_context(
             system_prompt=await ctx.pipeline.models[self.llm_model_name].system_prompt(ctx),
@@ -141,7 +141,7 @@ class BaseLLMScriptFunction(BaseModel):
             max_size=self.max_size,
         )
 
-    async def _get_api(self, ctx: Context) -> LLM_API:
+    def _get_api(self, ctx: Context) -> LLM_API:
         """
         Get LLM_API instance for the current model.
 
