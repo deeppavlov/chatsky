@@ -1,18 +1,21 @@
 """
-LLM responses.
---------------
+LLM API
+-------
 Wrapper around langchain.
 """
 
-from typing import Union, Type
+from typing import Union, Type, Optional
 import logging
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel, TypeAdapter, Field
 
+from chatsky import Context
 from chatsky.core.message import Message
 from chatsky.llm.methods import BaseMethod
-from chatsky.llm.prompt import PositionConfig
+from chatsky.llm.prompt import PositionConfig, Prompt
 from chatsky.core import AnyResponse, MessageInitTypes
+from chatsky.llm.filters import BaseHistoryFilter, DefaultFilter
+from chatsky.llm.langchain_context import get_langchain_context
 from chatsky.llm._langchain_imports import StrOutputParser, BaseChatModel, BaseMessage, check_langchain_available
 
 
@@ -84,3 +87,79 @@ class LLM_API:
         """
         result = await method(history, await self.model.agenerate([history], logprobs=True, top_logprobs=10))
         return result
+
+
+class BaseLLMScriptFunction(BaseModel):
+    """
+    Base class for script functions that use an LLM model.
+    """
+
+    llm_model_name: str
+    """
+    Key of the model in the :py:attr:`~chatsky.core.pipeline.Pipeline.models` dictionary.
+    """
+    prompt: Prompt = Field(default="", validate_default=True)
+    """
+    Script function prompt.
+    """
+    history: int = 1
+    """
+    Number of dialogue turns aside from the current one to keep in history. `-1` for full history.
+    """
+    filter_func: BaseHistoryFilter = Field(default_factory=DefaultFilter)
+    """
+    Filter function to filter messages in history.
+    """
+    prompt_misc_filter: str = Field(default=r"prompt")
+    """
+    Regular expression to find prompts by key names in MISC dictionary.
+    """
+    position_config: Optional[PositionConfig] = None
+    """
+    Config for positions of prompts and messages in history.
+    """
+    max_size: int = 5000
+    """
+    Maximum size of any message in chat in symbols.
+    If a message exceeds the limit it will not be sent to the LLM and a warning
+    will be produced.
+    """
+
+    async def _get_langchain_context(self, ctx: Context) -> list[BaseMessage]:
+        """
+        Convert :py:class:`Context` to langchain messages using :py:func:`.get_langchain_context`.
+
+        Arguments to the function are passed from attributes of this class and from
+        the :py:class:`.LLM_API` model stored in pipeline:
+
+        1. Model is retrieved from pipeline using :py:attr:`llm_model_name`;
+        2. Model's ``system_prompt`` is executed and passed to :py:func:`.get_langchain_context` as ``system_prompt``;
+        3. If :py:attr:`position_config` is `None`, model's ``position_config`` is used instead;
+        4. The rest of the arguments are passed as is.
+
+        :param ctx: Context object.
+        :return: A list of LangChain messages.
+        """
+        model = self._get_api(ctx=ctx)
+
+        return await get_langchain_context(
+            system_prompt=await model.system_prompt(ctx),
+            ctx=ctx,
+            call_prompt=self.prompt,
+            prompt_misc_filter=self.prompt_misc_filter,
+            position_config=self.position_config or model.position_config,
+            length=self.history,
+            filter_func=self.filter_func,
+            llm_model_name=self.llm_model_name,
+            max_size=self.max_size,
+        )
+
+    def _get_api(self, ctx: Context) -> LLM_API:
+        """
+        Get LLM_API instance for the current model.
+
+        :param ctx: Context object
+        :return: LLM_API instance
+        """
+        model = ctx.pipeline.models[self.llm_model_name]
+        return model
