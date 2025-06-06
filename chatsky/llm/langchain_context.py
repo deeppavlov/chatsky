@@ -1,7 +1,7 @@
 """
-LLM Utils.
-----------
-The Utils module contains functions for converting Chatsky's objects to an LLM_API and langchain compatible versions.
+Langchain Context
+-----------------
+This module contains functions for converting Chatsky's Message and Context to Langchain messages.
 """
 
 import re

@@ -1,6 +1,6 @@
 """
-LLM responses.
---------------
+LLM API
+-------
 Wrapper around langchain.
 """
 
