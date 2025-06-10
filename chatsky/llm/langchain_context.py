@@ -4,15 +4,19 @@ Langchain Context
 This module contains functions for converting Chatsky's Message and Context to Langchain messages.
 """
 
+from __future__ import annotations
+
 import re
 import logging
-from typing import Literal, Union
+from typing import Literal, Union, TYPE_CHECKING
 import asyncio
 
-from chatsky.core import Context, Message
 from chatsky.llm._langchain_imports import HumanMessage, SystemMessage, AIMessage, check_langchain_available
 from chatsky.llm.filters import BaseHistoryFilter, Return
 from chatsky.llm.prompt import Prompt, PositionConfig
+
+if TYPE_CHECKING:
+    from chatsky.core import Context, Message
 
 
 logger = logging.getLogger(__name__)

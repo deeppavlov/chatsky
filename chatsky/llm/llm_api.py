@@ -63,6 +63,21 @@ class LLM_API:
             result = await self.parser.ainvoke(await self.model.ainvoke(history))
             return Message(text=result)
         elif issubclass(message_schema, Message):
+            result = await self._ainvoke(history, message_schema)
+            return Message.model_validate(result)
+        elif issubclass(message_schema, BaseModel):
+            result = await self._ainvoke(history, message_schema)
+            return Message(text=result.model_dump_json())
+        else:
+            raise ValueError
+
+    async def _ainvoke(
+        self,
+        history: list[BaseMessage],
+        message_schema: Union[Type[Message], Type[BaseModel]],
+    ) -> Union[Message, BaseModel]:
+        # call the model and return result as BaseMessage or BaseModel
+        if issubclass(message_schema, Message):
             # Case if the message_schema describes Message structure
             structured_model = self.model.with_structured_output(message_schema, method="json_mode")
             model_result = await structured_model.ainvoke(history)
@@ -72,9 +87,7 @@ class LLM_API:
             # Case if the message_schema describes Message.text structure
             structured_model = self.model.with_structured_output(message_schema)
             model_result = await structured_model.ainvoke(history)
-            return Message(text=message_schema.model_validate(model_result).model_dump_json())
-        else:
-            raise ValueError
+            return message_schema.model_validate(model_result)
 
     async def condition(self, history: list[BaseMessage], method: BaseMethod) -> bool:
         """
