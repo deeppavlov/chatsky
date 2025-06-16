@@ -43,26 +43,14 @@ def _build_drawio(docker: DockerClient):
 
 
 def docs(use_docker: bool = False):
-    with docker_client(use_docker):
+    with docker_client(use_docker) as client:
         init()
         clean_docs()
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         if use_docker is True:
-            _build_drawio(docker_client)
+            _build_drawio(client)
         result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
         exit(result)
-
-
-# def docs_no_docker():
-#     init()
-#     clean_docs()
-#     dotenv.load_dotenv(".env_file")
-#     os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-#     os.environ["NBSPHINX_ALLOW_ERRORS"] = "true"
-#     result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "chatsky"])
-#     result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
-#     result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
-#     exit(result)
