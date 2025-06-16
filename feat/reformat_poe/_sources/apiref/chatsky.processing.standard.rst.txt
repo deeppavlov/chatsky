@@ -1,0 +1,7 @@
+:source_name: chatsky/processing/standard
+:doc_version: feat/reformat_poe/
+
+.. automodule:: chatsky.processing.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:
