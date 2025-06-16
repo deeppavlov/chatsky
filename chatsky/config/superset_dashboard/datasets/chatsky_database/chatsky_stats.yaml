@@ -94,7 +94,7 @@ columns:
   description: null
   python_date_format: null
   extra: {}
-- column_name: request_id
+- column_name: turn_id
   verbose_name: null
   is_dttm: false
   is_active: true

@@ -2,7 +2,7 @@ from os import urandom
 from pathlib import Path
 from random import randint
 from shutil import rmtree
-from typing import Hashable, Optional, TextIO
+from typing import Optional, TextIO
 from urllib.request import urlopen
 
 import pytest
@@ -48,7 +48,7 @@ class ChatskyCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWith
 
     def __init__(self, attachments_directory: Optional[Path] = None):
         MessengerInterfaceWithAttachments.__init__(self, attachments_directory)
-        self._ctx_id: Optional[Hashable] = None
+        self._ctx_id: Optional[str] = None
         self._intro: Optional[str] = None
         self._prompt_request: str = "request: "
         self._prompt_response: str = "response: "

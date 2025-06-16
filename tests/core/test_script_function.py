@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 
 from chatsky.core.script_function import ConstResponse, ConstDestination, ConstCondition, ConstPriority
@@ -131,3 +132,20 @@ async def test_const_object_immutability():
     response_result.text = "text2"
 
     assert message.text == "text1"
+
+
+class TestTimeout:
+    class SleepingFunc(BaseProcessing):
+        sleeping: float
+
+        async def call(self, ctx: Context):
+            await asyncio.sleep(self.sleeping)
+
+    async def test_timeout(self):
+        ctx = Context()
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.01)
+        assert await sleep_func.wrapped_call(ctx) is None
+
+        sleep_func = self.SleepingFunc(timeout=0.05, sleeping=0.06)
+        assert "TimeoutError" in repr(await sleep_func.wrapped_call(ctx))

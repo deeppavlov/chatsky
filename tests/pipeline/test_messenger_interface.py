@@ -10,15 +10,15 @@ import chatsky.conditions as cnd
 SCRIPT = {
     "pingpong_flow": {
         "start_node": {
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Ping"))],
         },
         "node1": {
             RESPONSE: "Pong",
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Ping"))],
         },
         "fallback_node": {
             RESPONSE: "Ooops",
-            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch("Ping"))],
+            TRANSITIONS: [Tr(dst="node1", cnd=cnd.ExactMatch(match="Ping"))],
         },
     }
 }

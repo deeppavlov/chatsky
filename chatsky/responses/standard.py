@@ -7,6 +7,8 @@ This module provides basic responses.
 import random
 from typing import List
 
+from pydantic import field_validator
+
 from chatsky.core import BaseResponse, Message, Context
 from chatsky.core.message import MessageInitTypes
 
@@ -16,11 +18,13 @@ class RandomChoice(BaseResponse):
     Return a random message from :py:attr:`responses`.
     """
 
-    responses: List[Message]
+    responses: List[MessageInitTypes]
     """A list of messages to choose from."""
 
-    def __init__(self, *responses: MessageInitTypes):
-        super().__init__(responses=responses)
+    @field_validator("responses", mode="before")
+    @classmethod
+    def validate_responses(cls, responses):
+        return [Message.model_validate(message) for message in responses]
 
     async def call(self, ctx: Context) -> MessageInitTypes:
         return random.choice(self.responses)

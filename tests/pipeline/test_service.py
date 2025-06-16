@@ -34,7 +34,7 @@ async def test_pipeline_component_order():
         pre_services=[MyProcessing(wait=0.02, text="A")],
         post_services=[MyProcessing(wait=0, text="C")],
     )
-    await pipeline._run_pipeline(Message(""))
+    await pipeline._run_pipeline(Message(""), ctx_id="0")
     assert logs == ["A", "B", "C"]
 
 
@@ -183,8 +183,8 @@ async def test_waiting_for_service_to_finish_condition(make_test_service_group, 
     running_order = []
     test_group = make_test_service_group(running_order)
     test_group.fully_concurrent = True
-    test_group.components[0].start_condition = ServiceFinished(".pre.InteractWithServiceB", wait=True)
-    test_group.components[1].start_condition = ServiceFinished(".pre.InteractWithServiceC", wait=True)
+    test_group.components[0].start_condition = ServiceFinished(path=".pre.InteractWithServiceB", wait=True)
+    test_group.components[1].start_condition = ServiceFinished(path=".pre.InteractWithServiceC", wait=True)
 
     await run_test_group(test_group)
     assert running_order == ["C1", "C2", "C3", "B1", "B2", "B3", "A1", "A2", "A3"]
