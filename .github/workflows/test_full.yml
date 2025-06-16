@@ -1,4 +1,4 @@
-name: test_full
+name: test
 
 on:
   push:
@@ -16,12 +16,12 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
-  test_full:
+  test_coverage:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        os: [macOS-latest, windows-latest, ubuntu-latest]
+        python-version: "3.13"
+        os: ubuntu-latest
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -42,17 +42,23 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          python -m poetry run poe test_no_cov
+          python -m poetry run poe test --docker --no-skip --coverage
 
   test_no_deps:
-    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: "3.13"
+        os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: set up python 3.9
+      - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
 
       - name: install dependencies
         run: |
@@ -64,4 +70,33 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          python -m poetry run poe test_no_deps
+          python -m poetry run poe test
+
+  test_other_os:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.13"]
+        os: [macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip poetry==1.8.5
+          python -m poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
+
+      - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+        run: |
+          python -m poetry run poe test
+
