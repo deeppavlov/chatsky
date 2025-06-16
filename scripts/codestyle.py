@@ -16,7 +16,7 @@ def _get_paths(paths: List[str]) -> List[pathlib.Path]:
 
 
 def _run_flake():
-    lint_result = 0
+    exit_code = 0
     flake8_configs = [
         "--select=E,W,F",
         # black formats binary operators after line breaks
@@ -27,15 +27,19 @@ def _run_flake():
         # patches that execute code before imports
         "**3_load_testing_with_locust.py:E402 **4_streamlit_chat.py:E402",
     ]
-    lint_result += flake_main([f"--max-line-length={_STANDARD_PATHS_LEN}"] + flake8_configs + _STANDARD_PATHS)
-    lint_result += flake_main([f"--max-line-length={_SHORT_PATHS_LEN}"] + flake8_configs + _SHORT_PATHS)
+    exit_code += flake_main([f"--max-line-length={_STANDARD_PATHS_LEN}"] + flake8_configs + _STANDARD_PATHS)
+    exit_code += flake_main([f"--max-line-length={_SHORT_PATHS_LEN}"] + flake8_configs + _SHORT_PATHS)
 
-    exit(lint_result)
+    return exit_code
 
 
-def _run_black(modify: bool):
-    report = black.Report(check=not modify, quiet=False)
-    write = black.WriteBack.YES if modify else black.WriteBack.CHECK
+def run_flake():
+    exit(_run_flake())
+
+
+def _run_black(no_modify: bool):
+    report = black.Report(check=no_modify, quiet=False)
+    write = black.WriteBack.YES if not no_modify else black.WriteBack.CHECK
     for path in _get_paths(_STANDARD_PATHS):
         mode = black.Mode(line_length=_STANDARD_PATHS_LEN)
         black.reformat_one(path, False, write, mode, report)
@@ -43,3 +47,15 @@ def _run_black(modify: bool):
         mode = black.Mode(line_length=_SHORT_PATHS_LEN)
         black.reformat_one(path, False, write, mode, report)
     exit(report.return_code)
+
+
+def run_black(no_modify: bool):
+    exit(_run_black(no_modify))
+
+
+def _run_lint(no_modify: bool):
+    print("Flake running")
+    result = _run_flake()
+    print("Black running")
+    result += _run_black(no_modify)
+    exit(result)

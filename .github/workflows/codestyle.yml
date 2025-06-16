@@ -33,4 +33,4 @@ jobs:
 
       - name: run codestyle
         run: |
-          python -m poetry run poe lint
+          python -m poetry run poe lint --no-modify

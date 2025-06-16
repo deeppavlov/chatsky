@@ -164,20 +164,71 @@ default_task_type = "script"
 
 [tool.poe.tasks]
 info = "scripts.misc:info"
-flake = "scripts.codestyle:_run_flake"
-black = "scripts.codestyle:_run_black(modify=False)"
-lint.sequence = ["flake", "black"]
-lint.ignore_fail = "return_non_zero"
-format = "scripts.codestyle:_run_black(modify=True)"
-clean_docs = "scripts.clean:clean_docs"
-clean = "scripts.clean:clean"
-quick_test = "scripts.test:quick_test"
-quick_test_coverage = "scripts.test:quick_test_coverage"
-test_no_cov = "scripts.test:test_no_cov"
-test_no_deps = "scripts.test:test_no_deps"
-test_all = "scripts.test:test_all"
-docs = "scripts.doc:docs"
-docs_no_docker = "scripts.doc:docs_no_docker"
+
+[tool.poe.tasks.clean_docs]
+script = "scripts.clean:clean_docs"
+
+[tool.poe.tasks.clean]
+script = "scripts.clean:clean"
+
+[tool.poe.tasks.docs]
+help = "Config docs"
+script = "scripts.doc:docs"
+    [tool.poe.tasks.docs.args.use_docker]
+    options = ["-d", "--docker", "--use-docker"]
+    help = "Allow docker usage"
+    default = false
+    required = false
+    type = "boolean"
+
+[tool.poe.tasks.flake]
+script = "scripts.codestyle:_run_flake"
+
+[tool.poe.tasks.black]
+script = "scripts.codestyle:_run_black(no_modify=no_modify)"
+args =[{name = "no_modify", options = ["--no-modify"], type = "boolean", default = false}]
+
+[tool.poe.tasks.lint]
+script = "scripts.codestyle:_run_lint(no_modify=no_modify)"
+args =[{name = "no_modify", options = ["--no-modify"], type = "boolean", default = false}]
+
+[tool.poe.tasks.test]
+help = "Tests setup"
+script = "scripts.test:run_tests"
+    [tool.poe.tasks.test.args.quick]
+    options = ["-q", "--quick"]
+    help = "Run only quick tests"
+    default = false
+    required = false
+    type = "boolean"
+    
+    [tool.poe.tasks.test.args.coverage]
+    options = ["-c", "--cov", "--coverage"]
+    help = "Enable coverage report"
+    default = false
+    required = false
+    type = "boolean"
+
+    [tool.poe.tasks.test.args.use_docker]
+    options = ["-d", "--docker", "--use-docker"]
+    help = "Allow docker usage"
+    default = false
+    required = false
+    type = "boolean"
+
+    [tool.poe.tasks.test.args.no_skip]
+    options = ["--no-skip"]
+    help = "Allow skipping tests with dependencies"
+    default = false
+    required = false
+    type = "boolean"
+
+    [tool.poe.tasks.test.args.path]
+    help = "Path to file or folder to test"
+    positional = true
+    required = false
+    type = "string"
+    default = "tests/"
 
 
 
