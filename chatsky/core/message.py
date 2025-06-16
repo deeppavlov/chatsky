@@ -344,7 +344,7 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
-    timestamp: Optional[int] = Field(default_factory=time_ns)
+    timestamp: int = Field(default_factory=time_ns)
 
     @property
     def metadata(self) -> Metadata:
@@ -385,6 +385,9 @@ class Message(DataModel):
         timestamp: Optional[int] = None,
         **kwargs,
     ):
+        if timestamp is None:
+            timestamp = time_ns()
+
         super().__init__(
             text=text,
             attachments=attachments,
