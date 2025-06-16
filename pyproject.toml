@@ -199,13 +199,12 @@ script = "scripts.doc:docs"
 script = "scripts.codestyle:_run_flake"
 
 [tool.poe.tasks.black]
-script = "scripts.codestyle:_run_black"
-args =[{name = "no-modify", type = "boolean", default = false}]
+script = "scripts.codestyle:_run_black(no_modify=no_modify)"
+args =[{name = "no_modify", options = ["--no-modify"], type = "boolean", default = false}]
 
 [tool.poe.tasks.lint]
-sequence = ["black", "flake"]
-args =[{name = "no-modify", type = "boolean", default = false}]
-ignore_fail = "return_non_zero"
+script = "scripts.codestyle:_run_lint(no_modify=no_modify)"
+args =[{name = "no_modify", options = ["--no-modify"], type = "boolean", default = false}]
 
 [tool.poe.tasks.test]
 help = "Tests setup"

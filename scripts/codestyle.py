@@ -16,7 +16,7 @@ def _get_paths(paths: List[str]) -> List[pathlib.Path]:
 
 
 def _run_flake():
-    lint_result = 0
+    flake_result = 0
     flake8_configs = [
         "--select=E,W,F",
         # black formats binary operators after line breaks
@@ -27,10 +27,10 @@ def _run_flake():
         # patches that execute code before imports
         "**3_load_testing_with_locust.py:E402 **4_streamlit_chat.py:E402",
     ]
-    lint_result += flake_main([f"--max-line-length={_STANDARD_PATHS_LEN}"] + flake8_configs + _STANDARD_PATHS)
-    lint_result += flake_main([f"--max-line-length={_SHORT_PATHS_LEN}"] + flake8_configs + _SHORT_PATHS)
+    flake_result += flake_main([f"--max-line-length={_STANDARD_PATHS_LEN}"] + flake8_configs + _STANDARD_PATHS)
+    flake_result += flake_main([f"--max-line-length={_SHORT_PATHS_LEN}"] + flake8_configs + _SHORT_PATHS)
 
-    exit(lint_result)
+    exit(flake_result)
 
 
 def _run_black(no_modify: bool):
@@ -43,3 +43,9 @@ def _run_black(no_modify: bool):
         mode = black.Mode(line_length=_SHORT_PATHS_LEN)
         black.reformat_one(path, False, write, mode, report)
     exit(report.return_code)
+
+
+def _run_lint(no_modify: bool):
+    flake_result = _run_flake()
+    black_result = _run_black(no_modify)
+    exit(flake_result + black_result)
