@@ -154,6 +154,9 @@ async def test_timestamps(context_factory):
     assert message_1 == message_2
     assert message_1.timestamp != message_2.timestamp
 
+    assert (fixed_response == 1231) is False
+    result = Message.__eq__(fixed_response, 1231) 
+    assert result is NotImplemented
 
 class TestTimeout:
     class SleepingFunc(BaseProcessing):
