@@ -50,7 +50,7 @@ jobs:
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
           DOC_VERSION: ${{ env.DOC_VERSION }}
         run: |
-          python -m poetry run poe docs
+          python -m poetry run poe docs --docker
 
       - name: deploy website
         uses: JamesIves/github-pages-deploy-action@v4
