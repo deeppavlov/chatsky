@@ -382,11 +382,11 @@ class Message(DataModel):
         annotations: Optional[Dict[str, Any]] = None,
         misc: Optional[Dict[str, Any]] = None,
         origin: Optional[Origin] = None,
-        timestamp: Optional[int] = None,
+        timestamp: int = Field(default_factory=time_ns),
         **kwargs,
     ):
-        if timestamp is None:
-            timestamp = time_ns()
+        # if timestamp is None:
+        #     timestamp = time_ns()
 
         super().__init__(
             text=text,
