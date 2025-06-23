@@ -9,7 +9,7 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Pattern, Union, List, cast
+from typing import Literal, Pattern, Sequence, Union, List, cast
 import logging
 import re
 from functools import cached_property
@@ -27,7 +27,7 @@ class ExactMatch(BaseCondition):
     """
     Check if :py:attr:`~.Context.last_request` matches :py:attr:`.match`.
 
-    If :py:attr:`.skip_none`, will not compare ``None`` fields of :py:attr:`.match`.
+    If :py:attr:`.skip_fields`, will allow skip matching the fields of :py:attr:`.match`.
     """
 
     match: MessageInitTypes
@@ -36,9 +36,12 @@ class ExactMatch(BaseCondition):
 
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
-    skip_none: bool = True
+    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "timestamps"]] = Field(
+        default=("timestamp")
+    )
+
     """
-    Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
+    Enumerated fields should not be compared in :py:attr:`.match`.
     """
 
     @field_validator("match", mode="before")
@@ -50,12 +53,12 @@ class ExactMatch(BaseCondition):
         match: Message = cast(Message, self.match)
 
         request = ctx.last_request
-        for field in match.model_fields:
-            match_value = match.__getattribute__(field)
-            if self.skip_none and match_value is None:
+        for field in match.__dict__:
+            if field in self.skip_fields:
                 continue
-            if field in request.model_fields.keys():
-                if request.__getattribute__(field) != match.__getattribute__(field):
+            match_value = match.__getattribute__(field)
+            if field in request.__dict__:
+                if request.__getattribute__(field) != match_value:
                     return False
             else:
                 return False

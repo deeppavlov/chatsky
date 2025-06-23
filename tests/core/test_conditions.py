@@ -14,6 +14,16 @@ class SubclassMessage(Message):
     additional_field: str
 
 
+async def regression_test_for_ExactMatch():
+    all_fields = list(Message.model_fields.keys())
+    accepted_fields = {"text", "attachments", "annotations", "misc", "timestamp"}
+    invalid_fields = set(all_fields) - accepted_fields
+    assert not invalid_fields, f"Message has new fields: {invalid_fields}"
+
+    condition = cnd.ExactMatch(skip_fields=all_fields)
+    assert isinstance(condition, cnd.ExactMatch)
+
+
 @pytest.fixture
 def request_based_ctx(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))
@@ -25,13 +35,10 @@ def request_based_ctx(context_factory):
     "condition,result",
     [
         (cnd.ExactMatch(match=Message(text="text", misc={"key": "value"})), True),
-        (cnd.ExactMatch(match=Message(text="text"), skip_none=True), True),
-        (cnd.ExactMatch(match=Message(text="text"), skip_none=False), False),
-        (cnd.ExactMatch(match="text", skip_none=True), True),
+        (cnd.ExactMatch(match=Message(text="smth"), skip_fields=["text", "misc"]), True),
         (cnd.ExactMatch(match=Message(text="")), False),
-        (cnd.ExactMatch(match=Message(text="text", misc={"key": None})), False),
-        (cnd.ExactMatch(match=Message(), skip_none=True), True),
-        (cnd.ExactMatch(match={}, skip_none=True), True),
+        (cnd.ExactMatch(match=Message(text="text", misc={"key": None}), skip_fields=["misc"]), True),
+        (cnd.ExactMatch(match={}), False),
         (cnd.ExactMatch(match=SubclassMessage(text="text", misc={"key": "value"}, additional_field="")), False),
     ],
 )
