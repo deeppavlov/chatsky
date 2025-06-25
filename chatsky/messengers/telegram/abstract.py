@@ -178,13 +178,13 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         """
 
         message = Message()
-        message.attachments = list()
+        temp_attachments = list()
 
         message.text = update.text or update.caption
         if update.location is not None:
-            message.attachments += [Location(latitude=update.location.latitude, longitude=update.location.longitude)]
+            temp_attachments += [Location(latitude=update.location.latitude, longitude=update.location.longitude)]
         if update.contact is not None:
-            message.attachments += [
+            temp_attachments += [
                 Contact(
                     phone_number=update.contact.phone_number,
                     first_name=update.contact.first_name,
@@ -193,7 +193,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 )
             ]
         if update.invoice is not None:
-            message.attachments += [
+            temp_attachments += [
                 Invoice(
                     title=update.invoice.title,
                     description=update.invoice.description,
@@ -202,7 +202,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 )
             ]
         if update.poll is not None:
-            message.attachments += [
+            temp_attachments += [
                 Poll(
                     question=update.poll.question,
                     options=[PollOption(text=option.text, votes=option.voter_count) for option in update.poll.options],
@@ -216,7 +216,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 )
             ]
         if update.sticker is not None:
-            message.attachments += [
+            temp_attachments += [
                 Sticker(
                     id=update.sticker.file_id,
                     is_animated=update.sticker.is_animated,
@@ -230,7 +230,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 if update.audio.thumbnail is not None
                 else None
             )
-            message.attachments += [
+            temp_attachments += [
                 Audio(
                     id=update.audio.file_id,
                     file_unique_id=update.audio.file_unique_id,
@@ -247,7 +247,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 if update.video.thumbnail is not None
                 else None
             )
-            message.attachments += [
+            temp_attachments += [
                 Video(
                     id=update.video.file_id,
                     file_unique_id=update.video.file_unique_id,
@@ -265,7 +265,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 if update.animation.thumbnail is not None
                 else None
             )
-            message.attachments += [
+            temp_attachments += [
                 Animation(
                     id=update.animation.file_id,
                     file_unique_id=update.animation.file_unique_id,
@@ -278,7 +278,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 )
             ]
         if len(update.photo) > 0:
-            message.attachments += [
+            temp_attachments += [
                 Image(
                     id=picture.file_id,
                     file_unique_id=picture.file_unique_id,
@@ -293,7 +293,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 if update.document.thumbnail is not None
                 else None
             )
-            message.attachments += [
+            temp_attachments += [
                 Document(
                     id=update.document.file_id,
                     file_unique_id=update.document.file_unique_id,
@@ -303,7 +303,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 )
             ]
         if update.voice is not None:
-            message.attachments += [
+            temp_attachments += [
                 VoiceMessage(
                     id=update.voice.file_id,
                     file_unique_id=update.voice.file_unique_id,
@@ -316,13 +316,16 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 if update.video_note.thumbnail is not None
                 else None
             )
-            message.attachments += [
+            temp_attachments += [
                 VideoMessage(
                     id=update.video_note.file_id,
                     file_unique_id=update.video_note.file_unique_id,
                     thumbnail=thumbnail,
                 )
             ]
+        
+        if temp_attachments:
+            message.attachments = temp_attachments
 
         return message
 
