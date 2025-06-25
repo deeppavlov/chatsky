@@ -64,6 +64,7 @@ class ExactMatch(BaseCondition):
             match_value = match.__getattribute__(field)
             if field in request.__dict__:
                 if request.__getattribute__(field) != match_value:
+                    logger.debug(f"Request and match don't match in {field}")
                     return False
             else:
                 return False
