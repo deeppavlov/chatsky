@@ -1,0 +1,7 @@
+:source_name: chatsky/core/pipeline
+:doc_version: feat/skip_fields_exacrmatch/
+
+.. automodule:: chatsky.core.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
