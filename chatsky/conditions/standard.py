@@ -36,7 +36,9 @@ class ExactMatch(BaseCondition):
 
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
-    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "origin"] | str] = Field(default=["origin"])
+    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "origin"] | str] = Field(
+        default=["origin"]
+    )
     """
     Listed fields should not be compared in :py:attr:`.match`.
     """
@@ -45,7 +47,7 @@ class ExactMatch(BaseCondition):
     @classmethod
     def validate_match(cls, value):
         return Message.model_validate(value)
-    
+
     @model_validator(mode="after")
     def skip_fields_validator(self):
         extra_fields = set(self.skip_fields) - set(self.match.__dict__.keys())

@@ -13,6 +13,7 @@ class FaultyCondition(BaseCondition):
 class SubclassMessage(Message):
     additional_field: str
 
+
 @pytest.fixture
 def request_based_ctx(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))

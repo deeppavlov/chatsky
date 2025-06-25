@@ -323,7 +323,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     thumbnail=thumbnail,
                 )
             ]
-        
+
         if temp_attachments:
             message.attachments = temp_attachments
 
