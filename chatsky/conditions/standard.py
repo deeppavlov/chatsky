@@ -14,7 +14,7 @@ import logging
 import re
 from functools import cached_property
 
-from pydantic import Field, computed_field, field_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -36,18 +36,23 @@ class ExactMatch(BaseCondition):
 
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
-    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "timestamps"]] = Field(
-        default=("timestamp")
-    )
-
+    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "origin"] | str] = Field(default=["origin"])
     """
-    Enumerated fields should not be compared in :py:attr:`.match`.
+    Listed fields should not be compared in :py:attr:`.match`.
     """
 
     @field_validator("match", mode="before")
     @classmethod
     def validate_match(cls, value):
         return Message.model_validate(value)
+    
+    @model_validator(mode="after")
+    def skip_fields_validator(self):
+        extra_fields = set(self.skip_fields) - set(self.match.__dict__.keys())
+        if extra_fields:
+            raise ValueError(extra_fields)
+        else:
+            return self
 
     async def call(self, ctx: Context) -> bool:
         match: Message = cast(Message, self.match)

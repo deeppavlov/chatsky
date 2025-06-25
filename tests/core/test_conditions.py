@@ -13,17 +13,6 @@ class FaultyCondition(BaseCondition):
 class SubclassMessage(Message):
     additional_field: str
 
-
-async def regression_test_for_ExactMatch():
-    all_fields = list(Message.model_fields.keys())
-    accepted_fields = {"text", "attachments", "annotations", "misc", "timestamp"}
-    invalid_fields = set(all_fields) - accepted_fields
-    assert not invalid_fields, f"Message has new fields: {invalid_fields}"
-
-    condition = cnd.ExactMatch(skip_fields=all_fields)
-    assert isinstance(condition, cnd.ExactMatch)
-
-
 @pytest.fixture
 def request_based_ctx(context_factory):
     ctx = context_factory(forbidden_fields=("labels", "responses", "misc"))

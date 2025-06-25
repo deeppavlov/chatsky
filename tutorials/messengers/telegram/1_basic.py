@@ -26,7 +26,7 @@ from chatsky import (
     destinations as dst,
 )
 
-from chatsky.core.message import MessageInitTypes
+from chatsky.core.message import Message, MessageInitTypes
 from chatsky.messengers.telegram import LongpollingInterface
 from chatsky.utils.testing.common import is_interactive_mode
 from chatsky.core.context import Context
