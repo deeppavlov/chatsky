@@ -36,7 +36,7 @@ class ExactMatch(BaseCondition):
 
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
-    skip_fields: Sequence[Literal["text", "attachments", "annotations", "misc", "origin"] | str] = Field(
+    skip_fields: Sequence[Union[Literal["text", "attachments", "annotations", "misc", "origin"], str]] = Field(
         default=["origin"]
     )
     """
