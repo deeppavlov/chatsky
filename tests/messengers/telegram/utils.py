@@ -83,6 +83,8 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         yield
         assert self.latest_ctx is not None, "During pipeline runner execution, no context was produced!"
         assert self.latest_ctx.last_request == last_request, "Expected request message is not equal to expected!"
+        print("latest_ctx.last_response", self.latest_ctx.last_response)
+        print("last_response", last_response)
         assert self.latest_ctx.last_response == last_response, "Expected response message is not equal to expected!"
         assert self.bot.latest_trace == last_trace, "Expected trace is not equal to expected!"
 

@@ -4,7 +4,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 8, 21, 5, 30, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -38,7 +38,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 8, 21, 5, 31, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=2, supergroup_chat_created=False, text='Hi'), update_id=2)",
             "received_message": {
                 "text": "Hi",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -74,7 +74,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 14, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -108,7 +108,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 25, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=2, supergroup_chat_created=False, text='location'), update_id=2)",
             "received_message": {
                 "text": "location",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -149,7 +149,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 32, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=3, supergroup_chat_created=False, text='contact'), update_id=3)",
             "received_message": {
                 "text": "contact",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -191,7 +191,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 36, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=4, supergroup_chat_created=False, text='poll'), update_id=4)",
             "received_message": {
                 "text": "poll",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -243,7 +243,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 43, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=5, supergroup_chat_created=False, text='sticker'), update_id=5)",
             "received_message": {
                 "text": "sticker",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -287,7 +287,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=6, supergroup_chat_created=False, text='audio'), update_id=6)",
             "received_message": {
                 "text": "audio",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -332,7 +332,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 4, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=7, supergroup_chat_created=False, text='video'), update_id=7)",
             "received_message": {
                 "text": "video",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -377,7 +377,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 22, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=8, supergroup_chat_created=False, text='animation'), update_id=8)",
             "received_message": {
                 "text": "animation",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -422,7 +422,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 35, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=9, supergroup_chat_created=False, text='image'), update_id=9)",
             "received_message": {
                 "text": "image",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -467,7 +467,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 19, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=10, supergroup_chat_created=False, text='document'), update_id=10)",
             "received_message": {
                 "text": "document",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -512,7 +512,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=11, supergroup_chat_created=False, text='voice_message'), update_id=11)",
             "received_message": {
                 "text": "voice_message",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -555,7 +555,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 3, 16, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, supergroup_chat_created=False, text='video_message'), update_id=12)",
             "received_message": {
                 "text": "video_message",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -598,7 +598,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 32, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=13, supergroup_chat_created=False, text='media_group'), update_id=13)",
             "received_message": {
                 "text": "media_group",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -657,7 +657,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=14, supergroup_chat_created=False, text='something else'), update_id=14)",
             "received_message": {
                 "text": "something else",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -693,7 +693,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 20, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -1015,7 +1015,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 57, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=8, supergroup_chat_created=False, text='some text'), update_id=8)",
             "received_message": {
                 "text": "some text",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {
@@ -1049,7 +1049,7 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 59, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=9, supergroup_chat_created=False, text='/start'), update_id=9)",
             "received_message": {
                 "text": "/start",
-                "attachments": [],
+                "attachments": null,
                 "annotations": null,
                 "misc": null,
                 "origin": {

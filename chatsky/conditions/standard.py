@@ -9,12 +9,12 @@ This module provides basic conditions.
 """
 
 import asyncio
-from typing import Pattern, Union, List, cast
+from typing import Literal, Pattern, Sequence, Union, List, cast
 import logging
 import re
 from functools import cached_property
 
-from pydantic import Field, computed_field, field_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from chatsky.core import BaseCondition, Context
 from chatsky.core.message import Message, MessageInitTypes, CallbackQuery
@@ -27,7 +27,7 @@ class ExactMatch(BaseCondition):
     """
     Check if :py:attr:`~.Context.last_request` matches :py:attr:`.match`.
 
-    If :py:attr:`.skip_none`, will not compare ``None`` fields of :py:attr:`.match`.
+    If :py:attr:`.skip_fields`, will allow skip matching the fields of :py:attr:`.match`.
     """
 
     match: MessageInitTypes
@@ -36,9 +36,11 @@ class ExactMatch(BaseCondition):
 
     Is initialized according to :py:data:`~.MessageInitTypes`.
     """
-    skip_none: bool = True
+    skip_fields: Sequence[Union[Literal["text", "attachments", "annotations", "misc", "origin"], str]] = Field(
+        default=["origin"]
+    )
     """
-    Whether fields set to ``None`` in :py:attr:`.match` should not be compared.
+    Listed fields should not be compared in :py:attr:`.match`.
     """
 
     @field_validator("match", mode="before")
@@ -46,16 +48,25 @@ class ExactMatch(BaseCondition):
     def validate_match(cls, value):
         return Message.model_validate(value)
 
+    @model_validator(mode="after")
+    def skip_fields_validator(self):
+        extra_fields = set(self.skip_fields) - set(self.match.__dict__.keys())
+        if extra_fields:
+            raise ValueError(extra_fields)
+        else:
+            return self
+
     async def call(self, ctx: Context) -> bool:
         match: Message = cast(Message, self.match)
 
         request = ctx.last_request
-        for field in match.model_fields:
-            match_value = match.__getattribute__(field)
-            if self.skip_none and match_value is None:
+        for field in match.__dict__:
+            if field in self.skip_fields:
                 continue
-            if field in request.model_fields.keys():
-                if request.__getattribute__(field) != match.__getattribute__(field):
+            match_value = match.__getattribute__(field)
+            if field in request.__dict__:
+                if request.__getattribute__(field) != match_value:
+                    logger.debug(f"Request and match don't match in {field}")
                     return False
             else:
                 return False
