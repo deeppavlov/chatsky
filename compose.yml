@@ -112,10 +112,9 @@ services:
     depends_on:
       dashboard-metadata:
         condition: service_healthy
-      clickhouse:
-        condition: service_started
     profiles:
       - stats
+      - dashboard
     ports:
       - "8088:8088"
 
@@ -124,6 +123,7 @@ services:
     image: postgres:latest
     profiles:
       - stats
+      - dashboard
     restart: unless-stopped
     expose:
       - "5433"

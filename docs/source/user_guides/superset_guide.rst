@@ -189,3 +189,69 @@ that has been saved in the manner described below.
 Log in to Superset, open the `Dashboards` tab and press the import button on the right of the screen.
 You will be prompted for the database password. If the database credentials match,
 the updated dashboard will appear in the dashboard list.
+
+Connecting Storage to Superset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want to connect context storage directly to Superset, make the following steps:
+
+#. Install additional dependencies (if required)
+
+   .. code-block:: python
+        
+        poetry install --extras postgresql
+
+#. Create database
+
+   .. code-block:: python
+        
+        docker-compose up psql
+
+#. Populate the database with data, e.g.
+
+   .. code-block:: python
+
+        poetry run python tutorials/context_storages/2_postgresql.py
+
+#. Connect Superset to the context storage
+
+    #. Hover over *Settings* in the top right;
+
+    #. Click *Database Connections* from the dropdown menu;
+
+    #. Click *+DATABASE* in the top right;
+
+    #. Choose *PostgreSQL*;
+
+    #. Scroll to the bottom and click *Connect this database with a SQLAlchemy URI string instead*;
+
+    #. Set *Display Name* to Context Storage;
+
+    #. Set *SQLAlchemy URI* to:
+
+       .. code-block:: python
+
+            postgresql://postgres:pass@context-storage/context-db
+
+    #. Click *Connect*.
+
+#. Create a dashboard
+
+    #. Click *Create a dashboard*;
+
+    #. Click *Choose a dataset*, then click *Add a dataset*;
+
+    #. Select your database, set schema to **public** and choose the desired table;
+
+    #. Click *Create dataset*;
+
+    #. Choose chart type and click *Create new chart*.
+
+       .. note:: 
+        
+          To display textual data from fields such as requests, responses, labels, etc., 
+          click to *Custom SQL* and use
+
+          .. code-block:: SQL
+             
+             encode(<column_name>, 'escape')::jsonb->'text'
