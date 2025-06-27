@@ -317,6 +317,8 @@ class Message(DataModel):
     MISC dictionary (that consists of user-defined parameters)
     and original message field that represents
     the update received from messenger interface API.
+    :py:attr:`timestamp` indicates when class object was created
+    and is modified when `BaseResponse` is called.
     """
 
     text: Optional[str] = None
