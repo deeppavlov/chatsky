@@ -8,6 +8,7 @@ These functions allow dynamic script configuration and are essential to the scri
 
 from __future__ import annotations
 
+from time import time_ns
 import asyncio
 from typing import Union, Tuple, ClassVar, Optional
 from typing_extensions import Annotated
@@ -158,7 +159,9 @@ class BaseResponse(BaseScriptFunc, ABC):
         return await super().wrapped_call(ctx, info=info)
 
     async def __call__(self, ctx: Context) -> Message:
-        return await super().__call__(ctx)
+        msg = await super().__call__(ctx)
+        msg.timestamp = time_ns()
+        return msg
 
 
 class ConstResponse(ConstScriptFunc, BaseResponse):

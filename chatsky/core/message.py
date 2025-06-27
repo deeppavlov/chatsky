@@ -7,6 +7,7 @@ It only contains types and properties that are compatible with most messaging se
 """
 
 from __future__ import annotations
+from time import time_ns
 from typing import Literal, Optional, List, Union, Dict, Any, TYPE_CHECKING
 from typing_extensions import TypeAlias, Annotated
 from pathlib import Path
@@ -316,6 +317,8 @@ class Message(DataModel):
     MISC dictionary (that consists of user-defined parameters)
     and original message field that represents
     the update received from messenger interface API.
+    :py:attr:`timestamp` indicates when class object was created
+    and is modified when `BaseResponse` is called.
     """
 
     text: Optional[str] = None
@@ -343,6 +346,7 @@ class Message(DataModel):
     annotations: Optional[Dict[str, Any]] = None
     misc: Optional[Dict[str, Any]] = None
     origin: Optional[Origin] = None
+    timestamp: int = Field(default_factory=time_ns)
 
     @property
     def metadata(self) -> Metadata:
@@ -380,16 +384,34 @@ class Message(DataModel):
         annotations: Optional[Dict[str, Any]] = None,
         misc: Optional[Dict[str, Any]] = None,
         origin: Optional[Origin] = None,
+        timestamp: int = Field(default_factory=time_ns),
         **kwargs,
     ):
+        # if timestamp is None:
+        #     timestamp = time_ns()
+
         super().__init__(
             text=text,
             attachments=attachments,
             annotations=annotations,
             misc=misc,
             origin=origin,
+            timestamp=timestamp,
             **kwargs,
         )
+
+    def __eq__(self, other):
+        if not isinstance(other, Message):
+            return NotImplemented
+        timestamp = self.timestamp
+        other_timestamp = other.timestamp
+        try:
+            self.timestamp = None
+            other.timestamp = None
+            return super().__eq__(other)
+        finally:
+            self.timestamp = timestamp
+            other.timestamp = other_timestamp
 
     @field_serializer("annotations", "misc", when_used="json")
     def pickle_serialize_dicts(self, value):
