@@ -7,6 +7,9 @@ from chatsky.core.script_function import logger
 from chatsky.core import Message, Pipeline, Context, Node, Transition
 from chatsky.core.node_label import AbsoluteNodeLabel, NodeLabel
 
+@pytest.fixture
+def ctx():
+    return Context()
 
 class TestBaseFunctionCallWrapper:
     @pytest.mark.parametrize(
@@ -19,19 +22,20 @@ class TestBaseFunctionCallWrapper:
             (BasePriority, 1.0, 1.0),
         ],
     )
+    
     async def test_validation(self, func_type, data, return_value):
         class MyFunc(func_type):
             async def call(self, ctx):
                 return data
 
         assert await MyFunc().wrapped_call(None) == return_value
-
-    async def test_wrong_type(self):
+    
+    async def test_wrong_type(self, ctx):
         class MyProc(BasePriority):
             async def call(self, ctx):
                 return "w"
-
-        assert isinstance(await MyProc().wrapped_call(None), TypeError)
+            
+        assert isinstance(await MyProc().wrapped_call(ctx), TypeError)
 
     async def test_non_async_func(self):
         class MyCondition(BaseCondition):
@@ -40,14 +44,14 @@ class TestBaseFunctionCallWrapper:
 
         assert await MyCondition().wrapped_call(None) is True
 
-    async def test_catch_exception(self, log_event_catcher):
+    async def test_catch_exception(self, log_event_catcher, ctx):
         log_list = log_event_catcher(logger)
 
         class MyProc(BaseProcessing):
             async def call(self, ctx):
                 raise RuntimeError()
 
-        assert isinstance(await MyProc().wrapped_call(None), RuntimeError)
+        assert isinstance(await MyProc().wrapped_call(ctx), RuntimeError)
         assert len(log_list) == 1
         assert log_list[0].levelname == "ERROR"
 

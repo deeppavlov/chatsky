@@ -76,12 +76,14 @@ async def get_next_label(
         2. The transition which lead to the next node or ``None`` if no transition is left by the end of the process.
     """
     filtered_transitions: List[Transition] = transitions.copy()
+    ctx.framework_data.current_stage = "CONDITION"
     condition_results = await asyncio.gather(*[transition.cnd.wrapped_call(ctx) for transition in filtered_transitions])
 
     filtered_transitions = [
         transition for transition, condition in zip(filtered_transitions, condition_results) if condition is True
     ]
 
+    ctx.framework_data.current_stage = "PRIORITY"
     priority_results = await asyncio.gather(
         *[transition.priority.wrapped_call(ctx) for transition in filtered_transitions]
     )
@@ -94,7 +96,7 @@ async def get_next_label(
     logger.debug(f"Possible transitions: {transitions_with_priorities!r}")
 
     transitions_with_priorities = sorted(transitions_with_priorities, key=lambda x: x[1], reverse=True)
-
+    ctx.framework_data.current_stage = "DESTINATION"
     destination_results: List[Union[AbsoluteNodeLabel, Exception]] = await asyncio.gather(
         *[transition.dst.wrapped_call(ctx) for transition, _ in transitions_with_priorities]
     )

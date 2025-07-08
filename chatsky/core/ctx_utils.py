@@ -9,9 +9,11 @@ that define all non-turn related data stored in contexts.
 
 from __future__ import annotations
 from asyncio import Event
+from collections import defaultdict
+from enum import Enum
 from json import loads
 from time import time_ns
-from typing import Any, Optional, Dict, TYPE_CHECKING
+from typing import Any, List, Optional, Dict, TYPE_CHECKING, Tuple
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
@@ -39,6 +41,17 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     Asyncio `Event` which can be awaited until this service finishes.
     Cleared at the end of every turn.
     """
+
+
+class Stages(Enum):
+    PRE_SERVICE = "PRE_SERVICE"
+    PRE_TRANSITION = "PRE_TRANSITION"
+    CONDITION = "CONDITION"
+    PRIORITY = "PRIORITY"
+    DESTINATION = "DESTINATION"
+    PRE_RESPONSE = "PRE_RESPONSE"
+    RESPONSE = "RESPONSE"
+    POST_SERVICE = "POST_SERVICE"
 
 
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
@@ -74,6 +87,25 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
+    current_stage: Optional[Stages] = Field(default=None, exclude=True)
+    "Stores current processing stage"
+    exception_info: Dict[Stages, List[Exception]] = Field(default=defaultdict(list), exclude=True)
+    "Stores exceptions raised at different stages"
+
+    def get_exception(self, stage: Optional[Stages] = None) -> Optional[Tuple[Stages, Exception]]:
+        # todo: write docs
+        if stage is None:
+            for stage in reversed(Stages):
+                exception_list = self.exception_info[stage]
+                if exception_list:
+                    return stage, exception_list[-1]
+            return None
+        else:
+            exception_list = self.exception_info[stage]
+            if exception_list:
+                return stage, exception_list[-1]
+            else:
+                return None
 
 
 class ContextMainInfo(BaseModel):
