@@ -1,0 +1,7 @@
+:source_name: chatsky/responses/standard
+:doc_version: feat/add_processing_stage/
+
+.. automodule:: chatsky.responses.standard
+   :members:
+   :undoc-members:
+   :show-inheritance:
