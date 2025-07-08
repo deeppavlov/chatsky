@@ -9,9 +9,11 @@ that define all non-turn related data stored in contexts.
 
 from __future__ import annotations
 from asyncio import Event
+from collections import defaultdict
+from enum import Enum
 from json import loads
 from time import time_ns
-from typing import Any, List, Optional, Dict, Literal, TYPE_CHECKING, Tuple
+from typing import Any, List, Optional, Dict, TYPE_CHECKING, Tuple
 
 from pydantic import BaseModel, Field, PrivateAttr, TypeAdapter, field_serializer, field_validator
 
@@ -41,28 +43,15 @@ class ServiceState(BaseModel, arbitrary_types_allowed=True):
     """
 
 
-STAGES = [
-    "PRE_SERVICE",
-    "PRE_TRANSITION",
-    "CONDITION",
-    "PRIORITY",
-    "DESTINATION",
-    "PRE_RESPONSE",
-    "RESPONSE",
-    "POST_SERVICE",
-]
-
-
-class ExceptionInfo(BaseModel, arbitrary_types_allowed=True):
-    PRE_SERVICE: List[Exception] = Field(default_factory=list)
-    PRE_TRANSITION: List[Exception] = Field(default_factory=list)
-    CONDITION: List[Exception] = Field(default_factory=list)
-    PRIORITY: List[Exception] = Field(default_factory=list)
-    DESTINATION: List[Exception] = Field(default_factory=list)
-    TRANSITION: List[Exception] = Field(default_factory=list)
-    PRE_RESPONSE: List[Exception] = Field(default_factory=list)
-    RESPONSE: List[Exception] = Field(default_factory=list)
-    POST_SERVICE: List[Exception] = Field(default_factory=list)
+class Stages(Enum):
+    PRE_SERVICE = "PRE_SERVICE"
+    PRE_TRANSITION = "PRE_TRANSITION"
+    CONDITION = "CONDITION"
+    PRIORITY = "PRIORITY"
+    DESTINATION = "DESTINATION"
+    PRE_RESPONSE = "PRE_RESPONSE"
+    RESPONSE = "RESPONSE"
+    POST_SERVICE = "POST_SERVICE"
 
 
 class FrameworkData(BaseModel, arbitrary_types_allowed=True):
@@ -98,19 +87,25 @@ class FrameworkData(BaseModel, arbitrary_types_allowed=True):
     - no transition has been made during this turn yet (e.g. the turn is in the pre-transition step);
     - no valid transition has been found (i.e. transitioned to fallback node).
     """
-    current_stage: Optional[Literal[*STAGES]] = Field(default=None, exclude=True)
+    current_stage: Optional[Stages] = Field(default=None, exclude=True)
     "Stores current processing stage"
-    exception_info: Optional[ExceptionInfo] = Field(default=None, exclude=True)
+    exception_info: Dict[Stages, List[Exception]] = Field(default=defaultdict(list), exclude=True)
     "Stores exceptions raised at different stages"
 
-    def get_exception(self, stage: Optional[Literal[*STAGES]]) -> Optional[Tuple[str, ExceptionInfo]]:
+    def get_exception(self, stage: Optional[Stages] = None) -> Optional[Tuple[Stages, Exception]]:
+        # todo: write docs
         if stage is None:
-            for stage in reversed(STAGES):
-                exception_list = getattr(self.exception_info, stage, [])
+            for stage in reversed(Stages):
+                exception_list = self.exception_info[stage]
                 if exception_list:
                     return stage, exception_list[-1]
+            return None
         else:
-            return getattr(self.exception_info, stage, [])
+            exception_list = self.exception_info[stage]
+            if exception_list:
+                return stage, exception_list[-1]
+            else:
+                return None
 
 
 class ContextMainInfo(BaseModel):
